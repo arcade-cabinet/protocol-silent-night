@@ -447,7 +447,7 @@ test.describe('Character Class Tests', () => {
       // Select character
       const button = page.getByRole('button', { name: new RegExp(char.name, 'i') });
       await expect(button).toBeVisible({ timeout: 15000 });
-      await expect(page.locator('text=' + char.role)).toBeVisible();
+      await expect(page.getByText(char.role)).toBeVisible();
       await button.click();
       
       console.log(`  ✓ ${char.name} selected`);
