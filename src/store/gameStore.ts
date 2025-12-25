@@ -244,13 +244,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const weaponType = bullet.type || 'cannon';
     if (weaponType === 'smg') {
       AudioManager.playSFX('weapon_smg');
-      triggerHaptic('fire_smg');
+      // Short, rapid pulses for SMG fire
+      triggerHaptic([0.05, 0.03, 0.05]);
     } else if (weaponType === 'stars') {
       AudioManager.playSFX('weapon_stars');
-      triggerHaptic('fire_stars');
+      // Softer, staggered pulses for throwing stars
+      triggerHaptic([0.04, 0.06, 0.04]);
     } else {
       AudioManager.playSFX('weapon_cannon');
-      triggerHaptic('fire_cannon');
+      // Heavier, single strong pulse for cannon fire
+      triggerHaptic([0.12]);
     }
   },
 
