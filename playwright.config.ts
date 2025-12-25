@@ -2,18 +2,30 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright E2E test configuration for Protocol: Silent Night
+ * 
+ * Supports two modes:
+ * 1. PLAYWRIGHT_MCP=true - Full Playwright MCP with headed browser and WebGL
+ * 2. Default - Headless mode with WebGL workarounds for CI/limited environments
+ * 
  * @see https://playwright.dev/docs/test-configuration
  */
+
+// Check if running with full Playwright MCP capabilities
+const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
+const isCI = !!process.env.CI;
+
 export default defineConfig({
   testDir: './e2e',
   // Run tests in files in parallel
   fullyParallel: true,
   // Fail the build on CI if you accidentally left test.only in the source code
-  forbidOnly: !!process.env.CI,
-  // Retry on CI only
-  retries: process.env.CI ? 2 : 0,
-  // Opt out of parallel tests on CI for stability
-  workers: process.env.CI ? 1 : undefined,
+  forbidOnly: isCI,
+  // Retry on CI only (not needed with MCP)
+  retries: hasMcpSupport ? 0 : (isCI ? 2 : 0),
+  // Parallel workers - more with MCP, fewer in CI
+  workers: hasMcpSupport ? undefined : (isCI ? 1 : undefined),
+  // Longer timeout for WebGL rendering with MCP
+  timeout: hasMcpSupport ? 60000 : 30000,
   // Reporter to use
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
@@ -27,6 +39,10 @@ export default defineConfig({
     trace: 'on-first-retry',
     // Take screenshot on failure
     screenshot: 'only-on-failure',
+    // Headed mode when MCP is available
+    headless: !hasMcpSupport,
+    // Video recording with MCP for debugging
+    video: hasMcpSupport ? 'on-first-retry' : 'off',
   },
   // Configure projects for major browsers
   projects: [
@@ -34,14 +50,21 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Enable WebGL in headless mode
-        launchOptions: {
-          args: [
-            '--use-gl=swiftshader',
-            '--enable-webgl',
-            '--ignore-gpu-blocklist',
-          ],
-        },
+        // Different launch options based on environment
+        launchOptions: hasMcpSupport 
+          ? {
+              // MCP mode - headed with full GPU
+              args: ['--enable-webgl', '--ignore-gpu-blocklist'],
+            }
+          : {
+              // Headless mode - software rendering
+              args: [
+                '--use-gl=swiftshader',
+                '--enable-webgl',
+                '--ignore-gpu-blocklist',
+                '--disable-gpu-sandbox',
+              ],
+            },
       },
     },
   ],
@@ -49,7 +72,7 @@ export default defineConfig({
   webServer: {
     command: 'pnpm preview',
     url: 'http://localhost:4173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !isCI,
     timeout: 120000,
   },
 });
