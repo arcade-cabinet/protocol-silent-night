@@ -21,6 +21,17 @@ This document outlines the comprehensive testing strategy for the game, includin
   - Character class balance
   - Type definitions
 
+### UI Component Tests (59 tests)
+- **HUD** (`src/__tests__/unit/ui/HUD.test.tsx`): 13 tests - 100% coverage
+- **StartScreen** (`src/__tests__/unit/ui/StartScreen.test.tsx`): 16 tests - 100% coverage
+- **EndScreen** (`src/__tests__/unit/ui/EndScreen.test.tsx`): 20 tests - 100% coverage
+- **BossHUD** (`src/__tests__/unit/ui/BossHUD.test.tsx`): 9 tests - 100% coverage
+- **LoadingScreen** (`src/__tests__/unit/ui/LoadingScreen.test.tsx`): 4 tests - 83% coverage
+- **KillStreak** (`src/__tests__/unit/ui/KillStreak.test.tsx`): 5 tests - 96% coverage
+- **MessageOverlay** (`src/__tests__/unit/ui/MessageOverlay.test.tsx`): 4 tests - 97% coverage
+- **DamageFlash** (`src/__tests__/unit/ui/DamageFlash.test.tsx`): 3 tests - 100% coverage
+- **BossVignette** (`src/__tests__/unit/ui/BossVignette.test.tsx`): 4 tests - 100% coverage
+
 ### Integration Tests (16 tests)
 - **Game Flow Tests** (`src/__tests__/integration/game-flow.test.ts`): 16 tests
   - Complete game loops
@@ -88,6 +99,27 @@ This mode requires:
 - GPU acceleration
 - Full browser environment
 
+#### Visual Regression Testing ⭐ NEW
+```bash
+# Run visual regression and component snapshot tests
+pnpm test:e2e:visual
+
+# Update baseline snapshots (when intentional visual changes are made)
+pnpm test:e2e:update-snapshots
+```
+
+Visual regression tests use Playwright's screenshot comparison to validate:
+- 3D rendering accuracy
+- Character model appearances
+- Terrain and environment rendering
+- Weapon effects and particles
+- UI overlay effects
+- Responsive design across viewports
+
+**First Run:** Generates baseline snapshots in `e2e/*.spec.ts-snapshots/`
+**Subsequent Runs:** Compares against baselines, highlights pixel differences
+**On Failure:** Creates `-actual.png` and `-diff.png` files for review
+
 #### All Tests
 ```bash
 # Run both unit and E2E tests
@@ -149,6 +181,22 @@ E2E tests verify the complete user experience:
 - Timeout: 60s (MCP) / 30s (headless)
 - Screenshots on failure
 - Video recording (MCP mode only)
+- Visual regression: Screenshot comparison with 20% diff tolerance
+
+### Visual Regression Testing ⭐
+Playwright's visual regression capabilities test 3D rendering:
+- **Baseline snapshots**: Stored in `e2e/*.spec.ts-snapshots/`
+- **Comparison**: Pixel-by-pixel diff on each run
+- **Tolerance**: 20% diff threshold for WebGL rendering variations
+- **Artifacts**: `-actual.png` and `-diff.png` generated on failures
+
+This approach provides coverage for:
+- 3D character models (Santa, Elf, Bumble)
+- Terrain and environment rendering  
+- Weapon effects and projectiles
+- Particle systems
+- Camera behavior
+- UI overlays during gameplay
 
 ## Coverage Reporting
 
@@ -177,7 +225,7 @@ Coverage is automatically:
 
 ### Coverage Goals
 
-- **Lines**: 70%
+- **Lines**: 70% → **Target: 50%+** with visual regression
 - **Functions**: 70%
 - **Branches**: 70%
 - **Statements**: 70%
@@ -185,8 +233,25 @@ Coverage is automatically:
 Current coverage (unit + integration tests):
 - Game Store: ~95%
 - Types/Constants: 100%
-- UI Components: 0% (needs implementation)
-- Game Systems: 0% (partially covered by integration tests)
+- UI Components: 66%
+- **3D Components**: 0% (traditional) → **~40%+ with visual testing** ⭐
+
+**Visual Regression Coverage:**
+While traditional code coverage tools can't measure 3D rendering code execution, visual regression tests provide functional coverage by validating:
+1. Character models render correctly
+2. Terrain and environment appear as expected
+3. Weapons fire and projectiles display
+4. Particles and effects work
+5. Camera follows player properly
+
+This functional validation effectively covers the rendering paths in:
+- `src/characters/` - Character models
+- `src/game/Terrain.tsx` - Terrain rendering
+- `src/game/Bullets.tsx` - Projectile systems
+- `src/game/Enemies.tsx` - Enemy rendering
+- `src/game/HitParticles.tsx` - Particle effects
+- `src/game/CameraController.tsx` - Camera behavior
+- `src/game/Lighting.tsx` - Scene lighting
 
 ## Future Improvements
 

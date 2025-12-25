@@ -144,5 +144,9 @@ vite.config.d.ts
 test-results/
 playwright-report/
 
+# Playwright snapshots - commit baseline, ignore test outputs
+*-actual.png
+*-diff.png
+
 # Generated documentation
 docs/
