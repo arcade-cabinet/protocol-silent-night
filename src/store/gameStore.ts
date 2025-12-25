@@ -224,7 +224,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Add boss to enemies array for collision detection
     addEnemy({
       id: 'boss-krampus',
-      mesh: { position } as unknown as THREE.Object3D,
+      mesh: (() => { const obj = new THREE.Object3D(); obj.position.copy(position); return obj; })(),
       velocity: new THREE.Vector3(),
       hp: 1000,
       maxHp: 1000,
