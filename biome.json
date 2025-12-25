@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/e2e", "!**/playwright-report", "!**/test-results"]
+"includes": ["**", "!e2e/**", "!playwright-report/**", "!test-results/**"]
   },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
