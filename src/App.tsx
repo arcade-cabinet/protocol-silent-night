@@ -13,6 +13,8 @@ import {
   MessageOverlay,
   DamageFlash,
   KillStreak,
+  LoadingScreen,
+  BossVignette,
 } from '@/ui';
 
 export default function App() {
@@ -30,10 +32,12 @@ export default function App() {
       {/* Effects */}
       <DamageFlash />
       <KillStreak />
+      <BossVignette />
 
       {/* Screens */}
       <StartScreen />
       <EndScreen />
+      <LoadingScreen />
     </div>
   );
 }

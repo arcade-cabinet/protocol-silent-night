@@ -1,0 +1,24 @@
+.vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(255, 0, 68, var(--intensity, 0.2)) 100%
+  );
+  animation: pulseVignette 2s ease-in-out infinite;
+}
+
+@keyframes pulseVignette {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}

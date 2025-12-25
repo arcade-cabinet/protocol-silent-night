@@ -235,9 +235,14 @@ function BossMesh({
   maxHp: number;
 }) {
   const coreRef = useRef<THREE.Mesh>(null);
-  const ringRef = useRef<THREE.Mesh>(null);
+  const ring1Ref = useRef<THREE.Mesh>(null);
+  const ring2Ref = useRef<THREE.Mesh>(null);
+  const ring3Ref = useRef<THREE.Mesh>(null);
+  const auraRef = useRef<THREE.Mesh>(null);
 
-  const intensity = 2 + (1 - hp / maxHp) * 2; // Gets more intense as damaged
+  const hpRatio = hp / maxHp;
+  const intensity = 2 + (1 - hpRatio) * 3; // Gets more intense as damaged
+  const pulseSpeed = 1 + (1 - hpRatio) * 2; // Faster pulse when low HP
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
@@ -245,11 +250,30 @@ function BossMesh({
     if (coreRef.current) {
       coreRef.current.rotation.x = time * 0.5;
       coreRef.current.rotation.y = time * 0.3;
+      // Pulsing scale
+      const pulse = 1 + Math.sin(time * pulseSpeed * 2) * 0.05;
+      coreRef.current.scale.setScalar(pulse);
     }
 
-    if (ringRef.current) {
-      ringRef.current.rotation.x = time * 1.2;
-      ringRef.current.rotation.y = time * 0.8;
+    if (ring1Ref.current) {
+      ring1Ref.current.rotation.x = time * 1.2;
+      ring1Ref.current.rotation.y = time * 0.8;
+    }
+
+    if (ring2Ref.current) {
+      ring2Ref.current.rotation.x = -time * 0.9;
+      ring2Ref.current.rotation.z = time * 1.1;
+    }
+
+    if (ring3Ref.current) {
+      ring3Ref.current.rotation.y = time * 1.5;
+      ring3Ref.current.rotation.z = -time * 0.7;
+    }
+
+    if (auraRef.current) {
+      // Pulsing aura
+      const auraPulse = 0.08 + Math.sin(time * pulseSpeed) * 0.04;
+      (auraRef.current.material as THREE.MeshBasicMaterial).opacity = auraPulse;
     }
   });
 
@@ -262,27 +286,51 @@ function BossMesh({
           color={0x220000}
           emissive={CONFIG.COLORS.ENEMY_BOSS}
           emissiveIntensity={intensity}
+          metalness={0.8}
+          roughness={0.2}
         />
       </mesh>
 
-      {/* Rotating Ring */}
-      <mesh ref={ringRef}>
+      {/* Primary Rotating Ring */}
+      <mesh ref={ring1Ref}>
         <torusGeometry args={[3, 0.2, 8, 32]} />
-        <meshBasicMaterial color={CONFIG.COLORS.ENEMY_BOSS} />
+        <meshStandardMaterial
+          color={CONFIG.COLORS.ENEMY_BOSS}
+          emissive={CONFIG.COLORS.ENEMY_BOSS}
+          emissiveIntensity={intensity * 0.5}
+        />
       </mesh>
 
-      {/* Second Ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
+      {/* Secondary Ring */}
+      <mesh ref={ring2Ref} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[2.5, 0.15, 8, 32]} />
-        <meshBasicMaterial color={CONFIG.COLORS.ENEMY_BOSS} transparent opacity={0.5} />
+        <meshStandardMaterial
+          color={CONFIG.COLORS.ENEMY_BOSS}
+          emissive={CONFIG.COLORS.ENEMY_BOSS}
+          emissiveIntensity={intensity * 0.3}
+          transparent
+          opacity={0.8}
+        />
       </mesh>
 
-      {/* Inner Glow */}
-      <pointLight color={CONFIG.COLORS.ENEMY_BOSS} intensity={3} distance={15} />
+      {/* Tertiary Ring */}
+      <mesh ref={ring3Ref} rotation={[Math.PI / 4, Math.PI / 4, 0]}>
+        <torusGeometry args={[3.5, 0.1, 8, 32]} />
+        <meshStandardMaterial
+          color={0xffffff}
+          emissive={CONFIG.COLORS.ENEMY_BOSS}
+          emissiveIntensity={intensity * 0.2}
+          transparent
+          opacity={0.5}
+        />
+      </mesh>
+
+      {/* Inner Core Glow */}
+      <pointLight color={CONFIG.COLORS.ENEMY_BOSS} intensity={intensity * 1.5} distance={20} />
 
       {/* Particle effect aura */}
-      <mesh>
-        <sphereGeometry args={[3.5, 16, 16]} />
+      <mesh ref={auraRef}>
+        <sphereGeometry args={[4, 16, 16]} />
         <meshBasicMaterial
           color={CONFIG.COLORS.ENEMY_BOSS}
           transparent
@@ -290,6 +338,19 @@ function BossMesh({
           side={THREE.BackSide}
         />
       </mesh>
+
+      {/* Danger indicator particles */}
+      {hpRatio < 0.5 && (
+        <mesh>
+          <sphereGeometry args={[4.5, 8, 8]} />
+          <meshBasicMaterial
+            color={0xffaa00}
+            transparent
+            opacity={0.05}
+            wireframe
+          />
+        </mesh>
+      )}
     </group>
   );
 }
