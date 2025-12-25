@@ -6,8 +6,8 @@ This is a **WebGL arcade game** built with Three.js and React Three Fiber. It's 
 
 ## Tech Stack
 
-- **Runtime**: React 18 + TypeScript
-- **3D Engine**: Three.js via React Three Fiber
+- **Runtime**: React 19 + TypeScript
+- **3D Engine**: Three.js via React Three Fiber (v9)
 - **Graphics**: @jbcom/strata for procedural characters, fur, sky, fog
 - **State**: Zustand
 - **Build**: Vite

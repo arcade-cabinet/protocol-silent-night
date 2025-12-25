@@ -1,6 +1,6 @@
 {
   "name": "protocol-silent-night",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "description": "Protocol: Silent Night - Arcade RPG Simulation with Three.js/WebGL",
   "type": "module",
   "scripts": {
