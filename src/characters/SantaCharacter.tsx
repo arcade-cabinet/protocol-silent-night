@@ -38,6 +38,8 @@ export function SantaCharacter({
   } | null>(null);
   const muzzleRef = useRef<THREE.PointLight | null>(null);
   const weaponGroupRef = useRef<THREE.Group | null>(null);
+  // Cache fur groups to avoid traversing scene graph every frame
+  const furGroupsRef = useRef<THREE.Group[]>([]);
 
   const config = PLAYER_CLASSES.santa;
 
@@ -68,12 +70,26 @@ export function SantaCharacter({
 
       // Customize for Santa appearance
       customizeSantaAppearance(character.joints, config.scale);
+
+      // Cache fur groups for efficient updates (avoid traversing every frame)
+      const furGroups: THREE.Group[] = [];
+      for (const joint of Object.values(character.joints)) {
+        if (joint?.mesh) {
+          joint.mesh.traverse((child) => {
+            if (child instanceof THREE.Group && child.userData.isFurGroup) {
+              furGroups.push(child);
+            }
+          });
+        }
+      }
+      furGroupsRef.current = furGroups;
     }
 
     return () => {
       if (characterRef.current && groupRef.current) {
         groupRef.current.remove(characterRef.current.root);
         characterRef.current = null;
+        furGroupsRef.current = [];
       }
     };
   }, [config.color, config.scale, furOptions]);
@@ -196,15 +212,9 @@ export function SantaCharacter({
       // Use Strata's animateCharacter for walk/idle cycles
       animateCharacter(characterRef.current, time);
 
-      // Update fur uniforms
-      for (const joint of Object.values(joints)) {
-        if (joint?.mesh) {
-          joint.mesh.traverse((child) => {
-            if (child instanceof THREE.Group) {
-              updateFurUniforms(child, time);
-            }
-          });
-        }
+      // Update fur uniforms using cached groups (avoids traversal every frame)
+      for (const furGroup of furGroupsRef.current) {
+        updateFurUniforms(furGroup, time);
       }
 
       // Weapon recoil when firing

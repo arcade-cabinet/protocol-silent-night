@@ -38,6 +38,8 @@ export function BumbleCharacter({
   } | null>(null);
   const muzzleRef = useRef<THREE.PointLight | null>(null);
   const starMeshRef = useRef<THREE.Mesh | null>(null);
+  // Cache fur groups to avoid traversing scene graph every frame
+  const furGroupsRef = useRef<THREE.Group[]>([]);
 
   const config = PLAYER_CLASSES.bumble;
 

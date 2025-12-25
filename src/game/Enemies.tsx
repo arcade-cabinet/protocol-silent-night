@@ -101,30 +101,33 @@ export function Enemies() {
       }
     }
 
-    // Update enemy positions
+    // Update enemy positions (immutable updates)
     updateEnemies((currentEnemies) => {
       return currentEnemies.map((enemy) => {
-        const pos = enemy.mesh.position;
+        const currentPos = enemy.mesh.position;
 
         // Calculate direction to player
-        const toPlayer = playerPosition.clone().sub(pos);
+        const toPlayer = playerPosition.clone().sub(currentPos);
         const distance = toPlayer.length();
         const direction = toPlayer.clone().normalize();
 
-        // Move toward player (use cloned direction to avoid mutation issues)
+        // Calculate new position (immutable - clone first)
+        const newPos = currentPos.clone();
         const moveSpeed = enemy.type === 'boss' ? 3 : enemy.speed;
-        pos.add(direction.clone().multiplyScalar(moveSpeed * delta));
+        newPos.add(direction.clone().multiplyScalar(moveSpeed * delta));
 
-        // Collision with player
+        // Collision with player - apply knockback
         if (distance < 1.5) {
           damagePlayer(enemy.damage);
-
-          // Knockback enemy (use original normalized direction)
           const knockback = direction.clone().multiplyScalar(-3);
-          pos.add(knockback);
+          newPos.add(knockback);
         }
 
-        return enemy;
+        // Create new mesh with updated position (immutable update)
+        const newMesh = new THREE.Object3D();
+        newMesh.position.copy(newPos);
+
+        return { ...enemy, mesh: newMesh };
       });
     });
   });
