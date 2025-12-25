@@ -1,13 +1,20 @@
 /**
  * MECHA-SANTA Character
- * Heavy Siege / Tank class with fur-lined suit and Coal Cannon
- * Uses Strata's fur system for realistic fur rendering
+ * Heavy Siege / Tank class with articulated body, fur-lined suit, and Coal Cannon
+ * Uses Strata's createCharacter for proper joint hierarchy
  */
 
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createFurSystem, updateFurUniforms, type FurOptions } from '@jbcom/strata';
+import {
+  createCharacter,
+  animateCharacter,
+  updateFurUniforms,
+  type CharacterJoints,
+  type CharacterState,
+  type FurOptions,
+} from '@jbcom/strata';
 import { PLAYER_CLASSES } from '@/types';
 
 interface SantaCharacterProps {
@@ -24,228 +31,203 @@ export function SantaCharacter({
   isFiring = false,
 }: SantaCharacterProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const bodyRef = useRef<THREE.Group>(null);
-  const armRef = useRef<THREE.Group>(null);
+  const characterRef = useRef<{
+    root: THREE.Group;
+    joints: CharacterJoints;
+    state: CharacterState;
+  } | null>(null);
   const muzzleRef = useRef<THREE.PointLight>(null);
-  const furGroupRef = useRef<THREE.Group>(null);
+  const weaponGroupRef = useRef<THREE.Group>(null);
 
   const config = PLAYER_CLASSES.santa;
 
-  // Strata fur options for the suit trim
+  // Strata fur options for Santa's suit
   const furOptions: FurOptions = useMemo(
     () => ({
-      baseColor: new THREE.Color(...config.furColor.base),
-      tipColor: new THREE.Color(...config.furColor.tip),
-      layerCount: 10,
-      spacing: 0.02,
-      windStrength: 0.5,
+      baseColor: new THREE.Color(0.8, 0.1, 0.1), // Red base
+      tipColor: new THREE.Color(1.0, 0.3, 0.3), // Lighter red tips
+      layerCount: 8,
+      spacing: 0.015,
+      windStrength: 0.3,
     }),
-    [config.furColor]
+    []
   );
 
-  // Create geometries
-  const bodyGeometry = useMemo(() => new THREE.CapsuleGeometry(0.5 * config.scale, 1.2, 8, 16), [config.scale]);
-  const headGeometry = useMemo(() => new THREE.SphereGeometry(0.35 * config.scale, 16, 16), [config.scale]);
-  const armGeometry = useMemo(() => new THREE.CapsuleGeometry(0.15 * config.scale, 0.6, 4, 8), [config.scale]);
-  const cannonGeometry = useMemo(() => new THREE.CylinderGeometry(0.1, 0.15, 0.8, 8), []);
-
-  // Fur trim geometry (torus around body) - using Strata's createFurSystem
-  const furTrimGeometry = useMemo(() => new THREE.TorusGeometry(0.55 * config.scale, 0.08, 8, 32), [config.scale]);
-  const furBaseMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: 0xeeeeee }), []);
-
-  // Create fur system using Strata
+  // Create articulated character using Strata
   useEffect(() => {
-    if (furGroupRef.current) {
-      // Clear existing children
-      while (furGroupRef.current.children.length > 0) {
-        furGroupRef.current.remove(furGroupRef.current.children[0]);
-      }
-      
-      // Create Strata fur system
-      const furSystem = createFurSystem(furTrimGeometry, furBaseMaterial, furOptions);
-      furGroupRef.current.add(furSystem);
+    if (groupRef.current && !characterRef.current) {
+      // Create the base character with Strata
+      const character = createCharacter({
+        skinColor: config.color,
+        furOptions,
+        scale: config.scale,
+      });
+
+      characterRef.current = character;
+      groupRef.current.add(character.root);
+
+      // Customize for Santa appearance
+      customizeSantaAppearance(character.joints, config.scale);
     }
-  }, [furTrimGeometry, furBaseMaterial, furOptions]);
 
-  // Materials
-  const suitMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: config.color,
-        emissive: config.color,
-        emissiveIntensity: 0.3,
-        roughness: 0.6,
-        metalness: 0.2,
-      }),
-    [config.color]
-  );
+    return () => {
+      if (characterRef.current && groupRef.current) {
+        groupRef.current.remove(characterRef.current.root);
+        characterRef.current = null;
+      }
+    };
+  }, [config.color, config.scale, furOptions]);
 
-  const beltMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: 0x111111,
-        roughness: 0.3,
-        metalness: 0.8,
-      }),
-    []
-  );
+  // Add Santa-specific details (hat, beard, belt, weapon)
+  function customizeSantaAppearance(joints: CharacterJoints, scale: number) {
+    if (!joints.head?.mesh) return;
 
-  const skinMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: 0xffccaa,
-        roughness: 0.8,
-        metalness: 0.0,
-      }),
-    []
-  );
+    const headMesh = joints.head.mesh;
 
-  const cannonMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+    // Remove default muzzle (Santa doesn't have a snout)
+    const childrenToRemove = headMesh.children.filter((child) => child instanceof THREE.Mesh);
+    for (const child of childrenToRemove) {
+      headMesh.remove(child);
+    }
+
+    // Add beard
+    const beardGeo = new THREE.SphereGeometry(0.28 * scale, 12, 12);
+    const beardMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+    const beard = new THREE.Mesh(beardGeo, beardMat);
+    beard.position.set(0, -0.15 * scale, 0.15 * scale);
+    beard.scale.set(1, 1.3, 0.8);
+    headMesh.add(beard);
+
+    // Add hat
+    const hatGeo = new THREE.ConeGeometry(0.22 * scale, 0.4 * scale, 8);
+    const hatMat = new THREE.MeshStandardMaterial({
+      color: config.color,
+      emissive: config.color,
+      emissiveIntensity: 0.2,
+    });
+    const hat = new THREE.Mesh(hatGeo, hatMat);
+    hat.position.set(0, 0.2 * scale, 0);
+    headMesh.add(hat);
+
+    // Hat pom-pom
+    const pomGeo = new THREE.SphereGeometry(0.08 * scale, 8, 8);
+    const pomMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const pom = new THREE.Mesh(pomGeo, pomMat);
+    pom.position.set(0, 0.45 * scale, 0);
+    headMesh.add(pom);
+
+    // Hat fur trim
+    const hatTrimGeo = new THREE.TorusGeometry(0.2 * scale, 0.04 * scale, 8, 16);
+    const hatTrim = new THREE.Mesh(hatTrimGeo, beardMat);
+    hatTrim.position.set(0, 0.05 * scale, 0);
+    hatTrim.rotation.x = Math.PI / 2;
+    headMesh.add(hatTrim);
+
+    // Glowing cyber eyes
+    const eyeGeo = new THREE.SphereGeometry(0.03 * scale, 8, 8);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+    const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeL.position.set(0.08 * scale, 0.05 * scale, 0.2 * scale);
+    headMesh.add(eyeL);
+    const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeR.position.set(-0.08 * scale, 0.05 * scale, 0.2 * scale);
+    headMesh.add(eyeR);
+
+    // Add belt to torso
+    if (joints.torso?.mesh) {
+      const beltGeo = new THREE.TorusGeometry(0.35 * scale, 0.04, 8, 32);
+      const beltMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8 });
+      const belt = new THREE.Mesh(beltGeo, beltMat);
+      belt.rotation.x = Math.PI / 2;
+      belt.position.y = -0.15 * scale;
+      joints.torso.mesh.add(belt);
+
+      // Belt buckle
+      const buckleGeo = new THREE.BoxGeometry(0.1 * scale, 0.08 * scale, 0.02);
+      const buckleMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 });
+      const buckle = new THREE.Mesh(buckleGeo, buckleMat);
+      buckle.position.set(0, -0.15 * scale, 0.35 * scale);
+      joints.torso.mesh.add(buckle);
+
+      // Fur collar trim
+      const collarGeo = new THREE.TorusGeometry(0.34 * scale, 0.05, 8, 32);
+      const collar = new THREE.Mesh(collarGeo, beardMat);
+      collar.rotation.x = Math.PI / 2;
+      collar.position.y = 0.35 * scale;
+      joints.torso.mesh.add(collar);
+    }
+
+    // Add Coal Cannon to right arm
+    if (joints.armR?.group) {
+      const weaponGroup = new THREE.Group();
+      weaponGroup.position.set(0, -0.3 * scale, 0.15 * scale);
+
+      const cannonGeo = new THREE.CylinderGeometry(0.06, 0.1, 0.5, 8);
+      const cannonMat = new THREE.MeshStandardMaterial({
         color: 0x333333,
         emissive: 0xff4400,
         emissiveIntensity: 0.2,
-        roughness: 0.2,
         metalness: 0.9,
-      }),
-    []
-  );
+      });
+      const cannon = new THREE.Mesh(cannonGeo, cannonMat);
+      cannon.rotation.x = Math.PI / 2;
+      weaponGroup.add(cannon);
+
+      // Muzzle light
+      const muzzle = new THREE.PointLight(0xff4400, 0, 5);
+      muzzle.position.set(0, 0, 0.3);
+      weaponGroup.add(muzzle);
+      if (muzzleRef) {
+        (muzzleRef as React.MutableRefObject<THREE.PointLight | null>).current = muzzle;
+      }
+
+      joints.armR.group.add(weaponGroup);
+      if (weaponGroupRef) {
+        (weaponGroupRef as React.MutableRefObject<THREE.Group | null>).current = weaponGroup;
+      }
+    }
+  }
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    // Update Strata fur animation
-    if (furGroupRef.current) {
-      furGroupRef.current.traverse((child) => {
-        if (child instanceof THREE.Group) {
-          updateFurUniforms(child, time);
+    if (characterRef.current) {
+      const { joints, state: charState } = characterRef.current;
+
+      // Update character state based on movement
+      charState.speed = isMoving ? charState.maxSpeed * 0.8 : 0;
+
+      // Use Strata's animateCharacter for walk/idle cycles
+      animateCharacter(characterRef.current, time);
+
+      // Update fur uniforms
+      for (const joint of Object.values(joints)) {
+        if (joint?.mesh) {
+          joint.mesh.traverse((child) => {
+            if (child instanceof THREE.Group) {
+              updateFurUniforms(child, time);
+            }
+          });
         }
-      });
-    }
-
-    // Animate body bob when moving
-    if (bodyRef.current) {
-      if (isMoving) {
-        bodyRef.current.position.y = Math.sin(time * 8) * 0.05;
-        bodyRef.current.rotation.z = Math.sin(time * 4) * 0.03;
-      } else {
-        // Idle breathing
-        bodyRef.current.position.y = Math.sin(time * 2) * 0.02;
-        bodyRef.current.rotation.z = 0;
       }
-    }
 
-    // Animate cannon arm
-    if (armRef.current) {
-      if (isFiring) {
-        armRef.current.rotation.x = Math.sin(time * 20) * 0.1 - 0.2;
-      } else {
-        armRef.current.rotation.x = -0.2;
+      // Weapon recoil when firing
+      if (weaponGroupRef.current) {
+        if (isFiring) {
+          weaponGroupRef.current.position.z = 0.15 + Math.sin(time * 20) * 0.02;
+        } else {
+          weaponGroupRef.current.position.z = 0.15;
+        }
       }
-    }
 
-    // Muzzle flash
-    if (muzzleRef.current) {
-      muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
+      // Muzzle flash
+      if (muzzleRef.current) {
+        muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
+      }
     }
   });
 
   return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]}>
-      <group ref={bodyRef}>
-        {/* Body - Red Suit */}
-        <mesh geometry={bodyGeometry} material={suitMaterial} position={[0, 1.2, 0]} castShadow />
-
-        {/* Belt */}
-        <mesh position={[0, 0.9, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.52 * config.scale, 0.06, 8, 32]} />
-          <primitive object={beltMaterial} attach="material" />
-        </mesh>
-
-        {/* Belt Buckle */}
-        <mesh position={[0, 0.9, 0.5 * config.scale]}>
-          <boxGeometry args={[0.15, 0.12, 0.03]} />
-          <meshStandardMaterial color={0xffd700} metalness={0.9} roughness={0.1} />
-        </mesh>
-
-        {/* Fur Trim (collar) - Using Strata */}
-        <group ref={furGroupRef} position={[0, 1.7, 0]} rotation={[Math.PI / 2, 0, 0]} />
-
-        {/* Fur Trim (bottom) */}
-        <group position={[0, 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <mesh geometry={furTrimGeometry}>
-            <meshStandardMaterial color={0xeeeeee} />
-          </mesh>
-        </group>
-
-        {/* Head */}
-        <group position={[0, 2.0, 0]}>
-          <mesh geometry={headGeometry} material={skinMaterial} castShadow />
-
-          {/* Beard (white fur) */}
-          <mesh position={[0, -0.2, 0.2 * config.scale]} scale={[1, 1.2, 0.8]}>
-            <sphereGeometry args={[0.25 * config.scale, 12, 12]} />
-            <meshStandardMaterial color={0xffffff} roughness={0.9} />
-          </mesh>
-
-          {/* Hat */}
-          <mesh position={[0, 0.25, 0]}>
-            <coneGeometry args={[0.3 * config.scale, 0.5, 8]} />
-            <primitive object={suitMaterial} attach="material" />
-          </mesh>
-
-          {/* Hat Fur Trim */}
-          <mesh position={[0, 0.05, 0]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.32 * config.scale, 0.05, 8, 16]} />
-            <meshStandardMaterial color={0xffffff} roughness={0.9} />
-          </mesh>
-
-          {/* Eyes (glowing) */}
-          <mesh position={[0.1, 0.05, 0.3]}>
-            <sphereGeometry args={[0.04, 8, 8]} />
-            <meshBasicMaterial color={0x00ffff} />
-          </mesh>
-          <mesh position={[-0.1, 0.05, 0.3]}>
-            <sphereGeometry args={[0.04, 8, 8]} />
-            <meshBasicMaterial color={0x00ffff} />
-          </mesh>
-        </group>
-
-        {/* Arms */}
-        <group ref={armRef} position={[0.7 * config.scale, 1.4, 0.2]}>
-          <mesh geometry={armGeometry} material={suitMaterial} rotation={[0, 0, -0.5]} castShadow />
-
-          {/* Coal Cannon */}
-          <group position={[0.3, -0.3, 0.4]} rotation={[Math.PI / 2, 0, 0]}>
-            <mesh geometry={cannonGeometry} material={cannonMaterial} castShadow />
-            <pointLight ref={muzzleRef} color={0xff4400} intensity={0} distance={5} position={[0, 0.5, 0]} />
-          </group>
-        </group>
-
-        {/* Left Arm */}
-        <mesh geometry={armGeometry} material={suitMaterial} position={[-0.7 * config.scale, 1.4, 0]} rotation={[0, 0, 0.5]} castShadow />
-
-        {/* Legs */}
-        <mesh position={[0.25 * config.scale, 0.3, 0]} rotation={[0, 0, 0]}>
-          <capsuleGeometry args={[0.12 * config.scale, 0.4, 4, 8]} />
-          <meshStandardMaterial color={0x111111} roughness={0.4} metalness={0.3} />
-        </mesh>
-        <mesh position={[-0.25 * config.scale, 0.3, 0]} rotation={[0, 0, 0]}>
-          <capsuleGeometry args={[0.12 * config.scale, 0.4, 4, 8]} />
-          <meshStandardMaterial color={0x111111} roughness={0.4} metalness={0.3} />
-        </mesh>
-
-        {/* Boots */}
-        <mesh position={[0.25 * config.scale, 0, 0.08]}>
-          <boxGeometry args={[0.18, 0.15, 0.3]} />
-          <meshStandardMaterial color={0x111111} roughness={0.3} metalness={0.5} />
-        </mesh>
-        <mesh position={[-0.25 * config.scale, 0, 0.08]}>
-          <boxGeometry args={[0.18, 0.15, 0.3]} />
-          <meshStandardMaterial color={0x111111} roughness={0.3} metalness={0.5} />
-        </mesh>
-      </group>
-    </group>
+    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
   );
 }

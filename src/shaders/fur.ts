@@ -1,9 +1,9 @@
 /**
  * Fur Shader Utilities
- * Re-exports from @jbcom/strata with custom extensions for game characters
+ * Re-exports from @jbcom/strata for fur rendering
  */
 
-// Re-export Strata's fur system
+// Re-export Strata's fur system from presets
 export {
   createFurMaterial,
   createFurSystem,
@@ -12,7 +12,7 @@ export {
   type FurUniforms,
 } from '@jbcom/strata';
 
-// Also export shaders for custom use cases
+// Re-export shaders for custom use cases
 export {
   furVertexShader,
   furFragmentShader,

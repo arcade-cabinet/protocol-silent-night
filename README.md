@@ -72,12 +72,18 @@ src/
 
 ## 🐻 Strata Integration
 
-This project uses techniques inspired by [@jbcom/strata](https://github.com/strata-game-library/core), a procedural 3D graphics library. Key concepts borrowed:
+This project is powered by [@jbcom/strata](https://github.com/strata-game-library/core), a procedural 3D graphics library for React Three Fiber.
 
-- **Shell-based Fur Rendering** - Multi-layer geometry with alpha-tested noise
-- **Character Animation Patterns** - Articulated joint systems
+### Features Used:
+- **`createCharacter()`** - Articulated characters with proper joint hierarchies (hips, torso, head, arms, legs)
+- **`animateCharacter()`** - Procedural walk cycles and idle breathing animations
+- **`createFurSystem()`** - Shell-based fur rendering with wind and gravity effects
+- **`updateFurUniforms()`** - Real-time fur animation
+- **`ProceduralSky`** - Dynamic sky with day/night settings
+- **`VolumetricFogMesh`** - Atmospheric fog effects
+- **`noise3D`, `fbm`** - Procedural terrain generation
 
-See [AGENTS.md](./AGENTS.md) for detailed documentation on the game architecture and potential Strata enhancements.
+See [AGENTS.md](./AGENTS.md) for detailed documentation on the game architecture.
 
 ## 📝 Scripts
 
@@ -93,20 +99,25 @@ See [AGENTS.md](./AGENTS.md) for detailed documentation on the game architecture
 
 ## 🎨 Character Details
 
+All characters use Strata's `createCharacter()` for proper articulated bodies with animated joints.
+
 ### MECHA-SANTA (Tank)
 - 300 HP, 9 speed
 - Coal Cannon: 40 damage, 0.5s cooldown
-- Red suit with white fur trim
+- Articulated body with fur-trimmed suit, beard, hat with pom-pom
+- Belt with golden buckle, glowing cyber eyes
 
 ### CYBER-ELF (Scout)
 - 100 HP, 18 speed
 - Plasma SMG: 8 damage, 0.1s cooldown
-- Sleek cyber suit with visor
+- Articulated body with cyber suit, pointed twitching ears
+- Visor with eye glow, spiky cyber-hair, hover boots
 
 ### THE BUMBLE (Bruiser)
 - 200 HP, 12 speed
 - Star Thrower: 18 damage × 3 spread
-- Full white fur coverage
+- Large articulated body with 16-layer dense white fur
+- Horns, glowing blue eyes, heavy breathing animation
 
 ## 📜 License
 

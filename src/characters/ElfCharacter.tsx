@@ -1,13 +1,20 @@
 /**
  * CYBER-ELF Character
- * Recon / Scout class with sleek cyber suit and Plasma SMG
- * Uses Strata's fur system for cyber-hair
+ * Recon / Scout class with articulated body, cyber aesthetic, and Plasma SMG
+ * Uses Strata's createCharacter for proper joint hierarchy
  */
 
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createFurSystem, updateFurUniforms, type FurOptions } from '@jbcom/strata';
+import {
+  createCharacter,
+  animateCharacter,
+  updateFurUniforms,
+  type CharacterJoints,
+  type CharacterState,
+  type FurOptions,
+} from '@jbcom/strata';
 import { PLAYER_CLASSES } from '@/types';
 
 interface ElfCharacterProps {
@@ -24,244 +31,253 @@ export function ElfCharacter({
   isFiring = false,
 }: ElfCharacterProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const bodyRef = useRef<THREE.Group>(null);
-  const armRef = useRef<THREE.Group>(null);
-  const earLRef = useRef<THREE.Mesh>(null);
-  const earRRef = useRef<THREE.Mesh>(null);
+  const characterRef = useRef<{
+    root: THREE.Group;
+    joints: CharacterJoints;
+    state: CharacterState;
+  } | null>(null);
   const muzzleRef = useRef<THREE.PointLight>(null);
-  const hairFurRef = useRef<THREE.Group>(null);
+  const weaponGroupRef = useRef<THREE.Group>(null);
+  const earsRef = useRef<{ left: THREE.Mesh; right: THREE.Mesh } | null>(null);
 
   const config = PLAYER_CLASSES.elf;
 
-  // Strata fur config for cyber-hair
+  // Strata fur options for Elf's cyber-hair
   const furOptions: FurOptions = useMemo(
     () => ({
-      baseColor: new THREE.Color(...config.furColor.base),
-      tipColor: new THREE.Color(...config.furColor.tip),
-      layerCount: 8,
-      spacing: 0.015,
-      windStrength: 1.5, // More responsive to wind
+      baseColor: new THREE.Color(0.0, 0.4, 0.35), // Cyan-teal base
+      tipColor: new THREE.Color(0.2, 0.8, 0.7), // Lighter cyan tips
+      layerCount: 6,
+      spacing: 0.012,
+      windStrength: 1.2, // More responsive
     }),
-    [config.furColor]
+    []
   );
 
-  // Hair geometry
-  const hairGeometry = useMemo(() => new THREE.SphereGeometry(0.2 * config.scale, 12, 12), [config.scale]);
-  const hairBaseMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: 0x00aa88, roughness: 0.8 }), []);
-
-  // Create Strata fur system for hair
+  // Create articulated character using Strata
   useEffect(() => {
-    if (hairFurRef.current) {
-      while (hairFurRef.current.children.length > 0) {
-        hairFurRef.current.remove(hairFurRef.current.children[0]);
-      }
-      const furSystem = createFurSystem(hairGeometry, hairBaseMaterial, furOptions);
-      hairFurRef.current.add(furSystem);
+    if (groupRef.current && !characterRef.current) {
+      const character = createCharacter({
+        skinColor: 0xffe4c4, // Skin tone
+        furOptions,
+        scale: config.scale,
+      });
+
+      characterRef.current = character;
+      groupRef.current.add(character.root);
+
+      // Customize for Elf appearance
+      customizeElfAppearance(character.joints, config.scale);
     }
-  }, [hairGeometry, hairBaseMaterial, furOptions]);
 
-  // Materials
-  const suitMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: config.color,
-        emissive: config.color,
-        emissiveIntensity: 0.5,
-        roughness: 0.2,
-        metalness: 0.8,
-      }),
-    [config.color]
-  );
+    return () => {
+      if (characterRef.current && groupRef.current) {
+        groupRef.current.remove(characterRef.current.root);
+        characterRef.current = null;
+      }
+    };
+  }, [config.scale, furOptions]);
 
-  const accentMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+  function customizeElfAppearance(joints: CharacterJoints, scale: number) {
+    if (!joints.head?.mesh) return;
+
+    const headMesh = joints.head.mesh;
+
+    // Remove default animal features
+    const childrenToRemove = headMesh.children.filter((child) => child instanceof THREE.Mesh);
+    for (const child of childrenToRemove) {
+      headMesh.remove(child);
+    }
+
+    // Pointed ears
+    const earGeo = new THREE.ConeGeometry(0.04 * scale, 0.18 * scale, 4);
+    const earMat = new THREE.MeshStandardMaterial({ color: 0xffe4c4 });
+
+    const earL = new THREE.Mesh(earGeo, earMat);
+    earL.position.set(0.18 * scale, 0.08 * scale, 0);
+    earL.rotation.z = 0.4;
+    headMesh.add(earL);
+
+    const earR = new THREE.Mesh(earGeo, earMat);
+    earR.position.set(-0.18 * scale, 0.08 * scale, 0);
+    earR.rotation.z = -0.4;
+    headMesh.add(earR);
+
+    earsRef.current = { left: earL, right: earR };
+
+    // Cyber visor
+    const visorGeo = new THREE.BoxGeometry(0.22 * scale, 0.05 * scale, 0.02);
+    const visorMat = new THREE.MeshStandardMaterial({
+      color: 0x00ffff,
+      emissive: 0x00ffff,
+      emissiveIntensity: 1.5,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const visor = new THREE.Mesh(visorGeo, visorMat);
+    visor.position.set(0, 0.02 * scale, 0.22 * scale);
+    headMesh.add(visor);
+
+    // Eye glow behind visor
+    const eyeLight = new THREE.PointLight(0x00ffff, 0.8, 2);
+    eyeLight.position.set(0, 0.02 * scale, 0.18 * scale);
+    headMesh.add(eyeLight);
+
+    // Cyber hair (spiky)
+    const hairGeo = new THREE.ConeGeometry(0.15 * scale, 0.2 * scale, 6);
+    const hairMat = new THREE.MeshStandardMaterial({
+      color: 0x00aa88,
+      emissive: 0x00aa88,
+      emissiveIntensity: 0.3,
+    });
+    for (let i = 0; i < 5; i++) {
+      const spike = new THREE.Mesh(hairGeo, hairMat);
+      const angle = (i / 5) * Math.PI - Math.PI / 2;
+      spike.position.set(
+        Math.sin(angle) * 0.08 * scale,
+        0.15 * scale,
+        Math.cos(angle) * 0.05 * scale - 0.05 * scale
+      );
+      spike.rotation.x = -0.3;
+      spike.rotation.z = Math.sin(angle) * 0.3;
+      headMesh.add(spike);
+    }
+
+    // Apply cyber suit material to torso and limbs
+    const suitMat = new THREE.MeshStandardMaterial({
+      color: config.color,
+      emissive: config.color,
+      emissiveIntensity: 0.4,
+      roughness: 0.2,
+      metalness: 0.8,
+    });
+
+    if (joints.torso?.mesh) {
+      joints.torso.mesh.material = suitMat;
+
+      // Add glowing accent lines
+      const lineGeo = new THREE.BoxGeometry(0.015, 0.4 * scale, 0.01);
+      const lineMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+      const line = new THREE.Mesh(lineGeo, lineMat);
+      line.position.set(0, 0, 0.33 * scale);
+      joints.torso.mesh.add(line);
+    }
+
+    // Apply suit material to arms and legs
+    for (const jointName of ['armL', 'armR', 'legL', 'legR']) {
+      const joint = joints[jointName];
+      if (joint?.mesh) {
+        joint.mesh.material = suitMat;
+      }
+    }
+
+    // Hover boots
+    if (joints.legL?.mesh && joints.legR?.mesh) {
+      const bootMat = new THREE.MeshStandardMaterial({
         color: 0x00ff88,
         emissive: 0x00ff88,
         emissiveIntensity: 0.8,
-        roughness: 0.1,
-        metalness: 0.9,
-      }),
-    []
-  );
+      });
+      const bootGeo = new THREE.BoxGeometry(0.08 * scale, 0.03, 0.12 * scale);
 
-  const skinMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: 0xffe4c4,
-        roughness: 0.7,
-        metalness: 0.0,
-      }),
-    []
-  );
+      const bootL = new THREE.Mesh(bootGeo, bootMat);
+      bootL.position.set(0, -0.25 * scale, 0);
+      joints.legL.mesh.add(bootL);
 
-  const weaponMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
+      const bootR = new THREE.Mesh(bootGeo, bootMat);
+      bootR.position.set(0, -0.25 * scale, 0);
+      joints.legR.mesh.add(bootR);
+
+      // Boot glow
+      const bootLightL = new THREE.PointLight(config.color, 0.5, 1);
+      bootLightL.position.set(0, -0.28 * scale, 0);
+      joints.legL.mesh.add(bootLightL);
+
+      const bootLightR = new THREE.PointLight(config.color, 0.5, 1);
+      bootLightR.position.set(0, -0.28 * scale, 0);
+      joints.legR.mesh.add(bootLightR);
+    }
+
+    // Add Plasma SMG to right arm
+    if (joints.armR?.group) {
+      const weaponGroup = new THREE.Group();
+      weaponGroup.position.set(0, -0.2 * scale, 0.12 * scale);
+      weaponGroup.rotation.x = Math.PI / 2;
+
+      // SMG body
+      const smgGeo = new THREE.BoxGeometry(0.04, 0.2, 0.06);
+      const smgMat = new THREE.MeshStandardMaterial({
         color: 0x222222,
         emissive: config.color,
-        emissiveIntensity: 0.3,
-        roughness: 0.1,
+        emissiveIntensity: 0.2,
         metalness: 0.95,
-      }),
-    [config.color]
-  );
+      });
+      const smg = new THREE.Mesh(smgGeo, smgMat);
+      weaponGroup.add(smg);
+
+      // Barrel
+      const barrelGeo = new THREE.CylinderGeometry(0.015, 0.02, 0.12, 8);
+      const barrel = new THREE.Mesh(barrelGeo, smgMat);
+      barrel.position.set(0, 0.15, 0);
+      weaponGroup.add(barrel);
+
+      // Energy core
+      const coreGeo = new THREE.SphereGeometry(0.015, 8, 8);
+      const coreMat = new THREE.MeshBasicMaterial({ color: config.color });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      core.position.set(0, 0.03, 0.025);
+      weaponGroup.add(core);
+
+      // Muzzle light
+      const muzzle = new THREE.PointLight(config.color, 0, 3);
+      muzzle.position.set(0, 0.22, 0);
+      weaponGroup.add(muzzle);
+      (muzzleRef as React.MutableRefObject<THREE.PointLight | null>).current = muzzle;
+
+      joints.armR.group.add(weaponGroup);
+      (weaponGroupRef as React.MutableRefObject<THREE.Group | null>).current = weaponGroup;
+    }
+  }
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    // Update Strata fur animation for hair
-    if (hairFurRef.current) {
-      hairFurRef.current.traverse((child) => {
-        if (child instanceof THREE.Group) {
-          updateFurUniforms(child, time);
+    if (characterRef.current) {
+      const { joints, state: charState } = characterRef.current;
+
+      // Elf moves faster
+      charState.maxSpeed = 0.25;
+      charState.speed = isMoving ? charState.maxSpeed : 0;
+
+      // Use Strata's animateCharacter
+      animateCharacter(characterRef.current, time);
+
+      // Update fur uniforms
+      for (const joint of Object.values(joints)) {
+        if (joint?.mesh) {
+          joint.mesh.traverse((child) => {
+            if (child instanceof THREE.Group) {
+              updateFurUniforms(child, time);
+            }
+          });
         }
-      });
-    }
-
-    // Fast, agile movement animation
-    if (bodyRef.current) {
-      if (isMoving) {
-        bodyRef.current.position.y = Math.sin(time * 15) * 0.03;
-        bodyRef.current.rotation.z = Math.sin(time * 7.5) * 0.05;
-      } else {
-        bodyRef.current.position.y = Math.sin(time * 3) * 0.01;
-        bodyRef.current.rotation.z = 0;
       }
-    }
 
-    // Ear twitch animation
-    if (earLRef.current && earRRef.current) {
-      const twitch = Math.sin(time * 2 + Math.random() * 0.1) * 0.1;
-      earLRef.current.rotation.z = 0.3 + twitch;
-      earRRef.current.rotation.z = -0.3 - twitch;
-    }
-
-    // Weapon aim
-    if (armRef.current) {
-      if (isFiring) {
-        armRef.current.rotation.x = Math.sin(time * 40) * 0.05;
-      } else {
-        armRef.current.rotation.x = 0;
+      // Ear twitch
+      if (earsRef.current) {
+        const twitch = Math.sin(time * 3) * 0.08;
+        earsRef.current.left.rotation.z = 0.4 + twitch;
+        earsRef.current.right.rotation.z = -0.4 - twitch;
       }
-    }
 
-    // Muzzle flash (rapid)
-    if (muzzleRef.current) {
-      muzzleRef.current.intensity = isFiring ? Math.random() * 2 + 1 : 0;
+      // Rapid muzzle flash
+      if (muzzleRef.current) {
+        muzzleRef.current.intensity = isFiring ? Math.random() * 2 + 1 : 0;
+      }
     }
   });
 
   return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]}>
-      <group ref={bodyRef}>
-        {/* Slim Body */}
-        <mesh position={[0, 0.8 * config.scale, 0]} castShadow>
-          <capsuleGeometry args={[0.25 * config.scale, 0.6 * config.scale, 8, 16]} />
-          <primitive object={suitMaterial} attach="material" />
-        </mesh>
-
-        {/* Cyber Lines on Suit */}
-        <mesh position={[0, 0.8 * config.scale, 0.26 * config.scale]}>
-          <boxGeometry args={[0.02, 0.5 * config.scale, 0.01]} />
-          <primitive object={accentMaterial} attach="material" />
-        </mesh>
-
-        {/* Head */}
-        <group position={[0, 1.4 * config.scale, 0]}>
-          <mesh castShadow>
-            <sphereGeometry args={[0.22 * config.scale, 16, 16]} />
-            <primitive object={skinMaterial} attach="material" />
-          </mesh>
-
-          {/* Pointed Ears */}
-          <mesh ref={earLRef} position={[0.2 * config.scale, 0.1, 0]} rotation={[0, 0, 0.3]}>
-            <coneGeometry args={[0.05 * config.scale, 0.2 * config.scale, 4]} />
-            <primitive object={skinMaterial} attach="material" />
-          </mesh>
-          <mesh ref={earRRef} position={[-0.2 * config.scale, 0.1, 0]} rotation={[0, 0, -0.3]}>
-            <coneGeometry args={[0.05 * config.scale, 0.2 * config.scale, 4]} />
-            <primitive object={skinMaterial} attach="material" />
-          </mesh>
-
-          {/* Cyber Hair - Using Strata fur system */}
-          <group ref={hairFurRef} position={[0, 0.15, -0.05]} />
-
-          {/* Visor */}
-          <mesh position={[0, 0.02, 0.18 * config.scale]}>
-            <boxGeometry args={[0.3 * config.scale, 0.06, 0.02]} />
-            <meshStandardMaterial
-              color={0x00ffff}
-              emissive={0x00ffff}
-              emissiveIntensity={1.5}
-              transparent
-              opacity={0.8}
-            />
-          </mesh>
-
-          {/* Eye Glow behind visor */}
-          <pointLight color={0x00ffff} intensity={0.5} distance={2} position={[0, 0.02, 0.15]} />
-        </group>
-
-        {/* Arms with SMG */}
-        <group ref={armRef} position={[0.35 * config.scale, 1.0 * config.scale, 0.15]}>
-          <mesh rotation={[0, 0, -0.3]} castShadow>
-            <capsuleGeometry args={[0.06 * config.scale, 0.35 * config.scale, 4, 8]} />
-            <primitive object={suitMaterial} attach="material" />
-          </mesh>
-
-          {/* Plasma SMG */}
-          <group position={[0.15, -0.1, 0.2]} rotation={[Math.PI / 2, 0.3, 0]}>
-            <mesh castShadow>
-              <boxGeometry args={[0.05, 0.3, 0.08]} />
-              <primitive object={weaponMaterial} attach="material" />
-            </mesh>
-            {/* Barrel */}
-            <mesh position={[0, 0.2, 0]}>
-              <cylinderGeometry args={[0.02, 0.025, 0.15, 8]} />
-              <primitive object={weaponMaterial} attach="material" />
-            </mesh>
-            {/* Energy Core */}
-            <mesh position={[0, 0.05, 0.03]}>
-              <sphereGeometry args={[0.02, 8, 8]} />
-              <meshBasicMaterial color={config.color} />
-            </mesh>
-            <pointLight ref={muzzleRef} color={config.color} intensity={0} distance={3} position={[0, 0.3, 0]} />
-          </group>
-        </group>
-
-        {/* Left Arm */}
-        <mesh position={[-0.35 * config.scale, 1.0 * config.scale, 0]} rotation={[0, 0, 0.3]} castShadow>
-          <capsuleGeometry args={[0.06 * config.scale, 0.35 * config.scale, 4, 8]} />
-          <primitive object={suitMaterial} attach="material" />
-        </mesh>
-
-        {/* Legs - Sleek */}
-        <mesh position={[0.12 * config.scale, 0.25 * config.scale, 0]} castShadow>
-          <capsuleGeometry args={[0.07 * config.scale, 0.35 * config.scale, 4, 8]} />
-          <primitive object={suitMaterial} attach="material" />
-        </mesh>
-        <mesh position={[-0.12 * config.scale, 0.25 * config.scale, 0]} castShadow>
-          <capsuleGeometry args={[0.07 * config.scale, 0.35 * config.scale, 4, 8]} />
-          <primitive object={suitMaterial} attach="material" />
-        </mesh>
-
-        {/* Hover Boots */}
-        <group position={[0.12 * config.scale, 0, 0]}>
-          <mesh>
-            <boxGeometry args={[0.1, 0.05, 0.15]} />
-            <primitive object={accentMaterial} attach="material" />
-          </mesh>
-          <pointLight color={config.color} intensity={0.3} distance={1} position={[0, -0.05, 0]} />
-        </group>
-        <group position={[-0.12 * config.scale, 0, 0]}>
-          <mesh>
-            <boxGeometry args={[0.1, 0.05, 0.15]} />
-            <primitive object={accentMaterial} attach="material" />
-          </mesh>
-          <pointLight color={config.color} intensity={0.3} distance={1} position={[0, -0.05, 0]} />
-        </group>
-      </group>
-    </group>
+    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
   );
 }

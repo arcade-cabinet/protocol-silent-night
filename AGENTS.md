@@ -272,49 +272,89 @@ src/
 
 ---
 
-## 8. STRATA INTEGRATION OPPORTUNITIES
+## 8. STRATA INTEGRATION
 
-The [@jbcom/strata](https://github.com/strata-game-library/core) library provides additional features that could enhance this game:
+This project is fully powered by [@jbcom/strata](https://github.com/strata-game-library/core).
 
-### Currently Utilized Concepts
-- **Fur Shell Rendering:** Our custom implementation is based on Strata's shell-based fur system
+### Active Strata Features
 
-### Potential Enhancements with Strata
+| Feature | Component | Usage |
+|---------|-----------|-------|
+| **Articulated Characters** | `createCharacter()` | All player characters have proper joint hierarchies |
+| **Procedural Animation** | `animateCharacter()` | Walk cycles, idle breathing, arm/leg swing |
+| **Fur Rendering** | `createFurSystem()` | Santa's suit trim, Elf's hair, Bumble's full body |
+| **Fur Animation** | `updateFurUniforms()` | Wind effects, gravity droop on fur |
+| **Procedural Sky** | `<ProceduralSky>` | Night sky with stars and fog |
+| **Volumetric Fog** | `<VolumetricFogMesh>` | Atmospheric depth |
+| **Terrain Noise** | `noise3D`, `fbm` | Procedural terrain height generation |
 
-| Feature | Strata Component | Benefit |
-|---------|------------------|---------|
-| **Character System** | `createCharacter()` | Full articulated character with joints, IK |
-| **Procedural Animation** | `animateCharacter()` | Walk cycles, idle animations |
-| **Advanced Fur** | `createFurSystem()` | Integrated fur with animation updates |
-| **Terrain** | SDF + Marching Cubes | More complex procedural terrain |
-| **Water** | `<Water>` component | Reflective water areas |
-| **Sky** | `<ProceduralSky>` | Dynamic day/night cycle |
-| **Volumetrics** | `<VolumetricFogMesh>` | Atmospheric fog effects |
-| **Vegetation** | `<GrassInstances>` | Snow-covered vegetation |
-
-### Example Strata Integration
+### Character Implementation
 
 ```tsx
-import { createCharacter, animateCharacter, createFurSystem } from '@jbcom/strata';
+import {
+  createCharacter,
+  animateCharacter,
+  updateFurUniforms,
+  type CharacterJoints,
+  type CharacterState,
+  type FurOptions,
+} from '@jbcom/strata';
 
-// Create a furry character with full animation support
-const { root, joints, state } = createCharacter({
+// Create articulated character with fur
+const character = createCharacter({
   skinColor: 0xeeeeee,
   furOptions: {
-    baseColor: 0xdddddd,
-    tipColor: 0xffffff,
+    baseColor: new THREE.Color(0.85, 0.85, 0.85),
+    tipColor: new THREE.Color(1.0, 1.0, 1.0),
     layerCount: 16,
-    windStrength: 0.8,
+    spacing: 0.035,
+    windStrength: 0.6,
   },
   scale: 1.6,
 });
 
+// Add to scene
+scene.add(character.root);
+
 // In animation loop
-useFrame((_, delta) => {
-  state.speed = isMoving ? state.maxSpeed : 0;
-  animateCharacter({ root, joints, state }, time, delta);
+useFrame((state) => {
+  const time = state.clock.elapsedTime;
+  
+  // Update movement state
+  character.state.speed = isMoving ? character.state.maxSpeed : 0;
+  
+  // Animate joints (walk/idle cycles)
+  animateCharacter(character, time);
+  
+  // Animate fur
+  for (const joint of Object.values(character.joints)) {
+    if (joint?.mesh) {
+      joint.mesh.traverse((child) => {
+        if (child instanceof THREE.Group) {
+          updateFurUniforms(child, time);
+        }
+      });
+    }
+  }
 });
 ```
+
+### Joint Hierarchy
+
+Each character created with `createCharacter()` has:
+- **hips** - Root of animation, controls overall height bob
+- **torso** - Attached to hips, handles spine twist
+- **head** - Attached to torso, with customizable features
+- **armL/armR** - Attached to torso, counter-swing during walk
+- **legL/legR** - Attached to hips, primary walk animation
+- **tail** - Optional, attached to hips
+
+### Other Strata Libraries
+
+The Strata organization provides additional packages:
+- **@jbcom/strata-presets** - Ready-to-use terrain, weather, physics presets
+- **strata-game-library/shaders** - GLSL shader collection
+- **strata-game-library/capacitor-plugin** - Mobile game input/haptics
 
 ---
 
