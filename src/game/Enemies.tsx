@@ -18,7 +18,6 @@ export function Enemies() {
   const {
     state,
     enemies,
-    addEnemy,
     updateEnemies,
     playerPosition,
     damagePlayer,
@@ -27,15 +26,18 @@ export function Enemies() {
     bossMaxHp,
   } = useGameStore();
 
-  // Spawn minion
+  // Spawn minion - using getState() to avoid recreating callback on enemies.length change
   const spawnMinion = useCallback(() => {
-    if (state === 'GAME_OVER' || state === 'WIN' || enemies.length >= CONFIG.MAX_MINIONS) return;
+    const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
+    if (currentState === 'GAME_OVER' || currentState === 'WIN' || currentEnemies.length >= CONFIG.MAX_MINIONS) return;
 
     const id = `minion-${enemyIdCounter++}`;
     const angle = Math.random() * Math.PI * 2;
     const radius = 25 + Math.random() * 10;
 
-    const position = new THREE.Vector3(
+    // Create a proper THREE.Object3D for position tracking
+    const mesh = new THREE.Object3D();
+    mesh.position.set(
       Math.cos(angle) * radius,
       1,
       Math.sin(angle) * radius
@@ -43,7 +45,7 @@ export function Enemies() {
 
     addEnemy({
       id,
-      mesh: { position } as unknown as THREE.Object3D,
+      mesh,
       velocity: new THREE.Vector3(),
       hp: 30,
       maxHp: 30,
@@ -53,7 +55,7 @@ export function Enemies() {
       damage: 1,
       pointValue: 10,
     });
-  }, [state, enemies.length, addEnemy]);
+  }, []);
 
   // Spawn initial enemies with cleanup
   useEffect(() => {
@@ -91,7 +93,7 @@ export function Enemies() {
     // Update enemy positions
     updateEnemies((currentEnemies) => {
       return currentEnemies.map((enemy) => {
-        const pos = (enemy.mesh as unknown as { position: THREE.Vector3 }).position;
+        const pos = enemy.mesh.position;
 
         // Calculate direction to player
         const toPlayer = playerPosition.clone().sub(pos);
@@ -122,7 +124,7 @@ export function Enemies() {
       {enemies
         .filter((e) => e.type === 'minion')
         .map((enemy) => {
-          const pos = (enemy.mesh as unknown as { position: THREE.Vector3 }).position;
+          const pos = enemy.mesh.position;
           return (
             <MinionMesh
               key={enemy.id}
@@ -134,20 +136,30 @@ export function Enemies() {
         })}
 
       {/* Render Boss */}
-      {bossActive && (() => {
-        const bossEnemy = enemies.find((e) => e.type === 'boss');
-        const bossPos = bossEnemy
-          ? (bossEnemy.mesh as unknown as { position: THREE.Vector3 }).position
-          : null;
-        return (
-          <BossMesh
-            position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
-            hp={bossHp}
-            maxHp={bossMaxHp}
-          />
-        );
-      })()}
+      {bossActive && <BossRenderer enemies={enemies} bossHp={bossHp} bossMaxHp={bossMaxHp} />}
     </group>
+  );
+}
+
+// Boss renderer component - extracted from IIFE for clarity
+function BossRenderer({
+  enemies,
+  bossHp,
+  bossMaxHp,
+}: {
+  enemies: { type: string; mesh: THREE.Object3D }[];
+  bossHp: number;
+  bossMaxHp: number;
+}) {
+  const bossEnemy = enemies.find((e) => e.type === 'boss');
+  const bossPos = bossEnemy?.mesh.position ?? null;
+
+  return (
+    <BossMesh
+      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
+      hp={bossHp}
+      maxHp={bossMaxHp}
+    />
   );
 }
 

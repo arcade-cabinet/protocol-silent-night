@@ -109,7 +109,7 @@ export function PlayerController() {
     groupRef.current.position.copy(positionRef.current);
     groupRef.current.rotation.y = rotationRef.current;
 
-    // Update store (throttled)
+    // Update store
     setPlayerPosition(positionRef.current);
     setPlayerRotation(rotationRef.current);
 

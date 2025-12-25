@@ -5,6 +5,13 @@
     "clientKind": "git",
     "useIgnoreFile": true
   },
+  "files": {
+    "ignore": [
+      "e2e/**",
+      "playwright-report/**",
+      "test-results/**"
+    ]
+  },
   "organizeImports": {
     "enabled": true
   },

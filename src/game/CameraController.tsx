@@ -39,10 +39,9 @@ export function CameraController() {
       targetRef.current.y += (Math.random() - 0.5) * screenShake * 2;
       targetRef.current.z += (Math.random() - 0.5) * screenShake * 2;
 
-      // Decay shake
-      useGameStore.setState((state) => ({
-        screenShake: state.screenShake * 0.9,
-      }));
+      // Decay shake using getState to avoid re-render cycles
+      const currentShake = useGameStore.getState().screenShake;
+      useGameStore.setState({ screenShake: currentShake * 0.9 });
     }
 
     // Smooth follow

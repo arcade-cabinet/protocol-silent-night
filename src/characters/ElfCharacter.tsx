@@ -36,8 +36,8 @@ export function ElfCharacter({
     joints: CharacterJoints;
     state: CharacterState;
   } | null>(null);
-  const muzzleRef = useRef<THREE.PointLight>(null);
-  const weaponGroupRef = useRef<THREE.Group>(null);
+  const muzzleRef = useRef<THREE.PointLight | null>(null);
+  const weaponGroupRef = useRef<THREE.Group | null>(null);
   const earsRef = useRef<{ left: THREE.Mesh; right: THREE.Mesh } | null>(null);
 
   const config = PLAYER_CLASSES.elf;
@@ -232,10 +232,10 @@ export function ElfCharacter({
       const muzzle = new THREE.PointLight(config.color, 0, 3);
       muzzle.position.set(0, 0.22, 0);
       weaponGroup.add(muzzle);
-      (muzzleRef as React.MutableRefObject<THREE.PointLight | null>).current = muzzle;
+      muzzleRef.current = muzzle;
 
       joints.armR.group.add(weaponGroup);
-      (weaponGroupRef as React.MutableRefObject<THREE.Group | null>).current = weaponGroup;
+      weaponGroupRef.current = weaponGroup;
     }
   }
 

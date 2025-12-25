@@ -36,8 +36,8 @@ export function SantaCharacter({
     joints: CharacterJoints;
     state: CharacterState;
   } | null>(null);
-  const muzzleRef = useRef<THREE.PointLight>(null);
-  const weaponGroupRef = useRef<THREE.Group>(null);
+  const muzzleRef = useRef<THREE.PointLight | null>(null);
+  const weaponGroupRef = useRef<THREE.Group | null>(null);
 
   const config = PLAYER_CLASSES.santa;
 
@@ -177,14 +177,11 @@ export function SantaCharacter({
       const muzzle = new THREE.PointLight(0xff4400, 0, 5);
       muzzle.position.set(0, 0, 0.3);
       weaponGroup.add(muzzle);
-      // Muzzle light
-      const muzzle = new THREE.PointLight(0xff4400, 0, 5);
-      muzzle.position.set(0, 0, 0.3);
-      weaponGroup.add(muzzle);
       muzzleRef.current = muzzle;
 
       joints.armR.group.add(weaponGroup);
       weaponGroupRef.current = weaponGroup;
+    }
   }
 
   useFrame((state) => {

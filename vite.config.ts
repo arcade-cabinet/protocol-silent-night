@@ -8,6 +8,8 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [react()],
+  // Use base URL from env for GitHub Pages, default to '/' for local dev
+  base: process.env.VITE_BASE_URL || '/',
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

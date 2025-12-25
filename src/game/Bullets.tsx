@@ -9,6 +9,15 @@ import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import { CONFIG } from '@/types';
 
+// Max bullets to render
+const MAX_BULLETS = 100;
+
+// Reusable dummy object for matrix calculations
+const dummy = new THREE.Object3D();
+// Scale to zero for hiding unused instances
+const zeroScale = new THREE.Vector3(0, 0, 0);
+const normalScale = new THREE.Vector3(1, 1, 1);
+
 export function Bullets() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } =
@@ -28,62 +37,72 @@ export function Bullets() {
     if (!meshRef.current) return;
 
     const toRemove: string[] = [];
-    const dummy = new THREE.Object3D();
 
-    // Update bullet positions and check collisions
+    // First pass: update positions, check collisions, mark for removal
     updateBullets((currentBullets) => {
-      return currentBullets
-        .map((bullet, index) => {
-          // Get bullet position (initialized when bullet was created)
-          const oldPos = (bullet.mesh as unknown as { position: THREE.Vector3 }).position;
-          const newPos = oldPos.clone().add(bullet.direction.clone().multiplyScalar(bullet.speed * delta));
+      const updatedBullets = currentBullets.map((bullet) => {
+        // Get bullet position and update it
+        const pos = (bullet.mesh as THREE.Object3D).position;
+        pos.add(bullet.direction.clone().multiplyScalar(bullet.speed * delta));
 
-          // Update instance matrix
-          dummy.position.copy(pos);
-          dummy.updateMatrix();
-          meshRef.current!.setMatrixAt(index, dummy.matrix);
+        // Decrease life
+        const newLife = bullet.life - delta;
 
-          // Decrease life
-          const newLife = bullet.life - delta;
+        // Check if out of bounds or expired
+        if (newLife <= 0 || pos.length() > 50) {
+          toRemove.push(bullet.id);
+          return { ...bullet, life: newLife };
+        }
 
-          // Check if out of bounds or expired
-          if (newLife <= 0 || pos.length() > 50) {
-            toRemove.push(bullet.id);
-            return bullet;
-          }
-
-          // Collision with enemies (for player bullets)
-          if (!bullet.isEnemy) {
-            for (const enemy of enemies) {
-              const enemyPos = (enemy.mesh as unknown as { position?: THREE.Vector3 })?.position;
-              if (enemyPos) {
-                const dist = pos.distanceTo(enemyPos);
-                if (dist < 1.5) {
-                  if (enemy.type === 'boss' && bossActive) {
-                    damageBoss(bullet.damage);
-                  } else {
-                    damageEnemy(enemy.id, bullet.damage);
-                  }
-                  toRemove.push(bullet.id);
-                  break;
+        // Collision with enemies (for player bullets)
+        if (!bullet.isEnemy) {
+          for (const enemy of enemies) {
+            const enemyPos = (enemy.mesh as THREE.Object3D)?.position;
+            if (enemyPos) {
+              const dist = pos.distanceTo(enemyPos);
+              if (dist < 1.5) {
+                if (enemy.type === 'boss' && bossActive) {
+                  damageBoss(bullet.damage);
+                } else {
+                  damageEnemy(enemy.id, bullet.damage);
                 }
+                toRemove.push(bullet.id);
+                break;
               }
             }
           }
+        }
 
-          return { ...bullet, life: newLife };
-        })
-        .filter((b) => !toRemove.includes(b.id));
+        return { ...bullet, life: newLife };
+      });
+
+      // Filter out removed bullets
+      const activeBullets = updatedBullets.filter((b) => !toRemove.includes(b.id));
+
+      // Update instance matrices for active bullets only
+      for (let i = 0; i < MAX_BULLETS; i++) {
+        if (i < activeBullets.length) {
+          const bullet = activeBullets[i];
+          const pos = (bullet.mesh as THREE.Object3D).position;
+          dummy.position.copy(pos);
+          dummy.scale.copy(normalScale);
+        } else {
+          // Hide unused instances by scaling to zero
+          dummy.position.set(0, -1000, 0);
+          dummy.scale.copy(zeroScale);
+        }
+        dummy.updateMatrix();
+        meshRef.current!.setMatrixAt(i, dummy.matrix);
+      }
+
+      return activeBullets;
     });
 
     meshRef.current.instanceMatrix.needsUpdate = true;
   });
 
-  // Max bullets to render
-  const maxBullets = 100;
-
   return (
-    <instancedMesh ref={meshRef} args={[geometry, material, maxBullets]} frustumCulled={false}>
+    <instancedMesh ref={meshRef} args={[geometry, material, MAX_BULLETS]} frustumCulled={false}>
       {/* Emissive glow */}
       <pointLight color={CONFIG.COLORS.BULLET_PLAYER} intensity={0.5} distance={3} />
     </instancedMesh>

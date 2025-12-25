@@ -146,7 +146,7 @@ The `gameStore` acts as the central state management system.
 
 **Logic:**
 1. Generates an 80×80 grid of cubes
-2. Applies a pseudo-noise function using `Math.sin(x) * Math.cos(z)` to create wave-like terrain elevation
+2. Uses Strata's `noise3D` and `fbm` (fractional Brownian motion) functions for procedural terrain elevation
 3. Applies a "Glitch" pass where random pillars are extruded vertically (0.5% chance)
 
 **Rendering:**

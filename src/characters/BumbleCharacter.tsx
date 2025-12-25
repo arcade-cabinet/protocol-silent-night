@@ -36,8 +36,8 @@ export function BumbleCharacter({
     joints: CharacterJoints;
     state: CharacterState;
   } | null>(null);
-  const muzzleRef = useRef<THREE.PointLight>(null);
-  const starMeshRef = useRef<THREE.Mesh>(null);
+  const muzzleRef = useRef<THREE.PointLight | null>(null);
+  const starMeshRef = useRef<THREE.Mesh | null>(null);
 
   const config = PLAYER_CLASSES.bumble;
 
@@ -201,12 +201,12 @@ export function BumbleCharacter({
       const star = new THREE.Mesh(starGeo, starMat);
       star.rotation.x = Math.PI / 2;
       weaponGroup.add(star);
-      (starMeshRef as React.MutableRefObject<THREE.Mesh | null>).current = star;
+      starMeshRef.current = star;
 
       // Star glow
       const starLight = new THREE.PointLight(0xffd700, 1, 4);
       weaponGroup.add(starLight);
-      (muzzleRef as React.MutableRefObject<THREE.PointLight | null>).current = starLight;
+      muzzleRef.current = starLight;
 
       joints.armL.group.add(weaponGroup);
     }
@@ -241,10 +241,15 @@ export function BumbleCharacter({
         }
       }
 
-      // Heavy breathing when idle
-      if (!isMoving && joints.torso?.mesh) {
-        const breath = Math.sin(time * 1.5);
-        joints.torso.mesh.scale.setScalar(1.1 + breath * 0.03);
+      // Heavy breathing when idle - only animate Y to preserve non-uniform scale
+      if (joints.torso?.mesh) {
+        if (!isMoving) {
+          const breath = Math.sin(time * 1.5);
+          joints.torso.mesh.scale.y = 1.1 + breath * 0.03;
+        } else {
+          // Reset Y scale when moving, preserving X and Z from customization
+          joints.torso.mesh.scale.y = 1.1;
+        }
       }
 
       // Rotate star when firing
