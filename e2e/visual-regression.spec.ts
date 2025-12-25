@@ -226,8 +226,16 @@ test.describe('Visual Regression - End Game States', () => {
     
     // Trigger game over by evaluating state (for testing purposes)
     await page.evaluate(() => {
-      // @ts-ignore - accessing game store
-      window.useGameStore?.getState().damagePlayer(300);
+      type GameWindow = Window & {
+        useGameStore?: {
+          getState(): {
+            damagePlayer: (amount: number) => void;
+          };
+        };
+      };
+
+      const gameWindow = window as GameWindow;
+      gameWindow.useGameStore?.getState().damagePlayer(300);
     });
     
     await page.waitForTimeout(2000);
