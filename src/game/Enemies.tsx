@@ -187,39 +187,85 @@ function MinionMesh({
   hp: number;
   maxHp: number;
 }) {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const bodyRef = useRef<THREE.Group>(null);
 
   // Flash effect when damaged
-  const intensity = hp < maxHp ? 1.5 : 0.8;
+  const hpRatio = hp / maxHp;
+  const intensity = hp < maxHp ? 2 : 1;
+  const isHurt = hp < maxHp * 0.5;
 
   useFrame((state) => {
-    if (meshRef.current) {
+    const time = state.clock.elapsedTime;
+    
+    if (groupRef.current) {
       // Rotate to face movement direction
-      meshRef.current.rotation.y = state.clock.elapsedTime * 2;
+      groupRef.current.rotation.y = time * 2;
+    }
+
+    if (bodyRef.current) {
+      // Bobbing movement
+      bodyRef.current.position.y = Math.sin(time * 6) * 0.1;
+      // Lean forward when moving
+      bodyRef.current.rotation.x = 0.2;
     }
   });
 
   return (
-    <group position={position}>
-      <mesh ref={meshRef} castShadow>
-        <coneGeometry args={[0.6, 1.5, 4]} />
-        <meshStandardMaterial
-          color={0x222222}
-          emissive={CONFIG.COLORS.ENEMY_MINION}
-          emissiveIntensity={intensity}
-          flatShading
-        />
-      </mesh>
-      {/* Evil eyes */}
-      <mesh position={[0.15, 0.3, 0.4]}>
-        <sphereGeometry args={[0.08, 8, 8]} />
-        <meshBasicMaterial color={0xff0000} />
-      </mesh>
-      <mesh position={[-0.15, 0.3, 0.4]}>
-        <sphereGeometry args={[0.08, 8, 8]} />
-        <meshBasicMaterial color={0xff0000} />
-      </mesh>
-      <pointLight color={CONFIG.COLORS.ENEMY_MINION} intensity={0.5} distance={3} />
+    <group position={position} ref={groupRef}>
+      {/* Body */}
+      <group ref={bodyRef}>
+        {/* Main body - wedge/pyramid shape */}
+        <mesh castShadow>
+          <coneGeometry args={[0.5, 1.2, 6]} />
+          <meshStandardMaterial
+            color={0x112211}
+            emissive={CONFIG.COLORS.ENEMY_MINION}
+            emissiveIntensity={intensity}
+            flatShading
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        
+        {/* Head */}
+        <mesh position={[0, 0.9, 0]} castShadow>
+          <dodecahedronGeometry args={[0.35]} />
+          <meshStandardMaterial
+            color={0x224422}
+            emissive={CONFIG.COLORS.ENEMY_MINION}
+            emissiveIntensity={intensity * 0.7}
+            flatShading
+          />
+        </mesh>
+        
+        {/* Evil eyes */}
+        <mesh position={[0.12, 0.95, 0.25]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshBasicMaterial color={isHurt ? 0xffff00 : 0xff0000} />
+        </mesh>
+        <mesh position={[-0.12, 0.95, 0.25]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshBasicMaterial color={isHurt ? 0xffff00 : 0xff0000} />
+        </mesh>
+        
+        {/* Antenna/spike */}
+        <mesh position={[0, 1.4, 0]}>
+          <coneGeometry args={[0.08, 0.4, 4]} />
+          <meshStandardMaterial
+            color={0x003300}
+            emissive={CONFIG.COLORS.ENEMY_MINION}
+            emissiveIntensity={intensity * 0.5}
+          />
+        </mesh>
+      </group>
+      
+      {/* Glow */}
+      <pointLight
+        color={CONFIG.COLORS.ENEMY_MINION}
+        intensity={0.5 + (1 - hpRatio) * 0.5}
+        distance={3}
+      />
     </group>
   );
 }

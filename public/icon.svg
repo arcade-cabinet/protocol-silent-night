@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a20"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </linearGradient>
+    <linearGradient id="star" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ffcc"/>
+      <stop offset="100%" style="stop-color:#ff0044"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="100" height="100" rx="15" fill="url(#bg)"/>
+  <!-- Cyber Star -->
+  <polygon 
+    points="50,10 58,38 88,38 64,55 72,85 50,68 28,85 36,55 12,38 42,38" 
+    fill="none" 
+    stroke="url(#star)" 
+    stroke-width="3"
+  />
+  <!-- Inner glow -->
+  <circle cx="50" cy="48" r="12" fill="#ff0044" opacity="0.6"/>
+  <circle cx="50" cy="48" r="6" fill="#00ffcc"/>
+</svg>

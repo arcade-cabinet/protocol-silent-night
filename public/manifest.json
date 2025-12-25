@@ -1,0 +1,19 @@
+{
+  "name": "Protocol: Silent Night",
+  "short_name": "Silent Night",
+  "description": "Arcade RPG Simulation - Defend the North Pole",
+  "theme_color": "#050505",
+  "background_color": "#050505",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

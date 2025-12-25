@@ -15,6 +15,7 @@ import { Bullets } from './Bullets';
 import { Enemies } from './Enemies';
 import { Lighting } from './Lighting';
 import { CameraController } from './CameraController';
+import { HitParticles } from './HitParticles';
 
 export function GameScene() {
   const state = useGameStore((s) => s.state);
@@ -77,6 +78,7 @@ export function GameScene() {
             <PlayerController />
             <Bullets />
             <Enemies />
+            <HitParticles />
           </>
         )}
 
