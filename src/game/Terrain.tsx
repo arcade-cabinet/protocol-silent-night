@@ -3,7 +3,7 @@
  * Procedural Tron-grid terrain using Strata's SDF and noise functions
  */
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { noise3D, fbm } from '@jbcom/strata';
@@ -60,12 +60,12 @@ export function Terrain() {
     return { matrices, count: instanceCount };
   }, []);
 
-  // Apply matrices to instanced mesh
-  useMemo(() => {
+  // Apply matrices to instanced mesh (useEffect since ref is null during first render)
+  useEffect(() => {
     if (meshRef.current) {
-      matrices.forEach((matrix, i) => {
-        meshRef.current!.setMatrixAt(i, matrix);
-      });
+      for (let i = 0; i < matrices.length; i++) {
+        meshRef.current.setMatrixAt(i, matrices[i]);
+      }
       meshRef.current.instanceMatrix.needsUpdate = true;
     }
   }, [matrices]);

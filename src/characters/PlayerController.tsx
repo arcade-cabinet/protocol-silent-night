@@ -32,10 +32,15 @@ export function PlayerController() {
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;
 
-  // Create bullet
+  // Create bullet with initial position
   const fireBullet = useCallback(
-    (_position: THREE.Vector3, direction: THREE.Vector3, damage: number) => {
+    (spawnPosition: THREE.Vector3, direction: THREE.Vector3, damage: number) => {
       const id = `bullet-${bulletIdCounter++}`;
+
+      // Create mesh-like object with position for tracking
+      const createBulletMesh = (pos: THREE.Vector3) => ({
+        position: pos.clone(),
+      }) as unknown as THREE.Object3D;
 
       // For star weapon, create spread pattern
       if (playerClass?.weaponType === 'star') {
@@ -46,7 +51,7 @@ export function PlayerController() {
 
           addBullet({
             id: `${id}-${angleOffset}`,
-            mesh: null as unknown as THREE.Object3D,
+            mesh: createBulletMesh(spawnPosition),
             velocity: spreadDir.clone().multiplyScalar(30),
             hp: 1,
             maxHp: 1,
@@ -61,7 +66,7 @@ export function PlayerController() {
       } else {
         addBullet({
           id,
-          mesh: null as unknown as THREE.Object3D,
+          mesh: createBulletMesh(spawnPosition),
           velocity: direction.clone().multiplyScalar(30),
           hp: 1,
           maxHp: 1,

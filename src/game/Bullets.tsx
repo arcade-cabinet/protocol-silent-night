@@ -11,7 +11,7 @@ import { CONFIG } from '@/types';
 
 export function Bullets() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss, playerPosition } =
+  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } =
     useGameStore();
 
   // Geometry and material for player bullets
@@ -34,14 +34,7 @@ export function Bullets() {
     updateBullets((currentBullets) => {
       return currentBullets
         .map((bullet, index) => {
-          // Actually track position properly
-          if (!bullet.mesh) {
-            // Initialize position from spawn
-            const spawnPos = playerPosition.clone();
-            spawnPos.y = 1.5;
-            bullet.mesh = { position: spawnPos } as unknown as THREE.Object3D;
-          }
-          
+          // Get bullet position (initialized when bullet was created)
           const pos = (bullet.mesh as unknown as { position: THREE.Vector3 }).position;
           pos.add(bullet.direction.clone().multiplyScalar(bullet.speed * delta));
 

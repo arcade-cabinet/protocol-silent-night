@@ -55,13 +55,23 @@ export function Enemies() {
     });
   }, [state, enemies.length, addEnemy]);
 
-  // Spawn initial enemies
+  // Spawn initial enemies with cleanup
   useEffect(() => {
+    const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+    
     if (state === 'PHASE_1') {
       for (let i = 0; i < 5; i++) {
-        setTimeout(() => spawnMinion(), i * 200);
+        const id = setTimeout(() => spawnMinion(), i * 200);
+        timeoutIds.push(id);
       }
     }
+    
+    return () => {
+      // Clear pending timeouts on cleanup
+      for (const id of timeoutIds) {
+        clearTimeout(id);
+      }
+    };
   }, [state, spawnMinion]);
 
   // Boss spawning is handled by the store
@@ -86,18 +96,18 @@ export function Enemies() {
         // Calculate direction to player
         const toPlayer = playerPosition.clone().sub(pos);
         const distance = toPlayer.length();
-        toPlayer.normalize();
+        const direction = toPlayer.clone().normalize();
 
-        // Move toward player
+        // Move toward player (use cloned direction to avoid mutation issues)
         const moveSpeed = enemy.type === 'boss' ? 3 : enemy.speed;
-        pos.add(toPlayer.multiplyScalar(moveSpeed * delta));
+        pos.add(direction.clone().multiplyScalar(moveSpeed * delta));
 
         // Collision with player
         if (distance < 1.5) {
           damagePlayer(enemy.damage);
 
-          // Knockback enemy
-          const knockback = toPlayer.clone().multiplyScalar(-3);
+          // Knockback enemy (use original normalized direction)
+          const knockback = direction.clone().multiplyScalar(-3);
           pos.add(knockback);
         }
 
@@ -124,21 +134,19 @@ export function Enemies() {
         })}
 
       {/* Render Boss */}
-      {bossActive && (
-        <BossMesh
-          position={[
-            enemies.find((e) => e.type === 'boss')
-              ? ((enemies.find((e) => e.type === 'boss')!.mesh as unknown as { position: THREE.Vector3 }).position.x)
-              : 0,
-            4,
-            enemies.find((e) => e.type === 'boss')
-              ? ((enemies.find((e) => e.type === 'boss')!.mesh as unknown as { position: THREE.Vector3 }).position.z)
-              : 0,
-          ]}
-          hp={bossHp}
-          maxHp={bossMaxHp}
-        />
-      )}
+      {bossActive && (() => {
+        const bossEnemy = enemies.find((e) => e.type === 'boss');
+        const bossPos = bossEnemy
+          ? (bossEnemy.mesh as unknown as { position: THREE.Vector3 }).position
+          : null;
+        return (
+          <BossMesh
+            position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
+            hp={bossHp}
+            maxHp={bossMaxHp}
+          />
+        );
+      })()}
     </group>
   );
 }

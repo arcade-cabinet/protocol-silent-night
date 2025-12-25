@@ -207,6 +207,34 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })),
 
   spawnBoss: () => {
+    const { enemies, addEnemy } = get();
+    
+    // Check if boss already exists
+    if (enemies.some((e) => e.type === 'boss')) return;
+    
+    // Spawn boss at random position
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 30;
+    const position = new THREE.Vector3(
+      Math.cos(angle) * radius,
+      4,
+      Math.sin(angle) * radius
+    );
+    
+    // Add boss to enemies array for collision detection
+    addEnemy({
+      id: 'boss-krampus',
+      mesh: { position } as unknown as THREE.Object3D,
+      velocity: new THREE.Vector3(),
+      hp: 1000,
+      maxHp: 1000,
+      isActive: true,
+      type: 'boss',
+      speed: 3,
+      damage: 5,
+      pointValue: 1000,
+    });
+    
     set({
       state: 'PHASE_BOSS',
       bossActive: true,
