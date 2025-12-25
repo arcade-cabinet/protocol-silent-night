@@ -57,6 +57,7 @@ export function ElfCharacter({
   );
 
   // Create articulated character using Strata
+  // biome-ignore lint/correctness/useExhaustiveDependencies: customizeElfAppearance is stable and defined below
   useEffect(() => {
     if (groupRef.current && !characterRef.current) {
       const character = createCharacter({

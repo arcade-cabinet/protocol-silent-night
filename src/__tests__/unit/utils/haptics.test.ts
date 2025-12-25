@@ -61,6 +61,7 @@ describe('Haptics Utility', () => {
       const originalDescriptor = Object.getOwnPropertyDescriptor(navigator, 'vibrate');
       
       // Remove vibrate property
+      // biome-ignore lint/suspicious/noExplicitAny: Testing requires dynamic property manipulation
       delete (navigator as any).vibrate;
 
       expect(isHapticsSupported()).toBe(false);
@@ -69,6 +70,7 @@ describe('Haptics Utility', () => {
       if (originalDescriptor) {
         Object.defineProperty(navigator, 'vibrate', originalDescriptor);
       } else {
+        // biome-ignore lint/suspicious/noExplicitAny: Testing requires dynamic property manipulation
         (navigator as any).vibrate = originalVibrate;
       }
     });

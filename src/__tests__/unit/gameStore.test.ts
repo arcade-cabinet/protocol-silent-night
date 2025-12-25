@@ -403,10 +403,19 @@ describe('GameStore - High Score', () => {
   });
 
   it('should load high score from localStorage on init', () => {
-    localStorage.setItem('protocol-silent-night-highscore', '2500');
+    // Set a high score via the store's updateHighScore mechanism
+    const { addKill, updateHighScore, reset } = useGameStore.getState();
     
-    // Note: This test may need adjustment based on store initialization
-    // The store loads high score on init, so we verify localStorage has the value
+    addKill(2500);
+    updateHighScore();
+    
+    // Verify it was persisted
     expect(localStorage.getItem('protocol-silent-night-highscore')).toBe('2500');
+    
+    // Reset the store - high score should persist
+    reset();
+    
+    // High score should still be available after reset
+    expect(useGameStore.getState().highScore).toBe(2500);
   });
 });
