@@ -233,10 +233,11 @@ src/
 │
 ├── game/                   # Core game systems
 │   ├── index.ts
-│   ├── GameScene.tsx       # Main 3D scene
-│   ├── Terrain.tsx         # Instanced terrain
+│   ├── GameScene.tsx       # Main 3D scene with Strata sky/fog
+│   ├── Terrain.tsx         # Instanced terrain with noise
 │   ├── Bullets.tsx         # Projectile system
 │   ├── Enemies.tsx         # Enemy spawning & AI
+│   ├── HitParticles.tsx    # Particle effects for hits
 │   ├── Lighting.tsx        # Scene lighting
 │   └── CameraController.tsx # Camera follow system
 │
@@ -246,7 +247,7 @@ src/
 │   └── fur.ts              # Shell fur shader
 │
 ├── store/                  # State management
-│   └── gameStore.ts        # Zustand store
+│   └── gameStore.ts        # Zustand store with localStorage
 │
 ├── styles/                 # Global styles
 │   └── global.css
@@ -257,17 +258,19 @@ src/
 └── ui/                     # UI components
     ├── index.ts
     ├── HUD.tsx             # Health & objective display
-    ├── HUD.module.css
     ├── BossHUD.tsx         # Boss health bar
-    ├── BossHUD.module.css
+    ├── BossVignette.tsx    # Boss phase tension effect
+    ├── DamageFlash.tsx     # Damage screen flash
+    ├── KillStreak.tsx      # Kill streak notifications
+    ├── LoadingScreen.tsx   # Initial loading screen
     ├── MessageOverlay.tsx  # Warning messages
-    ├── MessageOverlay.module.css
     ├── StartScreen.tsx     # Class selection
-    ├── StartScreen.module.css
-    ├── EndScreen.tsx       # Win/Lose screen
-    ├── EndScreen.module.css
-    ├── InputControls.tsx   # Touch/keyboard input
-    └── InputControls.module.css
+    ├── EndScreen.tsx       # Win/Lose screen with high scores
+    └── InputControls.tsx   # Touch/keyboard input
+
+public/
+├── icon.svg                # PWA icon
+└── manifest.json           # PWA manifest
 ```
 
 ---
@@ -358,4 +361,44 @@ The Strata organization provides additional packages:
 
 ---
 
-*Generated for Protocol: Silent Night v3.0*
+## 9. POLISH & PRODUCTION FEATURES
+
+### High Score System
+- Scores are persisted to `localStorage` under key `protocol-silent-night-highscore`
+- High score displayed on Start Screen and End Screen
+- "NEW HIGH SCORE" celebration on End Screen
+
+### Kill Streak System
+| Streak | Name | Bonus |
+|--------|------|-------|
+| 2 | DOUBLE KILL | +25% |
+| 3 | TRIPLE KILL | +50% |
+| 4 | MULTI KILL | +75% |
+| 5 | MEGA KILL | +100% |
+| 6 | ULTRA KILL | +125% |
+| 7+ | MONSTER KILL | +150% |
+
+### Visual Effects
+- **Damage Flash**: Red vignette on player damage
+- **Kill Streak Popup**: Centered notification with golden text
+- **Boss Vignette**: Pulsing red vignette that intensifies as boss HP decreases
+- **Hit Particles**: Particle burst on enemy death
+- **Loading Screen**: Animated progress bar during initialization
+
+### PWA Support
+- Web App Manifest for mobile installation
+- SVG icon with cyber-star design
+- Apple mobile web app meta tags
+- Fullscreen landscape orientation
+
+### Code Splitting
+Manual chunks for optimal loading:
+- `three` - Three.js core (~667KB)
+- `react-three` - R3F and postprocessing (~256KB)
+- `strata` - Strata library (~463KB)
+- `vendor` - React, ReactDOM, Zustand (~0.7KB)
+- `index` - Game code (~38KB)
+
+---
+
+*Generated for Protocol: Silent Night v3.1*

@@ -22,5 +22,16 @@ export default defineConfig({
   build: {
     target: 'esnext',
     sourcemap: true,
+    chunkSizeWarningLimit: 700, // Three.js is large but expected
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'three': ['three'],
+          'react-three': ['@react-three/fiber', '@react-three/postprocessing'],
+          'strata': ['@jbcom/strata'],
+          'vendor': ['react', 'react-dom', 'zustand'],
+        },
+      },
+    },
   },
 });
