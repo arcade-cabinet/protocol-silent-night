@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/ci.yml/badge.svg)](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/ci.yml)
 [![Deploy](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/deploy.yml/badge.svg)](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/deploy.yml)
+[![Coverage Status](https://coveralls.io/repos/github/arcade-cabinet/protocol-silent-night/badge.svg?branch=main)](https://coveralls.io/github/arcade-cabinet/protocol-silent-night?branch=main)
 
 <p align="center">
   <img src="public/icon.svg" alt="Protocol: Silent Night" width="120" />

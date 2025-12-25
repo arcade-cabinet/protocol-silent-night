@@ -150,7 +150,32 @@ E2E tests verify the complete user experience:
 - Screenshots on failure
 - Video recording (MCP mode only)
 
-## Coverage Goals
+## Coverage Reporting
+
+### Local Coverage
+```bash
+# Generate coverage report
+pnpm test:coverage
+
+# View HTML report
+open coverage/index.html  # macOS
+xdg-open coverage/index.html  # Linux
+start coverage/index.html  # Windows
+```
+
+### Coveralls Integration
+This project uses [Coveralls](https://coveralls.io/) for coverage tracking and reporting.
+
+- **Coverage Badge**: [![Coverage Status](https://coveralls.io/repos/github/arcade-cabinet/protocol-silent-night/badge.svg?branch=main)](https://coveralls.io/github/arcade-cabinet/protocol-silent-night?branch=main)
+- **Dashboard**: https://coveralls.io/github/arcade-cabinet/protocol-silent-night
+
+Coverage is automatically:
+- Generated during CI test runs
+- Uploaded to Coveralls after unit tests
+- Tracked over time to show trends
+- Commented on pull requests with coverage changes
+
+### Coverage Goals
 
 - **Lines**: 70%
 - **Functions**: 70%
