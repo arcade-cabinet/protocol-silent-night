@@ -11,7 +11,7 @@ import type {
 } from '@/types';
 import { PLAYER_CLASSES, CONFIG } from '@/types';
 import { AudioManager } from '@/audio/AudioManager';
-import { triggerHaptic } from '@/utils/haptics';
+import { triggerHaptic, HapticPatterns } from '@/utils/haptics';
 
 // High score persistence key
 const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
@@ -154,10 +154,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     // Haptic and audio feedback
     if (amount >= 20) {
-      triggerHaptic('damage_heavy');
+      triggerHaptic(HapticPatterns.DAMAGE_HEAVY);
       AudioManager.playSFX('player_damage_heavy');
     } else {
-      triggerHaptic('damage_light');
+      triggerHaptic(HapticPatterns.DAMAGE_LIGHT);
       AudioManager.playSFX('player_damage_light');
     }
 
@@ -198,7 +198,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     // Audio and haptic feedback
     AudioManager.playSFX('enemy_defeated');
-    triggerHaptic('enemy_defeated');
+    triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
     
     if (newStreak > 1 && newStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
@@ -244,16 +244,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const weaponType = bullet.type || 'cannon';
     if (weaponType === 'smg') {
       AudioManager.playSFX('weapon_smg');
-      // Short, rapid pulses for SMG fire
-      triggerHaptic([0.05, 0.03, 0.05]);
+      triggerHaptic(HapticPatterns.FIRE_LIGHT);
     } else if (weaponType === 'stars') {
       AudioManager.playSFX('weapon_stars');
-      // Softer, staggered pulses for throwing stars
-      triggerHaptic([0.04, 0.06, 0.04]);
+      triggerHaptic(HapticPatterns.FIRE_MEDIUM);
     } else {
       AudioManager.playSFX('weapon_cannon');
-      // Heavier, single strong pulse for cannon fire
-      triggerHaptic([0.12]);
+      triggerHaptic(HapticPatterns.FIRE_HEAVY);
     }
   },
 

@@ -58,17 +58,19 @@ describe('Haptics Utility', () => {
 
     it('should return false when vibrate API is not available', () => {
       const originalVibrate = navigator.vibrate;
-      // @ts-expect-error - Testing API absence
-      delete navigator.vibrate;
+      const originalDescriptor = Object.getOwnPropertyDescriptor(navigator, 'vibrate');
+      
+      // Remove vibrate property
+      delete (navigator as any).vibrate;
 
       expect(isHapticsSupported()).toBe(false);
 
       // Restore
-      Object.defineProperty(navigator, 'vibrate', {
-        value: originalVibrate,
-        writable: true,
-        configurable: true,
-      });
+      if (originalDescriptor) {
+        Object.defineProperty(navigator, 'vibrate', originalDescriptor);
+      } else {
+        (navigator as any).vibrate = originalVibrate;
+      }
     });
   });
 
