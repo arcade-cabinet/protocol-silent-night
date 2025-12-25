@@ -1,12 +1,13 @@
 /**
  * CYBER-ELF Character
  * Recon / Scout class with sleek cyber suit and Plasma SMG
+ * Uses Strata's fur system for cyber-hair
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createFurLayers, updateFurTime, type FurConfig } from '@/shaders/fur';
+import { createFurSystem, updateFurUniforms, type FurOptions } from '@jbcom/strata';
 import { PLAYER_CLASSES } from '@/types';
 
 interface ElfCharacterProps {
@@ -28,16 +29,17 @@ export function ElfCharacter({
   const earLRef = useRef<THREE.Mesh>(null);
   const earRRef = useRef<THREE.Mesh>(null);
   const muzzleRef = useRef<THREE.PointLight>(null);
+  const hairFurRef = useRef<THREE.Group>(null);
 
   const config = PLAYER_CLASSES.elf;
 
-  // Fur config for elf hair/details
-  const furConfig: Partial<FurConfig> = useMemo(
+  // Strata fur config for cyber-hair
+  const furOptions: FurOptions = useMemo(
     () => ({
-      layers: 8,
+      baseColor: new THREE.Color(...config.furColor.base),
+      tipColor: new THREE.Color(...config.furColor.tip),
+      layerCount: 8,
       spacing: 0.015,
-      colorBase: config.furColor.base,
-      colorTip: config.furColor.tip,
       windStrength: 1.5, // More responsive to wind
     }),
     [config.furColor]
@@ -45,7 +47,18 @@ export function ElfCharacter({
 
   // Hair geometry
   const hairGeometry = useMemo(() => new THREE.SphereGeometry(0.2 * config.scale, 12, 12), [config.scale]);
-  const furLayers = useMemo(() => createFurLayers(hairGeometry, furConfig), [hairGeometry, furConfig]);
+  const hairBaseMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: 0x00aa88, roughness: 0.8 }), []);
+
+  // Create Strata fur system for hair
+  useEffect(() => {
+    if (hairFurRef.current) {
+      while (hairFurRef.current.children.length > 0) {
+        hairFurRef.current.remove(hairFurRef.current.children[0]);
+      }
+      const furSystem = createFurSystem(hairGeometry, hairBaseMaterial, furOptions);
+      hairFurRef.current.add(furSystem);
+    }
+  }, [hairGeometry, hairBaseMaterial, furOptions]);
 
   // Materials
   const suitMaterial = useMemo(
@@ -97,8 +110,14 @@ export function ElfCharacter({
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    // Update fur animation
-    updateFurTime(furLayers, time);
+    // Update Strata fur animation for hair
+    if (hairFurRef.current) {
+      hairFurRef.current.traverse((child) => {
+        if (child instanceof THREE.Group) {
+          updateFurUniforms(child, time);
+        }
+      });
+    }
 
     // Fast, agile movement animation
     if (bodyRef.current) {
@@ -165,15 +184,8 @@ export function ElfCharacter({
             <primitive object={skinMaterial} attach="material" />
           </mesh>
 
-          {/* Cyber Hair */}
-          <group position={[0, 0.15, -0.05]}>
-            <mesh geometry={hairGeometry}>
-              <meshStandardMaterial color={0x00aa88} roughness={0.8} />
-            </mesh>
-            {furLayers.map((mesh) => (
-              <primitive key={mesh.uuid} object={mesh} />
-            ))}
-          </group>
+          {/* Cyber Hair - Using Strata fur system */}
+          <group ref={hairFurRef} position={[0, 0.15, -0.05]} />
 
           {/* Visor */}
           <mesh position={[0, 0.02, 0.18 * config.scale]}>

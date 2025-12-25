@@ -1,12 +1,13 @@
 /**
  * THE BUMBLE Character
  * Crowd Control / Bruiser class - Abominable Snowman with thick fur and Star Thrower
+ * Uses Strata's fur system for full-body fur coverage
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createFurLayers, updateFurTime, type FurConfig } from '@/shaders/fur';
+import { createFurSystem, updateFurUniforms, type FurOptions } from '@jbcom/strata';
 import { PLAYER_CLASSES } from '@/types';
 
 interface BumbleCharacterProps {
@@ -27,16 +28,20 @@ export function BumbleCharacter({
   const armLRef = useRef<THREE.Group>(null);
   const armRRef = useRef<THREE.Group>(null);
   const muzzleRef = useRef<THREE.PointLight>(null);
+  
+  // Refs for fur groups
+  const bodyFurRef = useRef<THREE.Group>(null);
+  const headFurRef = useRef<THREE.Group>(null);
 
   const config = PLAYER_CLASSES.bumble;
 
-  // Dense white fur configuration
-  const furConfig: Partial<FurConfig> = useMemo(
+  // Dense white fur configuration using Strata
+  const furOptions: FurOptions = useMemo(
     () => ({
-      layers: 16, // More layers for fluffy appearance
+      baseColor: new THREE.Color(...config.furColor.base),
+      tipColor: new THREE.Color(...config.furColor.tip),
+      layerCount: 16, // More layers for fluffy appearance
       spacing: 0.035, // Longer fur
-      colorBase: config.furColor.base,
-      colorTip: config.furColor.tip,
       windStrength: 0.8,
       gravityDroop: 0.05,
     }),
@@ -46,23 +51,35 @@ export function BumbleCharacter({
   // Main body geometry (large, rounded)
   const bodyGeometry = useMemo(() => new THREE.SphereGeometry(0.6 * config.scale, 16, 16), [config.scale]);
   const headGeometry = useMemo(() => new THREE.SphereGeometry(0.4 * config.scale, 16, 16), [config.scale]);
-  const armGeometry = useMemo(() => new THREE.CapsuleGeometry(0.18 * config.scale, 0.5, 8, 16), [config.scale]);
-
-  // Create fur layers for body and head
-  const bodyFurLayers = useMemo(() => createFurLayers(bodyGeometry, furConfig), [bodyGeometry, furConfig]);
-  const headFurLayers = useMemo(() => createFurLayers(headGeometry, furConfig), [headGeometry, furConfig]);
-  const armFurLayers = useMemo(() => createFurLayers(armGeometry, furConfig), [armGeometry, furConfig]);
-
-  // Materials
   const baseMaterial = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: config.color,
-        roughness: 0.9,
-        metalness: 0.0,
-      }),
+    () => new THREE.MeshStandardMaterial({
+      color: config.color,
+      roughness: 0.9,
+      metalness: 0.0,
+    }),
     [config.color]
   );
+
+  // Create Strata fur systems for body and head
+  useEffect(() => {
+    if (bodyFurRef.current) {
+      while (bodyFurRef.current.children.length > 0) {
+        bodyFurRef.current.remove(bodyFurRef.current.children[0]);
+      }
+      const furSystem = createFurSystem(bodyGeometry, baseMaterial, furOptions);
+      bodyFurRef.current.add(furSystem);
+    }
+  }, [bodyGeometry, baseMaterial, furOptions]);
+
+  useEffect(() => {
+    if (headFurRef.current) {
+      while (headFurRef.current.children.length > 0) {
+        headFurRef.current.remove(headFurRef.current.children[0]);
+      }
+      const furSystem = createFurSystem(headGeometry, baseMaterial, furOptions);
+      headFurRef.current.add(furSystem);
+    }
+  }, [headGeometry, baseMaterial, furOptions]);
 
   const hornMaterial = useMemo(
     () =>
@@ -113,10 +130,21 @@ export function BumbleCharacter({
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    // Update all fur animations
-    updateFurTime(bodyFurLayers, time);
-    updateFurTime(headFurLayers, time);
-    updateFurTime(armFurLayers, time);
+    // Update Strata fur animations
+    if (bodyFurRef.current) {
+      bodyFurRef.current.traverse((child) => {
+        if (child instanceof THREE.Group) {
+          updateFurUniforms(child, time);
+        }
+      });
+    }
+    if (headFurRef.current) {
+      headFurRef.current.traverse((child) => {
+        if (child instanceof THREE.Group) {
+          updateFurUniforms(child, time);
+        }
+      });
+    }
 
     // Heavy, lumbering movement
     if (bodyRef.current) {
@@ -151,20 +179,12 @@ export function BumbleCharacter({
   return (
     <group ref={groupRef} position={position} rotation={[0, rotation, 0]}>
       <group ref={bodyRef}>
-        {/* Large Furry Body */}
-        <group position={[0, 1.0 * config.scale, 0]}>
-          <mesh geometry={bodyGeometry} material={baseMaterial} castShadow />
-          {bodyFurLayers.map((mesh) => (
-            <primitive key={mesh.uuid} object={mesh} />
-          ))}
-        </group>
+        {/* Large Furry Body - Using Strata */}
+        <group ref={bodyFurRef} position={[0, 1.0 * config.scale, 0]} />
 
-        {/* Furry Head */}
+        {/* Furry Head - Using Strata */}
         <group position={[0, 1.8 * config.scale, 0]}>
-          <mesh geometry={headGeometry} material={baseMaterial} castShadow />
-          {headFurLayers.map((mesh) => (
-            <primitive key={mesh.uuid} object={mesh} />
-          ))}
+          <group ref={headFurRef} />
 
           {/* Horns */}
           <mesh position={[0.25 * config.scale, 0.3, 0]} rotation={[0, 0, -0.4]}>
@@ -203,8 +223,10 @@ export function BumbleCharacter({
 
         {/* Left Arm with Star Thrower */}
         <group ref={armLRef} position={[0.7 * config.scale, 1.3 * config.scale, 0]}>
-          <mesh geometry={armGeometry} material={baseMaterial} rotation={[0, 0, -0.3]} castShadow />
-          {/* Duplicate arm fur layers for left arm */}
+          <mesh rotation={[0, 0, -0.3]} castShadow>
+            <capsuleGeometry args={[0.18 * config.scale, 0.5, 8, 16]} />
+            <primitive object={baseMaterial} attach="material" />
+          </mesh>
 
           {/* Star weapon */}
           <group position={[0.2, -0.4, 0.3]} rotation={[0, 0, 0]}>
@@ -215,7 +237,10 @@ export function BumbleCharacter({
 
         {/* Right Arm */}
         <group ref={armRRef} position={[-0.7 * config.scale, 1.3 * config.scale, 0]}>
-          <mesh geometry={armGeometry} material={baseMaterial} rotation={[0, 0, 0.3]} castShadow />
+          <mesh rotation={[0, 0, 0.3]} castShadow>
+            <capsuleGeometry args={[0.18 * config.scale, 0.5, 8, 16]} />
+            <primitive object={baseMaterial} attach="material" />
+          </mesh>
         </group>
 
         {/* Legs - Thick and sturdy */}

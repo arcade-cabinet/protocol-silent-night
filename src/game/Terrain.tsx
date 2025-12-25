@@ -1,11 +1,12 @@
 /**
  * Terrain System
- * Procedural Tron-grid terrain using instanced meshes
+ * Procedural Tron-grid terrain using Strata's SDF and noise functions
  */
 
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { noise3D, fbm } from '@jbcom/strata';
 import { CONFIG } from '@/types';
 import { terrainVertexShader, terrainFragmentShader } from '@/shaders/terrain';
 
@@ -27,7 +28,7 @@ export function Terrain() {
     []
   );
 
-  // Generate instance matrices
+  // Generate instance matrices using Strata's noise functions
   const { matrices, count } = useMemo(() => {
     const size = CONFIG.WORLD_SIZE;
     const instanceCount = size * size;
@@ -36,17 +37,19 @@ export function Terrain() {
 
     for (let x = -size / 2; x < size / 2; x++) {
       for (let z = -size / 2; z < size / 2; z++) {
-        // Procedural height using noise-like function
-        const h =
-          Math.sin(x * 0.15) * Math.cos(z * 0.15) * 2 +
-          Math.cos(x * 0.3 + z * 0.1) +
-          Math.sin(x * 0.05) * Math.cos(z * 0.08) * 3;
+        // Use Strata's noise3D and fbm for procedural height
+        const baseNoise = noise3D(x * 0.1, 0, z * 0.1) * 2;
+        const detailNoise = fbm(x * 0.05, 0, z * 0.05, 3) * 1.5;
+        
+        // Combine for final height
+        const h = baseNoise + detailNoise - 3;
 
-        dummy.position.set(x * 1.8, h - 3, z * 1.8);
+        dummy.position.set(x * 1.8, h, z * 1.8);
 
-        // Random "glitch" pillars
-        if (Math.random() > 0.995) {
-          dummy.position.y += 3 + Math.random() * 2;
+        // Random "glitch" pillars using Strata noise for variation
+        const glitchChance = noise3D(x * 0.5, z * 0.5, 0);
+        if (glitchChance > 0.95) {
+          dummy.position.y += 3 + glitchChance * 3;
         }
 
         dummy.updateMatrix();

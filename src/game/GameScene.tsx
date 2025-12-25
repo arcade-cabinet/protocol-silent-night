@@ -1,11 +1,13 @@
 /**
  * Game Scene
  * Main 3D scene containing all game elements
+ * Uses Strata components for sky, volumetrics, and enhanced visuals
  */
 
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { ProceduralSky, VolumetricFogMesh } from '@jbcom/strata';
 import { useGameStore } from '@/store/gameStore';
 import { PlayerController } from '@/characters';
 import { Terrain } from './Terrain';
@@ -43,6 +45,28 @@ export function GameScene() {
         {/* Core Systems */}
         <CameraController />
         <Lighting />
+
+        {/* Strata Procedural Sky - Night setting */}
+        <ProceduralSky
+          timeOfDay={{ 
+            sunAngle: -30,  // Below horizon for night
+            sunIntensity: 0.1,
+            ambientLight: 0.2,
+            starVisibility: 0.8,
+            fogDensity: 0.3,
+          }}
+          weather={{ intensity: 0.2 }}
+          size={[500, 500]}
+          distance={100}
+        />
+
+        {/* Strata Volumetric Fog for atmosphere */}
+        <VolumetricFogMesh
+          color={0x0a0a20}
+          density={0.015}
+          height={20}
+          size={100}
+        />
 
         {/* World */}
         <Terrain />

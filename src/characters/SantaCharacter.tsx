@@ -1,12 +1,13 @@
 /**
  * MECHA-SANTA Character
  * Heavy Siege / Tank class with fur-lined suit and Coal Cannon
+ * Uses Strata's fur system for realistic fur rendering
  */
 
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createFurLayers, updateFurTime, type FurConfig } from '@/shaders/fur';
+import { createFurSystem, updateFurUniforms, type FurOptions } from '@jbcom/strata';
 import { PLAYER_CLASSES } from '@/types';
 
 interface SantaCharacterProps {
@@ -26,16 +27,17 @@ export function SantaCharacter({
   const bodyRef = useRef<THREE.Group>(null);
   const armRef = useRef<THREE.Group>(null);
   const muzzleRef = useRef<THREE.PointLight>(null);
+  const furGroupRef = useRef<THREE.Group>(null);
 
   const config = PLAYER_CLASSES.santa;
 
-  // Create fur layers for the suit trim
-  const furConfig: Partial<FurConfig> = useMemo(
+  // Strata fur options for the suit trim
+  const furOptions: FurOptions = useMemo(
     () => ({
-      layers: 10,
+      baseColor: new THREE.Color(...config.furColor.base),
+      tipColor: new THREE.Color(...config.furColor.tip),
+      layerCount: 10,
       spacing: 0.02,
-      colorBase: config.furColor.base,
-      colorTip: config.furColor.tip,
       windStrength: 0.5,
     }),
     [config.furColor]
@@ -47,9 +49,23 @@ export function SantaCharacter({
   const armGeometry = useMemo(() => new THREE.CapsuleGeometry(0.15 * config.scale, 0.6, 4, 8), [config.scale]);
   const cannonGeometry = useMemo(() => new THREE.CylinderGeometry(0.1, 0.15, 0.8, 8), []);
 
-  // Fur trim geometry (torus around body)
+  // Fur trim geometry (torus around body) - using Strata's createFurSystem
   const furTrimGeometry = useMemo(() => new THREE.TorusGeometry(0.55 * config.scale, 0.08, 8, 32), [config.scale]);
-  const furLayers = useMemo(() => createFurLayers(furTrimGeometry, furConfig), [furTrimGeometry, furConfig]);
+  const furBaseMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: 0xeeeeee }), []);
+
+  // Create fur system using Strata
+  useEffect(() => {
+    if (furGroupRef.current) {
+      // Clear existing children
+      while (furGroupRef.current.children.length > 0) {
+        furGroupRef.current.remove(furGroupRef.current.children[0]);
+      }
+      
+      // Create Strata fur system
+      const furSystem = createFurSystem(furTrimGeometry, furBaseMaterial, furOptions);
+      furGroupRef.current.add(furSystem);
+    }
+  }, [furTrimGeometry, furBaseMaterial, furOptions]);
 
   // Materials
   const suitMaterial = useMemo(
@@ -99,8 +115,14 @@ export function SantaCharacter({
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    // Update fur animation
-    updateFurTime(furLayers, time);
+    // Update Strata fur animation
+    if (furGroupRef.current) {
+      furGroupRef.current.traverse((child) => {
+        if (child instanceof THREE.Group) {
+          updateFurUniforms(child, time);
+        }
+      });
+    }
 
     // Animate body bob when moving
     if (bodyRef.current) {
@@ -147,15 +169,8 @@ export function SantaCharacter({
           <meshStandardMaterial color={0xffd700} metalness={0.9} roughness={0.1} />
         </mesh>
 
-        {/* Fur Trim (collar) */}
-        <group position={[0, 1.7, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <mesh geometry={furTrimGeometry}>
-            <meshStandardMaterial color={0xeeeeee} />
-          </mesh>
-          {furLayers.map((mesh) => (
-            <primitive key={mesh.uuid} object={mesh} />
-          ))}
-        </group>
+        {/* Fur Trim (collar) - Using Strata */}
+        <group ref={furGroupRef} position={[0, 1.7, 0]} rotation={[Math.PI / 2, 0, 0]} />
 
         {/* Fur Trim (bottom) */}
         <group position={[0, 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
