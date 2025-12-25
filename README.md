@@ -20,24 +20,20 @@ Works on desktop and mobile browsers. No installation required!
 
 ## 📖 Game Manual
 
-### Mission Briefing
+**[📘 Read the Full Player's Guide](docs/GAME_MANUAL.md)**
 
-The North Pole is under attack! Grinch-Bots are invading, and only you can stop them. Choose your Operator, eliminate the threat, and defeat the fearsome **Krampus-Prime** to save Christmas.
+### Quick Start
 
-### How to Play
+The North Pole is under attack! Choose your mech, eliminate 10 Grinch-Bots, then defeat KRAMPUS-PRIME to save Christmas.
 
-#### Controls
+**Controls:**
+- **Desktop:** WASD/Arrows to move, SPACE to fire
+- **Mobile:** Touch joystick (left) + FIRE button (right)
 
-| Platform | Movement | Fire |
-|----------|----------|------|
-| **Desktop** | WASD or Arrow Keys | Spacebar |
-| **Mobile** | Left side touch joystick | Right side FIRE button |
-
-#### Objective
-
-1. **Phase 1**: Eliminate **10 Grinch-Bots** to summon the boss
-2. **Boss Phase**: Destroy **Krampus-Prime** to win
-3. **Don't die!** Your HP is shown in the top-left HUD
+**Objective:**
+1. Eliminate 10 Grinch-Bots
+2. Defeat KRAMPUS-PRIME (boss)
+3. Survive!
 
 ---
 
