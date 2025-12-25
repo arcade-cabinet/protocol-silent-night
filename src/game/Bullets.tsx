@@ -35,8 +35,8 @@ export function Bullets() {
       return currentBullets
         .map((bullet, index) => {
           // Get bullet position (initialized when bullet was created)
-          const pos = (bullet.mesh as unknown as { position: THREE.Vector3 }).position;
-          pos.add(bullet.direction.clone().multiplyScalar(bullet.speed * delta));
+          const oldPos = (bullet.mesh as unknown as { position: THREE.Vector3 }).position;
+          const newPos = oldPos.clone().add(bullet.direction.clone().multiplyScalar(bullet.speed * delta));
 
           // Update instance matrix
           dummy.position.copy(pos);
