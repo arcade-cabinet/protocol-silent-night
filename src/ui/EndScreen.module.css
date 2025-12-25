@@ -1,0 +1,118 @@
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 1s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.win .title {
+  color: #00ffcc;
+  text-shadow: 0 0 30px #00ffcc;
+}
+
+.lose .title {
+  color: #ff0044;
+  text-shadow: 0 0 30px #ff0044;
+}
+
+.title {
+  font-size: 3rem;
+  margin: 0;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.subtitle {
+  color: #888;
+  margin-bottom: 40px;
+  letter-spacing: 2px;
+  font-size: 1rem;
+}
+
+.stats {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 30px 50px;
+  border: 1px solid #333;
+  margin-bottom: 40px;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  margin: 10px 0;
+  font-size: 1rem;
+}
+
+.statLabel {
+  color: #666;
+  letter-spacing: 2px;
+}
+
+.statValue {
+  color: #00ffcc;
+  font-weight: bold;
+}
+
+.btn {
+  background: #ff0044;
+  border: none;
+  padding: 20px 60px;
+  color: white;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  cursor: pointer;
+  clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 2px;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  background: #fff;
+  color: #ff0044;
+  box-shadow: 0 0 40px #ff0044;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .stats {
+    padding: 20px 30px;
+  }
+
+  .statRow {
+    font-size: 0.9rem;
+    gap: 20px;
+  }
+}
