@@ -6,15 +6,6 @@ export function AudioSettings() {
   const [settings, setSettings] = useState(AudioManager.getSettings());
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    // Update settings when they change
-    const interval = setInterval(() => {
-      setSettings(AudioManager.getSettings());
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
   const handleToggleMusic = () => {
     AudioManager.toggleMusic();
     setSettings(AudioManager.getSettings());
