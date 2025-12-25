@@ -38,9 +38,11 @@ export function PlayerController() {
       const id = `bullet-${bulletIdCounter++}`;
 
       // Create mesh-like object with position for tracking
-      const createBulletMesh = (pos: THREE.Vector3) => ({
-        position: pos.clone(),
-      }) as unknown as THREE.Object3D;
+      const createBulletMesh = (pos: THREE.Vector3) => {
+        const obj = new THREE.Object3D();
+        obj.position.copy(pos);
+        return obj;
+      };
 
       // For star weapon, create spread pattern
       if (playerClass?.weaponType === 'star') {
