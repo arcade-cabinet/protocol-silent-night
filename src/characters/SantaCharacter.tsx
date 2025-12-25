@@ -204,7 +204,7 @@ export function SantaCharacter({
     const time = state.clock.elapsedTime;
 
     if (characterRef.current) {
-      const { joints, state: charState } = characterRef.current;
+      const { state: charState } = characterRef.current;
 
       // Update character state based on movement
       charState.speed = isMoving ? charState.maxSpeed * 0.8 : 0;

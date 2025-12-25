@@ -259,7 +259,7 @@ export function ElfCharacter({
     const time = state.clock.elapsedTime;
 
     if (characterRef.current) {
-      const { joints, state: charState } = characterRef.current;
+      const { state: charState } = characterRef.current;
 
       // Elf moves faster
       charState.maxSpeed = 0.25;

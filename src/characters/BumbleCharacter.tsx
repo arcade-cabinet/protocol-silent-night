@@ -70,12 +70,26 @@ export function BumbleCharacter({
 
       // Customize for Bumble appearance
       customizeBumbleAppearance(character.joints, config.scale);
+
+      // Cache fur groups for efficient updates (avoid traversing every frame)
+      const furGroups: THREE.Group[] = [];
+      for (const joint of Object.values(character.joints)) {
+        if (joint?.mesh) {
+          joint.mesh.traverse((child) => {
+            if (child instanceof THREE.Group && child.userData.isFurGroup) {
+              furGroups.push(child);
+            }
+          });
+        }
+      }
+      furGroupsRef.current = furGroups;
     }
 
     return () => {
       if (characterRef.current && groupRef.current) {
         groupRef.current.remove(characterRef.current.root);
         characterRef.current = null;
+        furGroupsRef.current = [];
       }
     };
   }, [config.color, config.scale, furOptions]);
@@ -232,15 +246,9 @@ export function BumbleCharacter({
       // Use Strata's animateCharacter with heavier motion
       animateCharacter(characterRef.current, time * 0.7); // Slower animation
 
-      // Update fur uniforms for all parts
-      for (const joint of Object.values(joints)) {
-        if (joint?.mesh) {
-          joint.mesh.traverse((child) => {
-            if (child instanceof THREE.Group) {
-              updateFurUniforms(child, time);
-            }
-          });
-        }
+      // Update fur uniforms using cached groups (avoids traversal every frame)
+      for (const furGroup of furGroupsRef.current) {
+        updateFurUniforms(furGroup, time);
       }
 
       // Heavy breathing when idle - only animate Y to preserve non-uniform scale
