@@ -32,17 +32,18 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Enable WebGL in headless mode
+        launchOptions: {
+          args: [
+            '--use-gl=swiftshader',
+            '--enable-webgl',
+            '--ignore-gpu-blocklist',
+          ],
+        },
+      },
     },
-    // Uncomment for multi-browser testing
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
   ],
   // Run your local dev server before starting the tests
   webServer: {

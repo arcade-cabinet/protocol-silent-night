@@ -139,3 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 vite.config.js
 vite.config.d.ts
+
+# Playwright test artifacts
+test-results/
+playwright-report/
