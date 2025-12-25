@@ -1,9 +1,9 @@
 # PROTOCOL: SILENT NIGHT // AGENT REGISTRY
 
-**System Version:** 4.0 (Operator Edition) 
-**Target Runtime:** React 19 / Three.js 0.182 / WebGL 
-**Classification:** Arcade RPG Simulation 
-**Architecture:** Modular TypeScript with Zustand State Management (v5)
+**System Version:** 3.0 (Operator Edition)
+**Target Runtime:** React Three Fiber / Three.js / WebGL
+**Classification:** Arcade RPG Simulation
+**Architecture:** Modular TypeScript with Zustand State Management
 
 ---
 
@@ -401,4 +401,4 @@ Manual chunks for optimal loading:
 
 ---
 
-*Generated for Protocol: Silent Night v4.0*
+*Generated for Protocol: Silent Night v3.1*
