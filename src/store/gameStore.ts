@@ -125,6 +125,13 @@ const initialState = {
   lastKillTime: 0,
 };
 
+// Extend Window interface for e2e testing
+declare global {
+  interface Window {
+    useGameStore?: typeof useGameStore;
+  }
+}
+
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
@@ -368,3 +375,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerPosition: new THREE.Vector3(0, 0, 0),
     }),
 }));
+
+// Expose store on window for e2e testing
+if (typeof window !== 'undefined') {
+  window.useGameStore = useGameStore;
+}
