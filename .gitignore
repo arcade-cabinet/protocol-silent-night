@@ -148,5 +148,7 @@ playwright-report/
 *-actual.png
 *-diff.png
 
-# Generated documentation
-docs/
+# Auto-generated API documentation (if using TypeDoc, JSDoc, etc.)
+# Note: Manual documentation in *.md files should NOT be ignored
+/docs/api/
+/docs/typedoc/
