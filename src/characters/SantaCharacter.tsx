@@ -177,15 +177,14 @@ export function SantaCharacter({
       const muzzle = new THREE.PointLight(0xff4400, 0, 5);
       muzzle.position.set(0, 0, 0.3);
       weaponGroup.add(muzzle);
-      if (muzzleRef) {
-        (muzzleRef as React.MutableRefObject<THREE.PointLight | null>).current = muzzle;
-      }
+      // Muzzle light
+      const muzzle = new THREE.PointLight(0xff4400, 0, 5);
+      muzzle.position.set(0, 0, 0.3);
+      weaponGroup.add(muzzle);
+      muzzleRef.current = muzzle;
 
       joints.armR.group.add(weaponGroup);
-      if (weaponGroupRef) {
-        (weaponGroupRef as React.MutableRefObject<THREE.Group | null>).current = weaponGroup;
-      }
-    }
+      weaponGroupRef.current = weaponGroup;
   }
 
   useFrame((state) => {
