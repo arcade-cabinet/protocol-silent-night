@@ -38,4 +38,4 @@ services:
       - key: NODE_VERSION
         value: 20
       - key: PNPM_VERSION
-        value: 9
+        value: 10
