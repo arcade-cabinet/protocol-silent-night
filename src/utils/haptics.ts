@@ -29,10 +29,10 @@ export function isHapticsSupported(): boolean {
   return 'vibrate' in navigator;
 }
 
-export function triggerHaptic(pattern: number | number[]): void {
+export function triggerHaptic(pattern: number | readonly number[]): void {
   if (!isHapticsSupported()) return;
   try {
-    navigator.vibrate(pattern);
+    navigator.vibrate(pattern as number | number[]);
   } catch (error) {
     console.warn('Haptic feedback failed:', error);
   }

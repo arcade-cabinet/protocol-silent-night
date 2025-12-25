@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
 import * as THREE from 'three';
 
@@ -11,7 +11,7 @@ describe('GameStore - Player Management', () => {
 
   describe('selectClass', () => {
     it('should set player class to Santa', () => {
-      const { selectClass, playerClass, playerHp, playerMaxHp, state } = useGameStore.getState();
+      const { selectClass } = useGameStore.getState();
       
       selectClass('santa');
       
@@ -405,10 +405,8 @@ describe('GameStore - High Score', () => {
   it('should load high score from localStorage on init', () => {
     localStorage.setItem('protocol-silent-night-highscore', '2500');
     
-    // Force store recreation by getting a fresh state
-    const highScore = useGameStore.getState().highScore;
-    
     // Note: This test may need adjustment based on store initialization
+    // The store loads high score on init, so we verify localStorage has the value
     expect(localStorage.getItem('protocol-silent-night-highscore')).toBe('2500');
   });
 });

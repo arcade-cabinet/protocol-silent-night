@@ -271,8 +271,6 @@ describe('Game Flow Integration Tests', () => {
     });
 
     it('should handle player death during boss fight', () => {
-      const state = useGameStore.getState();
-      
       // Damage boss
       useGameStore.getState().damageBoss(500);
       expect(useGameStore.getState().bossHp).toBe(500);

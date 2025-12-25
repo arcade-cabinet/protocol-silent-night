@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AudioManager } from '../audio/AudioManager';
 import styles from './AudioSettings.module.css';
 
