@@ -1,0 +1,78 @@
+.joystickZone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 5;
+  touch-action: none;
+}
+
+.joystickBase {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: none;
+  z-index: 6;
+}
+
+.joystickKnob {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #00ffcc;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: none;
+  box-shadow: 0 0 20px #00ffcc;
+  z-index: 7;
+}
+
+.controlsArea {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  z-index: 10;
+}
+
+.fireBtn {
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 0, 68, 0.2);
+  border: 2px solid #ff0044;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff0044;
+  font-weight: 900;
+  font-size: 1.2rem;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 0 30px rgba(255, 0, 68, 0.4);
+  backdrop-filter: blur(5px);
+  transition: 0.1s;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.fireBtn:active {
+  background: #ff0044;
+  color: white;
+  transform: scale(0.95);
+  box-shadow: 0 0 50px #ff0044;
+}
+
+@media (min-width: 1024px) {
+  .joystickZone,
+  .controlsArea {
+    /* Hide touch controls on desktop - use keyboard */
+    display: none;
+  }
+}

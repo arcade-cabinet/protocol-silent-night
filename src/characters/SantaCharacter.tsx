@@ -1,0 +1,239 @@
+/**
+ * MECHA-SANTA Character
+ * Heavy Siege / Tank class with articulated body, fur-lined suit, and Coal Cannon
+ * Uses Strata's createCharacter for proper joint hierarchy
+ */
+
+import { useRef, useMemo, useEffect } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+import {
+  createCharacter,
+  animateCharacter,
+  updateFurUniforms,
+  type CharacterJoints,
+  type CharacterState,
+  type FurOptions,
+} from '@jbcom/strata';
+import { PLAYER_CLASSES } from '@/types';
+
+interface SantaCharacterProps {
+  position?: [number, number, number];
+  rotation?: number;
+  isMoving?: boolean;
+  isFiring?: boolean;
+}
+
+export function SantaCharacter({
+  position = [0, 0, 0],
+  rotation = 0,
+  isMoving = false,
+  isFiring = false,
+}: SantaCharacterProps) {
+  const groupRef = useRef<THREE.Group>(null);
+  const characterRef = useRef<{
+    root: THREE.Group;
+    joints: CharacterJoints;
+    state: CharacterState;
+  } | null>(null);
+  const muzzleRef = useRef<THREE.PointLight | null>(null);
+  const weaponGroupRef = useRef<THREE.Group | null>(null);
+  // Cache fur groups to avoid traversing scene graph every frame
+  const furGroupsRef = useRef<THREE.Group[]>([]);
+
+  const config = PLAYER_CLASSES.santa;
+
+  // Strata fur options for Santa's suit
+  const furOptions: FurOptions = useMemo(
+    () => ({
+      baseColor: new THREE.Color(0.8, 0.1, 0.1), // Red base
+      tipColor: new THREE.Color(1.0, 0.3, 0.3), // Lighter red tips
+      layerCount: 8,
+      spacing: 0.015,
+      windStrength: 0.3,
+    }),
+    []
+  );
+
+  // Create articulated character using Strata
+  useEffect(() => {
+    if (groupRef.current && !characterRef.current) {
+      // Create the base character with Strata
+      const character = createCharacter({
+        skinColor: config.color,
+        furOptions,
+        scale: config.scale,
+      });
+
+      characterRef.current = character;
+      groupRef.current.add(character.root);
+
+      // Customize for Santa appearance
+      customizeSantaAppearance(character.joints, config.scale);
+
+      // Cache fur groups for efficient updates (avoid traversing every frame)
+      const furGroups: THREE.Group[] = [];
+      for (const joint of Object.values(character.joints)) {
+        if (joint?.mesh) {
+          joint.mesh.traverse((child) => {
+            if (child instanceof THREE.Group && child.userData.isFurGroup) {
+              furGroups.push(child);
+            }
+          });
+        }
+      }
+      furGroupsRef.current = furGroups;
+    }
+
+    return () => {
+      if (characterRef.current && groupRef.current) {
+        groupRef.current.remove(characterRef.current.root);
+        characterRef.current = null;
+        furGroupsRef.current = [];
+      }
+    };
+  }, [config.color, config.scale, furOptions]);
+
+  // Add Santa-specific details (hat, beard, belt, weapon)
+  function customizeSantaAppearance(joints: CharacterJoints, scale: number) {
+    if (!joints.head?.mesh) return;
+
+    const headMesh = joints.head.mesh;
+
+    // Remove default muzzle (Santa doesn't have a snout)
+    const childrenToRemove = headMesh.children.filter((child) => child instanceof THREE.Mesh);
+    for (const child of childrenToRemove) {
+      headMesh.remove(child);
+    }
+
+    // Add beard
+    const beardGeo = new THREE.SphereGeometry(0.28 * scale, 12, 12);
+    const beardMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+    const beard = new THREE.Mesh(beardGeo, beardMat);
+    beard.position.set(0, -0.15 * scale, 0.15 * scale);
+    beard.scale.set(1, 1.3, 0.8);
+    headMesh.add(beard);
+
+    // Add hat
+    const hatGeo = new THREE.ConeGeometry(0.22 * scale, 0.4 * scale, 8);
+    const hatMat = new THREE.MeshStandardMaterial({
+      color: config.color,
+      emissive: config.color,
+      emissiveIntensity: 0.2,
+    });
+    const hat = new THREE.Mesh(hatGeo, hatMat);
+    hat.position.set(0, 0.2 * scale, 0);
+    headMesh.add(hat);
+
+    // Hat pom-pom
+    const pomGeo = new THREE.SphereGeometry(0.08 * scale, 8, 8);
+    const pomMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const pom = new THREE.Mesh(pomGeo, pomMat);
+    pom.position.set(0, 0.45 * scale, 0);
+    headMesh.add(pom);
+
+    // Hat fur trim
+    const hatTrimGeo = new THREE.TorusGeometry(0.2 * scale, 0.04 * scale, 8, 16);
+    const hatTrim = new THREE.Mesh(hatTrimGeo, beardMat);
+    hatTrim.position.set(0, 0.05 * scale, 0);
+    hatTrim.rotation.x = Math.PI / 2;
+    headMesh.add(hatTrim);
+
+    // Glowing cyber eyes
+    const eyeGeo = new THREE.SphereGeometry(0.03 * scale, 8, 8);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+    const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeL.position.set(0.08 * scale, 0.05 * scale, 0.2 * scale);
+    headMesh.add(eyeL);
+    const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeR.position.set(-0.08 * scale, 0.05 * scale, 0.2 * scale);
+    headMesh.add(eyeR);
+
+    // Add belt to torso
+    if (joints.torso?.mesh) {
+      const beltGeo = new THREE.TorusGeometry(0.35 * scale, 0.04, 8, 32);
+      const beltMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8 });
+      const belt = new THREE.Mesh(beltGeo, beltMat);
+      belt.rotation.x = Math.PI / 2;
+      belt.position.y = -0.15 * scale;
+      joints.torso.mesh.add(belt);
+
+      // Belt buckle
+      const buckleGeo = new THREE.BoxGeometry(0.1 * scale, 0.08 * scale, 0.02);
+      const buckleMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 });
+      const buckle = new THREE.Mesh(buckleGeo, buckleMat);
+      buckle.position.set(0, -0.15 * scale, 0.35 * scale);
+      joints.torso.mesh.add(buckle);
+
+      // Fur collar trim
+      const collarGeo = new THREE.TorusGeometry(0.34 * scale, 0.05, 8, 32);
+      const collar = new THREE.Mesh(collarGeo, beardMat);
+      collar.rotation.x = Math.PI / 2;
+      collar.position.y = 0.35 * scale;
+      joints.torso.mesh.add(collar);
+    }
+
+    // Add Coal Cannon to right arm
+    if (joints.armR?.group) {
+      const weaponGroup = new THREE.Group();
+      weaponGroup.position.set(0, -0.3 * scale, 0.15 * scale);
+
+      const cannonGeo = new THREE.CylinderGeometry(0.06, 0.1, 0.5, 8);
+      const cannonMat = new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        emissive: 0xff4400,
+        emissiveIntensity: 0.2,
+        metalness: 0.9,
+      });
+      const cannon = new THREE.Mesh(cannonGeo, cannonMat);
+      cannon.rotation.x = Math.PI / 2;
+      weaponGroup.add(cannon);
+
+      // Muzzle light
+      const muzzle = new THREE.PointLight(0xff4400, 0, 5);
+      muzzle.position.set(0, 0, 0.3);
+      weaponGroup.add(muzzle);
+      muzzleRef.current = muzzle;
+
+      joints.armR.group.add(weaponGroup);
+      weaponGroupRef.current = weaponGroup;
+    }
+  }
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+
+    if (characterRef.current) {
+      const { state: charState } = characterRef.current;
+
+      // Update character state based on movement
+      charState.speed = isMoving ? charState.maxSpeed * 0.8 : 0;
+
+      // Use Strata's animateCharacter for walk/idle cycles
+      animateCharacter(characterRef.current, time);
+
+      // Update fur uniforms using cached groups (avoids traversal every frame)
+      for (const furGroup of furGroupsRef.current) {
+        updateFurUniforms(furGroup, time);
+      }
+
+      // Weapon recoil when firing
+      if (weaponGroupRef.current) {
+        if (isFiring) {
+          weaponGroupRef.current.position.z = 0.15 + Math.sin(time * 20) * 0.02;
+        } else {
+          weaponGroupRef.current.position.z = 0.15;
+        }
+      }
+
+      // Muzzle flash
+      if (muzzleRef.current) {
+        muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
+      }
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
+  );
+}
