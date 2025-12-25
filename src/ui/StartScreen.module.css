@@ -114,6 +114,15 @@
   margin: 5px 0;
 }
 
+.highScore {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-top: 15px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  letter-spacing: 2px;
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 1.8rem;

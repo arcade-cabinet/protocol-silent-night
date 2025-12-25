@@ -4,7 +4,16 @@
  */
 
 import { GameScene } from '@/game';
-import { HUD, StartScreen, EndScreen, InputControls, BossHUD, MessageOverlay } from '@/ui';
+import { 
+  HUD, 
+  StartScreen, 
+  EndScreen, 
+  InputControls, 
+  BossHUD, 
+  MessageOverlay,
+  DamageFlash,
+  KillStreak,
+} from '@/ui';
 
 export default function App() {
   return (
@@ -17,6 +26,10 @@ export default function App() {
       <BossHUD />
       <MessageOverlay />
       <InputControls />
+
+      {/* Effects */}
+      <DamageFlash />
+      <KillStreak />
 
       {/* Screens */}
       <StartScreen />

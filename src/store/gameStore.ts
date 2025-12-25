@@ -11,6 +11,9 @@ import type {
 } from '@/types';
 import { PLAYER_CLASSES, CONFIG } from '@/types';
 
+// High score persistence key
+const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
+
 interface GameStore {
   // Game State
   state: GameState;
@@ -60,9 +63,39 @@ interface GameStore {
   screenShake: number;
   triggerShake: (intensity: number) => void;
 
+  // High Scores (persisted to localStorage)
+  highScore: number;
+  updateHighScore: () => void;
+
+  // Damage Flash
+  damageFlash: boolean;
+  
+  // Kill Streak
+  killStreak: number;
+  lastKillTime: number;
+  
   // Reset
   reset: () => void;
 }
+
+// Load high score from localStorage
+const loadHighScore = (): number => {
+  try {
+    const stored = localStorage.getItem(HIGH_SCORE_KEY);
+    return stored ? Number.parseInt(stored, 10) : 0;
+  } catch {
+    return 0;
+  }
+};
+
+// Save high score to localStorage
+const saveHighScore = (score: number): void => {
+  try {
+    localStorage.setItem(HIGH_SCORE_KEY, score.toString());
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+};
 
 const initialState = {
   state: 'MENU' as GameState,
@@ -84,6 +117,10 @@ const initialState = {
   bossMaxHp: 1000,
   bossActive: false,
   screenShake: 0,
+  highScore: loadHighScore(),
+  damageFlash: false,
+  killStreak: 0,
+  lastKillTime: 0,
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -108,9 +145,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (state === 'GAME_OVER' || state === 'WIN') return;
 
     const newHp = Math.max(0, playerHp - amount);
-    set({ playerHp: newHp, screenShake: 0.5 });
+    set({ playerHp: newHp, screenShake: 0.5, damageFlash: true });
+
+    // Clear damage flash after short delay
+    setTimeout(() => {
+      set({ damageFlash: false });
+    }, 150);
 
     if (newHp <= 0) {
+      get().updateHighScore();
       set({ state: 'GAME_OVER' });
     }
   },
@@ -119,12 +162,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
 
   addKill: (points) => {
-    const { stats, state, enemies } = get();
+    const { stats, state, enemies, lastKillTime, killStreak } = get();
+    const now = Date.now();
     const newKills = stats.kills + 1;
-    const newScore = stats.score + points;
+    
+    // Kill streak: if within 2 seconds of last kill, increment streak
+    const streakTimeout = 2000;
+    const newStreak = (now - lastKillTime < streakTimeout) ? killStreak + 1 : 1;
+    
+    // Bonus points for kill streaks
+    const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
+    const newScore = stats.score + points + streakBonus;
 
     set({
       stats: { ...stats, kills: newKills, score: newScore },
+      killStreak: newStreak,
+      lastKillTime: now,
     });
 
     // Check if we should spawn boss
@@ -254,6 +307,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         bossActive: false,
         stats: { ...get().stats, bossDefeated: true },
       });
+      get().updateHighScore();
       return true;
     }
     return false;
@@ -261,9 +315,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   triggerShake: (intensity) => set({ screenShake: intensity }),
 
+  updateHighScore: () => {
+    const { stats, highScore } = get();
+    if (stats.score > highScore) {
+      saveHighScore(stats.score);
+      set({ highScore: stats.score });
+    }
+  },
+
   reset: () =>
     set({
       ...initialState,
+      highScore: get().highScore, // Preserve high score
       playerPosition: new THREE.Vector3(0, 0, 0),
     }),
 }));

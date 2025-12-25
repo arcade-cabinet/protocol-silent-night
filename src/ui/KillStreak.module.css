@@ -1,0 +1,54 @@
+.container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 80;
+  animation: streakIn 0.3s ease-out;
+}
+
+.streakName {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.6),
+    0 0 40px rgba(255, 215, 0, 0.4);
+  letter-spacing: 0.15em;
+}
+
+.bonus {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem;
+  color: #00ffcc;
+  margin-top: 0.5rem;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.8);
+}
+
+@keyframes streakIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .streakName {
+    font-size: 1.8rem;
+  }
+  .bonus {
+    font-size: 1rem;
+  }
+}

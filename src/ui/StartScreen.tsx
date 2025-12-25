@@ -8,7 +8,7 @@ import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
-  const { state, selectClass } = useGameStore();
+  const { state, selectClass, highScore } = useGameStore();
 
   if (state !== 'MENU') return null;
 
@@ -96,6 +96,9 @@ export function StartScreen() {
 
       <div className={styles.instructions}>
         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
+        {highScore > 0 && (
+          <p className={styles.highScore}>HIGH SCORE: {highScore}</p>
+        )}
       </div>
     </div>
   );

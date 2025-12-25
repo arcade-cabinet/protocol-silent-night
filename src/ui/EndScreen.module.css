@@ -51,9 +51,28 @@
 
 .subtitle {
   color: #888;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   letter-spacing: 2px;
   font-size: 1rem;
+}
+
+.newHighScore {
+  color: #ffd700;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 30px;
+  animation: glow 1s ease-in-out infinite alternate;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.4);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.9), 0 0 40px rgba(255, 215, 0, 0.6);
+  }
 }
 
 .stats {
