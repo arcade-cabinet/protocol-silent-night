@@ -35,10 +35,15 @@ export default defineConfig({
     },
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist', 'e2e'],
+    deps: {
+      inline: ['@jbcom/strata'],
+    },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@jbcom/strata/components': path.resolve(__dirname, './node_modules/@jbcom/strata/dist/components/index.js'),
     },
+    conditions: ['node', 'default', 'import'],
   },
 });
