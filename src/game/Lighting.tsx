@@ -46,7 +46,7 @@ export function Lighting() {
       <hemisphereLight args={[0x0a0a20, 0x000000, 0.4]} />
 
       {/* Fog for depth */}
-      <fogExp2 attach="fog" color={0x050505} density={0.025} />
+      <fogExp2 attach="fog" args={[0x050505, 0.025]} />
     </>
   );
 }
