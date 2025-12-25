@@ -58,14 +58,25 @@ export function Enemies() {
   }, []);
 
   // Spawn initial enemies with cleanup
+  // Track if initial spawn has occurred for current phase
+  const hasSpawnedInitialRef = useRef(false);
+  
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
     
-    if (state === 'PHASE_1') {
+    // Only spawn initial enemies once when entering PHASE_1
+    if (state === 'PHASE_1' && !hasSpawnedInitialRef.current) {
+      hasSpawnedInitialRef.current = true;
+      
       for (let i = 0; i < 5; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
         timeoutIds.push(id);
       }
+    }
+    
+    // Reset flag when leaving PHASE_1
+    if (state !== 'PHASE_1') {
+      hasSpawnedInitialRef.current = false;
     }
     
     return () => {
