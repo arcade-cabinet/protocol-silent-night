@@ -1,124 +1,222 @@
 # Protocol: Silent Night
 
-> Arcade RPG Simulation with Three.js/WebGL
+> **Arcade RPG Simulation** | Defend the North Pole from the Grinch-Bot invasion
 
-A festive-themed 3D arcade shooter built with React Three Fiber, featuring three unique playable characters with real-time fur rendering, procedural terrain, and boss battles.
+[![CI](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/ci.yml/badge.svg)](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/ci.yml)
+[![Deploy](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/deploy.yml/badge.svg)](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/deploy.yml)
 
-![Protocol: Silent Night](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+<p align="center">
+  <img src="public/icon.svg" alt="Protocol: Silent Night" width="120" />
+</p>
 
-## 🎮 Features
+## 🎮 Play Now
 
-- **Three Playable Classes:**
-  - 🎅 **MECHA-SANTA** - Heavy tank with Coal Cannon
-  - 🧝 **CYBER-ELF** - Fast scout with Plasma SMG
-  - ⛄ **THE BUMBLE** - Bruiser with Star Thrower (spread weapon)
+**[▶️ PLAY THE GAME](https://arcade-cabinet.github.io/protocol-silent-night/)**
 
-- **Visual Effects:**
-  - Real-time fur rendering using shell technique
-  - Bloom post-processing for neon glow
-  - Tron-grid procedural terrain
-  - Dynamic lighting with shadows
+Works on desktop and mobile browsers. No installation required!
 
-- **Gameplay:**
-  - Wave-based enemy spawning
-  - Epic boss battle (Krampus-Prime)
-  - Touch and keyboard controls
+---
 
-## 🚀 Quick Start
+## 📖 Game Manual
 
+### Mission Briefing
+
+The North Pole is under attack! Grinch-Bots are invading, and only you can stop them. Choose your Operator, eliminate the threat, and defeat the fearsome **Krampus-Prime** to save Christmas.
+
+### How to Play
+
+#### Controls
+
+| Platform | Movement | Fire |
+|----------|----------|------|
+| **Desktop** | WASD or Arrow Keys | Spacebar |
+| **Mobile** | Left side touch joystick | Right side FIRE button |
+
+#### Objective
+
+1. **Phase 1**: Eliminate **10 Grinch-Bots** to summon the boss
+2. **Boss Phase**: Destroy **Krampus-Prime** to win
+3. **Don't die!** Your HP is shown in the top-left HUD
+
+---
+
+## 🤖 Operator Classes
+
+Choose your fighter! Each Operator has unique stats and weapons.
+
+### MECHA-SANTA
+> *Heavy Siege / Tank*
+
+| Stat | Value |
+|------|-------|
+| HP | 300 (Maximum) |
+| Speed | 9 (Slow) |
+| Weapon | Coal Cannon |
+| Damage | 40 per shot |
+| Fire Rate | 0.5s (Slow) |
+
+**Playstyle**: Tank hits, deal massive damage. Best for beginners who want survivability.
+
+---
+
+### CYBER-ELF
+> *Recon / Scout*
+
+| Stat | Value |
+|------|-------|
+| HP | 100 (Low) |
+| Speed | 18 (Fast) |
+| Weapon | Plasma SMG |
+| Damage | 8 per shot |
+| Fire Rate | 0.1s (Rapid) |
+
+**Playstyle**: Hit and run. High skill ceiling - dodge everything while shredding enemies.
+
+---
+
+### THE BUMBLE
+> *Crowd Control / Bruiser*
+
+| Stat | Value |
+|------|-------|
+| HP | 200 (High) |
+| Speed | 12 (Medium) |
+| Weapon | Star Thrower |
+| Damage | 18 per star (x3 spread) |
+| Fire Rate | 0.25s (Medium) |
+
+**Playstyle**: Balanced fighter with spread damage. Great for clearing groups.
+
+---
+
+## 👾 Enemies
+
+### Grinch-Bots (Minions)
+- **HP**: 30
+- **Behavior**: Chase the player relentlessly
+- **Damage**: 1 HP on contact
+- **Points**: 10 each
+
+### Krampus-Prime (Boss)
+- **HP**: 1000
+- **Behavior**: Slow pursuit with intimidating presence
+- **Damage**: 5 HP on contact
+- **Points**: 1000
+
+**Boss Tips**:
+- Keep moving! The boss is slow but deadly
+- The vignette intensifies as the boss takes damage
+- Watch for the rotating rings - they indicate attack patterns
+
+---
+
+## 🏆 Scoring System
+
+### Base Points
+- Grinch-Bot: **10 points**
+- Krampus-Prime: **1000 points**
+
+### Kill Streaks
+Chain kills within 2 seconds for bonus multipliers!
+
+| Streak | Name | Bonus |
+|--------|------|-------|
+| 2 | DOUBLE KILL | +25% |
+| 3 | TRIPLE KILL | +50% |
+| 4 | MULTI KILL | +75% |
+| 5 | MEGA KILL | +100% |
+| 6 | ULTRA KILL | +125% |
+| 7+ | MONSTER KILL | +150% |
+
+### High Scores
+Your best score is saved locally and displayed on the title screen!
+
+---
+
+## 🛠️ Technical Features
+
+- **Engine**: Three.js with React Three Fiber
+- **Graphics**: WebGL with bloom post-processing
+- **Characters**: Articulated models with shell-based fur rendering
+- **Terrain**: Procedural noise-based generation
+- **Sky**: Dynamic procedural sky with volumetric fog
+- **PWA**: Installable on mobile devices
+
+---
+
+## 💻 Development
+
+### Prerequisites
+- Node.js 20+
+- pnpm 9+
+
+### Setup
 ```bash
+# Clone the repository
+git clone https://github.com/arcade-cabinet/protocol-silent-night.git
+cd protocol-silent-night
+
 # Install dependencies
 pnpm install
 
 # Start development server
 pnpm dev
-
-# Build for production
-pnpm build
 ```
 
-## 🎯 Controls
-
-### Keyboard
-- **WASD / Arrow Keys** - Movement
-- **Space** - Fire
-
-### Touch (Mobile)
-- **Left side** - Virtual joystick
-- **Right side** - Fire button
-
-## 🛠️ Tech Stack
-
-- **Framework:** React 18 + TypeScript
-- **3D Engine:** Three.js via React Three Fiber
-- **State Management:** Zustand
-- **Build Tool:** Vite
-- **Linting/Formatting:** Biome
-- **Post-Processing:** @react-three/postprocessing
-
-## 📁 Project Structure
-
-```
-src/
-├── characters/     # Player character components with fur
-├── game/           # Core game systems (terrain, enemies, bullets)
-├── shaders/        # Custom GLSL shaders (fur, terrain)
-├── store/          # Zustand state management
-├── types/          # TypeScript definitions
-└── ui/             # UI components (HUD, menus)
-```
-
-## 🐻 Strata Integration
-
-This project is powered by [@jbcom/strata](https://github.com/strata-game-library/core), a procedural 3D graphics library for React Three Fiber.
-
-### Features Used:
-- **`createCharacter()`** - Articulated characters with proper joint hierarchies (hips, torso, head, arms, legs)
-- **`animateCharacter()`** - Procedural walk cycles and idle breathing animations
-- **`createFurSystem()`** - Shell-based fur rendering with wind and gravity effects
-- **`updateFurUniforms()`** - Real-time fur animation
-- **`ProceduralSky`** - Dynamic sky with day/night settings
-- **`VolumetricFogMesh`** - Atmospheric fog effects
-- **`noise3D`, `fbm`** - Procedural terrain generation
-
-See [AGENTS.md](./AGENTS.md) for detailed documentation on the game architecture.
-
-## 📝 Scripts
-
+### Scripts
 | Command | Description |
 |---------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Build for production |
+| `pnpm dev` | Start dev server (http://localhost:3000) |
+| `pnpm build` | Production build |
 | `pnpm preview` | Preview production build |
 | `pnpm lint` | Run Biome linter |
-| `pnpm format` | Format code with Biome |
-| `pnpm check` | Lint and format |
 | `pnpm typecheck` | TypeScript type checking |
+| `pnpm test:e2e` | Run Playwright E2E tests |
 
-## 🎨 Character Details
+### Project Structure
+```
+src/
+├── characters/     # Player character components (Santa, Elf, Bumble)
+├── game/           # Core game systems (terrain, enemies, bullets)
+├── store/          # Zustand state management
+├── ui/             # HUD, menus, overlays
+├── shaders/        # Custom GLSL shaders
+└── types/          # TypeScript definitions
+```
 
-All characters use Strata's `createCharacter()` for proper articulated bodies with animated joints.
+---
 
-### MECHA-SANTA (Tank)
-- 300 HP, 9 speed
-- Coal Cannon: 40 damage, 0.5s cooldown
-- Articulated body with fur-trimmed suit, beard, hat with pom-pom
-- Belt with golden buckle, glowing cyber eyes
+## 📱 Mobile Installation
 
-### CYBER-ELF (Scout)
-- 100 HP, 18 speed
-- Plasma SMG: 8 damage, 0.1s cooldown
-- Articulated body with cyber suit, pointed twitching ears
-- Visor with eye glow, spiky cyber-hair, hover boots
+Protocol: Silent Night is a Progressive Web App! Install it on your device:
 
-### THE BUMBLE (Bruiser)
-- 200 HP, 12 speed
-- Star Thrower: 18 damage × 3 spread
-- Large articulated body with 16-layer dense white fur
-- Horns, glowing blue eyes, heavy breathing animation
+### iOS (Safari)
+1. Open the game in Safari
+2. Tap the Share button
+3. Select "Add to Home Screen"
 
-## 📜 License
+### Android (Chrome)
+1. Open the game in Chrome
+2. Tap the menu (⋮)
+3. Select "Add to Home Screen" or "Install App"
 
-MIT
+---
+
+## 🎄 Credits
+
+- **Engine**: [Three.js](https://threejs.org/) & [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
+- **Graphics Library**: [@jbcom/strata](https://github.com/strata-game-library/core)
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+
+---
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  <strong>🎅 Happy Holidays! Save Christmas! 🎄</strong>
+</p>
