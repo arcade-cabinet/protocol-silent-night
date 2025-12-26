@@ -17,6 +17,10 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(5000);
     
     // Focus on character by centering view
@@ -39,6 +43,10 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(5000);
     
     await expect(page).toHaveScreenshot('elf-character-render.png', {
@@ -52,6 +60,10 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(5000);
     
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
@@ -67,6 +79,10 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(5000);
     
     // Move to see terrain better
@@ -89,6 +105,10 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(5000);
     
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
@@ -104,6 +124,10 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(8000); // Wait for enemy spawns
     
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
@@ -137,6 +161,10 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(3000);
     
     // Fire weapon and capture projectiles
@@ -154,6 +182,10 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(3000);
     
     // Fire SMG (rapid fire)
@@ -172,6 +204,10 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(3000);
     
     // Fire star weapon
@@ -211,6 +247,10 @@ test.describe('Component Snapshots - Camera System', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(3000);
     
     await expect(page).toHaveScreenshot('camera-perspective.png', {
@@ -224,6 +264,10 @@ test.describe('Component Snapshots - Camera System', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(3000);
     
     // Move in a pattern
@@ -246,6 +290,10 @@ test.describe('Component Snapshots - UI Overlays', () => {
     
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(8000);
     
     // Trigger damage by getting close to enemies
@@ -262,6 +310,10 @@ test.describe('Component Snapshots - UI Overlays', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(5000);
     
     // Trigger kill streak by rapid kills

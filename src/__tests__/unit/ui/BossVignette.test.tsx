@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { BossVignette } from '@/ui/BossVignette';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
+import { BossVignette } from '@/ui/BossVignette';
 
 describe('BossVignette Component', () => {
   beforeEach(() => {
@@ -10,27 +10,27 @@ describe('BossVignette Component', () => {
 
   it('should not render when boss is not active', () => {
     useGameStore.getState().selectClass('santa');
-    
+
     const { container } = render(<BossVignette />);
-    
+
     expect(container.firstChild).toBeNull();
   });
 
   it('should render when boss is active', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
-    
+
     const { container } = render(<BossVignette />);
-    
+
     expect(container.firstChild).not.toBeNull();
   });
 
   it('should apply vignette styling', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
-    
+
     const { container } = render(<BossVignette />);
-    
+
     const vignette = container.firstChild;
     expect(vignette).not.toBeNull();
     expect(vignette).toHaveAttribute('class');
@@ -40,9 +40,9 @@ describe('BossVignette Component', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
     useGameStore.getState().setState('WIN');
-    
+
     const { container } = render(<BossVignette />);
-    
+
     expect(container.firstChild).toBeNull();
   });
 });

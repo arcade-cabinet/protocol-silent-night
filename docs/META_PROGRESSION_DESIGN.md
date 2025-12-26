@@ -41,18 +41,7 @@ Transform Protocol: Silent Night from a **single-run arcade game** into a **deep
 - Passive upgrades: 100-500 NP
 
 **Persistent Storage:**
-```typescript
-// localStorage key: protocol-silent-night-nice-points
-interface MetaProgress {
-  nicePoints: number;
-  totalEarned: number;
-  unlockedWeapons: string[];
-  unlockedSkins: string[];
-  permanentUpgrades: {
-    [key: string]: number; // upgrade ID -> level
-  };
-}
-```
+See [Technical Implementation](#-technical-implementation) for the data structure specification.
 
 ---
 

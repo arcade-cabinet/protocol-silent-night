@@ -3,7 +3,7 @@
  * Handles keyboard, mouse, and touch input
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import styles from './InputControls.module.css';
 
@@ -41,7 +41,9 @@ export function InputControls() {
       const key = e.key.toLowerCase();
 
       // Prevent default for game keys
-      if (['w', 'a', 's', 'd', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+      if (
+        ['w', 'a', 's', 'd', ' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)
+      ) {
         e.preventDefault();
       }
 
@@ -145,7 +147,7 @@ export function InputControls() {
     setFiring(false);
   }, [setFiring]);
 
-  if (state === 'MENU' || state === 'WIN' || state === 'GAME_OVER') {
+  if (state === 'MENU' || state === 'BRIEFING' || state === 'WIN' || state === 'GAME_OVER') {
     return null;
   }
 

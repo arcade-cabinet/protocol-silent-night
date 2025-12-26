@@ -20,16 +20,12 @@ export function EndScreen() {
 
   return (
     <div className={`${styles.screen} ${isWin ? styles.win : styles.lose}`}>
-      <h1 className={styles.title}>
-        {isWin ? 'MISSION COMPLETE' : 'OPERATOR DOWN'}
-      </h1>
+      <h1 className={styles.title}>{isWin ? 'MISSION COMPLETE' : 'OPERATOR DOWN'}</h1>
       <h3 className={styles.subtitle}>
         {isWin ? 'The North Pole is secure.' : 'The threat persists...'}
       </h3>
 
-      {isNewHighScore && (
-        <div className={styles.newHighScore}>★ NEW HIGH SCORE ★</div>
-      )}
+      {isNewHighScore && <div className={styles.newHighScore}>★ NEW HIGH SCORE ★</div>}
 
       <div className={styles.stats}>
         <div className={styles.statRow}>
@@ -38,7 +34,9 @@ export function EndScreen() {
         </div>
         <div className={styles.statRow}>
           <span className={styles.statLabel}>HIGH SCORE</span>
-          <span className={styles.statValue} style={{ color: '#ffd700' }}>{highScore}</span>
+          <span className={styles.statValue} style={{ color: '#ffd700' }}>
+            {highScore}
+          </span>
         </div>
         <div className={styles.statRow}>
           <span className={styles.statLabel}>ENEMIES ELIMINATED</span>

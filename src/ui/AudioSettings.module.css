@@ -83,21 +83,21 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #4CAF50;
+  background: #4caf50;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .setting input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  background: #5FD068;
+  background: #5fd068;
 }
 
 .setting input[type="range"]::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #4CAF50;
+  background: #4caf50;
   cursor: pointer;
   border: none;
   transition: all 0.2s;
@@ -105,7 +105,7 @@
 
 .setting input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.2);
-  background: #5FD068;
+  background: #5fd068;
 }
 
 .setting input[type="range"]:disabled {

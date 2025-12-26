@@ -3,12 +3,12 @@
  * Procedural Tron-grid terrain using Strata's SDF and noise functions
  */
 
-import { useMemo, useRef, useEffect } from 'react';
+import { fbm, noise3D } from '@jbcom/strata';
 import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { noise3D, fbm } from '@jbcom/strata';
+import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { CONFIG } from '@/types';
-import { terrainVertexShader, terrainFragmentShader } from '@/shaders/terrain';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -40,7 +40,7 @@ export function Terrain() {
         // Use Strata's noise3D and fbm for procedural height
         const baseNoise = noise3D(x * 0.1, 0, z * 0.1) * 2;
         const detailNoise = fbm(x * 0.05, 0, z * 0.05, 3) * 1.5;
-        
+
         // Combine for final height
         const h = baseNoise + detailNoise - 3;
 

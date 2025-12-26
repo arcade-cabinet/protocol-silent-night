@@ -4,17 +4,17 @@
  * Uses Strata's createCharacter for proper joint hierarchy with dense fur coverage
  */
 
-import { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 import {
-  createCharacter,
   animateCharacter,
-  updateFurUniforms,
   type CharacterJoints,
   type CharacterState,
+  createCharacter,
   type FurOptions,
+  updateFurUniforms,
 } from '@jbcom/strata';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
 import { PLAYER_CLASSES } from '@/types';
 
 interface BumbleCharacterProps {
@@ -64,8 +64,6 @@ export function BumbleCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
-        
-        
       });
 
       characterRef.current = character;
@@ -268,7 +266,5 @@ export function BumbleCharacter({
     }
   });
 
-  return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
-  );
+  return <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />;
 }

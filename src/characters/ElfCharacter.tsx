@@ -4,17 +4,17 @@
  * Uses Strata's createCharacter for proper joint hierarchy
  */
 
-import { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 import {
-  createCharacter,
   animateCharacter,
-  updateFurUniforms,
   type CharacterJoints,
   type CharacterState,
+  createCharacter,
   type FurOptions,
+  updateFurUniforms,
 } from '@jbcom/strata';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
 import { PLAYER_CLASSES } from '@/types';
 
 interface ElfCharacterProps {
@@ -64,7 +64,6 @@ export function ElfCharacter({
         skinColor: 0xffe4c4, // Skin tone
         furOptions,
         scale: config.scale,
-        
       });
 
       characterRef.current = character;
@@ -101,148 +100,245 @@ export function ElfCharacter({
 
     const headMesh = joints.head.mesh;
 
-    // Pointed ears
-    const earGeo = new THREE.ConeGeometry(0.04 * scale, 0.18 * scale, 4);
-    const earMat = new THREE.MeshStandardMaterial({ color: 0xffe4c4 });
+    // Pointed ears with glow tips
+    const earGeo = new THREE.ConeGeometry(0.05 * scale, 0.2 * scale, 4);
+    const earMat = new THREE.MeshStandardMaterial({ color: 0xffe4c4, roughness: 0.7 });
 
     const earL = new THREE.Mesh(earGeo, earMat);
     earL.position.set(0.18 * scale, 0.08 * scale, 0);
-    earL.rotation.z = 0.4;
+    earL.rotation.z = 0.5;
     headMesh.add(earL);
 
     const earR = new THREE.Mesh(earGeo, earMat);
     earR.position.set(-0.18 * scale, 0.08 * scale, 0);
-    earR.rotation.z = -0.4;
+    earR.rotation.z = -0.5;
     headMesh.add(earR);
+
+    // Ear tip glow
+    const earTipGeo = new THREE.SphereGeometry(0.02 * scale, 6, 6);
+    const earTipMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+    const earTipL = new THREE.Mesh(earTipGeo, earTipMat);
+    earTipL.position.set(0.24 * scale, 0.18 * scale, 0);
+    headMesh.add(earTipL);
+    const earTipR = new THREE.Mesh(earTipGeo, earTipMat);
+    earTipR.position.set(-0.24 * scale, 0.18 * scale, 0);
+    headMesh.add(earTipR);
 
     earsRef.current = { left: earL, right: earR };
 
-    // Cyber visor
-    const visorGeo = new THREE.BoxGeometry(0.22 * scale, 0.05 * scale, 0.02);
+    // Cyber visor - wraparound style
+    const visorGeo = new THREE.BoxGeometry(0.26 * scale, 0.06 * scale, 0.03);
     const visorMat = new THREE.MeshStandardMaterial({
-      color: 0x00ffff,
+      color: 0x001122,
       emissive: 0x00ffff,
-      emissiveIntensity: 1.5,
+      emissiveIntensity: 1.8,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.85,
+      metalness: 0.9,
+      roughness: 0.1,
     });
     const visor = new THREE.Mesh(visorGeo, visorMat);
-    visor.position.set(0, 0.02 * scale, 0.22 * scale);
+    visor.position.set(0, 0.02 * scale, 0.21 * scale);
     headMesh.add(visor);
 
+    // Visor scanline effect
+    const scanlineGeo = new THREE.BoxGeometry(0.24 * scale, 0.008 * scale, 0.01);
+    const scanlineMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+    const scanline = new THREE.Mesh(scanlineGeo, scanlineMat);
+    scanline.position.set(0, 0.02 * scale, 0.235 * scale);
+    headMesh.add(scanline);
+
     // Eye glow behind visor
-    const eyeLight = new THREE.PointLight(0x00ffff, 0.8, 2);
+    const eyeLight = new THREE.PointLight(0x00ffff, 1, 2.5);
     eyeLight.position.set(0, 0.02 * scale, 0.18 * scale);
     headMesh.add(eyeLight);
 
-    // Cyber hair (spiky)
-    const hairGeo = new THREE.ConeGeometry(0.15 * scale, 0.2 * scale, 6);
+    // Cyber hair (spiky mohawk style)
+    const hairGeo = new THREE.ConeGeometry(0.08 * scale, 0.18 * scale, 4);
     const hairMat = new THREE.MeshStandardMaterial({
       color: 0x00aa88,
-      emissive: 0x00aa88,
-      emissiveIntensity: 0.3,
+      emissive: 0x00ffcc,
+      emissiveIntensity: 0.5,
     });
-    for (let i = 0; i < 5; i++) {
+
+    // Central mohawk spikes
+    for (let i = 0; i < 7; i++) {
       const spike = new THREE.Mesh(hairGeo, hairMat);
-      const angle = (i / 5) * Math.PI - Math.PI / 2;
-      spike.position.set(
-        Math.sin(angle) * 0.08 * scale,
-        0.15 * scale,
-        Math.cos(angle) * 0.05 * scale - 0.05 * scale
-      );
-      spike.rotation.x = -0.3;
-      spike.rotation.z = Math.sin(angle) * 0.3;
+      spike.position.set(0, 0.18 * scale, -0.08 * scale + i * 0.025 * scale);
+      spike.rotation.x = -0.4 + (i - 3) * 0.1;
+      spike.scale.y = 0.7 + Math.abs(i - 3) * 0.15;
       headMesh.add(spike);
+    }
+
+    // Side hair spikes
+    for (const side of [-1, 1]) {
+      for (let i = 0; i < 3; i++) {
+        const spike = new THREE.Mesh(hairGeo, hairMat);
+        spike.position.set(side * 0.1 * scale, 0.12 * scale, -0.05 * scale + i * 0.03 * scale);
+        spike.rotation.z = side * 0.6;
+        spike.rotation.x = -0.2;
+        spike.scale.setScalar(0.6);
+        headMesh.add(spike);
+      }
     }
 
     // Apply cyber suit material to torso and limbs
     const suitMat = new THREE.MeshStandardMaterial({
       color: config.color,
       emissive: config.color,
-      emissiveIntensity: 0.4,
-      roughness: 0.2,
-      metalness: 0.8,
+      emissiveIntensity: 0.5,
+      roughness: 0.15,
+      metalness: 0.85,
     });
 
     if (joints.torso?.mesh) {
       joints.torso.mesh.material = suitMat;
 
-      // Add glowing accent lines
-      const lineGeo = new THREE.BoxGeometry(0.015, 0.4 * scale, 0.01);
+      // Add glowing circuit-line accents
       const lineMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+
+      // Center line
+      const lineGeo = new THREE.BoxGeometry(0.012, 0.4 * scale, 0.008);
       const line = new THREE.Mesh(lineGeo, lineMat);
-      line.position.set(0, 0, 0.33 * scale);
+      line.position.set(0, 0, 0.32 * scale);
       joints.torso.mesh.add(line);
+
+      // Side lines
+      const sideLineGeo = new THREE.BoxGeometry(0.008, 0.3 * scale, 0.008);
+      const lineL = new THREE.Mesh(sideLineGeo, lineMat);
+      lineL.position.set(0.08 * scale, 0.02 * scale, 0.31 * scale);
+      joints.torso.mesh.add(lineL);
+      const lineR = new THREE.Mesh(sideLineGeo, lineMat);
+      lineR.position.set(-0.08 * scale, 0.02 * scale, 0.31 * scale);
+      joints.torso.mesh.add(lineR);
+
+      // Chest core
+      const coreGeo = new THREE.OctahedronGeometry(0.04 * scale);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      core.position.set(0, 0.1 * scale, 0.32 * scale);
+      joints.torso.mesh.add(core);
+
+      // Core glow
+      const coreLight = new THREE.PointLight(0x00ffcc, 0.6, 1.5);
+      coreLight.position.set(0, 0.1 * scale, 0.35 * scale);
+      joints.torso.mesh.add(coreLight);
     }
 
-    // Apply suit material to arms and legs
+    // Apply suit material to arms and legs with accent bands
     for (const jointName of ['armL', 'armR', 'legL', 'legR']) {
-      const joint = joints[jointName];
+      const joint = joints[jointName as keyof CharacterJoints];
       if (joint?.mesh) {
         joint.mesh.material = suitMat;
+
+        // Add glowing bands
+        const bandGeo = new THREE.TorusGeometry(0.06 * scale, 0.01, 8, 16);
+        const bandMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+        const band = new THREE.Mesh(bandGeo, bandMat);
+        band.rotation.x = Math.PI / 2;
+        band.position.y = -0.1 * scale;
+        joint.mesh.add(band);
       }
     }
 
-    // Hover boots
+    // Hover boots - more elaborate
     if (joints.legL?.mesh && joints.legR?.mesh) {
       const bootMat = new THREE.MeshStandardMaterial({
         color: 0x00ff88,
         emissive: 0x00ff88,
-        emissiveIntensity: 0.8,
+        emissiveIntensity: 1,
       });
-      const bootGeo = new THREE.BoxGeometry(0.08 * scale, 0.03, 0.12 * scale);
 
-      const bootL = new THREE.Mesh(bootGeo, bootMat);
-      bootL.position.set(0, -0.25 * scale, 0);
-      joints.legL.mesh.add(bootL);
+      for (const leg of [joints.legL.mesh, joints.legR.mesh]) {
+        // Boot upper
+        const bootUpperGeo = new THREE.CylinderGeometry(0.06 * scale, 0.08 * scale, 0.08, 8);
+        const bootUpper = new THREE.Mesh(bootUpperGeo, suitMat);
+        bootUpper.position.set(0, -0.22 * scale, 0);
+        leg.add(bootUpper);
 
-      const bootR = new THREE.Mesh(bootGeo, bootMat);
-      bootR.position.set(0, -0.25 * scale, 0);
-      joints.legR.mesh.add(bootR);
+        // Boot sole with glow
+        const bootGeo = new THREE.BoxGeometry(0.1 * scale, 0.025, 0.14 * scale);
+        const boot = new THREE.Mesh(bootGeo, bootMat);
+        boot.position.set(0, -0.27 * scale, 0.01 * scale);
+        leg.add(boot);
 
-      // Boot glow
-      const bootLightL = new THREE.PointLight(config.color, 0.5, 1);
-      bootLightL.position.set(0, -0.28 * scale, 0);
+        // Thruster glow
+        const thrusterGeo = new THREE.CylinderGeometry(0.03 * scale, 0.04 * scale, 0.02, 8);
+        const thrusterMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+        const thruster = new THREE.Mesh(thrusterGeo, thrusterMat);
+        thruster.position.set(0, -0.285 * scale, 0);
+        leg.add(thruster);
+      }
+
+      // Boot glow lights
+      const bootLightL = new THREE.PointLight(config.color, 0.8, 1.5);
+      bootLightL.position.set(0, -0.3 * scale, 0);
       joints.legL.mesh.add(bootLightL);
 
-      const bootLightR = new THREE.PointLight(config.color, 0.5, 1);
-      bootLightR.position.set(0, -0.28 * scale, 0);
+      const bootLightR = new THREE.PointLight(config.color, 0.8, 1.5);
+      bootLightR.position.set(0, -0.3 * scale, 0);
       joints.legR.mesh.add(bootLightR);
     }
 
-    // Add Plasma SMG to right arm
+    // Add Plasma SMG to right arm - enhanced version
     if (joints.armR?.group) {
       const weaponGroup = new THREE.Group();
       weaponGroup.position.set(0, -0.2 * scale, 0.12 * scale);
       weaponGroup.rotation.x = Math.PI / 2;
 
-      // SMG body
-      const smgGeo = new THREE.BoxGeometry(0.04, 0.2, 0.06);
+      // SMG body - sleeker design
+      const smgGeo = new THREE.BoxGeometry(0.045, 0.22, 0.065);
       const smgMat = new THREE.MeshStandardMaterial({
-        color: 0x222222,
+        color: 0x111111,
         emissive: config.color,
-        emissiveIntensity: 0.2,
+        emissiveIntensity: 0.25,
         metalness: 0.95,
+        roughness: 0.1,
       });
       const smg = new THREE.Mesh(smgGeo, smgMat);
       weaponGroup.add(smg);
 
-      // Barrel
-      const barrelGeo = new THREE.CylinderGeometry(0.015, 0.02, 0.12, 8);
-      const barrel = new THREE.Mesh(barrelGeo, smgMat);
-      barrel.position.set(0, 0.15, 0);
-      weaponGroup.add(barrel);
+      // Top rail
+      const railGeo = new THREE.BoxGeometry(0.02, 0.15, 0.02);
+      const rail = new THREE.Mesh(railGeo, smgMat);
+      rail.position.set(0, 0.03, -0.035);
+      weaponGroup.add(rail);
 
-      // Energy core
-      const coreGeo = new THREE.SphereGeometry(0.015, 8, 8);
+      // Barrel shroud
+      const shroudGeo = new THREE.CylinderGeometry(0.022, 0.025, 0.14, 8);
+      const shroud = new THREE.Mesh(shroudGeo, smgMat);
+      shroud.position.set(0, 0.16, 0);
+      weaponGroup.add(shroud);
+
+      // Barrel tip
+      const tipGeo = new THREE.CylinderGeometry(0.012, 0.018, 0.04, 8);
+      const tipMat = new THREE.MeshBasicMaterial({ color: config.color });
+      const tip = new THREE.Mesh(tipGeo, tipMat);
+      tip.position.set(0, 0.24, 0);
+      weaponGroup.add(tip);
+
+      // Energy cores (3)
+      const coreGeo = new THREE.SphereGeometry(0.012, 8, 8);
       const coreMat = new THREE.MeshBasicMaterial({ color: config.color });
-      const core = new THREE.Mesh(coreGeo, coreMat);
-      core.position.set(0, 0.03, 0.025);
-      weaponGroup.add(core);
+      for (let i = 0; i < 3; i++) {
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        core.position.set(0, -0.02 + i * 0.05, 0.035);
+        weaponGroup.add(core);
+      }
+
+      // Side panels with glow lines
+      const panelMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+      const panelGeo = new THREE.BoxGeometry(0.003, 0.12, 0.008);
+      const panelL = new THREE.Mesh(panelGeo, panelMat);
+      panelL.position.set(0.025, 0.02, 0.02);
+      weaponGroup.add(panelL);
+      const panelR = new THREE.Mesh(panelGeo, panelMat);
+      panelR.position.set(-0.025, 0.02, 0.02);
+      weaponGroup.add(panelR);
 
       // Muzzle light
-      const muzzle = new THREE.PointLight(config.color, 0, 3);
-      muzzle.position.set(0, 0.22, 0);
+      const muzzle = new THREE.PointLight(config.color, 0, 4);
+      muzzle.position.set(0, 0.26, 0);
       weaponGroup.add(muzzle);
       muzzleRef.current = muzzle;
 
@@ -283,7 +379,5 @@ export function ElfCharacter({
     }
   });
 
-  return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
-  );
+  return <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />;
 }

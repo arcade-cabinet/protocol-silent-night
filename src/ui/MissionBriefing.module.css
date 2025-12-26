@@ -1,0 +1,206 @@
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 5, 10, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.container {
+  max-width: 600px;
+  width: 90%;
+  padding: 30px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.headerLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #00ffcc, transparent);
+}
+
+.headerText {
+  color: #00ffcc;
+  font-size: 0.9rem;
+  letter-spacing: 4px;
+  text-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+}
+
+.briefingBox {
+  background: linear-gradient(135deg, rgba(0, 20, 20, 0.8), rgba(0, 10, 15, 0.9));
+  border: 1px solid #00ffcc33;
+  padding: 25px;
+  margin-bottom: 30px;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+}
+
+.briefingLine {
+  display: flex;
+  gap: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.1);
+  animation: slideIn 0.4s ease-out forwards;
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.briefingLine:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: #666;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  min-width: 140px;
+  text-transform: uppercase;
+}
+
+.value {
+  color: #fff;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+.briefingLine.accent .value {
+  color: #ff0044;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(255, 0, 68, 0.5);
+}
+
+.briefingLine.warning .label {
+  color: #ff6600;
+}
+
+.briefingLine.warning .value {
+  color: #ffaa00;
+  text-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+}
+
+.startButton {
+  display: block;
+  width: 100%;
+  padding: 18px 30px;
+  background: linear-gradient(135deg, rgba(255, 0, 68, 0.2), rgba(255, 0, 68, 0.1));
+  border: 2px solid #ff0044;
+  color: #ff0044;
+  font-size: 1rem;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+  animation:
+    buttonPulse 2s ease-in-out infinite,
+    fadeIn 0.5s ease-out;
+}
+
+@keyframes buttonPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 0, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 0, 68, 0.6);
+  }
+}
+
+.startButton:hover {
+  background: linear-gradient(135deg, rgba(255, 0, 68, 0.4), rgba(255, 0, 68, 0.2));
+  transform: scale(1.02);
+}
+
+.buttonText {
+  position: relative;
+  z-index: 1;
+}
+
+.buttonGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 0, 68, 0.3) 0%, transparent 50%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.startButton:hover .buttonGlow {
+  opacity: 1;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  color: #444;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+}
+
+.classification {
+  color: #ff0044;
+}
+
+.clearance {
+  color: #00ffcc;
+}
+
+.divider {
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  .briefingLine {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .label {
+    min-width: auto;
+  }
+}

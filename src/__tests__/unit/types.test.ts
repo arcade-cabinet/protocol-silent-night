@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { CONFIG, PLAYER_CLASSES, type PlayerClassType } from '@/types';
 
 describe('Game Constants', () => {
@@ -12,11 +12,11 @@ describe('Game Constants', () => {
     });
 
     it('should have max minions limit', () => {
-      expect(CONFIG.MAX_MINIONS).toBe(15);
+      expect(CONFIG.MAX_MINIONS).toBe(12);
     });
 
     it('should have spawn interval', () => {
-      expect(CONFIG.SPAWN_INTERVAL).toBe(2000);
+      expect(CONFIG.SPAWN_INTERVAL).toBe(2500);
     });
 
     it('should have color palette', () => {
@@ -168,7 +168,7 @@ describe('Game Constants', () => {
       it('should have inverse relationship between HP and speed (generally)', () => {
         const santa = PLAYER_CLASSES.santa;
         const elf = PLAYER_CLASSES.elf;
-        
+
         // Santa has highest HP and lowest speed
         expect(santa.hp).toBeGreaterThan(elf.hp);
         expect(santa.speed).toBeLessThan(elf.speed);
@@ -177,7 +177,7 @@ describe('Game Constants', () => {
       it('should have meaningful damage differences', () => {
         // Santa should have highest damage per shot
         expect(PLAYER_CLASSES.santa.damage).toBeGreaterThan(PLAYER_CLASSES.elf.damage);
-        
+
         // But Elf has much higher ROF for DPS
         expect(PLAYER_CLASSES.elf.rof).toBeLessThan(PLAYER_CLASSES.santa.rof);
       });
@@ -189,7 +189,7 @@ describe('Type System', () => {
   describe('PlayerClassType', () => {
     it('should accept valid character types', () => {
       const types: PlayerClassType[] = ['santa', 'elf', 'bumble'];
-      
+
       types.forEach((type) => {
         expect(PLAYER_CLASSES[type]).toBeDefined();
       });
@@ -205,8 +205,8 @@ describe('Type System', () => {
   });
 
   describe('GameState', () => {
-    const validStates = ['MENU', 'PHASE_1', 'PHASE_BOSS', 'WIN', 'GAME_OVER'];
-    
+    const validStates = ['MENU', 'BRIEFING', 'PHASE_1', 'PHASE_BOSS', 'WIN', 'GAME_OVER'];
+
     it('should have all game states defined', () => {
       validStates.forEach((state) => {
         expect(state).toBeTruthy();

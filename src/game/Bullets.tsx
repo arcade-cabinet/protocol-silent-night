@@ -1,66 +1,136 @@
 /**
  * Bullet System
  * Handles rendering and physics for all projectiles
+ * Each weapon type has distinct visual appearance
  */
 
-import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { CONFIG } from '@/types';
+import type { BulletData } from '@/types';
 
-// Max bullets to render
-const MAX_BULLETS = 100;
+// Max bullets per type
+const MAX_CANNON_BULLETS = 30;
+const MAX_SMG_BULLETS = 60;
+const MAX_STAR_BULLETS = 45;
 
 // Reusable dummy object for matrix calculations
 const dummy = new THREE.Object3D();
-// Scale to zero for hiding unused instances
 const zeroScale = new THREE.Vector3(0, 0, 0);
-const normalScale = new THREE.Vector3(1, 1, 1);
 
 export function Bullets() {
-  const meshRef = useRef<THREE.InstancedMesh>(null);
-  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } =
-    useGameStore();
+  const cannonRef = useRef<THREE.InstancedMesh>(null);
+  const smgRef = useRef<THREE.InstancedMesh>(null);
+  const starRef = useRef<THREE.InstancedMesh>(null);
+  const tempVecRef = useRef(new THREE.Vector3());
+  const lookAtVecRef = useRef(new THREE.Vector3());
 
-  // Geometry and material for player bullets
-  const geometry = useMemo(() => new THREE.SphereGeometry(0.25, 8, 8), []);
-  const material = useMemo(
+  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } = useGameStore();
+
+  // Coal Cannon geometry - large glowing coal chunk
+  const cannonGeometry = useMemo(() => {
+    const geo = new THREE.IcosahedronGeometry(0.35, 0);
+    return geo;
+  }, []);
+
+  const cannonMaterial = useMemo(
     () =>
-      new THREE.MeshBasicMaterial({
-        color: CONFIG.COLORS.BULLET_PLAYER,
+      new THREE.MeshStandardMaterial({
+        color: 0x331100,
+        emissive: 0xff4400,
+        emissiveIntensity: 2,
+        roughness: 0.3,
+        metalness: 0.2,
       }),
     []
   );
 
-  useFrame((_, delta) => {
-    if (!meshRef.current) return;
+  // Plasma SMG geometry - small fast energy bolts
+  const smgGeometry = useMemo(() => {
+    const geo = new THREE.CapsuleGeometry(0.08, 0.25, 4, 8);
+    geo.rotateX(Math.PI / 2);
+    return geo;
+  }, []);
+
+  const smgMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: 0x00ffcc,
+        transparent: true,
+        opacity: 0.9,
+      }),
+    []
+  );
+
+  // Star Thrower geometry - spinning star projectiles
+  const starGeometry = useMemo(() => {
+    const starShape = new THREE.Shape();
+    const outerRadius = 0.2;
+    const innerRadius = 0.08;
+    const points = 5;
+
+    for (let i = 0; i < points * 2; i++) {
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const angle = (i * Math.PI) / points - Math.PI / 2;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      if (i === 0) {
+        starShape.moveTo(x, y);
+      } else {
+        starShape.lineTo(x, y);
+      }
+    }
+    starShape.closePath();
+
+    const geo = new THREE.ExtrudeGeometry(starShape, { depth: 0.08, bevelEnabled: false });
+    geo.center();
+    return geo;
+  }, []);
+
+  const starMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0xffd700,
+        emissive: 0xffaa00,
+        emissiveIntensity: 1.5,
+        roughness: 0.1,
+        metalness: 0.9,
+      }),
+    []
+  );
+
+  useFrame((state, delta) => {
+    const time = state.clock.elapsedTime;
+
+    if (!cannonRef.current || !smgRef.current || !starRef.current) return;
 
     const toRemove: string[] = [];
 
-    // First pass: update positions, check collisions, mark for removal
+    // Update bullets and categorize by type
     updateBullets((currentBullets) => {
       const updatedBullets = currentBullets.map((bullet) => {
-        // Get bullet position and update it
         const pos = (bullet.mesh as THREE.Object3D).position;
-        pos.add(bullet.direction.clone().multiplyScalar(bullet.speed * delta));
+        tempVecRef.current.copy(bullet.direction).multiplyScalar(bullet.speed * delta);
+        pos.add(tempVecRef.current);
 
-        // Decrease life
         const newLife = bullet.life - delta;
 
-        // Check if out of bounds or expired
         if (newLife <= 0 || pos.length() > 50) {
           toRemove.push(bullet.id);
           return { ...bullet, life: newLife };
         }
 
-        // Collision with enemies (for player bullets)
+        // Collision with enemies
         if (!bullet.isEnemy) {
           for (const enemy of enemies) {
             const enemyPos = (enemy.mesh as THREE.Object3D)?.position;
             if (enemyPos) {
               const dist = pos.distanceTo(enemyPos);
-              if (dist < 1.5) {
+              // Collision radius varies by bullet type
+              const hitRadius =
+                bullet.type === 'cannon' ? 1.8 : bullet.type === 'stars' ? 1.6 : 1.4;
+              if (dist < hitRadius) {
                 if (enemy.type === 'boss' && bossActive) {
                   damageBoss(bullet.damage);
                 } else {
@@ -76,35 +146,95 @@ export function Bullets() {
         return { ...bullet, life: newLife };
       });
 
-      // Filter out removed bullets
       const activeBullets = updatedBullets.filter((b) => !toRemove.includes(b.id));
 
-      // Update instance matrices for active bullets only
-      for (let i = 0; i < MAX_BULLETS; i++) {
-        if (i < activeBullets.length) {
-          const bullet = activeBullets[i];
-          const pos = (bullet.mesh as THREE.Object3D).position;
-          dummy.position.copy(pos);
-          dummy.scale.copy(normalScale);
+      // Categorize bullets by type
+      const cannonBullets: BulletData[] = [];
+      const smgBullets: BulletData[] = [];
+      const starBullets: BulletData[] = [];
+
+      for (const bullet of activeBullets) {
+        if (bullet.type === 'cannon') {
+          cannonBullets.push(bullet);
+        } else if (bullet.type === 'smg') {
+          smgBullets.push(bullet);
         } else {
-          // Hide unused instances by scaling to zero
-          dummy.position.set(0, -1000, 0);
-          dummy.scale.copy(zeroScale);
+          starBullets.push(bullet);
         }
-        dummy.updateMatrix();
-        meshRef.current!.setMatrixAt(i, dummy.matrix);
       }
+
+      // Helper to update instanced mesh
+      const updateInstanceMesh = (
+        ref: React.RefObject<THREE.InstancedMesh | null>,
+        bullets: BulletData[],
+        maxCount: number,
+        updateLogic: (bullet: BulletData, dummy: THREE.Object3D) => void
+      ) => {
+        if (!ref.current) return;
+        for (let i = 0; i < maxCount; i++) {
+          if (i < bullets.length) {
+            const bullet = bullets[i];
+            const pos = (bullet.mesh as THREE.Object3D).position;
+            dummy.position.copy(pos);
+            updateLogic(bullet, dummy);
+          } else {
+            dummy.position.set(0, -1000, 0);
+            dummy.scale.copy(zeroScale);
+          }
+          dummy.updateMatrix();
+          ref.current.setMatrixAt(i, dummy.matrix);
+        }
+        ref.current.instanceMatrix.needsUpdate = true;
+      };
+
+      // Update Cannon bullets
+      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (_, d) => {
+        d.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
+        d.scale.setScalar(1 + Math.sin(time * 10) * 0.1); // Pulsing
+      });
+
+      // Update SMG bullets
+      updateInstanceMesh(smgRef, smgBullets, MAX_SMG_BULLETS, (bullet, d) => {
+        lookAtVecRef.current.copy((bullet.mesh as THREE.Object3D).position).add(bullet.direction);
+        d.lookAt(lookAtVecRef.current);
+        d.scale.set(1, 1, 1.5); // Elongated for motion blur effect
+      });
+
+      // Update Star bullets
+      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (_, d) => {
+        d.rotation.set(0, 0, time * 15); // Fast spin
+        d.scale.setScalar(1);
+      });
 
       return activeBullets;
     });
-
-    meshRef.current.instanceMatrix.needsUpdate = true;
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[geometry, material, MAX_BULLETS]} frustumCulled={false}>
-      {/* Emissive glow */}
-      <pointLight color={CONFIG.COLORS.BULLET_PLAYER} intensity={0.5} distance={3} />
-    </instancedMesh>
+    <group>
+      {/* Coal Cannon projectiles - large glowing coals */}
+      <instancedMesh
+        ref={cannonRef}
+        args={[cannonGeometry, cannonMaterial, MAX_CANNON_BULLETS]}
+        frustumCulled={false}
+      />
+
+      {/* Plasma SMG projectiles - fast energy bolts */}
+      <instancedMesh
+        ref={smgRef}
+        args={[smgGeometry, smgMaterial, MAX_SMG_BULLETS]}
+        frustumCulled={false}
+      />
+
+      {/* Star Thrower projectiles - spinning stars */}
+      <instancedMesh
+        ref={starRef}
+        args={[starGeometry, starMaterial, MAX_STAR_BULLETS]}
+        frustumCulled={false}
+      />
+
+      {/* Global bullet glow light */}
+      <pointLight color={0xffaa44} intensity={0.3} distance={10} position={[0, 2, 0]} />
+    </group>
   );
 }

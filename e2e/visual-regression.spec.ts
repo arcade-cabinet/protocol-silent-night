@@ -63,7 +63,10 @@ test.describe('Visual Regression - Game Start', () => {
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
-    
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     // Wait for game to load
     await page.waitForTimeout(5000);
     
@@ -80,7 +83,10 @@ test.describe('Visual Regression - Game Start', () => {
     // Select Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click();
-    
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     // Wait for game to load
     await page.waitForTimeout(5000);
     
@@ -97,7 +103,10 @@ test.describe('Visual Regression - Game Start', () => {
     // Select Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleButton.click();
-    
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     // Wait for game to load
     await page.waitForTimeout(5000);
     

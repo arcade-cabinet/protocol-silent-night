@@ -3,19 +3,51 @@
  * Class selection menu
  */
 
+import { useEffect, useRef } from 'react';
+import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
-import { AudioManager } from '@/audio/AudioManager';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
   const { state, selectClass, highScore } = useGameStore();
+  const audioInitializedRef = useRef(false);
+
+  // Initialize audio when screen is shown (on any interaction)
+  useEffect(() => {
+    if (state !== 'MENU') return;
+
+    const initAudio = async () => {
+      if (!audioInitializedRef.current) {
+        await AudioManager.initialize();
+        audioInitializedRef.current = true;
+        // Play menu music after initialization
+        AudioManager.playMusic('menu');
+      }
+    };
+
+    // Listen for first interaction to init audio
+    const handleInteraction = () => {
+      initAudio();
+    };
+
+    window.addEventListener('click', handleInteraction, { once: true });
+    window.addEventListener('touchstart', handleInteraction, { once: true });
+    window.addEventListener('keydown', handleInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+  }, [state]);
 
   if (state !== 'MENU') return null;
 
   const handleSelectClass = async (type: PlayerClassType) => {
     // Initialize audio on first user interaction
     await AudioManager.initialize();
+    audioInitializedRef.current = true;
     selectClass(type);
   };
 
@@ -51,11 +83,7 @@ export function StartScreen() {
         </button>
 
         {/* Elf Card */}
-        <button
-          type="button"
-          className={styles.classCard}
-          onClick={() => handleSelectClass('elf')}
-        >
+        <button type="button" className={styles.classCard} onClick={() => handleSelectClass('elf')}>
           <div className={styles.cardTitle} style={{ color: '#00ffcc' }}>
             {PLAYER_CLASSES.elf.name}
           </div>
@@ -99,9 +127,7 @@ export function StartScreen() {
 
       <div className={styles.instructions}>
         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
-        {highScore > 0 && (
-          <p className={styles.highScore}>HIGH SCORE: {highScore}</p>
-        )}
+        {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
       </div>
     </div>
   );

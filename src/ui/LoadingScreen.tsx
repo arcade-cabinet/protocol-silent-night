@@ -3,7 +3,7 @@
  * Shows while WebGL context and assets are loading
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './LoadingScreen.module.css';
 
 interface LoadingScreenProps {
@@ -46,14 +46,11 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
           PROTOCOL: <span className={styles.accent}>SILENT NIGHT</span>
         </h1>
         <div className={styles.subtitle}>INITIALIZING SYSTEMS</div>
-        
+
         <div className={styles.progressContainer}>
-          <div 
-            className={styles.progressBar} 
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          />
+          <div className={styles.progressBar} style={{ width: `${Math.min(progress, 100)}%` }} />
         </div>
-        
+
         <div className={styles.status}>
           {progress < 30 && 'Loading WebGL context...'}
           {progress >= 30 && progress < 60 && 'Initializing game systems...'}

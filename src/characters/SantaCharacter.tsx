@@ -4,17 +4,17 @@
  * Uses Strata's createCharacter for proper joint hierarchy
  */
 
-import { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 import {
-  createCharacter,
   animateCharacter,
-  updateFurUniforms,
   type CharacterJoints,
   type CharacterState,
+  createCharacter,
   type FurOptions,
+  updateFurUniforms,
 } from '@jbcom/strata';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
 import { PLAYER_CLASSES } from '@/types';
 
 interface SantaCharacterProps {
@@ -64,7 +64,6 @@ export function SantaCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
-        
       });
 
       characterRef.current = character;
@@ -75,7 +74,8 @@ export function SantaCharacter({
 
       // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
-      for (const joint of Object.values(character.joints)) {
+      for (const jointName of ['armL', 'armR', 'legL', 'legR', 'torso', 'head', 'hips'] as const) {
+        const joint = character.joints[jointName];
         if (joint?.mesh) {
           joint.mesh.traverse((child) => {
             if (child instanceof THREE.Group && child.userData.isFurGroup) {
@@ -101,7 +101,7 @@ export function SantaCharacter({
 
     const headMesh = joints.head.mesh;
 
-    // Add beard
+    // Add beard - multi-layered for fullness
     const beardGeo = new THREE.SphereGeometry(0.28 * scale, 12, 12);
     const beardMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
     const beard = new THREE.Mesh(beardGeo, beardMat);
@@ -109,33 +109,51 @@ export function SantaCharacter({
     beard.scale.set(1, 1.3, 0.8);
     headMesh.add(beard);
 
+    // Secondary beard layer for volume
+    const beardGeo2 = new THREE.SphereGeometry(0.22 * scale, 10, 10);
+    const beard2 = new THREE.Mesh(beardGeo2, beardMat);
+    beard2.position.set(0, -0.25 * scale, 0.18 * scale);
+    headMesh.add(beard2);
+
+    // Mustache
+    const mustacheGeo = new THREE.CapsuleGeometry(0.04 * scale, 0.15 * scale, 4, 8);
+    const mustache = new THREE.Mesh(mustacheGeo, beardMat);
+    mustache.position.set(0, -0.02 * scale, 0.22 * scale);
+    mustache.rotation.z = Math.PI / 2;
+    headMesh.add(mustache);
+
     // Add hat
     const hatGeo = new THREE.ConeGeometry(0.22 * scale, 0.4 * scale, 8);
     const hatMat = new THREE.MeshStandardMaterial({
       color: config.color,
       emissive: config.color,
-      emissiveIntensity: 0.2,
+      emissiveIntensity: 0.3,
     });
     const hat = new THREE.Mesh(hatGeo, hatMat);
     hat.position.set(0, 0.2 * scale, 0);
+    hat.rotation.z = 0.1; // Slight tilt
     headMesh.add(hat);
 
-    // Hat pom-pom
-    const pomGeo = new THREE.SphereGeometry(0.08 * scale, 8, 8);
-    const pomMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    // Hat pom-pom with glow
+    const pomGeo = new THREE.SphereGeometry(0.1 * scale, 8, 8);
+    const pomMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      emissive: 0xffffcc,
+      emissiveIntensity: 0.3,
+    });
     const pom = new THREE.Mesh(pomGeo, pomMat);
-    pom.position.set(0, 0.45 * scale, 0);
+    pom.position.set(0.05 * scale, 0.45 * scale, 0.1 * scale);
     headMesh.add(pom);
 
     // Hat fur trim
-    const hatTrimGeo = new THREE.TorusGeometry(0.2 * scale, 0.04 * scale, 8, 16);
+    const hatTrimGeo = new THREE.TorusGeometry(0.2 * scale, 0.05 * scale, 8, 16);
     const hatTrim = new THREE.Mesh(hatTrimGeo, beardMat);
     hatTrim.position.set(0, 0.05 * scale, 0);
     hatTrim.rotation.x = Math.PI / 2;
     headMesh.add(hatTrim);
 
-    // Glowing cyber eyes
-    const eyeGeo = new THREE.SphereGeometry(0.03 * scale, 8, 8);
+    // Glowing cyber eyes with scanline effect
+    const eyeGeo = new THREE.SphereGeometry(0.04 * scale, 8, 8);
     const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
     const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
     eyeL.position.set(0.08 * scale, 0.05 * scale, 0.2 * scale);
@@ -144,49 +162,129 @@ export function SantaCharacter({
     eyeR.position.set(-0.08 * scale, 0.05 * scale, 0.2 * scale);
     headMesh.add(eyeR);
 
+    // Eye glow light
+    const eyeLight = new THREE.PointLight(0x00ffff, 0.5, 1.5);
+    eyeLight.position.set(0, 0.05 * scale, 0.22 * scale);
+    headMesh.add(eyeLight);
+
+    // Nose
+    const noseGeo = new THREE.SphereGeometry(0.05 * scale, 8, 8);
+    const noseMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.8 });
+    const nose = new THREE.Mesh(noseGeo, noseMat);
+    nose.position.set(0, 0, 0.23 * scale);
+    headMesh.add(nose);
+
     // Add belt to torso
     if (joints.torso?.mesh) {
-      const beltGeo = new THREE.TorusGeometry(0.35 * scale, 0.04, 8, 32);
-      const beltMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8 });
+      // Main belt
+      const beltGeo = new THREE.TorusGeometry(0.35 * scale, 0.05, 8, 32);
+      const beltMat = new THREE.MeshStandardMaterial({
+        color: 0x111111,
+        metalness: 0.8,
+        roughness: 0.3,
+      });
       const belt = new THREE.Mesh(beltGeo, beltMat);
       belt.rotation.x = Math.PI / 2;
       belt.position.y = -0.15 * scale;
       joints.torso.mesh.add(belt);
 
-      // Belt buckle
-      const buckleGeo = new THREE.BoxGeometry(0.1 * scale, 0.08 * scale, 0.02);
-      const buckleMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 });
+      // Belt buckle - ornate
+      const buckleGeo = new THREE.BoxGeometry(0.12 * scale, 0.1 * scale, 0.03);
+      const buckleMat = new THREE.MeshStandardMaterial({
+        color: 0xffd700,
+        metalness: 0.95,
+        roughness: 0.1,
+        emissive: 0xffa500,
+        emissiveIntensity: 0.2,
+      });
       const buckle = new THREE.Mesh(buckleGeo, buckleMat);
-      buckle.position.set(0, -0.15 * scale, 0.35 * scale);
+      buckle.position.set(0, -0.15 * scale, 0.36 * scale);
       joints.torso.mesh.add(buckle);
 
+      // Buckle detail
+      const buckleDetailGeo = new THREE.BoxGeometry(0.06 * scale, 0.05 * scale, 0.015);
+      const buckleDetail = new THREE.Mesh(
+        buckleDetailGeo,
+        new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+      );
+      buckleDetail.position.set(0, -0.15 * scale, 0.38 * scale);
+      joints.torso.mesh.add(buckleDetail);
+
       // Fur collar trim
-      const collarGeo = new THREE.TorusGeometry(0.34 * scale, 0.05, 8, 32);
+      const collarGeo = new THREE.TorusGeometry(0.34 * scale, 0.06, 8, 32);
       const collar = new THREE.Mesh(collarGeo, beardMat);
       collar.rotation.x = Math.PI / 2;
       collar.position.y = 0.35 * scale;
       joints.torso.mesh.add(collar);
+
+      // Chest buttons
+      for (let i = 0; i < 3; i++) {
+        const buttonGeo = new THREE.CylinderGeometry(0.025 * scale, 0.025 * scale, 0.015, 8);
+        const buttonMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9 });
+        const button = new THREE.Mesh(buttonGeo, buttonMat);
+        button.position.set(0, 0.15 * scale - i * 0.12 * scale, 0.33 * scale);
+        button.rotation.x = Math.PI / 2;
+        joints.torso.mesh.add(button);
+      }
     }
 
-    // Add Coal Cannon to right arm
+    // Arm fur cuffs
+    for (const arm of [joints.armL, joints.armR]) {
+      if (arm?.mesh) {
+        const cuffGeo = new THREE.TorusGeometry(0.12 * scale, 0.03 * scale, 8, 16);
+        const cuff = new THREE.Mesh(cuffGeo, beardMat);
+        cuff.position.set(0, -0.2 * scale, 0);
+        cuff.rotation.x = Math.PI / 2;
+        arm.mesh.add(cuff);
+      }
+    }
+
+    // Add Coal Cannon to right arm - enhanced version
     if (joints.armR?.group) {
       const weaponGroup = new THREE.Group();
       weaponGroup.position.set(0, -0.3 * scale, 0.15 * scale);
 
-      const cannonGeo = new THREE.CylinderGeometry(0.06, 0.1, 0.5, 8);
+      // Main barrel
+      const cannonGeo = new THREE.CylinderGeometry(0.07, 0.12, 0.55, 8);
       const cannonMat = new THREE.MeshStandardMaterial({
-        color: 0x333333,
-        emissive: 0xff4400,
-        emissiveIntensity: 0.2,
-        metalness: 0.9,
+        color: 0x222222,
+        emissive: 0xff2200,
+        emissiveIntensity: 0.15,
+        metalness: 0.95,
+        roughness: 0.2,
       });
       const cannon = new THREE.Mesh(cannonGeo, cannonMat);
       cannon.rotation.x = Math.PI / 2;
       weaponGroup.add(cannon);
 
+      // Barrel rings
+      for (let i = 0; i < 3; i++) {
+        const ringGeo = new THREE.TorusGeometry(0.08 + i * 0.015, 0.015, 8, 16);
+        const ringMat = new THREE.MeshStandardMaterial({
+          color: 0x444444,
+          emissive: 0xff4400,
+          emissiveIntensity: 0.3 - i * 0.1,
+          metalness: 0.9,
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.position.z = -0.15 + i * 0.12;
+        ring.rotation.x = Math.PI / 2;
+        weaponGroup.add(ring);
+      }
+
+      // Heat vents
+      for (let i = 0; i < 4; i++) {
+        const ventGeo = new THREE.BoxGeometry(0.02, 0.08, 0.02);
+        const ventMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+        const vent = new THREE.Mesh(ventGeo, ventMat);
+        const angle = (i / 4) * Math.PI * 2;
+        vent.position.set(Math.cos(angle) * 0.1, 0, Math.sin(angle) * 0.1 - 0.1);
+        weaponGroup.add(vent);
+      }
+
       // Muzzle light
-      const muzzle = new THREE.PointLight(0xff4400, 0, 5);
-      muzzle.position.set(0, 0, 0.3);
+      const muzzle = new THREE.PointLight(0xff4400, 0, 6);
+      muzzle.position.set(0, 0, 0.35);
       weaponGroup.add(muzzle);
       muzzleRef.current = muzzle;
 
@@ -228,7 +326,5 @@ export function SantaCharacter({
     }
   });
 
-  return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
-  );
+  return <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />;
 }

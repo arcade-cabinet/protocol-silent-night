@@ -3,14 +3,15 @@
  * Handles player movement, shooting, and character rendering
  */
 
-import { useRef, useCallback, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { SantaCharacter } from './SantaCharacter';
-import { ElfCharacter } from './ElfCharacter';
-import { BumbleCharacter } from './BumbleCharacter';
 import type { PlayerClassType } from '@/types';
+import { getBulletTypeFromWeapon } from '@/types';
+import { BumbleCharacter } from './BumbleCharacter';
+import { ElfCharacter } from './ElfCharacter';
+import { SantaCharacter } from './SantaCharacter';
 
 let bulletIdCounter = 0;
 
@@ -19,15 +20,13 @@ export function PlayerController() {
   const lastFireTime = useRef(0);
   const positionRef = useRef(new THREE.Vector3(0, 0, 0));
   const rotationRef = useRef(0);
+  const moveDirRef = useRef(new THREE.Vector3());
+  const fireDirRef = useRef(new THREE.Vector3());
+  const upAxisRef = useRef(new THREE.Vector3(0, 1, 0));
+  const firePosRef = useRef(new THREE.Vector3());
 
-  const {
-    playerClass,
-    input,
-    state,
-    setPlayerPosition,
-    setPlayerRotation,
-    addBullet,
-  } = useGameStore();
+  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet } =
+    useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;
@@ -44,40 +43,49 @@ export function PlayerController() {
         return obj;
       };
 
+      // Determine bullet type and parameters from weapon
+      const weaponType = playerClass?.weaponType || 'star';
+      const bulletType = getBulletTypeFromWeapon(weaponType);
+
+      const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
+      const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;
+
       // For star weapon, create spread pattern
-      if (playerClass?.weaponType === 'star') {
+      if (weaponType === 'star') {
         const angles = [-0.2, 0, 0.2];
         for (const angleOffset of angles) {
           const spreadDir = direction.clone();
-          spreadDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), angleOffset);
+          spreadDir.applyAxisAngle(upAxisRef.current, angleOffset);
 
           addBullet({
             id: `${id}-${angleOffset}`,
             mesh: createBulletMesh(spawnPosition),
-            velocity: spreadDir.clone().multiplyScalar(30),
+            velocity: spreadDir.clone().multiplyScalar(bulletSpeed),
             hp: 1,
             maxHp: 1,
             isActive: true,
             direction: spreadDir,
             isEnemy: false,
             damage,
-            life: 2.0,
-            speed: 30,
+            life: bulletLife,
+            speed: bulletSpeed,
+            type: 'stars',
           });
         }
       } else {
         addBullet({
           id,
           mesh: createBulletMesh(spawnPosition),
-          velocity: direction.clone().multiplyScalar(30),
+          velocity: direction.clone().multiplyScalar(bulletSpeed),
           hp: 1,
           maxHp: 1,
           isActive: true,
-          direction,
+          direction: direction.clone(),
           isEnemy: false,
           damage,
-          life: 2.0,
-          speed: 30,
+          life: bulletLife,
+          speed: bulletSpeed,
+          type: bulletType,
         });
       }
     },
@@ -92,9 +100,9 @@ export function PlayerController() {
     // Movement
     if (movement.x !== 0 || movement.y !== 0) {
       const speed = playerClass.speed * delta;
-      const moveDir = new THREE.Vector3(movement.x, 0, movement.y).normalize();
+      moveDirRef.current.set(movement.x, 0, movement.y).normalize();
 
-      positionRef.current.add(moveDir.multiplyScalar(speed));
+      positionRef.current.add(moveDirRef.current.multiplyScalar(speed));
 
       // Clamp to world bounds
       const worldBound = 35;
@@ -119,13 +127,13 @@ export function PlayerController() {
       if (now - lastFireTime.current >= playerClass.rof) {
         lastFireTime.current = now;
 
-        const firePos = positionRef.current.clone();
-        firePos.y = 1.5;
+        firePosRef.current.copy(positionRef.current);
+        firePosRef.current.y = 1.5;
 
-        const fireDir = new THREE.Vector3(0, 0, 1);
-        fireDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationRef.current);
+        fireDirRef.current.set(0, 0, 1);
+        fireDirRef.current.applyAxisAngle(upAxisRef.current, rotationRef.current);
 
-        fireBullet(firePos, fireDir, playerClass.damage);
+        fireBullet(firePosRef.current, fireDirRef.current, playerClass.damage);
       }
     }
   });

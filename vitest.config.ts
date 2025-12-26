@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import path from 'node:path';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
@@ -51,7 +51,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@jbcom/strata/components': path.resolve(__dirname, './node_modules/@jbcom/strata/dist/components/index.js'),
+      '@jbcom/strata/components': path.resolve(
+        __dirname,
+        './node_modules/@jbcom/strata/dist/components/index.js'
+      ),
     },
     conditions: ['node', 'default', 'import'],
   },

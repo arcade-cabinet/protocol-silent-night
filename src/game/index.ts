@@ -1,7 +1,7 @@
-export { Terrain } from './Terrain';
 export { Bullets } from './Bullets';
+export { CameraController } from './CameraController';
 export { Enemies } from './Enemies';
 export { GameScene } from './GameScene';
-export { Lighting } from './Lighting';
-export { CameraController } from './CameraController';
 export { HitParticles } from './HitParticles';
+export { Lighting } from './Lighting';
+export { Terrain } from './Terrain';

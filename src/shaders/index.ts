@@ -1,2 +1,2 @@
-export * from './terrain';
 export * from './fur';
+export * from './terrain';

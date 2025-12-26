@@ -4,18 +4,18 @@
  * Uses Strata components for sky, volumetrics, and enhanced visuals
  */
 
-import { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { ProceduralSky, VolumetricFogMesh } from '@jbcom/strata';
-import { useGameStore } from '@/store/gameStore';
+import { Canvas } from '@react-three/fiber';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
+import { Suspense } from 'react';
 import { PlayerController } from '@/characters';
-import { Terrain } from './Terrain';
+import { useGameStore } from '@/store/gameStore';
 import { Bullets } from './Bullets';
-import { Enemies } from './Enemies';
-import { Lighting } from './Lighting';
 import { CameraController } from './CameraController';
+import { Enemies } from './Enemies';
 import { HitParticles } from './HitParticles';
+import { Lighting } from './Lighting';
+import { Terrain } from './Terrain';
 
 export function GameScene() {
   const state = useGameStore((s) => s.state);
@@ -49,8 +49,8 @@ export function GameScene() {
 
         {/* Strata Procedural Sky - Night setting */}
         <ProceduralSky
-          timeOfDay={{ 
-            sunAngle: 10,  // Near horizon for night (0-180 range required)
+          timeOfDay={{
+            sunAngle: 10, // Near horizon for night (0-180 range required)
             sunIntensity: 0.1,
             ambientLight: 0.2,
             starVisibility: 0.8,
@@ -62,18 +62,13 @@ export function GameScene() {
         />
 
         {/* Strata Volumetric Fog for atmosphere */}
-        <VolumetricFogMesh
-          color={0x0a0a20}
-          density={0.015}
-          height={20}
-          size={100}
-        />
+        <VolumetricFogMesh color={0x0a0a20} density={0.015} height={20} size={100} />
 
         {/* World */}
         <Terrain />
 
-        {/* Entities (only when game is active) */}
-        {state !== 'MENU' && (
+        {/* Entities (only when game is active - not menu or briefing) */}
+        {state !== 'MENU' && state !== 'BRIEFING' && (
           <>
             <PlayerController />
             <Bullets />
@@ -84,12 +79,7 @@ export function GameScene() {
 
         {/* Post Processing - Bloom for neon glow */}
         <EffectComposer>
-          <Bloom
-            luminanceThreshold={0.2}
-            luminanceSmoothing={0.9}
-            intensity={1.2}
-            radius={0.5}
-          />
+          <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={1.2} radius={0.5} />
         </EffectComposer>
       </Suspense>
     </Canvas>

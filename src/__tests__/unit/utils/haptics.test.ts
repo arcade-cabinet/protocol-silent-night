@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   HapticPatterns,
+  hapticButton,
+  hapticDamage,
+  hapticKillStreak,
+  hapticWeaponFire,
   isHapticsSupported,
   triggerHaptic,
-  hapticWeaponFire,
-  hapticDamage,
-  hapticButton,
-  hapticKillStreak,
 } from '../../../utils/haptics';
 
 describe('Haptics Utility', () => {
@@ -59,7 +59,7 @@ describe('Haptics Utility', () => {
     it('should return false when vibrate API is not available', () => {
       const originalVibrate = navigator.vibrate;
       const originalDescriptor = Object.getOwnPropertyDescriptor(navigator, 'vibrate');
-      
+
       // Remove vibrate property
       // biome-ignore lint/suspicious/noExplicitAny: Testing requires dynamic property manipulation
       delete (navigator as any).vibrate;
