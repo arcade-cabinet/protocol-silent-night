@@ -64,6 +64,7 @@ export function SantaCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
+        
       });
 
       characterRef.current = character;
@@ -72,7 +73,7 @@ export function SantaCharacter({
       // Customize for Santa appearance
       customizeSantaAppearance(character.joints, config.scale);
 
-      // Cache fur groups for efficient updates (avoid traversing every frame)
+      // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
       for (const joint of Object.values(character.joints)) {
         if (joint?.mesh) {
@@ -99,12 +100,6 @@ export function SantaCharacter({
     if (!joints.head?.mesh) return;
 
     const headMesh = joints.head.mesh;
-
-    // Remove default muzzle (Santa doesn't have a snout)
-    const childrenToRemove = headMesh.children.filter((child) => child instanceof THREE.Mesh);
-    for (const child of childrenToRemove) {
-      headMesh.remove(child);
-    }
 
     // Add beard
     const beardGeo = new THREE.SphereGeometry(0.28 * scale, 12, 12);

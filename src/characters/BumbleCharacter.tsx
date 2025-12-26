@@ -64,6 +64,8 @@ export function BumbleCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
+        
+        
       });
 
       characterRef.current = character;
@@ -72,7 +74,7 @@ export function BumbleCharacter({
       // Customize for Bumble appearance
       customizeBumbleAppearance(character.joints, config.scale);
 
-      // Cache fur groups for efficient updates (avoid traversing every frame)
+      // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
       for (const joint of Object.values(character.joints)) {
         if (joint?.mesh) {
@@ -111,12 +113,6 @@ export function BumbleCharacter({
 
     // Scale up head
     headMesh.scale.set(1.3, 1.2, 1.2);
-
-    // Remove default muzzle, add Bumble's snout
-    const childrenToRemove = headMesh.children.filter((child) => child instanceof THREE.Mesh);
-    for (const child of childrenToRemove) {
-      headMesh.remove(child);
-    }
 
     // Horns
     const hornGeo = new THREE.ConeGeometry(0.06 * scale, 0.3 * scale, 6);
@@ -226,11 +222,6 @@ export function BumbleCharacter({
       muzzleRef.current = starLight;
 
       joints.armL.group.add(weaponGroup);
-    }
-
-    // Remove tail (Bumble doesn't have a visible tail)
-    if (joints.tail?.group) {
-      joints.tail.group.visible = false;
     }
   }
 
