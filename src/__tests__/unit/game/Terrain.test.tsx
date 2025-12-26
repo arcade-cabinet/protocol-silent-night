@@ -75,8 +75,8 @@ describe('Terrain Component', () => {
     
     if (instancedMeshes.length > 0) {
       const terrainMesh = instancedMeshes[0].instance;
-      const disposeGeoSpy = vi.spyOn(terrainMesh.geometry, 'dispose');
-      const disposeMatSpy = vi.spyOn(terrainMesh.material, 'dispose');
+      vi.spyOn(terrainMesh.geometry, 'dispose');
+      vi.spyOn(terrainMesh.material, 'dispose');
 
       await renderer.unmount();
       
