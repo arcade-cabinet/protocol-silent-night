@@ -419,3 +419,97 @@ describe('GameStore - High Score', () => {
     expect(useGameStore.getState().highScore).toBe(2500);
   });
 });
+
+describe('GameStore - Meta Progression', () => {
+  beforeEach(() => {
+    useGameStore.getState().reset();
+    localStorage.clear();
+  });
+
+  it('should earn Nice Points', () => {
+    const { earnNicePoints } = useGameStore.getState();
+    earnNicePoints(100);
+
+    const meta = useGameStore.getState().metaProgress;
+    expect(meta.nicePoints).toBe(100);
+    expect(meta.totalPointsEarned).toBe(100);
+  });
+
+  it('should spend Nice Points if sufficient balance', () => {
+    const { earnNicePoints, spendNicePoints } = useGameStore.getState();
+    earnNicePoints(100);
+
+    const success = spendNicePoints(40);
+    expect(success).toBe(true);
+    expect(useGameStore.getState().metaProgress.nicePoints).toBe(60);
+  });
+
+  it('should not spend Nice Points if insufficient balance', () => {
+    const { earnNicePoints, spendNicePoints } = useGameStore.getState();
+    earnNicePoints(50);
+
+    const success = spendNicePoints(100);
+    expect(success).toBe(false);
+    expect(useGameStore.getState().metaProgress.nicePoints).toBe(50);
+  });
+
+  it('should unlock weapons', () => {
+    const { unlockWeapon } = useGameStore.getState();
+    unlockWeapon('ice-cannon');
+
+    expect(useGameStore.getState().metaProgress.unlockedWeapons).toContain('ice-cannon');
+  });
+
+  it('should not add duplicate weapons', () => {
+    const { unlockWeapon } = useGameStore.getState();
+    unlockWeapon('ice-cannon');
+    unlockWeapon('ice-cannon');
+
+    const weapons = useGameStore.getState().metaProgress.unlockedWeapons;
+    const count = weapons.filter(w => w === 'ice-cannon').length;
+    expect(count).toBe(1);
+  });
+
+  it('should unlock skins', () => {
+    const { unlockSkin } = useGameStore.getState();
+    unlockSkin('gold-santa');
+
+    expect(useGameStore.getState().metaProgress.unlockedSkins).toContain('gold-santa');
+  });
+
+  it('should upgrade permanent stats', () => {
+    const { upgradePermanent } = useGameStore.getState();
+    upgradePermanent('speed');
+
+    expect(useGameStore.getState().metaProgress.permanentUpgrades['speed']).toBe(1);
+
+    upgradePermanent('speed');
+    expect(useGameStore.getState().metaProgress.permanentUpgrades['speed']).toBe(2);
+  });
+});
+
+describe('GameStore - Run Progression', () => {
+  beforeEach(() => {
+    useGameStore.getState().reset();
+  });
+
+  it('should gain XP and level up', () => {
+    const { gainXP } = useGameStore.getState();
+    
+    // Level 1 needs 100 XP
+    gainXP(50);
+    expect(useGameStore.getState().runProgress.xp).toBe(50);
+    expect(useGameStore.getState().runProgress.level).toBe(1);
+
+    gainXP(60); // Total 110 XP -> level 2, 10 XP remainder
+    expect(useGameStore.getState().runProgress.xp).toBe(10);
+    expect(useGameStore.getState().runProgress.level).toBe(2);
+  });
+
+  it('should select level upgrades', () => {
+    const { selectLevelUpgrade } = useGameStore.getState();
+    selectLevelUpgrade('rapid-fire');
+
+    expect(useGameStore.getState().runProgress.selectedUpgrades).toContain('rapid-fire');
+  });
+});

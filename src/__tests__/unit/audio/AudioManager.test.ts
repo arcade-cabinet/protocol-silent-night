@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AudioManager } from '@/audio/AudioManager';
+import { AudioManager, type MusicTrack } from '@/audio/AudioManager';
 import * as Tone from 'tone';
 
 // Mock Tone.js
@@ -70,9 +70,6 @@ describe('AudioManager', () => {
     await AudioManager.initialize();
     await AudioManager.initialize();
 
-    // The first call sets initializing = true, and subsequent calls return early.
-    // However, if we wait for the first call to finish, the second call will see initialized = true and return early.
-    // Tone.start should only be called once.
     expect(Tone.start).toHaveBeenCalledTimes(1);
   });
 
@@ -113,14 +110,14 @@ describe('AudioManager', () => {
     expect(AudioManager.getSettings().sfxVolume).toBe(0.3);
   });
 
-  it('should play music tracks', async () => {
+  it('should play all music tracks', async () => {
     await AudioManager.initialize();
     
-    AudioManager.playMusic('menu');
-    expect(AudioManager.getSettings().currentTrack).toBe('menu');
-
-    AudioManager.playMusic('combat');
-    expect(AudioManager.getSettings().currentTrack).toBe('combat');
+    const tracks: MusicTrack[] = ['menu', 'combat', 'boss', 'victory', 'defeat'];
+    for (const track of tracks) {
+      AudioManager.playMusic(track);
+      expect(AudioManager.getSettings().currentTrack).toBe(track);
+    }
   });
 
   it('should stop music', async () => {
@@ -132,10 +129,28 @@ describe('AudioManager', () => {
     expect(AudioManager.getSettings().currentTrack).toBe(null);
   });
 
-  it('should play SFX', async () => {
+  it('should play all SFX', async () => {
     await AudioManager.initialize();
     
-    expect(() => AudioManager.playSFX('ui_click')).not.toThrow();
-    expect(() => AudioManager.playSFX('weapon_cannon')).not.toThrow();
+    const sfxList = [
+      'weapon_cannon', 'weapon_smg', 'weapon_stars',
+      'player_damage_light', 'player_damage_heavy',
+      'enemy_hit', 'enemy_defeated',
+      'boss_appear', 'boss_hit', 'boss_defeated',
+      'ui_click', 'ui_select', 'streak_start',
+      'victory', 'defeat'
+    ] as const;
+
+    for (const sfx of sfxList) {
+      expect(() => AudioManager.playSFX(sfx)).not.toThrow();
+    }
+  });
+
+  it('should not play music if disabled', async () => {
+    await AudioManager.initialize();
+    AudioManager.toggleMusic(); // disable
+    
+    AudioManager.playMusic('menu');
+    expect(AudioManager.getSettings().currentTrack).toBe(null);
   });
 });
