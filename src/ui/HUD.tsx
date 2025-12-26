@@ -16,16 +16,22 @@ export function HUD() {
   const hpPercent = (playerHp / playerMaxHp) * 100;
   const killsToGo = Math.max(0, CONFIG.WAVE_REQ - stats.kills);
 
-  const objective =
-    state === 'PHASE_1'
-      ? killsToGo > 0 
+  const getObjectiveText = () => {
+    if (state === 'PHASE_1') {
+      return killsToGo > 0 
         ? `ELIMINATE ${killsToGo} MORE GRINCH-BOTS`
-        : 'BOSS INCOMING...'
-      : state === 'PHASE_BOSS'
-        ? 'DESTROY KRAMPUS-PRIME'
-        : state === 'WIN'
-          ? 'MISSION COMPLETE'
-          : 'SYSTEM FAILURE';
+        : 'BOSS INCOMING...';
+    }
+    if (state === 'PHASE_BOSS') {
+      return 'DESTROY KRAMPUS-PRIME';
+    }
+    if (state === 'WIN') {
+      return 'MISSION COMPLETE';
+    }
+    return 'SYSTEM FAILURE';
+  };
+
+  const objective = getObjectiveText();
 
   return (
     <div className={styles.hud}>

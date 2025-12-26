@@ -125,6 +125,9 @@ export function Enemies() {
         const moveSpeed = enemy.type === 'boss' ? 3 : enemy.speed;
         currentPos.add(direction.clone().multiplyScalar(moveSpeed * delta));
 
+        // Set rotation to face the player
+        enemy.mesh.rotation.y = Math.atan2(direction.x, direction.z);
+
         // Collision with player - apply knockback and queue damage
         const hitRadius = enemy.type === 'boss' ? 3 : 1.5;
         if (distance < hitRadius) {
@@ -160,6 +163,7 @@ export function Enemies() {
             <MinionMesh
               key={enemy.id}
               position={[pos.x, pos.y, pos.z]}
+              rotation={enemy.mesh.rotation.y}
               hp={enemy.hp}
               maxHp={enemy.maxHp}
             />
