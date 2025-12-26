@@ -150,7 +150,7 @@ export function Terrain() {
 
       {/* Christmas-themed obstacles (rendered as individual meshes for better visual variety) */}
       {obstacles.map((obstacle) => (
-        <ChristmasObstacle key={`${obstacle.position.x}-${obstacle.position.z}`} obstacle={obstacle} />
+        <ChristmasObstacleMesh key={`${obstacle.position.x}-${obstacle.position.z}`} obstacle={obstacle} />
       ))}
 
       {/* Grid Floor Helper - darker for cyberpunk vibe */}
@@ -160,7 +160,7 @@ export function Terrain() {
 }
 
 // Individual Christmas obstacle component for visual variety
-function ChristmasObstacle({ obstacle }: { obstacle: ChristmasObstacle }) {
+function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   // Animated glow effect
