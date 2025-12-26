@@ -50,7 +50,7 @@ export function GameScene() {
         {/* Strata Procedural Sky - Night setting */}
         <ProceduralSky
           timeOfDay={{ 
-            sunAngle: -30,  // Below horizon for night
+            sunAngle: 10,  // Near horizon for night (0-180 range required)
             sunIntensity: 0.1,
             ambientLight: 0.2,
             starVisibility: 0.8,
