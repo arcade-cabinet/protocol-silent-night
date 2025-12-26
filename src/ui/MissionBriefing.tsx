@@ -16,33 +16,11 @@ interface BriefingLine {
 }
 
 export function MissionBriefing() {
-  const { state, setState, playerClass, missionBriefing } = useGameStore();
+  const { state, setState, getBriefingLines } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
 
-  const briefingLines = useMemo(() => {
-    const lines: BriefingLine[] = [
-      { label: 'OPERATION', text: missionBriefing.title, accent: true },
-      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
-      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
-    ];
-
-    // Add intel lines from store
-    for (const [index, intel] of missionBriefing.intel.entries()) {
-      const label =
-        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
-      lines.push({ label, text: intel });
-    }
-
-    // Add final warning
-    lines.push({
-      label: 'WARNING',
-      text: 'Hostiles are aggressive - engage on sight',
-      warning: true,
-    });
-
-    return lines;
-  }, [playerClass, missionBriefing]);
+  const briefingLines = useMemo(() => getBriefingLines(), [getBriefingLines]);
 
   useEffect(() => {
     if (state !== 'BRIEFING') return;

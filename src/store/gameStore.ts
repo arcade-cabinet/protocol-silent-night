@@ -29,6 +29,7 @@ interface GameStore {
     objective: string;
     intel: string[];
   };
+  getBriefingLines: () => { label: string; text: string; accent?: boolean; warning?: boolean }[];
 
   // Player
   playerClass: PlayerClassConfig | null;
@@ -213,6 +214,31 @@ declare global {
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
+
+  getBriefingLines: () => {
+    const { missionBriefing, playerClass } = get();
+    const lines = [
+      { label: 'OPERATION', text: missionBriefing.title, accent: true },
+      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
+      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
+    ];
+
+    // Add intel lines
+    for (const [index, intel] of missionBriefing.intel.entries()) {
+      const label =
+        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+      lines.push({ label, text: intel });
+    }
+
+    // Add final warning
+    lines.push({
+      label: 'WARNING',
+      text: 'Hostiles are aggressive - engage on sight',
+      warning: true,
+    });
+
+    return lines;
+  },
 
   setState: (state) => set({ state }),
 
