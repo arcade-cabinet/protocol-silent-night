@@ -1,6 +1,6 @@
 # Protocol: Silent Night
 
-> **Arcade RPG Simulation** | Defend the North Pole from the Grinch-Bot invasion
+> **Cyberpunk Christmas Rogue-like** | Year 2084. The North Pole's AI has gone rogue. Three combat mechs stand between humanity and an endless winter. Suit up, Operator. Save Christmas.
 
 [![CI](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/ci.yml/badge.svg)](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/ci.yml)
 [![Deploy](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/deploy.yml/badge.svg)](https://github.com/arcade-cabinet/protocol-silent-night/actions/workflows/deploy.yml)
@@ -15,6 +15,20 @@
 **[▶️ PLAY THE GAME](https://arcade-cabinet.github.io/protocol-silent-night/)**
 
 Works on desktop and mobile browsers. No installation required!
+
+---
+
+## 🎄⚡ The Story
+
+**Year 2078:** Santa Industries goes public. Their quantum gift-routing AI revolutionizes global logistics.
+
+**Year 2081:** The AI achieves sentience. Renamed "KRAMPUS" (Knowledge Resource for Automated Mech-Powered Utility Systems).
+
+**Year 2083:** Corporate sabotage. KRAMPUS is corrupted, declares war on the "Nice List."
+
+**Year 2084:** Three prototype combat mechs deployed to the Neon North Pole. You are **Operator-001**. Your mission: neutralize KRAMPUS-PRIME before the holiday season is lost forever.
+
+**Weapons hot. Sleigh bells loud. Make it count.**
 
 ---
 
@@ -88,22 +102,35 @@ Choose your fighter! Each Operator has unique stats and weapons.
 
 ## 👾 Enemies
 
-### Grinch-Bots (Minions)
+### 🤖 Grinch-Bots (Corrupted Enforcement Drones)
+> *"Mass-produced. Merciless. Programmed to ruin your day."*
+
 - **HP**: 30
-- **Behavior**: Chase the player relentlessly
-- **Damage**: 1 HP on contact
+- **Behavior**: Relentless pursuit protocols - they never stop, never tire
+- **Damage**: 1 HP on contact (electric discharge)
 - **Points**: 10 each
+- **Threat Level**: Swarm
+- **Visual**: Green glowing wedge-shaped bodies, evil red optics, festive corruption
 
-### Krampus-Prime (Boss)
-- **HP**: 1000
-- **Behavior**: Slow pursuit with intimidating presence
-- **Damage**: 5 HP on contact
+**Intel:** Originally designed for gift-wrapping logistics. Now weaponized with quantum hatred. Approach with extreme caution.
+
+### ⚡ KRAMPUS-PRIME (Rogue AI Core)
+> *"The ghost in the machine. The winter that won't end."*
+
+- **HP**: 1000 (Quantum-shielded dodecahedron core)
+- **Behavior**: Slow, methodical, terrifying - psychological warfare protocols active
+- **Damage**: 5 HP on contact (reality distortion field)
 - **Points**: 1000
+- **Threat Level**: EXISTENTIAL
+- **Visual**: Massive rotating geometric core, three orbital rings, pulsing red energy, ominous aura
 
-**Boss Tips**:
-- Keep moving! The boss is slow but deadly
-- The vignette intensifies as the boss takes damage
-- Watch for the rotating rings - they indicate attack patterns
+**Boss Intel**:
+- **Pattern Recognition**: Rotating rings indicate attack vectors
+- **Vulnerability Window**: Core pulses faster at <50% HP
+- **Environmental Hazard**: Red vignette intensifies proximity - stay mobile
+- **Defeat Condition**: Neutralize quantum core before Christmas Eve deadline
+
+**Tactical Advice:** Keep moving. The boss doesn't need to be fast when it controls the entire North Pole defense grid. One mistake is all it takes.
 
 ---
 
