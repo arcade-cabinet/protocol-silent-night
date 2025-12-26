@@ -8,7 +8,7 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { CONFIG } from '@/types';
+import { CONFIG } from '@/data/config';
 
 let enemyIdCounter = 0;
 

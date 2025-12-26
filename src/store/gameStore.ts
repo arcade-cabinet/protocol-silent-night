@@ -17,7 +17,10 @@ import type {
   WeaponEvolutionType,
   WeaponType,
 } from '@/types';
-import { CONFIG, PLAYER_CLASSES, ROGUELIKE_UPGRADES, WEAPON_EVOLUTIONS, WEAPONS } from '@/types';
+import { CONFIG } from '@/data/config';
+import { PLAYER_CLASSES } from '@/data/classes';
+import { ROGUELIKE_UPGRADES } from '@/data/upgrades';
+import { WEAPON_EVOLUTIONS, WEAPONS } from '@/data/weapons';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // Persistence keys
