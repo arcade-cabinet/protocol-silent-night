@@ -188,22 +188,26 @@ export function Bullets() {
       };
 
       // Update Cannon bullets
-      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (_, d) => {
+      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (bullet, d) => {
         d.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
-        d.scale.setScalar(1 + Math.sin(time * 10) * 0.1); // Pulsing
+        const baseScale = 1 + Math.sin(time * 10) * 0.1;
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.setScalar(baseScale * sizeMultiplier); // Pulsing with evolution size
       });
 
       // Update SMG bullets
       updateInstanceMesh(smgRef, smgBullets, MAX_SMG_BULLETS, (bullet, d) => {
         lookAtVecRef.current.copy((bullet.mesh as THREE.Object3D).position).add(bullet.direction);
         d.lookAt(lookAtVecRef.current);
-        d.scale.set(1, 1, 1.5); // Elongated for motion blur effect
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.set(sizeMultiplier, sizeMultiplier, 1.5 * sizeMultiplier); // Elongated for motion blur effect
       });
 
       // Update Star bullets
-      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (_, d) => {
+      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (bullet, d) => {
         d.rotation.set(0, 0, time * 15); // Fast spin
-        d.scale.setScalar(1);
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.setScalar(sizeMultiplier);
       });
 
       return activeBullets;

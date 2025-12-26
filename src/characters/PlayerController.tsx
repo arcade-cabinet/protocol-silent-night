@@ -7,8 +7,9 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
+<<<<<<< HEAD
 import type { ChristmasObstacle, PlayerClassType } from '@/types';
-import { getBulletTypeFromWeapon } from '@/types';
+import { getBulletTypeFromWeapon, WEAPON_EVOLUTIONS } from '@/types';
 import { BumbleCharacter } from './BumbleCharacter';
 import { ElfCharacter } from './ElfCharacter';
 import { SantaCharacter } from './SantaCharacter';
@@ -53,8 +54,17 @@ export function PlayerController() {
   const slideZRef = useRef(new THREE.Vector3());
   const moveVectorRef = useRef(new THREE.Vector3());
 
-  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet, obstacles } =
-    useGameStore();
+  const {
+    playerClass,
+    input,
+    state,
+    setPlayerPosition,
+    setPlayerRotation,
+    addBullet,
+    obstacles,
+    getWeaponModifiers,
+    currentEvolution,
+  } = useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;
@@ -75,12 +85,41 @@ export function PlayerController() {
       const weaponType = playerClass?.weaponType || 'star';
       const bulletType = getBulletTypeFromWeapon(weaponType);
 
-      const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
+      // Get evolution modifiers
+      const evolution = currentEvolution ? useGameStore.getState().currentEvolution : null;
+      const evolutionConfig = evolution
+        ? useGameStore.getState().currentEvolution
+          ? WEAPON_EVOLUTIONS[useGameStore.getState().currentEvolution!]
+          : null
+        : null;
+
+      const baseSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
+      const bulletSpeed =
+        baseSpeed * (evolutionConfig?.modifiers.speedMultiplier || 1);
       const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;
 
-      // For star weapon, create spread pattern
-      if (weaponType === 'star') {
-        const angles = [-0.2, 0, 0.2];
+      // Get projectile count and spread from evolution
+      const projectileCount = evolutionConfig?.modifiers.projectileCount || 3;
+      const spreadAngle = evolutionConfig?.modifiers.spreadAngle || 0.2;
+      const size = evolutionConfig?.modifiers.size || 1;
+      const penetration = evolutionConfig?.modifiers.penetration || false;
+      const explosive = evolutionConfig?.modifiers.explosive || false;
+
+      // For star weapon or evolved multi-projectile weapons, create spread pattern
+      if (weaponType === 'star' || (evolutionConfig && projectileCount > 1)) {
+        const count = weaponType === 'star' && !evolutionConfig ? 3 : projectileCount;
+        const angles: number[] = [];
+
+        // Generate angles for projectiles
+        if (count === 1) {
+          angles.push(0);
+        } else {
+          const angleStep = (spreadAngle * 2) / (count - 1);
+          for (let i = 0; i < count; i++) {
+            angles.push(-spreadAngle + i * angleStep);
+          }
+        }
+
         for (const angleOffset of angles) {
           const spreadDir = direction.clone();
           spreadDir.applyAxisAngle(upAxisRef.current, angleOffset);
@@ -97,7 +136,11 @@ export function PlayerController() {
             damage,
             life: bulletLife,
             speed: bulletSpeed,
-            type: 'stars',
+            type: weaponType === 'star' ? 'stars' : bulletType,
+            evolutionType: evolution || undefined,
+            size,
+            penetration,
+            explosive,
           });
         }
       } else {
@@ -114,10 +157,14 @@ export function PlayerController() {
           life: bulletLife,
           speed: bulletSpeed,
           type: bulletType,
+          evolutionType: evolution || undefined,
+          size,
+          penetration,
+          explosive,
         });
       }
     },
-    [playerClass, addBullet]
+    [playerClass, addBullet, currentEvolution]
   );
 
   useFrame((_, delta) => {
@@ -184,7 +231,9 @@ export function PlayerController() {
     // Firing
     if (firing) {
       const now = Date.now() / 1000;
-      if (now - lastFireTime.current >= playerClass.rof) {
+      // Use modified stats from evolution
+      const modifiedClass = getWeaponModifiers();
+      if (now - lastFireTime.current >= modifiedClass.rof) {
         lastFireTime.current = now;
 
         firePosRef.current.copy(positionRef.current);
@@ -193,7 +242,7 @@ export function PlayerController() {
         fireDirRef.current.set(0, 0, 1);
         fireDirRef.current.applyAxisAngle(upAxisRef.current, rotationRef.current);
 
-        fireBullet(firePosRef.current, fireDirRef.current, playerClass.damage);
+        fireBullet(firePosRef.current, fireDirRef.current, modifiedClass.damage);
       }
     }
   });

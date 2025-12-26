@@ -12,8 +12,9 @@ import type {
   PlayerClassConfig,
   PlayerClassType,
   RunProgressData,
+  WeaponEvolutionType,
 } from '@/types';
-import { CONFIG, PLAYER_CLASSES } from '@/types';
+import { CONFIG, PLAYER_CLASSES, WEAPON_EVOLUTIONS } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // Persistence keys
@@ -60,6 +61,12 @@ interface GameStore {
   gainXP: (amount: number) => void;
   levelUp: () => void;
   selectLevelUpgrade: (upgradeId: string) => void;
+
+  // Weapon Evolution
+  currentEvolution: WeaponEvolutionType | null;
+  evolveWeapon: (evolutionType: WeaponEvolutionType) => void;
+  checkEvolutionAvailability: () => WeaponEvolutionType | null;
+  getWeaponModifiers: () => PlayerClassConfig;
 
   // Input
   input: InputState;
@@ -202,6 +209,7 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
+  currentEvolution: null,
 };
 
 // Extend Window interface for e2e testing
@@ -426,6 +434,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   levelUp: () => {
     // This will eventually trigger the LevelUp UI
     AudioManager.playSFX('ui_select');
+    
+    // Check if evolution is available at this level
+    const availableEvolution = get().checkEvolutionAvailability();
+    if (availableEvolution && !get().currentEvolution) {
+      get().evolveWeapon(availableEvolution);
+    }
     // TODO: set state to SHOW_LEVEL_UP if we implement a separate state for it
   },
 
@@ -437,6 +451,88 @@ export const useGameStore = create<GameStore>((set, get) => ({
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
       },
     });
+
+    // Check if evolution is now available
+    const availableEvolution = get().checkEvolutionAvailability();
+    if (availableEvolution && !get().currentEvolution) {
+      get().evolveWeapon(availableEvolution);
+    }
+  },
+
+  // Weapon Evolution Actions
+  evolveWeapon: (evolutionType) => {
+    const { runProgress, playerClass } = get();
+    
+    if (!playerClass) return;
+    
+    const evolution = WEAPON_EVOLUTIONS[evolutionType];
+    if (!evolution) return;
+
+    // Add to weaponEvolutions array
+    set({
+      currentEvolution: evolutionType,
+      runProgress: {
+        ...runProgress,
+        weaponEvolutions: [...runProgress.weaponEvolutions, evolutionType],
+      },
+    });
+
+    // Play evolution sound
+    AudioManager.playSFX('ui_select');
+    triggerHaptic(HapticPatterns.FIRE_HEAVY);
+  },
+
+  checkEvolutionAvailability: () => {
+    const { runProgress, playerClass, currentEvolution } = get();
+    
+    // Already evolved
+    if (currentEvolution) return null;
+    
+    // Need to be at least level 10
+    if (runProgress.level < 10) return null;
+    
+    if (!playerClass) return null;
+
+    // Find matching evolution for current weapon
+    for (const [evolutionId, config] of Object.entries(WEAPON_EVOLUTIONS)) {
+      if (config.baseWeapon === playerClass.weaponType) {
+        // Check if level requirement is met
+        if (runProgress.level >= config.minLevel) {
+          // Check required upgrades if any
+          if (config.requiredUpgrades) {
+            const hasAllUpgrades = config.requiredUpgrades.every((upgrade) =>
+              runProgress.selectedUpgrades.includes(upgrade)
+            );
+            if (!hasAllUpgrades) continue;
+          }
+          
+          return evolutionId as WeaponEvolutionType;
+        }
+      }
+    }
+    
+    return null;
+  },
+
+  getWeaponModifiers: () => {
+    const { playerClass, currentEvolution } = get();
+    
+    if (!playerClass) return playerClass as PlayerClassConfig;
+    
+    // No evolution, return base class
+    if (!currentEvolution) return playerClass;
+    
+    const evolution = WEAPON_EVOLUTIONS[currentEvolution];
+    if (!evolution) return playerClass;
+
+    // Apply evolution modifiers
+    const modifiers = evolution.modifiers;
+    return {
+      ...playerClass,
+      damage: Math.round(playerClass.damage * (modifiers.damageMultiplier || 1)),
+      rof: playerClass.rof * (modifiers.rofMultiplier || 1),
+      speed: playerClass.speed * (modifiers.speedMultiplier || 1),
+    };
   },
 
   setMovement: (x, y) =>

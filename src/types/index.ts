@@ -40,7 +40,7 @@ export interface PlayerClassConfig {
   /** Character scale multiplier */
   scale: number;
   /** Weapon type determining projectile behavior */
-  weaponType: 'cannon' | 'smg' | 'star';
+  weaponType: 'cannon' | 'smg' | 'star' | 'snowball' | 'candy-cane';
   /** Fur rendering colors as RGB tuples (0-1 range) */
   furColor: {
     base: [number, number, number];
@@ -49,11 +49,49 @@ export interface PlayerClassConfig {
 }
 
 /**
+ * Weapon evolution identifiers
+ */
+export type WeaponEvolutionType =
+  | 'mega-coal-mortar'
+  | 'plasma-storm'
+  | 'supernova-burst'
+  | 'blizzard-cannon'
+  | 'peppermint-tornado';
+
+/**
+ * Configuration for weapon evolution
+ * @interface WeaponEvolutionConfig
+ */
+export interface WeaponEvolutionConfig {
+  /** Unique identifier for evolution */
+  id: WeaponEvolutionType;
+  /** Display name */
+  name: string;
+  /** Base weapon type that can evolve */
+  baseWeapon: PlayerClassConfig['weaponType'];
+  /** Minimum level required */
+  minLevel: number;
+  /** Required upgrade selections (if any) */
+  requiredUpgrades?: string[];
+  /** Stat modifiers applied on evolution */
+  modifiers: {
+    damageMultiplier?: number;
+    rofMultiplier?: number;
+    speedMultiplier?: number;
+    projectileCount?: number;
+    spreadAngle?: number;
+    size?: number;
+    penetration?: boolean;
+    explosive?: boolean;
+  };
+}
+
+/**
  * Helper to get bullet type from weapon type
  */
 export const getBulletTypeFromWeapon = (
   weaponType: PlayerClassConfig['weaponType']
-): 'cannon' | 'smg' | 'stars' => {
+): 'cannon' | 'smg' | 'stars' | 'snowball' | 'candy-cane' => {
   switch (weaponType) {
     case 'cannon':
       return 'cannon';
@@ -61,6 +99,10 @@ export const getBulletTypeFromWeapon = (
       return 'smg';
     case 'star':
       return 'stars';
+    case 'snowball':
+      return 'snowball';
+    case 'candy-cane':
+      return 'candy-cane';
     default:
       return 'stars';
   }
@@ -124,7 +166,15 @@ export interface BulletData extends EntityData {
   /** Travel speed in units per second */
   speed: number;
   /** Weapon type that fired this bullet */
-  type?: 'cannon' | 'smg' | 'stars';
+  type?: 'cannon' | 'smg' | 'stars' | 'snowball' | 'candy-cane';
+  /** Evolution type if weapon is evolved */
+  evolutionType?: WeaponEvolutionType;
+  /** Size multiplier for visual scaling */
+  size?: number;
+  /** Whether bullet has penetration */
+  penetration?: boolean;
+  /** Whether bullet is explosive */
+  explosive?: boolean;
 }
 
 /**
@@ -309,6 +359,70 @@ export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
     furColor: {
       base: [0.7, 0.7, 0.7],
       tip: [1.0, 1.0, 1.0],
+    },
+  },
+};
+
+/**
+ * Weapon evolution configurations
+ * @constant
+ */
+export const WEAPON_EVOLUTIONS: Record<WeaponEvolutionType, WeaponEvolutionConfig> = {
+  'mega-coal-mortar': {
+    id: 'mega-coal-mortar',
+    name: 'Mega Coal Mortar',
+    baseWeapon: 'cannon',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 2.0,
+      size: 2.0,
+      explosive: true,
+      rofMultiplier: 0.8, // Slightly slower
+    },
+  },
+  'plasma-storm': {
+    id: 'plasma-storm',
+    name: 'Plasma Storm',
+    baseWeapon: 'smg',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.5,
+      projectileCount: 3, // Burst of 3
+      rofMultiplier: 1.2, // Faster fire rate
+    },
+  },
+  'supernova-burst': {
+    id: 'supernova-burst',
+    name: 'Supernova Burst',
+    baseWeapon: 'star',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.8,
+      projectileCount: 5, // More stars
+      spreadAngle: 0.3, // Wider spread
+      size: 1.5,
+    },
+  },
+  'blizzard-cannon': {
+    id: 'blizzard-cannon',
+    name: 'Blizzard Cannon',
+    baseWeapon: 'snowball',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.6,
+      speedMultiplier: 1.3,
+      penetration: true,
+    },
+  },
+  'peppermint-tornado': {
+    id: 'peppermint-tornado',
+    name: 'Peppermint Tornado',
+    baseWeapon: 'candy-cane',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.7,
+      projectileCount: 6, // Spiral pattern
+      speedMultiplier: 1.1,
     },
   },
 };
