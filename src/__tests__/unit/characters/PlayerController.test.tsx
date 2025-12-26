@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
+import { describe, expect, it } from 'vitest';
 import { checkCollision } from '@/characters/PlayerController';
 import type { ChristmasObstacle } from '@/types';
 
@@ -51,7 +51,7 @@ describe('PlayerController Helpers', () => {
       // Distance is sqrt(1.5^2 + 1.5^2) = sqrt(4.5) ≈ 2.12
       // Default player radius 0.7 + 1 = 1.7. 2.12 > 1.7 (No collision)
       expect(checkCollision(position, obstacles)).toBe(false);
-      
+
       // Large player radius 1.5 + 1 = 2.5. 2.12 < 2.5 (Collision)
       expect(checkCollision(position, obstacles, 1.5)).toBe(true);
     });

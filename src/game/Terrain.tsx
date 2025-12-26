@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
-import { CONFIG, type ChristmasObstacle, type ChristmasObjectType } from '@/types';
+import { type ChristmasObjectType, type ChristmasObstacle, CONFIG } from '@/types';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -42,7 +42,7 @@ export function Terrain() {
       for (let z = -size / 2; z < size / 2; z++) {
         // Reset scale and position for each instance
         dummy.scale.set(1, 1, 1);
-        
+
         // Use Strata's noise3D and fbm for procedural height
         const baseNoise = noise3D(x * 0.1, 0, z * 0.1) * 2;
         const detailNoise = fbm(x * 0.05, 0, z * 0.05, 3) * 1.5;
@@ -65,9 +65,10 @@ export function Terrain() {
           // Create festive obstacles
           if (objectTypeNoise > 0.7) {
             obstacleType = 'present';
-            obstacleColor = objectTypeNoise > 0.85
-              ? new THREE.Color(0xff0044) // Red present
-              : new THREE.Color(0x00ff88); // Green present
+            obstacleColor =
+              objectTypeNoise > 0.85
+                ? new THREE.Color(0xff0044) // Red present
+                : new THREE.Color(0x00ff88); // Green present
             obstacleHeight = 2 + objectTypeNoise * 2;
             dummy.position.y = h + 1;
           } else if (objectTypeNoise > 0.4) {
@@ -150,7 +151,10 @@ export function Terrain() {
 
       {/* Christmas-themed obstacles (rendered as individual meshes for better visual variety) */}
       {obstacles.map((obstacle) => (
-        <ChristmasObstacleMesh key={`${obstacle.position.x}-${obstacle.position.z}`} obstacle={obstacle} />
+        <ChristmasObstacleMesh
+          key={`${obstacle.position.x}-${obstacle.position.z}`}
+          obstacle={obstacle}
+        />
       ))}
 
       {/* Grid Floor Helper - darker for cyberpunk vibe */}

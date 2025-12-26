@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AudioManager, type MusicTrack } from '@/audio/AudioManager';
 import * as Tone from 'tone';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AudioManager, type MusicTrack } from '@/audio/AudioManager';
 
 // Mock Tone.js
 vi.mock('tone', () => {
@@ -11,18 +11,10 @@ vi.mock('tone', () => {
     volume: { value: 0 },
   };
 
-  class MockSynth {
-    constructor() { return synthMock; }
-  }
-  class MockPolySynth {
-    constructor() { return synthMock; }
-  }
-  class MockFMSynth {
-    constructor() { return synthMock; }
-  }
-  class MockNoiseSynth {
-    constructor() { return synthMock; }
-  }
+  const MockSynth = vi.fn(() => synthMock);
+  const MockPolySynth = vi.fn(() => synthMock);
+  const MockFMSynth = vi.fn(() => synthMock);
+  const MockNoiseSynth = vi.fn(() => synthMock);
 
   return {
     start: vi.fn().mockResolvedValue(undefined),
@@ -39,8 +31,8 @@ vi.mock('tone', () => {
     FMSynth: MockFMSynth,
     NoiseSynth: MockNoiseSynth,
     Loop: class {
-      callback: any;
-      constructor(callback: any) {
+      callback: (time: number) => void;
+      constructor(callback: (time: number) => void) {
         this.callback = callback;
       }
       start = vi.fn().mockReturnThis();
@@ -100,7 +92,7 @@ describe('AudioManager', () => {
 
   it('should set volumes correctly', async () => {
     await AudioManager.initialize();
-    
+
     AudioManager.setMasterVolume(0.5);
     expect(AudioManager.getSettings().masterVolume).toBe(0.5);
 
@@ -113,7 +105,7 @@ describe('AudioManager', () => {
 
   it('should play all music tracks', async () => {
     await AudioManager.initialize();
-    
+
     const tracks: MusicTrack[] = ['menu', 'combat', 'boss', 'victory', 'defeat'];
     for (const track of tracks) {
       AudioManager.playMusic(track);
@@ -132,14 +124,23 @@ describe('AudioManager', () => {
 
   it('should play all SFX', async () => {
     await AudioManager.initialize();
-    
+
     const sfxList = [
-      'weapon_cannon', 'weapon_smg', 'weapon_stars',
-      'player_damage_light', 'player_damage_heavy',
-      'enemy_hit', 'enemy_defeated',
-      'boss_appear', 'boss_hit', 'boss_defeated',
-      'ui_click', 'ui_select', 'streak_start',
-      'victory', 'defeat'
+      'weapon_cannon',
+      'weapon_smg',
+      'weapon_stars',
+      'player_damage_light',
+      'player_damage_heavy',
+      'enemy_hit',
+      'enemy_defeated',
+      'boss_appear',
+      'boss_hit',
+      'boss_defeated',
+      'ui_click',
+      'ui_select',
+      'streak_start',
+      'victory',
+      'defeat',
     ] as const;
 
     for (const sfx of sfxList) {
@@ -150,7 +151,7 @@ describe('AudioManager', () => {
   it('should not play music if disabled', async () => {
     await AudioManager.initialize();
     AudioManager.toggleMusic(); // disable
-    
+
     AudioManager.playMusic('menu');
     expect(AudioManager.getSettings().currentTrack).toBe(null);
   });

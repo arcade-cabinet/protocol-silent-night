@@ -481,7 +481,7 @@ describe('GameStore - Meta Progression', () => {
     unlockWeapon('ice-cannon');
 
     const weapons = useGameStore.getState().metaProgress.unlockedWeapons;
-    const count = weapons.filter(w => w === 'ice-cannon').length;
+    const count = weapons.filter((w) => w === 'ice-cannon').length;
     expect(count).toBe(1);
   });
 
@@ -496,10 +496,10 @@ describe('GameStore - Meta Progression', () => {
     const { upgradePermanent } = useGameStore.getState();
     upgradePermanent('speed');
 
-    expect(useGameStore.getState().metaProgress.permanentUpgrades['speed']).toBe(1);
+    expect(useGameStore.getState().metaProgress.permanentUpgrades.speed).toBe(1);
 
     upgradePermanent('speed');
-    expect(useGameStore.getState().metaProgress.permanentUpgrades['speed']).toBe(2);
+    expect(useGameStore.getState().metaProgress.permanentUpgrades.speed).toBe(2);
   });
 });
 
@@ -510,7 +510,7 @@ describe('GameStore - Run Progression', () => {
 
   it('should gain XP and level up', () => {
     const { gainXP } = useGameStore.getState();
-    
+
     // Level 1 needs 100 XP
     gainXP(50);
     expect(useGameStore.getState().runProgress.xp).toBe(50);

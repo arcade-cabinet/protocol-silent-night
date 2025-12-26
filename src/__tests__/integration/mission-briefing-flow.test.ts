@@ -3,7 +3,7 @@
  * Tests the flow from character selection to mission briefing
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
 
 describe('Mission Briefing Flow', () => {
@@ -11,21 +11,22 @@ describe('Mission Briefing Flow', () => {
     useGameStore.getState().reset();
   });
 
-  it.each(['santa', 'elf', 'bumble'] as const)(
-    'should transition from MENU to BRIEFING when selecting %s',
-    (character) => {
-      const store = useGameStore.getState();
+  it.each([
+    'santa',
+    'elf',
+    'bumble',
+  ] as const)('should transition from MENU to BRIEFING when selecting %s', (character) => {
+    const store = useGameStore.getState();
 
-      // Initially in MENU state
-      expect(store.state).toBe('MENU');
+    // Initially in MENU state
+    expect(store.state).toBe('MENU');
 
-      // Select character
-      store.selectClass(character);
+    // Select character
+    store.selectClass(character);
 
-      // Should now be in BRIEFING state
-      expect(useGameStore.getState().state).toBe('BRIEFING');
-    }
-  );
+    // Should now be in BRIEFING state
+    expect(useGameStore.getState().state).toBe('BRIEFING');
+  });
 
   it('should set player class data when transitioning to BRIEFING', () => {
     const store = useGameStore.getState();

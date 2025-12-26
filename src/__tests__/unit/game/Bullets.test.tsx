@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ReactTestRenderer from '@react-three/test-renderer';
+import * as THREE from 'three';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Bullets } from '@/game/Bullets';
 import { useGameStore } from '@/store/gameStore';
-import * as THREE from 'three';
 
 describe('Bullets Component', () => {
   beforeEach(() => {
@@ -15,19 +15,17 @@ describe('Bullets Component', () => {
 
   it('should render instanced meshes for weapon types', async () => {
     const renderer = await ReactTestRenderer.create(<Bullets />);
-    
-    const instancedMeshes = renderer.allChildren.filter(
-      (child) => child.type === 'InstancedMesh'
-    );
-    
+
+    const instancedMeshes = renderer.allChildren.filter((child) => child.type === 'InstancedMesh');
+
     // 3 types: cannon, smg, stars
     expect(instancedMeshes.length).toBe(3);
-    
+
     // Check counts
-    const cannon = instancedMeshes.find(m => m.instance.geometry.type === 'IcosahedronGeometry');
-    const smg = instancedMeshes.find(m => m.instance.geometry.type === 'CapsuleGeometry');
-    const stars = instancedMeshes.find(m => m.instance.geometry.type === 'ExtrudeGeometry');
-    
+    const cannon = instancedMeshes.find((m) => m.instance.geometry.type === 'IcosahedronGeometry');
+    const smg = instancedMeshes.find((m) => m.instance.geometry.type === 'CapsuleGeometry');
+    const stars = instancedMeshes.find((m) => m.instance.geometry.type === 'ExtrudeGeometry');
+
     expect(cannon.instance.count).toBe(30);
     expect(smg.instance.count).toBe(60);
     expect(stars.instance.count).toBe(45);
@@ -72,7 +70,7 @@ describe('Bullets Component', () => {
     });
 
     const renderer = await ReactTestRenderer.create(<Bullets />);
-    
+
     // Advance frame to trigger movement and collision
     // 0.1s * 10 speed = 1 unit. We need 0.5s to hit enemy at 5 units
     await renderer.advanceFrames(5, 0.1);
@@ -88,11 +86,13 @@ describe('Bullets Component', () => {
 
   it('should cleanup resources', async () => {
     const renderer = await ReactTestRenderer.create(<Bullets />);
-    const meshes = renderer.allChildren.filter(c => c.type === 'InstancedMesh');
-    
-    const spies = meshes.map(m => vi.spyOn(m.instance.geometry, 'dispose'));
-    
+    const meshes = renderer.allChildren.filter((c) => c.type === 'InstancedMesh');
+
+    const spies = meshes.map((m) => vi.spyOn(m.instance.geometry, 'dispose'));
+
     await renderer.unmount();
-    spies.forEach(spy => expect(spy).toHaveBeenCalled());
+    for (const spy of spies) {
+      expect(spy).toHaveBeenCalled();
+    }
   });
 });

@@ -53,15 +53,8 @@ export function PlayerController() {
   const slideZRef = useRef(new THREE.Vector3());
   const moveVectorRef = useRef(new THREE.Vector3());
 
-  const {
-    playerClass,
-    input,
-    state,
-    setPlayerPosition,
-    setPlayerRotation,
-    addBullet,
-    obstacles,
-  } = useGameStore();
+  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet, obstacles } =
+    useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;

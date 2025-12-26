@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ReactTestRenderer from '@react-three/test-renderer';
+import * as THREE from 'three';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HitParticles } from '@/game/HitParticles';
 import { useGameStore } from '@/store/gameStore';
-import * as THREE from 'three';
 
 describe('HitParticles', () => {
   beforeEach(() => {
@@ -15,12 +15,8 @@ describe('HitParticles', () => {
   });
 
   it('should render and handle useFrame', async () => {
-    let renderer: any;
-    await ReactTestRenderer.act(async () => {
-      renderer = await ReactTestRenderer.create(<HitParticles />);
-    });
-    
-    expect(renderer!.scene).toBeDefined();
+    const renderer = await ReactTestRenderer.create(<HitParticles />);
+    expect(renderer.scene).toBeDefined();
 
     // Trigger kill to spawn particles
     useGameStore.setState({
@@ -34,7 +30,20 @@ describe('HitParticles', () => {
     // Trigger boss damage to spawn particles
     useGameStore.setState({
       bossHp: 900,
-      enemies: [{ type: 'boss', mesh: new THREE.Object3D() }] as any,
+      enemies: [
+        {
+          id: 'boss',
+          type: 'boss',
+          mesh: new THREE.Object3D(),
+          velocity: new THREE.Vector3(),
+          hp: 1000,
+          maxHp: 1000,
+          isActive: true,
+          speed: 3,
+          damage: 5,
+          pointValue: 1000,
+        },
+      ],
     });
 
     await ReactTestRenderer.act(async () => {

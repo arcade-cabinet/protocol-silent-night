@@ -48,7 +48,10 @@ export function HUD() {
         <div className={styles.label} style={{ marginTop: '10px' }}>
           LEVEL {runProgress.level} PROGRESS
         </div>
-        <div className={styles.barWrap} style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}>
+        <div
+          className={styles.barWrap}
+          style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}
+        >
           <div
             className={styles.hpBar}
             style={{

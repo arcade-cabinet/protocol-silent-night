@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ReactTestRenderer from '@react-three/test-renderer';
+import * as THREE from 'three';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Enemies } from '@/game/Enemies';
 import { useGameStore } from '@/store/gameStore';
-import * as THREE from 'three';
 
 describe('Enemies Component', () => {
   beforeEach(() => {
@@ -34,7 +34,7 @@ describe('Enemies Component', () => {
     });
 
     const renderer = await ReactTestRenderer.create(<Enemies />);
-    
+
     // Advance frames to move enemy
     await renderer.advanceFrames(5, 0.1);
 
@@ -66,7 +66,7 @@ describe('Enemies Component', () => {
     });
 
     const renderer = await ReactTestRenderer.create(<Enemies />);
-    
+
     await renderer.advanceFrames(1, 0.1);
 
     const state = useGameStore.getState();

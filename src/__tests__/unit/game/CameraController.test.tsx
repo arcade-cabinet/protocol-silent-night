@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ReactTestRenderer from '@react-three/test-renderer';
+import * as THREE from 'three';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CameraController } from '@/game/CameraController';
 import { useGameStore } from '@/store/gameStore';
-import * as THREE from 'three';
 
 describe('CameraController Component', () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('CameraController Component', () => {
 
   it('should follow player position', async () => {
     const renderer = await ReactTestRenderer.create(<CameraController />);
-    
+
     useGameStore.setState({
       playerPosition: new THREE.Vector3(10, 0, 10),
     });
@@ -27,7 +27,7 @@ describe('CameraController Component', () => {
     // Access camera from R3F state
     const camera = renderer.scene.allChildren[0].instance.camera;
     expect(camera.position.x).toBeCloseTo(10, 0);
-    expect(camera.position.z).toBeGreaterThan(10); 
+    expect(camera.position.z).toBeGreaterThan(10);
 
     await renderer.unmount();
   });
@@ -38,7 +38,7 @@ describe('CameraController Component', () => {
     });
 
     const renderer = await ReactTestRenderer.create(<CameraController />);
-    
+
     await renderer.advanceFrames(1, 0.1);
 
     const state = useGameStore.getState();

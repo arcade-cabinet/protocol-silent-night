@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import ReactTestRenderer from '@react-three/test-renderer';
+import { describe, expect, it, vi } from 'vitest';
 import { SantaCharacter } from '@/characters/SantaCharacter';
 
 // Mock Strata
@@ -29,12 +29,12 @@ describe('SantaCharacter Component', () => {
     const renderer = await ReactTestRenderer.create(
       <SantaCharacter isMoving={true} isFiring={true} />
     );
-    
+
     expect(renderer.scene).toBeDefined();
-    
+
     // Advance frame to trigger useFrame logic
     await renderer.advanceFrames(1, 0.1);
-    
+
     await renderer.unmount();
   });
 });

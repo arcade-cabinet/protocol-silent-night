@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import ReactTestRenderer from '@react-three/test-renderer';
+import { describe, expect, it, vi } from 'vitest';
 import { BumbleCharacter } from '@/characters/BumbleCharacter';
 
 // Mock Strata
@@ -29,11 +29,11 @@ describe('BumbleCharacter Component', () => {
     const renderer = await ReactTestRenderer.create(
       <BumbleCharacter isMoving={true} isFiring={true} />
     );
-    
+
     expect(renderer.scene).toBeDefined();
-    
+
     await renderer.advanceFrames(1, 0.1);
-    
+
     await renderer.unmount();
   });
 });
