@@ -7,8 +7,8 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import type { PlayerClassType } from '@/types';
-import { getBulletTypeFromWeapon } from '@/types';
+import type { PlayerClassType, WeaponType } from '@/types';
+import { WEAPONS } from '@/types';
 import { BumbleCharacter } from './BumbleCharacter';
 import { ElfCharacter } from './ElfCharacter';
 import { SantaCharacter } from './SantaCharacter';
@@ -25,7 +25,7 @@ export function PlayerController() {
   const upAxisRef = useRef(new THREE.Vector3(0, 1, 0));
   const firePosRef = useRef(new THREE.Vector3());
 
-  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet } =
+  const { playerClass, currentWeapon, input, state, setPlayerPosition, setPlayerRotation, addBullet } =
     useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
@@ -33,7 +33,7 @@ export function PlayerController() {
 
   // Create bullet with initial position
   const fireBullet = useCallback(
-    (spawnPosition: THREE.Vector3, direction: THREE.Vector3, damage: number) => {
+    (spawnPosition: THREE.Vector3, direction: THREE.Vector3, baseDamage: number, weaponType: WeaponType) => {
       const id = `bullet-${bulletIdCounter++}`;
 
       // Create mesh-like object with position for tracking
@@ -43,22 +43,28 @@ export function PlayerController() {
         return obj;
       };
 
-      // Determine bullet type and parameters from weapon
-      const weaponType = playerClass?.weaponType || 'star';
-      const bulletType = getBulletTypeFromWeapon(weaponType);
+      // Get weapon configuration
+      const weaponConfig = WEAPONS[weaponType];
+      
+      // Use weapon config or fallback to base damage
+      const damage = weaponConfig.damage || baseDamage;
+      const bulletSpeed = weaponConfig.speed;
+      const bulletLife = weaponConfig.life;
 
-      const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
-      const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;
+      // Handle spread weapons (star, jingle_bell)
+      if (weaponConfig.projectileCount && weaponConfig.projectileCount > 1) {
+        const count = weaponConfig.projectileCount;
+        const spreadAngle = weaponConfig.spreadAngle || 0.2;
+        const angleStep = (spreadAngle * 2) / (count - 1);
+        const startAngle = -spreadAngle;
 
-      // For star weapon, create spread pattern
-      if (weaponType === 'star') {
-        const angles = [-0.2, 0, 0.2];
-        for (const angleOffset of angles) {
+        for (let i = 0; i < count; i++) {
+          const angleOffset = startAngle + angleStep * i;
           const spreadDir = direction.clone();
           spreadDir.applyAxisAngle(upAxisRef.current, angleOffset);
 
           addBullet({
-            id: `${id}-${angleOffset}`,
+            id: `${id}-${i}`,
             mesh: createBulletMesh(spawnPosition),
             velocity: spreadDir.clone().multiplyScalar(bulletSpeed),
             hp: 1,
@@ -69,10 +75,12 @@ export function PlayerController() {
             damage,
             life: bulletLife,
             speed: bulletSpeed,
-            type: 'stars',
+            type: weaponType,
+            behavior: weaponConfig.behavior,
           });
         }
       } else {
+        // Single projectile
         addBullet({
           id,
           mesh: createBulletMesh(spawnPosition),
@@ -85,11 +93,12 @@ export function PlayerController() {
           damage,
           life: bulletLife,
           speed: bulletSpeed,
-          type: bulletType,
+          type: weaponType,
+          behavior: weaponConfig.behavior,
         });
       }
     },
-    [playerClass, addBullet]
+    [addBullet]
   );
 
   useFrame((_, delta) => {
@@ -124,7 +133,10 @@ export function PlayerController() {
     // Firing
     if (firing) {
       const now = Date.now() / 1000;
-      if (now - lastFireTime.current >= playerClass.rof) {
+      const weaponConfig = WEAPONS[currentWeapon];
+      const fireRate = weaponConfig.rof;
+      
+      if (now - lastFireTime.current >= fireRate) {
         lastFireTime.current = now;
 
         firePosRef.current.copy(positionRef.current);
@@ -133,7 +145,7 @@ export function PlayerController() {
         fireDirRef.current.set(0, 0, 1);
         fireDirRef.current.applyAxisAngle(upAxisRef.current, rotationRef.current);
 
-        fireBullet(firePosRef.current, fireDirRef.current, playerClass.damage);
+        fireBullet(firePosRef.current, fireDirRef.current, playerClass.damage, currentWeapon);
       }
     }
   });

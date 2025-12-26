@@ -226,7 +226,7 @@ describe('Bullets Component', () => {
         damage: 18,
         life: 4,
         isEnemy: false,
-        type: 'stars' as const,
+        type: 'star' as const,
         hp: 1,
         maxHp: 1,
         isActive: true,

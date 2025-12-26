@@ -11,6 +11,7 @@ import type {
   PlayerClassConfig,
   PlayerClassType,
   RunProgressData,
+  WeaponType,
 } from '@/types';
 import { CONFIG, PLAYER_CLASSES } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
@@ -39,6 +40,10 @@ interface GameStore {
   damagePlayer: (amount: number) => void;
   setPlayerPosition: (position: THREE.Vector3) => void;
   setPlayerRotation: (rotation: number) => void;
+
+  // Weapons
+  currentWeapon: WeaponType;
+  setWeapon: (weaponType: WeaponType) => void;
 
   // Stats
   stats: GameStats;
@@ -174,6 +179,7 @@ const initialState = {
   playerMaxHp: 100,
   playerPosition: new THREE.Vector3(0, 0, 0),
   playerRotation: 0,
+  currentWeapon: 'cannon' as WeaponType,
   stats: { score: 0, kills: 0, bossDefeated: false },
   metaProgress: initialMetaProgress,
   runProgress: {
@@ -221,6 +227,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       state: 'BRIEFING',
       playerPosition: new THREE.Vector3(0, 0, 0),
       playerRotation: 0,
+      currentWeapon: config.weaponType,
       runProgress: {
         xp: 0,
         level: 1,
@@ -270,6 +277,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setPlayerPosition: (position) => set({ playerPosition: position.clone() }),
   setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
+
+  setWeapon: (weaponType) => {
+    const { metaProgress } = get();
+    // Check if weapon is unlocked
+    if (metaProgress.unlockedWeapons.includes(weaponType)) {
+      set({ currentWeapon: weaponType });
+      AudioManager.playSFX('ui_select');
+    }
+  },
 
   addKill: (points) => {
     const { stats, state, enemies, lastKillTime, killStreak, metaProgress } = get();
@@ -461,10 +477,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Play weapon-specific sound and haptic
     const weaponType = bullet.type || 'cannon';
-    if (weaponType === 'smg') {
+    
+    // Map weapon types to audio categories
+    if (weaponType === 'smg' || weaponType === 'light_string') {
       AudioManager.playSFX('weapon_smg');
       triggerHaptic(HapticPatterns.FIRE_LIGHT);
-    } else if (weaponType === 'stars') {
+    } else if (weaponType === 'star' || weaponType === 'jingle_bell' || weaponType === 'candy_cane' || weaponType === 'quantum_gift') {
       AudioManager.playSFX('weapon_stars');
       triggerHaptic(HapticPatterns.FIRE_MEDIUM);
     } else {

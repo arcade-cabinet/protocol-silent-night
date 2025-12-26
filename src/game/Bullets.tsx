@@ -8,7 +8,7 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import type { BulletData } from '@/types';
+import type { BulletData, WeaponType } from '@/types';
 
 // Max bullets per type
 const MAX_CANNON_BULLETS = 30;
@@ -18,6 +18,26 @@ const MAX_STAR_BULLETS = 45;
 // Reusable dummy object for matrix calculations
 const dummy = new THREE.Object3D();
 const zeroScale = new THREE.Vector3(0, 0, 0);
+
+// Map weapon types to visual categories
+function getVisualType(weaponType: WeaponType | undefined): 'cannon' | 'smg' | 'star' {
+  switch (weaponType) {
+    case 'cannon':
+    case 'ornament':
+    case 'snowball':
+      return 'cannon';
+    case 'smg':
+    case 'light_string':
+      return 'smg';
+    case 'star':
+    case 'jingle_bell':
+    case 'candy_cane':
+    case 'gingerbread':
+    case 'quantum_gift':
+    default:
+      return 'star';
+  }
+}
 
 export function Bullets() {
   const cannonRef = useRef<THREE.InstancedMesh>(null);
@@ -129,7 +149,7 @@ export function Bullets() {
               const dist = pos.distanceTo(enemyPos);
               // Collision radius varies by bullet type
               const hitRadius =
-                bullet.type === 'cannon' ? 1.8 : bullet.type === 'stars' ? 1.6 : 1.4;
+                bullet.type === 'cannon' ? 1.8 : bullet.type === 'star' ? 1.6 : 1.4;
               if (dist < hitRadius) {
                 if (enemy.type === 'boss' && bossActive) {
                   damageBoss(bullet.damage);
@@ -154,9 +174,11 @@ export function Bullets() {
       const starBullets: BulletData[] = [];
 
       for (const bullet of activeBullets) {
-        if (bullet.type === 'cannon') {
+        // Map weapon types to visual categories
+        const visualType = getVisualType(bullet.type);
+        if (visualType === 'cannon') {
           cannonBullets.push(bullet);
-        } else if (bullet.type === 'smg') {
+        } else if (visualType === 'smg') {
           smgBullets.push(bullet);
         } else {
           starBullets.push(bullet);

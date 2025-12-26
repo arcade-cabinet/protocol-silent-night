@@ -16,6 +16,7 @@ import {
   MessageOverlay,
   MissionBriefing,
   StartScreen,
+  WeaponShop,
 } from '@/ui';
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
       <MissionBriefing />
       <EndScreen />
       <LoadingScreen />
+      <WeaponShop />
     </div>
   );
 }
