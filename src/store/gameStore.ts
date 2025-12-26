@@ -54,7 +54,7 @@ interface GameStore {
   earnNicePoints: (amount: number) => void;
   spendNicePoints: (amount: number) => boolean;
   unlockWeapon: (weaponId: string) => void;
-  unlockSkin: (skinId: string) => void;
+  unlockSkin: (skinId: SkinId) => void;
   upgradePermanent: (upgradeId: string) => void;
   updateMetaProgress: (updater: (data: MetaProgressData) => MetaProgressData) => void;
 

@@ -102,6 +102,8 @@ export function BumbleCharacter({
   }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
 
   function customizeBumbleAppearance(joints: CharacterJoints, scale: number, _primaryColor: number, _accentColor: number) {
+    // Note: Bumble appearance is primarily defined by fur colors, which are applied via the fur options.
+    // Primary and accent colors are not used for additional customization on this character.
     // Make hips larger for the Bumble's round body
     if (joints.hips?.mesh) {
       joints.hips.mesh.scale.set(1.4, 1.2, 1.3);

@@ -102,6 +102,7 @@ export function ElfCharacter({
   }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
 
   function customizeElfAppearance(joints: CharacterJoints, scale: number, primaryColor: number, _accentColor: number) {
+    // Note: Elf primarily uses primaryColor for hair. Accent color not currently used but reserved for future details.
     if (!joints.head?.mesh) return;
 
     const headMesh = joints.head.mesh;

@@ -128,7 +128,7 @@
   justify-content: center;
   position: relative;
   border-bottom: 1px solid #333;
-  background: linear-gradient(135deg, currentColor, rgba(0, 0, 0, 0.3));
+  /* backgroundColor is set via inline style in component */
 }
 
 .lockIcon {
