@@ -150,6 +150,7 @@ describe('InputControls', () => {
     });
 
     it('should handle space key to start firing', () => {
+      useGameStore.setState({ state: 'PLAYING' });
       render(<InputControls />);
       
       window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
@@ -206,6 +207,7 @@ describe('InputControls', () => {
 
   describe('Fire Button', () => {
     it('should start firing on mouse down', () => {
+      useGameStore.setState({ state: 'PLAYING' });
       render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       
@@ -216,6 +218,7 @@ describe('InputControls', () => {
     });
 
     it('should stop firing on mouse up', () => {
+      useGameStore.setState({ state: 'PLAYING' });
       render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       
@@ -238,6 +241,7 @@ describe('InputControls', () => {
     });
 
     it('should start firing on touch start', () => {
+      useGameStore.setState({ state: 'PLAYING' });
       render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       
@@ -423,6 +427,7 @@ describe('InputControls', () => {
 
   describe('Integration Scenarios', () => {
     it('should handle simultaneous keyboard and touch input', () => {
+      useGameStore.setState({ state: 'PLAYING' });
       const { container } = render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       

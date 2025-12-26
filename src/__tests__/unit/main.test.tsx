@@ -28,7 +28,9 @@ describe('main.tsx', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(rootElement);
+    if (document.body.contains(rootElement)) {
+      document.body.removeChild(rootElement);
+    }
     vi.clearAllMocks();
     vi.resetModules();
   });
