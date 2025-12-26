@@ -4,11 +4,16 @@ import { AudioManager, type MusicTrack } from '@/audio/AudioManager';
 
 // Mock Tone.js
 vi.mock('tone', () => {
+  const mockParam = {
+    value: 0,
+    rampTo: vi.fn(),
+  };
+
   const synthMock = {
     toDestination: vi.fn().mockReturnThis(),
     triggerAttackRelease: vi.fn(),
     dispose: vi.fn(),
-    volume: { value: 0 },
+    volume: mockParam,
   };
 
   const MockSynth = vi.fn(() => synthMock);
@@ -20,11 +25,11 @@ vi.mock('tone', () => {
     start: vi.fn().mockResolvedValue(undefined),
     now: vi.fn().mockReturnValue(0),
     gainToDb: vi.fn().mockReturnValue(0),
-    getDestination: vi.fn().mockReturnValue({ volume: { value: 0 } }),
+    getDestination: vi.fn().mockReturnValue({ volume: mockParam }),
     getTransport: vi.fn().mockReturnValue({
       start: vi.fn(),
       stop: vi.fn(),
-      bpm: { value: 120 },
+      bpm: mockParam,
     }),
     Synth: MockSynth,
     PolySynth: MockPolySynth,

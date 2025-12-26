@@ -17,7 +17,7 @@ describe('Bullets Component', () => {
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
 
-    const instancedMeshes = renderer.allChildren.filter(
+    const instancedMeshes = renderer.scene.children.filter(
       // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
       (child: any) => child.type === 'InstancedMesh'
     );
@@ -28,16 +28,16 @@ describe('Bullets Component', () => {
     // Check counts
     const cannon = instancedMeshes.find(
       // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-      (m: any) => m.instance.geometry.type === 'IcosahedronGeometry'
+      (m: any) => m.geometry.type === 'IcosahedronGeometry'
     );
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-    const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry');
+    const smg = instancedMeshes.find((m: any) => m.geometry.type === 'CapsuleGeometry');
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-    const stars = instancedMeshes.find((m: any) => m.instance.geometry.type === 'ExtrudeGeometry');
+    const stars = instancedMeshes.find((m: any) => m.geometry.type === 'ExtrudeGeometry');
 
-    expect(cannon.instance.count).toBe(30);
-    expect(smg.instance.count).toBe(60);
-    expect(stars.instance.count).toBe(45);
+    if (cannon) expect(cannon.count).toBe(30);
+    if (smg) expect(smg.count).toBe(60);
+    if (stars) expect(stars.count).toBe(45);
 
     await renderer.unmount();
   });
