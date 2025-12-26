@@ -3,8 +3,8 @@
  * Tests bullet rendering, physics, collision detection, and lifecycle
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as THREE from 'three';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Bullets } from '@/game/Bullets';
 import { useGameStore } from '@/store/gameStore';
 
@@ -122,9 +122,9 @@ describe('Bullets Component', () => {
       expect(useGameStore.getState().bullets).toHaveLength(1);
 
       // Simulate time passing by updating life
-      useGameStore.getState().updateBullets((bullets) =>
-        bullets.map((b) => ({ ...b, life: b.life - 0.2 }))
-      );
+      useGameStore
+        .getState()
+        .updateBullets((bullets) => bullets.map((b) => ({ ...b, life: b.life - 0.2 })));
 
       // Bullet with negative life should be marked for removal
       const updatedBullets = useGameStore.getState().bullets;
@@ -283,11 +283,7 @@ describe('Bullets Component', () => {
           id: `perf-bullet-${i}`,
           mesh: new THREE.Object3D(),
           velocity: new THREE.Vector3(),
-          direction: new THREE.Vector3(
-            Math.random() - 0.5,
-            0,
-            Math.random() - 0.5
-          ).normalize(),
+          direction: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
           speed: 20 + Math.random() * 10,
           damage: 10,
           life: 5,
@@ -323,9 +319,9 @@ describe('Bullets Component', () => {
       const originalBullet = originalBullets[0];
 
       // Update bullets
-      useGameStore.getState().updateBullets((bullets) =>
-        bullets.map((b) => ({ ...b, life: b.life - 1 }))
-      );
+      useGameStore
+        .getState()
+        .updateBullets((bullets) => bullets.map((b) => ({ ...b, life: b.life - 1 })));
 
       const updatedBullets = useGameStore.getState().bullets;
 

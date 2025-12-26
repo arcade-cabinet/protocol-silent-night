@@ -25,15 +25,27 @@ export function PlayerController() {
   const upAxisRef = useRef(new THREE.Vector3(0, 1, 0));
   const firePosRef = useRef(new THREE.Vector3());
 
-  const { playerClass, currentWeapon, input, state, setPlayerPosition, setPlayerRotation, addBullet } =
-    useGameStore();
+  const {
+    playerClass,
+    currentWeapon,
+    input,
+    state,
+    setPlayerPosition,
+    setPlayerRotation,
+    addBullet,
+  } = useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;
 
   // Create bullet with initial position
   const fireBullet = useCallback(
-    (spawnPosition: THREE.Vector3, direction: THREE.Vector3, baseDamage: number, weaponType: WeaponType) => {
+    (
+      spawnPosition: THREE.Vector3,
+      direction: THREE.Vector3,
+      baseDamage: number,
+      weaponType: WeaponType
+    ) => {
       const id = `bullet-${bulletIdCounter++}`;
 
       // Create mesh-like object with position for tracking
@@ -45,7 +57,7 @@ export function PlayerController() {
 
       // Get weapon configuration
       const weaponConfig = WEAPONS[weaponType];
-      
+
       // Use weapon config or fallback to base damage
       const damage = weaponConfig.damage || baseDamage;
       const bulletSpeed = weaponConfig.speed;
@@ -135,7 +147,7 @@ export function PlayerController() {
       const now = Date.now() / 1000;
       const weaponConfig = WEAPONS[currentWeapon];
       const fireRate = weaponConfig.rof;
-      
+
       if (now - lastFireTime.current >= fireRate) {
         lastFireTime.current = now;
 

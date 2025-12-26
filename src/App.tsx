@@ -16,6 +16,7 @@ import {
   MessageOverlay,
   MissionBriefing,
   StartScreen,
+  WeaponHUD,
   WeaponShop,
 } from '@/ui';
 
@@ -30,6 +31,7 @@ export default function App() {
       <BossHUD />
       <MessageOverlay />
       <InputControls />
+      <WeaponHUD />
 
       {/* Effects */}
       <DamageFlash />

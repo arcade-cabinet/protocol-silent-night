@@ -9,4 +9,5 @@ export { LoadingScreen } from './LoadingScreen';
 export { MessageOverlay } from './MessageOverlay';
 export { MissionBriefing } from './MissionBriefing';
 export { StartScreen } from './StartScreen';
+export { WeaponHUD } from './WeaponHUD';
 export { WeaponShop } from './WeaponShop';

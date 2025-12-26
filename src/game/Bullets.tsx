@@ -148,8 +148,7 @@ export function Bullets() {
             if (enemyPos) {
               const dist = pos.distanceTo(enemyPos);
               // Collision radius varies by bullet type
-              const hitRadius =
-                bullet.type === 'cannon' ? 1.8 : bullet.type === 'star' ? 1.6 : 1.4;
+              const hitRadius = bullet.type === 'cannon' ? 1.8 : bullet.type === 'star' ? 1.6 : 1.4;
               if (dist < hitRadius) {
                 if (enemy.type === 'boss' && bossActive) {
                   damageBoss(bullet.damage);

@@ -477,12 +477,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Play weapon-specific sound and haptic
     const weaponType = bullet.type || 'cannon';
-    
+
     // Map weapon types to audio categories
     if (weaponType === 'smg' || weaponType === 'light_string') {
       AudioManager.playSFX('weapon_smg');
       triggerHaptic(HapticPatterns.FIRE_LIGHT);
-    } else if (weaponType === 'star' || weaponType === 'jingle_bell' || weaponType === 'candy_cane' || weaponType === 'quantum_gift') {
+    } else if (
+      weaponType === 'star' ||
+      weaponType === 'jingle_bell' ||
+      weaponType === 'candy_cane' ||
+      weaponType === 'quantum_gift'
+    ) {
       AudioManager.playSFX('weapon_stars');
       triggerHaptic(HapticPatterns.FIRE_MEDIUM);
     } else {
