@@ -314,14 +314,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newSessionNP = sessionNicePoints + npGain;
     get().earnNicePoints(npGain);
 
+    // Get updated metaProgress after earnNicePoints
+    const updatedMeta = get().metaProgress;
+    
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
       sessionNicePoints: newSessionNP,
       metaProgress: {
-        ...metaProgress,
-        totalKills: metaProgress.totalKills + 1,
+        ...updatedMeta,
+        totalKills: updatedMeta.totalKills + 1,
       },
     });
 
@@ -586,7 +589,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   damageBoss: (amount) => {
-    const { bossHp, metaProgress, sessionNicePoints } = get();
+    const { bossHp, sessionNicePoints } = get();
     const newHp = Math.max(0, bossHp - amount);
     set({ bossHp: newHp, screenShake: 0.3 });
 
@@ -597,21 +600,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Boss defeated: +500 Nice Points as per design spec
       const bossNP = 500;
       get().earnNicePoints(bossNP);
+      
+      // Get updated metaProgress after earnNicePoints
+      const updatedMeta = get().metaProgress;
 
-      const updatedMeta = {
-        ...metaProgress,
-        bossesDefeated: metaProgress.bossesDefeated + 1,
-        runsCompleted: metaProgress.runsCompleted + 1,
+      const finalMeta = {
+        ...updatedMeta,
+        bossesDefeated: updatedMeta.bossesDefeated + 1,
+        runsCompleted: updatedMeta.runsCompleted + 1,
       };
       set({
         state: 'WIN',
         bossActive: false,
         stats: { ...get().stats, bossDefeated: true },
-        metaProgress: updatedMeta,
+        metaProgress: finalMeta,
         sessionNicePoints: sessionNicePoints + bossNP,
       });
       get().updateHighScore();
-      saveMetaProgress(updatedMeta);
+      saveMetaProgress(finalMeta);
 
       // Victory audio
       AudioManager.playSFX('boss_defeated');
