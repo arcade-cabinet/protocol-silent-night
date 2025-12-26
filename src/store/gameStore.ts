@@ -102,6 +102,9 @@ interface GameStore {
   killStreak: number;
   lastKillTime: number;
 
+  // Session Nice Points (earned this run, not yet persisted)
+  sessionNicePoints: number;
+
   // Reset
   reset: () => void;
 }
@@ -202,6 +205,7 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
+  sessionNicePoints: 0,
 };
 
 // Extend Window interface for e2e testing
@@ -276,7 +280,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
 
   addKill: (points) => {
-    const { stats, state, enemies, lastKillTime, killStreak, metaProgress } = get();
+    const { stats, state, enemies, lastKillTime, killStreak, metaProgress, sessionNicePoints } =
+      get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
@@ -292,15 +297,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
-    // Nice Points calculation: matches points or uses a specific formula
-    // For now, let's say 1 Nice Point per 10 points scored
-    const npGain = Math.floor((points + streakBonus) / 10);
+    // Nice Points calculation per design spec:
+    // - Base: +10 NP per kill
+    // - Kill Streak Bonus: 2x: +5, 3x: +10, 5x: +25, 7+: +50
+    let npGain = 10; // Base per kill
+    if (newStreak >= 7) {
+      npGain += 50;
+    } else if (newStreak >= 5) {
+      npGain += 25;
+    } else if (newStreak >= 3) {
+      npGain += 10;
+    } else if (newStreak >= 2) {
+      npGain += 5;
+    }
+
+    const newSessionNP = sessionNicePoints + npGain;
     get().earnNicePoints(npGain);
 
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
+      sessionNicePoints: newSessionNP,
       metaProgress: {
         ...metaProgress,
         totalKills: metaProgress.totalKills + 1,
@@ -568,7 +586,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   damageBoss: (amount) => {
-    const { bossHp, metaProgress } = get();
+    const { bossHp, metaProgress, sessionNicePoints } = get();
     const newHp = Math.max(0, bossHp - amount);
     set({ bossHp: newHp, screenShake: 0.3 });
 
@@ -576,6 +594,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     AudioManager.playSFX('boss_hit');
 
     if (newHp <= 0) {
+      // Boss defeated: +500 Nice Points as per design spec
+      const bossNP = 500;
+      get().earnNicePoints(bossNP);
+
       const updatedMeta = {
         ...metaProgress,
         bossesDefeated: metaProgress.bossesDefeated + 1,
@@ -586,6 +608,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         bossActive: false,
         stats: { ...get().stats, bossDefeated: true },
         metaProgress: updatedMeta,
+        sessionNicePoints: sessionNicePoints + bossNP,
       });
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
@@ -620,6 +643,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       highScore: get().highScore, // Preserve high score
       metaProgress: get().metaProgress, // Preserve meta progress
       playerPosition: new THREE.Vector3(0, 0, 0),
+      sessionNicePoints: 0, // Reset session NP for new run
     }),
 }));
 

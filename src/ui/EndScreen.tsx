@@ -7,7 +7,7 @@ import { useGameStore } from '@/store/gameStore';
 import styles from './EndScreen.module.css';
 
 export function EndScreen() {
-  const { state, stats, highScore, reset } = useGameStore();
+  const { state, stats, highScore, reset, sessionNicePoints, metaProgress } = useGameStore();
 
   if (state !== 'WIN' && state !== 'GAME_OVER') return null;
 
@@ -45,6 +45,21 @@ export function EndScreen() {
         <div className={styles.statRow}>
           <span className={styles.statLabel}>BOSS DEFEATED</span>
           <span className={styles.statValue}>{stats.bossDefeated ? 'YES' : 'NO'}</span>
+        </div>
+        <div
+          className={styles.statRow}
+          style={{ marginTop: '1rem', borderTop: '1px solid #333', paddingTop: '1rem' }}
+        >
+          <span className={styles.statLabel}>NICE POINTS EARNED</span>
+          <span className={styles.statValue} style={{ color: '#00ffcc' }}>
+            +{sessionNicePoints}
+          </span>
+        </div>
+        <div className={styles.statRow}>
+          <span className={styles.statLabel}>TOTAL NICE POINTS</span>
+          <span className={styles.statValue} style={{ color: '#00ffcc' }}>
+            {metaProgress.nicePoints}
+          </span>
         </div>
       </div>
 

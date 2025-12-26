@@ -39,10 +39,36 @@
 
 .subtitle {
   color: #888;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   letter-spacing: 2px;
   text-transform: uppercase;
   font-size: 0.8rem;
+}
+
+.nicePointsDisplay {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  padding: 10px 30px;
+  background: rgba(0, 255, 200, 0.05);
+  border: 1px solid #00ffcc;
+  border-radius: 5px;
+  box-shadow: 0 0 20px rgba(0, 255, 200, 0.2);
+}
+
+.nicePointsLabel {
+  color: #888;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.nicePointsValue {
+  color: #00ffcc;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00ffcc;
 }
 
 .classContainer {

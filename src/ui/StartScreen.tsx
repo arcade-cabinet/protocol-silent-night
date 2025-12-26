@@ -10,7 +10,7 @@ import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
-  const { state, selectClass, highScore } = useGameStore();
+  const { state, selectClass, highScore, metaProgress } = useGameStore();
   const audioInitializedRef = useRef(false);
 
   // Initialize audio when screen is shown (on first interaction)
@@ -62,6 +62,12 @@ export function StartScreen() {
         Protocol: <span className={styles.accent}>Silent Night</span>
       </h1>
       <h3 className={styles.subtitle}>Operator Edition v3.0</h3>
+
+      {/* Nice Points Display */}
+      <div className={styles.nicePointsDisplay}>
+        <span className={styles.nicePointsLabel}>NICE POINTS:</span>
+        <span className={styles.nicePointsValue}>{metaProgress.nicePoints}</span>
+      </div>
 
       <div className={styles.classContainer}>
         {/* Santa Card */}
