@@ -7,24 +7,30 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import type { PlayerClassType } from '@/types';
+import type { ChristmasObstacle, PlayerClassType } from '@/types';
 import { getBulletTypeFromWeapon } from '@/types';
-import { terrainObstacles } from '@/game/Terrain';
 import { BumbleCharacter } from './BumbleCharacter';
 import { ElfCharacter } from './ElfCharacter';
 import { SantaCharacter } from './SantaCharacter';
 
 let bulletIdCounter = 0;
 
+const PLAYER_COLLISION_RADIUS = 0.7;
+
 // Collision detection helper using simple circle-to-circle check
-function checkCollision(position: THREE.Vector3, radius: number = 0.7): boolean {
-  for (const obstacle of terrainObstacles) {
+function checkCollision(
+  position: THREE.Vector3,
+  obstacles: ChristmasObstacle[],
+  radius: number = PLAYER_COLLISION_RADIUS
+): boolean {
+  for (const obstacle of obstacles) {
     const dx = position.x - obstacle.position.x;
     const dz = position.z - obstacle.position.z;
-    const distance = Math.sqrt(dx * dx + dz * dz);
+    const distanceSq = dx * dx + dz * dz;
+    const combinedRadius = radius + obstacle.radius;
 
-    // Check if player (radius 0.7) would collide with obstacle
-    if (distance < radius + obstacle.radius) {
+    // Check if player would collide with obstacle (using squared distances for performance)
+    if (distanceSq < combinedRadius * combinedRadius) {
       return true; // Collision detected
     }
   }
@@ -41,8 +47,21 @@ export function PlayerController() {
   const upAxisRef = useRef(new THREE.Vector3(0, 1, 0));
   const firePosRef = useRef(new THREE.Vector3());
 
-  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet } =
-    useGameStore();
+  // Reuse vectors for performance in game loop
+  const newPositionRef = useRef(new THREE.Vector3());
+  const slideXRef = useRef(new THREE.Vector3());
+  const slideZRef = useRef(new THREE.Vector3());
+  const moveVectorRef = useRef(new THREE.Vector3());
+
+  const {
+    playerClass,
+    input,
+    state,
+    setPlayerPosition,
+    setPlayerRotation,
+    addBullet,
+    obstacles,
+  } = useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;
@@ -119,31 +138,39 @@ export function PlayerController() {
       moveDirRef.current.set(movement.x, 0, movement.y).normalize();
 
       // Calculate potential new position
-      const newPosition = positionRef.current.clone();
-      newPosition.add(moveDirRef.current.clone().multiplyScalar(speed));
+      moveVectorRef.current.copy(moveDirRef.current).multiplyScalar(speed);
+      newPositionRef.current.copy(positionRef.current).add(moveVectorRef.current);
 
       // Clamp to world bounds
       const worldBound = 35;
-      newPosition.x = THREE.MathUtils.clamp(newPosition.x, -worldBound, worldBound);
-      newPosition.z = THREE.MathUtils.clamp(newPosition.z, -worldBound, worldBound);
+      newPositionRef.current.x = THREE.MathUtils.clamp(
+        newPositionRef.current.x,
+        -worldBound,
+        worldBound
+      );
+      newPositionRef.current.z = THREE.MathUtils.clamp(
+        newPositionRef.current.z,
+        -worldBound,
+        worldBound
+      );
 
       // Check collision before moving
-      if (!checkCollision(newPosition)) {
+      if (!checkCollision(newPositionRef.current, obstacles)) {
         // No collision - apply movement
-        positionRef.current.copy(newPosition);
+        positionRef.current.copy(newPositionRef.current);
       } else {
         // Collision detected - try sliding along obstacles
         // Try X-axis only movement
-        const slideX = positionRef.current.clone();
-        slideX.x = newPosition.x;
-        if (!checkCollision(slideX)) {
-          positionRef.current.copy(slideX);
+        slideXRef.current.copy(positionRef.current);
+        slideXRef.current.x = newPositionRef.current.x;
+        if (!checkCollision(slideXRef.current, obstacles)) {
+          positionRef.current.copy(slideXRef.current);
         } else {
           // Try Z-axis only movement
-          const slideZ = positionRef.current.clone();
-          slideZ.z = newPosition.z;
-          if (!checkCollision(slideZ)) {
-            positionRef.current.copy(slideZ);
+          slideZRef.current.copy(positionRef.current);
+          slideZRef.current.z = newPositionRef.current.z;
+          if (!checkCollision(slideZRef.current, obstacles)) {
+            positionRef.current.copy(slideZRef.current);
           }
           // If both fail, don't move (stuck against obstacle)
         }

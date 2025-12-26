@@ -8,24 +8,12 @@ import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
-import { CONFIG } from '@/types';
-
-// Christmas object types with distinct appearances
-type ChristmasObjectType = 'present' | 'tree' | 'candy_cane' | 'pillar';
-
-interface ChristmasObstacle {
-  position: THREE.Vector3;
-  type: ChristmasObjectType;
-  radius: number; // collision radius
-  height: number;
-  color: THREE.Color;
-}
-
-// Export obstacles for collision detection
-export const terrainObstacles: ChristmasObstacle[] = [];
+import { useGameStore } from '@/store/gameStore';
+import { CONFIG, type ChristmasObstacle, type ChristmasObjectType } from '@/types';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const setObstacles = useGameStore((state) => state.setObstacles);
 
   // Create geometry and material
   const geometry = useMemo(() => new THREE.BoxGeometry(1.8, 4, 1.8), []);
@@ -52,6 +40,9 @@ export function Terrain() {
 
     for (let x = -size / 2; x < size / 2; x++) {
       for (let z = -size / 2; z < size / 2; z++) {
+        // Reset scale and position for each instance
+        dummy.scale.set(1, 1, 1);
+        
         // Use Strata's noise3D and fbm for procedural height
         const baseNoise = noise3D(x * 0.1, 0, z * 0.1) * 2;
         const detailNoise = fbm(x * 0.05, 0, z * 0.05, 3) * 1.5;
@@ -65,12 +56,12 @@ export function Terrain() {
         const objectTypeNoise = noise3D(x * 0.3, z * 0.3, 42);
         const isObstacle = noise3D(x * 0.5, z * 0.5, 0);
 
-        let obstacleType: ChristmasObjectType | null = null;
-        let obstacleColor = new THREE.Color(0x4488ff);
-        let obstacleHeight = 4;
-        let obstacleRadius = 0.9; // collision radius
-
         if (isObstacle > 0.92) {
+          let obstacleType: ChristmasObjectType;
+          let obstacleColor: THREE.Color;
+          let obstacleHeight: number;
+          let obstacleRadius = 0.9; // collision radius
+
           // Create festive obstacles
           if (objectTypeNoise > 0.7) {
             obstacleType = 'present';
@@ -123,14 +114,14 @@ export function Terrain() {
       }
     }
 
-    // Update global obstacles array for collision detection
-    terrainObstacles.length = 0;
-    terrainObstacles.push(...obstacleList);
-
     return { matrices, count: instanceCount, obstacles: obstacleList };
   }, []);
 
-  // Apply matrices to instanced mesh
+  // Sync obstacles to store and apply matrices to instanced mesh
+  useEffect(() => {
+    setObstacles(obstacles);
+  }, [obstacles, setObstacles]);
+
   useEffect(() => {
     if (meshRef.current) {
       for (let i = 0; i < matrices.length; i++) {
@@ -158,8 +149,8 @@ export function Terrain() {
       />
 
       {/* Christmas-themed obstacles (rendered as individual meshes for better visual variety) */}
-      {obstacles.map((obstacle, index) => (
-        <ChristmasObstacle key={index} obstacle={obstacle} />
+      {obstacles.map((obstacle) => (
+        <ChristmasObstacle key={`${obstacle.position.x}-${obstacle.position.z}`} obstacle={obstacle} />
       ))}
 
       {/* Grid Floor Helper - darker for cyberpunk vibe */}

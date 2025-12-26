@@ -28,6 +28,7 @@ export type MusicTrack = 'menu' | 'combat' | 'boss' | 'victory' | 'defeat';
 
 class AudioManagerClass {
   private initialized = false;
+  private initializing = false;
   private musicEnabled = true;
   private sfxEnabled = true;
   private masterVolume = 0.7;
@@ -44,8 +45,9 @@ class AudioManagerClass {
    * Initialize audio system. Must be called after user interaction.
    */
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized || this.initializing) return;
 
+    this.initializing = true;
     try {
       // Start Tone.js audio context
       await Tone.start();
@@ -60,6 +62,8 @@ class AudioManagerClass {
       this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize audio:', error);
+    } finally {
+      this.initializing = false;
     }
   }
 

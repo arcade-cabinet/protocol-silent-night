@@ -148,6 +148,22 @@ export interface EnemyData extends EntityData {
 }
 
 /**
+ * Christmas object types with distinct appearances
+ */
+export type ChristmasObjectType = 'present' | 'tree' | 'candy_cane' | 'pillar';
+
+/**
+ * Data for Christmas-themed terrain obstacles
+ */
+export interface ChristmasObstacle {
+  position: THREE.Vector3;
+  type: ChristmasObjectType;
+  radius: number; // collision radius
+  height: number;
+  color: THREE.Color;
+}
+
+/**
  * Player input state from keyboard/touch
  * @interface InputState
  */

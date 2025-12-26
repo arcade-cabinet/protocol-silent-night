@@ -11,35 +11,21 @@ describe('Mission Briefing Flow', () => {
     useGameStore.getState().reset();
   });
 
-  it('should transition from MENU to BRIEFING when selecting Santa', () => {
-    const store = useGameStore.getState();
+  it.each(['santa', 'elf', 'bumble'] as const)(
+    'should transition from MENU to BRIEFING when selecting %s',
+    (character) => {
+      const store = useGameStore.getState();
 
-    // Initially in MENU state
-    expect(store.state).toBe('MENU');
+      // Initially in MENU state
+      expect(store.state).toBe('MENU');
 
-    // Select Santa
-    store.selectClass('santa');
+      // Select character
+      store.selectClass(character);
 
-    // Should now be in BRIEFING state
-    const newState = useGameStore.getState().state;
-    expect(newState).toBe('BRIEFING');
-  });
-
-  it('should transition from MENU to BRIEFING when selecting Elf', () => {
-    const store = useGameStore.getState();
-
-    expect(store.state).toBe('MENU');
-    store.selectClass('elf');
-    expect(useGameStore.getState().state).toBe('BRIEFING');
-  });
-
-  it('should transition from MENU to BRIEFING when selecting Bumble', () => {
-    const store = useGameStore.getState();
-
-    expect(store.state).toBe('MENU');
-    store.selectClass('bumble');
-    expect(useGameStore.getState().state).toBe('BRIEFING');
-  });
+      // Should now be in BRIEFING state
+      expect(useGameStore.getState().state).toBe('BRIEFING');
+    }
+  );
 
   it('should set player class data when transitioning to BRIEFING', () => {
     const store = useGameStore.getState();

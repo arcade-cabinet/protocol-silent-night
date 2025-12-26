@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { AudioManager } from '@/audio/AudioManager';
 import type {
   BulletData,
+  ChristmasObstacle,
   EnemyData,
   GameState,
   GameStats,
@@ -69,6 +70,7 @@ interface GameStore {
   // Entities
   bullets: BulletData[];
   enemies: EnemyData[];
+  obstacles: ChristmasObstacle[];
   addBullet: (bullet: BulletData) => void;
   removeBullet: (id: string) => void;
   addEnemy: (enemy: EnemyData) => void;
@@ -76,6 +78,7 @@ interface GameStore {
   damageEnemy: (id: string, damage: number) => boolean; // returns true if killed
   updateBullets: (updater: (bullets: BulletData[]) => BulletData[]) => void;
   updateEnemies: (updater: (enemies: EnemyData[]) => EnemyData[]) => void;
+  setObstacles: (obstacles: ChristmasObstacle[]) => void;
 
   // Boss
   bossHp: number;
@@ -190,6 +193,7 @@ const initialState = {
   },
   bullets: [],
   enemies: [],
+  obstacles: [],
   bossHp: 1000,
   bossMaxHp: 1000,
   bossActive: false,
@@ -519,6 +523,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => ({
       enemies: updater(state.enemies),
     })),
+
+  setObstacles: (obstacles) => set({ obstacles }),
 
   spawnBoss: () => {
     const { enemies, addEnemy } = get();
