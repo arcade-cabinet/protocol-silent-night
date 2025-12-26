@@ -18,11 +18,13 @@ describe('Terrain Component', () => {
   });
 
   it('should render correctly and match snapshot', async () => {
-    const renderer = await ReactTestRenderer.create(<Terrain />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Terrain />)) as any;
     expect(renderer.scene).toBeDefined();
 
     // Test count: WORLD_SIZE is 80, so 80*80 = 6400 instances
-    const instancedMesh = renderer.allChildren.find((child) => child.type === 'InstancedMesh');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const instancedMesh = renderer.allChildren.find((child: any) => child.type === 'InstancedMesh');
     expect(instancedMesh).toBeDefined();
     expect(instancedMesh.instance.count).toBe(6400);
 
@@ -37,7 +39,8 @@ describe('Terrain Component', () => {
       return 0.5;
     });
 
-    const renderer = await ReactTestRenderer.create(<Terrain />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Terrain />)) as any;
 
     const state = useGameStore.getState();
     expect(state.obstacles.length).toBeGreaterThan(0);
@@ -45,7 +48,8 @@ describe('Terrain Component', () => {
     // Check if ChristmasObstacleMesh components are rendered
     // They are individual meshes
     const obstacles = renderer.allChildren.filter(
-      (child) =>
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+      (child: any) =>
         child.instance.type === 'Mesh' && child.instance.material.type === 'MeshStandardMaterial'
     );
     expect(obstacles.length).toBeGreaterThan(0);
@@ -54,11 +58,13 @@ describe('Terrain Component', () => {
   });
 
   it('should cleanup resources on unmount', async () => {
-    const renderer = await ReactTestRenderer.create(<Terrain />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Terrain />)) as any;
 
     // Spy on dispose methods of geometries and materials
     const terrainMesh = renderer.allChildren.find(
-      (child) => child.type === 'InstancedMesh'
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+      (child: any) => child.type === 'InstancedMesh'
     ).instance;
 
     const disposeGeoSpy = vi.spyOn(terrainMesh.geometry, 'dispose');

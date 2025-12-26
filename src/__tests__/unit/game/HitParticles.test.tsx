@@ -15,7 +15,8 @@ describe('HitParticles', () => {
   });
 
   it('should render and handle useFrame', async () => {
-    const renderer = await ReactTestRenderer.create(<HitParticles />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<HitParticles />)) as any;
     expect(renderer.scene).toBeDefined();
 
     // Trigger kill to spawn particles

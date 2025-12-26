@@ -15,7 +15,8 @@ describe('CameraController Component', () => {
   });
 
   it('should follow player position', async () => {
-    const renderer = await ReactTestRenderer.create(<CameraController />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<CameraController />)) as any;
 
     useGameStore.setState({
       playerPosition: new THREE.Vector3(10, 0, 10),

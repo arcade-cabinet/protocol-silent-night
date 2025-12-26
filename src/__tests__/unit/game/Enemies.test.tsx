@@ -33,7 +33,8 @@ describe('Enemies Component', () => {
       enemies: [enemy],
     });
 
-    const renderer = await ReactTestRenderer.create(<Enemies />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
     // Advance frames to move enemy
     await renderer.advanceFrames(5, 0.1);
@@ -65,7 +66,8 @@ describe('Enemies Component', () => {
       playerHp: 100,
     });
 
-    const renderer = await ReactTestRenderer.create(<Enemies />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
     await renderer.advanceFrames(1, 0.1);
 

@@ -14,17 +14,26 @@ describe('Bullets Component', () => {
   });
 
   it('should render instanced meshes for weapon types', async () => {
-    const renderer = await ReactTestRenderer.create(<Bullets />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
 
-    const instancedMeshes = renderer.allChildren.filter((child) => child.type === 'InstancedMesh');
+    const instancedMeshes = renderer.allChildren.filter(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+      (child: any) => child.type === 'InstancedMesh'
+    );
 
     // 3 types: cannon, smg, stars
     expect(instancedMeshes.length).toBe(3);
 
     // Check counts
-    const cannon = instancedMeshes.find((m) => m.instance.geometry.type === 'IcosahedronGeometry');
-    const smg = instancedMeshes.find((m) => m.instance.geometry.type === 'CapsuleGeometry');
-    const stars = instancedMeshes.find((m) => m.instance.geometry.type === 'ExtrudeGeometry');
+    const cannon = instancedMeshes.find(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+      (m: any) => m.instance.geometry.type === 'IcosahedronGeometry'
+    );
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const stars = instancedMeshes.find((m: any) => m.instance.geometry.type === 'ExtrudeGeometry');
 
     expect(cannon.instance.count).toBe(30);
     expect(smg.instance.count).toBe(60);
@@ -69,7 +78,8 @@ describe('Bullets Component', () => {
       enemies: [enemy],
     });
 
-    const renderer = await ReactTestRenderer.create(<Bullets />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
 
     // Advance frame to trigger movement and collision
     // 0.1s * 10 speed = 1 unit. We need 0.5s to hit enemy at 5 units
@@ -85,10 +95,13 @@ describe('Bullets Component', () => {
   });
 
   it('should cleanup resources', async () => {
-    const renderer = await ReactTestRenderer.create(<Bullets />);
-    const meshes = renderer.allChildren.filter((c) => c.type === 'InstancedMesh');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const meshes = renderer.allChildren.filter((c: any) => c.type === 'InstancedMesh');
 
-    const spies = meshes.map((m) => vi.spyOn(m.instance.geometry, 'dispose'));
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const spies = meshes.map((m: any) => vi.spyOn(m.instance.geometry, 'dispose'));
 
     await renderer.unmount();
     for (const spy of spies) {
