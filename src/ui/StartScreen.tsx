@@ -5,6 +5,7 @@
 
 import { useGameStore } from '@/store/gameStore';
 import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
+import { AudioManager } from '@/audio/AudioManager';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
@@ -12,7 +13,9 @@ export function StartScreen() {
 
   if (state !== 'MENU') return null;
 
-  const handleSelectClass = (type: PlayerClassType) => {
+  const handleSelectClass = async (type: PlayerClassType) => {
+    // Initialize audio on first user interaction
+    await AudioManager.initialize();
     selectClass(type);
   };
 

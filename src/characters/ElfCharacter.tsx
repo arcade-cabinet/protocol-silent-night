@@ -64,6 +64,7 @@ export function ElfCharacter({
         skinColor: 0xffe4c4, // Skin tone
         furOptions,
         scale: config.scale,
+        includeMuzzle: false, // New option in Strata
       });
 
       characterRef.current = character;
@@ -72,7 +73,7 @@ export function ElfCharacter({
       // Customize for Elf appearance
       customizeElfAppearance(character.joints, config.scale);
 
-      // Cache fur groups for efficient updates (avoid traversing every frame)
+      // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
       for (const joint of Object.values(character.joints)) {
         if (joint?.mesh) {
@@ -99,12 +100,6 @@ export function ElfCharacter({
     if (!joints.head?.mesh) return;
 
     const headMesh = joints.head.mesh;
-
-    // Remove default animal features
-    const childrenToRemove = headMesh.children.filter((child) => child instanceof THREE.Mesh);
-    for (const child of childrenToRemove) {
-      headMesh.remove(child);
-    }
 
     // Pointed ears
     const earGeo = new THREE.ConeGeometry(0.04 * scale, 0.18 * scale, 4);
