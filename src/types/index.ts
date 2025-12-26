@@ -9,7 +9,14 @@ import type * as THREE from 'three';
  * Game state machine states
  * @description Represents the current phase of the game
  */
-export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' | 'GAME_OVER';
+export type GameState =
+  | 'MENU'
+  | 'BRIEFING'
+  | 'PHASE_1'
+  | 'PHASE_BOSS'
+  | 'WIN'
+  | 'GAME_OVER'
+  | 'LEVEL_UP';
 
 /**
  * Available player character classes
@@ -219,6 +226,67 @@ export interface RunProgressData {
 }
 
 /**
+ * Upgrade category types
+ */
+export type UpgradeCategory = 'offensive' | 'defensive' | 'utility' | 'christmas';
+
+/**
+ * Upgrade definition
+ * @interface Upgrade
+ */
+export interface Upgrade {
+  /** Unique identifier */
+  id: string;
+  /** Display name */
+  name: string;
+  /** Description of effect */
+  description: string;
+  /** Category for filtering */
+  category: UpgradeCategory;
+  /** Icon/emoji for display */
+  icon: string;
+  /** Maximum times this can be stacked */
+  maxStacks: number;
+  /** Effect function that modifies player stats */
+  apply: (currentStats: PlayerUpgradeStats) => PlayerUpgradeStats;
+}
+
+/**
+ * Player upgrade stats (modifiers applied from upgrades)
+ * @interface PlayerUpgradeStats
+ */
+export interface PlayerUpgradeStats {
+  /** Damage multiplier (1.0 = 100%) */
+  damageMultiplier: number;
+  /** Fire rate multiplier (higher = faster) */
+  fireRateMultiplier: number;
+  /** Movement speed multiplier */
+  speedMultiplier: number;
+  /** Max HP bonus (additive) */
+  maxHpBonus: number;
+  /** Projectile speed multiplier */
+  projectileSpeedMultiplier: number;
+  /** Projectile size multiplier */
+  projectileSizeMultiplier: number;
+  /** Life steal percentage (0-1) */
+  lifeSteal: number;
+  /** Damage reduction percentage (0-1) */
+  damageReduction: number;
+  /** Area of effect radius bonus */
+  aoeRadiusBonus: number;
+  /** Critical hit chance (0-1) */
+  critChance: number;
+  /** Critical damage multiplier */
+  critDamage: number;
+  /** XP gain multiplier */
+  xpMultiplier: number;
+  /** Piercing shots (bullets pass through enemies) */
+  piercingShots: number;
+  /** Christmas spirit meter (special ability) */
+  christmasSpiritCharge: number;
+}
+
+/**
  * Global game configuration constants
  */
 export const CONFIG = {
@@ -296,3 +364,6 @@ export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
     },
   },
 };
+
+// Export upgrade system
+export * from './upgrades';

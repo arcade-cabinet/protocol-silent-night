@@ -1,0 +1,221 @@
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1000px;
+  padding: 20px;
+}
+
+.title {
+  font-size: 3rem;
+  color: #fff;
+  text-shadow: 0 0 30px #00ffcc;
+  margin: 0;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.accent {
+  color: #ffd700;
+  text-shadow: 0 0 30px #ffd700;
+}
+
+.subtitle {
+  color: #00ffcc;
+  margin: 10px 0 40px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-size: 1rem;
+  text-shadow: 0 0 15px #00ffcc;
+}
+
+.upgradeContainer {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.upgradeCard {
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(10, 10, 10, 0.98));
+  border: 2px solid #333;
+  padding: 30px 25px;
+  width: 260px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%);
+  position: relative;
+  overflow: hidden;
+}
+
+.upgradeCard::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
+}
+
+.upgradeCard:hover::before {
+  left: 100%;
+}
+
+.upgradeCard:hover,
+.upgradeCard:focus {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(0, 255, 200, 0.2);
+  outline: none;
+}
+
+/* Category-specific colors */
+.upgradeCard.offensive {
+  border-color: #ff4444;
+}
+
+.upgradeCard.offensive:hover,
+.upgradeCard.offensive:focus {
+  border-color: #ff6666;
+  box-shadow: 0 15px 40px rgba(255, 68, 68, 0.3);
+}
+
+.upgradeCard.defensive {
+  border-color: #4444ff;
+}
+
+.upgradeCard.defensive:hover,
+.upgradeCard.defensive:focus {
+  border-color: #6666ff;
+  box-shadow: 0 15px 40px rgba(68, 68, 255, 0.3);
+}
+
+.upgradeCard.utility {
+  border-color: #44ff44;
+}
+
+.upgradeCard.utility:hover,
+.upgradeCard.utility:focus {
+  border-color: #66ff66;
+  box-shadow: 0 15px 40px rgba(68, 255, 68, 0.3);
+}
+
+.upgradeCard.christmas {
+  border-color: #ffd700;
+}
+
+.upgradeCard.christmas:hover,
+.upgradeCard.christmas:focus {
+  border-color: #ffed4e;
+  box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+}
+
+.icon {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.cardTitle {
+  font-size: 1.3rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+.cardCategory {
+  font-size: 0.7rem;
+  color: #888;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.offensive .cardCategory {
+  color: #ff6666;
+}
+
+.defensive .cardCategory {
+  color: #6666ff;
+}
+
+.utility .cardCategory {
+  color: #66ff66;
+}
+
+.christmas .cardCategory {
+  color: #ffd700;
+}
+
+.cardDescription {
+  color: #aaa;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+.instructions {
+  margin-top: 20px;
+  color: #666;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .upgradeContainer {
+    gap: 20px;
+  }
+
+  .upgradeCard {
+    width: 200px;
+    padding: 20px 15px;
+  }
+
+  .icon {
+    font-size: 3rem;
+  }
+
+  .cardTitle {
+    font-size: 1.1rem;
+  }
+}

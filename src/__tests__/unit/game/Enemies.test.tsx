@@ -3,8 +3,8 @@
  * Tests enemy spawning, AI behavior, rendering, and boss mechanics
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import * as THREE from 'three';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { Enemies } from '@/game/Enemies';
 import { useGameStore } from '@/store/gameStore';
 import { CONFIG } from '@/types';
@@ -109,7 +109,7 @@ describe('Enemies Component', () => {
       useGameStore.setState({
         playerPosition: playerPos,
         playerHp: 100,
-        state: 'PHASE_1'
+        state: 'PHASE_1',
       });
 
       const enemyMesh = new THREE.Object3D();
@@ -180,7 +180,7 @@ describe('Enemies Component', () => {
     it('should spawn boss after 10 kills', () => {
       useGameStore.setState({
         state: 'PHASE_1',
-        stats: { score: 0, kills: 0, bossDefeated: false }
+        stats: { score: 0, kills: 0, bossDefeated: false },
       });
 
       // Simulate 10 kills
@@ -200,9 +200,7 @@ describe('Enemies Component', () => {
       useGameStore.getState().spawnBoss();
       useGameStore.getState().spawnBoss();
 
-      const bossEnemies = useGameStore.getState().enemies.filter(
-        (e) => e.type === 'boss'
-      );
+      const bossEnemies = useGameStore.getState().enemies.filter((e) => e.type === 'boss');
 
       expect(bossEnemies).toHaveLength(1);
     });
@@ -239,7 +237,7 @@ describe('Enemies Component', () => {
       useGameStore.setState({
         bossActive: true,
         bossHp: 1000,
-        state: 'PHASE_BOSS'
+        state: 'PHASE_BOSS',
       });
 
       // Defeat boss
@@ -300,11 +298,7 @@ describe('Enemies Component', () => {
           pointValue: 10,
         };
 
-        enemy.mesh.position.set(
-          Math.random() * 50 - 25,
-          1,
-          Math.random() * 50 - 25
-        );
+        enemy.mesh.position.set(Math.random() * 50 - 25, 1, Math.random() * 50 - 25);
 
         useGameStore.getState().addEnemy(enemy);
       }

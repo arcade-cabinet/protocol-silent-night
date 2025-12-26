@@ -5,6 +5,7 @@ export { EndScreen } from './EndScreen';
 export { HUD } from './HUD';
 export { InputControls } from './InputControls';
 export { KillStreak } from './KillStreak';
+export { LevelUpScreen } from './LevelUpScreen';
 export { LoadingScreen } from './LoadingScreen';
 export { MessageOverlay } from './MessageOverlay';
 export { MissionBriefing } from './MissionBriefing';

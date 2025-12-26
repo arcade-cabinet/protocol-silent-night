@@ -10,9 +10,11 @@ import type {
   MetaProgressData,
   PlayerClassConfig,
   PlayerClassType,
+  PlayerUpgradeStats,
   RunProgressData,
+  Upgrade,
 } from '@/types';
-import { CONFIG, PLAYER_CLASSES } from '@/types';
+import { CONFIG, getInitialUpgradeStats, getRandomUpgrades, PLAYER_CLASSES } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // Persistence keys
@@ -56,6 +58,8 @@ interface GameStore {
 
   // Run-Progression (XP/Leveling)
   runProgress: RunProgressData;
+  upgradeStats: PlayerUpgradeStats;
+  levelUpChoices: Upgrade[];
   gainXP: (amount: number) => void;
   levelUp: () => void;
   selectLevelUpgrade: (upgradeId: string) => void;
@@ -182,6 +186,8 @@ const initialState = {
     selectedUpgrades: [],
     weaponEvolutions: [],
   },
+  upgradeStats: getInitialUpgradeStats(),
+  levelUpChoices: [],
   input: {
     movement: { x: 0, y: 0 },
     isFiring: false,
@@ -227,6 +233,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         selectedUpgrades: [],
         weaponEvolutions: [],
       },
+      upgradeStats: getInitialUpgradeStats(),
+      levelUpChoices: [],
     });
 
     // Play UI select sound
@@ -285,7 +293,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newScore = stats.score + points + streakBonus;
 
     // XP calculation: 10 XP per kill + streak bonus
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+    const baseXP = 10;
+    const { xpMultiplier } = get().upgradeStats;
+    const xpGain = Math.floor((baseXP + (newStreak > 1 ? (newStreak - 1) * 5 : 0)) * xpMultiplier);
     get().gainXP(xpGain);
 
     // Nice Points calculation: matches points or uses a specific formula
@@ -395,7 +405,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Run-Progression Actions
   gainXP: (amount) => {
-    const { runProgress } = get();
+    const { runProgress, state } = get();
+
+    // Don't gain XP if in level-up screen or game over
+    if (state === 'LEVEL_UP' || state === 'GAME_OVER' || state === 'WIN') return;
+
     const newXP = runProgress.xp + amount;
     // Simple level up curve: 100 * level
     const xpToNextLevel = runProgress.level * 100;
@@ -420,19 +434,54 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   levelUp: () => {
-    // This will eventually trigger the LevelUp UI
+    const { runProgress, state } = get();
+
+    // Don't show level up if not in active gameplay
+    if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
+
+    // Generate 3 random upgrades
+    const choices = getRandomUpgrades(runProgress.selectedUpgrades, 3);
+
+    // Pause game and show level up screen
+    set({
+      state: 'LEVEL_UP',
+      levelUpChoices: choices,
+    });
+
     AudioManager.playSFX('ui_select');
-    // TODO: set state to SHOW_LEVEL_UP if we implement a separate state for it
   },
 
   selectLevelUpgrade: (upgradeId) => {
-    const { runProgress } = get();
+    const { runProgress, upgradeStats, levelUpChoices, state } = get();
+
+    // Find the selected upgrade
+    const selectedUpgrade = levelUpChoices.find((u) => u.id === upgradeId);
+    if (!selectedUpgrade) return;
+
+    // Apply upgrade effect
+    const newStats = selectedUpgrade.apply(upgradeStats);
+
+    // Update player max HP if bonus was added
+    const hpIncrease = newStats.maxHpBonus - upgradeStats.maxHpBonus;
+    const { playerHp, playerMaxHp } = get();
+
+    // Determine previous game state (before LEVEL_UP)
+    const previousState: GameState = state === 'LEVEL_UP' ? 'PHASE_1' : state;
+
     set({
       runProgress: {
         ...runProgress,
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
       },
+      upgradeStats: newStats,
+      state: previousState,
+      levelUpChoices: [],
+      playerHp: playerHp + hpIncrease,
+      playerMaxHp: playerMaxHp + hpIncrease,
     });
+
+    // Play sound effect
+    AudioManager.playSFX('ui_select');
   },
 
   setMovement: (x, y) =>
@@ -614,6 +663,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       highScore: get().highScore, // Preserve high score
       metaProgress: get().metaProgress, // Preserve meta progress
       playerPosition: new THREE.Vector3(0, 0, 0),
+      upgradeStats: getInitialUpgradeStats(),
+      levelUpChoices: [],
     }),
 }));
 
