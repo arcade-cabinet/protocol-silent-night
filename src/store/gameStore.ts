@@ -280,7 +280,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
 
   addKill: (points) => {
-    const { stats, state, enemies, lastKillTime, killStreak, metaProgress, sessionNicePoints } =
+    const { stats, state, enemies, lastKillTime, killStreak, sessionNicePoints } =
       get();
     const now = Date.now();
     const newKills = stats.kills + 1;

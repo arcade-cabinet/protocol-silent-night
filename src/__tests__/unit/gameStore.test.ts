@@ -501,6 +501,46 @@ describe('GameStore - Meta Progression', () => {
     upgradePermanent('speed');
     expect(useGameStore.getState().metaProgress.permanentUpgrades.speed).toBe(2);
   });
+
+  it('should earn Nice Points bonuses based on kill streaks', () => {
+    const { addKill } = useGameStore.getState();
+
+    // Kill 1: 10 base NP, 0 bonus
+    addKill(100);
+    expect(useGameStore.getState().metaProgress.nicePoints).toBe(10);
+    expect(useGameStore.getState().sessionNicePoints).toBe(10);
+
+    // Kill 2: 10 base + 5 bonus = 15 NP
+    addKill(100);
+    expect(useGameStore.getState().sessionNicePoints).toBe(25); // 10 + 15
+    expect(useGameStore.getState().metaProgress.nicePoints).toBe(25);
+
+    // Kill 3: 10 base + 10 bonus = 20 NP
+    addKill(100);
+    expect(useGameStore.getState().sessionNicePoints).toBe(45); // 25 + 20
+
+    // Kill 5 (simulate skip 4): 10 base + 25 bonus = 35 NP
+    // We need to manually set the streak for testing higher bonuses easily
+    useGameStore.setState({ killStreak: 4, lastKillTime: Date.now() });
+    addKill(100); // Streak becomes 5
+    expect(useGameStore.getState().sessionNicePoints).toBe(80); // 45 + 35
+
+    // Kill 7: 10 base + 50 bonus = 60 NP
+    useGameStore.setState({ killStreak: 6, lastKillTime: Date.now() });
+    addKill(100); // Streak becomes 7
+    expect(useGameStore.getState().sessionNicePoints).toBe(140); // 80 + 60
+  });
+
+  it('should earn 500 Nice Points for boss defeat', () => {
+    const { damageBoss } = useGameStore.getState();
+    useGameStore.setState({ bossHp: 100, bossActive: true });
+
+    damageBoss(100);
+    
+    expect(useGameStore.getState().sessionNicePoints).toBe(500);
+    expect(useGameStore.getState().metaProgress.nicePoints).toBe(500);
+    expect(useGameStore.getState().metaProgress.bossesDefeated).toBe(1);
+  });
 });
 
 describe('GameStore - Run Progression', () => {
