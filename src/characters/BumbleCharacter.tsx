@@ -64,8 +64,8 @@ export function BumbleCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
-        includeMuzzle: false,
-        includeTail: false,
+        
+        
       });
 
       characterRef.current = character;
