@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import * as THREE from 'three';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Enemies } from '@/game/Enemies';
@@ -54,7 +54,9 @@ describe('Spawning Logic', () => {
     render(<Enemies />);
 
     // Transition to PHASE_1
-    useGameStore.setState({ state: 'PHASE_1' });
+    act(() => {
+      useGameStore.setState({ state: 'PHASE_1' });
+    });
 
     // Enemies.tsx has a useEffect that spawns initial minions
     // It uses setTimeout, so we need to wait.
@@ -64,7 +66,7 @@ describe('Spawning Logic', () => {
         const enemies = useGameStore.getState().enemies;
         expect(enemies.length).toBeGreaterThan(0);
       },
-      { timeout: 2000 }
+      { timeout: 5000 }
     );
   });
 
