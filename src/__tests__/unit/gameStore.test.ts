@@ -423,6 +423,20 @@ describe('GameStore - High Score', () => {
 describe('GameStore - Meta Progression', () => {
   beforeEach(() => {
     useGameStore.getState().reset();
+    useGameStore.setState({
+      metaProgress: {
+        nicePoints: 0,
+        totalPointsEarned: 0,
+        runsCompleted: 0,
+        bossesDefeated: 0,
+        unlockedWeapons: ['cannon', 'smg', 'star'],
+        unlockedSkins: [],
+        permanentUpgrades: {},
+        highScore: 0,
+        totalKills: 0,
+        totalDeaths: 0,
+      },
+    });
     localStorage.clear();
   });
 
