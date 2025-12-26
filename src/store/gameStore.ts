@@ -42,6 +42,7 @@ const META_PROGRESS_KEY = 'protocol-silent-night-meta-progress';
 interface GameStore {
   // Game State
   state: GameState;
+  previousState: GameState;
   setState: (state: GameState) => void;
   missionBriefing: {
     title: string;
@@ -210,6 +211,7 @@ const initialMetaProgress = loadMetaProgress();
 
 const initialState = {
   state: 'MENU' as GameState,
+  previousState: 'MENU' as GameState,
   missionBriefing: BRIEFING,
   playerClass: null,
   playerHp: 100,
@@ -254,7 +256,7 @@ const initialState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  setState: (state) => set({ state }),
+  setState: (state) => set((prev) => ({ state, previousState: prev.state })),
 
   selectClass: (type) => {
     const config = PLAYER_CLASSES[type as keyof typeof PLAYER_CLASSES] as unknown as PlayerClassConfig;
@@ -386,7 +388,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    if (newKills >= CONFIG.WAVE_REQ && state === 'PHASE_1') {
+    if (newKills >= CONFIG.WAVE_REQ && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
@@ -542,20 +544,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const choices = getRandomUpgrades();
 
-    set({
+    set((state) => ({
       state: 'LEVEL_UP',
+      previousState: state.state,
       runProgress: {
         ...runProgress,
         pendingLevelUp: true,
         upgradeChoices: choices,
       },
-    });
+    }));
 
     AudioManager.playSFX('ui_select');
   },
 
   selectLevelUpgrade: (upgradeId) => {
-    const { runProgress, playerMaxHp, playerHp } = get();
+    const { runProgress, playerMaxHp, playerHp, previousState } = get();
     const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === upgradeId);
 
     if (!upgrade) return;
@@ -587,7 +590,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     set({
-      state: 'PHASE_1',
+      state: previousState === 'LEVEL_UP' ? 'PHASE_1' : previousState,
       runProgress: {
         ...runProgress,
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
@@ -828,12 +831,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    set({
-      state: 'PHASE_BOSS',
+    const isLeveling = get().state === 'LEVEL_UP';
+    set((state) => ({
+      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
+      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-    });
+    }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
   },

@@ -24,13 +24,15 @@ A modular, high-performance Christmas cyberpunk roguelike powered by **Strata + 
 - ✅ **Audio Synthesis**: Data-driven procedural music and SFX via Tone.js.
 
 ### Testing & Quality
-- ✅ **100% Pass Rate**: 385 unit and integration tests verified.
+- ✅ **100% Pass Rate**: 395 unit and integration tests verified.
 - ✅ **Zero Stale State**: Addressed AI feedback on store race conditions.
 - ✅ **Clean Code**: Removed all individual character/weapon boilerplate.
 
 ### Bug Fixes (v4.1)
 - ✅ **LevelUpScreen Display Bug**: Fixed critical bug where level-up screen never displayed. The state check incorrectly looked for PHASE_1/PHASE_BOSS instead of LEVEL_UP state.
-- ✅ **Regression Tests**: Added 10 new tests for LevelUpScreen component to prevent future regressions.
+- ✅ **Enemies & Obstacles Spawning**: Fixed core issue where enemies and obstacles were not spawning correctly due to high noise thresholds and incorrect state transition logic after level-ups.
+- ✅ **State Persistence**: Introduced `previousState` tracking to ensure the game returns to the correct phase (e.g. Boss Phase) after selecting an upgrade.
+- ✅ **Regression Tests**: Added 20+ new tests (LevelUpScreen, Spawning, State Transitions) to prevent future regressions.
 
 ---
 

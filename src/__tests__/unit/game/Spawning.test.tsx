@@ -75,4 +75,25 @@ describe('Spawning Logic', () => {
     const obstacles = useGameStore.getState().obstacles;
     expect(obstacles.length).toBeGreaterThan(0);
   });
+
+  it('selectLevelUpgrade should return to previous state', async () => {
+    // Start in PHASE_BOSS
+    useGameStore.setState({ state: 'PHASE_BOSS' });
+    
+    // Trigger level up
+    useGameStore.getState().levelUp();
+    expect(useGameStore.getState().state).toBe('LEVEL_UP');
+    expect(useGameStore.getState().previousState).toBe('PHASE_BOSS');
+    
+    // Select upgrade
+    const mockUpgrade = { id: 'test', name: 'Test', maxStacks: 1 };
+    // Mock the data
+    const data = await import('@/data');
+    (data.ROGUELIKE_UPGRADES as any).push(mockUpgrade);
+    
+    useGameStore.getState().selectLevelUpgrade('test');
+    
+    // Should return to PHASE_BOSS
+    expect(useGameStore.getState().state).toBe('PHASE_BOSS');
+  });
 });

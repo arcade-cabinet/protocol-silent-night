@@ -122,6 +122,9 @@ export function Bullets() {
   );
 
   useFrame((state, delta) => {
+    const { state: gameState } = useGameStore.getState();
+    if (gameState === 'LEVEL_UP' || gameState === 'MENU' || gameState === 'BRIEFING' || gameState === 'GAME_OVER' || gameState === 'WIN') return;
+
     const time = state.clock.elapsedTime;
 
     if (!cannonRef.current || !smgRef.current || !starRef.current) return;
