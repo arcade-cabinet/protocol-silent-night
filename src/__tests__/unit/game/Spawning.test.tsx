@@ -18,6 +18,7 @@ describe('Spawning Logic', () => {
   });
 
   it('Enemies should spawn when state transitions to PHASE_1', async () => {
+    vi.useFakeTimers();
     // Start in MENU
     useGameStore.setState({ state: 'MENU' });
 
@@ -27,15 +28,18 @@ describe('Spawning Logic', () => {
     // Transition to PHASE_1
     await ReactTestRenderer.act(async () => {
       useGameStore.setState({ state: 'PHASE_1' });
-      // Enemies.tsx initial spawn uses setTimeout with i * 200
-      // We need to wait for these timeouts to finish.
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    });
+
+    // Advance timers to trigger the setTimeouts in Enemies.tsx
+    await ReactTestRenderer.act(async () => {
+      vi.advanceTimersByTime(2000);
     });
 
     const enemies = useGameStore.getState().enemies;
     expect(enemies.length).toBeGreaterThan(0);
 
     await renderer.unmount();
+    vi.useRealTimers();
   });
 
   it('Obstacles should spawn if noise is above threshold', async () => {
