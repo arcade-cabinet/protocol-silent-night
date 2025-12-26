@@ -6,7 +6,7 @@
 
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import THEMES from '@/data/themes.json';
 
 export function Lighting() {
@@ -19,7 +19,8 @@ export function Lighting() {
       const time = state.clock.elapsedTime;
       const { intensityRange, speed } = theme.moonlight.animation;
       const range = intensityRange[1] - intensityRange[0];
-      moonLightRef.current.intensity = intensityRange[0] + (Math.sin(time * speed) * 0.5 + 0.5) * range;
+      moonLightRef.current.intensity =
+        intensityRange[0] + (Math.sin(time * speed) * 0.5 + 0.5) * range;
     }
   });
 
@@ -45,14 +46,16 @@ export function Lighting() {
       />
 
       {/* Rim Light - Subtle cyan from behind */}
-      <directionalLight 
-        color={theme.rim.color} 
-        intensity={theme.rim.intensity} 
-        position={theme.rim.position as [number, number, number]} 
+      <directionalLight
+        color={theme.rim.color}
+        intensity={theme.rim.intensity}
+        position={theme.rim.position as [number, number, number]}
       />
 
       {/* Ground Bounce Light */}
-      <hemisphereLight args={[theme.hemisphere.skyColor, theme.hemisphere.groundColor, theme.hemisphere.intensity]} />
+      <hemisphereLight
+        args={[theme.hemisphere.skyColor, theme.hemisphere.groundColor, theme.hemisphere.intensity]}
+      />
 
       {/* Fog for depth */}
       <fogExp2 attach="fog" args={[theme.fog.color, theme.fog.density]} />

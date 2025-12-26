@@ -1,8 +1,8 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { LevelUpScreen } from '@/ui/LevelUpScreen';
 import { useGameStore } from '@/store/gameStore';
-import type { RoguelikeUpgrade, GameState, RunProgressData } from '@/types';
+import type { GameState, RoguelikeUpgrade, RunProgressData } from '@/types';
+import { LevelUpScreen } from '@/ui/LevelUpScreen';
 
 describe('LevelUpScreen Component', () => {
   beforeEach(() => {
@@ -11,7 +11,8 @@ describe('LevelUpScreen Component', () => {
 
   const setupTestState = (
     state: GameState,
-    runProgressOverrides: Partial<RunProgressData> = {}
+    runProgressOverrides: Partial<RunProgressData> = {},
+    previousState: GameState = 'PHASE_1'
   ) => {
     const defaultRunProgress: RunProgressData = {
       xp: 0,
@@ -27,6 +28,7 @@ describe('LevelUpScreen Component', () => {
 
     useGameStore.setState({
       state,
+      previousState,
       runProgress: { ...defaultRunProgress, ...runProgressOverrides },
     });
   };
@@ -97,7 +99,7 @@ describe('LevelUpScreen Component', () => {
     });
 
     render(<LevelUpScreen />);
-    
+
     expect(screen.getByText('Damage Boost')).not.toBeNull();
     expect(screen.getByText('Shield Wall')).not.toBeNull();
     expect(screen.getByText('Increases damage')).not.toBeNull();
@@ -128,17 +130,17 @@ describe('LevelUpScreen Component', () => {
     });
 
     render(<LevelUpScreen />);
-    
+
     const upgradeButton = screen.getByText('Coal Fury').closest('button');
     expect(upgradeButton).not.toBeNull();
-    
+
     fireEvent.click(upgradeButton as HTMLElement);
-    
+
     const state = useGameStore.getState();
     // After selecting, pendingLevelUp should be false and state should return to PHASE_1
     expect(state.runProgress.pendingLevelUp).toBe(false);
     expect(state.state).toBe('PHASE_1');
-    expect(state.runProgress.activeUpgrades['coal_fury']).toBe(1);
+    expect(state.runProgress.activeUpgrades.coal_fury).toBe(1);
   });
 
   it('should show current stack count for upgrades with max stacks > 1', () => {
@@ -163,7 +165,7 @@ describe('LevelUpScreen Component', () => {
     });
 
     render(<LevelUpScreen />);
-    
+
     // Should show 2/5 (current stacks / max stacks)
     expect(screen.getByText('2/5')).not.toBeNull();
   });
@@ -190,7 +192,7 @@ describe('LevelUpScreen Component', () => {
     });
 
     render(<LevelUpScreen />);
-    
+
     expect(screen.getByText('ACTIVE UPGRADES:')).not.toBeNull();
   });
 

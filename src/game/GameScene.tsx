@@ -10,6 +10,7 @@ import { Canvas } from '@react-three/fiber';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { Suspense } from 'react';
 import { PlayerController } from '@/characters';
+import THEMES from '@/data/themes.json';
 import { useGameStore } from '@/store/gameStore';
 import { Bullets } from './Bullets';
 import { CameraController } from './CameraController';
@@ -17,7 +18,6 @@ import { Enemies } from './Enemies';
 import { HitParticles } from './HitParticles';
 import { Lighting } from './Lighting';
 import { Terrain } from './Terrain';
-import THEMES from '@/data/themes.json';
 
 export function GameScene() {
   const state = useGameStore((s) => s.state);
@@ -65,11 +65,11 @@ export function GameScene() {
         />
 
         {/* Strata Volumetric Fog for atmosphere */}
-        <VolumetricFogMesh 
-          color={theme.sky.volumetricFog.color} 
-          density={theme.sky.volumetricFog.density} 
-          height={theme.sky.volumetricFog.height} 
-          size={100} 
+        <VolumetricFogMesh
+          color={theme.sky.volumetricFog.color}
+          density={theme.sky.volumetricFog.density}
+          height={theme.sky.volumetricFog.height}
+          size={100}
         />
 
         {/* World */}
@@ -87,11 +87,11 @@ export function GameScene() {
 
         {/* Post Processing - Bloom for neon glow */}
         <EffectComposer>
-          <Bloom 
-            luminanceThreshold={theme.postProcessing.bloom.luminanceThreshold} 
-            luminanceSmoothing={theme.postProcessing.bloom.luminanceSmoothing} 
-            intensity={theme.postProcessing.bloom.intensity} 
-            radius={theme.postProcessing.bloom.radius} 
+          <Bloom
+            luminanceThreshold={theme.postProcessing.bloom.luminanceThreshold}
+            luminanceSmoothing={theme.postProcessing.bloom.luminanceSmoothing}
+            intensity={theme.postProcessing.bloom.intensity}
+            radius={theme.postProcessing.bloom.radius}
           />
         </EffectComposer>
       </Suspense>

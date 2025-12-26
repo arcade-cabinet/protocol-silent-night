@@ -6,11 +6,15 @@ import { StartScreen } from '@/ui/StartScreen';
 
 // Mock SantasWorkshop to avoid complex dependency issues in unit test
 vi.mock('@/ui', async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
     SantasWorkshop: () => <div data-testid="santas-workshop" />,
-    WorkshopButton: ({ onOpen }: any) => <button onClick={onOpen}>🎄 SANTA'S WORKSHOP</button>,
+    WorkshopButton: ({ onOpen }: { onOpen: () => void }) => (
+      <button type="button" onClick={onOpen}>
+        🎄 SANTA'S WORKSHOP
+      </button>
+    ),
   };
 });
 

@@ -3,9 +3,9 @@
  * Roguelike upgrade selection when player levels up
  */
 
+import { ROGUELIKE_UPGRADES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import type { RoguelikeUpgrade } from '@/types';
-import { ROGUELIKE_UPGRADES } from '@/data';
 import styles from './LevelUpScreen.module.css';
 
 export function LevelUpScreen() {

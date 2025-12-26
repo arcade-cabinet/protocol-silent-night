@@ -116,7 +116,7 @@
   font-size: 0.75rem;
   letter-spacing: 2px;
   margin-bottom: 10px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .upgradesGrid {
@@ -144,14 +144,14 @@
 .upgradeName {
   font-size: 0.7rem;
   color: #aaa;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-transform: uppercase;
 }
 
 .upgradeStacks {
   font-size: 0.65rem;
   color: #ffd700;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: bold;
 }
 
@@ -171,14 +171,14 @@
   color: #00ffcc;
   font-size: 0.8rem;
   letter-spacing: 1px;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .npValue {
   color: #00ffcc;
   font-size: 1.2rem;
   font-weight: bold;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
 }
 
@@ -187,7 +187,7 @@
   border: none;
   padding: 18px 50px;
   color: white;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 1.2rem;
   cursor: pointer;
   text-transform: uppercase;
@@ -223,7 +223,7 @@
     font-size: 0.9rem;
     gap: 20px;
   }
-  
+
   .upgradesGrid {
     max-width: 300px;
   }

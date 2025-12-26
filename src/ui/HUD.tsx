@@ -3,8 +3,8 @@
  * Displays player health, current objective, and active upgrades
  */
 
-import { useGameStore } from '@/store/gameStore';
 import { CONFIG, ROGUELIKE_UPGRADES } from '@/data';
+import { useGameStore } from '@/store/gameStore';
 import styles from './HUD.module.css';
 
 export function HUD() {
@@ -41,7 +41,10 @@ export function HUD() {
       <div className={styles.panel} style={{ borderColor: '#00ffcc' }}>
         <div className={styles.label}>OPERATOR STATUS</div>
         <div className={styles.barWrap}>
-          <div className={styles.hpBar} style={{ width: `${hpPercent}%`, backgroundColor: hpColor }} />
+          <div
+            className={styles.hpBar}
+            style={{ width: `${hpPercent}%`, backgroundColor: hpColor }}
+          />
         </div>
         <div className={styles.hpText} style={{ color: hpColor }}>
           HP: {Math.floor(playerHp)} / {playerMaxHp}
@@ -103,7 +106,10 @@ export function HUD() {
             <span className={styles.statValue}>{stats.kills}</span>
           </span>
         </div>
-        <div className={styles.score} style={{ color: '#00ffcc', fontSize: '0.85rem', marginTop: '8px' }}>
+        <div
+          className={styles.score}
+          style={{ color: '#00ffcc', fontSize: '0.85rem', marginTop: '8px' }}
+        >
           NICE POINTS: {metaProgress.nicePoints}
         </div>
       </div>

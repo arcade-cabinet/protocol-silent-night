@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as Tone from 'tone';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AudioManager, type MusicTrack } from '@/audio/AudioManager';
 
 describe('AudioManager', () => {

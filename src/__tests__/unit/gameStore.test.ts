@@ -328,26 +328,26 @@ describe('GameStore - Stats Management', () => {
       expect(useGameStore.getState().stats.score).toBeGreaterThan(200);
     });
 
-  it('should spawn boss after 10 kills in PHASE_1', () => {
-    const { addKill, selectClass, setState } = useGameStore.getState();
+    it('should spawn boss after 10 kills in PHASE_1', () => {
+      const { addKill, selectClass, setState } = useGameStore.getState();
 
-    selectClass('santa');
-    // Set level to 10 to avoid level-up system complexity in this test
-    useGameStore.setState({
-      runProgress: {
-        ...useGameStore.getState().runProgress,
-        level: 10,
-      },
+      selectClass('santa');
+      // Set level to 10 to avoid level-up system complexity in this test
+      useGameStore.setState({
+        runProgress: {
+          ...useGameStore.getState().runProgress,
+          level: 10,
+        },
+      });
+      setState('PHASE_1');
+
+      // Add 10 kills
+      for (let i = 0; i < 10; i++) {
+        addKill(10);
+      }
+
+      expect(useGameStore.getState().state).toBe('PHASE_BOSS');
     });
-    setState('PHASE_1');
-
-    // Add 10 kills
-    for (let i = 0; i < 10; i++) {
-      addKill(10);
-    }
-
-    expect(useGameStore.getState().state).toBe('PHASE_BOSS');
-  });
   });
 
   describe('resetStats', () => {

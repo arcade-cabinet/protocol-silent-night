@@ -3,8 +3,8 @@
  * Allows players to select and unlock character skins
  */
 
-import { useGameStore } from '@/store/gameStore';
 import { WORKSHOP } from '@/data';
+import { useGameStore } from '@/store/gameStore';
 import type { PlayerClassType, SkinConfig } from '@/types';
 import styles from './SkinSelector.module.css';
 
@@ -16,15 +16,15 @@ interface SkinSelectorProps {
 export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
   const { selectedSkin, selectSkin, metaProgress, spendNicePoints, unlockSkin } = useGameStore();
 
-  const skinConfigs = (WORKSHOP as any).skins as SkinConfig[];
-  const skins = skinConfigs.filter(s => s.character === characterClass);
+  const skinConfigs = WORKSHOP.skins as SkinConfig[];
+  const skins = skinConfigs.filter((s) => s.character === characterClass);
   const unlockedSkins = metaProgress.unlockedSkins;
   const nicePoints = metaProgress.nicePoints;
 
   const handleSelectSkin = (skinId: string) => {
-    const skin = skinConfigs.find(s => s.id === skinId);
+    const skin = skinConfigs.find((s) => s.id === skinId);
     if (!skin) return;
-    
+
     const isUnlocked = unlockedSkins.includes(skinId);
 
     if (!isUnlocked) {
@@ -40,22 +40,23 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
   };
 
   return (
-    <div
+    <button
+      type="button"
       className={styles.overlay}
       onClick={onClose}
       onKeyDown={(e) => e.key === 'Escape' && onClose()}
-      role="button"
-      tabIndex={-1}
       aria-label="Close skin selector"
     >
       <div
         className={styles.modal}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => e.stopPropagation()}
-        role="presentation"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="skin-selector-title"
       >
         <div className={styles.header}>
-          <h2 className={styles.title}>SELECT SKIN</h2>
+          <h2 id="skin-selector-title" className={styles.title}>SELECT SKIN</h2>
           <div className={styles.points}>
             <span className={styles.pointsLabel}>NICE POINTS:</span>
             <span className={styles.pointsValue}>{nicePoints}</span>
@@ -84,17 +85,15 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
                 </div>
                 <div className={styles.skinInfo}>
                   <div className={styles.skinName}>{skin.name}</div>
-                  {skin.description && (
-                    <div className={styles.skinDesc}>{skin.description}</div>
-                  )}
+                  {skin.description && <div className={styles.skinDesc}>{skin.description}</div>}
                   {!isUnlocked && (
-                    <div className={`${styles.skinCost} ${canAfford ? styles.affordable : styles.expensive}`}>
+                    <div
+                      className={`${styles.skinCost} ${canAfford ? styles.affordable : styles.expensive}`}
+                    >
                       {skin.cost} NP
                     </div>
                   )}
-                  {isUnlocked && skin.cost > 0 && (
-                    <div className={styles.ownedBadge}>UNLOCKED</div>
-                  )}
+                  {isUnlocked && skin.cost > 0 && <div className={styles.ownedBadge}>UNLOCKED</div>}
                 </div>
               </button>
             );
@@ -105,6 +104,6 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
           CONTINUE
         </button>
       </div>
-    </div>
+    </button>
   );
 }

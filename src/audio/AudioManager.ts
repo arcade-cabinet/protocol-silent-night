@@ -80,20 +80,19 @@ class AudioManagerClass {
 
       switch (config.type) {
         case 'PolySynth':
-          // @ts-ignore - Tone.js types can be tricky with constructors
+          // @ts-expect-error - Tone.js types can be tricky with constructors
           synth = new Tone.PolySynth(Tone.Synth, config.options).toDestination();
           break;
         case 'FMSynth':
-          // @ts-ignore
+          // @ts-expect-error
           synth = new Tone.FMSynth(config.options).toDestination();
           break;
         case 'NoiseSynth':
-          // @ts-ignore
+          // @ts-expect-error
           synth = new Tone.NoiseSynth(config.options).toDestination();
           break;
-        case 'Synth':
         default:
-          // @ts-ignore
+          // @ts-expect-error
           synth = new Tone.Synth(config.options).toDestination();
           break;
       }
@@ -126,11 +125,11 @@ class AudioManagerClass {
     let chordIndex = 0;
     let bassIndex = 0;
 
-    // @ts-ignore
+    // @ts-expect-error
     const melody = trackData.melody || [];
-    // @ts-ignore
+    // @ts-expect-error
     const chords = trackData.chords || [];
-    // @ts-ignore
+    // @ts-expect-error
     const bass = trackData.bass || [];
 
     this.musicLoop = new Tone.Loop((time) => {
@@ -186,21 +185,21 @@ class AudioManagerClass {
     if (!effectData) return;
 
     // Handle sequence
-    // @ts-ignore
+    // @ts-expect-error
     if (effectData.sequence) {
-      // @ts-ignore
+      // @ts-expect-error
       for (const [note, duration, delay = 0] of effectData.sequence) {
         sfxSynth.triggerAttackRelease(note, duration, now + delay);
       }
     } else {
-      // @ts-ignore
+      // @ts-expect-error
       if (effectData.note) {
-        // @ts-ignore
+        // @ts-expect-error
         sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
       }
-      // @ts-ignore
+      // @ts-expect-error
       if (effectData.noise) {
-        // @ts-ignore
+        // @ts-expect-error
         noiseSynth.triggerAttackRelease(effectData.duration, now);
       }
     }

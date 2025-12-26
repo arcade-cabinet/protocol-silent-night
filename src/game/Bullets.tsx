@@ -7,9 +7,9 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { CONFIG } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData, WeaponType } from '@/types';
-import { CONFIG } from '@/data';
 
 // Max bullets per type from config
 const MAX_CANNON_BULLETS = CONFIG.BULLET_LIMITS.CANNON;
@@ -30,11 +30,6 @@ function getVisualType(weaponType: WeaponType | undefined): 'cannon' | 'smg' | '
     case 'smg':
     case 'light_string':
       return 'smg';
-    case 'star':
-    case 'jingle_bell':
-    case 'candy_cane':
-    case 'gingerbread':
-    case 'quantum_gift':
     default:
       return 'star';
   }
@@ -123,7 +118,14 @@ export function Bullets() {
 
   useFrame((state, delta) => {
     const { state: gameState } = useGameStore.getState();
-    if (gameState === 'LEVEL_UP' || gameState === 'MENU' || gameState === 'BRIEFING' || gameState === 'GAME_OVER' || gameState === 'WIN') return;
+    if (
+      gameState === 'LEVEL_UP' ||
+      gameState === 'MENU' ||
+      gameState === 'BRIEFING' ||
+      gameState === 'GAME_OVER' ||
+      gameState === 'WIN'
+    )
+      return;
 
     const time = state.clock.elapsedTime;
 
@@ -156,14 +158,14 @@ export function Bullets() {
               const sizeScale = bullet.size || 1;
               const baseRadius = visualType === 'cannon' ? 1.8 : visualType === 'star' ? 1.6 : 1.4;
               const hitRadius = baseRadius * sizeScale;
-              
+
               if (dist < hitRadius) {
                 if (enemy.type === 'boss' && bossActive) {
                   damageBoss(bullet.damage);
                 } else {
                   damageEnemy(enemy.id, bullet.damage);
                 }
-                
+
                 // Penetration check
                 if (!bullet.penetration) {
                   toRemove.push(bullet.id);

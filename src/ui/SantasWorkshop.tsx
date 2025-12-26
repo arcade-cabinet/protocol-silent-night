@@ -5,14 +5,18 @@
 
 import { useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
-import { useGameStore } from '@/store/gameStore';
 import { WORKSHOP } from '@/data';
+import { useGameStore } from '@/store/gameStore';
+import type { 
+  WeaponUnlock, 
+  SkinConfig, 
+  PermanentUpgradeConfig 
+} from '@/types';
 import styles from './SantasWorkshop.module.css';
 
-const { weapons: WEAPON_UNLOCKS_RAW, skins: SKIN_UNLOCKS_RAW, upgrades: PERMANENT_UPGRADES_RAW } = (WORKSHOP as any);
-const WEAPON_UNLOCKS = (WEAPON_UNLOCKS_RAW as any[]);
-const SKIN_UNLOCKS = (SKIN_UNLOCKS_RAW as any[]);
-const PERMANENT_UPGRADES = (PERMANENT_UPGRADES_RAW as any[]);
+const WEAPON_UNLOCKS = WORKSHOP.weapons as WeaponUnlock[];
+const SKIN_UNLOCKS = WORKSHOP.skins as SkinConfig[];
+const PERMANENT_UPGRADES = WORKSHOP.upgrades as PermanentUpgradeConfig[];
 
 type TabType = 'weapons' | 'skins' | 'upgrades';
 
@@ -33,7 +37,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
     AudioManager.playSFX('ui_select');
   };
 
-  const handlePurchaseWeapon = (weapon: any) => {
+  const handlePurchaseWeapon = (weapon: WeaponUnlock) => {
     if (metaProgress.unlockedWeapons.includes(weapon.id)) return;
 
     if (spendNicePoints(weapon.cost)) {
@@ -44,7 +48,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
     }
   };
 
-  const handlePurchaseSkin = (skin: any) => {
+  const handlePurchaseSkin = (skin: SkinConfig) => {
     if (metaProgress.unlockedSkins.includes(skin.id)) return;
 
     if (spendNicePoints(skin.cost)) {
@@ -55,7 +59,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
     }
   };
 
-  const handlePurchaseUpgrade = (upgrade: any) => {
+  const handlePurchaseUpgrade = (upgrade: PermanentUpgradeConfig) => {
     const currentLevel = metaProgress.permanentUpgrades[upgrade.id] || 0;
     if (currentLevel >= upgrade.maxLevel) return;
 

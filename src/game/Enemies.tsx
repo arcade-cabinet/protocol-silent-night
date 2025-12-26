@@ -8,8 +8,8 @@
 import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { useGameStore } from '@/store/gameStore';
 import { CONFIG, ENEMIES } from '@/data';
+import { useGameStore } from '@/store/gameStore';
 
 const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES;
 
@@ -47,7 +47,10 @@ export function Enemies() {
 
     const id = `minion-${enemyIdCounter++}`;
     const angle = Math.random() * Math.PI * 2;
-    const radius = ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin + Math.random() * (ENEMY_SPAWN_CONFIG.minionSpawnRadiusMax - ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin);
+    const radius =
+      ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin +
+      Math.random() *
+        (ENEMY_SPAWN_CONFIG.minionSpawnRadiusMax - ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin);
 
     const mesh = new THREE.Object3D();
     mesh.position.set(Math.cos(angle) * radius, 1, Math.sin(angle) * radius);
@@ -127,10 +130,14 @@ export function Enemies() {
         currentPos.add(tempVec);
 
         const targetRotation = Math.atan2(direction.x, direction.z);
-        const angleDiff = ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
+        const angleDiff =
+          ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
         enemy.mesh.rotation.y += angleDiff * delta * 8;
 
-        const hitRadius = enemy.type === 'boss' ? ENEMY_SPAWN_CONFIG.hitRadiusBoss : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
+        const hitRadius =
+          enemy.type === 'boss'
+            ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
+            : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
         if (distance < hitRadius) {
           if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
             shouldDamage = true;
@@ -160,7 +167,11 @@ export function Enemies() {
   );
 }
 
-function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: number; maxHp: number }[] }) {
+function InstancedMinions({
+  minions,
+}: {
+  minions: { mesh: THREE.Object3D; hp: number; maxHp: number }[];
+}) {
   const bodyRef = useRef<THREE.InstancedMesh>(null);
   const headRef = useRef<THREE.InstancedMesh>(null);
   const eyeRef = useRef<THREE.InstancedMesh>(null);
@@ -200,7 +211,7 @@ function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: nu
 
     if (!bodyRef.current || !headRef.current || !eyeRef.current) return;
 
-    for (let i = 0; i < (CONFIG.MAX_MINIONS + 5); i++) {
+    for (let i = 0; i < CONFIG.MAX_MINIONS + 5; i++) {
       if (i < minions.length) {
         const minion = minions[i];
         const pos = minion.mesh.position;
@@ -228,7 +239,11 @@ function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: nu
 
         const eyeOffsetX = Math.sin(rot) * 0.17;
         const eyeOffsetZ = Math.cos(rot) * 0.17;
-        dummy.position.set(pos.x + eyeOffsetX, pos.y + 1.1 + Math.sin(time * 8 + uniqueOffset) * 0.08, pos.z + eyeOffsetZ);
+        dummy.position.set(
+          pos.x + eyeOffsetX,
+          pos.y + 1.1 + Math.sin(time * 8 + uniqueOffset) * 0.08,
+          pos.z + eyeOffsetZ
+        );
         dummy.scale.setScalar(1);
         dummy.updateMatrix();
         eyeRef.current.setMatrixAt(i, dummy.matrix);
@@ -253,7 +268,12 @@ function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: nu
       <instancedMesh ref={bodyRef} args={[bodyGeo, bodyMat, CONFIG.MAX_MINIONS + 5]} castShadow />
       <instancedMesh ref={headRef} args={[headGeo, headMat, CONFIG.MAX_MINIONS + 5]} castShadow />
       <instancedMesh ref={eyeRef} args={[eyeGeo, eyeMat, CONFIG.MAX_MINIONS + 5]} />
-      <pointLight color={new THREE.Color(CONFIG.COLORS.ENEMY_MINION)} intensity={1.5} distance={30} position={[0, 2, 0]} />
+      <pointLight
+        color={new THREE.Color(CONFIG.COLORS.ENEMY_MINION)}
+        intensity={1.5}
+        distance={30}
+        position={[0, 2, 0]}
+      />
     </group>
   );
 }
@@ -272,7 +292,12 @@ function BossRenderer({
   const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
 
   return (
-    <BossMesh position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]} rotation={bossRotation} hp={bossHp} maxHp={bossMaxHp} />
+    <BossMesh
+      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
+      rotation={bossRotation}
+      hp={bossHp}
+      maxHp={bossMaxHp}
+    />
   );
 }
 
@@ -354,80 +379,297 @@ function BossMesh({
       <group ref={bodyRef}>
         <mesh castShadow>
           <boxGeometry args={[2.5, 3, 1.8]} />
-          <meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.3} metalness={0.4} roughness={0.7} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.3}
+            metalness={0.4}
+            roughness={0.7}
+          />
         </mesh>
         <mesh position={[0, 0.3, 0.95]} castShadow>
           <boxGeometry args={[2, 2, 0.15]} />
-          <meshStandardMaterial color={0x111111} emissive={emissiveColor} emissiveIntensity={intensity * 0.2} metalness={0.9} roughness={0.2} />
+          <meshStandardMaterial
+            color={0x111111}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.2}
+            metalness={0.9}
+            roughness={0.2}
+          />
         </mesh>
         <mesh position={[0, 0.2, 1]}>
           <dodecahedronGeometry args={[0.4]} />
           <meshBasicMaterial color={emissiveColor} />
         </mesh>
-        <pointLight color={emissiveColor} intensity={intensity * 2} distance={8} position={[0, 0.2, 1.2]} />
-        {[-0.6, -0.2, 0.2, 0.6].map((y, i) => (
-          <mesh key={`rib-${i}`} position={[0, y, 0.9]} castShadow>
+        <pointLight
+          color={emissiveColor}
+          intensity={intensity * 2}
+          distance={8}
+          position={[0, 0.2, 1.2]}
+        />
+        {[-0.6, -0.2, 0.2, 0.6].map((y) => (
+          <mesh key={`rib-${y}`} position={[0, y, 0.9]} castShadow>
             <boxGeometry args={[2.2, 0.15, 0.1]} />
-            <meshStandardMaterial color={0x222222} emissive={emissiveColor} emissiveIntensity={0.1 + i * 0.05} metalness={0.85} />
+            <meshStandardMaterial
+              color={0x222222}
+              emissive={emissiveColor}
+              emissiveIntensity={0.1 + (y + 0.6) * 0.1}
+              metalness={0.85}
+            />
           </mesh>
         ))}
-        {[-0.8, -0.4, 0, 0.4, 0.8].map((y, i) => (
-          <mesh key={`spine-${i}`} position={[0, y, -0.95]} castShadow>
+        {[-0.8, -0.4, 0, 0.4, 0.8].map((y) => (
+          <mesh key={`spine-${y}`} position={[0, y, -0.95]} castShadow>
             <coneGeometry args={[0.15, 0.4, 4]} />
-            <meshStandardMaterial color={0x110000} emissive={emissiveColor} emissiveIntensity={0.3} metalness={0.6} />
+            <meshStandardMaterial
+              color={0x110000}
+              emissive={emissiveColor}
+              emissiveIntensity={0.3}
+              metalness={0.6}
+            />
           </mesh>
         ))}
-        <mesh position={[1.4, 1.2, 0]}><coneGeometry args={[0.5, 1, 6]} /><meshStandardMaterial color={0x111111} roughness={1} /></mesh>
-        <mesh position={[-1.4, 1.2, 0]}><coneGeometry args={[0.5, 1, 6]} /><meshStandardMaterial color={0x111111} roughness={1} /></mesh>
+        <mesh position={[1.4, 1.2, 0]}>
+          <coneGeometry args={[0.5, 1, 6]} />
+          <meshStandardMaterial color={0x111111} roughness={1} />
+        </mesh>
+        <mesh position={[-1.4, 1.2, 0]}>
+          <coneGeometry args={[0.5, 1, 6]} />
+          <meshStandardMaterial color={0x111111} roughness={1} />
+        </mesh>
       </group>
       <group ref={headRef} position={[0, 2.2, 0]}>
-        <mesh castShadow><boxGeometry args={[1.2, 1.4, 1.2]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.2} metalness={0.3} roughness={0.8} /></mesh>
-        <mesh position={[0, -0.2, 0.7]} castShadow><boxGeometry args={[0.8, 0.7, 0.8]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.15} metalness={0.3} roughness={0.8} /></mesh>
-        <mesh position={[0, -0.5, 0.7]}><boxGeometry args={[0.75, 0.3, 0.75]} /><meshStandardMaterial color={0x110000} metalness={0.4} roughness={0.6} /></mesh>
-        {[-0.25, -0.1, 0.1, 0.25].map((x, i) => (
-          <mesh key={`tooth-top-${i}`} position={[x, -0.35, 1.05]} rotation={[0.2, 0, 0]}>
-            <coneGeometry args={[0.06, 0.2, 4]} /><meshStandardMaterial color={0xffffcc} emissive={0xffffaa} emissiveIntensity={0.2} metalness={0.3} />
+        <mesh castShadow>
+          <boxGeometry args={[1.2, 1.4, 1.2]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.2}
+            metalness={0.3}
+            roughness={0.8}
+          />
+        </mesh>
+        <mesh position={[0, -0.2, 0.7]} castShadow>
+          <boxGeometry args={[0.8, 0.7, 0.8]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.15}
+            metalness={0.3}
+            roughness={0.8}
+          />
+        </mesh>
+        <mesh position={[0, -0.5, 0.7]}>
+          <boxGeometry args={[0.75, 0.3, 0.75]} />
+          <meshStandardMaterial color={0x110000} metalness={0.4} roughness={0.6} />
+        </mesh>
+        {[-0.25, -0.1, 0.1, 0.25].map((x) => (
+          <mesh key={`tooth-top-${x}`} position={[x, -0.35, 1.05]} rotation={[0.2, 0, 0]}>
+            <coneGeometry args={[0.06, 0.2, 4]} />
+            <meshStandardMaterial
+              color={0xffffcc}
+              emissive={0xffffaa}
+              emissiveIntensity={0.2}
+              metalness={0.3}
+            />
           </mesh>
         ))}
-        {[-0.2, 0, 0.2].map((x, i) => (
-          <mesh key={`tooth-bot-${i}`} position={[x, -0.6, 1]} rotation={[-0.2, 0, Math.PI]}>
-            <coneGeometry args={[0.05, 0.18, 4]} /><meshStandardMaterial color={0xffffcc} emissive={0xffffaa} emissiveIntensity={0.2} metalness={0.3} />
+        {[-0.2, 0, 0.2].map((x) => (
+          <mesh key={`tooth-bot-${x}`} position={[x, -0.6, 1]} rotation={[-0.2, 0, Math.PI]}>
+            <coneGeometry args={[0.05, 0.18, 4]} />
+            <meshStandardMaterial
+              color={0xffffcc}
+              emissive={0xffffaa}
+              emissiveIntensity={0.2}
+              metalness={0.3}
+            />
           </mesh>
         ))}
-        {rage > 0.5 && <mesh ref={tongueRef} position={[0, -0.45, 0.9]} rotation={[0.3, 0, 0]}><boxGeometry args={[0.2, 0.08, 0.6]} /><meshStandardMaterial color={0x660033} emissive={0xff0066} emissiveIntensity={0.5} /></mesh>}
-        <mesh position={[0.35, 0.15, 0.55]}><sphereGeometry args={[0.18, 8, 8]} /><meshBasicMaterial color={eyeColor} /></mesh>
-        <mesh position={[-0.35, 0.15, 0.55]}><sphereGeometry args={[0.18, 8, 8]} /><meshBasicMaterial color={eyeColor} /></mesh>
-        <pointLight color={eyeColor} intensity={intensity * 1.5} distance={6} position={[0, 0.15, 0.8]} />
-        <group position={[0.5, 0.5, -0.1]} rotation={[0.3, 0.4, 0.2]}><mesh castShadow><coneGeometry args={[0.2, 1.5, 6]} /><meshStandardMaterial color={0x111100} emissive={emissiveColor} emissiveIntensity={intensity * 0.15} metalness={0.5} roughness={0.4} /></mesh></group>
-        <group position={[-0.5, 0.5, -0.1]} rotation={[0.3, -0.4, -0.2]}><mesh castShadow><coneGeometry args={[0.2, 1.5, 6]} /><meshStandardMaterial color={0x111100} emissive={emissiveColor} emissiveIntensity={intensity * 0.15} metalness={0.5} roughness={0.4} /></mesh></group>
+        {rage > 0.5 && (
+          <mesh ref={tongueRef} position={[0, -0.45, 0.9]} rotation={[0.3, 0, 0]}>
+            <boxGeometry args={[0.2, 0.08, 0.6]} />
+            <meshStandardMaterial color={0x660033} emissive={0xff0066} emissiveIntensity={0.5} />
+          </mesh>
+        )}
+        <mesh position={[0.35, 0.15, 0.55]}>
+          <sphereGeometry args={[0.18, 8, 8]} />
+          <meshBasicMaterial color={eyeColor} />
+        </mesh>
+        <mesh position={[-0.35, 0.15, 0.55]}>
+          <sphereGeometry args={[0.18, 8, 8]} />
+          <meshBasicMaterial color={eyeColor} />
+        </mesh>
+        <pointLight
+          color={eyeColor}
+          intensity={intensity * 1.5}
+          distance={6}
+          position={[0, 0.15, 0.8]}
+        />
+        <group position={[0.5, 0.5, -0.1]} rotation={[0.3, 0.4, 0.2]}>
+          <mesh castShadow>
+            <coneGeometry args={[0.2, 1.5, 6]} />
+            <meshStandardMaterial
+              color={0x111100}
+              emissive={emissiveColor}
+              emissiveIntensity={intensity * 0.15}
+              metalness={0.5}
+              roughness={0.4}
+            />
+          </mesh>
+        </group>
+        <group position={[-0.5, 0.5, -0.1]} rotation={[0.3, -0.4, -0.2]}>
+          <mesh castShadow>
+            <coneGeometry args={[0.2, 1.5, 6]} />
+            <meshStandardMaterial
+              color={0x111100}
+              emissive={emissiveColor}
+              emissiveIntensity={intensity * 0.15}
+              metalness={0.5}
+              roughness={0.4}
+            />
+          </mesh>
+        </group>
       </group>
       <group ref={leftArmRef} position={[1.6, 1, 0]}>
-        <mesh castShadow><capsuleGeometry args={[0.35, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.15} metalness={0.3} roughness={0.7} /></mesh>
-        <group position={[0.2, -1.2, 0]}><mesh castShadow><capsuleGeometry args={[0.3, 1, 6, 12]} /><meshStandardMaterial color={0x111111} emissive={emissiveColor} emissiveIntensity={intensity * 0.2} metalness={0.85} roughness={0.2} /></mesh></group>
-        {[0, -0.4, -0.8].map((y, i) => (<mesh key={`chain-l-${i}`} position={[0.1, y, 0.3]} ref={(el) => { if (el) chainRefs.current[i] = el; }}><torusGeometry args={[0.4 + i * 0.05, 0.04, 6, 12]} /><meshStandardMaterial color={0x444444} metalness={0.95} roughness={0.3} /></mesh>))}
+        <mesh castShadow>
+          <capsuleGeometry args={[0.35, 1.2, 6, 12]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.15}
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        <group position={[0.2, -1.2, 0]}>
+          <mesh castShadow>
+            <capsuleGeometry args={[0.3, 1, 6, 12]} />
+            <meshStandardMaterial
+              color={0x111111}
+              emissive={emissiveColor}
+              emissiveIntensity={intensity * 0.2}
+              metalness={0.85}
+              roughness={0.2}
+            />
+          </mesh>
+        </group>
+        {[0, -0.4, -0.8].map((y) => {
+          const idx = y === 0 ? 0 : y === -0.4 ? 1 : 2;
+          return (
+            <mesh
+              key={`chain-l-${y}`}
+              position={[0.1, y, 0.3]}
+              ref={(el) => {
+                if (el) {
+                  chainRefs.current[idx] = el;
+                }
+              }}
+            >
+              <torusGeometry args={[0.4 + idx * 0.05, 0.04, 6, 12]} />
+              <meshStandardMaterial color={0x444444} metalness={0.95} roughness={0.3} />
+            </mesh>
+          );
+        })}
       </group>
       <group ref={rightArmRef} position={[-1.6, 1, 0]}>
-        <mesh castShadow><capsuleGeometry args={[0.35, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.15} metalness={0.3} roughness={0.7} /></mesh>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.35, 1.2, 6, 12]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.15}
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
         <group position={[-0.2, -1.2, 0]}>
-          <mesh castShadow><capsuleGeometry args={[0.3, 1, 6, 12]} /><meshStandardMaterial color={0x111111} emissive={emissiveColor} emissiveIntensity={intensity * 0.2} metalness={0.85} roughness={0.2} /></mesh>
+          <mesh castShadow>
+            <capsuleGeometry args={[0.3, 1, 6, 12]} />
+            <meshStandardMaterial
+              color={0x111111}
+              emissive={emissiveColor}
+              emissiveIntensity={intensity * 0.2}
+              metalness={0.85}
+              roughness={0.2}
+            />
+          </mesh>
           <group position={[0, -0.6, 0.4]} rotation={[0.3, 0, 0.2]}>
-            <mesh><cylinderGeometry args={[0.08, 0.08, 2, 8]} /><meshStandardMaterial color={0x330011} emissive={0xff0044} emissiveIntensity={0.3} /></mesh>
-            <mesh position={[0, 1.2, 0.3]} rotation={[0.8, 0, 0]}><boxGeometry args={[0.08, 1, 0.4]} /><meshStandardMaterial color={0xffffff} emissive={emissiveColor} emissiveIntensity={0.5} metalness={0.9} /></mesh>
+            <mesh>
+              <cylinderGeometry args={[0.08, 0.08, 2, 8]} />
+              <meshStandardMaterial color={0x330011} emissive={0xff0044} emissiveIntensity={0.3} />
+            </mesh>
+            <mesh position={[0, 1.2, 0.3]} rotation={[0.8, 0, 0]}>
+              <boxGeometry args={[0.08, 1, 0.4]} />
+              <meshStandardMaterial
+                color={0xffffff}
+                emissive={emissiveColor}
+                emissiveIntensity={0.5}
+                metalness={0.9}
+              />
+            </mesh>
           </group>
         </group>
       </group>
       <group ref={leftLegRef} position={[0.6, -2, 0]}>
-        <mesh castShadow><capsuleGeometry args={[0.4, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.1} metalness={0.3} roughness={0.7} /></mesh>
-        <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}><mesh castShadow><capsuleGeometry args={[0.3, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.1} metalness={0.3} roughness={0.7} /></mesh></group>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.4, 1.2, 6, 12]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.1}
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}>
+          <mesh castShadow>
+            <capsuleGeometry args={[0.3, 1.2, 6, 12]} />
+            <meshStandardMaterial
+              color={baseColor}
+              emissive={emissiveColor}
+              emissiveIntensity={intensity * 0.1}
+              metalness={0.3}
+              roughness={0.7}
+            />
+          </mesh>
+        </group>
       </group>
       <group ref={rightLegRef} position={[-0.6, -2, 0]}>
-        <mesh castShadow><capsuleGeometry args={[0.4, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.1} metalness={0.3} roughness={0.7} /></mesh>
-        <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}><mesh castShadow><capsuleGeometry args={[0.3, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.1} metalness={0.3} roughness={0.7} /></mesh></group>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.4, 1.2, 6, 12]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.1}
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}>
+          <mesh castShadow>
+            <capsuleGeometry args={[0.3, 1.2, 6, 12]} />
+            <meshStandardMaterial
+              color={baseColor}
+              emissive={emissiveColor}
+              emissiveIntensity={intensity * 0.1}
+              metalness={0.3}
+              roughness={0.7}
+            />
+          </mesh>
+        </group>
       </group>
-      <pointLight color={new THREE.Color(emissiveColor)} intensity={intensity * 3} distance={15} position={[0, 0, 0]} />
+      <pointLight
+        color={new THREE.Color(emissiveColor)}
+        intensity={intensity * 3}
+        distance={15}
+        position={[0, 0, 0]}
+      />
       <mesh position={[0, 5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1.8, 2, 32, 1, 0, Math.PI * 2 * hpRatio]} />
-        <meshBasicMaterial color={hpRatio > 0.5 ? 0x00ff00 : hpRatio > 0.25 ? 0xffaa00 : 0xff0000} side={THREE.DoubleSide} />
+        <meshBasicMaterial
+          color={hpRatio > 0.5 ? 0x00ff00 : hpRatio > 0.25 ? 0xffaa00 : 0xff0000}
+          side={THREE.DoubleSide}
+        />
       </mesh>
     </group>
   );

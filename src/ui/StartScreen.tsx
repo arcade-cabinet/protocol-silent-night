@@ -5,9 +5,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
+import { PLAYER_CLASSES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import type { PlayerClassType } from '@/types';
-import { PLAYER_CLASSES } from '@/data';
 import { SantasWorkshop, WorkshopButton } from '@/ui';
 import styles from './StartScreen.module.css';
 

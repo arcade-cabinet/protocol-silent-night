@@ -11,7 +11,7 @@ import { useGameStore } from '../../store/gameStore';
 
 // Mock UI components to avoid data-dependency cascading failures
 vi.mock('@/ui', async (importOriginal) => {
-  const actual = await importOriginal() as any;
+  const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
     HUD: () => <div data-testid="hud">HUD</div>,
@@ -81,46 +81,46 @@ describe('App', () => {
   });
 
   describe('Game States', () => {
-  it('should render properly in MENU state', () => {
-    useGameStore.setState({ state: 'MENU' });
-    render(<App />);
-    expect(screen.getByTestId('start-screen')).toBeInTheDocument();
-  });
+    it('should render properly in MENU state', () => {
+      useGameStore.setState({ state: 'MENU' });
+      render(<App />);
+      expect(screen.getByTestId('start-screen')).toBeInTheDocument();
+    });
 
-  it('should render StartScreen in menu', () => {
-    useGameStore.setState({ state: 'MENU' });
-    render(<App />);
-    expect(screen.getByTestId('start-screen')).toBeInTheDocument();
-  });
+    it('should render StartScreen in menu', () => {
+      useGameStore.setState({ state: 'MENU' });
+      render(<App />);
+      expect(screen.getByTestId('start-screen')).toBeInTheDocument();
+    });
 
-  it('should render properly in PLAYING state', () => {
-    act(() => {
-      useGameStore.setState({
-        state: 'PHASE_1',
-        playerClass: PLAYER_CLASSES.santa,
-        playerHp: 300,
-        playerMaxHp: 300,
+    it('should render properly in PLAYING state', () => {
+      act(() => {
+        useGameStore.setState({
+          state: 'PHASE_1',
+          playerClass: PLAYER_CLASSES.santa,
+          playerHp: 300,
+          playerMaxHp: 300,
+        });
       });
+      render(<App />);
+      expect(screen.getByTestId('hud')).toBeInTheDocument();
     });
-    render(<App />);
-    expect(screen.getByTestId('hud')).toBeInTheDocument();
-  });
 
-  it('should render properly in WIN state', () => {
-    act(() => {
-      useGameStore.setState({ state: 'WIN' });
+    it('should render properly in WIN state', () => {
+      act(() => {
+        useGameStore.setState({ state: 'WIN' });
+      });
+      render(<App />);
+      expect(screen.getByTestId('end-screen')).toBeInTheDocument();
     });
-    render(<App />);
-    expect(screen.getByTestId('end-screen')).toBeInTheDocument();
-  });
 
-  it('should render properly in GAME_OVER state', () => {
-    act(() => {
-      useGameStore.setState({ state: 'GAME_OVER' });
+    it('should render properly in GAME_OVER state', () => {
+      act(() => {
+        useGameStore.setState({ state: 'GAME_OVER' });
+      });
+      render(<App />);
+      expect(screen.getByTestId('end-screen')).toBeInTheDocument();
     });
-    render(<App />);
-    expect(screen.getByTestId('end-screen')).toBeInTheDocument();
-  });
   });
 
   describe('Component Integration', () => {

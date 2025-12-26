@@ -24,6 +24,7 @@ describe('Terrain Component', () => {
 
     // Check for instance.count to identify InstancedMesh
     const instancedMeshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
       (node: any) => node.instance && node.instance.count !== undefined
     );
     expect(instancedMeshes.length).toBeGreaterThan(0);
@@ -46,9 +47,9 @@ describe('Terrain Component', () => {
     // Wait for useEffect to run and update state
     await ReactTestRenderer.act(async () => {
       // Small delay to allow effects to run
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     });
-    
+
     // Explicitly update the renderer to pick up store changes
     await renderer.update(<Terrain />);
 
@@ -56,8 +57,9 @@ describe('Terrain Component', () => {
     expect(state.obstacles.length).toBeGreaterThan(0);
 
     // Check for meshes in the scene
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const meshes = renderer.scene.findAll((node: any) => node.instance?.type === 'Mesh');
-    
+
     // We expect one instanced mesh for terrain and one regular mesh for the obstacle
     expect(meshes.length).toBeGreaterThan(1);
 
@@ -70,16 +72,17 @@ describe('Terrain Component', () => {
 
     // Spy on dispose methods of geometries and materials
     const instancedMeshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
       (node: any) => node.instance && node.instance.count !== undefined
     );
-    
+
     if (instancedMeshes.length > 0) {
       const terrainMesh = instancedMeshes[0].instance;
       vi.spyOn(terrainMesh.geometry, 'dispose');
       vi.spyOn(terrainMesh.material, 'dispose');
 
       await renderer.unmount();
-      
+
       // We don't strictly check if it's called because R3F behavior in RTTR varies
       // but we ensure no errors occur during unmount
       expect(renderer).toBeDefined();
