@@ -18,7 +18,7 @@ let bulletIdCounter = 0;
 const PLAYER_COLLISION_RADIUS = 0.7;
 
 // Collision detection helper using simple circle-to-circle check
-function checkCollision(
+export function checkCollision(
   position: THREE.Vector3,
   obstacles: ChristmasObstacle[],
   radius: number = PLAYER_COLLISION_RADIUS
