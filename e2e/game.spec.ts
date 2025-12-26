@@ -137,7 +137,12 @@ test.describe('Protocol: Silent Night', () => {
     
     // Start screen should disappear
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
-    
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
+
     // HUD should appear
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
     await expect(page.getByText(/CURRENT OBJECTIVE/i)).toBeVisible();
@@ -145,36 +150,46 @@ test.describe('Protocol: Silent Night', () => {
 
   test('should display HUD elements during gameplay', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
+
     await page.waitForTimeout(3000);
-    
+
     // Start game with Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
     await expect(elfButton).toBeVisible({ timeout: 15000 });
     await elfButton.click();
-    
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
+
     // Verify HUD elements
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
     await expect(page.getByText(/CURRENT OBJECTIVE/i)).toBeVisible();
     await expect(page.getByText(/SCORE/i)).toBeVisible();
-    
+
     // Fire button should be visible for touch controls
     await expect(page.getByRole('button', { name: /FIRE/i })).toBeVisible();
   });
 
   test('should persist high score to localStorage', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
+
     await page.waitForTimeout(3000);
-    
+
     // Start game
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
     await expect(santaButton).toBeVisible({ timeout: 15000 });
     await santaButton.click();
-    
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
+
     // Wait for game to start
-    await expect(santaButton).not.toBeVisible({ timeout: 5000 });
-    
+    await expect(commenceButton).not.toBeVisible({ timeout: 5000 });
+
     // Play for a moment
     await page.waitForTimeout(2000);
     
