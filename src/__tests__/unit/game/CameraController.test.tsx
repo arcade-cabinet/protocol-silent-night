@@ -1,19 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import ReactTestRenderer from '@react-three/test-renderer';
 import { CameraController } from '@/game/CameraController';
 import { useGameStore } from '@/store/gameStore';
 import * as THREE from 'three';
-import { useFrame, useThree } from '@react-three/fiber';
 
-// Mock R3F
-vi.mock('@react-three/fiber', () => ({
-  useFrame: vi.fn(),
-  useThree: vi.fn(() => ({
-    camera: new THREE.PerspectiveCamera(),
-  })),
-}));
-
-describe('CameraController', () => {
+describe('CameraController Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useGameStore.setState({
@@ -23,38 +14,36 @@ describe('CameraController', () => {
     });
   });
 
-  it('should update camera position in useFrame', () => {
-    const camera = new THREE.PerspectiveCamera();
-    camera.position.set(0, 0, 0);
-    vi.mocked(useThree).mockReturnValue({ camera } as any);
-
+  it('should follow player position', async () => {
+    const renderer = await ReactTestRenderer.create(<CameraController />);
+    
     useGameStore.setState({
       playerPosition: new THREE.Vector3(10, 0, 10),
     });
 
-    render(<CameraController />);
+    // Advance frames to lerp camera
+    await renderer.advanceFrames(60, 0.1);
 
-    const callback = vi.mocked(useFrame).mock.calls[0][0];
-    // Call multiple times to simulate lerp
-    for (let i = 0; i < 10; i++) {
-      callback({ clock: { elapsedTime: 0 } } as any, 0.1);
-    }
+    // Access camera from R3F state
+    const camera = renderer.scene.allChildren[0].instance.camera;
+    expect(camera.position.x).toBeCloseTo(10, 0);
+    expect(camera.position.z).toBeGreaterThan(10); 
 
-    // Camera should have moved towards player position
-    expect(camera.position.x).toBeGreaterThan(0);
-    expect(camera.position.z).toBeGreaterThan(0);
+    await renderer.unmount();
   });
 
-  it('should handle screen shake decay', () => {
+  it('should handle screen shake decay', async () => {
     useGameStore.setState({
       screenShake: 1.0,
     });
 
-    render(<CameraController />);
+    const renderer = await ReactTestRenderer.create(<CameraController />);
+    
+    await renderer.advanceFrames(1, 0.1);
 
-    const callback = vi.mocked(useFrame).mock.calls[0][0];
-    callback({ clock: { elapsedTime: 0 } } as any, 0.1);
+    const state = useGameStore.getState();
+    expect(state.screenShake).toBeLessThan(1.0);
 
-    expect(useGameStore.getState().screenShake).toBeLessThan(1.0);
+    await renderer.unmount();
   });
 });

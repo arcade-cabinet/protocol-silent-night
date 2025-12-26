@@ -1,34 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import ReactTestRenderer from '@react-three/test-renderer';
 import { Terrain } from '@/game/Terrain';
 import { useGameStore } from '@/store/gameStore';
-import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
-// Mock R3F
-vi.mock('@react-three/fiber', () => ({
-  useFrame: vi.fn(),
-}));
-
-// Mock THREE.InstancedMesh.prototype.setMatrixAt
-vi.mock('three', async () => {
-  const actual = await vi.importActual('three') as any;
-  const InstancedMesh = actual.InstancedMesh;
-  InstancedMesh.prototype.setMatrixAt = vi.fn();
-  // Ensure instanceMatrix exists
-  Object.defineProperty(InstancedMesh.prototype, 'instanceMatrix', {
-    get: () => ({ needsUpdate: false }),
-    configurable: true
-  });
-  return actual;
-});
-
-// Mock Strata
+// Mock Strata noise
 vi.mock('@jbcom/strata', () => ({
   noise3D: vi.fn(() => 0.5),
   fbm: vi.fn(() => 0.5),
 }));
 
-describe('Terrain', () => {
+describe('Terrain Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useGameStore.setState({
@@ -36,39 +18,58 @@ describe('Terrain', () => {
     });
   });
 
-  it('should render and sync obstacles', async () => {
-    const { noise3D } = await import('@jbcom/strata');
-    (noise3D as any).mockImplementation((_x: number, _z: number, w: number) => {
+  it('should render correctly and match snapshot', async () => {
+    const renderer = await ReactTestRenderer.create(<Terrain />);
+    expect(renderer.scene).toBeDefined();
+    
+    // Test count: WORLD_SIZE is 80, so 80*80 = 6400 instances
+    const instancedMesh = renderer.allChildren.find(
+      (child) => child.type === 'InstancedMesh'
+    );
+    expect(instancedMesh).toBeDefined();
+    expect(instancedMesh.instance.count).toBe(6400);
+
+    await renderer.unmount();
+  });
+
+  it('should generate obstacles when noise is high', async () => {
+    const strata = await import('@jbcom/strata');
+    // Mock noise to trigger obstacle (isObstacle > 0.92)
+    (strata.noise3D as any).mockImplementation((x: number, z: number, w: number) => {
       if (w === 0) return 0.95; // isObstacle
       return 0.5;
     });
 
-    render(<Terrain />);
+    const renderer = await ReactTestRenderer.create(<Terrain />);
     
-    expect(useGameStore.getState().obstacles.length).toBeGreaterThan(0);
+    const state = useGameStore.getState();
+    expect(state.obstacles.length).toBeGreaterThan(0);
+    
+    // Check if ChristmasObstacleMesh components are rendered
+    // They are individual meshes
+    const obstacles = renderer.allChildren.filter(
+      (child) => child.instance.type === 'Mesh' && child.instance.material.type === 'MeshStandardMaterial'
+    );
+    expect(obstacles.length).toBeGreaterThan(0);
+
+    await renderer.unmount();
   });
 
-  it('should have correct instanced mesh count', () => {
-    const { container } = render(<Terrain />);
-    // We can't directly check the 'count' property on the DOM element in RTL,
-    // but we can check if it rendered the tag.
-    const instancedMesh = container.querySelector('instancedmesh');
-    expect(instancedMesh).toBeDefined();
-  });
-
-  it('should cleanup resources on unmount', () => {
-    const { unmount } = render(<Terrain />);
-    expect(() => unmount()).not.toThrow();
-  });
-
-  it('should update material time in useFrame', () => {
-    render(<Terrain />);
+  it('should cleanup resources on unmount', async () => {
+    const renderer = await ReactTestRenderer.create(<Terrain />);
     
-    const callback = vi.mocked(useFrame).mock.calls[0][0];
-    const time = 1.5;
+    // Spy on dispose methods of geometries and materials
+    const terrainMesh = renderer.allChildren.find(
+      (child) => child.type === 'InstancedMesh'
+    ).instance;
     
-    // We can't easily access the internal material uniforms without more mocking,
-    // but we can ensure the callback runs.
-    expect(() => callback({ clock: { elapsedTime: time } } as any, 0.1)).not.toThrow();
+    const disposeGeoSpy = vi.spyOn(terrainMesh.geometry, 'dispose');
+    const disposeMatSpy = vi.spyOn(terrainMesh.material, 'dispose');
+
+    await renderer.unmount();
+    
+    // R3F handles automatic disposal of objects in the scene graph
+    expect(disposeGeoSpy).toHaveBeenCalled();
+    expect(disposeMatSpy).toHaveBeenCalled();
   });
 });

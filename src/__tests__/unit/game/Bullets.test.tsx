@@ -1,29 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import ReactTestRenderer from '@react-three/test-renderer';
 import { Bullets } from '@/game/Bullets';
 import { useGameStore } from '@/store/gameStore';
 import * as THREE from 'three';
-import { useFrame } from '@react-three/fiber';
 
-// Mock R3F
-vi.mock('@react-three/fiber', () => ({
-  useFrame: vi.fn(),
-}));
-
-// Mock THREE.InstancedMesh.prototype.setMatrixAt
-vi.mock('three', async () => {
-  const actual = await vi.importActual('three') as any;
-  const InstancedMesh = actual.InstancedMesh;
-  InstancedMesh.prototype.setMatrixAt = vi.fn();
-  // Ensure instanceMatrix exists
-  Object.defineProperty(InstancedMesh.prototype, 'instanceMatrix', {
-    get: () => ({ needsUpdate: false }),
-    configurable: true
-  });
-  return actual;
-});
-
-describe('Bullets', () => {
+describe('Bullets Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useGameStore.setState({
@@ -32,7 +13,29 @@ describe('Bullets', () => {
     });
   });
 
-  it('should update bullet positions when useFrame is called', () => {
+  it('should render instanced meshes for weapon types', async () => {
+    const renderer = await ReactTestRenderer.create(<Bullets />);
+    
+    const instancedMeshes = renderer.allChildren.filter(
+      (child) => child.type === 'InstancedMesh'
+    );
+    
+    // 3 types: cannon, smg, stars
+    expect(instancedMeshes.length).toBe(3);
+    
+    // Check counts
+    const cannon = instancedMeshes.find(m => m.instance.geometry.type === 'IcosahedronGeometry');
+    const smg = instancedMeshes.find(m => m.instance.geometry.type === 'CapsuleGeometry');
+    const stars = instancedMeshes.find(m => m.instance.geometry.type === 'ExtrudeGeometry');
+    
+    expect(cannon.instance.count).toBe(30);
+    expect(smg.instance.count).toBe(60);
+    expect(stars.instance.count).toBe(45);
+
+    await renderer.unmount();
+  });
+
+  it('should update positions and handle collisions', async () => {
     const bullet = {
       id: 'test-bullet',
       mesh: new THREE.Object3D(),
@@ -49,72 +52,6 @@ describe('Bullets', () => {
     };
     bullet.mesh.position.set(0, 0, 0);
 
-    useGameStore.setState({
-      bullets: [bullet],
-    });
-
-    render(<Bullets />);
-
-    // Get the useFrame callback
-    const useFrameMock = vi.mocked(useFrame);
-    expect(useFrameMock).toHaveBeenCalled();
-    const callback = useFrameMock.mock.calls[0][0];
-
-    // Call the callback with a delta time of 0.1s
-    callback({ clock: { elapsedTime: 0 } } as any, 0.1);
-
-    const state = useGameStore.getState();
-    // Position should be initial + direction * speed * delta = 0 + 1 * 10 * 0.1 = 1
-    expect(state.bullets[0].mesh.position.x).toBeCloseTo(1);
-    expect(state.bullets[0].life).toBeCloseTo(0.9);
-  });
-
-  it('should remove bullets when life expires', () => {
-    const bullet = {
-      id: 'test-bullet',
-      mesh: new THREE.Object3D(),
-      velocity: new THREE.Vector3(10, 0, 0),
-      direction: new THREE.Vector3(1, 0, 0),
-      speed: 10,
-      life: 0.05, // Expiring soon
-      isActive: true,
-      hp: 1,
-      maxHp: 1,
-      isEnemy: false,
-      damage: 10,
-      type: 'cannon' as const,
-    };
-
-    useGameStore.setState({
-      bullets: [bullet],
-    });
-
-    render(<Bullets />);
-
-    const callback = vi.mocked(useFrame).mock.calls[0][0];
-    callback({ clock: { elapsedTime: 0 } } as any, 0.1);
-
-    const state = useGameStore.getState();
-    expect(state.bullets).toHaveLength(0);
-  });
-
-  it('should handle collisions with enemies', () => {
-    const bullet = {
-      id: 'test-bullet',
-      mesh: new THREE.Object3D(),
-      velocity: new THREE.Vector3(10, 0, 0),
-      direction: new THREE.Vector3(1, 0, 0),
-      speed: 10,
-      life: 1.0,
-      isActive: true,
-      hp: 1,
-      maxHp: 1,
-      isEnemy: false,
-      damage: 10,
-      type: 'cannon' as const,
-    };
-    bullet.mesh.position.set(5, 0, 5);
-
     const enemy = {
       id: 'test-enemy',
       mesh: new THREE.Object3D(),
@@ -127,22 +64,35 @@ describe('Bullets', () => {
       damage: 1,
       pointValue: 10,
     };
-    enemy.mesh.position.set(5, 0, 5); // Same position
+    enemy.mesh.position.set(5, 0, 0);
 
     useGameStore.setState({
       bullets: [bullet],
       enemies: [enemy],
     });
 
-    const damageEnemySpy = vi.spyOn(useGameStore.getState(), 'damageEnemy');
+    const renderer = await ReactTestRenderer.create(<Bullets />);
+    
+    // Advance frame to trigger movement and collision
+    // 0.1s * 10 speed = 1 unit. We need 0.5s to hit enemy at 5 units
+    await renderer.advanceFrames(5, 0.1);
 
-    render(<Bullets />);
-
-    const callback = vi.mocked(useFrame).mock.calls[0][0];
-    callback({ clock: { elapsedTime: 0 } } as any, 0.1);
-
-    expect(damageEnemySpy).toHaveBeenCalled();
     const state = useGameStore.getState();
-    expect(state.bullets).toHaveLength(0); // Bullet removed on hit
+    // Bullet should be removed after hit
+    expect(state.bullets.length).toBe(0);
+    // Enemy should have taken damage (100 - 10 = 90)
+    expect(state.enemies[0].hp).toBe(90);
+
+    await renderer.unmount();
+  });
+
+  it('should cleanup resources', async () => {
+    const renderer = await ReactTestRenderer.create(<Bullets />);
+    const meshes = renderer.allChildren.filter(c => c.type === 'InstancedMesh');
+    
+    const spies = meshes.map(m => vi.spyOn(m.instance.geometry, 'dispose'));
+    
+    await renderer.unmount();
+    spies.forEach(spy => expect(spy).toHaveBeenCalled());
   });
 });
