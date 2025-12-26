@@ -281,7 +281,7 @@ export interface RunProgressData {
   /** IDs of upgrades selected during this run */
   selectedUpgrades: string[];
   /** IDs of weapon evolutions unlocked this run */
-  weaponEvolutions: string[];
+  weaponEvolutions: WeaponEvolutionType[];
 }
 
 /**

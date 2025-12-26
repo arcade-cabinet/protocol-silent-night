@@ -86,12 +86,7 @@ export function PlayerController() {
       const bulletType = getBulletTypeFromWeapon(weaponType);
 
       // Get evolution modifiers
-      const evolution = currentEvolution ? useGameStore.getState().currentEvolution : null;
-      const evolutionConfig = evolution
-        ? useGameStore.getState().currentEvolution
-          ? WEAPON_EVOLUTIONS[useGameStore.getState().currentEvolution!]
-          : null
-        : null;
+      const evolutionConfig = currentEvolution ? WEAPON_EVOLUTIONS[currentEvolution] : null;
 
       const baseSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
       const bulletSpeed =
@@ -137,7 +132,7 @@ export function PlayerController() {
             life: bulletLife,
             speed: bulletSpeed,
             type: weaponType === 'star' ? 'stars' : bulletType,
-            evolutionType: evolution || undefined,
+            evolutionType: currentEvolution || undefined,
             size,
             penetration,
             explosive,
@@ -157,7 +152,7 @@ export function PlayerController() {
           life: bulletLife,
           speed: bulletSpeed,
           type: bulletType,
-          evolutionType: evolution || undefined,
+          evolutionType: currentEvolution || undefined,
           size,
           penetration,
           explosive,
