@@ -1,0 +1,128 @@
+{
+  "synths": {
+    "melody": {
+      "type": "PolySynth",
+      "options": {
+        "oscillator": { "type": "sine" },
+        "envelope": {
+          "attack": 0.01,
+          "decay": 0.3,
+          "sustain": 0.1,
+          "release": 0.5
+        }
+      },
+      "volume": -12
+    },
+    "bass": {
+      "type": "FMSynth",
+      "options": {
+        "harmonicity": 0.5,
+        "modulationIndex": 3,
+        "envelope": {
+          "attack": 0.1,
+          "decay": 0.2,
+          "sustain": 0.3,
+          "release": 0.5
+        }
+      },
+      "volume": -18
+    },
+    "pad": {
+      "type": "PolySynth",
+      "options": {
+        "oscillator": { "type": "triangle" },
+        "envelope": {
+          "attack": 1.0,
+          "decay": 0.5,
+          "sustain": 0.7,
+          "release": 2.0
+        }
+      },
+      "volume": -20
+    },
+    "noise": {
+      "type": "NoiseSynth",
+      "options": {
+        "noise": { "type": "white" },
+        "envelope": {
+          "attack": 0.001,
+          "decay": 0.1,
+          "sustain": 0
+        }
+      },
+      "volume": -20
+    },
+    "sfx": {
+      "type": "Synth",
+      "options": {
+        "oscillator": { "type": "square" },
+        "envelope": {
+          "attack": 0.005,
+          "decay": 0.1,
+          "sustain": 0.1,
+          "release": 0.1
+        }
+      },
+      "volume": -10
+    }
+  },
+  "music": {
+    "menu": {
+      "bpm": 100,
+      "loop": "4n",
+      "chords": [
+        ["C4", "E4", "G4"],
+        ["A3", "C4", "E4"],
+        ["F3", "A3", "C4"],
+        ["G3", "B3", "D4"]
+      ],
+      "melody": ["C5", "E5", "G5", "C6", "G5", "E5", "C5", "G4"]
+    },
+    "combat": {
+      "bpm": 140,
+      "loop": "16n",
+      "melody": ["G4", "A4", "B4", "D5", "B4", "A4", "G4", "E4"],
+      "bass": ["G2", "G2", "E2", "E2"]
+    },
+    "boss": {
+      "bpm": 160,
+      "loop": "16n",
+      "melody": ["E4", "G4", "B4", "E5", "D5", "B4", "G4", "E4"],
+      "chords": [
+        ["E3", "G3", "B3"],
+        ["D3", "F#3", "A3"]
+      ],
+      "bass": ["E2", "E2", "D2", "D2"]
+    },
+    "victory": {
+      "bpm": 120,
+      "loop": "4n",
+      "melody": ["C5", "E5", "G5", "C6"]
+    },
+    "defeat": {
+      "bpm": 60,
+      "loop": "2n",
+      "chords": [
+        ["C4", "Eb4", "G4"],
+        ["A3", "C4", "Eb4"]
+      ]
+    }
+  },
+  "sfx": {
+    "weapon_cannon": { "note": "C2", "duration": "0.1", "noise": true },
+    "weapon_smg": { "note": "G3", "duration": "0.05" },
+    "weapon_stars": { "note": "C5", "duration": "0.08" },
+    "player_damage_light": { "note": "E3", "duration": "0.1" },
+    "player_damage_heavy": { "note": "C2", "duration": "0.2", "noise": true },
+    "enemy_hit": { "note": "A4", "duration": "0.05" },
+    "enemy_defeated": { "sequence": [["E5", "0.15"], ["C5", "0.15", 0.1]] },
+    "boss_appear": { "sequence": [["C2", "0.5"], ["G2", "0.5", 0.2], ["C3", "0.5", 0.4]] },
+    "boss_hit": { "note": "E3", "duration": "0.1", "noise": true },
+    "boss_defeated": { "sequence": [["C5", "0.3"], ["E5", "0.3", 0.15], ["G5", "0.3", 0.3]] },
+    "ui_click": { "note": "C5", "duration": "0.05" },
+    "ui_select": { "sequence": [["E5", "0.1"], ["G5", "0.1", 0.05]] },
+    "streak_start": { "sequence": [["G4", "0.1"], ["B4", "0.1", 0.05], ["D5", "0.1", 0.1]] },
+    "victory": { "sequence": [["C5", "0.3"], ["E5", "0.3", 0.15], ["G5", "0.3", 0.3], ["C6", "0.5", 0.45]] },
+    "defeat": { "sequence": [["C4", "0.5"], ["A3", "0.5", 0.2], ["F3", "1.0", 0.4]] }
+  }
+}
