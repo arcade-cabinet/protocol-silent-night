@@ -11,6 +11,7 @@ import { SantaCharacter } from './SantaCharacter';
 import { ElfCharacter } from './ElfCharacter';
 import { BumbleCharacter } from './BumbleCharacter';
 import type { PlayerClassType } from '@/types';
+import { getBulletTypeFromWeapon } from '@/types';
 
 let bulletIdCounter = 0;
 
@@ -45,10 +46,8 @@ export function PlayerController() {
       };
 
       // Determine bullet type and parameters from weapon
-      const weaponType = playerClass?.weaponType || 'stars';
-      const bulletType = weaponType === 'cannon' ? 'cannon' 
-        : weaponType === 'smg' ? 'smg' 
-        : 'stars';
+      const weaponType = playerClass?.weaponType || 'star';
+      const bulletType = getBulletTypeFromWeapon(weaponType);
       
       const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
       const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;

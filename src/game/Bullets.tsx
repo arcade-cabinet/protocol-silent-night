@@ -23,6 +23,8 @@ export function Bullets() {
   const cannonRef = useRef<THREE.InstancedMesh>(null);
   const smgRef = useRef<THREE.InstancedMesh>(null);
   const starRef = useRef<THREE.InstancedMesh>(null);
+  const tempVecRef = useRef(new THREE.Vector3());
+  const lookAtVecRef = useRef(new THREE.Vector3());
   
   const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } =
     useGameStore();
@@ -110,7 +112,8 @@ export function Bullets() {
     updateBullets((currentBullets) => {
       const updatedBullets = currentBullets.map((bullet) => {
         const pos = (bullet.mesh as THREE.Object3D).position;
-        pos.add(bullet.direction.clone().multiplyScalar(bullet.speed * delta));
+        tempVecRef.current.copy(bullet.direction).multiplyScalar(bullet.speed * delta);
+        pos.add(tempVecRef.current);
 
         const newLife = bullet.life - delta;
 

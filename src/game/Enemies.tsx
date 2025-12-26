@@ -90,6 +90,10 @@ export function Enemies() {
 
   // Boss spawning is handled by the store
 
+  const toPlayerRef = useRef(new THREE.Vector3());
+  const directionRef = useRef(new THREE.Vector3());
+  const tempVecRef = useRef(new THREE.Vector3());
+
   useFrame((_, delta) => {
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
 
@@ -104,9 +108,9 @@ export function Enemies() {
 
     // Update enemy positions - mutate positions directly for performance
     // We use a shared vector to avoid allocations
-    const toPlayer = new THREE.Vector3();
-    const direction = new THREE.Vector3();
-    const tempVec = new THREE.Vector3();
+    const toPlayer = toPlayerRef.current;
+    const direction = directionRef.current;
+    const tempVec = tempVecRef.current;
     const now = Date.now();
     const damageCooldown = 500; // 500ms between damage ticks
     
