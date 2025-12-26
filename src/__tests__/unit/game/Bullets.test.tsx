@@ -3,9 +3,9 @@
  * Tests bullet rendering, physics, collision detection, and lifecycle
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render } from '@testing-library/react';
-import { Canvas } from '@react-three/fiber';
+import { describe, it, expect, beforeEach } from 'vitest';
+// import { render } from '@testing-library/react';
+// import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Bullets } from '@/game/Bullets';
 import { useGameStore } from '@/store/gameStore';
@@ -46,11 +46,15 @@ describe('Bullets Component', () => {
       const bullet = {
         id: 'test-bullet-1',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 20,
         damage: 10,
         life: 5,
         isEnemy: false,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       useGameStore.getState().addBullet(bullet);
@@ -64,21 +68,29 @@ describe('Bullets Component', () => {
       const bullet1 = {
         id: 'bullet-1',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 20,
         damage: 10,
         life: 5,
         isEnemy: false,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       const bullet2 = {
         id: 'bullet-2',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(0, 0, 1),
         speed: 20,
         damage: 10,
         life: 5,
         isEnemy: false,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       useGameStore.getState().addBullet(bullet1);
@@ -97,11 +109,15 @@ describe('Bullets Component', () => {
       const bullet = {
         id: 'expire-test',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 20,
         damage: 10,
         life: 0.1, // Very short life
         isEnemy: false,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       useGameStore.getState().addBullet(bullet);
@@ -145,11 +161,15 @@ describe('Bullets Component', () => {
       const bullet = {
         id: 'bullet-collision-test',
         mesh: bulletMesh,
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 20,
         damage: 15,
         life: 5,
         isEnemy: false,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       useGameStore.getState().addBullet(bullet);
@@ -259,34 +279,46 @@ describe('Bullets Component', () => {
       const cannonBullet = {
         id: 'cannon-1',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 15,
         damage: 40,
         life: 5,
         isEnemy: false,
         type: 'cannon' as const,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       const smgBullet = {
         id: 'smg-1',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 25,
         damage: 8,
         life: 3,
         isEnemy: false,
         type: 'smg' as const,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       const starsBullet = {
         id: 'stars-1',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 20,
         damage: 18,
         life: 4,
         isEnemy: false,
         type: 'stars' as const,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       useGameStore.getState().addBullet(cannonBullet);
@@ -339,6 +371,7 @@ describe('Bullets Component', () => {
         const bullet = {
           id: `perf-bullet-${i}`,
           mesh: new THREE.Object3D(),
+          velocity: new THREE.Vector3(),
           direction: new THREE.Vector3(
             Math.random() - 0.5,
             0,
@@ -348,6 +381,9 @@ describe('Bullets Component', () => {
           damage: 10,
           life: 5,
           isEnemy: false,
+          hp: 1,
+          maxHp: 1,
+          isActive: true,
         };
         useGameStore.getState().addBullet(bullet);
       }
@@ -359,11 +395,15 @@ describe('Bullets Component', () => {
       const bullet = {
         id: 'immutable-test',
         mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
         direction: new THREE.Vector3(1, 0, 0),
         speed: 20,
         damage: 10,
         life: 5,
         isEnemy: false,
+        hp: 1,
+        maxHp: 1,
+        isActive: true,
       };
 
       useGameStore.getState().addBullet(bullet);

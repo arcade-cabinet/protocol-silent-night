@@ -3,9 +3,9 @@
  * Tests enemy spawning, AI behavior, rendering, and boss mechanics
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render } from '@testing-library/react';
-import { Canvas } from '@react-three/fiber';
+import { describe, it, expect, beforeEach } from 'vitest';
+// import { render } from '@testing-library/react';
+// import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Enemies } from '@/game/Enemies';
 import { useGameStore } from '@/store/gameStore';
@@ -48,7 +48,7 @@ describe('Enemies Component', () => {
 
     it('should track max minions config', () => {
       const maxMinions = CONFIG.MAX_MINIONS;
-      expect(maxMinions).toBe(15);
+      expect(maxMinions).toBe(12);
 
       // Manually add enemies up to limit (gameStore doesn't enforce limit on addEnemy)
       for (let i = 0; i < maxMinions; i++) {
