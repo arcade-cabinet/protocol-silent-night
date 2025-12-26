@@ -198,6 +198,17 @@ export interface EnemyData extends EntityData {
 }
 
 /**
+ * Data structure for mission briefing lines
+ * @interface BriefingLine
+ */
+export interface BriefingLine {
+  label: string;
+  text: string;
+  accent?: boolean;
+  warning?: boolean;
+}
+
+/**
  * Christmas object types with distinct appearances
  */
 export type ChristmasObjectType = 'present' | 'tree' | 'candy_cane' | 'pillar';

@@ -29,7 +29,7 @@ export function CameraController() {
   const pinchStartRef = useRef<number | null>(null);
   const initialZoomRef = useRef(1.0);
 
-  const { playerPosition, screenShake, state } = useGameStore();
+  const { state } = useGameStore();
 
   // Handle pinch-to-zoom
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -143,6 +143,8 @@ export function CameraController() {
   }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handleDeviceOrientation]);
 
   useFrame((_, delta) => {
+    const { playerPosition, screenShake } = useGameStore.getState();
+    
     if (state === 'MENU' || state === 'BRIEFING') {
       // Menu camera - static elevated view with slow rotation
       camera.position.lerp(MENU_CAMERA_POS, delta * 2);

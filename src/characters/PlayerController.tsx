@@ -7,7 +7,6 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-<<<<<<< HEAD
 import type { ChristmasObstacle, PlayerClassType } from '@/types';
 import { getBulletTypeFromWeapon, WEAPON_EVOLUTIONS } from '@/types';
 import { BumbleCharacter } from './BumbleCharacter';
@@ -228,7 +227,7 @@ export function PlayerController() {
       const now = Date.now() / 1000;
       // Use modified stats from evolution
       const modifiedClass = getWeaponModifiers();
-      if (now - lastFireTime.current >= modifiedClass.rof) {
+      if (modifiedClass && now - lastFireTime.current >= modifiedClass.rof) {
         lastFireTime.current = now;
 
         firePosRef.current.copy(positionRef.current);

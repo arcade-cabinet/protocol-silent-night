@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { create } from 'zustand';
 import { AudioManager } from '@/audio/AudioManager';
 import type {
+  BriefingLine,
   BulletData,
   ChristmasObstacle,
   EnemyData,
@@ -66,7 +67,7 @@ interface GameStore {
   currentEvolution: WeaponEvolutionType | null;
   evolveWeapon: (evolutionType: WeaponEvolutionType) => void;
   checkEvolutionAvailability: () => WeaponEvolutionType | null;
-  getWeaponModifiers: () => PlayerClassConfig;
+  getWeaponModifiers: () => PlayerClassConfig | null;
 
   // Input
   input: InputState;
@@ -78,6 +79,7 @@ interface GameStore {
   bullets: BulletData[];
   enemies: EnemyData[];
   obstacles: ChristmasObstacle[];
+  getBriefingLines: () => BriefingLine[];
   addBullet: (bullet: BulletData) => void;
   removeBullet: (id: string) => void;
   addEnemy: (enemy: EnemyData) => void;
@@ -517,7 +519,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   getWeaponModifiers: () => {
     const { playerClass, currentEvolution } = get();
     
-    if (!playerClass) return playerClass as PlayerClassConfig;
+    if (!playerClass) return null;
     
     // No evolution, return base class
     if (!currentEvolution) return playerClass;
@@ -621,6 +623,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })),
 
   setObstacles: (obstacles) => set({ obstacles }),
+
+  getBriefingLines: () => {
+    const { missionBriefing, playerClass } = get();
+    const lines: BriefingLine[] = [
+      { label: 'OPERATION', text: missionBriefing.title, accent: true },
+      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
+      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
+    ];
+
+    // Add intel lines
+    for (const [index, intel] of missionBriefing.intel.entries()) {
+      const label =
+        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+      lines.push({ label, text: intel });
+    }
+
+    // Add final warning
+    lines.push({
+      label: 'WARNING',
+      text: 'Hostiles are aggressive - engage on sight',
+      warning: true,
+    });
+
+    return lines;
+  },
 
   spawnBoss: () => {
     const { enemies, addEnemy } = get();

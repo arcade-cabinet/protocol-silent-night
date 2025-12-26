@@ -132,8 +132,11 @@ export function Enemies() {
         tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
         currentPos.add(tempVec);
 
-        // Set rotation to face the player
-        enemy.mesh.rotation.y = Math.atan2(direction.x, direction.z);
+        // Set rotation to face the player - smooth rotation
+        const targetRotation = Math.atan2(direction.x, direction.z);
+        const angleDiff =
+          ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
+        enemy.mesh.rotation.y += angleDiff * delta * 8;
 
         // Collision with player - apply knockback and queue damage
         const hitRadius = enemy.type === 'boss' ? 3 : 1.5;
@@ -196,9 +199,15 @@ function BossRenderer({
 }) {
   const bossEnemy = enemies.find((e) => e.type === 'boss');
   const bossPos = bossEnemy?.mesh.position ?? null;
+  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
 
   return (
-    <BossMesh position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]} hp={bossHp} maxHp={bossMaxHp} />
+    <BossMesh
+      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
+      rotation={bossRotation}
+      hp={bossHp}
+      maxHp={bossMaxHp}
+    />
   );
 }
 
@@ -470,10 +479,12 @@ function MinionMesh({
 // Boss (Krampus-Prime) mesh component
 function BossMesh({
   position,
+  rotation = 0,
   hp,
   maxHp,
 }: {
   position: [number, number, number];
+  rotation?: number;
   hp: number;
   maxHp: number;
 }) {
@@ -521,7 +532,7 @@ function BossMesh({
   });
 
   return (
-    <group position={position}>
+    <group position={position} rotation={[0, rotation, 0]}>
       {/* Core */}
       <mesh ref={coreRef} castShadow>
         <dodecahedronGeometry args={[2]} />
