@@ -3,15 +3,17 @@
  * Class selection menu
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
+import { SantasWorkshop, WorkshopButton } from './SantasWorkshop';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
   const { state, selectClass, highScore } = useGameStore();
   const audioInitializedRef = useRef(false);
+  const [showWorkshop, setShowWorkshop] = useState(false);
 
   // Initialize audio when screen is shown (on first interaction)
   useEffect(() => {
@@ -134,6 +136,12 @@ export function StartScreen() {
         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
         {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
       </div>
+
+      {/* Workshop Button */}
+      <WorkshopButton onOpen={() => setShowWorkshop(true)} />
+
+      {/* Workshop Modal */}
+      <SantasWorkshop show={showWorkshop} onClose={() => setShowWorkshop(false)} />
     </div>
   );
 }
