@@ -16,6 +16,9 @@ const LERP_SPEED = 5;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.0;
 
+const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
+const LOOK_TARGET = new THREE.Vector3();
+
 export function CameraController() {
   const { camera } = useThree();
   const targetRef = useRef(new THREE.Vector3(0, DEFAULT_CAMERA_HEIGHT, DEFAULT_CAMERA_DISTANCE));
@@ -46,7 +49,7 @@ export function CameraController() {
       
       const scale = currentDistance / pinchStartRef.current;
       zoomRef.current = THREE.MathUtils.clamp(
-        initialZoomRef.current / scale, // Pinch out = zoom in (closer)
+        initialZoomRef.current / scale, // Pinch out (fingers apart) => zoom out (camera further)
         MIN_ZOOM,
         MAX_ZOOM
       );
@@ -124,7 +127,7 @@ export function CameraController() {
   useFrame((_, delta) => {
     if (state === 'MENU' || state === 'BRIEFING') {
       // Menu camera - static elevated view with slow rotation
-      camera.position.lerp(new THREE.Vector3(0, 30, 30), delta * 2);
+      camera.position.lerp(MENU_CAMERA_POS, delta * 2);
       camera.lookAt(0, 0, 0);
       return;
     }
@@ -155,12 +158,12 @@ export function CameraController() {
     camera.position.lerp(targetRef.current, LERP_SPEED * delta);
 
     // Look at player (slightly ahead)
-    const lookTarget = new THREE.Vector3(
+    LOOK_TARGET.set(
       playerPosition.x,
       0,
       playerPosition.z
     );
-    camera.lookAt(lookTarget);
+    camera.lookAt(LOOK_TARGET);
   });
 
   return null;

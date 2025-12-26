@@ -14,7 +14,9 @@ describe('HUD Component', () => {
   });
 
   it('should render in PHASE_1 state', () => {
-    useGameStore.getState().selectClass('santa');
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
     
     render(<HUD />);
     
@@ -23,7 +25,9 @@ describe('HUD Component', () => {
   });
 
   it('should display player health correctly', () => {
-    useGameStore.getState().selectClass('santa');
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
     
     render(<HUD />);
     
@@ -31,18 +35,22 @@ describe('HUD Component', () => {
   });
 
   it('should update health display when damaged', () => {
-    useGameStore.getState().selectClass('santa');
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
     const { rerender } = render(<HUD />);
     
-    useGameStore.getState().damagePlayer(100);
+    store.damagePlayer(100);
     rerender(<HUD />);
     
     expect(screen.getByText('200 / 300')).toBeInTheDocument();
   });
 
   it('should display health bar percentage correctly', () => {
-    useGameStore.getState().selectClass('elf');
-    useGameStore.getState().damagePlayer(50);
+    const store = useGameStore.getState();
+    store.selectClass('elf');
+    store.setState('PHASE_1');
+    store.damagePlayer(50);
     
     const { container } = render(<HUD />);
     
@@ -51,23 +59,27 @@ describe('HUD Component', () => {
   });
 
   it('should show correct objective in PHASE_1', () => {
-    useGameStore.getState().selectClass('santa');
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
     
     render(<HUD />);
     
-    expect(screen.getByText('ELIMINATE 10 MORE')).toBeInTheDocument();
+    expect(screen.getByText('ELIMINATE 10 MORE GRINCH-BOTS')).toBeInTheDocument();
   });
 
   it('should update kills remaining in objective', () => {
-    useGameStore.getState().selectClass('santa');
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
     const { rerender } = render(<HUD />);
     
-    useGameStore.getState().addKill(50);
-    useGameStore.getState().addKill(50);
-    useGameStore.getState().addKill(50);
+    store.addKill(50);
+    store.addKill(50);
+    store.addKill(50);
     rerender(<HUD />);
     
-    expect(screen.getByText('ELIMINATE 7 MORE')).toBeInTheDocument();
+    expect(screen.getByText('ELIMINATE 7 MORE GRINCH-BOTS')).toBeInTheDocument();
   });
 
   it('should show boss objective in PHASE_BOSS', () => {
@@ -98,8 +110,10 @@ describe('HUD Component', () => {
   });
 
   it('should display current score', () => {
-    useGameStore.getState().selectClass('santa');
-    useGameStore.getState().addKill(100);
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
+    store.addKill(100);
     
     render(<HUD />);
     
@@ -107,18 +121,22 @@ describe('HUD Component', () => {
   });
 
   it('should update score display when kills added', () => {
-    useGameStore.getState().selectClass('santa');
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
     const { rerender } = render(<HUD />);
     
-    useGameStore.getState().addKill(50);
-    useGameStore.getState().addKill(75);
+    store.addKill(50);
+    store.addKill(75);
     rerender(<HUD />);
     
     expect(screen.getByText(/SCORE: 1\d\d/)).toBeInTheDocument();
   });
 
   it('should work with different character classes', () => {
-    useGameStore.getState().selectClass('elf');
+    const store = useGameStore.getState();
+    store.selectClass('elf');
+    store.setState('PHASE_1');
     
     render(<HUD />);
     

@@ -106,6 +106,7 @@ export function Enemies() {
     // We use a shared vector to avoid allocations
     const toPlayer = new THREE.Vector3();
     const direction = new THREE.Vector3();
+    const tempVec = new THREE.Vector3();
     const now = Date.now();
     const damageCooldown = 500; // 500ms between damage ticks
     
@@ -123,7 +124,8 @@ export function Enemies() {
 
         // Move towards player
         const moveSpeed = enemy.type === 'boss' ? 3 : enemy.speed;
-        currentPos.add(direction.clone().multiplyScalar(moveSpeed * delta));
+        tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
+        currentPos.add(tempVec);
 
         // Set rotation to face the player
         enemy.mesh.rotation.y = Math.atan2(direction.x, direction.z);
@@ -137,7 +139,8 @@ export function Enemies() {
             damageAmount = Math.max(damageAmount, enemy.damage);
           }
           // Knockback regardless
-          currentPos.add(direction.clone().multiplyScalar(-2));
+          tempVec.copy(direction).multiplyScalar(-2);
+          currentPos.add(tempVec);
         }
       }
       
@@ -201,10 +204,12 @@ function BossRenderer({
 // Minion (Grinch-Bot) mesh component - Detailed robotic enemy
 function MinionMesh({
   position,
+  rotation,
   hp,
   maxHp,
 }: {
   position: [number, number, number];
+  rotation: number;
   hp: number;
   maxHp: number;
 }) {
@@ -224,6 +229,8 @@ function MinionMesh({
     const uniqueOffset = position[0] * 0.1 + position[2] * 0.1; // Unique per enemy
     
     if (groupRef.current) {
+      // Apply the rotation from the parent
+      groupRef.current.rotation.y = rotation;
       // Slight sway
       groupRef.current.rotation.z = Math.sin(time * 3 + uniqueOffset) * 0.05;
     }
@@ -284,8 +291,8 @@ function MinionMesh({
         </mesh>
         
         {/* Central power core */}
-        <mesh position={[0, 0.5, 0.24]}>
-          <cylinderGeometry args={[0.08, 0.08, 0.05, 8]} rotation={[Math.PI / 2, 0, 0]} />
+        <mesh position={[0, 0.5, 0.24]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.08, 0.08, 0.05, 8]} />
           <meshBasicMaterial color={emissiveColor} />
         </mesh>
         

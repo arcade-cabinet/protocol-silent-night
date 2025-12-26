@@ -3,7 +3,7 @@
  * Displays mission objectives before starting the game
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { AudioManager } from '@/audio/AudioManager';
 import styles from './MissionBriefing.module.css';
@@ -13,7 +13,7 @@ export function MissionBriefing() {
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
 
-  const briefingLines = [
+  const briefingLines = useMemo(() => [
     { label: 'OPERATION', text: 'SILENT NIGHT', accent: true },
     { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
     { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
@@ -21,7 +21,7 @@ export function MissionBriefing() {
     { label: 'SECONDARY OBJECTIVE', text: 'Neutralize Krampus-Prime command unit' },
     { label: 'INTEL', text: 'Defeat 10 Grinch-Bots to draw out Krampus-Prime' },
     { label: 'WARNING', text: 'Hostiles are aggressive - engage on sight', warning: true },
-  ];
+  ], [playerClass]);
 
   useEffect(() => {
     if (state !== 'BRIEFING') return;
@@ -43,7 +43,7 @@ export function MissionBriefing() {
     }, 600);
 
     return () => clearInterval(interval);
-  }, [state, briefingLines.length]);
+  }, [state, briefingLines]);
 
   // Reset state when briefing starts
   useEffect(() => {

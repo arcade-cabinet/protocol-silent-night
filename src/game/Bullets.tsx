@@ -151,9 +151,9 @@ export function Bullets() {
       const starBullets: BulletData[] = [];
 
       for (const bullet of activeBullets) {
-        if (bullet.type === 'cannon' || (!bullet.type && bullet.damage >= 30)) {
+        if (bullet.type === 'cannon') {
           cannonBullets.push(bullet);
-        } else if (bullet.type === 'smg' || (!bullet.type && bullet.damage < 15)) {
+        } else if (bullet.type === 'smg') {
           smgBullets.push(bullet);
         } else {
           starBullets.push(bullet);

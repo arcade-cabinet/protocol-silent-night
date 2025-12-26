@@ -21,7 +21,7 @@ describe('GameStore - Player Management', () => {
       expect(currentState.playerClass?.name).toBe('MECHA-SANTA');
       expect(currentState.playerHp).toBe(300);
       expect(currentState.playerMaxHp).toBe(300);
-      expect(currentState.state).toBe('PHASE_1');
+      expect(currentState.state).toBe('BRIEFING');
     });
 
     it('should set player class to Elf with correct stats', () => {

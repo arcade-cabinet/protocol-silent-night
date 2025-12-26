@@ -20,6 +20,7 @@ describe('GameStore - Bullet Management', () => {
     damage: 10,
     life: 3,
     speed: 20,
+    type: 'cannon',
   });
 
   describe('addBullet', () => {

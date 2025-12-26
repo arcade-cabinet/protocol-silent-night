@@ -12,11 +12,11 @@ describe('Game Constants', () => {
     });
 
     it('should have max minions limit', () => {
-      expect(CONFIG.MAX_MINIONS).toBe(15);
+      expect(CONFIG.MAX_MINIONS).toBe(12);
     });
 
     it('should have spawn interval', () => {
-      expect(CONFIG.SPAWN_INTERVAL).toBe(2000);
+      expect(CONFIG.SPAWN_INTERVAL).toBe(2500);
     });
 
     it('should have color palette', () => {
@@ -205,7 +205,7 @@ describe('Type System', () => {
   });
 
   describe('GameState', () => {
-    const validStates = ['MENU', 'PHASE_1', 'PHASE_BOSS', 'WIN', 'GAME_OVER'];
+    const validStates = ['MENU', 'BRIEFING', 'PHASE_1', 'PHASE_BOSS', 'WIN', 'GAME_OVER'];
     
     it('should have all game states defined', () => {
       validStates.forEach((state) => {

@@ -44,17 +44,17 @@ export function PlayerController() {
         return obj;
       };
 
-      // Determine bullet type from weapon
-      const bulletType = playerClass?.weaponType === 'cannon' ? 'cannon' 
-        : playerClass?.weaponType === 'smg' ? 'smg' 
+      // Determine bullet type and parameters from weapon
+      const weaponType = playerClass?.weaponType || 'stars';
+      const bulletType = weaponType === 'cannon' ? 'cannon' 
+        : weaponType === 'smg' ? 'smg' 
         : 'stars';
       
-      // Weapon-specific parameters
       const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
       const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;
 
       // For star weapon, create spread pattern
-      if (playerClass?.weaponType === 'star') {
+      if (weaponType === 'star') {
         const angles = [-0.2, 0, 0.2];
         for (const angleOffset of angles) {
           const spreadDir = direction.clone();

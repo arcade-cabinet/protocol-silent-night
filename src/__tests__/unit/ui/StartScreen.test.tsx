@@ -84,7 +84,7 @@ describe('StartScreen Component', () => {
     
     const state = useGameStore.getState();
     expect(state.playerClass?.type).toBe('santa');
-    expect(state.state).toBe('PHASE_1');
+    expect(state.state).toBe('BRIEFING');
   });
 
   it('should select Elf when button clicked', async () => {
@@ -96,7 +96,7 @@ describe('StartScreen Component', () => {
     
     const state = useGameStore.getState();
     expect(state.playerClass?.type).toBe('elf');
-    expect(state.state).toBe('PHASE_1');
+    expect(state.state).toBe('BRIEFING');
   });
 
   it('should select Bumble when button clicked', async () => {
@@ -108,7 +108,7 @@ describe('StartScreen Component', () => {
     
     const state = useGameStore.getState();
     expect(state.playerClass?.type).toBe('bumble');
-    expect(state.state).toBe('PHASE_1');
+    expect(state.state).toBe('BRIEFING');
   });
 
   it('should not display high score when zero', () => {

@@ -18,6 +18,11 @@ describe('Game Flow Integration Tests', () => {
       useGameStore.getState().selectClass('santa');
       
       let state = useGameStore.getState();
+      expect(state.state).toBe('BRIEFING');
+      
+      // 2b. Transition to PHASE_1 (simulating briefing completion)
+      useGameStore.getState().setState('PHASE_1');
+      state = useGameStore.getState();
       expect(state.state).toBe('PHASE_1');
       expect(state.playerClass?.type).toBe('santa');
       expect(state.playerHp).toBe(300);
@@ -46,6 +51,7 @@ describe('Game Flow Integration Tests', () => {
     it('should handle player death before boss', () => {
       // Select character
       useGameStore.getState().selectClass('santa');
+      useGameStore.getState().setState('PHASE_1');
       
       // Kill some enemies
       useGameStore.getState().addKill(50);
@@ -180,6 +186,7 @@ describe('Game Flow Integration Tests', () => {
     it('should handle Elf full combat scenario', () => {
       const store = useGameStore.getState();
       store.selectClass('elf');
+      store.setState('PHASE_1');
       
       const state = useGameStore.getState();
       
@@ -200,6 +207,7 @@ describe('Game Flow Integration Tests', () => {
     it('should handle Bumble tank gameplay', () => {
       const store = useGameStore.getState();
       store.selectClass('bumble');
+      store.setState('PHASE_1');
       
       const state = useGameStore.getState();
       
@@ -218,6 +226,7 @@ describe('Game Flow Integration Tests', () => {
     it('should handle Santa heavy gameplay', () => {
       const store = useGameStore.getState();
       store.selectClass('santa');
+      store.setState('PHASE_1');
       
       const state = useGameStore.getState();
       
@@ -239,6 +248,7 @@ describe('Game Flow Integration Tests', () => {
     beforeEach(() => {
       const store = useGameStore.getState();
       store.selectClass('santa');
+      store.setState('PHASE_1');
       
       // Trigger boss spawn
       for (let i = 0; i < 10; i++) {
@@ -271,6 +281,11 @@ describe('Game Flow Integration Tests', () => {
     });
 
     it('should handle player death during boss fight', () => {
+      // Transition to boss fight
+      useGameStore.getState().selectClass('santa');
+      useGameStore.getState().setState('PHASE_BOSS');
+      useGameStore.getState().bossActive = true;
+      
       // Damage boss
       useGameStore.getState().damageBoss(500);
       expect(useGameStore.getState().bossHp).toBe(500);
@@ -385,9 +400,11 @@ describe('Game Flow Integration Tests', () => {
     it('should transition through all game states correctly', () => {
       const store = useGameStore.getState();
       
-      // MENU -> PHASE_1
+      // MENU -> BRIEFING -> PHASE_1
       expect(store.state).toBe('MENU');
       store.selectClass('santa');
+      expect(useGameStore.getState().state).toBe('BRIEFING');
+      store.setState('PHASE_1');
       expect(useGameStore.getState().state).toBe('PHASE_1');
       
       // PHASE_1 -> PHASE_BOSS
@@ -409,6 +426,7 @@ describe('Game Flow Integration Tests', () => {
       const store = useGameStore.getState();
       
       store.selectClass('elf');
+      store.setState('PHASE_1');
       expect(useGameStore.getState().state).toBe('PHASE_1');
       
       // Player dies
