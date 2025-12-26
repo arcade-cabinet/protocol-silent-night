@@ -17,13 +17,113 @@
       "spacing": 0.015,
       "windStrength": 0.3
     },
-    "customization": {
-      "beardColor": "#ffffff",
-      "eyeColor": "#00ffff",
-      "beltColor": "#111111",
-      "buckleColor": "#ffd700",
-      "noseColor": "#ffccaa"
-    }
+    "customizations": [
+      {
+        "joint": "head",
+        "name": "beard_main",
+        "type": "sphere",
+        "args": [0.28, 12, 12],
+        "material": { "color": "#ffffff", "roughness": 0.9 },
+        "position": [0, -0.15, 0.15],
+        "scale": [1, 1.3, 0.8]
+      },
+      {
+        "joint": "head",
+        "name": "beard_sub",
+        "type": "sphere",
+        "args": [0.22, 10, 10],
+        "material": { "color": "#ffffff", "roughness": 0.9 },
+        "position": [0, -0.25, 0.18]
+      },
+      {
+        "joint": "head",
+        "name": "hat_base",
+        "type": "cone",
+        "args": [0.22, 0.4, 8],
+        "material": { "color": "#ff0044", "emissive": "#ff0044", "emissiveIntensity": 0.3 },
+        "position": [0, 0.2, 0],
+        "rotation": [0, 0, 0.1]
+      },
+      {
+        "joint": "head",
+        "name": "pom_pom",
+        "type": "sphere",
+        "args": [0.1, 8, 8],
+        "material": { "color": "#ffffff", "emissive": "#ffffcc", "emissiveIntensity": 0.3 },
+        "position": [0.05, 0.45, 0.1]
+      },
+      {
+        "joint": "head",
+        "name": "hat_trim",
+        "type": "torus",
+        "args": [0.2, 0.05, 8, 16],
+        "material": { "color": "#ffffff", "roughness": 0.9 },
+        "position": [0, 0.05, 0],
+        "rotation": [1.57, 0, 0]
+      },
+      {
+        "joint": "head",
+        "name": "eye_l",
+        "type": "sphere",
+        "args": [0.04, 8, 8],
+        "material": { "color": "#00ffff" },
+        "position": [0.08, 0.05, 0.2]
+      },
+      {
+        "joint": "head",
+        "name": "eye_r",
+        "type": "sphere",
+        "args": [0.04, 8, 8],
+        "material": { "color": "#00ffff" },
+        "position": [-0.08, 0.05, 0.2]
+      },
+      {
+        "joint": "head",
+        "name": "nose",
+        "type": "sphere",
+        "args": [0.05, 8, 8],
+        "material": { "color": "#ffccaa", "roughness": 0.8 },
+        "position": [0, 0, 0.23]
+      },
+      {
+        "joint": "torso",
+        "name": "belt",
+        "type": "torus",
+        "args": [0.35, 0.05, 8, 32],
+        "material": { "color": "#111111", "metalness": 0.8, "roughness": 0.3 },
+        "position": [0, -0.15, 0],
+        "rotation": [1.57, 0, 0]
+      },
+      {
+        "joint": "torso",
+        "name": "buckle",
+        "type": "box",
+        "args": [0.12, 0.1, 0.03],
+        "material": { "color": "#ffd700", "metalness": 0.95, "roughness": 0.1, "emissive": "#ffa500", "emissiveIntensity": 0.2 },
+        "position": [0, -0.15, 0.36]
+      },
+      {
+        "joint": "armR",
+        "name": "weapon_group",
+        "type": "group",
+        "position": [0, -0.3, 0.15],
+        "children": [
+          {
+            "name": "cannon_barrel",
+            "type": "cylinder",
+            "args": [0.07, 0.12, 0.55, 8],
+            "material": { "color": "#222222", "emissive": "#ff2200", "emissiveIntensity": 0.15, "metalness": 0.95, "roughness": 0.2 },
+            "rotation": [1.57, 0, 0]
+          },
+          {
+            "name": "muzzle_flash",
+            "type": "pointLight",
+            "args": ["#ff4400", 0, 6],
+            "position": [0, 0, 0.35]
+          }
+        ]
+      }
+    ]
   },
   "elf": {
     "type": "elf",
@@ -43,12 +143,55 @@
       "spacing": 0.012,
       "windStrength": 1.2
     },
-    "customization": {
-      "skinColor": "#ffe4c4",
-      "eyeColor": "#00ffff",
-      "accentColor": "#00ff88",
-      "hairColor": "#00ffcc"
-    }
+    "customizations": [
+      {
+        "joint": "head",
+        "name": "ear_l",
+        "type": "cone",
+        "args": [0.05, 0.2, 4],
+        "material": { "color": "#ffe4c4", "roughness": 0.7 },
+        "position": [0.18, 0.08, 0],
+        "rotation": [0, 0, 0.5]
+      },
+      {
+        "joint": "head",
+        "name": "ear_r",
+        "type": "cone",
+        "args": [0.05, 0.2, 4],
+        "material": { "color": "#ffe4c4", "roughness": 0.7 },
+        "position": [-0.18, 0.08, 0],
+        "rotation": [0, 0, -0.5]
+      },
+      {
+        "joint": "head",
+        "name": "visor",
+        "type": "box",
+        "args": [0.26, 0.06, 0.03],
+        "material": { "color": "#001122", "emissive": "#00ffff", "emissiveIntensity": 1.8, "transparent": true, "opacity": 0.85, "metalness": 0.9, "roughness": 0.1 },
+        "position": [0, 0.02, 0.21]
+      },
+      {
+        "joint": "armR",
+        "name": "weapon_group",
+        "type": "group",
+        "position": [0, -0.2, 0.12],
+        "rotation": [1.57, 0, 0],
+        "children": [
+          {
+            "name": "smg_body",
+            "type": "box",
+            "args": [0.045, 0.22, 0.065],
+            "material": { "color": "#111111", "emissive": "#00ffcc", "emissiveIntensity": 0.25, "metalness": 0.95, "roughness": 0.1 }
+          },
+          {
+            "name": "muzzle_flash",
+            "type": "pointLight",
+            "args": ["#00ffcc", 0, 4],
+            "position": [0, 0.26, 0]
+          }
+        ]
+      }
+    ]
   },
   "bumble": {
     "type": "bumble",
@@ -69,12 +212,54 @@
       "windStrength": 0.6,
       "gravityDroop": 0.05
     },
-    "customization": {
-      "hornColor": "#ccccaa",
-      "eyeColor": "#00ccff",
-      "snoutColor": "#333333",
-      "teethColor": "#ffffff",
-      "starColor": "#ffd700"
-    }
+    "customizations": [
+      {
+        "joint": "hips",
+        "type": "scale",
+        "scale": [1.4, 1.2, 1.3]
+      },
+      {
+        "joint": "torso",
+        "type": "scale",
+        "scale": [1.3, 1.1, 1.2]
+      },
+      {
+        "joint": "head",
+        "type": "scale",
+        "scale": [1.3, 1.2, 1.2]
+      },
+      {
+        "joint": "head",
+        "name": "horn_l",
+        "type": "cone",
+        "args": [0.06, 0.3, 6],
+        "material": { "color": "#ccccaa", "roughness": 0.4, "metalness": 0.2 },
+        "position": [0.2, 0.2, 0],
+        "rotation": [0, 0, -0.4]
+      },
+      {
+        "joint": "head",
+        "name": "horn_r",
+        "type": "cone",
+        "args": [0.06, 0.3, 6],
+        "material": { "color": "#ccccaa", "roughness": 0.4, "metalness": 0.2 },
+        "position": [-0.2, 0.2, 0],
+        "rotation": [0, 0, 0.4]
+      },
+      {
+        "joint": "armL",
+        "name": "weapon_group",
+        "type": "group",
+        "position": [0.15, -0.35, 0.2],
+        "children": [
+          {
+            "name": "muzzle_flash",
+            "type": "pointLight",
+            "args": ["#ffd700", 1, 4],
+            "position": [0, 0, 0]
+          }
+        ]
+      }
+    ]
   }
 }
