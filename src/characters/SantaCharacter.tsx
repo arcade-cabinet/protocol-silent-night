@@ -75,7 +75,8 @@ export function SantaCharacter({
 
       // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
-      for (const joint of Object.values(character.joints)) {
+      for (const jointName of ['armL', 'armR', 'legL', 'legR', 'torso', 'head', 'hips'] as const) {
+        const joint = character.joints[jointName];
         if (joint?.mesh) {
           joint.mesh.traverse((child) => {
             if (child instanceof THREE.Group && child.userData.isFurGroup) {
@@ -222,19 +223,14 @@ export function SantaCharacter({
     }
 
     // Arm fur cuffs
-    if (joints.armL?.mesh) {
-      const cuffGeo = new THREE.TorusGeometry(0.12 * scale, 0.03 * scale, 8, 16);
-      const cuff = new THREE.Mesh(cuffGeo, beardMat);
-      cuff.position.set(0, -0.2 * scale, 0);
-      cuff.rotation.x = Math.PI / 2;
-      joints.armL.mesh.add(cuff);
-    }
-    if (joints.armR?.mesh) {
-      const cuffGeo = new THREE.TorusGeometry(0.12 * scale, 0.03 * scale, 8, 16);
-      const cuff = new THREE.Mesh(cuffGeo, beardMat);
-      cuff.position.set(0, -0.2 * scale, 0);
-      cuff.rotation.x = Math.PI / 2;
-      joints.armR.mesh.add(cuff);
+    for (const arm of [joints.armL, joints.armR]) {
+      if (arm?.mesh) {
+        const cuffGeo = new THREE.TorusGeometry(0.12 * scale, 0.03 * scale, 8, 16);
+        const cuff = new THREE.Mesh(cuffGeo, beardMat);
+        cuff.position.set(0, -0.2 * scale, 0);
+        cuff.rotation.x = Math.PI / 2;
+        arm.mesh.add(cuff);
+      }
     }
 
     // Add Coal Cannon to right arm - enhanced version

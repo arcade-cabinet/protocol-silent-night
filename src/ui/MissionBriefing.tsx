@@ -39,11 +39,12 @@ export function MissionBriefing() {
     AudioManager.playSFX('ui_click');
 
     // Reveal lines one by one
+    let timeoutId: ReturnType<typeof setTimeout>;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
         if (prev >= briefingLines.length - 1) {
           clearInterval(interval);
-          setTimeout(() => setShowButton(true), 500);
+          timeoutId = setTimeout(() => setShowButton(true), 500);
           return prev;
         }
         AudioManager.playSFX('ui_click');
@@ -51,7 +52,10 @@ export function MissionBriefing() {
       });
     }, 600);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [state, briefingLines]);
 
   // Reset state when briefing starts

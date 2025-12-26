@@ -95,19 +95,20 @@ export function CameraController() {
     window.addEventListener('wheel', handleWheel, { passive: true });
 
     // Request gyroscope permission on iOS 13+
+    let isCancelled = false;
     const requestGyroPermission = async () => {
       if (typeof DeviceOrientationEvent !== 'undefined' && 
           // Check if requestPermission exists (iOS 13+)
           typeof (DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission?: () => Promise<string> }).requestPermission === 'function') {
         try {
           const permission = await (DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission: () => Promise<string> }).requestPermission();
-          if (permission === 'granted') {
+          if (permission === 'granted' && !isCancelled) {
             window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true });
           }
         } catch {
           // Permission denied or error
         }
-      } else {
+      } else if (!isCancelled) {
         // Non-iOS or older browsers - just add listener
         window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true });
       }
@@ -116,6 +117,7 @@ export function CameraController() {
     requestGyroPermission();
 
     return () => {
+      isCancelled = true;
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
