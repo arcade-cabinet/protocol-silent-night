@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { BossHUD } from '@/ui/BossHUD';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
+import { BossHUD } from '@/ui/BossHUD';
 
 describe('BossHUD Component', () => {
   beforeEach(() => {
@@ -10,27 +10,27 @@ describe('BossHUD Component', () => {
 
   it('should not render when boss is not active', () => {
     useGameStore.getState().selectClass('santa');
-    
+
     const { container } = render(<BossHUD />);
-    
+
     expect(container.firstChild).toBeNull();
   });
 
   it('should render when boss is active', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
-    
+
     render(<BossHUD />);
-    
+
     expect(screen.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeInTheDocument();
   });
 
   it('should display boss health correctly', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
-    
+
     render(<BossHUD />);
-    
+
     expect(screen.getByText('1000 / 1000')).toBeInTheDocument();
   });
 
@@ -38,10 +38,10 @@ describe('BossHUD Component', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
     const { rerender } = render(<BossHUD />);
-    
+
     useGameStore.getState().damageBoss(300);
     rerender(<BossHUD />);
-    
+
     expect(screen.getByText('700 / 1000')).toBeInTheDocument();
   });
 
@@ -49,9 +49,9 @@ describe('BossHUD Component', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
     useGameStore.getState().damageBoss(500);
-    
+
     const { container } = render(<BossHUD />);
-    
+
     const bossBar = container.querySelector('[class*="bossBar"]');
     expect(bossBar).toHaveStyle({ width: '50%' });
   });
@@ -60,9 +60,9 @@ describe('BossHUD Component', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
     useGameStore.getState().setState('WIN');
-    
+
     const { container } = render(<BossHUD />);
-    
+
     expect(container.firstChild).toBeNull();
   });
 
@@ -70,18 +70,18 @@ describe('BossHUD Component', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
     useGameStore.getState().setState('GAME_OVER');
-    
+
     const { container } = render(<BossHUD />);
-    
+
     expect(container.firstChild).toBeNull();
   });
 
   it('should show full health bar at 100%', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
-    
+
     const { container } = render(<BossHUD />);
-    
+
     const bossBar = container.querySelector('[class*="bossBar"]');
     expect(bossBar).toHaveStyle({ width: '100%' });
   });
@@ -90,9 +90,9 @@ describe('BossHUD Component', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().spawnBoss();
     useGameStore.getState().damageBoss(950);
-    
+
     const { container } = render(<BossHUD />);
-    
+
     const bossBar = container.querySelector('[class*="bossBar"]');
     expect(bossBar).toHaveStyle({ width: '5%' });
   });

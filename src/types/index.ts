@@ -51,12 +51,18 @@ export interface PlayerClassConfig {
 /**
  * Helper to get bullet type from weapon type
  */
-export const getBulletTypeFromWeapon = (weaponType: PlayerClassConfig['weaponType']): 'cannon' | 'smg' | 'stars' => {
+export const getBulletTypeFromWeapon = (
+  weaponType: PlayerClassConfig['weaponType']
+): 'cannon' | 'smg' | 'stars' => {
   switch (weaponType) {
-    case 'cannon': return 'cannon';
-    case 'smg': return 'smg';
-    case 'star': return 'stars';
-    default: return 'stars';
+    case 'cannon':
+      return 'cannon';
+    case 'smg':
+      return 'smg';
+    case 'star':
+      return 'stars';
+    default:
+      return 'stars';
   }
 };
 

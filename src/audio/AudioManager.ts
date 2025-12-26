@@ -1,13 +1,13 @@
 /**
  * AudioManager - Comprehensive audio system for Protocol: Silent Night
- * 
+ *
  * Manages background music (procedural Christmas synth) and sound effects
  * using Tone.js for synthesis and Web Audio API for playback.
  */
 
 import * as Tone from 'tone';
 
-export type SoundEffect = 
+export type SoundEffect =
   | 'weapon_cannon'
   | 'weapon_smg'
   | 'weapon_stars'
@@ -35,7 +35,8 @@ class AudioManagerClass {
   private sfxVolume = 0.8;
 
   // Synth instruments
-  private synths: Map<string, Tone.Synth | Tone.PolySynth | Tone.FMSynth | Tone.NoiseSynth> = new Map();
+  private synths: Map<string, Tone.Synth | Tone.PolySynth | Tone.FMSynth | Tone.NoiseSynth> =
+    new Map();
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
 
@@ -478,13 +479,16 @@ class AudioManagerClass {
    */
   private savePreferences(): void {
     try {
-      localStorage.setItem('audio_preferences', JSON.stringify({
-        musicEnabled: this.musicEnabled,
-        sfxEnabled: this.sfxEnabled,
-        masterVolume: this.masterVolume,
-        musicVolume: this.musicVolume,
-        sfxVolume: this.sfxVolume,
-      }));
+      localStorage.setItem(
+        'audio_preferences',
+        JSON.stringify({
+          musicEnabled: this.musicEnabled,
+          sfxEnabled: this.sfxEnabled,
+          masterVolume: this.masterVolume,
+          musicVolume: this.musicVolume,
+          sfxVolume: this.sfxVolume,
+        })
+      );
     } catch (error) {
       console.warn('Failed to save audio preferences:', error);
     }
@@ -519,7 +523,7 @@ class AudioManagerClass {
    */
   dispose(): void {
     this.stopMusic();
-    
+
     for (const synth of this.synths.values()) {
       synth.dispose();
     }

@@ -3,15 +3,15 @@
  * Handles player movement, shooting, and character rendering
  */
 
-import { useRef, useCallback, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { SantaCharacter } from './SantaCharacter';
-import { ElfCharacter } from './ElfCharacter';
-import { BumbleCharacter } from './BumbleCharacter';
 import type { PlayerClassType } from '@/types';
 import { getBulletTypeFromWeapon } from '@/types';
+import { BumbleCharacter } from './BumbleCharacter';
+import { ElfCharacter } from './ElfCharacter';
+import { SantaCharacter } from './SantaCharacter';
 
 let bulletIdCounter = 0;
 
@@ -25,14 +25,8 @@ export function PlayerController() {
   const upAxisRef = useRef(new THREE.Vector3(0, 1, 0));
   const firePosRef = useRef(new THREE.Vector3());
 
-  const {
-    playerClass,
-    input,
-    state,
-    setPlayerPosition,
-    setPlayerRotation,
-    addBullet,
-  } = useGameStore();
+  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet } =
+    useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;
@@ -52,7 +46,7 @@ export function PlayerController() {
       // Determine bullet type and parameters from weapon
       const weaponType = playerClass?.weaponType || 'star';
       const bulletType = getBulletTypeFromWeapon(weaponType);
-      
+
       const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
       const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;
 

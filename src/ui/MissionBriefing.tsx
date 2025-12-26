@@ -3,10 +3,17 @@
  * Displays mission objectives before starting the game
  */
 
-import { useState, useEffect, useMemo } from 'react';
-import { useGameStore } from '@/store/gameStore';
+import { useEffect, useMemo, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
+import { useGameStore } from '@/store/gameStore';
 import styles from './MissionBriefing.module.css';
+
+interface BriefingLine {
+  label: string;
+  text: string;
+  accent?: boolean;
+  warning?: boolean;
+}
 
 export function MissionBriefing() {
   const { state, setState, playerClass, missionBriefing } = useGameStore();
@@ -14,7 +21,7 @@ export function MissionBriefing() {
   const [showButton, setShowButton] = useState(false);
 
   const briefingLines = useMemo(() => {
-    const lines = [
+    const lines: BriefingLine[] = [
       { label: 'OPERATION', text: missionBriefing.title, accent: true },
       { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
       { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
@@ -22,12 +29,17 @@ export function MissionBriefing() {
 
     // Add intel lines from store
     for (const [index, intel] of missionBriefing.intel.entries()) {
-      const label = index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+      const label =
+        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
 
     // Add final warning
-    lines.push({ label: 'WARNING', text: 'Hostiles are aggressive - engage on sight', warning: true });
+    lines.push({
+      label: 'WARNING',
+      text: 'Hostiles are aggressive - engage on sight',
+      warning: true,
+    });
 
     return lines;
   }, [playerClass, missionBriefing]);
@@ -98,11 +110,7 @@ export function MissionBriefing() {
         </div>
 
         {showButton && (
-          <button
-            type="button"
-            className={styles.startButton}
-            onClick={handleStart}
-          >
+          <button type="button" className={styles.startButton} onClick={handleStart}>
             <span className={styles.buttonText}>COMMENCE OPERATION</span>
             <div className={styles.buttonGlow} />
           </button>

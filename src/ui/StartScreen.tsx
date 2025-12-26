@@ -4,9 +4,9 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
-import { AudioManager } from '@/audio/AudioManager';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
@@ -83,11 +83,7 @@ export function StartScreen() {
         </button>
 
         {/* Elf Card */}
-        <button
-          type="button"
-          className={styles.classCard}
-          onClick={() => handleSelectClass('elf')}
-        >
+        <button type="button" className={styles.classCard} onClick={() => handleSelectClass('elf')}>
           <div className={styles.cardTitle} style={{ color: '#00ffcc' }}>
             {PLAYER_CLASSES.elf.name}
           </div>
@@ -131,9 +127,7 @@ export function StartScreen() {
 
       <div className={styles.instructions}>
         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
-        {highScore > 0 && (
-          <p className={styles.highScore}>HIGH SCORE: {highScore}</p>
-        )}
+        {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
       </div>
     </div>
   );

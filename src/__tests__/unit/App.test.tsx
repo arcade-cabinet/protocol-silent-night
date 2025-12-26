@@ -3,11 +3,11 @@
  * Verifies main application structure and rendering
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { PLAYER_CLASSES } from '@/types';
 import App from '../../App';
 import { useGameStore } from '../../store/gameStore';
-import { PLAYER_CLASSES } from '@/types';
 
 // Mock GameScene to avoid Three.js complexity
 vi.mock('@/game', () => ({
@@ -42,7 +42,7 @@ describe('App', () => {
     it('should render the main app container', () => {
       const { container } = render(<App />);
       const mainDiv = container.firstChild as HTMLElement;
-      
+
       expect(mainDiv).toBeTruthy();
       expect(mainDiv.style.width).toBe('100%');
       expect(mainDiv.style.height).toBe('100%');
@@ -56,10 +56,10 @@ describe('App', () => {
 
     it('should render all UI components', () => {
       const { container } = render(<App />);
-      
+
       // App should render without errors
       expect(container).toBeTruthy();
-      
+
       // Note: Individual UI components are tested separately
       // This test ensures they're all included in the App structure
     });
@@ -75,7 +75,7 @@ describe('App', () => {
     it('should render properly in PLAYING state', () => {
       useGameStore.setState({
         state: 'PHASE_1',
-        playerClass: PLAYER_CLASSES['santa'],
+        playerClass: PLAYER_CLASSES.santa,
         playerHp: 300,
         playerMaxHp: 300,
       });
@@ -100,11 +100,11 @@ describe('App', () => {
     it('should render HUD during gameplay', () => {
       useGameStore.setState({
         state: 'PHASE_1',
-        playerClass: PLAYER_CLASSES['santa'],
+        playerClass: PLAYER_CLASSES.santa,
         playerHp: 300,
         playerMaxHp: 300,
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -112,12 +112,12 @@ describe('App', () => {
     it('should render BossHUD when boss is active', () => {
       useGameStore.setState({
         state: 'PHASE_BOSS',
-        playerClass: PLAYER_CLASSES['santa'],
+        playerClass: PLAYER_CLASSES.santa,
         bossActive: true,
         bossHp: 1000,
         bossMaxHp: 1000,
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -125,9 +125,9 @@ describe('App', () => {
     it('should render InputControls during gameplay', () => {
       useGameStore.setState({
         state: 'PHASE_1',
-        playerClass: PLAYER_CLASSES['santa'],
+        playerClass: PLAYER_CLASSES.santa,
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -143,7 +143,7 @@ describe('App', () => {
         state: 'GAME_OVER',
         stats: { kills: 10, score: 1000, bossDefeated: false },
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -153,7 +153,7 @@ describe('App', () => {
         state: 'WIN',
         stats: { kills: 20, score: 5000, bossDefeated: true },
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -165,7 +165,7 @@ describe('App', () => {
         state: 'PHASE_1',
         damageFlash: true,
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -176,7 +176,7 @@ describe('App', () => {
         stats: { kills: 5, score: 500, bossDefeated: false },
         killStreak: 5,
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -186,7 +186,7 @@ describe('App', () => {
         state: 'PHASE_BOSS',
         bossActive: true,
       });
-      
+
       const { container } = render(<App />);
       expect(container).toBeTruthy();
     });
@@ -196,10 +196,10 @@ describe('App', () => {
     it('should render components in correct order', () => {
       const { container } = render(<App />);
       const mainDiv = container.firstChild as HTMLElement;
-      
+
       // Check that container exists
       expect(mainDiv).toBeTruthy();
-      
+
       // Components should be layered: GameScene, then UI overlays
       // This ensures proper z-index stacking
     });
@@ -209,7 +209,7 @@ describe('App', () => {
     it('should use full viewport dimensions', () => {
       const { container } = render(<App />);
       const mainDiv = container.firstChild as HTMLElement;
-      
+
       expect(mainDiv.style.width).toBe('100%');
       expect(mainDiv.style.height).toBe('100%');
     });
@@ -217,7 +217,7 @@ describe('App', () => {
     it('should use relative positioning for overlays', () => {
       const { container } = render(<App />);
       const mainDiv = container.firstChild as HTMLElement;
-      
+
       expect(mainDiv.style.position).toBe('relative');
     });
   });

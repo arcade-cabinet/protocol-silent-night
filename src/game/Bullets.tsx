@@ -4,8 +4,8 @@
  * Each weapon type has distinct visual appearance
  */
 
-import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData } from '@/types';
@@ -25,16 +25,15 @@ export function Bullets() {
   const starRef = useRef<THREE.InstancedMesh>(null);
   const tempVecRef = useRef(new THREE.Vector3());
   const lookAtVecRef = useRef(new THREE.Vector3());
-  
-  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } =
-    useGameStore();
+
+  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } = useGameStore();
 
   // Coal Cannon geometry - large glowing coal chunk
   const cannonGeometry = useMemo(() => {
     const geo = new THREE.IcosahedronGeometry(0.35, 0);
     return geo;
   }, []);
-  
+
   const cannonMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -53,7 +52,7 @@ export function Bullets() {
     geo.rotateX(Math.PI / 2);
     return geo;
   }, []);
-  
+
   const smgMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
@@ -70,7 +69,7 @@ export function Bullets() {
     const outerRadius = 0.2;
     const innerRadius = 0.08;
     const points = 5;
-    
+
     for (let i = 0; i < points * 2; i++) {
       const radius = i % 2 === 0 ? outerRadius : innerRadius;
       const angle = (i * Math.PI) / points - Math.PI / 2;
@@ -83,12 +82,12 @@ export function Bullets() {
       }
     }
     starShape.closePath();
-    
+
     const geo = new THREE.ExtrudeGeometry(starShape, { depth: 0.08, bevelEnabled: false });
     geo.center();
     return geo;
   }, []);
-  
+
   const starMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -103,7 +102,7 @@ export function Bullets() {
 
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
-    
+
     if (!cannonRef.current || !smgRef.current || !starRef.current) return;
 
     const toRemove: string[] = [];
@@ -129,7 +128,8 @@ export function Bullets() {
             if (enemyPos) {
               const dist = pos.distanceTo(enemyPos);
               // Collision radius varies by bullet type
-              const hitRadius = bullet.type === 'cannon' ? 1.8 : bullet.type === 'stars' ? 1.6 : 1.4;
+              const hitRadius =
+                bullet.type === 'cannon' ? 1.8 : bullet.type === 'stars' ? 1.6 : 1.4;
               if (dist < hitRadius) {
                 if (enemy.type === 'boss' && bossActive) {
                   damageBoss(bullet.damage);
@@ -165,7 +165,7 @@ export function Bullets() {
 
       // Helper to update instanced mesh
       const updateInstanceMesh = (
-        ref: React.RefObject<THREE.InstancedMesh>,
+        ref: React.RefObject<THREE.InstancedMesh | null>,
         bullets: BulletData[],
         maxCount: number,
         updateLogic: (bullet: BulletData, dummy: THREE.Object3D) => void
@@ -213,26 +213,26 @@ export function Bullets() {
   return (
     <group>
       {/* Coal Cannon projectiles - large glowing coals */}
-      <instancedMesh 
-        ref={cannonRef} 
-        args={[cannonGeometry, cannonMaterial, MAX_CANNON_BULLETS]} 
+      <instancedMesh
+        ref={cannonRef}
+        args={[cannonGeometry, cannonMaterial, MAX_CANNON_BULLETS]}
         frustumCulled={false}
       />
-      
+
       {/* Plasma SMG projectiles - fast energy bolts */}
-      <instancedMesh 
-        ref={smgRef} 
-        args={[smgGeometry, smgMaterial, MAX_SMG_BULLETS]} 
+      <instancedMesh
+        ref={smgRef}
+        args={[smgGeometry, smgMaterial, MAX_SMG_BULLETS]}
         frustumCulled={false}
       />
-      
+
       {/* Star Thrower projectiles - spinning stars */}
-      <instancedMesh 
-        ref={starRef} 
-        args={[starGeometry, starMaterial, MAX_STAR_BULLETS]} 
+      <instancedMesh
+        ref={starRef}
+        args={[starGeometry, starMaterial, MAX_STAR_BULLETS]}
         frustumCulled={false}
       />
-      
+
       {/* Global bullet glow light */}
       <pointLight color={0xffaa44} intensity={0.3} distance={10} position={[0, 2, 0]} />
     </group>

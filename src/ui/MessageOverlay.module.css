@@ -9,14 +9,18 @@
   font-size: 2rem;
   font-weight: 900;
   color: #ff0044;
-  text-shadow: 0 0 20px #ff0044, 0 0 40px #ff0044;
+  text-shadow:
+    0 0 20px #ff0044,
+    0 0 40px #ff0044;
   letter-spacing: 5px;
   animation: scaleIn 0.5s ease-out;
 }
 
 .overlay.win {
   color: #00ffcc;
-  text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc;
+  text-shadow:
+    0 0 20px #00ffcc,
+    0 0 40px #00ffcc;
 }
 
 @keyframes scaleIn {

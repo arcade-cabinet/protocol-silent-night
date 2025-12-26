@@ -3,8 +3,8 @@
  * Follows player with smooth interpolation, screen shake, pinch-to-zoom, and gyroscopic tilt
  */
 
-import { useRef, useEffect, useCallback } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
+import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 
@@ -22,7 +22,7 @@ const LOOK_TARGET = new THREE.Vector3();
 export function CameraController() {
   const { camera } = useThree();
   const targetRef = useRef(new THREE.Vector3(0, DEFAULT_CAMERA_HEIGHT, DEFAULT_CAMERA_DISTANCE));
-  
+
   // Zoom and tilt state
   const zoomRef = useRef(1.0);
   const gyroOffsetRef = useRef({ x: 0, z: 0 });
@@ -46,7 +46,7 @@ export function CameraController() {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const currentDistance = Math.hypot(dx, dy);
-      
+
       const scale = currentDistance / pinchStartRef.current;
       zoomRef.current = THREE.MathUtils.clamp(
         initialZoomRef.current / scale, // Pinch out (fingers apart) => zoom out (camera further)
@@ -61,22 +61,25 @@ export function CameraController() {
   }, []);
 
   // Handle gyroscopic tilt
-  const handleDeviceOrientation = useCallback((e: DeviceOrientationEvent) => {
-    if (state === 'MENU' || state === 'BRIEFING') return;
-    
-    // gamma: left/right tilt (-90 to 90)
-    // beta: front/back tilt (-180 to 180)
-    const gamma = e.gamma || 0;
-    const beta = e.beta || 0;
-    
-    // Normalize and apply subtle offset
-    // Clamp values to reasonable range for subtle effect
-    const maxTilt = 4; // Max camera offset
-    gyroOffsetRef.current = {
-      x: THREE.MathUtils.clamp((gamma / 45) * maxTilt, -maxTilt, maxTilt),
-      z: THREE.MathUtils.clamp(((beta - 45) / 45) * maxTilt, -maxTilt, maxTilt), // Assume phone held at ~45 degrees
-    };
-  }, [state]);
+  const handleDeviceOrientation = useCallback(
+    (e: DeviceOrientationEvent) => {
+      if (state === 'MENU' || state === 'BRIEFING') return;
+
+      // gamma: left/right tilt (-90 to 90)
+      // beta: front/back tilt (-180 to 180)
+      const gamma = e.gamma || 0;
+      const beta = e.beta || 0;
+
+      // Normalize and apply subtle offset
+      // Clamp values to reasonable range for subtle effect
+      const maxTilt = 4; // Max camera offset
+      gyroOffsetRef.current = {
+        x: THREE.MathUtils.clamp((gamma / 45) * maxTilt, -maxTilt, maxTilt),
+        z: THREE.MathUtils.clamp(((beta - 45) / 45) * maxTilt, -maxTilt, maxTilt), // Assume phone held at ~45 degrees
+      };
+    },
+    [state]
+  );
 
   // Handle mouse wheel for desktop zoom
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -90,20 +93,32 @@ export function CameraController() {
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
-    
+
     // Mouse wheel for desktop
     window.addEventListener('wheel', handleWheel, { passive: true });
 
     // Request gyroscope permission on iOS 13+
     let isCancelled = false;
     const requestGyroPermission = async () => {
-      if (typeof DeviceOrientationEvent !== 'undefined' && 
-          // Check if requestPermission exists (iOS 13+)
-          typeof (DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission?: () => Promise<string> }).requestPermission === 'function') {
+      if (
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        // Check if requestPermission exists (iOS 13+)
+        typeof (
+          DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+            requestPermission?: () => Promise<string>;
+          }
+        ).requestPermission === 'function'
+      ) {
         try {
-          const permission = await (DeviceOrientationEvent as typeof DeviceOrientationEvent & { requestPermission: () => Promise<string> }).requestPermission();
+          const permission = await (
+            DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+              requestPermission: () => Promise<string>;
+            }
+          ).requestPermission();
           if (permission === 'granted' && !isCancelled) {
-            window.addEventListener('deviceorientation', handleDeviceOrientation, { passive: true });
+            window.addEventListener('deviceorientation', handleDeviceOrientation, {
+              passive: true,
+            });
           }
         } catch {
           // Permission denied or error
@@ -160,11 +175,7 @@ export function CameraController() {
     camera.position.lerp(targetRef.current, LERP_SPEED * delta);
 
     // Look at player (slightly ahead)
-    LOOK_TARGET.set(
-      playerPosition.x,
-      0,
-      playerPosition.z
-    );
+    LOOK_TARGET.set(playerPosition.x, 0, playerPosition.z);
     camera.lookAt(LOOK_TARGET);
   });
 

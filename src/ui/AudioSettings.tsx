@@ -102,9 +102,7 @@ export function AudioSettings() {
           </div>
 
           <div className={styles.setting}>
-            <label htmlFor="sfx-volume">
-              SFX Volume: {Math.round(settings.sfxVolume * 100)}%
-            </label>
+            <label htmlFor="sfx-volume">SFX Volume: {Math.round(settings.sfxVolume * 100)}%</label>
             <input
               id="sfx-volume"
               type="range"
@@ -118,9 +116,7 @@ export function AudioSettings() {
           </div>
 
           {settings.currentTrack && (
-            <div className={styles.nowPlaying}>
-              Now playing: {settings.currentTrack}
-            </div>
+            <div className={styles.nowPlaying}>Now playing: {settings.currentTrack}</div>
           )}
         </div>
       )}

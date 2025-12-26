@@ -4,17 +4,17 @@
  * Uses Strata's createCharacter for proper joint hierarchy
  */
 
-import { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 import {
-  createCharacter,
   animateCharacter,
-  updateFurUniforms,
   type CharacterJoints,
   type CharacterState,
+  createCharacter,
   type FurOptions,
+  updateFurUniforms,
 } from '@jbcom/strata';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
 import { PLAYER_CLASSES } from '@/types';
 
 interface SantaCharacterProps {
@@ -64,7 +64,6 @@ export function SantaCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
-        
       });
 
       characterRef.current = character;
@@ -137,7 +136,7 @@ export function SantaCharacter({
 
     // Hat pom-pom with glow
     const pomGeo = new THREE.SphereGeometry(0.1 * scale, 8, 8);
-    const pomMat = new THREE.MeshStandardMaterial({ 
+    const pomMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       emissive: 0xffffcc,
       emissiveIntensity: 0.3,
@@ -179,7 +178,11 @@ export function SantaCharacter({
     if (joints.torso?.mesh) {
       // Main belt
       const beltGeo = new THREE.TorusGeometry(0.35 * scale, 0.05, 8, 32);
-      const beltMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8, roughness: 0.3 });
+      const beltMat = new THREE.MeshStandardMaterial({
+        color: 0x111111,
+        metalness: 0.8,
+        roughness: 0.3,
+      });
       const belt = new THREE.Mesh(beltGeo, beltMat);
       belt.rotation.x = Math.PI / 2;
       belt.position.y = -0.15 * scale;
@@ -187,8 +190,8 @@ export function SantaCharacter({
 
       // Belt buckle - ornate
       const buckleGeo = new THREE.BoxGeometry(0.12 * scale, 0.1 * scale, 0.03);
-      const buckleMat = new THREE.MeshStandardMaterial({ 
-        color: 0xffd700, 
+      const buckleMat = new THREE.MeshStandardMaterial({
+        color: 0xffd700,
         metalness: 0.95,
         roughness: 0.1,
         emissive: 0xffa500,
@@ -200,7 +203,10 @@ export function SantaCharacter({
 
       // Buckle detail
       const buckleDetailGeo = new THREE.BoxGeometry(0.06 * scale, 0.05 * scale, 0.015);
-      const buckleDetail = new THREE.Mesh(buckleDetailGeo, new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+      const buckleDetail = new THREE.Mesh(
+        buckleDetailGeo,
+        new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+      );
       buckleDetail.position.set(0, -0.15 * scale, 0.38 * scale);
       joints.torso.mesh.add(buckleDetail);
 
@@ -320,7 +326,5 @@ export function SantaCharacter({
     }
   });
 
-  return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
-  );
+  return <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />;
 }

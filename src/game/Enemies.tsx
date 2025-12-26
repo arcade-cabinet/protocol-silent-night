@@ -3,8 +3,8 @@
  * Handles spawning, AI, and rendering of enemies
  */
 
-import { useRef, useEffect, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import { CONFIG } from '@/types';
@@ -30,7 +30,12 @@ export function Enemies() {
   // Spawn minion - using getState() to avoid recreating callback on enemies.length change
   const spawnMinion = useCallback(() => {
     const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
-    if (currentState === 'GAME_OVER' || currentState === 'WIN' || currentEnemies.length >= CONFIG.MAX_MINIONS) return;
+    if (
+      currentState === 'GAME_OVER' ||
+      currentState === 'WIN' ||
+      currentEnemies.length >= CONFIG.MAX_MINIONS
+    )
+      return;
 
     const id = `minion-${enemyIdCounter++}`;
     const angle = Math.random() * Math.PI * 2;
@@ -38,11 +43,7 @@ export function Enemies() {
 
     // Create a proper THREE.Object3D for position tracking
     const mesh = new THREE.Object3D();
-    mesh.position.set(
-      Math.cos(angle) * radius,
-      1,
-      Math.sin(angle) * radius
-    );
+    mesh.position.set(Math.cos(angle) * radius, 1, Math.sin(angle) * radius);
 
     addEnemy({
       id,
@@ -61,25 +62,25 @@ export function Enemies() {
   // Spawn initial enemies with cleanup
   // Track if initial spawn has occurred for current phase
   const hasSpawnedInitialRef = useRef(false);
-  
+
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
-    
+
     // Only spawn initial enemies once when entering PHASE_1
     if (state === 'PHASE_1' && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
-      
+
       for (let i = 0; i < 5; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
         timeoutIds.push(id);
       }
     }
-    
+
     // Reset flag when leaving PHASE_1
     if (state !== 'PHASE_1') {
       hasSpawnedInitialRef.current = false;
     }
-    
+
     return () => {
       // Clear pending timeouts on cleanup
       for (const id of timeoutIds) {
@@ -113,11 +114,11 @@ export function Enemies() {
     const tempVec = tempVecRef.current;
     const now = Date.now();
     const damageCooldown = 500; // 500ms between damage ticks
-    
+
     updateEnemies((currentEnemies) => {
       let shouldDamage = false;
       let damageAmount = 0;
-      
+
       for (const enemy of currentEnemies) {
         const currentPos = enemy.mesh.position;
 
@@ -147,13 +148,13 @@ export function Enemies() {
           currentPos.add(tempVec);
         }
       }
-      
+
       // Apply damage after the loop to avoid issues
       if (shouldDamage) {
         lastDamageTimeRef.current = now;
         damagePlayer(damageAmount);
       }
-      
+
       // Return same array - positions were mutated in place
       return currentEnemies;
     });
@@ -197,11 +198,7 @@ function BossRenderer({
   const bossPos = bossEnemy?.mesh.position ?? null;
 
   return (
-    <BossMesh
-      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
-      hp={bossHp}
-      maxHp={bossMaxHp}
-    />
+    <BossMesh position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]} hp={bossHp} maxHp={bossMaxHp} />
   );
 }
 
@@ -231,7 +228,7 @@ function MinionMesh({
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     const uniqueOffset = position[0] * 0.1 + position[2] * 0.1; // Unique per enemy
-    
+
     if (groupRef.current) {
       // Apply the rotation from the parent
       groupRef.current.rotation.y = rotation;
@@ -281,7 +278,7 @@ function MinionMesh({
             roughness={0.3}
           />
         </mesh>
-        
+
         {/* Chest plate detail */}
         <mesh position={[0, 0.55, 0.21]} castShadow>
           <boxGeometry args={[0.4, 0.5, 0.05]} />
@@ -293,13 +290,13 @@ function MinionMesh({
             roughness={0.1}
           />
         </mesh>
-        
+
         {/* Central power core */}
         <mesh position={[0, 0.5, 0.24]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.08, 0.08, 0.05, 8]} />
           <meshBasicMaterial color={emissiveColor} />
         </mesh>
-        
+
         {/* Head - angular robot head */}
         <mesh position={[0, 1.1, 0]} castShadow>
           <boxGeometry args={[0.4, 0.35, 0.35]} />
@@ -311,7 +308,7 @@ function MinionMesh({
             roughness={0.2}
           />
         </mesh>
-        
+
         {/* Visor/face plate */}
         <mesh position={[0, 1.08, 0.18]}>
           <boxGeometry args={[0.35, 0.15, 0.02]} />
@@ -323,7 +320,7 @@ function MinionMesh({
             opacity={0.9}
           />
         </mesh>
-        
+
         {/* Evil eyes behind visor */}
         <mesh position={[0.1, 1.1, 0.17]}>
           <sphereGeometry args={[0.05, 8, 8]} />
@@ -333,7 +330,7 @@ function MinionMesh({
           <sphereGeometry args={[0.05, 8, 8]} />
           <meshBasicMaterial color={isCritical ? 0xff0000 : isHurt ? 0xffff00 : 0xff3300} />
         </mesh>
-        
+
         {/* Antenna array */}
         <mesh position={[0, 1.4, 0]}>
           <coneGeometry args={[0.03, 0.25, 4]} />
@@ -351,7 +348,7 @@ function MinionMesh({
           <coneGeometry args={[0.02, 0.15, 4]} />
           <meshStandardMaterial color={0x111111} emissive={emissiveColor} emissiveIntensity={0.5} />
         </mesh>
-        
+
         {/* Arms group */}
         <group ref={armsRef}>
           {/* Left arm */}
@@ -391,7 +388,7 @@ function MinionMesh({
             </mesh>
           </group>
         </group>
-        
+
         {/* Legs group */}
         <group ref={legsRef}>
           {/* Left leg */}
@@ -431,30 +428,39 @@ function MinionMesh({
             </mesh>
           </group>
         </group>
-        
+
         {/* Shoulder pads */}
         <mesh position={[0.35, 0.85, 0]} castShadow>
           <boxGeometry args={[0.2, 0.1, 0.25]} />
-          <meshStandardMaterial color={0x001100} emissive={emissiveColor} emissiveIntensity={0.3} metalness={0.7} />
+          <meshStandardMaterial
+            color={0x001100}
+            emissive={emissiveColor}
+            emissiveIntensity={0.3}
+            metalness={0.7}
+          />
         </mesh>
         <mesh position={[-0.35, 0.85, 0]} castShadow>
           <boxGeometry args={[0.2, 0.1, 0.25]} />
-          <meshStandardMaterial color={0x001100} emissive={emissiveColor} emissiveIntensity={0.3} metalness={0.7} />
+          <meshStandardMaterial
+            color={0x001100}
+            emissive={emissiveColor}
+            emissiveIntensity={0.3}
+            metalness={0.7}
+          />
         </mesh>
       </group>
-      
+
       {/* Glow - intensity based on health */}
-      <pointLight
-        color={emissiveColor}
-        intensity={0.8 + (1 - hpRatio) * 1.2}
-        distance={4}
-      />
-      
+      <pointLight color={emissiveColor} intensity={0.8 + (1 - hpRatio) * 1.2} distance={4} />
+
       {/* HP indicator ring when damaged */}
       {hp < maxHp && (
         <mesh position={[0, 2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.3, 0.35, 16, 1, 0, Math.PI * 2 * hpRatio]} />
-          <meshBasicMaterial color={isCritical ? 0xff0000 : isHurt ? 0xffaa00 : 0x00ff00} side={THREE.DoubleSide} />
+          <meshBasicMaterial
+            color={isCritical ? 0xff0000 : isHurt ? 0xffaa00 : 0x00ff00}
+            side={THREE.DoubleSide}
+          />
         </mesh>
       )}
     </group>
@@ -580,12 +586,7 @@ function BossMesh({
       {hpRatio < 0.5 && (
         <mesh>
           <sphereGeometry args={[4.5, 8, 8]} />
-          <meshBasicMaterial
-            color={0xffaa00}
-            transparent
-            opacity={0.05}
-            wireframe
-          />
+          <meshBasicMaterial color={0xffaa00} transparent opacity={0.05} wireframe />
         </mesh>
       )}
     </group>

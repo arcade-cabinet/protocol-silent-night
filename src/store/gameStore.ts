@@ -1,17 +1,17 @@
-import { create } from 'zustand';
 import * as THREE from 'three';
+import { create } from 'zustand';
+import { AudioManager } from '@/audio/AudioManager';
 import type {
-  GameState,
-  PlayerClassType,
-  PlayerClassConfig,
-  GameStats,
-  InputState,
   BulletData,
   EnemyData,
+  GameState,
+  GameStats,
+  InputState,
+  PlayerClassConfig,
+  PlayerClassType,
 } from '@/types';
-import { PLAYER_CLASSES, CONFIG } from '@/types';
-import { AudioManager } from '@/audio/AudioManager';
-import { triggerHaptic, HapticPatterns } from '@/utils/haptics';
+import { CONFIG, PLAYER_CLASSES } from '@/types';
+import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // High score persistence key
 const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
@@ -20,6 +20,11 @@ interface GameStore {
   // Game State
   state: GameState;
   setState: (state: GameState) => void;
+  missionBriefing: {
+    title: string;
+    objective: string;
+    intel: string[];
+  };
 
   // Player
   playerClass: PlayerClassConfig | null;
@@ -71,11 +76,11 @@ interface GameStore {
 
   // Damage Flash
   damageFlash: boolean;
-  
+
   // Kill Streak
   killStreak: number;
   lastKillTime: number;
-  
+
   // Reset
   reset: () => void;
 }
@@ -156,7 +161,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerPosition: new THREE.Vector3(0, 0, 0),
       playerRotation: 0,
     });
-    
+
     // Play UI select sound
     AudioManager.playSFX('ui_select');
   },
@@ -167,7 +172,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const newHp = Math.max(0, playerHp - amount);
     set({ playerHp: newHp, screenShake: 0.5, damageFlash: true });
-    
+
     // Haptic and audio feedback
     if (amount >= 20) {
       triggerHaptic(HapticPatterns.DAMAGE_HEAVY);
@@ -197,11 +202,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { stats, state, enemies, lastKillTime, killStreak } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
-    
+
     // Kill streak: if within 2 seconds of last kill, increment streak
     const streakTimeout = 2000;
-    const newStreak = (now - lastKillTime < streakTimeout) ? killStreak + 1 : 1;
-    
+    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+
     // Bonus points for kill streaks
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
@@ -211,11 +216,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       killStreak: newStreak,
       lastKillTime: now,
     });
-    
+
     // Audio and haptic feedback
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
-    
+
     if (newStreak > 1 && newStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
     }
@@ -255,7 +260,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => ({
       bullets: [...state.bullets, bullet],
     }));
-    
+
     // Play weapon-specific sound and haptic
     const weaponType = bullet.type || 'cannon';
     if (weaponType === 'smg') {
@@ -296,10 +301,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!enemy) return false;
 
     const newHp = enemy.hp - damage;
-    
+
     // Play hit sound
     AudioManager.playSFX('enemy_hit');
-    
+
     if (newHp <= 0) {
       get().removeEnemy(id);
       get().addKill(enemy.pointValue);
@@ -319,23 +324,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   spawnBoss: () => {
     const { enemies, addEnemy } = get();
-    
+
     // Check if boss already exists
     if (enemies.some((e) => e.type === 'boss')) return;
-    
+
     // Spawn boss at random position
     const angle = Math.random() * Math.PI * 2;
     const radius = 30;
-    const position = new THREE.Vector3(
-      Math.cos(angle) * radius,
-      4,
-      Math.sin(angle) * radius
-    );
-    
+    const position = new THREE.Vector3(Math.cos(angle) * radius, 4, Math.sin(angle) * radius);
+
     // Add boss to enemies array for collision detection
     addEnemy({
       id: 'boss-krampus',
-      mesh: (() => { const obj = new THREE.Object3D(); obj.position.copy(position); return obj; })(),
+      mesh: (() => {
+        const obj = new THREE.Object3D();
+        obj.position.copy(position);
+        return obj;
+      })(),
       velocity: new THREE.Vector3(),
       hp: 1000,
       maxHp: 1000,
@@ -345,14 +350,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: 5,
       pointValue: 1000,
     });
-    
+
     set({
       state: 'PHASE_BOSS',
       bossActive: true,
       bossHp: 1000,
       bossMaxHp: 1000,
     });
-    
+
     // Play boss music and announce
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
@@ -362,7 +367,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { bossHp } = get();
     const newHp = Math.max(0, bossHp - amount);
     set({ bossHp: newHp, screenShake: 0.3 });
-    
+
     // Play boss hit sound
     AudioManager.playSFX('boss_hit');
 
@@ -373,7 +378,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         stats: { ...get().stats, bossDefeated: true },
       });
       get().updateHighScore();
-      
+
       // Victory audio
       AudioManager.playSFX('boss_defeated');
       AudioManager.playSFX('victory');

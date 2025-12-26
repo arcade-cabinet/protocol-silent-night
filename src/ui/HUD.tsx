@@ -18,9 +18,7 @@ export function HUD() {
 
   const getObjectiveText = () => {
     if (state === 'PHASE_1') {
-      return killsToGo > 0 
-        ? `ELIMINATE ${killsToGo} MORE GRINCH-BOTS`
-        : 'BOSS INCOMING...';
+      return killsToGo > 0 ? `ELIMINATE ${killsToGo} MORE GRINCH-BOTS` : 'BOSS INCOMING...';
     }
     if (state === 'PHASE_BOSS') {
       return 'DESTROY KRAMPUS-PRIME';
@@ -39,10 +37,7 @@ export function HUD() {
       <div className={styles.panel} style={{ borderColor: '#00ffcc' }}>
         <div className={styles.label}>OPERATOR STATUS</div>
         <div className={styles.barWrap}>
-          <div
-            className={styles.hpBar}
-            style={{ width: `${hpPercent}%` }}
-          />
+          <div className={styles.hpBar} style={{ width: `${hpPercent}%` }} />
         </div>
         <div className={styles.hpText}>
           {playerHp} / {playerMaxHp}

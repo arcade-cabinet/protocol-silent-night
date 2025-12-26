@@ -4,18 +4,18 @@
  */
 
 import { GameScene } from '@/game';
-import { 
-  HUD, 
-  StartScreen, 
-  EndScreen, 
-  InputControls, 
-  BossHUD, 
-  MessageOverlay,
+import {
+  BossHUD,
+  BossVignette,
   DamageFlash,
+  EndScreen,
+  HUD,
+  InputControls,
   KillStreak,
   LoadingScreen,
-  BossVignette,
+  MessageOverlay,
   MissionBriefing,
+  StartScreen,
 } from '@/ui';
 
 export default function App() {

@@ -12,13 +12,10 @@ export function BossVignette() {
   if (!bossActive || state === 'WIN' || state === 'GAME_OVER') return null;
 
   // Increase intensity as boss health decreases
-  const intensity = 1 - (bossHp / bossMaxHp);
+  const intensity = 1 - bossHp / bossMaxHp;
   const opacity = 0.15 + intensity * 0.25;
 
   return (
-    <div 
-      className={styles.vignette} 
-      style={{ '--intensity': opacity } as React.CSSProperties}
-    />
+    <div className={styles.vignette} style={{ '--intensity': opacity } as React.CSSProperties} />
   );
 }

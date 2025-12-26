@@ -3,8 +3,8 @@
  * Shows particles when enemies are damaged
  */
 
-import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 
@@ -53,7 +53,7 @@ export function HitParticles() {
 
     // Check for boss damage
     if (bossHp < lastBossHpRef.current) {
-      const bossEnemy = useGameStore.getState().enemies.find(e => e.type === 'boss');
+      const bossEnemy = useGameStore.getState().enemies.find((e) => e.type === 'boss');
       if (bossEnemy) {
         const bossPos = tempVecRef.current.copy(bossEnemy.mesh.position);
         bossPos.y = 4;
@@ -99,18 +99,19 @@ export function HitParticles() {
   });
 
   return (
-    <instancedMesh
-      ref={meshRef}
-      args={[undefined, undefined, MAX_PARTICLES]}
-      frustumCulled={false}
-    >
+    <instancedMesh ref={meshRef} args={[undefined, undefined, MAX_PARTICLES]} frustumCulled={false}>
       <sphereGeometry args={[0.15, 6, 6]} />
       <meshBasicMaterial color={0x00ff00} transparent opacity={0.8} />
     </instancedMesh>
   );
 }
 
-function spawnParticles(particles: Particle[], position: THREE.Vector3, color: number, count: number) {
+function spawnParticles(
+  particles: Particle[],
+  position: THREE.Vector3,
+  color: number,
+  count: number
+) {
   // Limit total particles
   while (particles.length + count > MAX_PARTICLES) {
     particles.shift();

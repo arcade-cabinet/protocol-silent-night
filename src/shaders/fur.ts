@@ -4,19 +4,16 @@
  */
 
 // Re-export Strata's fur system from presets
+// Re-export shaders for custom use cases
 export {
   createFurMaterial,
   createFurSystem,
-  updateFurUniforms,
-  type FurOptions,
-  type FurUniforms,
-} from '@jbcom/strata';
-
-// Re-export shaders for custom use cases
-export {
-  furVertexShader,
-  furFragmentShader,
   createFurUniforms,
   defaultFurConfig,
   type FurConfig,
+  type FurOptions,
+  type FurUniforms,
+  furFragmentShader,
+  furVertexShader,
+  updateFurUniforms,
 } from '@jbcom/strata';

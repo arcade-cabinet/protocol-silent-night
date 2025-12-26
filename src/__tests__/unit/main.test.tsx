@@ -3,7 +3,7 @@
  * Verifies application initialization
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('main.tsx', () => {
   let rootElement: HTMLElement;
@@ -129,7 +129,7 @@ describe('main.tsx', () => {
   describe('TypeScript Compatibility', () => {
     it('should have correct TypeScript types', () => {
       const root = document.getElementById('root');
-      
+
       // Verify type safety
       if (root) {
         expect(root instanceof HTMLElement).toBe(true);
@@ -146,13 +146,13 @@ describe('main.tsx', () => {
   describe('Performance', () => {
     it('should initialize efficiently', () => {
       const start = performance.now();
-      
+
       // Simulate initialization
       const root = document.getElementById('root');
       expect(root).toBeTruthy();
-      
+
       const duration = performance.now() - start;
-      
+
       // Should be very fast (< 10ms for element lookup)
       expect(duration).toBeLessThan(10);
     });

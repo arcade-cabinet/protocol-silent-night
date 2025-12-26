@@ -2,11 +2,11 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright E2E test configuration for Protocol: Silent Night
- * 
+ *
  * Supports two modes:
  * 1. PLAYWRIGHT_MCP=true - Full Playwright MCP with headed browser and WebGL
  * 2. Default - Headless mode with WebGL workarounds for CI/limited environments
- * 
+ *
  * @see https://playwright.dev/docs/test-configuration
  */
 
@@ -21,16 +21,13 @@ export default defineConfig({
   // Fail the build on CI if you accidentally left test.only in the source code
   forbidOnly: isCI,
   // Retry on CI only (not needed with MCP)
-  retries: hasMcpSupport ? 0 : (isCI ? 2 : 0),
+  retries: hasMcpSupport ? 0 : isCI ? 2 : 0,
   // Parallel workers - more with MCP, fewer in CI
-  workers: hasMcpSupport ? undefined : (isCI ? 1 : undefined),
+  workers: hasMcpSupport ? undefined : isCI ? 1 : undefined,
   // Longer timeout for WebGL rendering with MCP
   timeout: hasMcpSupport ? 60000 : 30000,
   // Reporter to use
-  reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['list'],
-  ],
+  reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
   // Shared settings for all the projects below
   use: {
     // Base URL to use in actions like `await page.goto('/')`
@@ -64,10 +61,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Different launch options based on environment
-        launchOptions: hasMcpSupport 
+        launchOptions: hasMcpSupport
           ? {
               // MCP mode - headed with full GPU
               args: ['--enable-webgl', '--ignore-gpu-blocklist'],

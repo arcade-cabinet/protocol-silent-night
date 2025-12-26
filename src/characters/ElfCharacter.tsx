@@ -4,17 +4,17 @@
  * Uses Strata's createCharacter for proper joint hierarchy
  */
 
-import { useRef, useMemo, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
 import {
-  createCharacter,
   animateCharacter,
-  updateFurUniforms,
   type CharacterJoints,
   type CharacterState,
+  createCharacter,
   type FurOptions,
+  updateFurUniforms,
 } from '@jbcom/strata';
+import { useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
 import { PLAYER_CLASSES } from '@/types';
 
 interface ElfCharacterProps {
@@ -64,7 +64,6 @@ export function ElfCharacter({
         skinColor: 0xffe4c4, // Skin tone
         furOptions,
         scale: config.scale,
-        
       });
 
       characterRef.current = character;
@@ -161,29 +160,21 @@ export function ElfCharacter({
       emissive: 0x00ffcc,
       emissiveIntensity: 0.5,
     });
-    
+
     // Central mohawk spikes
     for (let i = 0; i < 7; i++) {
       const spike = new THREE.Mesh(hairGeo, hairMat);
-      spike.position.set(
-        0,
-        0.18 * scale,
-        -0.08 * scale + i * 0.025 * scale
-      );
+      spike.position.set(0, 0.18 * scale, -0.08 * scale + i * 0.025 * scale);
       spike.rotation.x = -0.4 + (i - 3) * 0.1;
       spike.scale.y = 0.7 + Math.abs(i - 3) * 0.15;
       headMesh.add(spike);
     }
 
     // Side hair spikes
-    for (let side of [-1, 1]) {
+    for (const side of [-1, 1]) {
       for (let i = 0; i < 3; i++) {
         const spike = new THREE.Mesh(hairGeo, hairMat);
-        spike.position.set(
-          side * 0.1 * scale,
-          0.12 * scale,
-          -0.05 * scale + i * 0.03 * scale
-        );
+        spike.position.set(side * 0.1 * scale, 0.12 * scale, -0.05 * scale + i * 0.03 * scale);
         spike.rotation.z = side * 0.6;
         spike.rotation.x = -0.2;
         spike.scale.setScalar(0.6);
@@ -205,7 +196,7 @@ export function ElfCharacter({
 
       // Add glowing circuit-line accents
       const lineMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
-      
+
       // Center line
       const lineGeo = new THREE.BoxGeometry(0.012, 0.4 * scale, 0.008);
       const line = new THREE.Mesh(lineGeo, lineMat);
@@ -388,7 +379,5 @@ export function ElfCharacter({
     }
   });
 
-  return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />
-  );
+  return <group ref={groupRef} position={position} rotation={[0, rotation, 0]} />;
 }

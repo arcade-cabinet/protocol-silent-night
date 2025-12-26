@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,10 +26,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'three': ['three'],
+          three: ['three'],
           'react-three': ['@react-three/fiber', '@react-three/postprocessing'],
-          'strata': ['@jbcom/strata'],
-          'vendor': ['react', 'react-dom', 'zustand'],
+          strata: ['@jbcom/strata'],
+          vendor: ['react', 'react-dom', 'zustand'],
         },
       },
     },

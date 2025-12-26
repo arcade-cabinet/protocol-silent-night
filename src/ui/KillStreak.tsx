@@ -7,7 +7,16 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import styles from './KillStreak.module.css';
 
-const STREAK_NAMES = ['', '', 'DOUBLE KILL', 'TRIPLE KILL', 'MULTI KILL', 'MEGA KILL', 'ULTRA KILL', 'MONSTER KILL'];
+const STREAK_NAMES = [
+  '',
+  '',
+  'DOUBLE KILL',
+  'TRIPLE KILL',
+  'MULTI KILL',
+  'MEGA KILL',
+  'ULTRA KILL',
+  'MONSTER KILL',
+];
 
 export function KillStreak() {
   const { killStreak, state } = useGameStore();
