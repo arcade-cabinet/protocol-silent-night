@@ -209,6 +209,46 @@ export function StrataCharacter({
     []
   );
 
+  useEffect(() => {
+    if (!groupRef.current) return;
+
+    // 1. Create base character
+    const character = createCharacter({
+      skinColor: new THREE.Color(config.color).getHex(),
+      furOptions,
+      scale: config.scale,
+    });
+
+    characterRef.current = character;
+    groupRef.current.add(character.root);
+
+    // 2. Apply DDL customizations
+    if (config.customizations) {
+      applyCustomizations(
+        character.joints,
+        config.customizations as unknown as CustomizationConfig[],
+        config.scale
+      );
+    }
+
+    // 3. Cache fur groups
+    const furGroups: THREE.Group[] = [];
+    character.root.traverse((child) => {
+      if (child instanceof THREE.Group && (child as any).userData.isFurGroup) {
+        furGroups.push(child as THREE.Group);
+      }
+    });
+    furGroupsRef.current = furGroups;
+
+    return () => {
+      if (characterRef.current && groupRef.current) {
+        groupRef.current.remove(characterRef.current.root);
+        characterRef.current = null;
+        furGroupsRef.current = [];
+      }
+    };
+  }, [config, furOptions, applyCustomizations]);
+
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
