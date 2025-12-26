@@ -20,6 +20,10 @@ export function PlayerController() {
   const lastFireTime = useRef(0);
   const positionRef = useRef(new THREE.Vector3(0, 0, 0));
   const rotationRef = useRef(0);
+  const moveDirRef = useRef(new THREE.Vector3());
+  const fireDirRef = useRef(new THREE.Vector3());
+  const upAxisRef = useRef(new THREE.Vector3(0, 1, 0));
+  const firePosRef = useRef(new THREE.Vector3());
 
   const {
     playerClass,
@@ -57,7 +61,7 @@ export function PlayerController() {
         const angles = [-0.2, 0, 0.2];
         for (const angleOffset of angles) {
           const spreadDir = direction.clone();
-          spreadDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), angleOffset);
+          spreadDir.applyAxisAngle(upAxisRef.current, angleOffset);
 
           addBullet({
             id: `${id}-${angleOffset}`,
@@ -82,7 +86,7 @@ export function PlayerController() {
           hp: 1,
           maxHp: 1,
           isActive: true,
-          direction,
+          direction: direction.clone(),
           isEnemy: false,
           damage,
           life: bulletLife,
@@ -102,9 +106,9 @@ export function PlayerController() {
     // Movement
     if (movement.x !== 0 || movement.y !== 0) {
       const speed = playerClass.speed * delta;
-      const moveDir = new THREE.Vector3(movement.x, 0, movement.y).normalize();
+      moveDirRef.current.set(movement.x, 0, movement.y).normalize();
 
-      positionRef.current.add(moveDir.multiplyScalar(speed));
+      positionRef.current.add(moveDirRef.current.multiplyScalar(speed));
 
       // Clamp to world bounds
       const worldBound = 35;
@@ -129,13 +133,13 @@ export function PlayerController() {
       if (now - lastFireTime.current >= playerClass.rof) {
         lastFireTime.current = now;
 
-        const firePos = positionRef.current.clone();
-        firePos.y = 1.5;
+        firePosRef.current.copy(positionRef.current);
+        firePosRef.current.y = 1.5;
 
-        const fireDir = new THREE.Vector3(0, 0, 1);
-        fireDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationRef.current);
+        fireDirRef.current.set(0, 0, 1);
+        fireDirRef.current.applyAxisAngle(upAxisRef.current, rotationRef.current);
 
-        fireBullet(firePos, fireDir, playerClass.damage);
+        fireBullet(firePosRef.current, fireDirRef.current, playerClass.damage);
       }
     }
   });

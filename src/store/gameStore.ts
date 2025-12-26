@@ -102,11 +102,11 @@ const saveHighScore = (score: number): void => {
 const initialState = {
   state: 'MENU' as GameState,
   missionBriefing: {
-    title: 'OPERATION: SILENT NIGHT',
+    title: 'SILENT NIGHT',
     objective: 'Neutralize hostile Grinch-Bots and eliminate Krampus-Prime',
     intel: [
-      'Enemy forces: Grinch-Bot scouts + Krampus-Prime command unit',
-      'Hostiles are aggressive - eliminate on sight',
+      'Eliminate hostile Grinch-Bot forces',
+      'Neutralize Krampus-Prime command unit',
       'Defeat 10 Grinch-Bots to draw out Krampus-Prime',
     ],
   },

@@ -31,6 +31,7 @@ export function HitParticles() {
 
   const { stats, bossHp } = useGameStore();
   const lastBossHpRef = useRef(bossHp);
+  const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;
@@ -42,7 +43,7 @@ export function HitParticles() {
       const playerPos = useGameStore.getState().playerPosition;
       const angle = Math.random() * Math.PI * 2;
       const dist = 3 + Math.random() * 5;
-      const hitPos = new THREE.Vector3(
+      const hitPos = tempVecRef.current.set(
         playerPos.x + Math.cos(angle) * dist,
         1,
         playerPos.z + Math.sin(angle) * dist
@@ -54,7 +55,7 @@ export function HitParticles() {
     if (bossHp < lastBossHpRef.current) {
       const bossEnemy = useGameStore.getState().enemies.find(e => e.type === 'boss');
       if (bossEnemy) {
-        const bossPos = bossEnemy.mesh.position.clone();
+        const bossPos = tempVecRef.current.copy(bossEnemy.mesh.position);
         bossPos.y = 4;
         spawnParticles(particlesRef.current, bossPos, 0xff0044, 8);
       }
@@ -64,12 +65,14 @@ export function HitParticles() {
     // Update particles
     const particles = particlesRef.current;
     const activeParticles: Particle[] = [];
+    const tempVec = tempVecRef.current;
 
     for (const p of particles) {
       p.life -= delta;
       if (p.life > 0) {
         // Apply velocity and gravity
-        p.position.add(p.velocity.clone().multiplyScalar(delta));
+        tempVec.copy(p.velocity).multiplyScalar(delta);
+        p.position.add(tempVec);
         p.velocity.y -= 15 * delta; // Gravity
         activeParticles.push(p);
       }

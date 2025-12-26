@@ -163,57 +163,48 @@ export function Bullets() {
         }
       }
 
-      // Update Cannon bullets
-      for (let i = 0; i < MAX_CANNON_BULLETS; i++) {
-        if (i < cannonBullets.length) {
-          const bullet = cannonBullets[i];
-          const pos = (bullet.mesh as THREE.Object3D).position;
-          dummy.position.copy(pos);
-          dummy.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
-          dummy.scale.setScalar(1 + Math.sin(time * 10) * 0.1); // Pulsing
-        } else {
-          dummy.position.set(0, -1000, 0);
-          dummy.scale.copy(zeroScale);
+      // Helper to update instanced mesh
+      const updateInstanceMesh = (
+        ref: React.RefObject<THREE.InstancedMesh>,
+        bullets: BulletData[],
+        maxCount: number,
+        updateLogic: (bullet: BulletData, dummy: THREE.Object3D) => void
+      ) => {
+        if (!ref.current) return;
+        for (let i = 0; i < maxCount; i++) {
+          if (i < bullets.length) {
+            const bullet = bullets[i];
+            const pos = (bullet.mesh as THREE.Object3D).position;
+            dummy.position.copy(pos);
+            updateLogic(bullet, dummy);
+          } else {
+            dummy.position.set(0, -1000, 0);
+            dummy.scale.copy(zeroScale);
+          }
+          dummy.updateMatrix();
+          ref.current.setMatrixAt(i, dummy.matrix);
         }
-        dummy.updateMatrix();
-        cannonRef.current!.setMatrixAt(i, dummy.matrix);
-      }
-      cannonRef.current!.instanceMatrix.needsUpdate = true;
+        ref.current.instanceMatrix.needsUpdate = true;
+      };
+
+      // Update Cannon bullets
+      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (_, d) => {
+        d.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
+        d.scale.setScalar(1 + Math.sin(time * 10) * 0.1); // Pulsing
+      });
 
       // Update SMG bullets
-      for (let i = 0; i < MAX_SMG_BULLETS; i++) {
-        if (i < smgBullets.length) {
-          const bullet = smgBullets[i];
-          const pos = (bullet.mesh as THREE.Object3D).position;
-          dummy.position.copy(pos);
-          // Align with direction of travel
-          dummy.lookAt(pos.clone().add(bullet.direction));
-          dummy.scale.set(1, 1, 1.5); // Elongated for motion blur effect
-        } else {
-          dummy.position.set(0, -1000, 0);
-          dummy.scale.copy(zeroScale);
-        }
-        dummy.updateMatrix();
-        smgRef.current!.setMatrixAt(i, dummy.matrix);
-      }
-      smgRef.current!.instanceMatrix.needsUpdate = true;
+      updateInstanceMesh(smgRef, smgBullets, MAX_SMG_BULLETS, (bullet, d) => {
+        lookAtVecRef.current.copy((bullet.mesh as THREE.Object3D).position).add(bullet.direction);
+        d.lookAt(lookAtVecRef.current);
+        d.scale.set(1, 1, 1.5); // Elongated for motion blur effect
+      });
 
       // Update Star bullets
-      for (let i = 0; i < MAX_STAR_BULLETS; i++) {
-        if (i < starBullets.length) {
-          const bullet = starBullets[i];
-          const pos = (bullet.mesh as THREE.Object3D).position;
-          dummy.position.copy(pos);
-          dummy.rotation.set(0, 0, time * 15); // Fast spin
-          dummy.scale.setScalar(1);
-        } else {
-          dummy.position.set(0, -1000, 0);
-          dummy.scale.copy(zeroScale);
-        }
-        dummy.updateMatrix();
-        starRef.current!.setMatrixAt(i, dummy.matrix);
-      }
-      starRef.current!.instanceMatrix.needsUpdate = true;
+      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (_, d) => {
+        d.rotation.set(0, 0, time * 15); // Fast spin
+        d.scale.setScalar(1);
+      });
 
       return activeBullets;
     });

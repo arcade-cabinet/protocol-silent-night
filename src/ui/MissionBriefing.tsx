@@ -9,19 +9,28 @@ import { AudioManager } from '@/audio/AudioManager';
 import styles from './MissionBriefing.module.css';
 
 export function MissionBriefing() {
-  const { state, setState, playerClass } = useGameStore();
+  const { state, setState, playerClass, missionBriefing } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
 
-  const briefingLines = useMemo(() => [
-    { label: 'OPERATION', text: 'SILENT NIGHT', accent: true },
-    { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
-    { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
-    { label: 'PRIMARY OBJECTIVE', text: 'Eliminate hostile Grinch-Bot forces' },
-    { label: 'SECONDARY OBJECTIVE', text: 'Neutralize Krampus-Prime command unit' },
-    { label: 'INTEL', text: 'Defeat 10 Grinch-Bots to draw out Krampus-Prime' },
-    { label: 'WARNING', text: 'Hostiles are aggressive - engage on sight', warning: true },
-  ], [playerClass]);
+  const briefingLines = useMemo(() => {
+    const lines = [
+      { label: 'OPERATION', text: missionBriefing.title, accent: true },
+      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
+      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
+    ];
+
+    // Add intel lines from store
+    for (const [index, intel] of missionBriefing.intel.entries()) {
+      const label = index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+      lines.push({ label, text: intel });
+    }
+
+    // Add final warning
+    lines.push({ label: 'WARNING', text: 'Hostiles are aggressive - engage on sight', warning: true });
+
+    return lines;
+  }, [playerClass, missionBriefing]);
 
   useEffect(() => {
     if (state !== 'BRIEFING') return;

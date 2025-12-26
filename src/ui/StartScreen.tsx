@@ -29,9 +29,6 @@ export function StartScreen() {
     // Listen for first interaction to init audio
     const handleInteraction = () => {
       initAudio();
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('touchstart', handleInteraction);
-      window.removeEventListener('keydown', handleInteraction);
     };
 
     window.addEventListener('click', handleInteraction, { once: true });
