@@ -24,6 +24,7 @@ describe('Terrain Component', () => {
 
     // Check for instance.count to identify InstancedMesh
     const instancedMeshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
       (node: any) => node.instance && node.instance.count !== undefined
     );
     expect(instancedMeshes.length).toBeGreaterThan(0);
@@ -56,6 +57,7 @@ describe('Terrain Component', () => {
     expect(state.obstacles.length).toBeGreaterThan(0);
 
     // Check for meshes in the scene
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
     const meshes = renderer.scene.findAll((node: any) => node.instance?.type === 'Mesh');
     
     // We expect one instanced mesh for terrain and one regular mesh for the obstacle
@@ -70,6 +72,7 @@ describe('Terrain Component', () => {
 
     // Spy on dispose methods of geometries and materials
     const instancedMeshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
       (node: any) => node.instance && node.instance.count !== undefined
     );
     

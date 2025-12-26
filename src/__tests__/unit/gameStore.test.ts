@@ -487,9 +487,9 @@ describe('GameStore - Meta Progression', () => {
 
   it('should unlock skins', () => {
     const { unlockSkin } = useGameStore.getState();
-    unlockSkin('gold-santa');
+    unlockSkin('santa-gold');
 
-    expect(useGameStore.getState().metaProgress.unlockedSkins).toContain('gold-santa');
+    expect(useGameStore.getState().metaProgress.unlockedSkins).toContain('santa-gold');
   });
 
   it('should upgrade permanent stats', () => {

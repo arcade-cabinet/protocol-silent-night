@@ -21,7 +21,7 @@ export type PlayerClassType = 'santa' | 'elf' | 'bumble';
  */
 export type SkinId = 
   | 'santa-classic' | 'santa-arctic' | 'santa-gold'
-  | 'elf-forest' | 'elf-neon' | 'elf-shadow'
+  | 'elf-classic' | 'elf-neon' | 'elf-shadow'
   | 'bumble-classic' | 'bumble-midnight' | 'bumble-crystal';
 
 /**
@@ -394,8 +394,8 @@ export const CHARACTER_SKINS: Record<SkinId, SkinConfig> = {
   },
 
   // CYBER-ELF Skins
-  'elf-forest': {
-    id: 'elf-forest',
+  'elf-classic': {
+    id: 'elf-classic',
     characterClass: 'elf',
     name: 'Forest Green',
     cost: 0, // Default skin, always unlocked

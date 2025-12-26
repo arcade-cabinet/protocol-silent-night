@@ -43,8 +43,22 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    // biome-ignore lint/a11y/useSemanticElements: overlay is a common pattern for modals
+    <div
+      className={styles.overlay}
+      onClick={onClose}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
+      role="button"
+      tabIndex={-1}
+      aria-label="Close skin selector"
+    >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: modal container stops propagation */}
+      <div
+        className={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+        role="presentation"
+      >
         <div className={styles.header}>
           <h2 className={styles.title}>SELECT SKIN</h2>
           <div className={styles.points}>

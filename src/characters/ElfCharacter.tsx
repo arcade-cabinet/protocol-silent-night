@@ -46,7 +46,7 @@ export function ElfCharacter({
   const config = PLAYER_CLASSES.elf;
   const selectedSkin = useGameStore((state) => state.selectedSkin);
   
-  // Get skin config, defaulting to forest if none selected
+  // Get skin config, defaulting to classic if none selected
   const skinId = selectedSkin?.startsWith('elf-') ? selectedSkin : getDefaultSkin('elf');
   const skinConfig = CHARACTER_SKINS[skinId];
 
@@ -101,6 +101,13 @@ export function ElfCharacter({
     };
   }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
 
+  /**
+   * Customizes Elf's appearance
+   * @param joints - Character joints
+   * @param scale - Character scale
+   * @param primaryColor - Primary color for hair
+   * @param _accentColor - Accent color (reserved for future use)
+   */
   function customizeElfAppearance(joints: CharacterJoints, scale: number, primaryColor: number, _accentColor: number) {
     // Note: Elf primarily uses primaryColor for hair. Accent color not currently used but reserved for future details.
     if (!joints.head?.mesh) return;

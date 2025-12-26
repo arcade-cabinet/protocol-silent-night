@@ -19,6 +19,7 @@ describe('Bullets Component', () => {
 
     // Use findAll and check if it has a count property which is characteristic of InstancedMesh
     const instancedMeshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
       (node: any) => node.instance && node.instance.count !== undefined
     );
 
@@ -27,9 +28,12 @@ describe('Bullets Component', () => {
 
     // Check counts
     const cannon = instancedMeshes.find(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
       (m: any) => m.instance.geometry.type === 'IcosahedronGeometry'
     );
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
     const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
     const stars = instancedMeshes.find((m: any) => m.instance.geometry.type === 'ExtrudeGeometry');
 
     if (cannon) expect(cannon.instance.count).toBe(30);
@@ -96,6 +100,7 @@ describe('Bullets Component', () => {
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
     const meshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
       (node: any) => node.instance && node.instance.count !== undefined
     );
 

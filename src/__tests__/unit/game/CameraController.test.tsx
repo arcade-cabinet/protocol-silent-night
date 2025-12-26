@@ -26,6 +26,7 @@ describe('CameraController Component', () => {
     await renderer.advanceFrames(60, 0.1);
 
     // Access camera from R3F state
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
     const camera = renderer.scene.instance.children[0]?.camera || (renderer.scene.allChildren.find((c: any) => c.instance.camera)?.instance.camera);
     if (camera) {
       expect(camera.position.x).toBeCloseTo(10, 0);

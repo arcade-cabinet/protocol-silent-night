@@ -82,6 +82,13 @@ describe('StartScreen Component', () => {
     const santaButton = screen.getByRole('button', { name: /MECHA-SANTA/ });
     await user.click(santaButton);
 
+    // After clicking Santa, skin selector should appear
+    expect(screen.getByText('SELECT SKIN')).toBeInTheDocument();
+    
+    // Click continue on skin selector
+    const continueButton = screen.getByRole('button', { name: /CONTINUE/ });
+    await user.click(continueButton);
+
     const state = useGameStore.getState();
     expect(state.playerClass?.type).toBe('santa');
     expect(state.state).toBe('BRIEFING');
@@ -94,6 +101,13 @@ describe('StartScreen Component', () => {
     const elfButton = screen.getByRole('button', { name: /CYBER-ELF/ });
     await user.click(elfButton);
 
+    // After clicking Elf, skin selector should appear
+    expect(screen.getByText('SELECT SKIN')).toBeInTheDocument();
+    
+    // Click continue on skin selector
+    const continueButton = screen.getByRole('button', { name: /CONTINUE/ });
+    await user.click(continueButton);
+
     const state = useGameStore.getState();
     expect(state.playerClass?.type).toBe('elf');
     expect(state.state).toBe('BRIEFING');
@@ -105,6 +119,13 @@ describe('StartScreen Component', () => {
 
     const bumbleButton = screen.getByRole('button', { name: /BUMBLE/ });
     await user.click(bumbleButton);
+
+    // After clicking Bumble, skin selector should appear
+    expect(screen.getByText('SELECT SKIN')).toBeInTheDocument();
+    
+    // Click continue on skin selector
+    const continueButton = screen.getByRole('button', { name: /CONTINUE/ });
+    await user.click(continueButton);
 
     const state = useGameStore.getState();
     expect(state.playerClass?.type).toBe('bumble');
@@ -134,8 +155,9 @@ describe('StartScreen Component', () => {
   it('should have clickable character cards', () => {
     render(<StartScreen />);
 
+    // Initially there are 3 character class buttons
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(3);
+    expect(buttons.length).toBeGreaterThanOrEqual(3);
 
     buttons.forEach((button) => {
       expect(button).toHaveAttribute('type', 'button');

@@ -101,6 +101,13 @@ export function BumbleCharacter({
     };
   }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
 
+  /**
+   * Customizes Bumble's appearance
+   * @param joints - Character joints
+   * @param scale - Character scale
+   * @param _primaryColor - Primary color (unused for Bumble)
+   * @param _accentColor - Accent color (unused for Bumble)
+   */
   function customizeBumbleAppearance(joints: CharacterJoints, scale: number, _primaryColor: number, _accentColor: number) {
     // Note: Bumble appearance is primarily defined by fur colors, which are applied via the fur options.
     // Primary and accent colors are not used for additional customization on this character.
