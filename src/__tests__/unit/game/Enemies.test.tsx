@@ -4,8 +4,6 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-// import { render } from '@testing-library/react';
-// import { Canvas } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Enemies } from '@/game/Enemies';
 import { useGameStore } from '@/store/gameStore';
@@ -96,69 +94,7 @@ describe('Enemies Component', () => {
     });
   });
 
-  describe('Enemy AI & Movement', () => {
-    it('should track player position', () => {
-      const playerPos = new THREE.Vector3(10, 0, 5);
-      useGameStore.setState({ playerPosition: playerPos });
-
-      const enemyMesh = new THREE.Object3D();
-      enemyMesh.position.set(0, 1, 0);
-
-      const enemy = {
-        id: 'ai-test',
-        mesh: enemyMesh,
-        velocity: new THREE.Vector3(),
-        hp: 30,
-        maxHp: 30,
-        isActive: true,
-        type: 'minion' as const,
-        speed: 4,
-        damage: 1,
-        pointValue: 10,
-      };
-
-      useGameStore.getState().addEnemy(enemy);
-
-      // Calculate direction to player
-      const toPlayer = playerPos.clone().sub(enemy.mesh.position);
-      const direction = toPlayer.normalize();
-
-      // Should have a direction toward player
-      expect(direction.length()).toBeCloseTo(1, 5); // Normalized = length 1
-    });
-
-    it('should move toward player', () => {
-      const playerPos = new THREE.Vector3(100, 0, 0);
-      const enemyStartPos = new THREE.Vector3(0, 1, 0);
-
-      useGameStore.setState({ playerPosition: playerPos, state: 'PHASE_1' });
-
-      const enemyMesh = new THREE.Object3D();
-      enemyMesh.position.copy(enemyStartPos);
-
-      const enemy = {
-        id: 'movement-test',
-        mesh: enemyMesh,
-        velocity: new THREE.Vector3(),
-        hp: 30,
-        maxHp: 30,
-        isActive: true,
-        type: 'minion' as const,
-        speed: 4,
-        damage: 1,
-        pointValue: 10,
-      };
-
-      useGameStore.getState().addEnemy(enemy);
-
-      // Simulate movement (direction * speed * delta)
-      const direction = playerPos.clone().sub(enemyStartPos).normalize();
-      const newPos = enemyStartPos.clone().add(direction.multiplyScalar(4 * 0.016)); // 60fps
-
-      // Should move in X direction toward player
-      expect(newPos.x).toBeGreaterThan(enemyStartPos.x);
-    });
-
+  describe('Enemy AI & Movement Config', () => {
     it('should have slower speed for boss', () => {
       const bossSpeed = 3;
       const minionSpeed = 4;
@@ -289,17 +225,14 @@ describe('Enemies Component', () => {
       useGameStore.getState().spawnBoss();
 
       const boss = useGameStore.getState().enemies.find((e) => e.type === 'boss');
-      const bossPos = boss?.mesh.position;
+      expect(boss).toBeDefined();
+      const bossPos = boss!.mesh.position;
 
-      if (bossPos) {
-        const distanceFromOrigin = Math.sqrt(
-          bossPos.x * bossPos.x + bossPos.z * bossPos.z
-        );
+      const distanceFromOrigin = Math.sqrt(bossPos.x * bossPos.x + bossPos.z * bossPos.z);
 
-        // Boss spawns at radius 30 from player
-        expect(distanceFromOrigin).toBeGreaterThanOrEqual(25);
-        expect(distanceFromOrigin).toBeLessThanOrEqual(35);
-      }
+      // Boss spawns at radius 30 from player
+      expect(distanceFromOrigin).toBeGreaterThanOrEqual(25);
+      expect(distanceFromOrigin).toBeLessThanOrEqual(35);
     });
 
     it('should transition to WIN state when boss defeated', () => {
