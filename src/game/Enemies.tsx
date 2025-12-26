@@ -9,8 +9,10 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { CONFIG } from '@/data/config';
-import { ENEMIES, ENEMY_SPAWN_CONFIG } from '@/data/enemies';
+import CONFIG from '@/data/config.json';
+import ENEMIES_DATA from '@/data/enemies.json';
+
+const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES_DATA;
 
 let enemyIdCounter = 0;
 
@@ -44,7 +46,6 @@ export function Enemies() {
     )
       return;
 
-    const minionConfig = ENEMIES.minion;
     const id = `minion-${enemyIdCounter++}`;
     const angle = Math.random() * Math.PI * 2;
     const radius = ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin + Math.random() * (ENEMY_SPAWN_CONFIG.minionSpawnRadiusMax - ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin);
@@ -56,13 +57,13 @@ export function Enemies() {
       id,
       mesh,
       velocity: new THREE.Vector3(),
-      hp: minionConfig.hp,
-      maxHp: minionConfig.hp,
+      hp: MINION_CONFIG.hp,
+      maxHp: MINION_CONFIG.hp,
       isActive: true,
       type: 'minion',
-      speed: minionConfig.speed + Math.random() * 2,
-      damage: minionConfig.damage,
-      pointValue: minionConfig.pointValue,
+      speed: MINION_CONFIG.speed + Math.random() * 2,
+      damage: MINION_CONFIG.damage,
+      pointValue: MINION_CONFIG.pointValue,
     });
   }, []);
 
@@ -122,7 +123,7 @@ export function Enemies() {
         const distance = toPlayer.length();
         direction.copy(toPlayer).normalize();
 
-        const moveSpeed = enemy.type === 'boss' ? ENEMIES.boss.speed : enemy.speed;
+        const moveSpeed = enemy.type === 'boss' ? BOSS_CONFIG.speed : enemy.speed;
         tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
         currentPos.add(tempVec);
 
@@ -173,7 +174,7 @@ function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: nu
     () =>
       new THREE.MeshStandardMaterial({
         color: 0x112211,
-        emissive: CONFIG.COLORS.ENEMY_MINION,
+        emissive: new THREE.Color(CONFIG.COLORS.ENEMY_MINION),
         emissiveIntensity: 0.3,
         metalness: 0.7,
         roughness: 0.3,
@@ -185,7 +186,7 @@ function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: nu
     () =>
       new THREE.MeshStandardMaterial({
         color: 0x222222,
-        emissive: CONFIG.COLORS.ENEMY_MINION,
+        emissive: new THREE.Color(CONFIG.COLORS.ENEMY_MINION),
         emissiveIntensity: 0.2,
         metalness: 0.8,
         roughness: 0.2,
@@ -253,7 +254,7 @@ function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: nu
       <instancedMesh ref={bodyRef} args={[bodyGeo, bodyMat, CONFIG.MAX_MINIONS + 5]} castShadow />
       <instancedMesh ref={headRef} args={[headGeo, headMat, CONFIG.MAX_MINIONS + 5]} castShadow />
       <instancedMesh ref={eyeRef} args={[eyeGeo, eyeMat, CONFIG.MAX_MINIONS + 5]} />
-      <pointLight color={CONFIG.COLORS.ENEMY_MINION} intensity={1.5} distance={30} position={[0, 2, 0]} />
+      <pointLight color={new THREE.Color(CONFIG.COLORS.ENEMY_MINION)} intensity={1.5} distance={30} position={[0, 2, 0]} />
     </group>
   );
 }
@@ -424,7 +425,7 @@ function BossMesh({
         <mesh castShadow><capsuleGeometry args={[0.4, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.1} metalness={0.3} roughness={0.7} /></mesh>
         <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}><mesh castShadow><capsuleGeometry args={[0.3, 1.2, 6, 12]} /><meshStandardMaterial color={baseColor} emissive={emissiveColor} emissiveIntensity={intensity * 0.1} metalness={0.3} roughness={0.7} /></mesh></group>
       </group>
-      <pointLight color={emissiveColor} intensity={intensity * 3} distance={15} position={[0, 0, 0]} />
+      <pointLight color={new THREE.Color(emissiveColor)} intensity={intensity * 3} distance={15} position={[0, 0, 0]} />
       <mesh position={[0, 5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1.8, 2, 32, 1, 0, Math.PI * 2 * hpRatio]} />
         <meshBasicMaterial color={hpRatio > 0.5 ? 0x00ff00 : hpRatio > 0.25 ? 0xffaa00 : 0xff0000} side={THREE.DoubleSide} />

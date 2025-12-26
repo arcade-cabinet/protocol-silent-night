@@ -17,11 +17,15 @@ import type {
   WeaponEvolutionType,
   WeaponType,
 } from '@/types';
-import { CONFIG } from '@/data/config';
-import { PLAYER_CLASSES } from '@/data/classes';
-import { ROGUELIKE_UPGRADES } from '@/data/upgrades';
-import { WEAPON_EVOLUTIONS, WEAPONS } from '@/data/weapons';
+import CONFIG from '@/data/config.json';
+import CLASSES from '@/data/classes.json';
+import UPGRADES from '@/data/upgrades.json';
+import WEAPONS_DATA from '@/data/weapons.json';
+const { weapons: WEAPONS, evolutions: WEAPON_EVOLUTIONS } = WEAPONS_DATA;
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
+
+const PLAYER_CLASSES = CLASSES as Record<PlayerClassType, PlayerClassConfig>;
+const ROGUELIKE_UPGRADES = UPGRADES as RoguelikeUpgrade[];
 
 // Persistence keys
 const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
