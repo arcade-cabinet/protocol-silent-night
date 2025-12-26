@@ -191,8 +191,8 @@ export const UPGRADE_REGISTRY: Upgrade[] = [
     maxStacks: 2,
     apply: (stats) => ({
       ...stats,
-      // Note: Actual dual projectile implementation would require changes to bullet spawning logic.
-      // For now, we balance it by giving 50% more damage as placeholder effect.
+      // Simulates dual projectile effect through damage increase.
+      // Future enhancement: modify bullet spawning logic to fire 2 projectiles with 0.75x damage each.
       damageMultiplier: stats.damageMultiplier * 1.5,
     }),
   },
