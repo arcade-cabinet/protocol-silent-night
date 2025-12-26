@@ -3,7 +3,8 @@ import ReactTestRenderer from '@react-three/test-renderer';
 import { BumbleCharacter } from '@/characters/BumbleCharacter';
 
 // Mock Strata
-vi.mock('@jbcom/strata', () => {
+vi.mock('@jbcom/strata', async () => {
+  const THREE = await import('three');
   const mockJoint = () => ({
     mesh: new THREE.Group(),
     group: new THREE.Group(),

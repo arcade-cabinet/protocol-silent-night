@@ -44,6 +44,7 @@ describe('Bullets', () => {
       hp: 1,
       maxHp: 1,
       isEnemy: false,
+      damage: 10,
       type: 'cannon' as const,
     };
     bullet.mesh.position.set(0, 0, 0);
@@ -80,6 +81,7 @@ describe('Bullets', () => {
       hp: 1,
       maxHp: 1,
       isEnemy: false,
+      damage: 10,
       type: 'cannon' as const,
     };
 
@@ -108,6 +110,7 @@ describe('Bullets', () => {
       hp: 1,
       maxHp: 1,
       isEnemy: false,
+      damage: 10,
       type: 'cannon' as const,
     };
     bullet.mesh.position.set(5, 0, 5);

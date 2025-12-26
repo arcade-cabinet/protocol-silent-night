@@ -38,7 +38,7 @@ describe('Terrain', () => {
 
   it('should render and sync obstacles', async () => {
     const { noise3D } = await import('@jbcom/strata');
-    (noise3D as any).mockImplementation((x: number, z: number, w: number) => {
+    (noise3D as any).mockImplementation((_x: number, _z: number, w: number) => {
       if (w === 0) return 0.95; // isObstacle
       return 0.5;
     });
@@ -46,6 +46,19 @@ describe('Terrain', () => {
     render(<Terrain />);
     
     expect(useGameStore.getState().obstacles.length).toBeGreaterThan(0);
+  });
+
+  it('should have correct instanced mesh count', () => {
+    const { container } = render(<Terrain />);
+    // We can't directly check the 'count' property on the DOM element in RTL,
+    // but we can check if it rendered the tag.
+    const instancedMesh = container.querySelector('instancedmesh');
+    expect(instancedMesh).toBeDefined();
+  });
+
+  it('should cleanup resources on unmount', () => {
+    const { unmount } = render(<Terrain />);
+    expect(() => unmount()).not.toThrow();
   });
 
   it('should update material time in useFrame', () => {

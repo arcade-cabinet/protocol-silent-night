@@ -39,7 +39,8 @@ vi.mock('tone', () => {
     FMSynth: MockFMSynth,
     NoiseSynth: MockNoiseSynth,
     Loop: class {
-      constructor(callback) {
+      callback: any;
+      constructor(callback: any) {
         this.callback = callback;
       }
       start = vi.fn().mockReturnThis();
