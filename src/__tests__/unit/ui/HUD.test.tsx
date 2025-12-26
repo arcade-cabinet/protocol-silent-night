@@ -31,7 +31,7 @@ describe('HUD Component', () => {
 
     render(<HUD />);
 
-    expect(screen.getByText('300 / 300')).toBeInTheDocument();
+    expect(screen.getByText(/HP: 300 \/ 300/)).toBeInTheDocument();
   });
 
   it('should update health display when damaged', () => {
@@ -43,7 +43,7 @@ describe('HUD Component', () => {
     store.damagePlayer(100);
     rerender(<HUD />);
 
-    expect(screen.getByText('200 / 300')).toBeInTheDocument();
+    expect(screen.getByText(/HP: 200 \/ 300/)).toBeInTheDocument();
   });
 
   it('should display health bar percentage correctly', () => {
@@ -140,6 +140,6 @@ describe('HUD Component', () => {
 
     render(<HUD />);
 
-    expect(screen.getByText('100 / 100')).toBeInTheDocument();
+    expect(screen.getByText(/HP: 100 \/ 100/)).toBeInTheDocument();
   });
 });

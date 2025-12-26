@@ -176,8 +176,50 @@ export interface GameStats {
 }
 
 /**
+ * Meta-progression data (persisted across runs)
+ * @interface MetaProgressData
+ */
+export interface MetaProgressData {
+  /** Universal currency earned through gameplay */
+  nicePoints: number;
+  /** Total currency earned over all time */
+  totalPointsEarned: number;
+  /** Total number of game runs completed */
+  runsCompleted: number;
+  /** Total number of bosses defeated */
+  bossesDefeated: number;
+
+  /** Unlocked weapon IDs */
+  unlockedWeapons: string[];
+  /** Unlocked character skin IDs */
+  unlockedSkins: string[];
+
+  /** Permanent upgrades (upgrade ID -> level) */
+  permanentUpgrades: Record<string, number>;
+
+  /** Historical statistics */
+  highScore: number;
+  totalKills: number;
+  totalDeaths: number;
+}
+
+/**
+ * Progress data for the current active run
+ * @interface RunProgressData
+ */
+export interface RunProgressData {
+  /** Experience points earned in current run */
+  xp: number;
+  /** Current player level in run */
+  level: number;
+  /** IDs of upgrades selected during this run */
+  selectedUpgrades: string[];
+  /** IDs of weapon evolutions unlocked this run */
+  weaponEvolutions: string[];
+}
+
+/**
  * Global game configuration constants
- * @constant
  */
 export const CONFIG = {
   /** Size of the game world (NxN grid) */

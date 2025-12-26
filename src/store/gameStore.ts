@@ -7,14 +7,17 @@ import type {
   GameState,
   GameStats,
   InputState,
+  MetaProgressData,
   PlayerClassConfig,
   PlayerClassType,
+  RunProgressData,
 } from '@/types';
 import { CONFIG, PLAYER_CLASSES } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
-// High score persistence key
+// Persistence keys
 const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
+const META_PROGRESS_KEY = 'protocol-silent-night-meta-progress';
 
 interface GameStore {
   // Game State
@@ -41,6 +44,21 @@ interface GameStore {
   stats: GameStats;
   addKill: (points: number) => void;
   resetStats: () => void;
+
+  // Meta-Progression
+  metaProgress: MetaProgressData;
+  earnNicePoints: (amount: number) => void;
+  spendNicePoints: (amount: number) => boolean;
+  unlockWeapon: (weaponId: string) => void;
+  unlockSkin: (skinId: string) => void;
+  upgradePermanent: (upgradeId: string) => void;
+  updateMetaProgress: (updater: (data: MetaProgressData) => MetaProgressData) => void;
+
+  // Run-Progression (XP/Leveling)
+  runProgress: RunProgressData;
+  gainXP: (amount: number) => void;
+  levelUp: () => void;
+  selectLevelUpgrade: (upgradeId: string) => void;
 
   // Input
   input: InputState;
@@ -85,6 +103,40 @@ interface GameStore {
   reset: () => void;
 }
 
+// Load meta-progression from localStorage
+const loadMetaProgress = (): MetaProgressData => {
+  try {
+    const stored = localStorage.getItem(META_PROGRESS_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('Failed to load meta progress:', e);
+  }
+
+  return {
+    nicePoints: 0,
+    totalPointsEarned: 0,
+    runsCompleted: 0,
+    bossesDefeated: 0,
+    unlockedWeapons: ['cannon', 'smg', 'star'], // Base weapons unlocked by default
+    unlockedSkins: [],
+    permanentUpgrades: {},
+    highScore: 0,
+    totalKills: 0,
+    totalDeaths: 0,
+  };
+};
+
+// Save meta-progression to localStorage
+const saveMetaProgress = (data: MetaProgressData): void => {
+  try {
+    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('Failed to save meta progress:', e);
+  }
+};
+
 // Load high score from localStorage
 const loadHighScore = (): number => {
   try {
@@ -104,6 +156,8 @@ const saveHighScore = (score: number): void => {
   }
 };
 
+const initialMetaProgress = loadMetaProgress();
+
 const initialState = {
   state: 'MENU' as GameState,
   missionBriefing: {
@@ -121,6 +175,13 @@ const initialState = {
   playerPosition: new THREE.Vector3(0, 0, 0),
   playerRotation: 0,
   stats: { score: 0, kills: 0, bossDefeated: false },
+  metaProgress: initialMetaProgress,
+  runProgress: {
+    xp: 0,
+    level: 1,
+    selectedUpgrades: [],
+    weaponEvolutions: [],
+  },
   input: {
     movement: { x: 0, y: 0 },
     isFiring: false,
@@ -160,6 +221,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       state: 'BRIEFING',
       playerPosition: new THREE.Vector3(0, 0, 0),
       playerRotation: 0,
+      runProgress: {
+        xp: 0,
+        level: 1,
+        selectedUpgrades: [],
+        weaponEvolutions: [],
+      },
     });
 
     // Play UI select sound
@@ -167,7 +234,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   damagePlayer: (amount) => {
-    const { playerHp, state } = get();
+    const { playerHp, state, metaProgress } = get();
     if (state === 'GAME_OVER' || state === 'WIN') return;
 
     const newHp = Math.max(0, playerHp - amount);
@@ -189,7 +256,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (newHp <= 0) {
       get().updateHighScore();
-      set({ state: 'GAME_OVER' });
+      const updatedMeta = {
+        ...metaProgress,
+        totalDeaths: metaProgress.totalDeaths + 1,
+        runsCompleted: metaProgress.runsCompleted + 1,
+      };
+      set({ state: 'GAME_OVER', metaProgress: updatedMeta });
+      saveMetaProgress(updatedMeta);
       AudioManager.playSFX('defeat');
       AudioManager.playMusic('defeat');
     }
@@ -199,7 +272,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
 
   addKill: (points) => {
-    const { stats, state, enemies, lastKillTime, killStreak } = get();
+    const { stats, state, enemies, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
@@ -211,10 +284,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
 
+    // XP calculation: 10 XP per kill + streak bonus
+    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+    get().gainXP(xpGain);
+
+    // Nice Points calculation: matches points or uses a specific formula
+    // For now, let's say 1 Nice Point per 10 points scored
+    const npGain = Math.floor((points + streakBonus) / 10);
+    get().earnNicePoints(npGain);
+
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
+      metaProgress: {
+        ...metaProgress,
+        totalKills: metaProgress.totalKills + 1,
+      },
     });
 
     // Audio and haptic feedback
@@ -236,6 +322,118 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   resetStats: () => set({ stats: { score: 0, kills: 0, bossDefeated: false } }),
+
+  // Meta-Progression Actions
+  earnNicePoints: (amount) => {
+    const { metaProgress } = get();
+    const updated = {
+      ...metaProgress,
+      nicePoints: metaProgress.nicePoints + amount,
+      totalPointsEarned: metaProgress.totalPointsEarned + amount,
+    };
+    set({ metaProgress: updated });
+    saveMetaProgress(updated);
+  },
+
+  spendNicePoints: (amount) => {
+    const { metaProgress } = get();
+    if (metaProgress.nicePoints >= amount) {
+      const updated = {
+        ...metaProgress,
+        nicePoints: metaProgress.nicePoints - amount,
+      };
+      set({ metaProgress: updated });
+      saveMetaProgress(updated);
+      return true;
+    }
+    return false;
+  },
+
+  unlockWeapon: (weaponId) => {
+    const { metaProgress } = get();
+    if (!metaProgress.unlockedWeapons.includes(weaponId)) {
+      const updated = {
+        ...metaProgress,
+        unlockedWeapons: [...metaProgress.unlockedWeapons, weaponId],
+      };
+      set({ metaProgress: updated });
+      saveMetaProgress(updated);
+    }
+  },
+
+  unlockSkin: (skinId) => {
+    const { metaProgress } = get();
+    if (!metaProgress.unlockedSkins.includes(skinId)) {
+      const updated = {
+        ...metaProgress,
+        unlockedSkins: [...metaProgress.unlockedSkins, skinId],
+      };
+      set({ metaProgress: updated });
+      saveMetaProgress(updated);
+    }
+  },
+
+  upgradePermanent: (upgradeId) => {
+    const { metaProgress } = get();
+    const currentLevel = metaProgress.permanentUpgrades[upgradeId] || 0;
+    const updated = {
+      ...metaProgress,
+      permanentUpgrades: {
+        ...metaProgress.permanentUpgrades,
+        [upgradeId]: currentLevel + 1,
+      },
+    };
+    set({ metaProgress: updated });
+    saveMetaProgress(updated);
+  },
+
+  updateMetaProgress: (updater) => {
+    const updated = updater(get().metaProgress);
+    set({ metaProgress: updated });
+    saveMetaProgress(updated);
+  },
+
+  // Run-Progression Actions
+  gainXP: (amount) => {
+    const { runProgress } = get();
+    const newXP = runProgress.xp + amount;
+    // Simple level up curve: 100 * level
+    const xpToNextLevel = runProgress.level * 100;
+
+    if (newXP >= xpToNextLevel) {
+      set({
+        runProgress: {
+          ...runProgress,
+          xp: newXP - xpToNextLevel,
+          level: runProgress.level + 1,
+        },
+      });
+      get().levelUp();
+    } else {
+      set({
+        runProgress: {
+          ...runProgress,
+          xp: newXP,
+        },
+      });
+    }
+  },
+
+  levelUp: () => {
+    // This will eventually trigger the LevelUp UI
+    AudioManager.playSFX('ui_select');
+    // TODO: set state to SHOW_LEVEL_UP if we implement a separate state for it
+  },
+
+  selectLevelUpgrade: (upgradeId) => {
+    const { runProgress } = get();
+    set({
+      runProgress: {
+        ...runProgress,
+        selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
+      },
+    });
+  },
 
   setMovement: (x, y) =>
     set((state) => ({
@@ -364,7 +562,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   damageBoss: (amount) => {
-    const { bossHp } = get();
+    const { bossHp, metaProgress } = get();
     const newHp = Math.max(0, bossHp - amount);
     set({ bossHp: newHp, screenShake: 0.3 });
 
@@ -372,12 +570,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
     AudioManager.playSFX('boss_hit');
 
     if (newHp <= 0) {
+      const updatedMeta = {
+        ...metaProgress,
+        bossesDefeated: metaProgress.bossesDefeated + 1,
+        runsCompleted: metaProgress.runsCompleted + 1,
+      };
       set({
         state: 'WIN',
         bossActive: false,
         stats: { ...get().stats, bossDefeated: true },
+        metaProgress: updatedMeta,
       });
       get().updateHighScore();
+      saveMetaProgress(updatedMeta);
 
       // Victory audio
       AudioManager.playSFX('boss_defeated');
@@ -391,10 +596,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   triggerShake: (intensity) => set({ screenShake: intensity }),
 
   updateHighScore: () => {
-    const { stats, highScore } = get();
+    const { stats, highScore, metaProgress } = get();
     if (stats.score > highScore) {
       saveHighScore(stats.score);
-      set({ highScore: stats.score });
+      const updatedMeta = {
+        ...metaProgress,
+        highScore: stats.score,
+      };
+      set({ highScore: stats.score, metaProgress: updatedMeta });
+      saveMetaProgress(updatedMeta);
     }
   },
 
@@ -402,6 +612,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       ...initialState,
       highScore: get().highScore, // Preserve high score
+      metaProgress: get().metaProgress, // Preserve meta progress
       playerPosition: new THREE.Vector3(0, 0, 0),
     }),
 }));
