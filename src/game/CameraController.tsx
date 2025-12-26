@@ -150,6 +150,8 @@ export function CameraController() {
       return;
     }
 
+    if (state === 'LEVEL_UP' || state === 'GAME_OVER' || state === 'WIN') return;
+
     // Calculate zoomed camera height and distance
     const cameraHeight = DEFAULT_CAMERA_HEIGHT * zoomRef.current;
     const cameraDistance = DEFAULT_CAMERA_DISTANCE * zoomRef.current;

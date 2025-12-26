@@ -59,10 +59,18 @@ vi.mock('tone', () => {
   };
 
   // Use functions that can be used as constructors
-  function MockSynth() { return synthMock; }
-  function MockPolySynth() { return synthMock; }
-  function MockFMSynth() { return synthMock; }
-  function MockNoiseSynth() { return synthMock; }
+  function MockSynth() {
+    return synthMock;
+  }
+  function MockPolySynth() {
+    return synthMock;
+  }
+  function MockFMSynth() {
+    return synthMock;
+  }
+  function MockNoiseSynth() {
+    return synthMock;
+  }
 
   return {
     start: vi.fn().mockResolvedValue(undefined),

@@ -33,7 +33,7 @@ describe('MissionBriefing Component', () => {
     expect(screen.getByText('MISSION BRIEFING')).toBeInTheDocument();
   });
 
-    it('should display briefing lines over time', () => {
+  it('should display briefing lines over time', () => {
     vi.useFakeTimers();
 
     act(() => {
@@ -46,7 +46,7 @@ describe('MissionBriefing Component', () => {
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    
+
     // We check for text presence without strict label mapping since it's data-driven
     expect(screen.getByText(/OPERATION/i)).toBeInTheDocument();
     expect(screen.getByText(/SILENT NIGHT/i)).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe('MissionBriefing Component', () => {
     vi.useRealTimers();
   });
 
-    it('should show start button after all lines revealed', () => {
+  it('should show start button after all lines revealed', () => {
     vi.useFakeTimers();
 
     act(() => {
@@ -80,7 +80,7 @@ describe('MissionBriefing Component', () => {
     vi.useRealTimers();
   });
 
-    it('should transition to PHASE_1 when button clicked', () => {
+  it('should transition to PHASE_1 when button clicked', () => {
     vi.useFakeTimers();
 
     act(() => {

@@ -7,9 +7,9 @@
 import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import { type ChristmasObstacle, getBulletTypeFromWeapon, type WeaponType } from '@/types';
-import { WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
 import { StrataCharacter } from './StrataCharacter';
 
 let bulletIdCounter = 0;
@@ -75,7 +75,12 @@ export function PlayerController() {
 
   // Create bullet with initial position
   const fireBullet = useCallback(
-    (spawnPosition: THREE.Vector3, direction: THREE.Vector3, baseDamage: number, weaponType: WeaponType) => {
+    (
+      spawnPosition: THREE.Vector3,
+      direction: THREE.Vector3,
+      baseDamage: number,
+      weaponType: WeaponType
+    ) => {
       const id = `bullet-${bulletIdCounter++}`;
 
       // Create mesh-like object with position for tracking
@@ -92,18 +97,19 @@ export function PlayerController() {
       // Use weapon config or fallback to base damage, applied with multipliers
       const damage = baseDamage;
       const bulletType = getBulletTypeFromWeapon(weaponType);
-      
+
       // Evolution modifiers
       const speedMultiplier = evolutionConfig?.modifiers.speedMultiplier || 1;
       const sizeMultiplier = evolutionConfig?.modifiers.size || 1;
       const penetration = evolutionConfig?.modifiers.penetration || false;
       const explosive = evolutionConfig?.modifiers.explosive || false;
-      
+
       const bulletSpeed = (weaponConfig.speed || 25) * speedMultiplier;
       const bulletLife = weaponConfig.life || 3.0;
 
       // Handle multi-projectile weapons (spread)
-      const projectileCount = evolutionConfig?.modifiers.projectileCount || weaponConfig.projectileCount || 1;
+      const projectileCount =
+        evolutionConfig?.modifiers.projectileCount || weaponConfig.projectileCount || 1;
       const spreadAngle = evolutionConfig?.modifiers.spreadAngle || weaponConfig.spreadAngle || 0.2;
 
       if (projectileCount > 1) {
@@ -162,7 +168,14 @@ export function PlayerController() {
   );
 
   useFrame((_, delta) => {
-    if (!groupRef.current || !playerClass || state === 'GAME_OVER' || state === 'WIN' || state === 'LEVEL_UP') return;
+    if (
+      !groupRef.current ||
+      !playerClass ||
+      state === 'GAME_OVER' ||
+      state === 'WIN' ||
+      state === 'LEVEL_UP'
+    )
+      return;
 
     const { movement, isFiring: firing } = input;
 
@@ -212,7 +225,8 @@ export function PlayerController() {
 
       // Calculate rotation from movement direction - smooth rotation
       const targetRotation = Math.atan2(movement.x, movement.y);
-      const angleDiff = ((targetRotation - rotationRef.current + Math.PI) % (Math.PI * 2)) - Math.PI;
+      const angleDiff =
+        ((targetRotation - rotationRef.current + Math.PI) % (Math.PI * 2)) - Math.PI;
       rotationRef.current += angleDiff * delta * 10;
     }
 
@@ -227,15 +241,17 @@ export function PlayerController() {
     // Firing - use effective ROF and damage with upgrades and evolution
     if (firing) {
       const now = Date.now() / 1000;
-      
+
       // Combine effective stats from upgrades and weapon modifiers from evolution
       const fireRate = weaponModifiers?.rof ?? playerClass.rof;
       // We should also apply roguelike upgrades to this base fire rate
-      const effectiveFireRate = effectiveStats ? fireRate * (1 - (effectiveStats.rof - playerClass.rof) / playerClass.rof) : fireRate;
-      
+      const effectiveFireRate = effectiveStats
+        ? fireRate * (1 - (effectiveStats.rof - playerClass.rof) / playerClass.rof)
+        : fireRate;
+
       // Simplified: just use what the store provides, we should probably reconcile them in the store itself
       // but for now let's use weaponModifiers which handles evolution.
-      
+
       if (now - lastFireTime.current >= effectiveFireRate) {
         lastFireTime.current = now;
 

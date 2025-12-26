@@ -58,12 +58,12 @@ describe('HUD Component', () => {
     expect(healthBar).toHaveStyle({ width: '50%' });
   });
 
-    it('should show correct objective in PHASE_1', () => {
+  it('should show correct objective in PHASE_1', () => {
     const store = useGameStore.getState();
     store.selectClass('santa');
     // Set level to avoid level-up interruption
     useGameStore.setState({
-      runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+      runProgress: { ...useGameStore.getState().runProgress, level: 100 },
     });
     store.setState('PHASE_1');
 
@@ -79,7 +79,7 @@ describe('HUD Component', () => {
       store.selectClass('santa');
       // Set level to avoid level-up interruption
       useGameStore.setState({
-        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 },
       });
       store.setState('PHASE_1');
     });
@@ -98,7 +98,7 @@ describe('HUD Component', () => {
     expect(matches.length).toBeGreaterThan(0);
   });
 
-    it('should show boss objective in PHASE_BOSS', () => {
+  it('should show boss objective in PHASE_BOSS', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().setState('PHASE_BOSS');
 
@@ -107,7 +107,7 @@ describe('HUD Component', () => {
     expect(screen.getByText(/KRAMPUS-PRIME/i)).toBeInTheDocument();
   });
 
-    it('should show mission complete in WIN state', () => {
+  it('should show mission complete in WIN state', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().setState('WIN');
 

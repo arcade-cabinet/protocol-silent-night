@@ -36,6 +36,16 @@ export function HitParticles() {
   useFrame((_, delta) => {
     if (!meshRef.current) return;
 
+    const { state: gameState } = useGameStore.getState();
+    if (
+      gameState === 'LEVEL_UP' ||
+      gameState === 'MENU' ||
+      gameState === 'BRIEFING' ||
+      gameState === 'GAME_OVER' ||
+      gameState === 'WIN'
+    )
+      return;
+
     // Check for new kill (enemy death particle burst)
     if (stats.kills > lastKillsRef.current) {
       lastKillsRef.current = stats.kills;

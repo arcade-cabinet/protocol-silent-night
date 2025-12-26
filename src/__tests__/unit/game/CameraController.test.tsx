@@ -26,7 +26,9 @@ describe('CameraController Component', () => {
     await renderer.advanceFrames(60, 0.1);
 
     // Access camera from R3F state
-    const camera = renderer.scene.instance.children[0]?.camera || (renderer.scene.allChildren.find((c: any) => c.instance.camera)?.instance.camera);
+    const camera =
+      renderer.scene.instance.children[0]?.camera ||
+      (renderer.scene.allChildren.find((c: any) => (c as any).instance.camera) as any)?.instance.camera;
     if (camera) {
       expect(camera.position.x).toBeCloseTo(10, 0);
       expect(camera.position.z).toBeGreaterThan(10);

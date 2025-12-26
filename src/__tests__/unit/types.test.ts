@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PLAYER_CLASSES, CONFIG } from '@/data';
+import { CONFIG, PLAYER_CLASSES } from '@/data';
 import type { PlayerClassType } from '@/types';
 
 describe('Game Constants', () => {
@@ -20,16 +20,16 @@ describe('Game Constants', () => {
       expect(CONFIG.SPAWN_INTERVAL).toBe(2500);
     });
 
-  it('should have color palette', () => {
-    // JSON colors are strings like "#ff0044"
-    expect(CONFIG.COLORS.SANTA).toBe('#ff0044');
-    expect(CONFIG.COLORS.ELF).toBe('#00ffcc');
-    expect(CONFIG.COLORS.BUMBLE).toBe('#eeeeee');
-    expect(CONFIG.COLORS.ENEMY_MINION).toBe('#00ff00');
-    expect(CONFIG.COLORS.ENEMY_BOSS).toBe('#ff0044');
-    expect(CONFIG.COLORS.BULLET_PLAYER).toBe('#ffffaa');
-    expect(CONFIG.COLORS.BULLET_ENEMY).toBe('#ff0000');
-  });
+    it('should have color palette', () => {
+      // JSON colors are strings like "#ff0044"
+      expect(CONFIG.COLORS.SANTA).toBe('#ff0044');
+      expect(CONFIG.COLORS.ELF).toBe('#00ffcc');
+      expect(CONFIG.COLORS.BUMBLE).toBe('#eeeeee');
+      expect(CONFIG.COLORS.ENEMY_MINION).toBe('#00ff00');
+      expect(CONFIG.COLORS.ENEMY_BOSS).toBe('#ff0044');
+      expect(CONFIG.COLORS.BULLET_PLAYER).toBe('#ffffaa');
+      expect(CONFIG.COLORS.BULLET_ENEMY).toBe('#ff0000');
+    });
   });
 
   describe('PLAYER_CLASSES', () => {
@@ -41,6 +41,7 @@ describe('Game Constants', () => {
     });
 
     describe('Santa (Mecha-Santa)', () => {
+      // biome-ignore lint/suspicious/noExplicitAny: necessary for raw data inspection
       const santa = PLAYER_CLASSES.santa as any;
 
       it('should have correct basic properties', () => {
@@ -72,6 +73,7 @@ describe('Game Constants', () => {
     });
 
     describe('Elf (Cyber-Elf)', () => {
+      // biome-ignore lint/suspicious/noExplicitAny: necessary for raw data inspection
       const elf = PLAYER_CLASSES.elf as any;
 
       it('should have correct basic properties', () => {
@@ -113,6 +115,7 @@ describe('Game Constants', () => {
     });
 
     describe('Bumble (The Bumble)', () => {
+      // biome-ignore lint/suspicious/noExplicitAny: necessary for raw data inspection
       const bumble = PLAYER_CLASSES.bumble as any;
 
       it('should have correct basic properties', () => {

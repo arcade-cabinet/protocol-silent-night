@@ -8,17 +8,25 @@ import { fbm, noise3D } from '@jbcom/strata';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { OBSTACLE_TYPES, TERRAIN_CONFIG } from '@/data';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
-import { type ChristmasObstacle } from '@/types';
-import { TERRAIN_CONFIG, OBSTACLE_TYPES } from '@/data';
+import type { ChristmasObstacle } from '@/types';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const setObstacles = useGameStore((state) => state.setObstacles);
 
   // Create geometry and material
-  const geometry = useMemo(() => new THREE.BoxGeometry(TERRAIN_CONFIG.cubeSize, TERRAIN_CONFIG.cubeHeight, TERRAIN_CONFIG.cubeSize), []);
+  const geometry = useMemo(
+    () =>
+      new THREE.BoxGeometry(
+        TERRAIN_CONFIG.cubeSize,
+        TERRAIN_CONFIG.cubeHeight,
+        TERRAIN_CONFIG.cubeSize
+      ),
+    []
+  );
 
   const material = useMemo(
     () =>
@@ -46,8 +54,12 @@ export function Terrain() {
         dummy.scale.set(1, 1, 1);
 
         // Use Strata's noise3D and fbm for procedural height
-        const baseNoise = noise3D(x * TERRAIN_CONFIG.noiseScale, 0, z * TERRAIN_CONFIG.noiseScale) * TERRAIN_CONFIG.heightMultiplier;
-        const detailNoise = fbm(x * TERRAIN_CONFIG.detailNoiseScale, 0, z * TERRAIN_CONFIG.detailNoiseScale, 3) * TERRAIN_CONFIG.detailHeightMultiplier;
+        const baseNoise =
+          noise3D(x * TERRAIN_CONFIG.noiseScale, 0, z * TERRAIN_CONFIG.noiseScale) *
+          TERRAIN_CONFIG.heightMultiplier;
+        const detailNoise =
+          fbm(x * TERRAIN_CONFIG.detailNoiseScale, 0, z * TERRAIN_CONFIG.detailNoiseScale, 3) *
+          TERRAIN_CONFIG.detailHeightMultiplier;
 
         // Combine for final height
         const h = baseNoise + detailNoise + TERRAIN_CONFIG.baseElevation;
@@ -62,7 +74,8 @@ export function Terrain() {
           let config = OBSTACLE_TYPES.pillar; // Default
 
           if (objectTypeNoise > 0.7) {
-            config = objectTypeNoise > 0.85 ? OBSTACLE_TYPES.present_red : OBSTACLE_TYPES.present_green;
+            config =
+              objectTypeNoise > 0.85 ? OBSTACLE_TYPES.present_red : OBSTACLE_TYPES.present_green;
           } else if (objectTypeNoise > 0.4) {
             config = OBSTACLE_TYPES.tree;
           } else if (objectTypeNoise > 0) {
@@ -71,7 +84,7 @@ export function Terrain() {
 
           const hRange = config.heightRange;
           const obstacleHeight = hRange[0] + Math.random() * (hRange[1] - hRange[0]);
-          
+
           dummy.position.y = h + (config.yOffset || obstacleHeight / 2);
 
           // Store obstacle for collision detection
@@ -168,13 +181,21 @@ function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
   return <FallbackObstacle position={posArray} height={obstacle.height} color={obstacle.color} />;
 }
 
-function FallbackObstacle({ position, height, color }: { position: [number, number, number]; height: number; color: THREE.Color }) {
+function FallbackObstacle({
+  position,
+  height,
+  color,
+}: {
+  position: [number, number, number];
+  height: number;
+  color: THREE.Color;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     const uniquePhase = position[0] * 0.1 + position[2] * 0.1;
-    
+
     if (meshRef.current) {
       const pulse = Math.sin(time * 2 + uniquePhase) * 0.15 + 0.85;
       (meshRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse * 0.4;
@@ -184,19 +205,21 @@ function FallbackObstacle({ position, height, color }: { position: [number, numb
   return (
     <mesh ref={meshRef} position={position} castShadow receiveShadow>
       <boxGeometry args={[1, height, 1]} />
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={0.2}
-      />
+      <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
     </mesh>
   );
 }
 
 // Cyberpunk Christmas Tree - Holographic with neon decorations
-function CyberpunkTree({ position, height }: { position: [number, number, number]; height: number }) {
+function CyberpunkTree({
+  position,
+  height,
+}: {
+  position: [number, number, number];
+  height: number;
+}) {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   useFrame((state) => {
     if (groupRef.current) {
       // Subtle sway
@@ -217,29 +240,41 @@ function CyberpunkTree({ position, height }: { position: [number, number, number
           roughness={0.8}
         />
       </mesh>
-      
+
       {/* Holographic rings */}
       {[0.2, 0.4, 0.6, 0.8].map((y, i) => (
-        <mesh key={`ring-${i}`} position={[0, height * y - height / 2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh
+          key={`ring-${y}`}
+          position={[0, height * y - height / 2, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+        >
           <torusGeometry args={[1.1 - y * 0.8, 0.02, 8, 16]} />
           <meshBasicMaterial color={i % 2 === 0 ? 0x00ffcc : 0xff0066} transparent opacity={0.8} />
         </mesh>
       ))}
-      
+
       {/* Star on top */}
       <mesh position={[0, height / 2 + 0.3, 0]}>
         <octahedronGeometry args={[0.2]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
-      <pointLight color={0xffd700} intensity={0.5} distance={4} position={[0, height / 2 + 0.3, 0]} />
-      
+      <pointLight
+        color={0xffd700}
+        intensity={0.5}
+        distance={4}
+        position={[0, height / 2 + 0.3, 0]}
+      />
+
       {/* Ornament lights */}
       {[0, 1, 2].map((i) => {
         const angle = (i / 3) * Math.PI * 2;
         const y = 0.3 + i * 0.25;
         const r = 0.8 - i * 0.2;
         return (
-          <mesh key={`ornament-${i}`} position={[Math.cos(angle) * r, y * height - height / 2, Math.sin(angle) * r]}>
+          <mesh
+            key={`ornament-${i}`}
+            position={[Math.cos(angle) * r, y * height - height / 2, Math.sin(angle) * r]}
+          >
             <sphereGeometry args={[0.1, 8, 8]} />
             <meshBasicMaterial color={[0xff0044, 0x00ffcc, 0xffd700][i]} />
           </mesh>
@@ -250,9 +285,17 @@ function CyberpunkTree({ position, height }: { position: [number, number, number
 }
 
 // Cyberpunk Present - Glowing gift box with circuit patterns
-function CyberpunkPresent({ position, height, color }: { position: [number, number, number]; height: number; color: THREE.Color }) {
+function CyberpunkPresent({
+  position,
+  height,
+  color,
+}: {
+  position: [number, number, number];
+  height: number;
+  color: THREE.Color;
+}) {
   const boxRef = useRef<THREE.Mesh>(null);
-  
+
   useFrame((state) => {
     if (boxRef.current) {
       const pulse = Math.sin(state.clock.elapsedTime * 3 + position[0] + position[2]) * 0.1 + 0.9;
@@ -261,7 +304,7 @@ function CyberpunkPresent({ position, height, color }: { position: [number, numb
   });
 
   const colorHex = color.getHex();
-  
+
   return (
     <group position={position}>
       {/* Main box */}
@@ -275,7 +318,7 @@ function CyberpunkPresent({ position, height, color }: { position: [number, numb
           roughness={0.3}
         />
       </mesh>
-      
+
       {/* Ribbon cross - vertical */}
       <mesh position={[0, 0, 0.76]}>
         <boxGeometry args={[0.2, height + 0.1, 0.02]} />
@@ -285,7 +328,7 @@ function CyberpunkPresent({ position, height, color }: { position: [number, numb
         <boxGeometry args={[0.2, height + 0.1, 0.02]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
-      
+
       {/* Ribbon cross - horizontal */}
       <mesh position={[0.76, 0, 0]}>
         <boxGeometry args={[0.02, height + 0.1, 0.2]} />
@@ -295,13 +338,13 @@ function CyberpunkPresent({ position, height, color }: { position: [number, numb
         <boxGeometry args={[0.02, height + 0.1, 0.2]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
-      
+
       {/* Bow on top */}
       <mesh position={[0, height / 2 + 0.2, 0]}>
         <torusGeometry args={[0.15, 0.05, 8, 16]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
-      
+
       {/* Glow */}
       <pointLight color={colorHex} intensity={0.4} distance={3} position={[0, height / 2, 0]} />
     </group>
@@ -309,7 +352,13 @@ function CyberpunkPresent({ position, height, color }: { position: [number, numb
 }
 
 // Cyberpunk Candy Cane - Neon striped pole
-function CyberpunkCandyCane({ position, height }: { position: [number, number, number]; height: number }) {
+function CyberpunkCandyCane({
+  position,
+  height,
+}: {
+  position: [number, number, number];
+  height: number;
+}) {
   return (
     <group position={position}>
       {/* Main pole */}
@@ -323,30 +372,39 @@ function CyberpunkCandyCane({ position, height }: { position: [number, number, n
           roughness={0.3}
         />
       </mesh>
-      
+
       {/* Neon stripes */}
-      {Array.from({ length: Math.floor(height / 0.5) }, (_, i) => (
-        <mesh key={`stripe-${i}`} position={[0, -height / 2 + 0.25 + i * 0.5, 0]}>
-          <torusGeometry args={[0.16, 0.03, 8, 16]} />
-          <meshBasicMaterial color={i % 2 === 0 ? 0xff0066 : 0xffffff} />
-        </mesh>
-      ))}
-      
+      {Array.from({ length: Math.floor(height / 0.5) }, (_, i) => {
+        const yPos = -height / 2 + 0.25 + i * 0.5;
+        return (
+          <mesh key={`stripe-${yPos}`} position={[0, yPos, 0]}>
+            <torusGeometry args={[0.16, 0.03, 8, 16]} />
+            <meshBasicMaterial color={i % 2 === 0 ? 0xff0066 : 0xffffff} />
+          </mesh>
+        );
+      })}
+
       {/* Top hook (simplified) */}
       <mesh position={[0.15, height / 2, 0]} rotation={[0, 0, Math.PI / 4]}>
         <torusGeometry args={[0.15, 0.05, 8, 8, Math.PI]} />
         <meshBasicMaterial color={0xff0066} />
       </mesh>
-      
+
       <pointLight color={0xff0066} intensity={0.3} distance={3} position={[0, height / 2, 0]} />
     </group>
   );
 }
 
 // Cyberpunk Pillar - Tech monolith with scanlines
-function CyberpunkPillar({ position, height }: { position: [number, number, number]; height: number }) {
+function CyberpunkPillar({
+  position,
+  height,
+}: {
+  position: [number, number, number];
+  height: number;
+}) {
   const groupRef = useRef<THREE.Group>(null);
-  
+
   return (
     <group ref={groupRef} position={position}>
       {/* Main pillar */}
@@ -360,22 +418,31 @@ function CyberpunkPillar({ position, height }: { position: [number, number, numb
           roughness={0.1}
         />
       </mesh>
-      
+
       {/* Data rings */}
       {[0.2, 0.5, 0.8].map((y, i) => (
-        <mesh key={`data-${i}`} position={[0, height * y - height / 2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh
+          key={`data-${y}`}
+          position={[0, height * y - height / 2, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+        >
           <torusGeometry args={[0.7 + i * 0.05, 0.02, 8, 16]} />
           <meshBasicMaterial color={0x00ffcc} transparent opacity={0.6} />
         </mesh>
       ))}
-      
+
       {/* Top cap with light */}
       <mesh position={[0, height / 2, 0]}>
         <cylinderGeometry args={[0.5, 0.6, 0.2, 6]} />
         <meshStandardMaterial color={0x002222} emissive={0x00ffcc} emissiveIntensity={0.5} />
       </mesh>
-      
-      <pointLight color={0x00ffcc} intensity={0.6} distance={5} position={[0, height / 2 + 0.5, 0]} />
+
+      <pointLight
+        color={0x00ffcc}
+        intensity={0.6}
+        distance={5}
+        position={[0, height / 2 + 0.5, 0]}
+      />
     </group>
   );
 }

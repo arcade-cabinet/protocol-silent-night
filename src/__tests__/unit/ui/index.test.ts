@@ -52,6 +52,11 @@ describe('UI Index Exports', () => {
     expect(typeof UIExports.BossVignette).toBe('function');
   });
 
+  it('should export LevelUpScreen component', () => {
+    expect(UIExports.LevelUpScreen).toBeDefined();
+    expect(typeof UIExports.LevelUpScreen).toBe('function');
+  });
+
   it('should export all expected UI components', () => {
     const expectedExports = [
       'HUD',
@@ -64,6 +69,7 @@ describe('UI Index Exports', () => {
       'MessageOverlay',
       'DamageFlash',
       'BossVignette',
+      'LevelUpScreen',
     ];
 
     expectedExports.forEach((exportName) => {

@@ -5,7 +5,13 @@ import type { PlayerClassConfig } from '@/types';
 // Mock Strata
 vi.mock('@jbcom/strata', () => ({
   createCharacter: vi.fn(() => ({
-    root: { add: vi.fn(), remove: vi.fn(), traverse: vi.fn(), rotation: { y: 0 }, position: { copy: vi.fn() } },
+    root: {
+      add: vi.fn(),
+      remove: vi.fn(),
+      traverse: vi.fn(),
+      rotation: { y: 0 },
+      position: { copy: vi.fn() },
+    },
     joints: {
       head: { mesh: { add: vi.fn() } },
       torso: { mesh: { add: vi.fn() } },
@@ -30,11 +36,12 @@ vi.mock('@react-three/fiber', () => {
 
 // Polyfill THREE.Group for HappyDOM test
 if (typeof window !== 'undefined') {
-  // @ts-ignore
+  // @ts-expect-error
   window.THREE = require('three');
 }
 
 describe('StrataCharacter Component', () => {
+  // biome-ignore lint/suspicious/noExplicitAny: necessary for mock data
   const santaConfig = CLASSES_DATA.santa as any as PlayerClassConfig;
 
   it('should render without crashing', () => {

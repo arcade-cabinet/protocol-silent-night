@@ -99,7 +99,13 @@
         "name": "buckle",
         "type": "box",
         "args": [0.12, 0.1, 0.03],
-        "material": { "color": "#ffd700", "metalness": 0.95, "roughness": 0.1, "emissive": "#ffa500", "emissiveIntensity": 0.2 },
+        "material": {
+          "color": "#ffd700",
+          "metalness": 0.95,
+          "roughness": 0.1,
+          "emissive": "#ffa500",
+          "emissiveIntensity": 0.2
+        },
         "position": [0, -0.15, 0.36]
       },
       {
@@ -112,7 +118,13 @@
             "name": "cannon_barrel",
             "type": "cylinder",
             "args": [0.07, 0.12, 0.55, 8],
-            "material": { "color": "#222222", "emissive": "#ff2200", "emissiveIntensity": 0.15, "metalness": 0.95, "roughness": 0.2 },
+            "material": {
+              "color": "#222222",
+              "emissive": "#ff2200",
+              "emissiveIntensity": 0.15,
+              "metalness": 0.95,
+              "roughness": 0.2
+            },
             "rotation": [1.57, 0, 0]
           },
           {
@@ -167,7 +179,15 @@
         "name": "visor",
         "type": "box",
         "args": [0.26, 0.06, 0.03],
-        "material": { "color": "#001122", "emissive": "#00ffff", "emissiveIntensity": 1.8, "transparent": true, "opacity": 0.85, "metalness": 0.9, "roughness": 0.1 },
+        "material": {
+          "color": "#001122",
+          "emissive": "#00ffff",
+          "emissiveIntensity": 1.8,
+          "transparent": true,
+          "opacity": 0.85,
+          "metalness": 0.9,
+          "roughness": 0.1
+        },
         "position": [0, 0.02, 0.21]
       },
       {
@@ -181,7 +201,13 @@
             "name": "smg_body",
             "type": "box",
             "args": [0.045, 0.22, 0.065],
-            "material": { "color": "#111111", "emissive": "#00ffcc", "emissiveIntensity": 0.25, "metalness": 0.95, "roughness": 0.1 }
+            "material": {
+              "color": "#111111",
+              "emissive": "#00ffcc",
+              "emissiveIntensity": 0.25,
+              "metalness": 0.95,
+              "roughness": 0.1
+            }
           },
           {
             "name": "muzzle_flash",

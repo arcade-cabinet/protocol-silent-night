@@ -3,16 +3,16 @@
  * Roguelike upgrade selection when player levels up
  */
 
+import { ROGUELIKE_UPGRADES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import type { RoguelikeUpgrade } from '@/types';
-import { ROGUELIKE_UPGRADES } from '@/data';
 import styles from './LevelUpScreen.module.css';
 
 export function LevelUpScreen() {
   const { runProgress, selectLevelUpgrade, state } = useGameStore();
 
-  // Only show during active gameplay with pending level up
-  if (!runProgress.pendingLevelUp || (state !== 'PHASE_1' && state !== 'PHASE_BOSS')) {
+  // Only show during LEVEL_UP state with pending level up
+  if (!runProgress.pendingLevelUp || state !== 'LEVEL_UP') {
     return null;
   }
 

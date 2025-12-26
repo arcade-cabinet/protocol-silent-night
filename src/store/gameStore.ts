@@ -1,6 +1,15 @@
 import * as THREE from 'three';
 import { create } from 'zustand';
 import { AudioManager } from '@/audio/AudioManager';
+import {
+  BRIEFING,
+  CONFIG,
+  ENEMIES,
+  PLAYER_CLASSES,
+  ROGUELIKE_UPGRADES,
+  WEAPON_EVOLUTIONS,
+  WEAPONS,
+} from '@/data';
 import type {
   BriefingLine,
   BulletData,
@@ -17,21 +26,12 @@ import type {
   WeaponEvolutionType,
   WeaponType,
 } from '@/types';
-import { 
-  CONFIG, 
-  PLAYER_CLASSES, 
-  ROGUELIKE_UPGRADES, 
-  WEAPONS, 
-  WEAPON_EVOLUTIONS, 
-  ENEMIES, 
-  BRIEFING 
-} from '@/data';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // Extend Window interface for e2e testing
 declare global {
   interface Window {
-    useGameStore?: any;
+    useGameStore?: unknown;
   }
 }
 
@@ -42,6 +42,7 @@ const META_PROGRESS_KEY = 'protocol-silent-night-meta-progress';
 interface GameStore {
   // Game State
   state: GameState;
+  previousState: GameState;
   setState: (state: GameState) => void;
   missionBriefing: {
     title: string;
@@ -210,6 +211,7 @@ const initialMetaProgress = loadMetaProgress();
 
 const initialState = {
   state: 'MENU' as GameState,
+  previousState: 'MENU' as GameState,
   missionBriefing: BRIEFING,
   playerClass: null,
   playerHp: 100,
@@ -254,10 +256,12 @@ const initialState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  setState: (state) => set({ state }),
+  setState: (state) => set((prev) => ({ state, previousState: prev.state })),
 
   selectClass: (type) => {
-    const config = PLAYER_CLASSES[type as keyof typeof PLAYER_CLASSES] as unknown as PlayerClassConfig;
+    const config = PLAYER_CLASSES[
+      type as keyof typeof PLAYER_CLASSES
+    ] as unknown as PlayerClassConfig;
     set({
       playerClass: config,
       playerHp: config.hp,
@@ -291,7 +295,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (state === 'GAME_OVER' || state === 'WIN') return;
 
     const stats = getEffectiveStats();
-    
+
     // Nice Points display - matches points or uses a specific formula
     // For a real implementation we would need a cooldown, but let's follow the feedback logic
     if (stats?.hasShield && amount > 0) {
@@ -386,7 +390,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    if (newKills >= CONFIG.WAVE_REQ && state === 'PHASE_1') {
+    if (newKills >= CONFIG.WAVE_REQ && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
@@ -469,8 +473,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { runProgress, state } = get();
     if (state === 'LEVEL_UP') return;
 
-    const xpBonus = runProgress.activeUpgrades['christmas_spirit']
-      ? 1 + runProgress.activeUpgrades['christmas_spirit'] * 0.3
+    const xpBonus = runProgress.activeUpgrades.christmas_spirit
+      ? 1 + runProgress.activeUpgrades.christmas_spirit * 0.3
       : 1;
     const adjustedAmount = Math.floor(amount * xpBonus);
 
@@ -515,11 +519,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const weighted = available.flatMap((u) => {
         let weight = 1;
         switch (u.rarity) {
-          case 'common': weight = Math.max(0.5, 4 - levelBonus * 4); break;
-          case 'rare': weight = 2 + levelBonus * 2; break;
-          case 'epic': weight = 1 + levelBonus * 3; break;
-          case 'legendary': weight = 0.3 + levelBonus * 2; break;
-          default: weight = 1;
+          case 'common':
+            weight = Math.max(0.5, 4 - levelBonus * 4);
+            break;
+          case 'rare':
+            weight = 2 + levelBonus * 2;
+            break;
+          case 'epic':
+            weight = 1 + levelBonus * 3;
+            break;
+          case 'legendary':
+            weight = 0.3 + levelBonus * 2;
+            break;
+          default:
+            weight = 1;
         }
         return Array(Math.max(1, Math.round(weight * 10))).fill(u);
       });
@@ -542,20 +555,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const choices = getRandomUpgrades();
 
-    set({
+    set((state) => ({
       state: 'LEVEL_UP',
+      previousState: state.state,
       runProgress: {
         ...runProgress,
         pendingLevelUp: true,
         upgradeChoices: choices,
       },
-    });
+    }));
 
     AudioManager.playSFX('ui_select');
   },
 
   selectLevelUpgrade: (upgradeId) => {
-    const { runProgress, playerMaxHp, playerHp } = get();
+    const { runProgress, playerMaxHp, playerHp, previousState } = get();
     const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === upgradeId);
 
     if (!upgrade) return;
@@ -587,7 +601,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     set({
-      state: 'PHASE_1',
+      state: previousState === 'LEVEL_UP' ? 'PHASE_1' : previousState,
       runProgress: {
         ...runProgress,
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
@@ -625,13 +639,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
           const totalValue = data.value * stacks;
           switch (stat) {
             case 'damage':
-              damage *= (1 + totalValue);
+              damage *= 1 + totalValue;
               break;
             case 'speed':
-              speed *= (1 + totalValue);
+              speed *= 1 + totalValue;
               break;
             case 'rof':
-              rof *= (1 - totalValue * 0.8);
+              rof *= 1 - totalValue * 0.8;
               break;
             case 'critChance':
               critChance += totalValue;
@@ -732,7 +746,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setMovement: (x, y) => set((state) => ({ input: { ...state.input, movement: { x, y } } })),
   setFiring: (isFiring) => set((state) => ({ input: { ...state.input, isFiring } })),
-  setJoystick: (active, origin) => set((state) => ({ input: { ...state.input, joystickActive: active, joystickOrigin: origin || state.input.joystickOrigin } })),
+  setJoystick: (active, origin) =>
+    set((state) => ({
+      input: {
+        ...state.input,
+        joystickActive: active,
+        joystickOrigin: origin || state.input.joystickOrigin,
+      },
+    })),
 
   addBullet: (bullet) => {
     set((state) => ({ bullets: [...state.bullets, bullet] }));
@@ -800,10 +821,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
     ];
     for (const [index, intel] of missionBriefing.intel.entries()) {
-      const label = index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+      const label =
+        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-    lines.push({ label: 'WARNING', text: (missionBriefing as any).warning, warning: true });
+    lines.push({ label: 'WARNING', text: (missionBriefing as unknown as { warning: string }).warning, warning: true });
     return lines;
   },
 
@@ -828,12 +850,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    set({
-      state: 'PHASE_BOSS',
+    const isLeveling = get().state === 'LEVEL_UP';
+    set((state) => ({
+      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
+      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-    });
+    }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
   },
@@ -852,13 +876,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (newHp <= 0) {
-      const updatedMeta = { 
-      ...get().metaProgress, 
-      bossesDefeated: get().metaProgress.bossesDefeated + 1, 
-      runsCompleted: get().metaProgress.runsCompleted + 1, 
-      nicePoints: get().metaProgress.nicePoints + 500 
-    };
-      set({ state: 'WIN', bossActive: false, stats: { ...get().stats, bossDefeated: true }, metaProgress: updatedMeta });
+      const updatedMeta = {
+        ...get().metaProgress,
+        bossesDefeated: get().metaProgress.bossesDefeated + 1,
+        runsCompleted: get().metaProgress.runsCompleted + 1,
+        nicePoints: get().metaProgress.nicePoints + 500,
+      };
+      set({
+        state: 'WIN',
+        bossActive: false,
+        stats: { ...get().stats, bossDefeated: true },
+        metaProgress: updatedMeta,
+      });
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
@@ -881,15 +910,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  reset: () => set({ 
-    ...initialState, 
-    highScore: get().highScore, 
-    metaProgress: get().metaProgress, 
-    playerPosition: new THREE.Vector3(0, 0, 0) 
-  }),
+  reset: () =>
+    set({
+      ...initialState,
+      highScore: get().highScore,
+      metaProgress: get().metaProgress,
+      playerPosition: new THREE.Vector3(0, 0, 0),
+    }),
 }));
 
 // Expose store on window for e2e testing
 if (typeof window !== 'undefined') {
-  (window as any).useGameStore = useGameStore;
+  (window as unknown as { useGameStore: unknown }).useGameStore = useGameStore;
 }

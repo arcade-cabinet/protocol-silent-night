@@ -114,7 +114,13 @@
       "name": "buckle",
       "type": "box",
       "args": [0.12, 0.1, 0.03],
-      "material": { "color": "#ffd700", "metalness": 0.95, "roughness": 0.1, "emissive": "#ffa500", "emissiveIntensity": 0.2 },
+      "material": {
+        "color": "#ffd700",
+        "metalness": 0.95,
+        "roughness": 0.1,
+        "emissive": "#ffa500",
+        "emissiveIntensity": 0.2
+      },
       "position": [0, -0.15, 0.36]
     },
     {
@@ -154,7 +160,13 @@
           "name": "cannon_barrel",
           "type": "cylinder",
           "args": [0.07, 0.12, 0.55, 8],
-          "material": { "color": "#222222", "emissive": "#ff2200", "emissiveIntensity": 0.15, "metalness": 0.95, "roughness": 0.2 },
+          "material": {
+            "color": "#222222",
+            "emissive": "#ff2200",
+            "emissiveIntensity": 0.15,
+            "metalness": 0.95,
+            "roughness": 0.2
+          },
           "rotation": [1.57, 0, 0]
         },
         {

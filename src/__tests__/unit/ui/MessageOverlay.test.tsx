@@ -19,7 +19,7 @@ describe('MessageOverlay Component', () => {
       useGameStore.getState().selectClass('santa');
       // Set level to 10 to avoid level-up interruption
       useGameStore.setState({
-        runProgress: { ...useGameStore.getState().runProgress, level: 10 }
+        runProgress: { ...useGameStore.getState().runProgress, level: 10 },
       });
       // Manually trigger boss spawn
       useGameStore.getState().spawnBoss();
@@ -27,10 +27,13 @@ describe('MessageOverlay Component', () => {
 
     render(<MessageOverlay />);
 
-    await waitFor(() => {
-      const warningText = screen.queryByText(/WARNING/i) || screen.queryByText(/DETECTED/i);
-      expect(warningText).toBeInTheDocument();
-    }, { timeout: 2000 });
+    await waitFor(
+      () => {
+        const warningText = screen.queryByText(/WARNING/i) || screen.queryByText(/DETECTED/i);
+        expect(warningText).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
   });
 
   it('should render win message in WIN state', async () => {

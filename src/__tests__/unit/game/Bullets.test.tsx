@@ -19,6 +19,7 @@ describe('Bullets Component', () => {
 
     // Use findAll and check if it has a count property which is characteristic of InstancedMesh
     const instancedMeshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
       (node: any) => node.instance && node.instance.count !== undefined
     );
 
@@ -27,9 +28,12 @@ describe('Bullets Component', () => {
 
     // Check counts
     const cannon = instancedMeshes.find(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
       (m: any) => m.instance.geometry.type === 'IcosahedronGeometry'
     );
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const stars = instancedMeshes.find((m: any) => m.instance.geometry.type === 'ExtrudeGeometry');
 
     if (cannon) expect(cannon.instance.count).toBe(30);
@@ -73,6 +77,7 @@ describe('Bullets Component', () => {
     useGameStore.setState({
       bullets: [bullet],
       enemies: [enemy],
+      state: 'PHASE_1',
     });
 
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
@@ -96,6 +101,7 @@ describe('Bullets Component', () => {
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
     const meshes = renderer.scene.findAll(
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
       (node: any) => node.instance && node.instance.count !== undefined
     );
 
@@ -103,7 +109,7 @@ describe('Bullets Component', () => {
     expect(meshes.length).toBe(3);
 
     await renderer.unmount();
-    
+
     // Ensure no errors occurred during unmount
     expect(renderer).toBeDefined();
   });

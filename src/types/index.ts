@@ -8,7 +8,14 @@ import type * as THREE from 'three';
 /**
  * Game state machine states
  */
-export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' | 'GAME_OVER' | 'LEVEL_UP';
+export type GameState =
+  | 'MENU'
+  | 'BRIEFING'
+  | 'PHASE_1'
+  | 'PHASE_BOSS'
+  | 'WIN'
+  | 'GAME_OVER'
+  | 'LEVEL_UP';
 
 /**
  * Available player character classes
@@ -52,7 +59,7 @@ export interface PlayerClassConfig {
     windStrength: number;
     gravityDroop?: number;
   };
-  customizations?: any[];
+  customizations?: unknown[];
 }
 
 /**
@@ -315,9 +322,7 @@ export interface WeaponUnlock {
 /**
  * Helper to get bullet type from weapon type
  */
-export const getBulletTypeFromWeapon = (
-  weaponType: WeaponType
-): 'cannon' | 'smg' | 'star' => {
+export const getBulletTypeFromWeapon = (weaponType: WeaponType): 'cannon' | 'smg' | 'star' => {
   switch (weaponType) {
     case 'cannon':
     case 'ornament':
@@ -326,11 +331,6 @@ export const getBulletTypeFromWeapon = (
     case 'smg':
     case 'light_string':
       return 'smg';
-    case 'star':
-    case 'jingle_bell':
-    case 'candy_cane':
-    case 'gingerbread':
-    case 'quantum_gift':
     default:
       return 'star';
   }

@@ -1,5 +1,5 @@
-import * as THREE from 'three';
 import { act } from '@testing-library/react';
+import * as THREE from 'three';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData, EnemyData } from '@/types';
@@ -26,9 +26,9 @@ describe('Game Flow Integration Tests', () => {
       store.setState('PHASE_1');
       // Set high level to avoid level up system interruptions
       useGameStore.setState({
-        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 },
       });
-      
+
       state = useGameStore.getState();
       expect(state.state).toBe('PHASE_1');
       expect(state.playerClass?.type).toBe('santa');
@@ -195,7 +195,7 @@ describe('Game Flow Integration Tests', () => {
       store.selectClass('elf');
       // Set high level to avoid level up system interruptions
       useGameStore.setState({
-        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 },
       });
       store.setState('PHASE_1');
 
@@ -259,6 +259,10 @@ describe('Game Flow Integration Tests', () => {
     beforeEach(() => {
       const store = useGameStore.getState();
       store.selectClass('santa');
+      // Set high level before kills to avoid level up system interruptions
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 },
+      });
       store.setState('PHASE_1');
 
       // Trigger boss spawn
@@ -267,46 +271,42 @@ describe('Game Flow Integration Tests', () => {
       }
     });
 
-  it('should handle full boss fight', () => {
-    const store = useGameStore.getState();
-    act(() => {
-      // Set high level to avoid level up system interruptions
-      useGameStore.setState({
-        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+    it('should handle full boss fight', () => {
+      const store = useGameStore.getState();
+      act(() => {
+        // Ensure boss is active
+        useGameStore.getState().spawnBoss();
       });
-      // Ensure boss is active
-      useGameStore.getState().spawnBoss();
+
+      expect(useGameStore.getState().bossActive).toBe(true);
+      expect(useGameStore.getState().state).toBe('PHASE_BOSS');
+
+      act(() => {
+        // Damage boss in chunks
+        store.damageBoss(200); // 800 HP left
+      });
+      expect(useGameStore.getState().bossHp).toBe(800);
+
+      act(() => {
+        store.damageBoss(300); // 500 HP left
+      });
+      expect(useGameStore.getState().bossHp).toBe(500);
+
+      act(() => {
+        store.damageBoss(250); // 250 HP left
+      });
+      expect(useGameStore.getState().bossHp).toBe(250);
+
+      // Final blow
+      let killed = false;
+      act(() => {
+        killed = store.damageBoss(250);
+      });
+
+      expect(killed).toBe(true);
+      expect(useGameStore.getState().state).toBe('WIN');
+      expect(useGameStore.getState().stats.bossDefeated).toBe(true);
     });
-
-    expect(useGameStore.getState().bossActive).toBe(true);
-    expect(useGameStore.getState().state).toBe('PHASE_BOSS');
-
-    act(() => {
-      // Damage boss in chunks
-      store.damageBoss(200); // 800 HP left
-    });
-    expect(useGameStore.getState().bossHp).toBe(800);
-
-    act(() => {
-      store.damageBoss(300); // 500 HP left
-    });
-    expect(useGameStore.getState().bossHp).toBe(500);
-
-    act(() => {
-      store.damageBoss(250); // 250 HP left
-    });
-    expect(useGameStore.getState().bossHp).toBe(250);
-
-    // Final blow
-    let killed = false;
-    act(() => {
-      killed = store.damageBoss(250);
-    });
-
-    expect(killed).toBe(true);
-    expect(useGameStore.getState().state).toBe('WIN');
-    expect(useGameStore.getState().stats.bossDefeated).toBe(true);
-  });
 
     it('should handle player death during boss fight', () => {
       // Transition to boss fight
@@ -437,7 +437,7 @@ describe('Game Flow Integration Tests', () => {
 
       // Set high level to avoid level-up system interruptions
       useGameStore.setState({
-        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 },
       });
 
       // PHASE_1 -> PHASE_BOSS
