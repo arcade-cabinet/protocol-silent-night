@@ -17,8 +17,6 @@ import type {
   WeaponEvolutionConfig,
   EnemyConfig,
   EnemyType,
-  ObstacleTypeConfig,
-  BriefingLine
 } from '../types';
 
 export const CONFIG = CONFIG_DATA;
@@ -28,7 +26,7 @@ export const WEAPONS = WEAPONS_DATA.weapons as Record<string, WeaponConfig>;
 export const WEAPON_EVOLUTIONS = WEAPONS_DATA.evolutions as Record<string, WeaponEvolutionConfig>;
 export const ENEMIES = ENEMIES_DATA as Record<EnemyType, EnemyConfig> & { spawnConfig: any };
 export const TERRAIN_CONFIG = TERRAIN_DATA.terrain;
-export const OBSTACLE_TYPES = TERRAIN_DATA.obstacles as Record<string, ObstacleTypeConfig>;
+export const OBSTACLE_TYPES = TERRAIN_DATA.obstacles as any;
 export const WORKSHOP = WORKSHOP_DATA;
 export const BRIEFING = BRIEFING_DATA;
 export const THEMES = THEMES_DATA;

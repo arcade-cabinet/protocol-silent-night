@@ -11,15 +11,13 @@ import styles from './WeaponHUD.module.css';
 export function WeaponHUD() {
   const { state, currentWeapon, metaProgress, setWeapon } = useGameStore();
 
-  const currentWeaponConfig = WEAPONS[currentWeapon];
+  const currentWeaponConfig = WEAPONS[currentWeapon as keyof typeof WEAPONS];
   const unlockedWeapons = metaProgress.unlockedWeapons
     .map((id) => WEAPONS[id as keyof typeof WEAPONS])
     .filter(Boolean);
 
-  // Handle weapon switching with number keys
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Number keys 1-9 for weapon switching
       const num = parseInt(e.key, 10);
       if (num >= 1 && num <= 9 && num <= unlockedWeapons.length) {
         const weaponToSelect = unlockedWeapons[num - 1];
@@ -33,7 +31,6 @@ export function WeaponHUD() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [unlockedWeapons, setWeapon]);
 
-  // Only show during gameplay
   if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return null;
 
   return (

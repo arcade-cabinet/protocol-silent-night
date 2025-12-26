@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
 import { type ChristmasObstacle } from '@/types';
-import { CONFIG, TERRAIN_CONFIG, OBSTACLE_TYPES } from '@/data';
+import { TERRAIN_CONFIG, OBSTACLE_TYPES } from '@/data';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -142,19 +142,6 @@ export function Terrain() {
 
 // Individual Christmas obstacle component for visual variety
 function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  // Animated glow effect for fallback mesh
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    const uniquePhase = obstacle.position.x * 0.1 + obstacle.position.z * 0.1;
-    
-    if (meshRef.current) {
-      const pulse = Math.sin(time * 2 + uniquePhase) * 0.15 + 0.85;
-      (meshRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse * 0.4;
-    }
-  });
-
   const posArray: [number, number, number] = useMemo(
     () => [obstacle.position.x, obstacle.position.y, obstacle.position.z],
     [obstacle.position]
@@ -177,13 +164,29 @@ function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
     return <CyberpunkPillar position={posArray} height={obstacle.height} />;
   }
 
-  // Default fallback
+  // Default fallback with its own animation
+  return <FallbackObstacle position={posArray} height={obstacle.height} color={obstacle.color} />;
+}
+
+function FallbackObstacle({ position, height, color }: { position: [number, number, number]; height: number; color: THREE.Color }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    const uniquePhase = position[0] * 0.1 + position[2] * 0.1;
+    
+    if (meshRef.current) {
+      const pulse = Math.sin(time * 2 + uniquePhase) * 0.15 + 0.85;
+      (meshRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse * 0.4;
+    }
+  });
+
   return (
-    <mesh ref={meshRef} position={posArray} castShadow receiveShadow>
-      <boxGeometry args={[1, obstacle.height, 1]} />
+    <mesh ref={meshRef} position={position} castShadow receiveShadow>
+      <boxGeometry args={[1, height, 1]} />
       <meshStandardMaterial
-        color={obstacle.color}
-        emissive={obstacle.color}
+        color={color}
+        emissive={color}
         emissiveIntensity={0.2}
       />
     </mesh>

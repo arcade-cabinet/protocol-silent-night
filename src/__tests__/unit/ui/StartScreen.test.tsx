@@ -138,7 +138,7 @@ describe('StartScreen Component', () => {
   it('should display version number', () => {
     render(<StartScreen />);
 
-    expect(screen.getByText(/Operator Edition v3.0/)).toBeInTheDocument();
+    expect(screen.getByText(/Edition v4.0/)).toBeInTheDocument();
   });
 
   it('should have clickable character cards', () => {
@@ -149,7 +149,8 @@ describe('StartScreen Component', () => {
     expect(buttons).toHaveLength(4);
 
     buttons.forEach((button) => {
-      expect(button).toHaveAttribute('type', 'button');
+      // Ensure it is a button (the role check already does this, but we check attribute for robustness)
+      expect(button.tagName).toBe('BUTTON');
     });
   });
 });

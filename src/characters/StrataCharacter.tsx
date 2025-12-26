@@ -91,7 +91,8 @@ export function StrataCharacter({
   function applyCustomizations(joints: CharacterJoints, customizations: any[], scale: number) {
     for (const custom of customizations) {
       const joint = joints[custom.joint as keyof CharacterJoints];
-      if (!joint?.mesh && custom.type !== 'scale') continue;
+      // Type scale can apply without a mesh on certain joints in future, but for now we require mesh for attachments
+      if (custom.type !== 'scale' && !joint?.mesh) continue;
 
       if (custom.type === 'scale') {
         if (joint?.mesh) {
@@ -101,9 +102,9 @@ export function StrataCharacter({
       }
 
       const obj = createObjectFromConfig(custom, scale);
-      if (obj) {
+      if (obj && joint?.mesh) {
         if (custom.name === 'weapon_group') weaponGroupRef.current = obj as THREE.Group;
-        joint?.mesh.add(obj);
+        joint.mesh.add(obj);
       }
     }
   }

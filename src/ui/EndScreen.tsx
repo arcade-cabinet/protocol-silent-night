@@ -4,7 +4,7 @@
  */
 
 import { useGameStore } from '@/store/gameStore';
-import { ROGUELIKE_UPGRADES } from '@/types';
+import { ROGUELIKE_UPGRADES } from '@/data';
 import styles from './EndScreen.module.css';
 
 export function EndScreen() {

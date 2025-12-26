@@ -7,10 +7,12 @@ import { useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import { WORKSHOP } from '@/data';
-import type { PermanentUpgradeConfig, SkinConfig, WeaponUnlock } from '@/types';
 import styles from './SantasWorkshop.module.css';
 
-const { upgrades: PERMANENT_UPGRADES, skins: SKIN_UNLOCKS, weapons: WEAPON_UNLOCKS } = WORKSHOP;
+const { weapons: WEAPON_UNLOCKS_RAW, skins: SKIN_UNLOCKS_RAW, upgrades: PERMANENT_UPGRADES_RAW } = (WORKSHOP as any);
+const WEAPON_UNLOCKS = (WEAPON_UNLOCKS_RAW as any[]);
+const SKIN_UNLOCKS = (SKIN_UNLOCKS_RAW as any[]);
+const PERMANENT_UPGRADES = (PERMANENT_UPGRADES_RAW as any[]);
 
 type TabType = 'weapons' | 'skins' | 'upgrades';
 
@@ -31,18 +33,18 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
     AudioManager.playSFX('ui_select');
   };
 
-  const handlePurchaseWeapon = (weapon: WeaponUnlock) => {
+  const handlePurchaseWeapon = (weapon: any) => {
     if (metaProgress.unlockedWeapons.includes(weapon.id)) return;
 
     if (spendNicePoints(weapon.cost)) {
       unlockWeapon(weapon.id);
       AudioManager.playSFX('ui_select');
     } else {
-      AudioManager.playSFX('ui_select'); // Could be a different "error" sound
+      AudioManager.playSFX('ui_select');
     }
   };
 
-  const handlePurchaseSkin = (skin: SkinConfig) => {
+  const handlePurchaseSkin = (skin: any) => {
     if (metaProgress.unlockedSkins.includes(skin.id)) return;
 
     if (spendNicePoints(skin.cost)) {
@@ -53,7 +55,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
     }
   };
 
-  const handlePurchaseUpgrade = (upgrade: PermanentUpgradeConfig) => {
+  const handlePurchaseUpgrade = (upgrade: any) => {
     const currentLevel = metaProgress.permanentUpgrades[upgrade.id] || 0;
     if (currentLevel >= upgrade.maxLevel) return;
 
@@ -73,7 +75,6 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
   return (
     <div className={styles.screen}>
       <div className={styles.container}>
-        {/* Header */}
         <div className={styles.header}>
           <h1 className={styles.title}>
             Santa's <span className={styles.accent}>Workshop</span>
@@ -87,7 +88,6 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        {/* Tabs */}
         <div className={styles.tabs}>
           <button
             type="button"
@@ -112,9 +112,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        {/* Content */}
         <div className={styles.content}>
-          {/* Weapons Tab */}
           {activeTab === 'weapons' && (
             <div className={styles.grid}>
               {WEAPON_UNLOCKS.map((weapon) => {
@@ -167,7 +165,6 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             </div>
           )}
 
-          {/* Skins Tab */}
           {activeTab === 'skins' && (
             <div className={styles.grid}>
               {SKIN_UNLOCKS.map((skin) => {
@@ -209,10 +206,8 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             </div>
           )}
 
-          {/* Upgrades Tab */}
           {activeTab === 'upgrades' && (
             <div className={styles.upgradesGrid}>
-              {/* Group by tier */}
               {[1, 2, 3].map((tier) => {
                 const tierUpgrades = PERMANENT_UPGRADES.filter((u) => u.tier === tier);
                 return (
@@ -270,9 +265,6 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
   );
 }
 
-/**
- * Button component to open workshop from main menu
- */
 interface WorkshopButtonProps {
   onOpen: () => void;
 }

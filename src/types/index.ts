@@ -52,7 +52,7 @@ export interface PlayerClassConfig {
     windStrength: number;
     gravityDroop?: number;
   };
-  customization?: Record<string, any>;
+  customizations?: any[];
 }
 
 /**
@@ -103,6 +103,17 @@ export interface WeaponConfig {
   projectileCount?: number;
   spreadAngle?: number;
   bulletType: 'cannon' | 'smg' | 'star';
+}
+
+/**
+ * Enemy configuration
+ */
+export interface EnemyConfig {
+  type: EnemyType;
+  hp: number;
+  speed: number;
+  damage: number;
+  pointValue: number;
 }
 
 /**
@@ -243,6 +254,18 @@ export interface BriefingLine {
 }
 
 /**
+ * Obstacle type configuration
+ */
+export interface ObstacleTypeConfig {
+  type: ChristmasObjectType;
+  color: number | string;
+  heightRange: [number, number];
+  radius: number;
+  scale: [number, number, number];
+  yOffset: number;
+}
+
+/**
  * Skin definition
  */
 export interface SkinConfig {
@@ -251,7 +274,7 @@ export interface SkinConfig {
   cost: number;
   character: PlayerClassType;
   description: string;
-  colors: {
+  colors?: {
     skin?: string;
     primary?: string;
     secondary?: string;
@@ -288,3 +311,27 @@ export interface WeaponUnlock {
   special: string;
   flavor: string;
 }
+
+/**
+ * Helper to get bullet type from weapon type
+ */
+export const getBulletTypeFromWeapon = (
+  weaponType: WeaponType
+): 'cannon' | 'smg' | 'star' => {
+  switch (weaponType) {
+    case 'cannon':
+    case 'ornament':
+    case 'snowball':
+      return 'cannon';
+    case 'smg':
+    case 'light_string':
+      return 'smg';
+    case 'star':
+    case 'jingle_bell':
+    case 'candy_cane':
+    case 'gingerbread':
+    case 'quantum_gift':
+    default:
+      return 'star';
+  }
+};

@@ -3,7 +3,7 @@
  * Verifies main application structure and rendering
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PLAYER_CLASSES } from '@/data';
 import App from '../../App';
@@ -94,24 +94,30 @@ describe('App', () => {
   });
 
   it('should render properly in PLAYING state', () => {
-    useGameStore.setState({
-      state: 'PHASE_1',
-      playerClass: PLAYER_CLASSES.santa,
-      playerHp: 300,
-      playerMaxHp: 300,
+    act(() => {
+      useGameStore.setState({
+        state: 'PHASE_1',
+        playerClass: PLAYER_CLASSES.santa,
+        playerHp: 300,
+        playerMaxHp: 300,
+      });
     });
     render(<App />);
     expect(screen.getByTestId('hud')).toBeInTheDocument();
   });
 
   it('should render properly in WIN state', () => {
-    useGameStore.setState({ state: 'WIN' });
+    act(() => {
+      useGameStore.setState({ state: 'WIN' });
+    });
     render(<App />);
     expect(screen.getByTestId('end-screen')).toBeInTheDocument();
   });
 
   it('should render properly in GAME_OVER state', () => {
-    useGameStore.setState({ state: 'GAME_OVER' });
+    act(() => {
+      useGameStore.setState({ state: 'GAME_OVER' });
+    });
     render(<App />);
     expect(screen.getByTestId('end-screen')).toBeInTheDocument();
   });
@@ -119,11 +125,13 @@ describe('App', () => {
 
   describe('Component Integration', () => {
     it('should render HUD during gameplay', () => {
-      useGameStore.setState({
-        state: 'PHASE_1',
-        playerClass: PLAYER_CLASSES.santa,
-        playerHp: 300,
-        playerMaxHp: 300,
+      act(() => {
+        useGameStore.setState({
+          state: 'PHASE_1',
+          playerClass: PLAYER_CLASSES.santa,
+          playerHp: 300,
+          playerMaxHp: 300,
+        });
       });
 
       render(<App />);
@@ -131,12 +139,14 @@ describe('App', () => {
     });
 
     it('should render BossHUD when boss is active', () => {
-      useGameStore.setState({
-        state: 'PHASE_BOSS',
-        playerClass: PLAYER_CLASSES.santa,
-        bossActive: true,
-        bossHp: 1000,
-        bossMaxHp: 1000,
+      act(() => {
+        useGameStore.setState({
+          state: 'PHASE_BOSS',
+          playerClass: PLAYER_CLASSES.santa,
+          bossActive: true,
+          bossHp: 1000,
+          bossMaxHp: 1000,
+        });
       });
 
       render(<App />);
@@ -144,9 +154,11 @@ describe('App', () => {
     });
 
     it('should render InputControls during gameplay', () => {
-      useGameStore.setState({
-        state: 'PHASE_1',
-        playerClass: PLAYER_CLASSES.santa,
+      act(() => {
+        useGameStore.setState({
+          state: 'PHASE_1',
+          playerClass: PLAYER_CLASSES.santa,
+        });
       });
 
       render(<App />);
@@ -155,9 +167,11 @@ describe('App', () => {
     });
 
     it('should render EndScreen on game over', () => {
-      useGameStore.setState({
-        state: 'GAME_OVER',
-        stats: { kills: 10, score: 1000, bossDefeated: false },
+      act(() => {
+        useGameStore.setState({
+          state: 'GAME_OVER',
+          stats: { kills: 10, score: 1000, bossDefeated: false },
+        });
       });
 
       render(<App />);
@@ -165,9 +179,11 @@ describe('App', () => {
     });
 
     it('should render EndScreen on win', () => {
-      useGameStore.setState({
-        state: 'WIN',
-        stats: { kills: 20, score: 5000, bossDefeated: true },
+      act(() => {
+        useGameStore.setState({
+          state: 'WIN',
+          stats: { kills: 20, score: 5000, bossDefeated: true },
+        });
       });
 
       render(<App />);
@@ -177,34 +193,40 @@ describe('App', () => {
 
   describe('Effects Integration', () => {
     it('should render DamageFlash effect', () => {
-      useGameStore.setState({
-        state: 'PHASE_1',
-        damageFlash: true,
+      act(() => {
+        useGameStore.setState({
+          state: 'PHASE_1',
+          damageFlash: true,
+        });
       });
 
-      const { container } = render(<App />);
-      expect(container).toBeTruthy();
+      render(<App />);
+      expect(screen.getByTestId('game-scene')).toBeInTheDocument();
     });
 
     it('should render KillStreak indicator', () => {
-      useGameStore.setState({
-        state: 'PHASE_1',
-        stats: { kills: 5, score: 500, bossDefeated: false },
-        killStreak: 5,
+      act(() => {
+        useGameStore.setState({
+          state: 'PHASE_1',
+          stats: { kills: 5, score: 500, bossDefeated: false },
+          killStreak: 5,
+        });
       });
 
-      const { container } = render(<App />);
-      expect(container).toBeTruthy();
+      render(<App />);
+      expect(screen.getByTestId('game-scene')).toBeInTheDocument();
     });
 
     it('should render BossVignette when boss is active', () => {
-      useGameStore.setState({
-        state: 'PHASE_BOSS',
-        bossActive: true,
+      act(() => {
+        useGameStore.setState({
+          state: 'PHASE_BOSS',
+          bossActive: true,
+        });
       });
 
-      const { container } = render(<App />);
-      expect(container).toBeTruthy();
+      render(<App />);
+      expect(screen.getByTestId('game-scene')).toBeInTheDocument();
     });
   });
 

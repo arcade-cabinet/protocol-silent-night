@@ -8,7 +8,7 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import type { ChristmasObstacle, PlayerClassType, WeaponType } from '@/types';
+import { type ChristmasObstacle, getBulletTypeFromWeapon, type WeaponType } from '@/types';
 import { WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
 import { StrataCharacter } from './StrataCharacter';
 
@@ -111,7 +111,7 @@ export function PlayerController() {
         const startAngle = -spreadAngle;
 
         for (let i = 0; i < projectileCount; i++) {
-          const angleOffset = projectileCount === 1 ? 0 : startAngle + angleStep * i;
+          const angleOffset = startAngle + angleStep * i;
           const spreadDir = direction.clone();
           spreadDir.applyAxisAngle(upAxisRef.current, angleOffset);
 
@@ -236,7 +236,7 @@ export function PlayerController() {
       // Simplified: just use what the store provides, we should probably reconcile them in the store itself
       // but for now let's use weaponModifiers which handles evolution.
       
-      if (now - lastFireTime.current >= (weaponModifiers?.rof ?? playerClass.rof)) {
+      if (now - lastFireTime.current >= effectiveFireRate) {
         lastFireTime.current = now;
 
         firePosRef.current.copy(positionRef.current);

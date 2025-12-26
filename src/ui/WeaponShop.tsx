@@ -13,10 +13,8 @@ export function WeaponShop() {
   const { state, metaProgress, spendNicePoints, unlockWeapon } = useGameStore();
   const [showShop, setShowShop] = useState(false);
 
-  // Only show shop button on menu
   if (state !== 'MENU') return null;
 
-  // Get all unlockable weapons (cost > 0)
   const unlockableWeapons = Object.values(WEAPONS).filter((w) => w.cost > 0);
 
   const handleUnlock = (weaponId: WeaponType, cost: number) => {
@@ -27,12 +25,10 @@ export function WeaponShop() {
 
   return (
     <>
-      {/* Shop button */}
       <button type="button" className={styles.shopButton} onClick={() => setShowShop(!showShop)}>
         🎁 WEAPON SHOP ({metaProgress.nicePoints} NP)
       </button>
 
-      {/* Shop modal */}
       {showShop && (
         <div className={styles.modal}>
           <div className={styles.shopContainer}>

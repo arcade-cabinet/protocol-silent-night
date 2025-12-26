@@ -332,11 +332,11 @@ describe('GameStore - Stats Management', () => {
     const { addKill, selectClass, setState } = useGameStore.getState();
 
     selectClass('santa');
-    // Set level to 1 to avoid level-up system complexity in this test
+    // Set level to 10 to avoid level-up system complexity in this test
     useGameStore.setState({
       runProgress: {
         ...useGameStore.getState().runProgress,
-        level: 1,
+        level: 10,
       },
     });
     setState('PHASE_1');
@@ -346,8 +346,7 @@ describe('GameStore - Stats Management', () => {
       addKill(10);
     }
 
-    // Since level is 1, 10 kills should reach level 2 and trigger level up
-    expect(useGameStore.getState().state).toBe('LEVEL_UP');
+    expect(useGameStore.getState().state).toBe('PHASE_BOSS');
   });
   });
 

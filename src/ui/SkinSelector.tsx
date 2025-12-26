@@ -8,8 +8,6 @@ import { WORKSHOP } from '@/data';
 import type { PlayerClassType, SkinConfig } from '@/types';
 import styles from './SkinSelector.module.css';
 
-const { skins: SKIN_UNLOCKS } = WORKSHOP;
-
 interface SkinSelectorProps {
   characterClass: PlayerClassType;
   onClose: () => void;
@@ -18,7 +16,7 @@ interface SkinSelectorProps {
 export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
   const { selectedSkin, selectSkin, metaProgress, spendNicePoints, unlockSkin } = useGameStore();
 
-  const skinConfigs = WORKSHOP.skins as SkinConfig[];
+  const skinConfigs = (WORKSHOP as any).skins as SkinConfig[];
   const skins = skinConfigs.filter(s => s.character === characterClass);
   const unlockedSkins = metaProgress.unlockedSkins;
   const nicePoints = metaProgress.nicePoints;
@@ -30,7 +28,6 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
     const isUnlocked = unlockedSkins.includes(skinId);
 
     if (!isUnlocked) {
-      // Try to unlock
       if (skin.cost <= nicePoints) {
         if (spendNicePoints(skin.cost)) {
           unlockSkin(skinId);
@@ -38,13 +35,11 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
         }
       }
     } else {
-      // Already unlocked, select it
       selectSkin(skinId);
     }
   };
 
   return (
-    // biome-ignore lint/a11y/useSemanticElements: overlay is a common pattern for modals
     <div
       className={styles.overlay}
       onClick={onClose}
@@ -53,7 +48,6 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
       tabIndex={-1}
       aria-label="Close skin selector"
     >
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: modal container stops propagation */}
       <div
         className={styles.modal}
         onClick={(e) => e.stopPropagation()}
@@ -69,7 +63,7 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
         </div>
 
         <div className={styles.skinGrid}>
-            {skins.map((skin) => {
+          {skins.map((skin) => {
             const isUnlocked = unlockedSkins.includes(skin.id);
             const isSelected = selectedSkin === skin.id;
             const canAfford = nicePoints >= skin.cost;

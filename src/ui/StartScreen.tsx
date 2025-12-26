@@ -64,7 +64,7 @@ export function StartScreen() {
       <h1 className={styles.title}>
         Protocol: <span className={styles.accent}>Silent Night</span>
       </h1>
-      <h3 className={styles.subtitle}>Operator Edition v3.0</h3>
+      <h3 className={styles.subtitle}>DDL Edition v4.0</h3>
 
       <div className={styles.classContainer}>
         {/* Santa Card */}
