@@ -155,6 +155,8 @@ export function InputControls() {
       <div
         ref={joystickZoneRef}
         className={styles.joystickZone}
+        role="application"
+        aria-label="Virtual joystick control area"
         onTouchStart={handleJoystickStart}
         onTouchMove={handleJoystickMove}
         onTouchEnd={handleJoystickEnd}

@@ -105,6 +105,8 @@ export interface BulletData extends EntityData {
   life: number;
   /** Travel speed in units per second */
   speed: number;
+  /** Weapon type that fired this bullet */
+  type?: 'cannon' | 'smg' | 'stars';
 }
 
 /**

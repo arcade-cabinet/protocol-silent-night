@@ -57,6 +57,7 @@ export function BumbleCharacter({
   );
 
   // Create articulated character using Strata
+  // biome-ignore lint/correctness/useExhaustiveDependencies: customizeBumbleAppearance is stable and defined below
   useEffect(() => {
     if (groupRef.current && !characterRef.current) {
       const character = createCharacter({
