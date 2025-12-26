@@ -21,6 +21,7 @@ import CONFIG from '@/data/config.json';
 import CLASSES from '@/data/classes.json';
 import UPGRADES from '@/data/upgrades.json';
 import WEAPONS_DATA from '@/data/weapons.json';
+import BRIEFING from '@/data/briefing.json';
 const { weapons: WEAPONS, evolutions: WEAPON_EVOLUTIONS } = WEAPONS_DATA;
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
@@ -202,15 +203,7 @@ const initialMetaProgress = loadMetaProgress();
 
 const initialState = {
   state: 'MENU' as GameState,
-  missionBriefing: {
-    title: 'SILENT NIGHT',
-    objective: 'Neutralize hostile Grinch-Bots and eliminate Krampus-Prime',
-    intel: [
-      'Eliminate hostile Grinch-Bot forces',
-      'Neutralize Krampus-Prime command unit',
-      'Defeat 10 Grinch-Bots to draw out Krampus-Prime',
-    ],
-  },
+  missionBriefing: BRIEFING,
   playerClass: null,
   playerHp: 100,
   playerMaxHp: 100,
@@ -766,7 +759,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const label = index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-    lines.push({ label: 'WARNING', text: 'Hostiles are aggressive - engage on sight', warning: true });
+    lines.push({ label: 'WARNING', text: missionBriefing.warning, warning: true });
     return lines;
   },
 
@@ -776,19 +769,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const angle = Math.random() * Math.PI * 2;
     const radius = 30;
     const position = new THREE.Vector3(Math.cos(angle) * radius, 4, Math.sin(angle) * radius);
+    const bossConfig = ENEMIES_DATA.boss;
     addEnemy({
       id: 'boss-krampus',
       mesh: (() => { const obj = new THREE.Object3D(); obj.position.copy(position); return obj; })(),
       velocity: new THREE.Vector3(),
-      hp: 1000,
-      maxHp: 1000,
+      hp: bossConfig.hp,
+      maxHp: bossConfig.hp,
       isActive: true,
       type: 'boss',
-      speed: 3,
-      damage: 5,
-      pointValue: 1000,
+      speed: bossConfig.speed,
+      damage: bossConfig.damage,
+      pointValue: bossConfig.pointValue,
     });
-    set({ state: 'PHASE_BOSS', bossActive: true, bossHp: 1000, bossMaxHp: 1000 });
+    set({ state: 'PHASE_BOSS', bossActive: true, bossHp: bossConfig.hp, bossMaxHp: bossConfig.hp });
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
   },

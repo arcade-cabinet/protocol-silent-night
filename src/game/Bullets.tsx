@@ -9,11 +9,12 @@ import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData, WeaponType } from '@/types';
+import CONFIG from '@/data/config.json';
 
-// Max bullets per type
-const MAX_CANNON_BULLETS = 30;
-const MAX_SMG_BULLETS = 60;
-const MAX_STAR_BULLETS = 45;
+// Max bullets per type from config
+const MAX_CANNON_BULLETS = CONFIG.BULLET_LIMITS.CANNON;
+const MAX_SMG_BULLETS = CONFIG.BULLET_LIMITS.SMG;
+const MAX_STAR_BULLETS = CONFIG.BULLET_LIMITS.STAR;
 
 // Reusable dummy object for matrix calculations
 const dummy = new THREE.Object3D();

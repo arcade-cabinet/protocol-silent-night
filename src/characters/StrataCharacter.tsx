@@ -108,11 +108,11 @@ export function StrataCharacter({
     }
   }
 
-  function createObjectFromConfig(config: any, scale: number): THREE.Object3D | null {
+  function createObjectFromConfig(custom: any, scale: number): THREE.Object3D | null {
     let geometry: THREE.BufferGeometry | null = null;
-    const scaledArgs = config.args?.map((arg: any) => typeof arg === 'number' ? arg * scale : arg);
+    const scaledArgs = custom.args?.map((arg: any) => typeof arg === 'number' ? arg * scale : arg);
 
-    switch (config.type) {
+    switch (custom.type) {
       case 'sphere':
         geometry = new THREE.SphereGeometry(...(scaledArgs || []));
         break;
@@ -128,46 +128,64 @@ export function StrataCharacter({
       case 'torus':
         geometry = new THREE.TorusGeometry(...(scaledArgs || []));
         break;
+      case 'capsule':
+        geometry = new THREE.CapsuleGeometry(...(scaledArgs || []));
+        break;
+      case 'octahedron':
+        geometry = new THREE.OctahedronGeometry(...(scaledArgs || []));
+        break;
+      case 'star':
+        const starShape = new THREE.Shape();
+        const [outer, inner, points, depth] = custom.args;
+        for (let i = 0; i < points * 2; i++) {
+          const radius = i % 2 === 0 ? outer : inner;
+          const angle = (i * Math.PI) / points - Math.PI / 2;
+          starShape.lineTo(Math.cos(angle) * radius * scale, Math.sin(angle) * radius * scale);
+        }
+        starShape.closePath();
+        geometry = new THREE.ExtrudeGeometry(starShape, { depth: depth * scale, bevelEnabled: false });
+        geometry.center();
+        break;
       case 'group':
         const group = new THREE.Group();
-        if (config.children) {
-          for (const child of config.children) {
+        if (custom.children) {
+          for (const child of custom.children) {
             const childObj = createObjectFromConfig(child, scale);
             if (childObj) group.add(childObj);
           }
         }
-        applyTransforms(group, config, scale);
+        applyTransforms(group, custom, scale);
         return group;
       case 'pointLight':
-        const light = new THREE.PointLight(config.args[0], config.args[1], config.args[2]);
-        if (config.name === 'muzzle_flash') muzzleRef.current = light;
-        applyTransforms(light, config, scale);
+        const light = new THREE.PointLight(custom.args[0], custom.args[1], custom.args[2]);
+        if (custom.name === 'muzzle_flash') muzzleRef.current = light;
+        applyTransforms(light, custom, scale);
         return light;
     }
 
     if (geometry) {
       const material = new THREE.MeshStandardMaterial({
-        color: config.material.color,
-        emissive: config.material.emissive,
-        emissiveIntensity: config.material.emissiveIntensity,
-        roughness: config.material.roughness,
-        metalness: config.material.metalness,
-        transparent: config.material.transparent,
-        opacity: config.material.opacity,
+        color: custom.material.color,
+        emissive: custom.material.emissive,
+        emissiveIntensity: custom.material.emissiveIntensity,
+        roughness: custom.material.roughness,
+        metalness: custom.material.metalness,
+        transparent: custom.material.transparent,
+        opacity: custom.material.opacity,
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.castShadow = true;
-      applyTransforms(mesh, config, scale);
+      applyTransforms(mesh, custom, scale);
       return mesh;
     }
 
     return null;
   }
 
-  function applyTransforms(obj: THREE.Object3D, config: any, scale: number) {
-    if (config.position) obj.position.set(config.position[0] * scale, config.position[1] * scale, config.position[2] * scale);
-    if (config.rotation) obj.rotation.set(config.rotation[0], config.rotation[1], config.rotation[2]);
-    if (config.scale) obj.scale.set(config.scale[0], config.scale[1], config.scale[2]);
+  function applyTransforms(obj: THREE.Object3D, custom: any, scale: number) {
+    if (custom.position) obj.position.set(custom.position[0] * scale, custom.position[1] * scale, custom.position[2] * scale);
+    if (custom.rotation) obj.rotation.set(custom.rotation[0], custom.rotation[1], custom.rotation[2]);
+    if (custom.scale) obj.scale.set(custom.scale[0], custom.scale[1], custom.scale[2]);
   }
 
   useFrame((state) => {

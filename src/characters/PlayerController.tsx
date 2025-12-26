@@ -11,9 +11,7 @@ import { useGameStore } from '@/store/gameStore';
 import type { ChristmasObstacle, PlayerClassType, WeaponType } from '@/types';
 import WEAPONS_DATA from '@/data/weapons.json';
 const { evolutions: WEAPON_EVOLUTIONS, weapons: WEAPONS } = WEAPONS_DATA;
-import { BumbleCharacter } from './BumbleCharacter';
-import { ElfCharacter } from './ElfCharacter';
-import { SantaCharacter } from './SantaCharacter';
+import { StrataCharacter } from './StrataCharacter';
 
 let bulletIdCounter = 0;
 
@@ -264,11 +262,10 @@ export function PlayerController() {
 
   if (!playerClass) return null;
 
-  const CharacterComponent = getCharacterComponent(playerClass.type);
-
   return (
     <group ref={groupRef}>
-      <CharacterComponent
+      <StrataCharacter
+        config={playerClass}
         position={[0, 0, 0]}
         rotation={0}
         isMoving={isMoving}
@@ -276,17 +273,4 @@ export function PlayerController() {
       />
     </group>
   );
-}
-
-function getCharacterComponent(type: PlayerClassType) {
-  switch (type) {
-    case 'santa':
-      return SantaCharacter;
-    case 'elf':
-      return ElfCharacter;
-    case 'bumble':
-      return BumbleCharacter;
-    default:
-      return SantaCharacter;
-  }
 }

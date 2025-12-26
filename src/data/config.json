@@ -3,6 +3,11 @@
   "WAVE_REQ": 10,
   "MAX_MINIONS": 12,
   "SPAWN_INTERVAL": 2500,
+  "BULLET_LIMITS": {
+    "CANNON": 30,
+    "SMG": 60,
+    "STAR": 45
+  },
   "COLORS": {
     "SANTA": "#ff0044",
     "ELF": "#00ffcc",
