@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { create } from 'zustand';
 import { AudioManager } from '@/audio/AudioManager';
 import type {
+  BriefingLine,
   BulletData,
   ChristmasObstacle,
   EnemyData,
@@ -13,8 +14,10 @@ import type {
   PlayerClassType,
   RoguelikeUpgrade,
   RunProgressData,
+  WeaponEvolutionType,
+  WeaponType,
 } from '@/types';
-import { CONFIG, PLAYER_CLASSES, ROGUELIKE_UPGRADES } from '@/types';
+import { CONFIG, PLAYER_CLASSES, ROGUELIKE_UPGRADES, WEAPON_EVOLUTIONS, WEAPONS } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // Persistence keys
@@ -41,6 +44,10 @@ interface GameStore {
   damagePlayer: (amount: number) => void;
   setPlayerPosition: (position: THREE.Vector3) => void;
   setPlayerRotation: (rotation: number) => void;
+
+  // Weapons
+  currentWeapon: WeaponType;
+  setWeapon: (weaponType: WeaponType) => void;
 
   // Stats
   stats: GameStats;
@@ -73,6 +80,16 @@ interface GameStore {
     hasRevive: boolean;
   } | null;
 
+  // Weapon Evolution
+  currentEvolution: WeaponEvolutionType | null;
+  evolveWeapon: (evolutionType: WeaponEvolutionType) => void;
+  checkEvolutionAvailability: () => WeaponEvolutionType | null;
+  getWeaponModifiers: () => {
+    damage: number;
+    rof: number;
+    speed: number;
+  } | null;
+
   // Input
   input: InputState;
   setMovement: (x: number, y: number) => void;
@@ -83,6 +100,7 @@ interface GameStore {
   bullets: BulletData[];
   enemies: EnemyData[];
   obstacles: ChristmasObstacle[];
+  getBriefingLines: () => BriefingLine[];
   addBullet: (bullet: BulletData) => void;
   removeBullet: (id: string) => void;
   addEnemy: (enemy: EnemyData) => void;
@@ -189,6 +207,8 @@ const initialState = {
   playerMaxHp: 100,
   playerPosition: new THREE.Vector3(0, 0, 0),
   playerRotation: 0,
+  currentWeapon: 'cannon' as WeaponType,
+  currentEvolution: null,
   stats: { score: 0, kills: 0, bossDefeated: false },
   metaProgress: initialMetaProgress,
   runProgress: {
@@ -221,13 +241,6 @@ const initialState = {
   lastKillTime: 0,
 };
 
-// Extend Window interface for e2e testing
-declare global {
-  interface Window {
-    useGameStore?: typeof useGameStore;
-  }
-}
-
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
@@ -242,6 +255,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       state: 'BRIEFING',
       playerPosition: new THREE.Vector3(0, 0, 0),
       playerRotation: 0,
+      currentWeapon: config.weaponType,
+      currentEvolution: null,
       runProgress: {
         xp: 0,
         level: 1,
@@ -297,6 +312,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPlayerPosition: (position) => set({ playerPosition: position.clone() }),
   setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
 
+  setWeapon: (weaponType) => {
+    const { metaProgress } = get();
+    // Check if weapon is unlocked
+    if (metaProgress.unlockedWeapons.includes(weaponType)) {
+      set({ currentWeapon: weaponType });
+      AudioManager.playSFX('ui_select');
+    }
+  },
+
   addKill: (points) => {
     const { stats, state, enemies, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
@@ -314,8 +338,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
-    // Nice Points calculation: matches points or uses a specific formula
-    // For now, let's say 1 Nice Point per 10 points scored
+    // Nice Points calculation: 1 Nice Point per 10 points scored
     const npGain = Math.floor((points + streakBonus) / 10);
     get().earnNicePoints(npGain);
 
@@ -421,14 +444,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // Run-Progression Actions
   gainXP: (amount) => {
-    const { runProgress } = get();
-    
+    const { runProgress, state } = get();
+    if (state === 'LEVEL_UP') return;
+
     // Apply XP bonus from upgrades (christmas_spirit)
-    const xpBonus = runProgress.activeUpgrades['christmas_spirit'] 
-      ? 1 + (runProgress.activeUpgrades['christmas_spirit'] * 0.3)
+    const xpBonus = runProgress.activeUpgrades['christmas_spirit']
+      ? 1 + runProgress.activeUpgrades['christmas_spirit'] * 0.3
       : 1;
     const adjustedAmount = Math.floor(amount * xpBonus);
-    
+
     const newXP = runProgress.xp + adjustedAmount;
     // Level up curve: 100 * level (gets harder each level)
     const xpToNextLevel = runProgress.level * 100;
@@ -453,8 +477,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   levelUp: () => {
-    const { runProgress } = get();
-    
+    const { runProgress, state } = get();
+
+    // Check for weapon evolution at level 10
+    if (runProgress.level === 10) {
+      const availableEvolution = get().checkEvolutionAvailability();
+      if (availableEvolution) {
+        get().evolveWeapon(availableEvolution);
+      }
+    }
+
     // Generate 3 random upgrade choices with weighted rarity
     const getRandomUpgrades = (): RoguelikeUpgrade[] => {
       const available = ROGUELIKE_UPGRADES.filter((u) => {
@@ -469,17 +501,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const weighted = available.flatMap((u) => {
         let weight = 1;
         switch (u.rarity) {
-          case 'common': weight = Math.max(0.5, 4 - levelBonus * 4); break;
-          case 'rare': weight = 2 + levelBonus * 2; break;
-          case 'epic': weight = 1 + levelBonus * 3; break;
-          case 'legendary': weight = 0.3 + levelBonus * 2; break;
+          case 'common':
+            weight = Math.max(0.5, 4 - levelBonus * 4);
+            break;
+          case 'rare':
+            weight = 2 + levelBonus * 2;
+            break;
+          case 'epic':
+            weight = 1 + levelBonus * 3;
+            break;
+          case 'legendary':
+            weight = 0.3 + levelBonus * 2;
+            break;
         }
         return Array(Math.max(1, Math.round(weight * 10))).fill(u);
       });
 
       const choices: RoguelikeUpgrade[] = [];
       const usedIds = new Set<string>();
-      
+
       while (choices.length < 3 && weighted.length > 0) {
         const idx = Math.floor(Math.random() * weighted.length);
         const upgrade = weighted[idx];
@@ -494,8 +534,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
 
     const choices = getRandomUpgrades();
-    
+
     set({
+      state: 'LEVEL_UP',
       runProgress: {
         ...runProgress,
         pendingLevelUp: true,
@@ -509,7 +550,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectLevelUpgrade: (upgradeId) => {
     const { runProgress, playerMaxHp, playerHp } = get();
     const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === upgradeId);
-    
+
     if (!upgrade) return;
 
     const currentStacks = runProgress.activeUpgrades[upgradeId] || 0;
@@ -535,6 +576,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     set({
+      state: 'PHASE_1', // Return to game
       runProgress: {
         ...runProgress,
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
@@ -625,6 +667,92 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
   },
 
+  // Weapon Evolution Actions
+  evolveWeapon: (evolutionType) => {
+    const { runProgress, playerClass } = get();
+
+    if (!playerClass) return;
+
+    const evolution = WEAPON_EVOLUTIONS[evolutionType];
+    if (!evolution) return;
+
+    // Add to weaponEvolutions array
+    set({
+      currentEvolution: evolutionType,
+      runProgress: {
+        ...runProgress,
+        weaponEvolutions: [...runProgress.weaponEvolutions, evolutionType],
+      },
+    });
+
+    // Play evolution sound
+    AudioManager.playSFX('ui_select');
+    triggerHaptic(HapticPatterns.FIRE_HEAVY);
+  },
+
+  checkEvolutionAvailability: () => {
+    const { runProgress, currentWeapon, currentEvolution } = get();
+
+    // Already evolved
+    if (currentEvolution) return null;
+
+    // Need to be at least level 10
+    if (runProgress.level < 10) return null;
+
+    // Find matching evolution for current weapon
+    for (const [evolutionId, config] of Object.entries(WEAPON_EVOLUTIONS)) {
+      if (config.baseWeapon === currentWeapon) {
+        // Check if level requirement is met
+        if (runProgress.level >= config.minLevel) {
+          // Check required upgrades if any
+          if (config.requiredUpgrades) {
+            const hasAllUpgrades = config.requiredUpgrades.every((upgrade) =>
+              runProgress.selectedUpgrades.includes(upgrade)
+            );
+            if (!hasAllUpgrades) continue;
+          }
+
+          return evolutionId as WeaponEvolutionType;
+        }
+      }
+    }
+
+    return null;
+  },
+
+  getWeaponModifiers: () => {
+    const { currentWeapon, currentEvolution } = get();
+    const weaponConfig = WEAPONS[currentWeapon];
+
+    if (!weaponConfig) return null;
+
+    // No evolution, return base weapon config as modifiers
+    if (!currentEvolution) {
+      return {
+        damage: weaponConfig.damage,
+        rof: weaponConfig.rof,
+        speed: weaponConfig.speed,
+      };
+    }
+
+    const evolution = WEAPON_EVOLUTIONS[currentEvolution];
+    if (!evolution) {
+      return {
+        damage: weaponConfig.damage,
+        rof: weaponConfig.rof,
+        speed: weaponConfig.speed,
+      };
+    }
+
+    // Apply evolution modifiers to base weapon stats
+    const modifiers = evolution.modifiers;
+    return {
+      damage: Math.round(weaponConfig.damage * (modifiers.damageMultiplier || 1)),
+      rof: weaponConfig.rof * (modifiers.rofMultiplier || 1),
+      speed: weaponConfig.speed * (modifiers.speedMultiplier || 1),
+    };
+  },
+
   setMovement: (x, y) =>
     set((state) => ({
       input: { ...state.input, movement: { x, y } },
@@ -651,10 +779,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Play weapon-specific sound and haptic
     const weaponType = bullet.type || 'cannon';
-    if (weaponType === 'smg') {
+    if (weaponType === 'smg' || weaponType === 'light_string') {
       AudioManager.playSFX('weapon_smg');
       triggerHaptic(HapticPatterns.FIRE_LIGHT);
-    } else if (weaponType === 'stars') {
+    } else if (
+      weaponType === 'star' ||
+      weaponType === 'jingle_bell' ||
+      weaponType === 'candy_cane' ||
+      weaponType === 'quantum_gift'
+    ) {
       AudioManager.playSFX('weapon_stars');
       triggerHaptic(HapticPatterns.FIRE_MEDIUM);
     } else {
@@ -711,6 +844,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })),
 
   setObstacles: (obstacles) => set({ obstacles }),
+
+  getBriefingLines: () => {
+    const { missionBriefing, playerClass } = get();
+    const lines: BriefingLine[] = [
+      { label: 'OPERATION', text: missionBriefing.title, accent: true },
+      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
+      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
+    ];
+
+    // Add intel lines
+    for (const [index, intel] of missionBriefing.intel.entries()) {
+      const label = index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+      lines.push({ label, text: intel });
+    }
+
+    // Add final warning
+    lines.push({
+      label: 'WARNING',
+      text: 'Hostiles are aggressive - engage on sight',
+      warning: true,
+    });
+
+    return lines;
+  },
 
   spawnBoss: () => {
     const { enemies, addEnemy } = get();
