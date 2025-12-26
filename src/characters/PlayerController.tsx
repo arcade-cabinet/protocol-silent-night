@@ -9,11 +9,27 @@ import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import type { PlayerClassType } from '@/types';
 import { getBulletTypeFromWeapon } from '@/types';
+import { terrainObstacles } from '@/game/Terrain';
 import { BumbleCharacter } from './BumbleCharacter';
 import { ElfCharacter } from './ElfCharacter';
 import { SantaCharacter } from './SantaCharacter';
 
 let bulletIdCounter = 0;
+
+// Collision detection helper using simple circle-to-circle check
+function checkCollision(position: THREE.Vector3, radius: number = 0.7): boolean {
+  for (const obstacle of terrainObstacles) {
+    const dx = position.x - obstacle.position.x;
+    const dz = position.z - obstacle.position.z;
+    const distance = Math.sqrt(dx * dx + dz * dz);
+
+    // Check if player (radius 0.7) would collide with obstacle
+    if (distance < radius + obstacle.radius) {
+      return true; // Collision detected
+    }
+  }
+  return false; // No collision
+}
 
 export function PlayerController() {
   const groupRef = useRef<THREE.Group>(null);
@@ -97,17 +113,41 @@ export function PlayerController() {
 
     const { movement, isFiring: firing } = input;
 
-    // Movement
+    // Movement with collision detection
     if (movement.x !== 0 || movement.y !== 0) {
       const speed = playerClass.speed * delta;
       moveDirRef.current.set(movement.x, 0, movement.y).normalize();
 
-      positionRef.current.add(moveDirRef.current.multiplyScalar(speed));
+      // Calculate potential new position
+      const newPosition = positionRef.current.clone();
+      newPosition.add(moveDirRef.current.clone().multiplyScalar(speed));
 
       // Clamp to world bounds
       const worldBound = 35;
-      positionRef.current.x = THREE.MathUtils.clamp(positionRef.current.x, -worldBound, worldBound);
-      positionRef.current.z = THREE.MathUtils.clamp(positionRef.current.z, -worldBound, worldBound);
+      newPosition.x = THREE.MathUtils.clamp(newPosition.x, -worldBound, worldBound);
+      newPosition.z = THREE.MathUtils.clamp(newPosition.z, -worldBound, worldBound);
+
+      // Check collision before moving
+      if (!checkCollision(newPosition)) {
+        // No collision - apply movement
+        positionRef.current.copy(newPosition);
+      } else {
+        // Collision detected - try sliding along obstacles
+        // Try X-axis only movement
+        const slideX = positionRef.current.clone();
+        slideX.x = newPosition.x;
+        if (!checkCollision(slideX)) {
+          positionRef.current.copy(slideX);
+        } else {
+          // Try Z-axis only movement
+          const slideZ = positionRef.current.clone();
+          slideZ.z = newPosition.z;
+          if (!checkCollision(slideZ)) {
+            positionRef.current.copy(slideZ);
+          }
+          // If both fail, don't move (stuck against obstacle)
+        }
+      }
 
       // Calculate rotation from movement direction
       rotationRef.current = Math.atan2(movement.x, movement.y);

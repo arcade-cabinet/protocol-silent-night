@@ -1,6 +1,6 @@
 /**
  * Terrain System
- * Procedural Tron-grid terrain using Strata's SDF and noise functions
+ * Christmas-themed procedural terrain with collision-enabled obstacles
  */
 
 import { fbm, noise3D } from '@jbcom/strata';
@@ -9,6 +9,20 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { CONFIG } from '@/types';
+
+// Christmas object types with distinct appearances
+type ChristmasObjectType = 'present' | 'tree' | 'candy_cane' | 'pillar';
+
+interface ChristmasObstacle {
+  position: THREE.Vector3;
+  type: ChristmasObjectType;
+  radius: number; // collision radius
+  height: number;
+  color: THREE.Color;
+}
+
+// Export obstacles for collision detection
+export const terrainObstacles: ChristmasObstacle[] = [];
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -28,11 +42,12 @@ export function Terrain() {
     []
   );
 
-  // Generate instance matrices using Strata's noise functions
-  const { matrices, count } = useMemo(() => {
+  // Generate Christmas-themed obstacles using Strata's noise functions
+  const { matrices, count, obstacles } = useMemo(() => {
     const size = CONFIG.WORLD_SIZE;
     const instanceCount = size * size;
     const matrices: THREE.Matrix4[] = [];
+    const obstacleList: ChristmasObstacle[] = [];
     const dummy = new THREE.Object3D();
 
     for (let x = -size / 2; x < size / 2; x++) {
@@ -46,10 +61,61 @@ export function Terrain() {
 
         dummy.position.set(x * 1.8, h, z * 1.8);
 
-        // Random "glitch" pillars using Strata noise for variation
-        const glitchChance = noise3D(x * 0.5, z * 0.5, 0);
-        if (glitchChance > 0.95) {
-          dummy.position.y += 3 + glitchChance * 3;
+        // Determine Christmas object type using Strata noise
+        const objectTypeNoise = noise3D(x * 0.3, z * 0.3, 42);
+        const isObstacle = noise3D(x * 0.5, z * 0.5, 0);
+
+        let obstacleType: ChristmasObjectType | null = null;
+        let obstacleColor = new THREE.Color(0x4488ff);
+        let obstacleHeight = 4;
+        let obstacleRadius = 0.9; // collision radius
+
+        if (isObstacle > 0.92) {
+          // Create festive obstacles
+          if (objectTypeNoise > 0.7) {
+            obstacleType = 'present';
+            obstacleColor = objectTypeNoise > 0.85
+              ? new THREE.Color(0xff0044) // Red present
+              : new THREE.Color(0x00ff88); // Green present
+            obstacleHeight = 2 + objectTypeNoise * 2;
+            dummy.position.y = h + 1;
+          } else if (objectTypeNoise > 0.4) {
+            obstacleType = 'tree';
+            obstacleColor = new THREE.Color(0x00aa44); // Green Christmas tree
+            obstacleHeight = 4 + objectTypeNoise * 4;
+            obstacleRadius = 1.2;
+            dummy.position.y = h + 2;
+          } else if (objectTypeNoise > 0) {
+            obstacleType = 'candy_cane';
+            obstacleColor = new THREE.Color(0xff4477); // Pink/Red candy cane
+            obstacleHeight = 3 + objectTypeNoise * 2;
+            dummy.position.y = h + 1.5;
+          } else {
+            obstacleType = 'pillar';
+            obstacleColor = new THREE.Color(0x00ffcc); // Cyan cyberpunk pillar
+            obstacleHeight = 5 + isObstacle * 5;
+            dummy.position.y = h + obstacleHeight / 2;
+          }
+
+          // Store obstacle for collision detection
+          obstacleList.push({
+            position: dummy.position.clone(),
+            type: obstacleType,
+            radius: obstacleRadius,
+            height: obstacleHeight,
+            color: obstacleColor,
+          });
+
+          // Scale based on object type
+          if (obstacleType === 'tree') {
+            dummy.scale.set(1, obstacleHeight / 4, 1);
+          } else if (obstacleType === 'candy_cane') {
+            dummy.scale.set(0.5, obstacleHeight / 4, 0.5);
+          } else if (obstacleType === 'present') {
+            dummy.scale.set(1.2, obstacleHeight / 4, 1.2);
+          } else {
+            dummy.scale.set(1, obstacleHeight / 4, 1);
+          }
         }
 
         dummy.updateMatrix();
@@ -57,10 +123,14 @@ export function Terrain() {
       }
     }
 
-    return { matrices, count: instanceCount };
+    // Update global obstacles array for collision detection
+    terrainObstacles.length = 0;
+    terrainObstacles.push(...obstacleList);
+
+    return { matrices, count: instanceCount, obstacles: obstacleList };
   }, []);
 
-  // Apply matrices to instanced mesh (useEffect since ref is null during first render)
+  // Apply matrices to instanced mesh
   useEffect(() => {
     if (meshRef.current) {
       for (let i = 0; i < matrices.length; i++) {
@@ -78,15 +148,75 @@ export function Terrain() {
 
   return (
     <>
+      {/* Main terrain - instanced boxes with Christmas shader */}
       <instancedMesh
         ref={meshRef}
         args={[geometry, material, count]}
         receiveShadow
+        castShadow
         frustumCulled={false}
       />
 
-      {/* Grid Floor Helper */}
-      <gridHelper args={[200, 100, 0x111111, 0x050505]} position={[0, -2, 0]} />
+      {/* Christmas-themed obstacles (rendered as individual meshes for better visual variety) */}
+      {obstacles.map((obstacle, index) => (
+        <ChristmasObstacle key={index} obstacle={obstacle} />
+      ))}
+
+      {/* Grid Floor Helper - darker for cyberpunk vibe */}
+      <gridHelper args={[200, 100, 0x001111, 0x000505]} position={[0, -2, 0]} />
     </>
+  );
+}
+
+// Individual Christmas obstacle component for visual variety
+function ChristmasObstacle({ obstacle }: { obstacle: ChristmasObstacle }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  // Animated glow effect
+  useFrame((state) => {
+    if (meshRef.current) {
+      const pulse = Math.sin(state.clock.elapsedTime * 2) * 0.1 + 0.9;
+      (meshRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse * 0.3;
+    }
+  });
+
+  const geometry = useMemo(() => {
+    switch (obstacle.type) {
+      case 'tree':
+        // Cone shape for Christmas tree
+        return new THREE.ConeGeometry(obstacle.radius, obstacle.height, 8);
+      case 'candy_cane':
+        // Cylinder for candy cane
+        return new THREE.CylinderGeometry(0.2, 0.2, obstacle.height, 8);
+      case 'present':
+        // Cube for present
+        return new THREE.BoxGeometry(1.5, obstacle.height, 1.5);
+      case 'pillar':
+        // Tall pillar
+        return new THREE.CylinderGeometry(0.8, 0.8, obstacle.height, 6);
+      default:
+        return new THREE.BoxGeometry(1, obstacle.height, 1);
+    }
+  }, [obstacle.type, obstacle.height, obstacle.radius]);
+
+  const material = useMemo(() => {
+    return new THREE.MeshStandardMaterial({
+      color: obstacle.color,
+      emissive: obstacle.color,
+      emissiveIntensity: 0.2,
+      metalness: obstacle.type === 'pillar' ? 0.8 : 0.3,
+      roughness: obstacle.type === 'present' ? 0.4 : 0.6,
+    });
+  }, [obstacle.color, obstacle.type]);
+
+  return (
+    <mesh
+      ref={meshRef}
+      position={obstacle.position}
+      geometry={geometry}
+      material={material}
+      castShadow
+      receiveShadow
+    />
   );
 }
