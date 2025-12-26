@@ -3,15 +3,18 @@
  * Class selection menu
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
+import { SkinSelector } from './SkinSelector';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
   const { state, selectClass, highScore } = useGameStore();
   const audioInitializedRef = useRef(false);
+  const [showingSkinSelector, setShowingSkinSelector] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<PlayerClassType | null>(null);
 
   // Initialize audio when screen is shown (on first interaction)
   useEffect(() => {
@@ -52,8 +55,17 @@ export function StartScreen() {
         console.warn('Audio initialization failed:', error);
       });
 
-    // Always proceed with class selection
-    selectClass(type);
+    // Show skin selector first
+    setSelectedClass(type);
+    setShowingSkinSelector(true);
+  };
+
+  const handleCloseSkinSelector = () => {
+    setShowingSkinSelector(false);
+    // Proceed to game
+    if (selectedClass) {
+      selectClass(selectedClass);
+    }
   };
 
   return (
@@ -134,6 +146,11 @@ export function StartScreen() {
         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
         {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
       </div>
+
+      {/* Skin Selector Modal */}
+      {showingSkinSelector && selectedClass && (
+        <SkinSelector characterClass={selectedClass} onClose={handleCloseSkinSelector} />
+      )}
     </div>
   );
 }

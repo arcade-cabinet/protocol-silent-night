@@ -15,7 +15,8 @@ import {
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { PLAYER_CLASSES } from '@/types';
+import { useGameStore } from '@/store/gameStore';
+import { CHARACTER_SKINS, PLAYER_CLASSES, getDefaultSkin } from '@/types';
 
 interface ElfCharacterProps {
   position?: [number, number, number];
@@ -43,17 +44,22 @@ export function ElfCharacter({
   const furGroupsRef = useRef<THREE.Group[]>([]);
 
   const config = PLAYER_CLASSES.elf;
+  const selectedSkin = useGameStore((state) => state.selectedSkin);
+  
+  // Get skin config, defaulting to forest if none selected
+  const skinId = selectedSkin?.startsWith('elf-') ? selectedSkin : getDefaultSkin('elf');
+  const skinConfig = CHARACTER_SKINS[skinId];
 
-  // Strata fur options for Elf's cyber-hair
+  // Strata fur options for Elf's cyber-hair - using skin colors
   const furOptions: FurOptions = useMemo(
     () => ({
-      baseColor: new THREE.Color(0.0, 0.4, 0.35), // Cyan-teal base
-      tipColor: new THREE.Color(0.2, 0.8, 0.7), // Lighter cyan tips
+      baseColor: new THREE.Color(...skinConfig.furColor.base),
+      tipColor: new THREE.Color(...skinConfig.furColor.tip),
       layerCount: 6,
       spacing: 0.012,
       windStrength: 1.2, // More responsive
     }),
-    []
+    [skinConfig]
   );
 
   // Create articulated character using Strata
@@ -70,7 +76,7 @@ export function ElfCharacter({
       groupRef.current.add(character.root);
 
       // Customize for Elf appearance
-      customizeElfAppearance(character.joints, config.scale);
+      customizeElfAppearance(character.joints, config.scale, skinConfig.color, skinConfig.accentColor || skinConfig.color);
 
       // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
@@ -93,9 +99,9 @@ export function ElfCharacter({
         furGroupsRef.current = [];
       }
     };
-  }, [config.scale, furOptions]);
+  }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
 
-  function customizeElfAppearance(joints: CharacterJoints, scale: number) {
+  function customizeElfAppearance(joints: CharacterJoints, scale: number, primaryColor: number, _accentColor: number) {
     if (!joints.head?.mesh) return;
 
     const headMesh = joints.head.mesh;
@@ -156,9 +162,9 @@ export function ElfCharacter({
     // Cyber hair (spiky mohawk style)
     const hairGeo = new THREE.ConeGeometry(0.08 * scale, 0.18 * scale, 4);
     const hairMat = new THREE.MeshStandardMaterial({
-      color: 0x00aa88,
-      emissive: 0x00ffcc,
-      emissiveIntensity: 0.5,
+      color: primaryColor,
+      emissive: primaryColor,
+      emissiveIntensity: 0.4,
     });
 
     // Central mohawk spikes

@@ -12,8 +12,9 @@ import type {
   PlayerClassConfig,
   PlayerClassType,
   RunProgressData,
+  SkinId,
 } from '@/types';
-import { CONFIG, PLAYER_CLASSES } from '@/types';
+import { CONFIG, PLAYER_CLASSES, getDefaultSkin } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // Persistence keys
@@ -32,11 +33,13 @@ interface GameStore {
 
   // Player
   playerClass: PlayerClassConfig | null;
+  selectedSkin: SkinId | null;
   playerHp: number;
   playerMaxHp: number;
   playerPosition: THREE.Vector3;
   playerRotation: number;
   selectClass: (type: PlayerClassType) => void;
+  selectSkin: (skinId: SkinId) => void;
   damagePlayer: (amount: number) => void;
   setPlayerPosition: (position: THREE.Vector3) => void;
   setPlayerRotation: (rotation: number) => void;
@@ -123,7 +126,7 @@ const loadMetaProgress = (): MetaProgressData => {
     runsCompleted: 0,
     bossesDefeated: 0,
     unlockedWeapons: ['cannon', 'smg', 'star'], // Base weapons unlocked by default
-    unlockedSkins: [],
+    unlockedSkins: ['santa-classic', 'elf-forest', 'bumble-classic'], // Default skins always unlocked
     permanentUpgrades: {},
     highScore: 0,
     totalKills: 0,
@@ -173,6 +176,7 @@ const initialState = {
     ],
   },
   playerClass: null,
+  selectedSkin: null,
   playerHp: 100,
   playerMaxHp: 100,
   playerPosition: new THREE.Vector3(0, 0, 0),
@@ -218,8 +222,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   selectClass: (type) => {
     const config = PLAYER_CLASSES[type];
+    const defaultSkin = getDefaultSkin(type);
     set({
       playerClass: config,
+      selectedSkin: defaultSkin,
       playerHp: config.hp,
       playerMaxHp: config.hp,
       state: 'BRIEFING',
@@ -233,6 +239,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     });
 
+    // Play UI select sound
+    AudioManager.playSFX('ui_select');
+  },
+
+  selectSkin: (skinId) => {
+    set({ selectedSkin: skinId });
     // Play UI select sound
     AudioManager.playSFX('ui_select');
   },

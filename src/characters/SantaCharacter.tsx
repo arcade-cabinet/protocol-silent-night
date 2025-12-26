@@ -15,7 +15,8 @@ import {
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { PLAYER_CLASSES } from '@/types';
+import { useGameStore } from '@/store/gameStore';
+import { CHARACTER_SKINS, PLAYER_CLASSES, getDefaultSkin } from '@/types';
 
 interface SantaCharacterProps {
   position?: [number, number, number];
@@ -42,17 +43,22 @@ export function SantaCharacter({
   const furGroupsRef = useRef<THREE.Group[]>([]);
 
   const config = PLAYER_CLASSES.santa;
+  const selectedSkin = useGameStore((state) => state.selectedSkin);
+  
+  // Get skin config, defaulting to classic if none selected
+  const skinId = selectedSkin?.startsWith('santa-') ? selectedSkin : getDefaultSkin('santa');
+  const skinConfig = CHARACTER_SKINS[skinId];
 
-  // Strata fur options for Santa's suit
+  // Strata fur options for Santa's suit - using skin colors
   const furOptions: FurOptions = useMemo(
     () => ({
-      baseColor: new THREE.Color(0.8, 0.1, 0.1), // Red base
-      tipColor: new THREE.Color(1.0, 0.3, 0.3), // Lighter red tips
+      baseColor: new THREE.Color(...skinConfig.furColor.base),
+      tipColor: new THREE.Color(...skinConfig.furColor.tip),
       layerCount: 8,
       spacing: 0.015,
       windStrength: 0.3,
     }),
-    []
+    [skinConfig]
   );
 
   // Add Santa-specific details (hat, beard, belt, weapon)
@@ -61,7 +67,7 @@ export function SantaCharacter({
     if (groupRef.current && !characterRef.current) {
       // Create the base character with Strata
       const character = createCharacter({
-        skinColor: config.color,
+        skinColor: skinConfig.color,
         furOptions,
         scale: config.scale,
       });
@@ -70,7 +76,7 @@ export function SantaCharacter({
       groupRef.current.add(character.root);
 
       // Customize for Santa appearance
-      customizeSantaAppearance(character.joints, config.scale);
+      customizeSantaAppearance(character.joints, config.scale, skinConfig.color, skinConfig.accentColor || 0xffd700);
 
       // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
@@ -94,9 +100,9 @@ export function SantaCharacter({
         furGroupsRef.current = [];
       }
     };
-  }, [config.color, config.scale, furOptions]);
+  }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
 
-  function customizeSantaAppearance(joints: CharacterJoints, scale: number) {
+  function customizeSantaAppearance(joints: CharacterJoints, scale: number, primaryColor: number, accentColor: number) {
     if (!joints.head?.mesh) return;
 
     const headMesh = joints.head.mesh;
@@ -125,8 +131,8 @@ export function SantaCharacter({
     // Add hat
     const hatGeo = new THREE.ConeGeometry(0.22 * scale, 0.4 * scale, 8);
     const hatMat = new THREE.MeshStandardMaterial({
-      color: config.color,
-      emissive: config.color,
+      color: primaryColor,
+      emissive: primaryColor,
       emissiveIntensity: 0.3,
     });
     const hat = new THREE.Mesh(hatGeo, hatMat);
@@ -191,10 +197,10 @@ export function SantaCharacter({
       // Belt buckle - ornate
       const buckleGeo = new THREE.BoxGeometry(0.12 * scale, 0.1 * scale, 0.03);
       const buckleMat = new THREE.MeshStandardMaterial({
-        color: 0xffd700,
+        color: accentColor,
         metalness: 0.95,
         roughness: 0.1,
-        emissive: 0xffa500,
+        emissive: accentColor,
         emissiveIntensity: 0.2,
       });
       const buckle = new THREE.Mesh(buckleGeo, buckleMat);
@@ -205,7 +211,7 @@ export function SantaCharacter({
       const buckleDetailGeo = new THREE.BoxGeometry(0.06 * scale, 0.05 * scale, 0.015);
       const buckleDetail = new THREE.Mesh(
         buckleDetailGeo,
-        new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+        new THREE.MeshBasicMaterial({ color: accentColor })
       );
       buckleDetail.position.set(0, -0.15 * scale, 0.38 * scale);
       joints.torso.mesh.add(buckleDetail);

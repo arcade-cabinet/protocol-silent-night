@@ -17,6 +17,40 @@ export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' |
 export type PlayerClassType = 'santa' | 'elf' | 'bumble';
 
 /**
+ * Character skin identifiers
+ */
+export type SkinId = 
+  | 'santa-classic' | 'santa-arctic' | 'santa-gold'
+  | 'elf-forest' | 'elf-neon' | 'elf-shadow'
+  | 'bumble-classic' | 'bumble-midnight' | 'bumble-crystal';
+
+/**
+ * Character skin configuration
+ * @interface SkinConfig
+ */
+export interface SkinConfig {
+  /** Unique skin identifier */
+  id: SkinId;
+  /** Character class this skin belongs to */
+  characterClass: PlayerClassType;
+  /** Display name for the skin */
+  name: string;
+  /** Nice Points cost to unlock (0 = default/free) */
+  cost: number;
+  /** Primary color as hex number */
+  color: number;
+  /** Secondary accent color */
+  accentColor?: number;
+  /** Fur rendering colors as RGB tuples (0-1 range) */
+  furColor: {
+    base: [number, number, number];
+    tip: [number, number, number];
+  };
+  /** Optional description */
+  description?: string;
+}
+
+/**
  * Configuration for a player character class
  * @interface PlayerClassConfig
  */
@@ -312,3 +346,148 @@ export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
     },
   },
 };
+
+/**
+ * Character skin definitions
+ * @constant
+ */
+export const CHARACTER_SKINS: Record<SkinId, SkinConfig> = {
+  // MECHA-SANTA Skins
+  'santa-classic': {
+    id: 'santa-classic',
+    characterClass: 'santa',
+    name: 'Classic Red',
+    cost: 0, // Default skin, always unlocked
+    color: 0xff0044,
+    accentColor: 0xffd700,
+    furColor: {
+      base: [0.5, 0.05, 0.05],
+      tip: [0.8, 0.2, 0.2],
+    },
+    description: 'Traditional red armor with gold accents',
+  },
+  'santa-arctic': {
+    id: 'santa-arctic',
+    characterClass: 'santa',
+    name: 'Arctic Camo',
+    cost: 500,
+    color: 0xccddff,
+    accentColor: 0x88aacc,
+    furColor: {
+      base: [0.7, 0.8, 0.9],
+      tip: [0.9, 0.95, 1.0],
+    },
+    description: 'Winter camouflage for stealth operations',
+  },
+  'santa-gold': {
+    id: 'santa-gold',
+    characterClass: 'santa',
+    name: 'Gold Edition',
+    cost: 1000,
+    color: 0xffd700,
+    accentColor: 0xffaa00,
+    furColor: {
+      base: [0.8, 0.6, 0.1],
+      tip: [1.0, 0.85, 0.3],
+    },
+    description: 'Prestigious gold plating for elite operators',
+  },
+
+  // CYBER-ELF Skins
+  'elf-forest': {
+    id: 'elf-forest',
+    characterClass: 'elf',
+    name: 'Forest Green',
+    cost: 0, // Default skin, always unlocked
+    color: 0x00cc66,
+    accentColor: 0x00ff88,
+    furColor: {
+      base: [0.0, 0.3, 0.15],
+      tip: [0.2, 0.6, 0.4],
+    },
+    description: 'Classic forest operations color scheme',
+  },
+  'elf-neon': {
+    id: 'elf-neon',
+    characterClass: 'elf',
+    name: 'Neon Cyan',
+    cost: 500,
+    color: 0x00ffcc,
+    accentColor: 0x00ffff,
+    furColor: {
+      base: [0.0, 0.5, 0.5],
+      tip: [0.3, 0.9, 0.9],
+    },
+    description: 'High-visibility cyberpunk aesthetic',
+  },
+  'elf-shadow': {
+    id: 'elf-shadow',
+    characterClass: 'elf',
+    name: 'Shadow Ops',
+    cost: 1000,
+    color: 0x1a1a2e,
+    accentColor: 0x6633cc,
+    furColor: {
+      base: [0.1, 0.1, 0.2],
+      tip: [0.3, 0.2, 0.5],
+    },
+    description: 'Covert operations stealth variant',
+  },
+
+  // THE BUMBLE Skins
+  'bumble-classic': {
+    id: 'bumble-classic',
+    characterClass: 'bumble',
+    name: 'Classic White',
+    cost: 0, // Default skin, always unlocked
+    color: 0xeeeeee,
+    accentColor: 0xffffff,
+    furColor: {
+      base: [0.7, 0.7, 0.7],
+      tip: [1.0, 1.0, 1.0],
+    },
+    description: 'Iconic white fur of the abominable snowman',
+  },
+  'bumble-midnight': {
+    id: 'bumble-midnight',
+    characterClass: 'bumble',
+    name: 'Midnight Black',
+    cost: 500,
+    color: 0x222222,
+    accentColor: 0x444444,
+    furColor: {
+      base: [0.1, 0.1, 0.1],
+      tip: [0.3, 0.3, 0.3],
+    },
+    description: 'Shadowy variant for night operations',
+  },
+  'bumble-crystal': {
+    id: 'bumble-crystal',
+    characterClass: 'bumble',
+    name: 'Crystal Blue',
+    cost: 1000,
+    color: 0x4466ff,
+    accentColor: 0x88aaff,
+    furColor: {
+      base: [0.3, 0.4, 0.8],
+      tip: [0.6, 0.7, 1.0],
+    },
+    description: 'Crystalline ice armor with blue glow',
+  },
+};
+
+/**
+ * Get skins for a specific character class
+ */
+export function getSkinsForCharacter(characterClass: PlayerClassType): SkinConfig[] {
+  return Object.values(CHARACTER_SKINS).filter(
+    (skin) => skin.characterClass === characterClass
+  );
+}
+
+/**
+ * Get default skin ID for a character class
+ */
+export function getDefaultSkin(characterClass: PlayerClassType): SkinId {
+  return `${characterClass}-classic` as SkinId;
+}

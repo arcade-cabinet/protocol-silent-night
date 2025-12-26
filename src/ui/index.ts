@@ -8,4 +8,5 @@ export { KillStreak } from './KillStreak';
 export { LoadingScreen } from './LoadingScreen';
 export { MessageOverlay } from './MessageOverlay';
 export { MissionBriefing } from './MissionBriefing';
+export { SkinSelector } from './SkinSelector';
 export { StartScreen } from './StartScreen';

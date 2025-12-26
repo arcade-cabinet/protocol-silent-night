@@ -15,7 +15,8 @@ import {
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { PLAYER_CLASSES } from '@/types';
+import { useGameStore } from '@/store/gameStore';
+import { CHARACTER_SKINS, PLAYER_CLASSES, getDefaultSkin } from '@/types';
 
 interface BumbleCharacterProps {
   position?: [number, number, number];
@@ -42,18 +43,23 @@ export function BumbleCharacter({
   const furGroupsRef = useRef<THREE.Group[]>([]);
 
   const config = PLAYER_CLASSES.bumble;
+  const selectedSkin = useGameStore((state) => state.selectedSkin);
+  
+  // Get skin config, defaulting to classic if none selected
+  const skinId = selectedSkin?.startsWith('bumble-') ? selectedSkin : getDefaultSkin('bumble');
+  const skinConfig = CHARACTER_SKINS[skinId];
 
-  // Dense white fur for the Bumble
+  // Dense fur for the Bumble - using skin colors
   const furOptions: FurOptions = useMemo(
     () => ({
-      baseColor: new THREE.Color(0.85, 0.85, 0.85), // White-gray base
-      tipColor: new THREE.Color(1.0, 1.0, 1.0), // Pure white tips
+      baseColor: new THREE.Color(...skinConfig.furColor.base),
+      tipColor: new THREE.Color(...skinConfig.furColor.tip),
       layerCount: 16, // Very dense fur
       spacing: 0.035, // Longer fur
       windStrength: 0.6,
       gravityDroop: 0.05,
     }),
-    []
+    [skinConfig]
   );
 
   // Create articulated character using Strata
@@ -61,7 +67,7 @@ export function BumbleCharacter({
   useEffect(() => {
     if (groupRef.current && !characterRef.current) {
       const character = createCharacter({
-        skinColor: config.color,
+        skinColor: skinConfig.color,
         furOptions,
         scale: config.scale,
       });
@@ -70,7 +76,7 @@ export function BumbleCharacter({
       groupRef.current.add(character.root);
 
       // Customize for Bumble appearance
-      customizeBumbleAppearance(character.joints, config.scale);
+      customizeBumbleAppearance(character.joints, config.scale, skinConfig.color, skinConfig.accentColor || skinConfig.color);
 
       // Cache fur groups for efficient updates
       const furGroups: THREE.Group[] = [];
@@ -93,9 +99,9 @@ export function BumbleCharacter({
         furGroupsRef.current = [];
       }
     };
-  }, [config.color, config.scale, furOptions]);
+  }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
 
-  function customizeBumbleAppearance(joints: CharacterJoints, scale: number) {
+  function customizeBumbleAppearance(joints: CharacterJoints, scale: number, _primaryColor: number, _accentColor: number) {
     // Make hips larger for the Bumble's round body
     if (joints.hips?.mesh) {
       joints.hips.mesh.scale.set(1.4, 1.2, 1.3);
