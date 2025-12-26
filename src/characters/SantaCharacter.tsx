@@ -55,7 +55,8 @@ export function SantaCharacter({
     []
   );
 
-  // Create articulated character using Strata
+  // Add Santa-specific details (hat, beard, belt, weapon)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: customizeSantaAppearance is stable and defined below
   useEffect(() => {
     if (groupRef.current && !characterRef.current) {
       // Create the base character with Strata
@@ -94,7 +95,6 @@ export function SantaCharacter({
     };
   }, [config.color, config.scale, furOptions]);
 
-  // Add Santa-specific details (hat, beard, belt, weapon)
   function customizeSantaAppearance(joints: CharacterJoints, scale: number) {
     if (!joints.head?.mesh) return;
 

@@ -1,8 +1,8 @@
 # PROTOCOL: SILENT NIGHT // AGENT REGISTRY
 
-**System Version:** 3.0 (Operator Edition)  
-**Target Runtime:** React Three Fiber / Three.js / WebGL  
-**Classification:** Arcade RPG Simulation  
+**System Version:** 3.0 (Operator Edition)
+**Target Runtime:** React Three Fiber / Three.js / WebGL
+**Classification:** Arcade RPG Simulation
 **Architecture:** Modular TypeScript with Zustand State Management
 
 ---

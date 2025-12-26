@@ -1,0 +1,17 @@
+# Coveralls Configuration
+# https://docs.coveralls.io/
+
+# Service name
+service_name: github-actions
+
+# Coverage file location
+coverage_clover: coverage/lcov.info
+
+# Repo token (optional for public repos, uses GITHUB_TOKEN)
+# repo_token: set in GitHub Secrets if needed
+
+# Parallel builds support
+parallel: false
+
+# Flag name for multi-job coverage
+flag_name: unit-tests

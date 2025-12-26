@@ -10,6 +10,8 @@ import type {
   EnemyData,
 } from '@/types';
 import { PLAYER_CLASSES, CONFIG } from '@/types';
+import { AudioManager } from '@/audio/AudioManager';
+import { triggerHaptic, HapticPatterns } from '@/utils/haptics';
 
 // High score persistence key
 const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
@@ -123,6 +125,13 @@ const initialState = {
   lastKillTime: 0,
 };
 
+// Extend Window interface for e2e testing
+declare global {
+  interface Window {
+    useGameStore?: typeof useGameStore;
+  }
+}
+
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
@@ -138,6 +147,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerPosition: new THREE.Vector3(0, 0, 0),
       playerRotation: 0,
     });
+    
+    // Play UI select sound
+    AudioManager.playSFX('ui_select');
   },
 
   damagePlayer: (amount) => {
@@ -146,6 +158,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const newHp = Math.max(0, playerHp - amount);
     set({ playerHp: newHp, screenShake: 0.5, damageFlash: true });
+    
+    // Haptic and audio feedback
+    if (amount >= 20) {
+      triggerHaptic(HapticPatterns.DAMAGE_HEAVY);
+      AudioManager.playSFX('player_damage_heavy');
+    } else {
+      triggerHaptic(HapticPatterns.DAMAGE_LIGHT);
+      AudioManager.playSFX('player_damage_light');
+    }
 
     // Clear damage flash after short delay
     setTimeout(() => {
@@ -155,6 +176,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (newHp <= 0) {
       get().updateHighScore();
       set({ state: 'GAME_OVER' });
+      AudioManager.playSFX('defeat');
+      AudioManager.playMusic('defeat');
     }
   },
 
@@ -179,6 +202,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       killStreak: newStreak,
       lastKillTime: now,
     });
+    
+    // Audio and haptic feedback
+    AudioManager.playSFX('enemy_defeated');
+    triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
+    
+    if (newStreak > 1 && newStreak % 3 === 0) {
+      AudioManager.playSFX('streak_start');
+    }
 
     // Check if we should spawn boss
     if (newKills >= CONFIG.WAVE_REQ && state === 'PHASE_1') {
@@ -211,10 +242,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     })),
 
-  addBullet: (bullet) =>
+  addBullet: (bullet) => {
     set((state) => ({
       bullets: [...state.bullets, bullet],
-    })),
+    }));
+    
+    // Play weapon-specific sound and haptic
+    const weaponType = bullet.type || 'cannon';
+    if (weaponType === 'smg') {
+      AudioManager.playSFX('weapon_smg');
+      triggerHaptic(HapticPatterns.FIRE_LIGHT);
+    } else if (weaponType === 'stars') {
+      AudioManager.playSFX('weapon_stars');
+      triggerHaptic(HapticPatterns.FIRE_MEDIUM);
+    } else {
+      AudioManager.playSFX('weapon_cannon');
+      triggerHaptic(HapticPatterns.FIRE_HEAVY);
+    }
+  },
 
   removeBullet: (id) =>
     set((state) => ({
@@ -330,3 +375,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerPosition: new THREE.Vector3(0, 0, 0),
     }),
 }));
+
+// Expose store on window for e2e testing
+if (typeof window !== 'undefined') {
+  window.useGameStore = useGameStore;
+}
