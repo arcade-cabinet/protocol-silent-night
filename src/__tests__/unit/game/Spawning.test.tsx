@@ -1,5 +1,4 @@
 import ReactTestRenderer from '@react-three/test-renderer';
-import * as THREE from 'three';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Enemies } from '@/game/Enemies';
 import { Terrain } from '@/game/Terrain';
