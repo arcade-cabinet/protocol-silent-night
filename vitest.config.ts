@@ -35,8 +35,17 @@ export default defineConfig({
     },
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist', 'e2e'],
-    deps: {
-      inline: ['@jbcom/strata'],
+    // Handle ESM packages that have directory imports or other Node ESM issues
+    server: {
+      deps: {
+        inline: [
+          '@jbcom/strata',
+          '@react-three/fiber',
+          '@react-three/drei',
+          '@react-three/postprocessing',
+          'three',
+        ],
+      },
     },
   },
   resolve: {

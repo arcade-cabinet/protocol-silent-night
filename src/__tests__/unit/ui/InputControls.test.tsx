@@ -10,12 +10,12 @@ import { useGameStore } from '../../../store/gameStore';
 
 describe('InputControls', () => {
   beforeEach(() => {
-    // Reset store before each test
+    // Reset store before each test with valid game state
     useGameStore.setState({
-      state: 'PLAYING',
+      state: 'PHASE_1', // Valid playing state (not MENU, WIN, or GAME_OVER)
       input: {
         movement: { x: 0, y: 0 },
-        firing: false,
+        isFiring: false,
         joystickActive: false,
         joystickOrigin: { x: 0, y: 0 },
       },
@@ -28,7 +28,7 @@ describe('InputControls', () => {
 
   describe('Rendering', () => {
     it('should render input controls when game is playing', () => {
-      useGameStore.setState({ state: 'PLAYING' });
+      useGameStore.setState({ state: 'PHASE_1' });
       const { container } = render(<InputControls />);
       
       const joystickZone = container.querySelector('[aria-label="Virtual joystick control area"]');
@@ -150,13 +150,13 @@ describe('InputControls', () => {
     });
 
     it('should handle space key to start firing', () => {
-      useGameStore.setState({ state: 'PLAYING' });
+      useGameStore.setState({ state: 'PHASE_1' });
       render(<InputControls />);
       
       window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(true);
+      expect(state.input.isFiring).toBe(true);
     });
 
     it('should handle space key release to stop firing', () => {
@@ -166,7 +166,7 @@ describe('InputControls', () => {
       window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(false);
+      expect(state.input.isFiring).toBe(false);
     });
 
     it('should reset movement when keys are released', () => {
@@ -207,18 +207,18 @@ describe('InputControls', () => {
 
   describe('Fire Button', () => {
     it('should start firing on mouse down', () => {
-      useGameStore.setState({ state: 'PLAYING' });
+      useGameStore.setState({ state: 'PHASE_1' });
       render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       
       fireEvent.mouseDown(fireButton);
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(true);
+      expect(state.input.isFiring).toBe(true);
     });
 
     it('should stop firing on mouse up', () => {
-      useGameStore.setState({ state: 'PLAYING' });
+      useGameStore.setState({ state: 'PHASE_1' });
       render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       
@@ -226,7 +226,7 @@ describe('InputControls', () => {
       fireEvent.mouseUp(fireButton);
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(false);
+      expect(state.input.isFiring).toBe(false);
     });
 
     it('should stop firing on mouse leave', () => {
@@ -237,11 +237,11 @@ describe('InputControls', () => {
       fireEvent.mouseLeave(fireButton);
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(false);
+      expect(state.input.isFiring).toBe(false);
     });
 
     it('should start firing on touch start', () => {
-      useGameStore.setState({ state: 'PLAYING' });
+      useGameStore.setState({ state: 'PHASE_1' });
       render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       
@@ -250,7 +250,7 @@ describe('InputControls', () => {
       });
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(true);
+      expect(state.input.isFiring).toBe(true);
     });
 
     it('should stop firing on touch end', () => {
@@ -263,7 +263,7 @@ describe('InputControls', () => {
       fireEvent.touchEnd(fireButton);
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(false);
+      expect(state.input.isFiring).toBe(false);
     });
   });
 
@@ -427,8 +427,8 @@ describe('InputControls', () => {
 
   describe('Integration Scenarios', () => {
     it('should handle simultaneous keyboard and touch input', () => {
-      useGameStore.setState({ state: 'PLAYING' });
-      const { container } = render(<InputControls />);
+      useGameStore.setState({ state: 'PHASE_1' });
+      render(<InputControls />);
       const fireButton = screen.getByRole('button', { name: /fire/i });
       
       // Keyboard movement
@@ -441,7 +441,7 @@ describe('InputControls', () => {
       
       const state = useGameStore.getState();
       expect(state.input.movement.y).toBe(-1);
-      expect(state.input.firing).toBe(true);
+      expect(state.input.isFiring).toBe(true);
     });
 
     it('should handle rapid fire button tapping', () => {
@@ -455,7 +455,7 @@ describe('InputControls', () => {
       }
       
       const state = useGameStore.getState();
-      expect(state.input.firing).toBe(false); // Should end up not firing
+      expect(state.input.isFiring).toBe(false); // Should end up not firing
     });
 
     it('should handle joystick circular motion', () => {
