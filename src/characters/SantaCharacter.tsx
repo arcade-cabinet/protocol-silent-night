@@ -64,7 +64,7 @@ export function SantaCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
-        
+        includeMuzzle: false,
       });
 
       characterRef.current = character;

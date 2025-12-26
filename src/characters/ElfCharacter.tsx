@@ -64,7 +64,7 @@ export function ElfCharacter({
         skinColor: 0xffe4c4, // Skin tone
         furOptions,
         scale: config.scale,
-         // New option in Strata
+        includeMuzzle: false,
       });
 
       characterRef.current = character;
