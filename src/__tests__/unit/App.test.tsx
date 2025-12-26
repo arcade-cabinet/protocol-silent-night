@@ -7,6 +7,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import App from '../../App';
 import { useGameStore } from '../../store/gameStore';
+import { PLAYER_CLASSES } from '@/types';
 
 // Mock GameScene to avoid Three.js complexity
 vi.mock('@/game', () => ({
@@ -19,25 +20,21 @@ describe('App', () => {
       state: 'MENU',
       playerClass: null,
       playerHp: 0,
-      maxHp: 0,
+      playerMaxHp: 0,
       bossHp: 0,
-      maxBossHp: 0,
+      bossMaxHp: 0,
       bossActive: false,
-      bossPhase: 1,
       stats: {
         kills: 0,
         score: 0,
-        highScore: 0,
-        killStreak: 0,
-        maxStreak: 0,
+        bossDefeated: false,
       },
       input: {
         movement: { x: 0, y: 0 },
-        firing: false,
+        isFiring: false,
         joystickActive: false,
         joystickOrigin: { x: 0, y: 0 },
       },
-      lastDamageTime: 0,
     });
   });
 
@@ -77,10 +74,10 @@ describe('App', () => {
 
     it('should render properly in PLAYING state', () => {
       useGameStore.setState({
-        state: 'PLAYING',
-        playerClass: 'santa',
+        state: 'PHASE_1',
+        playerClass: PLAYER_CLASSES['santa'],
         playerHp: 300,
-        maxHp: 300,
+        playerMaxHp: 300,
       });
       const { container } = render(<App />);
       expect(container).toBeTruthy();
@@ -102,10 +99,10 @@ describe('App', () => {
   describe('Component Integration', () => {
     it('should render HUD during gameplay', () => {
       useGameStore.setState({
-        state: 'PLAYING',
-        playerClass: 'santa',
+        state: 'PHASE_1',
+        playerClass: PLAYER_CLASSES['santa'],
         playerHp: 300,
-        maxHp: 300,
+        playerMaxHp: 300,
       });
       
       const { container } = render(<App />);
@@ -114,11 +111,11 @@ describe('App', () => {
 
     it('should render BossHUD when boss is active', () => {
       useGameStore.setState({
-        state: 'PLAYING',
-        playerClass: 'santa',
+        state: 'PHASE_BOSS',
+        playerClass: PLAYER_CLASSES['santa'],
         bossActive: true,
         bossHp: 1000,
-        maxBossHp: 1000,
+        bossMaxHp: 1000,
       });
       
       const { container } = render(<App />);
@@ -127,8 +124,8 @@ describe('App', () => {
 
     it('should render InputControls during gameplay', () => {
       useGameStore.setState({
-        state: 'PLAYING',
-        playerClass: 'santa',
+        state: 'PHASE_1',
+        playerClass: PLAYER_CLASSES['santa'],
       });
       
       const { container } = render(<App />);
@@ -144,7 +141,7 @@ describe('App', () => {
     it('should render EndScreen on game over', () => {
       useGameStore.setState({
         state: 'GAME_OVER',
-        stats: { kills: 10, score: 1000, highScore: 1000, killStreak: 0, maxStreak: 5 },
+        stats: { kills: 10, score: 1000, bossDefeated: false },
       });
       
       const { container } = render(<App />);
@@ -154,7 +151,7 @@ describe('App', () => {
     it('should render EndScreen on win', () => {
       useGameStore.setState({
         state: 'WIN',
-        stats: { kills: 20, score: 5000, highScore: 5000, killStreak: 0, maxStreak: 10 },
+        stats: { kills: 20, score: 5000, bossDefeated: true },
       });
       
       const { container } = render(<App />);
@@ -165,8 +162,8 @@ describe('App', () => {
   describe('Effects Integration', () => {
     it('should render DamageFlash effect', () => {
       useGameStore.setState({
-        state: 'PLAYING',
-        lastDamageTime: Date.now(),
+        state: 'PHASE_1',
+        damageFlash: true,
       });
       
       const { container } = render(<App />);
@@ -175,8 +172,9 @@ describe('App', () => {
 
     it('should render KillStreak indicator', () => {
       useGameStore.setState({
-        state: 'PLAYING',
-        stats: { kills: 5, score: 500, highScore: 500, killStreak: 5, maxStreak: 5 },
+        state: 'PHASE_1',
+        stats: { kills: 5, score: 500, bossDefeated: false },
+        killStreak: 5,
       });
       
       const { container } = render(<App />);
@@ -185,7 +183,7 @@ describe('App', () => {
 
     it('should render BossVignette when boss is active', () => {
       useGameStore.setState({
-        state: 'PLAYING',
+        state: 'PHASE_BOSS',
         bossActive: true,
       });
       
