@@ -12,6 +12,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     rof: 0.5,
     speed: 25,
     life: 3.0,
+    bulletType: 'cannon',
   },
   smg: {
     id: 'smg',
@@ -23,6 +24,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     rof: 0.1,
     speed: 45,
     life: 1.5,
+    bulletType: 'smg',
   },
   star: {
     id: 'star',
@@ -36,6 +38,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     life: 2.5,
     projectileCount: 3,
     spreadAngle: 0.2,
+    bulletType: 'star',
   },
 
   // Unlockable weapons
@@ -50,6 +53,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     speed: 30,
     life: 2.5,
     behavior: 'freeze',
+    bulletType: 'cannon',
   },
   candy_cane: {
     id: 'candy_cane',
@@ -62,6 +66,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     speed: 0,
     life: 0.5,
     behavior: 'melee',
+    bulletType: 'star',
   },
   ornament: {
     id: 'ornament',
@@ -74,6 +79,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     speed: 20,
     life: 2.0,
     behavior: 'aoe',
+    bulletType: 'cannon',
   },
   light_string: {
     id: 'light_string',
@@ -86,6 +92,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     speed: 40,
     life: 2.0,
     behavior: 'chain',
+    bulletType: 'smg',
   },
   gingerbread: {
     id: 'gingerbread',
@@ -98,6 +105,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     speed: 0,
     life: 10.0,
     behavior: 'turret',
+    bulletType: 'star',
   },
   jingle_bell: {
     id: 'jingle_bell',
@@ -112,6 +120,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     behavior: 'spread',
     projectileCount: 7,
     spreadAngle: 0.4,
+    bulletType: 'star',
   },
   quantum_gift: {
     id: 'quantum_gift',
@@ -124,6 +133,7 @@ export const WEAPONS: Record<WeaponType, WeaponConfig> = {
     speed: 25,
     life: 2.5,
     behavior: 'random',
+    bulletType: 'star',
   },
 };
 

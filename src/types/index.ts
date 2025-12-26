@@ -97,6 +97,7 @@ export interface WeaponConfig {
   behavior?: BulletData['behavior'];
   projectileCount?: number;
   spreadAngle?: number;
+  bulletType: 'cannon' | 'smg' | 'star';
 }
 
 /**

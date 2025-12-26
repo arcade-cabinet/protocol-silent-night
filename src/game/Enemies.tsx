@@ -2,6 +2,7 @@
  * Enemy System
  * Handles spawning, AI, and rendering of enemies
  * Performance optimized with instanced rendering and smooth rotation
+ * Data-driven configuration for enemies and spawning
  */
 
 import { useFrame } from '@react-three/fiber';
@@ -9,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import { CONFIG } from '@/data/config';
+import { ENEMIES, ENEMY_SPAWN_CONFIG } from '@/data/enemies';
 
 let enemyIdCounter = 0;
 
@@ -19,7 +21,7 @@ const tempColor = new THREE.Color();
 export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
-  const lastDamageTimeRef = useRef(0); // Damage cooldown
+  const lastDamageTimeRef = useRef(0);
 
   const {
     state,
@@ -32,7 +34,6 @@ export function Enemies() {
     bossMaxHp,
   } = useGameStore();
 
-  // Spawn minion - using getState() to avoid recreating callback on enemies.length change
   const spawnMinion = useCallback(() => {
     const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
     if (
@@ -43,11 +44,11 @@ export function Enemies() {
     )
       return;
 
+    const minionConfig = ENEMIES.minion;
     const id = `minion-${enemyIdCounter++}`;
     const angle = Math.random() * Math.PI * 2;
-    const radius = 25 + Math.random() * 10;
+    const radius = ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin + Math.random() * (ENEMY_SPAWN_CONFIG.minionSpawnRadiusMax - ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin);
 
-    // Create a proper THREE.Object3D for position tracking
     const mesh = new THREE.Object3D();
     mesh.position.set(Math.cos(angle) * radius, 1, Math.sin(angle) * radius);
 
@@ -55,17 +56,16 @@ export function Enemies() {
       id,
       mesh,
       velocity: new THREE.Vector3(),
-      hp: 30,
-      maxHp: 30,
+      hp: minionConfig.hp,
+      maxHp: minionConfig.hp,
       isActive: true,
       type: 'minion',
-      speed: 4 + Math.random() * 2,
-      damage: 1,
-      pointValue: 10,
+      speed: minionConfig.speed + Math.random() * 2,
+      damage: minionConfig.damage,
+      pointValue: minionConfig.pointValue,
     });
   }, []);
 
-  // Spawn initial enemies with cleanup
   const hasSpawnedInitialRef = useRef(false);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export function Enemies() {
     if (state === 'PHASE_1' && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
         timeoutIds.push(id);
       }
@@ -98,7 +98,6 @@ export function Enemies() {
   useFrame((_, delta) => {
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
 
-    // Spawn timer (only in PHASE_1)
     if (state === 'PHASE_1') {
       spawnTimerRef.current += delta * 1000;
       if (spawnTimerRef.current >= CONFIG.SPAWN_INTERVAL) {
@@ -107,12 +106,10 @@ export function Enemies() {
       }
     }
 
-    // Update enemy positions
     const toPlayer = toPlayerRef.current;
     const direction = directionRef.current;
     const tempVec = tempVecRef.current;
     const now = Date.now();
-    const damageCooldown = 500;
 
     updateEnemies((currentEnemies) => {
       let shouldDamage = false;
@@ -121,29 +118,25 @@ export function Enemies() {
       for (const enemy of currentEnemies) {
         const currentPos = enemy.mesh.position;
 
-        // Calculate direction to player
         toPlayer.copy(playerPosition).sub(currentPos);
         const distance = toPlayer.length();
         direction.copy(toPlayer).normalize();
 
-        // Move towards player
-        const moveSpeed = enemy.type === 'boss' ? 3 : enemy.speed;
+        const moveSpeed = enemy.type === 'boss' ? ENEMIES.boss.speed : enemy.speed;
         tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
         currentPos.add(tempVec);
 
-        // Set rotation to face the player - smooth rotation
         const targetRotation = Math.atan2(direction.x, direction.z);
         const angleDiff = ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
         enemy.mesh.rotation.y += angleDiff * delta * 8;
 
-        // Collision with player
-        const hitRadius = enemy.type === 'boss' ? 3 : 1.5;
+        const hitRadius = enemy.type === 'boss' ? ENEMY_SPAWN_CONFIG.hitRadiusBoss : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
         if (distance < hitRadius) {
-          if (now - lastDamageTimeRef.current > damageCooldown) {
+          if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
             shouldDamage = true;
             damageAmount = Math.max(damageAmount, enemy.damage);
           }
-          tempVec.copy(direction).multiplyScalar(-2);
+          tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
           currentPos.add(tempVec);
         }
       }

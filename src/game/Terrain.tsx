@@ -1,6 +1,7 @@
 /**
  * Terrain System
  * Christmas-themed procedural terrain with collision-enabled obstacles
+ * Data-driven configuration for terrain and obstacles
  */
 
 import { fbm, noise3D } from '@jbcom/strata';
@@ -10,14 +11,14 @@ import * as THREE from 'three';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
 import { type ChristmasObjectType, type ChristmasObstacle } from '@/types';
-import { CONFIG } from '@/data/config';
+import { TERRAIN_CONFIG, OBSTACLE_TYPES } from '@/data/terrain';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const setObstacles = useGameStore((state) => state.setObstacles);
 
   // Create geometry and material
-  const geometry = useMemo(() => new THREE.BoxGeometry(1.8, 4, 1.8), []);
+  const geometry = useMemo(() => new THREE.BoxGeometry(TERRAIN_CONFIG.cubeSize, TERRAIN_CONFIG.cubeHeight, TERRAIN_CONFIG.cubeSize), []);
 
   const material = useMemo(
     () =>
@@ -33,7 +34,7 @@ export function Terrain() {
 
   // Generate Christmas-themed obstacles using Strata's noise functions
   const { matrices, count, obstacles } = useMemo(() => {
-    const size = CONFIG.WORLD_SIZE;
+    const size = TERRAIN_CONFIG.gridSize;
     const instanceCount = size * size;
     const matrices: THREE.Matrix4[] = [];
     const obstacleList: ChristmasObstacle[] = [];
@@ -45,70 +46,45 @@ export function Terrain() {
         dummy.scale.set(1, 1, 1);
 
         // Use Strata's noise3D and fbm for procedural height
-        const baseNoise = noise3D(x * 0.1, 0, z * 0.1) * 2;
-        const detailNoise = fbm(x * 0.05, 0, z * 0.05, 3) * 1.5;
+        const baseNoise = noise3D(x * TERRAIN_CONFIG.noiseScale, 0, z * TERRAIN_CONFIG.noiseScale) * TERRAIN_CONFIG.heightMultiplier;
+        const detailNoise = fbm(x * TERRAIN_CONFIG.detailNoiseScale, 0, z * TERRAIN_CONFIG.detailNoiseScale, 3) * TERRAIN_CONFIG.detailHeightMultiplier;
 
         // Combine for final height
-        const h = baseNoise + detailNoise - 3;
+        const h = baseNoise + detailNoise + TERRAIN_CONFIG.baseElevation;
 
-        dummy.position.set(x * 1.8, h, z * 1.8);
+        dummy.position.set(x * TERRAIN_CONFIG.cubeSize, h, z * TERRAIN_CONFIG.cubeSize);
 
         // Determine Christmas object type using Strata noise
         const objectTypeNoise = noise3D(x * 0.3, z * 0.3, 42);
         const isObstacle = noise3D(x * 0.5, z * 0.5, 0);
 
-        if (isObstacle > 0.92) {
-          let obstacleType: ChristmasObjectType;
-          let obstacleColor: THREE.Color;
-          let obstacleHeight: number;
-          let obstacleRadius = 0.9; // collision radius
+        if (isObstacle > TERRAIN_CONFIG.obstacleThreshold) {
+          let config = OBSTACLE_TYPES.pillar; // Default
 
-          // Create festive obstacles
           if (objectTypeNoise > 0.7) {
-            obstacleType = 'present';
-            obstacleColor =
-              objectTypeNoise > 0.85
-                ? new THREE.Color(0xff0044) // Red present
-                : new THREE.Color(0x00ff88); // Green present
-            obstacleHeight = 2 + objectTypeNoise * 2;
-            dummy.position.y = h + 1;
+            config = objectTypeNoise > 0.85 ? OBSTACLE_TYPES.present_red : OBSTACLE_TYPES.present_green;
           } else if (objectTypeNoise > 0.4) {
-            obstacleType = 'tree';
-            obstacleColor = new THREE.Color(0x00aa44); // Green Christmas tree
-            obstacleHeight = 4 + objectTypeNoise * 4;
-            obstacleRadius = 1.2;
-            dummy.position.y = h + 2;
+            config = OBSTACLE_TYPES.tree;
           } else if (objectTypeNoise > 0) {
-            obstacleType = 'candy_cane';
-            obstacleColor = new THREE.Color(0xff4477); // Pink/Red candy cane
-            obstacleHeight = 3 + objectTypeNoise * 2;
-            dummy.position.y = h + 1.5;
-          } else {
-            obstacleType = 'pillar';
-            obstacleColor = new THREE.Color(0x00ffcc); // Cyan cyberpunk pillar
-            obstacleHeight = 5 + isObstacle * 5;
-            dummy.position.y = h + obstacleHeight / 2;
+            config = OBSTACLE_TYPES.candy_cane;
           }
+
+          const hRange = config.heightRange;
+          const obstacleHeight = hRange[0] + Math.random() * (hRange[1] - hRange[0]);
+          
+          dummy.position.y = h + (config.yOffset || obstacleHeight / 2);
 
           // Store obstacle for collision detection
           obstacleList.push({
             position: dummy.position.clone(),
-            type: obstacleType,
-            radius: obstacleRadius,
+            type: config.type,
+            radius: config.radius,
             height: obstacleHeight,
-            color: obstacleColor,
+            color: new THREE.Color(config.color),
           });
 
-          // Scale based on object type
-          if (obstacleType === 'tree') {
-            dummy.scale.set(1, obstacleHeight / 4, 1);
-          } else if (obstacleType === 'candy_cane') {
-            dummy.scale.set(0.5, obstacleHeight / 4, 0.5);
-          } else if (obstacleType === 'present') {
-            dummy.scale.set(1.2, obstacleHeight / 4, 1.2);
-          } else {
-            dummy.scale.set(1, obstacleHeight / 4, 1);
-          }
+          // Apply scale
+          dummy.scale.set(config.scale[0], obstacleHeight / 4, config.scale[2]);
         }
 
         dummy.updateMatrix();
@@ -368,10 +344,6 @@ function CyberpunkCandyCane({ position, height }: { position: [number, number, n
 function CyberpunkPillar({ position, height }: { position: [number, number, number]; height: number }) {
   const groupRef = useRef<THREE.Group>(null);
   
-  useFrame((state) => {
-    // Pulse effect handled by children
-  });
-
   return (
     <group ref={groupRef} position={position}>
       {/* Main pillar */}
