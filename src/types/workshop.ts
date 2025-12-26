@@ -33,7 +33,7 @@ export interface PermanentUpgrade {
 /**
  * All unlockable weapons
  */
-export const WEAPON_UNLOCKS: WeaponUnlock[] = [
+export const WEAPON_UNLOCKS = [
   {
     id: 'snowball',
     name: 'Snowball Launcher',
@@ -104,12 +104,12 @@ export const WEAPON_UNLOCKS: WeaponUnlock[] = [
     special: 'Random weapon effect each shot',
     flavor: "What's inside? Even Santa doesn't know.",
   },
-];
+] as const;
 
 /**
  * All unlockable character skins
  */
-export const SKIN_UNLOCKS: SkinUnlock[] = [
+export const SKIN_UNLOCKS = [
   // Mecha-Santa Skins
   {
     id: 'santa-frosty',
@@ -176,12 +176,12 @@ export const SKIN_UNLOCKS: SkinUnlock[] = [
     character: 'bumble',
     description: 'Dark matter aesthetic',
   },
-];
+] as const;
 
 /**
  * All permanent upgrades
  */
-export const PERMANENT_UPGRADES: PermanentUpgrade[] = [
+export const PERMANENT_UPGRADES = [
   // Tier 1
   {
     id: 'extra-ammo',
@@ -281,4 +281,4 @@ export const PERMANENT_UPGRADES: PermanentUpgrade[] = [
     maxLevel: 2,
     description: '+25% damage to bosses per level',
   },
-];
+] as const;

@@ -17,11 +17,11 @@ const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.0;
 
 const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
-const LOOK_TARGET = new THREE.Vector3();
 
 export function CameraController() {
   const { camera } = useThree();
   const targetRef = useRef(new THREE.Vector3(0, DEFAULT_CAMERA_HEIGHT, DEFAULT_CAMERA_DISTANCE));
+  const lookTargetRef = useRef(new THREE.Vector3());
 
   // Zoom and tilt state
   const zoomRef = useRef(1.0);
@@ -29,7 +29,7 @@ export function CameraController() {
   const pinchStartRef = useRef<number | null>(null);
   const initialZoomRef = useRef(1.0);
 
-  const { playerPosition, screenShake, state } = useGameStore();
+  const { state } = useGameStore();
 
   // Handle pinch-to-zoom
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -143,6 +143,8 @@ export function CameraController() {
   }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handleDeviceOrientation]);
 
   useFrame((_, delta) => {
+    const { playerPosition, screenShake } = useGameStore.getState();
+
     if (state === 'MENU' || state === 'BRIEFING') {
       // Menu camera - static elevated view with slow rotation
       camera.position.lerp(MENU_CAMERA_POS, delta * 2);
@@ -176,8 +178,8 @@ export function CameraController() {
     camera.position.lerp(targetRef.current, LERP_SPEED * delta);
 
     // Look at player (slightly ahead)
-    LOOK_TARGET.set(playerPosition.x, 0, playerPosition.z);
-    camera.lookAt(LOOK_TARGET);
+    lookTargetRef.current.set(playerPosition.x, 0, playerPosition.z);
+    camera.lookAt(lookTargetRef.current);
   });
 
   return null;

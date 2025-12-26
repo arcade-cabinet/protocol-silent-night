@@ -196,9 +196,15 @@ function BossRenderer({
 }) {
   const bossEnemy = enemies.find((e) => e.type === 'boss');
   const bossPos = bossEnemy?.mesh.position ?? null;
+  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
 
   return (
-    <BossMesh position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]} hp={bossHp} maxHp={bossMaxHp} />
+    <BossMesh
+      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
+      rotation={bossRotation}
+      hp={bossHp}
+      maxHp={bossMaxHp}
+    />
   );
 }
 
@@ -470,13 +476,16 @@ function MinionMesh({
 // Boss (Krampus-Prime) mesh component
 function BossMesh({
   position,
+  rotation,
   hp,
   maxHp,
 }: {
   position: [number, number, number];
+  rotation: number;
   hp: number;
   maxHp: number;
 }) {
+  const groupRef = useRef<THREE.Group>(null);
   const coreRef = useRef<THREE.Mesh>(null);
   const ring1Ref = useRef<THREE.Mesh>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
@@ -489,6 +498,10 @@ function BossMesh({
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
+
+    if (groupRef.current) {
+      groupRef.current.rotation.y = rotation;
+    }
 
     if (coreRef.current) {
       coreRef.current.rotation.x = time * 0.5;
@@ -521,7 +534,7 @@ function BossMesh({
   });
 
   return (
-    <group position={position}>
+    <group position={position} ref={groupRef}>
       {/* Core */}
       <mesh ref={coreRef} castShadow>
         <dodecahedronGeometry args={[2]} />

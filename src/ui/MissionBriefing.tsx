@@ -34,10 +34,10 @@ export function MissionBriefing() {
       lines.push({ label, text: intel });
     }
 
-    // Add final warning
+    // Add final warning from store
     lines.push({
       label: 'WARNING',
-      text: 'Hostiles are aggressive - engage on sight',
+      text: missionBriefing.warning,
       warning: true,
     });
 

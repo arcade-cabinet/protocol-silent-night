@@ -131,11 +131,12 @@ describe('StartScreen Component', () => {
     expect(screen.getByText(/Operator Edition v3.0/)).toBeInTheDocument();
   });
 
-  it('should have clickable character cards', () => {
+  it('should have clickable buttons', () => {
     render(<StartScreen />);
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(3);
+    // 3 character cards + 1 workshop button
+    expect(buttons).toHaveLength(4);
 
     buttons.forEach((button) => {
       expect(button).toHaveAttribute('type', 'button');

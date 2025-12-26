@@ -28,6 +28,7 @@ interface GameStore {
     title: string;
     objective: string;
     intel: string[];
+    warning: string;
   };
 
   // Player
@@ -171,6 +172,7 @@ const initialState = {
       'Neutralize Krampus-Prime command unit',
       'Defeat 10 Grinch-Bots to draw out Krampus-Prime',
     ],
+    warning: 'Hostiles are aggressive - engage on sight',
   },
   playerClass: null,
   playerHp: 100,

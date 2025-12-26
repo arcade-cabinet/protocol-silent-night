@@ -29,7 +29,7 @@ export function HitParticles() {
   const particlesRef = useRef<Particle[]>([]);
   const lastKillsRef = useRef(0);
 
-  const { stats, bossHp } = useGameStore();
+  const { stats, bossHp, enemies } = useGameStore();
   const lastBossHpRef = useRef(bossHp);
   const tempVecRef = useRef(new THREE.Vector3());
 
@@ -40,20 +40,20 @@ export function HitParticles() {
     if (stats.kills > lastKillsRef.current) {
       lastKillsRef.current = stats.kills;
       // Spawn hit particles at a random position (since we don't track exact hit location)
-      const playerPos = useGameStore.getState().playerPosition;
+      const { playerPosition } = useGameStore.getState();
       const angle = Math.random() * Math.PI * 2;
       const dist = 3 + Math.random() * 5;
       const hitPos = tempVecRef.current.set(
-        playerPos.x + Math.cos(angle) * dist,
+        playerPosition.x + Math.cos(angle) * dist,
         1,
-        playerPos.z + Math.sin(angle) * dist
+        playerPosition.z + Math.sin(angle) * dist
       );
       spawnParticles(particlesRef.current, hitPos, 0x00ff00, 6);
     }
 
     // Check for boss damage
     if (bossHp < lastBossHpRef.current) {
-      const bossEnemy = useGameStore.getState().enemies.find((e) => e.type === 'boss');
+      const bossEnemy = enemies.find((e) => e.type === 'boss');
       if (bossEnemy) {
         const bossPos = tempVecRef.current.copy(bossEnemy.mesh.position);
         bossPos.y = 4;
