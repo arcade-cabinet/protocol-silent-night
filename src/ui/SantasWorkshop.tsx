@@ -7,12 +7,12 @@ import { useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import {
-  WEAPON_UNLOCKS,
-  SKIN_UNLOCKS,
   PERMANENT_UPGRADES,
-  type WeaponUnlock,
-  type SkinUnlock,
   type PermanentUpgrade,
+  SKIN_UNLOCKS,
+  type SkinUnlock,
+  WEAPON_UNLOCKS,
+  type WeaponUnlock,
 } from '@/types/workshop';
 import styles from './SantasWorkshop.module.css';
 
@@ -195,9 +195,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
                         )}
                       </div>
                     </div>
-                    <div className={styles.cardType}>
-                      {skin.character.toUpperCase()} SKIN
-                    </div>
+                    <div className={styles.cardType}>{skin.character.toUpperCase()} SKIN</div>
                     <div className={styles.cardDescription}>{skin.description}</div>
                     {!isUnlocked && (
                       <button
