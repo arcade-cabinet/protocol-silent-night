@@ -271,51 +271,16 @@ See [Technical Implementation](#-technical-implementation) for the data structur
 ## 🛠️ Technical Implementation
 
 ### Data Structures
-```typescript
-// Add to src/types/index.ts
-export interface MetaProgressData {
-  nicePoints: number;
-  totalPointsEarned: number;
-  runsCompleted: number;
-  bossesDefeated: number;
-
-  // Unlocks
-  unlockedWeapons: string[];
-  unlockedSkins: string[];
-
-  // Permanent upgrades (upgrade ID -> level)
-  permanentUpgrades: Record<string, number>;
-
-  // Stats
-  highScore: number;
-  totalKills: number;
-  totalDeaths: number;
-}
-
-export interface RunProgressData {
-  xp: number;
-  level: number;
-  selectedUpgrades: string[];
-  weaponEvolutions: string[];
-}
-```
+The meta-progression and run progress data structures are defined in `src/types/index.ts` (`MetaProgressData` and `RunProgressData`).
 
 ### Store Updates
-```typescript
-// Add to src/store/gameStore.ts
-metaProgress: MetaProgressData;
-runProgress: RunProgressData;
-
-// Actions
-earnNicePoints: (amount: number) => void;
-spendNicePoints: (amount: number) => boolean;
-unlockWeapon: (weaponId: string) => void;
-unlockSkin: (skinId: string) => void;
-upgradePermanent: (upgradeId: string) => void;
-gainXP: (amount: number) => void;
-levelUp: () => void;
-selectLevelUpgrade: (upgradeId: string) => void;
-```
+State management is centralized in `src/store/gameStore.ts`. Actions include:
+- `earnNicePoints(amount)` / `spendNicePoints(amount)`
+- `unlockWeapon(id)` / `unlockSkin(id)`
+- `upgradePermanent(id)`
+- `gainXP(amount)`
+- `levelUp()`
+- `selectLevelUpgrade(id)`
 
 ### UI Components
 ```typescript

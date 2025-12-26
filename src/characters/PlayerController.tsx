@@ -7,13 +7,35 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import type { PlayerClassType } from '@/types';
+import type { ChristmasObstacle, PlayerClassType } from '@/types';
 import { getBulletTypeFromWeapon } from '@/types';
 import { BumbleCharacter } from './BumbleCharacter';
 import { ElfCharacter } from './ElfCharacter';
 import { SantaCharacter } from './SantaCharacter';
 
 let bulletIdCounter = 0;
+
+const PLAYER_COLLISION_RADIUS = 0.7;
+
+// Collision detection helper using simple circle-to-circle check
+export function checkCollision(
+  position: THREE.Vector3,
+  obstacles: ChristmasObstacle[],
+  radius: number = PLAYER_COLLISION_RADIUS
+): boolean {
+  for (const obstacle of obstacles) {
+    const dx = position.x - obstacle.position.x;
+    const dz = position.z - obstacle.position.z;
+    const distanceSq = dx * dx + dz * dz;
+    const combinedRadius = radius + obstacle.radius;
+
+    // Check if player would collide with obstacle (using squared distances for performance)
+    if (distanceSq < combinedRadius * combinedRadius) {
+      return true; // Collision detected
+    }
+  }
+  return false; // No collision
+}
 
 export function PlayerController() {
   const groupRef = useRef<THREE.Group>(null);
@@ -25,7 +47,13 @@ export function PlayerController() {
   const upAxisRef = useRef(new THREE.Vector3(0, 1, 0));
   const firePosRef = useRef(new THREE.Vector3());
 
-  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet } =
+  // Reuse vectors for performance in game loop
+  const newPositionRef = useRef(new THREE.Vector3());
+  const slideXRef = useRef(new THREE.Vector3());
+  const slideZRef = useRef(new THREE.Vector3());
+  const moveVectorRef = useRef(new THREE.Vector3());
+
+  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet, obstacles } =
     useGameStore();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
@@ -97,17 +125,49 @@ export function PlayerController() {
 
     const { movement, isFiring: firing } = input;
 
-    // Movement
+    // Movement with collision detection
     if (movement.x !== 0 || movement.y !== 0) {
       const speed = playerClass.speed * delta;
       moveDirRef.current.set(movement.x, 0, movement.y).normalize();
 
-      positionRef.current.add(moveDirRef.current.multiplyScalar(speed));
+      // Calculate potential new position
+      moveVectorRef.current.copy(moveDirRef.current).multiplyScalar(speed);
+      newPositionRef.current.copy(positionRef.current).add(moveVectorRef.current);
 
       // Clamp to world bounds
       const worldBound = 35;
-      positionRef.current.x = THREE.MathUtils.clamp(positionRef.current.x, -worldBound, worldBound);
-      positionRef.current.z = THREE.MathUtils.clamp(positionRef.current.z, -worldBound, worldBound);
+      newPositionRef.current.x = THREE.MathUtils.clamp(
+        newPositionRef.current.x,
+        -worldBound,
+        worldBound
+      );
+      newPositionRef.current.z = THREE.MathUtils.clamp(
+        newPositionRef.current.z,
+        -worldBound,
+        worldBound
+      );
+
+      // Check collision before moving
+      if (!checkCollision(newPositionRef.current, obstacles)) {
+        // No collision - apply movement
+        positionRef.current.copy(newPositionRef.current);
+      } else {
+        // Collision detected - try sliding along obstacles
+        // Try X-axis only movement
+        slideXRef.current.copy(positionRef.current);
+        slideXRef.current.x = newPositionRef.current.x;
+        if (!checkCollision(slideXRef.current, obstacles)) {
+          positionRef.current.copy(slideXRef.current);
+        } else {
+          // Try Z-axis only movement
+          slideZRef.current.copy(positionRef.current);
+          slideZRef.current.z = newPositionRef.current.z;
+          if (!checkCollision(slideZRef.current, obstacles)) {
+            positionRef.current.copy(slideZRef.current);
+          }
+          // If both fail, don't move (stuck against obstacle)
+        }
+      }
 
       // Calculate rotation from movement direction
       rotationRef.current = Math.atan2(movement.x, movement.y);

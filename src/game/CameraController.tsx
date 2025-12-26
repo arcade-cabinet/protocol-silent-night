@@ -25,7 +25,7 @@ export function CameraController() {
 
   // Zoom and tilt state
   const zoomRef = useRef(1.0);
-  const gyroOffsetRef = useRef({ x: 0, z: 0 });
+  const gyroOffsetRef = useRef(new THREE.Vector3());
   const pinchStartRef = useRef<number | null>(null);
   const initialZoomRef = useRef(1.0);
 
@@ -73,10 +73,11 @@ export function CameraController() {
       // Normalize and apply subtle offset
       // Clamp values to reasonable range for subtle effect
       const maxTilt = 4; // Max camera offset
-      gyroOffsetRef.current = {
-        x: THREE.MathUtils.clamp((gamma / 45) * maxTilt, -maxTilt, maxTilt),
-        z: THREE.MathUtils.clamp(((beta - 45) / 45) * maxTilt, -maxTilt, maxTilt), // Assume phone held at ~45 degrees
-      };
+      gyroOffsetRef.current.set(
+        THREE.MathUtils.clamp((gamma / 45) * maxTilt, -maxTilt, maxTilt),
+        0,
+        THREE.MathUtils.clamp(((beta - 45) / 45) * maxTilt, -maxTilt, maxTilt) // Assume phone held at ~45 degrees
+      );
     },
     [state]
   );

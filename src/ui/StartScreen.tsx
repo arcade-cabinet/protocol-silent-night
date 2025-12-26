@@ -13,17 +13,15 @@ export function StartScreen() {
   const { state, selectClass, highScore } = useGameStore();
   const audioInitializedRef = useRef(false);
 
-  // Initialize audio when screen is shown (on any interaction)
+  // Initialize audio when screen is shown (on first interaction)
   useEffect(() => {
     if (state !== 'MENU') return;
 
     const initAudio = async () => {
-      if (!audioInitializedRef.current) {
-        await AudioManager.initialize();
-        audioInitializedRef.current = true;
-        // Play menu music after initialization
-        AudioManager.playMusic('menu');
-      }
+      await AudioManager.initialize();
+      audioInitializedRef.current = true;
+      // Play menu music after initialization
+      AudioManager.playMusic('menu');
     };
 
     // Listen for first interaction to init audio
@@ -45,9 +43,16 @@ export function StartScreen() {
   if (state !== 'MENU') return null;
 
   const handleSelectClass = async (type: PlayerClassType) => {
-    // Initialize audio on first user interaction
-    await AudioManager.initialize();
-    audioInitializedRef.current = true;
+    // Ensure audio is initialized, but don't block on it
+    AudioManager.initialize()
+      .then(() => {
+        audioInitializedRef.current = true;
+      })
+      .catch((error) => {
+        console.warn('Audio initialization failed:', error);
+      });
+
+    // Always proceed with class selection
     selectClass(type);
   };
 

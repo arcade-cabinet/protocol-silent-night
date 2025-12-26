@@ -3,7 +3,7 @@
  * Tests keyboard, mouse, and touch input handling
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useGameStore } from '../../../store/gameStore';
 import { InputControls } from '../../../ui/InputControls';
@@ -61,83 +61,107 @@ describe('InputControls', () => {
   });
 
   describe('Keyboard Input', () => {
-    it('should handle W key for upward movement', () => {
+    it('should handle W key for upward movement', async () => {
       render(<InputControls />);
 
-      const keyDownEvent = new KeyboardEvent('keydown', { key: 'w' });
-      window.dispatchEvent(keyDownEvent);
+      await act(async () => {
+        const keyDownEvent = new KeyboardEvent('keydown', { key: 'w' });
+        window.dispatchEvent(keyDownEvent);
+      });
 
       const state = useGameStore.getState();
       expect(state.input.movement.y).toBe(-1);
       expect(state.input.movement.x).toBe(0);
     });
 
-    it('should handle S key for downward movement', () => {
+    it('should handle S key for downward movement', async () => {
       render(<InputControls />);
 
-      const keyDownEvent = new KeyboardEvent('keydown', { key: 's' });
-      window.dispatchEvent(keyDownEvent);
+      await act(async () => {
+        const keyDownEvent = new KeyboardEvent('keydown', { key: 's' });
+        window.dispatchEvent(keyDownEvent);
+      });
 
       const state = useGameStore.getState();
       expect(state.input.movement.y).toBe(1);
     });
 
-    it('should handle A key for left movement', () => {
+    it('should handle A key for left movement', async () => {
       render(<InputControls />);
 
-      const keyDownEvent = new KeyboardEvent('keydown', { key: 'a' });
-      window.dispatchEvent(keyDownEvent);
+      await act(async () => {
+        const keyDownEvent = new KeyboardEvent('keydown', { key: 'a' });
+        window.dispatchEvent(keyDownEvent);
+      });
 
       const state = useGameStore.getState();
       expect(state.input.movement.x).toBe(-1);
     });
 
-    it('should handle D key for right movement', () => {
+    it('should handle D key for right movement', async () => {
       render(<InputControls />);
 
-      const keyDownEvent = new KeyboardEvent('keydown', { key: 'd' });
-      window.dispatchEvent(keyDownEvent);
+      await act(async () => {
+        const keyDownEvent = new KeyboardEvent('keydown', { key: 'd' });
+        window.dispatchEvent(keyDownEvent);
+      });
 
       const state = useGameStore.getState();
       expect(state.input.movement.x).toBe(1);
     });
 
-    it('should handle arrow keys for movement', () => {
+    it('should handle arrow keys for movement', async () => {
       render(<InputControls />);
 
       // Arrow up
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+      });
       let state = useGameStore.getState();
       expect(state.input.movement.y).toBe(-1);
 
-      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' }));
+      });
 
       // Arrow down
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+      });
       state = useGameStore.getState();
       expect(state.input.movement.y).toBe(1);
 
-      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' }));
+      });
 
       // Arrow left
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+      });
       state = useGameStore.getState();
       expect(state.input.movement.x).toBe(-1);
 
-      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' }));
+      });
 
       // Arrow right
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+      });
       state = useGameStore.getState();
       expect(state.input.movement.x).toBe(1);
     });
 
-    it('should normalize diagonal movement', () => {
+    it('should normalize diagonal movement', async () => {
       render(<InputControls />);
 
       // Press W and D simultaneously for diagonal movement
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd' }));
+      });
 
       const state = useGameStore.getState();
       const { x, y } = state.input.movement;
@@ -149,35 +173,43 @@ describe('InputControls', () => {
       expect(y).toBeCloseTo(-Math.SQRT1_2, 5);
     });
 
-    it('should handle space key to start firing', () => {
+    it('should handle space key to start firing', async () => {
       useGameStore.setState({ state: 'PHASE_1' });
       render(<InputControls />);
 
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+      });
 
       const state = useGameStore.getState();
       expect(state.input.isFiring).toBe(true);
     });
 
-    it('should handle space key release to stop firing', () => {
+    it('should handle space key release to stop firing', async () => {
       render(<InputControls />);
 
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
-      window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
+      });
 
       const state = useGameStore.getState();
       expect(state.input.isFiring).toBe(false);
     });
 
-    it('should reset movement when keys are released', () => {
+    it('should reset movement when keys are released', async () => {
       render(<InputControls />);
 
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd' }));
+      });
 
       // Release both keys
-      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }));
-      window.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }));
+      await act(async () => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'w' }));
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }));
+      });
 
       const state = useGameStore.getState();
       expect(state.input.movement.x).toBe(0);

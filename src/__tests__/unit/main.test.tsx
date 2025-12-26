@@ -96,7 +96,6 @@ describe('main.tsx', () => {
     it('should import React correctly', () => {
       // Verify React imports work
       expect(() => {
-        // biome-ignore lint: test verification
         const React = require('react');
         expect(React.StrictMode).toBeDefined();
       }).not.toThrow();
@@ -105,7 +104,6 @@ describe('main.tsx', () => {
     it('should import ReactDOM correctly', () => {
       // Verify ReactDOM imports work
       expect(() => {
-        // biome-ignore lint: test verification
         const ReactDOM = require('react-dom/client');
         expect(ReactDOM.createRoot).toBeDefined();
       }).not.toThrow();
@@ -168,7 +166,6 @@ describe('main.tsx', () => {
     it('should use modern React API', () => {
       // Verify createRoot (React 18+) is used, not legacy render
       expect(() => {
-        // biome-ignore lint: test verification
         const ReactDOM = require('react-dom/client');
         expect(ReactDOM.createRoot).toBeDefined();
       }).not.toThrow();
