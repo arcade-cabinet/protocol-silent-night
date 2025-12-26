@@ -1,0 +1,145 @@
++++ b/src/ui/WeaponHUD.module.css
+@@ -0,0 +1,143 @@
++.weaponHUD {
++  position: fixed;
++  bottom: 20px;
++  left: 50%;
++  transform: translateX(-50%);
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  gap: 12px;
++  z-index: 50;
++  pointer-events: none;
++}
++
++.currentWeapon {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  background: rgba(10, 10, 30, 0.85);
++  border: 2px solid rgba(255, 215, 0, 0.6);
++  border-radius: 8px;
++  padding: 8px 16px;
++  backdrop-filter: blur(4px);
++  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
++}
++
++.weaponIcon {
++  font-size: 32px;
++  line-height: 1;
++}
++
++.weaponInfo {
++  display: flex;
++  flex-direction: column;
++  gap: 2px;
++}
++
++.weaponName {
++  font-family: "Orbitron", monospace;
++  font-size: 14px;
++  font-weight: bold;
++  color: #ffd700;
++  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
++}
++
++.weaponStats {
++  font-size: 11px;
++  color: rgba(255, 255, 255, 0.7);
++  font-family: "Orbitron", monospace;
++}
++
++.weaponList {
++  display: flex;
++  gap: 8px;
++  background: rgba(10, 10, 30, 0.7);
++  border: 2px solid rgba(255, 255, 255, 0.2);
++  border-radius: 8px;
++  padding: 8px;
++  backdrop-filter: blur(4px);
++}
++
++.weaponSlot {
++  position: relative;
++  width: 48px;
++  height: 48px;
++  background: rgba(255, 255, 255, 0.05);
++  border: 2px solid rgba(255, 255, 255, 0.2);
++  border-radius: 6px;
++  cursor: pointer;
++  transition: all 0.2s;
++  pointer-events: auto;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  padding: 4px;
++}
++
++.weaponSlot:hover {
++  background: rgba(255, 215, 0, 0.1);
++  border-color: #ffd700;
++  transform: translateY(-2px);
++  box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
++}
++
++.weaponSlot.active {
++  background: rgba(255, 215, 0, 0.2);
++  border-color: #ffd700;
++  box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
++}
++
++.slotNumber {
++  position: absolute;
++  top: 2px;
++  left: 4px;
++  font-size: 10px;
++  font-weight: bold;
++  color: rgba(255, 255, 255, 0.5);
++  font-family: "Orbitron", monospace;
++}
++
++.slotIcon {
++  font-size: 24px;
++  line-height: 1;
++}
++
++/* Mobile responsive */
++@media (max-width: 768px) {
++  .weaponHUD {
++    bottom: 80px; /* Above fire button */
++    left: 50%;
++    transform: translateX(-50%);
++  }
++
++  .currentWeapon {
++    padding: 6px 12px;
++  }
++
++  .weaponIcon {
++    font-size: 24px;
++  }
++
++  .weaponName {
++    font-size: 12px;
++  }
++
++  .weaponStats {
++    font-size: 10px;
++  }
++
++  .weaponList {
++    padding: 6px;
++    gap: 6px;
++  }
++
++  .weaponSlot {
++    width: 40px;
++    height: 40px;
++  }
++
++  .slotIcon {
++    font-size: 20px;
++  }
++}
