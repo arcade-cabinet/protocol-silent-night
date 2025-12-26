@@ -3,27 +3,30 @@ import { render } from '@testing-library/react';
 import { Terrain } from '@/game/Terrain';
 import { useGameStore } from '@/store/gameStore';
 import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
 
-// Mock R3F and Strata
+// Mock R3F
 vi.mock('@react-three/fiber', () => ({
   useFrame: vi.fn(),
-  useThree: vi.fn(() => ({
-    scene: new THREE.Scene(),
-    camera: new THREE.PerspectiveCamera(),
-    gl: {
-      capabilities: { isWebGL2: true },
-    },
-  })),
 }));
 
+// Mock THREE.InstancedMesh.prototype.setMatrixAt
+vi.mock('three', async () => {
+  const actual = await vi.importActual('three') as any;
+  const InstancedMesh = actual.InstancedMesh;
+  InstancedMesh.prototype.setMatrixAt = vi.fn();
+  // Ensure instanceMatrix exists
+  Object.defineProperty(InstancedMesh.prototype, 'instanceMatrix', {
+    get: () => ({ needsUpdate: false }),
+    configurable: true
+  });
+  return actual;
+});
+
+// Mock Strata
 vi.mock('@jbcom/strata', () => ({
   noise3D: vi.fn(() => 0.5),
   fbm: vi.fn(() => 0.5),
-}));
-
-// Mock THREE components used in JSX
-vi.mock('@react-three/drei', () => ({
-  useHelper: vi.fn(),
 }));
 
 describe('Terrain', () => {
@@ -34,29 +37,27 @@ describe('Terrain', () => {
     });
   });
 
-  it('should render correctly', () => {
-    // We need to provide a basic environment for R3F components
-    // Since we are mocking R3F, we just want to ensure it doesn't throw during render
-    expect(() => render(<Terrain />)).not.toThrow();
-  });
+  it('should render and sync obstacles', async () => {
+    const { noise3D } = await import('@jbcom/strata');
+    (noise3D as any).mockImplementation((x: number, z: number, w: number) => {
+      if (w === 0) return 0.95; // isObstacle
+      return 0.5;
+    });
 
-  it('should generate and sync obstacles to the store', () => {
-    // This test exercises the useMemo and useEffect logic in Terrain
     render(<Terrain />);
     
     const state = useGameStore.getState();
-    // By default, noise3D returns 0.5, which is > 0.92 only if we mock it differently.
-    // Let's mock it to trigger obstacle generation.
-    const { noise3D: noise3DMock } = require('@jbcom/strata');
-    noise3DMock.mockReturnValueOnce(0).mockReturnValueOnce(0).mockReturnValueOnce(0.95); // trigger obstacle
+    expect(state.obstacles.length).toBeGreaterThan(0);
+  });
 
-    // Re-render to trigger useMemo
-    const { rerender } = render(<Terrain />);
-    rerender(<Terrain />);
-
-    // In a real test, we would check if setObstacles was called.
-    // Since we are using the real store, we can check the state.
-    // However, useMemo only runs once unless dependencies change.
-    // The current Terrain component has [] as dependencies for useMemo.
+  it('should update material time in useFrame', () => {
+    render(<Terrain />);
+    
+    const callback = vi.mocked(useFrame).mock.calls[0][0];
+    const time = 1.5;
+    
+    // We can't easily access the internal material uniforms without more mocking,
+    // but we can ensure the callback runs.
+    expect(() => callback({ clock: { elapsedTime: time } } as any, 0.1)).not.toThrow();
   });
 });

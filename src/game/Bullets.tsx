@@ -170,7 +170,7 @@ export function Bullets() {
         maxCount: number,
         updateLogic: (bullet: BulletData, dummy: THREE.Object3D) => void
       ) => {
-        if (!ref.current) return;
+        if (!ref.current || typeof ref.current.setMatrixAt !== 'function') return;
         for (let i = 0; i < maxCount; i++) {
           if (i < bullets.length) {
             const bullet = bullets[i];

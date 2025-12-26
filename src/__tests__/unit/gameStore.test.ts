@@ -422,7 +422,9 @@ describe('GameStore - High Score', () => {
 
 describe('GameStore - Meta Progression', () => {
   beforeEach(() => {
+    localStorage.clear();
     useGameStore.getState().reset();
+    // Force set metaProgress to known initial state after reset
     useGameStore.setState({
       metaProgress: {
         nicePoints: 0,
@@ -437,7 +439,6 @@ describe('GameStore - Meta Progression', () => {
         totalDeaths: 0,
       },
     });
-    localStorage.clear();
   });
 
   it('should earn Nice Points', () => {

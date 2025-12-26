@@ -123,7 +123,7 @@ export function Terrain() {
   }, [obstacles, setObstacles]);
 
   useEffect(() => {
-    if (meshRef.current) {
+    if (meshRef.current && typeof meshRef.current.setMatrixAt === 'function') {
       for (let i = 0; i < matrices.length; i++) {
         meshRef.current.setMatrixAt(i, matrices[i]);
       }
