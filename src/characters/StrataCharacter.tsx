@@ -11,7 +11,7 @@ import {
   updateFurUniforms,
 } from '@jbcom/strata';
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { PlayerClassConfig } from '@/types';
 
@@ -75,168 +75,139 @@ export function StrataCharacter({
     [config.furOptions]
   );
 
-  const applyCustomizations = useCallback((joints: CharacterJoints, customizations: CustomizationConfig[], scale: number) => {
-    for (const custom of customizations) {
-      const joint = joints[custom.joint as keyof CharacterJoints];
-      // Type scale can apply without a mesh on certain joints in future, but for now we require mesh for attachments
-      if (custom.type !== 'scale' && !joint?.mesh) continue;
+  const applyCustomizations = useCallback(
+    (joints: CharacterJoints, customizations: CustomizationConfig[], scale: number) => {
+      function createObjectFromConfig(custom: CustomizationConfig, scale: number): THREE.Object3D | null {
+        let geometry: THREE.BufferGeometry | null = null;
+        const scaledArgs = custom.args?.map((arg) =>
+          typeof arg === 'number' ? arg * scale : arg
+        );
 
-      if (custom.type === 'scale') {
-        if (joint?.mesh && custom.scale) {
-          joint.mesh.scale.set(custom.scale[0], custom.scale[1], custom.scale[2]);
-        }
-        continue;
-      }
-
-      const obj = createObjectFromConfig(custom, scale);
-      if (obj && joint?.mesh) {
-        if (custom.name === 'weapon_group') weaponGroupRef.current = obj as THREE.Group;
-        joint.mesh.add(obj);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!groupRef.current) return;
-
-    // 1. Create base character
-    const character = createCharacter({
-      skinColor: new THREE.Color(config.color).getHex(),
-      furOptions,
-      scale: config.scale,
-    });
-
-    characterRef.current = character;
-    groupRef.current.add(character.root);
-
-    // 2. Apply DDL customizations
-    if (config.customizations) {
-      applyCustomizations(character.joints, config.customizations as unknown as CustomizationConfig[], config.scale);
-    }
-
-    // 3. Cache fur groups
-    const furGroups: THREE.Group[] = [];
-    character.root.traverse((child) => {
-      if (child instanceof THREE.Group && child.userData.isFurGroup) {
-        furGroups.push(child);
-      }
-    });
-    furGroupsRef.current = furGroups;
-
-    return () => {
-      if (characterRef.current && groupRef.current) {
-        groupRef.current.remove(characterRef.current.root);
-        characterRef.current = null;
-        furGroupsRef.current = [];
-      }
-    };
-  }, [config, furOptions, applyCustomizations]);
-
-  function createObjectFromConfig(custom: CustomizationConfig, scale: number): THREE.Object3D | null {
-    let geometry: THREE.BufferGeometry | null = null;
-    const scaledArgs = custom.args?.map((arg) =>
-      typeof arg === 'number' ? arg * scale : arg
-    );
-
-    switch (custom.type) {
-      case 'sphere':
-        // @ts-expect-error - spread args for THREE geometry
-        geometry = new THREE.SphereGeometry(...(scaledArgs || []));
-        break;
-      case 'box':
-        // @ts-expect-error - spread args for THREE geometry
-        geometry = new THREE.BoxGeometry(...(scaledArgs || []));
-        break;
-      case 'cone':
-        // @ts-expect-error - spread args for THREE geometry
-        geometry = new THREE.ConeGeometry(...(scaledArgs || []));
-        break;
-      case 'cylinder':
-        // @ts-expect-error - spread args for THREE geometry
-        geometry = new THREE.CylinderGeometry(...(scaledArgs || []));
-        break;
-      case 'torus':
-        // @ts-expect-error - spread args for THREE geometry
-        geometry = new THREE.TorusGeometry(...(scaledArgs || []));
-        break;
-      case 'capsule':
-        // @ts-expect-error - spread args for THREE geometry
-        geometry = new THREE.CapsuleGeometry(...(scaledArgs || []));
-        break;
-      case 'octahedron':
-        // @ts-expect-error - spread args for THREE geometry
-        geometry = new THREE.OctahedronGeometry(...(scaledArgs || []));
-        break;
-      case 'star': {
-        const starShape = new THREE.Shape();
-        if (custom.args && custom.args.length >= 4) {
-          const [outer, inner, points, depth] = custom.args;
-          for (let i = 0; i < points * 2; i++) {
-            const radius = i % 2 === 0 ? outer : inner;
-            const angle = (i * Math.PI) / points - Math.PI / 2;
-            starShape.lineTo(Math.cos(angle) * radius * scale, Math.sin(angle) * radius * scale);
+        switch (custom.type) {
+          case 'sphere':
+            // @ts-expect-error - spread args for THREE geometry
+            geometry = new THREE.SphereGeometry(...(scaledArgs || []));
+            break;
+          case 'box':
+            // @ts-expect-error - spread args for THREE geometry
+            geometry = new THREE.BoxGeometry(...(scaledArgs || []));
+            break;
+          case 'cone':
+            // @ts-expect-error - spread args for THREE geometry
+            geometry = new THREE.ConeGeometry(...(scaledArgs || []));
+            break;
+          case 'cylinder':
+            // @ts-expect-error - spread args for THREE geometry
+            geometry = new THREE.CylinderGeometry(...(scaledArgs || []));
+            break;
+          case 'torus':
+            // @ts-expect-error - spread args for THREE geometry
+            geometry = new THREE.TorusGeometry(...(scaledArgs || []));
+            break;
+          case 'capsule':
+            // @ts-expect-error - spread args for THREE geometry
+            geometry = new THREE.CapsuleGeometry(...(scaledArgs || []));
+            break;
+          case 'octahedron':
+            // @ts-expect-error - spread args for THREE geometry
+            geometry = new THREE.OctahedronGeometry(...(scaledArgs || []));
+            break;
+          case 'star': {
+            const starShape = new THREE.Shape();
+            if (scaledArgs && scaledArgs.length >= 4) {
+              const [outer, inner, points, depth] = scaledArgs as [number, number, number, number];
+              for (let i = 0; i < points * 2; i++) {
+                const radius = i % 2 === 0 ? outer : inner;
+                const angle = (i * Math.PI) / points - Math.PI / 2;
+                starShape.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
+              }
+              starShape.closePath();
+              geometry = new THREE.ExtrudeGeometry(starShape, {
+                depth: depth,
+                bevelEnabled: false,
+              });
+              geometry.center();
+            }
+            break;
           }
-          starShape.closePath();
-          geometry = new THREE.ExtrudeGeometry(starShape, {
-            depth: depth * scale,
-            bevelEnabled: false,
+          case 'group': {
+            const group = new THREE.Group();
+            if (custom.children) {
+              for (const child of custom.children) {
+                const childObj = createObjectFromConfig(child, scale);
+                if (childObj) group.add(childObj);
+              }
+            }
+            applyTransforms(group, custom, scale);
+            return group;
+          }
+          case 'pointLight': {
+            if (scaledArgs && scaledArgs.length >= 3) {
+              const light = new THREE.PointLight(
+                scaledArgs[0] as string | number,
+                scaledArgs[1] as number,
+                scaledArgs[2] as number
+              );
+              if (custom.name === 'muzzle_flash') muzzleRef.current = light;
+              applyTransforms(light, custom, scale);
+              return light;
+            }
+            return null;
+          }
+        }
+
+        if (geometry && custom.material) {
+          const material = new THREE.MeshStandardMaterial({
+            color: custom.material.color,
+            emissive: custom.material.emissive,
+            emissiveIntensity: custom.material.emissiveIntensity,
+            roughness: custom.material.roughness,
+            metalness: custom.material.metalness,
+            transparent: custom.material.transparent,
+            opacity: custom.material.opacity,
           });
-          geometry.center();
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.castShadow = true;
+          applyTransforms(mesh, custom, scale);
+          return mesh;
         }
-        break;
-      }
-      case 'group': {
-        const group = new THREE.Group();
-        if (custom.children) {
-          for (const child of custom.children) {
-            const childObj = createObjectFromConfig(child, scale);
-            if (childObj) group.add(childObj);
-          }
-        }
-        applyTransforms(group, custom, scale);
-        return group;
-      }
-      case 'pointLight': {
-        if (custom.args && custom.args.length >= 3) {
-          const light = new THREE.PointLight(custom.args[0], custom.args[1], custom.args[2]);
-          if (custom.name === 'muzzle_flash') muzzleRef.current = light;
-          applyTransforms(light, custom, scale);
-          return light;
-        }
+
         return null;
       }
-    }
 
-    if (geometry && custom.material) {
-      const material = new THREE.MeshStandardMaterial({
-        color: custom.material.color,
-        emissive: custom.material.emissive,
-        emissiveIntensity: custom.material.emissiveIntensity,
-        roughness: custom.material.roughness,
-        metalness: custom.material.metalness,
-        transparent: custom.material.transparent,
-        opacity: custom.material.opacity,
-      });
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.castShadow = true;
-      applyTransforms(mesh, custom, scale);
-      return mesh;
-    }
+      function applyTransforms(obj: THREE.Object3D, custom: CustomizationConfig, scale: number) {
+        if (custom.position)
+          obj.position.set(
+            custom.position[0] * scale,
+            custom.position[1] * scale,
+            custom.position[2] * scale
+          );
+        if (custom.rotation)
+          obj.rotation.set(custom.rotation[0], custom.rotation[1], custom.rotation[2]);
+        if (custom.scale) obj.scale.set(custom.scale[0], custom.scale[1], custom.scale[2]);
+      }
 
-    return null;
-  }
+      for (const custom of customizations) {
+        const joint = joints[custom.joint as keyof CharacterJoints];
+        // Type scale can apply without a mesh on certain joints in future, but for now we require mesh for attachments
+        if (custom.type !== 'scale' && !joint?.mesh) continue;
 
-  function applyTransforms(obj: THREE.Object3D, custom: CustomizationConfig, scale: number) {
-    if (custom.position)
-      obj.position.set(
-        custom.position[0] * scale,
-        custom.position[1] * scale,
-        custom.position[2] * scale
-      );
-    if (custom.rotation)
-      obj.rotation.set(custom.rotation[0], custom.rotation[1], custom.rotation[2]);
-    if (custom.scale) obj.scale.set(custom.scale[0], custom.scale[1], custom.scale[2]);
-  }
+        if (custom.type === 'scale') {
+          if (joint?.mesh && custom.scale) {
+            joint.mesh.scale.set(custom.scale[0], custom.scale[1], custom.scale[2]);
+          }
+          continue;
+        }
+
+        const obj = createObjectFromConfig(custom, scale);
+        if (obj && joint?.mesh) {
+          if (custom.name === 'weapon_group') weaponGroupRef.current = obj as THREE.Group;
+          joint.mesh.add(obj);
+        }
+      }
+    },
+    []
+  );
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
