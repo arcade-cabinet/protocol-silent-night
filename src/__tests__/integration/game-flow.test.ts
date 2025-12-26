@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { act } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData, EnemyData } from '@/types';
@@ -11,17 +12,23 @@ describe('Game Flow Integration Tests', () => {
 
   describe('Complete Game Flow - Santa', () => {
     it('should complete full game flow from start to boss spawn', () => {
+      const store = useGameStore.getState();
       // 1. Start in MENU state
-      expect(useGameStore.getState().state).toBe('MENU');
+      expect(store.state).toBe('MENU');
 
       // 2. Select Santa character
-      useGameStore.getState().selectClass('santa');
+      store.selectClass('santa');
 
       let state = useGameStore.getState();
       expect(state.state).toBe('BRIEFING');
 
       // 2b. Transition to PHASE_1 (simulating briefing completion)
-      useGameStore.getState().setState('PHASE_1');
+      store.setState('PHASE_1');
+      // Set high level to avoid level up system interruptions
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+      });
+      
       state = useGameStore.getState();
       expect(state.state).toBe('PHASE_1');
       expect(state.playerClass?.type).toBe('santa');
@@ -29,7 +36,7 @@ describe('Game Flow Integration Tests', () => {
 
       // 3. Kill 10 enemies to trigger boss
       for (let i = 0; i < 10; i++) {
-        useGameStore.getState().addKill(50);
+        store.addKill(50);
       }
 
       state = useGameStore.getState();
@@ -39,7 +46,7 @@ describe('Game Flow Integration Tests', () => {
       expect(state.stats.kills).toBe(10);
 
       // 5. Defeat boss
-      const killed = useGameStore.getState().damageBoss(1000);
+      const killed = store.damageBoss(1000);
 
       state = useGameStore.getState();
       // 6. Game won
@@ -186,6 +193,10 @@ describe('Game Flow Integration Tests', () => {
     it('should handle Elf full combat scenario', () => {
       const store = useGameStore.getState();
       store.selectClass('elf');
+      // Set high level to avoid level up system interruptions
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+      });
       store.setState('PHASE_1');
 
       const state = useGameStore.getState();
@@ -256,29 +267,46 @@ describe('Game Flow Integration Tests', () => {
       }
     });
 
-    it('should handle full boss fight', () => {
-      const state = useGameStore.getState();
-
-      expect(state.bossActive).toBe(true);
-      expect(state.state).toBe('PHASE_BOSS');
-
-      // Damage boss in chunks
-      useGameStore.getState().damageBoss(200); // 800 HP left
-      expect(useGameStore.getState().bossHp).toBe(800);
-
-      useGameStore.getState().damageBoss(300); // 500 HP left
-      expect(useGameStore.getState().bossHp).toBe(500);
-
-      useGameStore.getState().damageBoss(250); // 250 HP left
-      expect(useGameStore.getState().bossHp).toBe(250);
-
-      // Final blow
-      const killed = useGameStore.getState().damageBoss(250);
-
-      expect(killed).toBe(true);
-      expect(useGameStore.getState().state).toBe('WIN');
-      expect(useGameStore.getState().stats.bossDefeated).toBe(true);
+  it('should handle full boss fight', () => {
+    const store = useGameStore.getState();
+    act(() => {
+      // Set high level to avoid level up system interruptions
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+      });
+      // Ensure boss is active
+      useGameStore.getState().spawnBoss();
     });
+
+    expect(useGameStore.getState().bossActive).toBe(true);
+    expect(useGameStore.getState().state).toBe('PHASE_BOSS');
+
+    act(() => {
+      // Damage boss in chunks
+      store.damageBoss(200); // 800 HP left
+    });
+    expect(useGameStore.getState().bossHp).toBe(800);
+
+    act(() => {
+      store.damageBoss(300); // 500 HP left
+    });
+    expect(useGameStore.getState().bossHp).toBe(500);
+
+    act(() => {
+      store.damageBoss(250); // 250 HP left
+    });
+    expect(useGameStore.getState().bossHp).toBe(250);
+
+    // Final blow
+    let killed = false;
+    act(() => {
+      killed = store.damageBoss(250);
+    });
+
+    expect(killed).toBe(true);
+    expect(useGameStore.getState().state).toBe('WIN');
+    expect(useGameStore.getState().stats.bossDefeated).toBe(true);
+  });
 
     it('should handle player death during boss fight', () => {
       // Transition to boss fight
@@ -406,6 +434,11 @@ describe('Game Flow Integration Tests', () => {
       expect(useGameStore.getState().state).toBe('BRIEFING');
       store.setState('PHASE_1');
       expect(useGameStore.getState().state).toBe('PHASE_1');
+
+      // Set high level to avoid level-up system interruptions
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, level: 100 }
+      });
 
       // PHASE_1 -> PHASE_BOSS
       for (let i = 0; i < 10; i++) {

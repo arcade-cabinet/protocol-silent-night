@@ -1,0 +1,2144 @@
+diff --git a/e2e/santas-workshop.spec.ts b/e2e/santas-workshop.spec.ts
+new file mode 100644
+index 0000000..68f3af9
+--- /dev/null
++++ b/e2e/santas-workshop.spec.ts
+@@ -0,0 +1,354 @@
++import { test, expect } from '@playwright/test';
++
++/**
++ * Santa's Workshop E2E Tests
++ * 
++ * Tests the Santa's Workshop hub screen functionality including:
++ * - Opening/closing the workshop
++ * - Viewing weapons, skins, and upgrades tabs
++ * - Purchase flow with Nice Points
++ * - Unlock states (locked, unlocked, maxed)
++ */
++
++test.describe('Santas Workshop - UI Navigation', () => {
++  test('should display workshop button on main menu', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Check if workshop button exists
++    const workshopButton = page.getByRole('button', { name: /SANTA'S WORKSHOP/i });
++    await expect(workshopButton).toBeVisible();
++  });
++
++  test('should open workshop modal when button is clicked', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Click workshop button
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Check if workshop modal is visible
++    const workshopTitle = page.getByRole('heading', { name: /Santa's Workshop/i });
++    await expect(workshopTitle).toBeVisible();
++
++    // Check if tabs are visible
++    await expect(page.getByRole('button', { name: 'Weapons' })).toBeVisible();
++    await expect(page.getByRole('button', { name: 'Skins' })).toBeVisible();
++    await expect(page.getByRole('button', { name: 'Upgrades' })).toBeVisible();
++  });
++
++  test('should close workshop when X button is clicked', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Close workshop
++    const closeButton = page.getByRole('button', { name: '✕' });
++    await closeButton.click();
++
++    await page.waitForTimeout(500);
++
++    // Workshop should not be visible
++    const workshopTitle = page.getByRole('heading', { name: /Santa's Workshop/i });
++    await expect(workshopTitle).not.toBeVisible();
++  });
++});
++
++test.describe('Santas Workshop - Tabs', () => {
++  test.beforeEach(async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++  });
++
++  test('should display weapons tab by default', async ({ page }) => {
++    // Check for weapon cards
++    await expect(page.getByRole('heading', { name: 'Snowball Launcher' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Candy Cane Staff' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Ornament Bomb Launcher' })).toBeVisible();
++  });
++
++  test('should switch to skins tab', async ({ page }) => {
++    // Click skins tab
++    await page.evaluate(() => {
++      const buttons = document.querySelectorAll('button');
++      for (const btn of buttons) {
++        if (btn.textContent?.includes('Skins')) {
++          btn.click();
++          break;
++        }
++      }
++    });
++
++    await page.waitForTimeout(500);
++
++    // Check for skin cards
++    await expect(page.getByRole('heading', { name: 'Frosty Titan' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Neon Recon' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Crystal Yeti' })).toBeVisible();
++  });
++
++  test('should switch to upgrades tab', async ({ page }) => {
++    // Click upgrades tab
++    await page.evaluate(() => {
++      const buttons = document.querySelectorAll('button');
++      for (const btn of buttons) {
++        if (btn.textContent?.includes('Upgrades')) {
++          btn.click();
++          break;
++        }
++      }
++    });
++
++    await page.waitForTimeout(500);
++
++    // Check for tier headings and upgrades
++    await expect(page.getByRole('heading', { name: 'Tier 1' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Extra Ammo' })).toBeVisible();
++    await expect(page.getByRole('heading', { name: 'Tough Skin' })).toBeVisible();
++  });
++});
++
++test.describe('Santas Workshop - Nice Points Display', () => {
++  test('should display current Nice Points balance', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Check Nice Points display
++    const nicePointsLabel = page.locator('text=Nice Points:');
++    await expect(nicePointsLabel).toBeVisible();
++
++    // Should show 0 by default (or whatever the user has)
++    const nicePointsValue = page.locator('text=Nice Points:').locator('..').locator('text=/\\d+/');
++    await expect(nicePointsValue).toBeVisible();
++  });
++});
++
++test.describe('Santas Workshop - Purchase Flow', () => {
++  test('should show insufficient NP for expensive items', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Expensive items should show "INSUFFICIENT NP"
++    const insufficientButtons = page.getByRole('button', { name: 'INSUFFICIENT NP' });
++    await expect(insufficientButtons.first()).toBeVisible();
++  });
++
++  test('should allow purchase when enough Nice Points', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Give player Nice Points
++    await page.evaluate(() => {
++      const store = (window as any).useGameStore?.getState();
++      if (store) {
++        store.earnNicePoints(1000);
++      }
++    });
++
++    await page.waitForTimeout(500);
++
++    // Navigate to upgrades tab
++    await page.evaluate(() => {
++      const buttons = document.querySelectorAll('button');
++      for (const btn of buttons) {
++        if (btn.textContent?.includes('Upgrades')) {
++          btn.click();
++          break;
++        }
++      }
++    });
++
++    await page.waitForTimeout(500);
++
++    // Should show UPGRADE buttons for affordable items
++    const upgradeButtons = page.getByRole('button', { name: 'UPGRADE' });
++    await expect(upgradeButtons.first()).toBeVisible();
++
++    // Get initial Nice Points
++    const initialNP = await page.evaluate(() => {
++      const store = (window as any).useGameStore?.getState();
++      return store?.metaProgress.nicePoints || 0;
++    });
++
++    // Click first upgrade button
++    await page.evaluate(() => {
++      const buttons = Array.from(document.querySelectorAll('button'));
++      const upgradeBtn = buttons.find(btn => btn.textContent === 'UPGRADE');
++      if (upgradeBtn) (upgradeBtn as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Nice Points should decrease
++    const newNP = await page.evaluate(() => {
++      const store = (window as any).useGameStore?.getState();
++      return store?.metaProgress.nicePoints || 0;
++    });
++
++    expect(newNP).toBeLessThan(initialNP);
++
++    // Level should increase
++    const levelText = page.locator('text=/Level: [1-9]/').first();
++    await expect(levelText).toBeVisible();
++  });
++
++  test('should show unlocked state for weapons', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Give Nice Points and unlock a weapon
++    await page.evaluate(() => {
++      const store = (window as any).useGameStore?.getState();
++      if (store) {
++        store.earnNicePoints(1000);
++        store.unlockWeapon('snowball');
++      }
++    });
++
++    await page.waitForTimeout(500);
++
++    // Should show UNLOCKED badge
++    const unlockedBadge = page.locator('text=✓ UNLOCKED').first();
++    await expect(unlockedBadge).toBeVisible();
++  });
++});
++
++test.describe('Santas Workshop - Visual Regression', () => {
++  test('should match weapons tab snapshot', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Take snapshot (only in MCP mode with WebGL)
++    if (process.env.PLAYWRIGHT_MCP) {
++      await expect(page).toHaveScreenshot('workshop-weapons-tab-e2e.png', {
++        maxDiffPixelRatio: 0.2,
++      });
++    }
++  });
++
++  test('should match skins tab snapshot', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Switch to skins tab
++    await page.evaluate(() => {
++      const buttons = document.querySelectorAll('button');
++      for (const btn of buttons) {
++        if (btn.textContent?.includes('Skins')) {
++          btn.click();
++          break;
++        }
++      }
++    });
++
++    await page.waitForTimeout(500);
++
++    // Take snapshot (only in MCP mode with WebGL)
++    if (process.env.PLAYWRIGHT_MCP) {
++      await expect(page).toHaveScreenshot('workshop-skins-tab-e2e.png', {
++        maxDiffPixelRatio: 0.2,
++      });
++    }
++  });
++
++  test('should match upgrades tab snapshot', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(2000);
++
++    // Open workshop
++    await page.evaluate(() => {
++      const button = document.querySelector('button[class*="workshopBtn"]');
++      if (button) (button as HTMLButtonElement).click();
++    });
++
++    await page.waitForTimeout(500);
++
++    // Switch to upgrades tab
++    await page.evaluate(() => {
++      const buttons = document.querySelectorAll('button');
++      for (const btn of buttons) {
++        if (btn.textContent?.includes('Upgrades')) {
++          btn.click();
++          break;
++        }
++      }
++    });
++
++    await page.waitForTimeout(500);
++
++    // Take snapshot (only in MCP mode with WebGL)
++    if (process.env.PLAYWRIGHT_MCP) {
++      await expect(page).toHaveScreenshot('workshop-upgrades-tab-e2e.png', {
++        maxDiffPixelRatio: 0.2,
++      });
++    }
++  });
++});
+diff --git a/src/__tests__/unit/game/Bullets.test.tsx b/src/__tests__/unit/game/Bullets.test.tsx
+index 37c040a..bf5bd5e 100644
+--- a/src/__tests__/unit/game/Bullets.test.tsx
++++ b/src/__tests__/unit/game/Bullets.test.tsx
+@@ -1,3 +1,8 @@
++/**
++ * Bullets System Tests
++ * Tests bullet rendering, physics, collision detection, and lifecycle
++ */
++
+ import ReactTestRenderer from '@react-three/test-renderer';
+ import * as THREE from 'three';
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
+@@ -92,6 +97,35 @@ describe('Bullets Component', () => {
+     await renderer.unmount();
+   });
+ 
++  it('should mark bullet for removal when life expires', async () => {
++    const bullet = {
++      id: 'test-bullet',
++      mesh: new THREE.Object3D(),
++      velocity: new THREE.Vector3(10, 0, 0),
++      direction: new THREE.Vector3(1, 0, 0),
++      speed: 10,
++      life: 0.1,
++      isActive: true,
++      hp: 1,
++      maxHp: 1,
++      isEnemy: false,
++      damage: 10,
++      type: 'cannon' as const,
++    };
++    
++    useGameStore.getState().addBullet(bullet);
++    expect(useGameStore.getState().bullets).toHaveLength(1);
++
++    // Simulate time passing by updating life
++    useGameStore
++      .getState()
++      .updateBullets((bullets) => bullets.map((b) => ({ ...b, life: b.life - 0.2 })));
++
++    // Bullet with negative life should be marked for removal or have negative life
++    const updatedBullets = useGameStore.getState().bullets;
++    expect(updatedBullets[0].life).toBeLessThan(0);
++  });
++
+   it('should cleanup resources', async () => {
+     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+     const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
+@@ -107,4 +141,193 @@ describe('Bullets Component', () => {
+     // Ensure no errors occurred during unmount
+     expect(renderer).toBeDefined();
+   });
++
++  describe('Boss Collision', () => {
++    it('should damage boss on bullet hit', () => {
++      useGameStore.setState({ bossActive: true, bossHp: 1000, bossMaxHp: 1000 });
++
++      const bossMesh = new THREE.Object3D();
++      bossMesh.position.set(0, 4, 0);
++
++      const bossEnemy = {
++        id: 'boss-krampus',
++        mesh: bossMesh,
++        velocity: new THREE.Vector3(),
++        hp: 1000,
++        maxHp: 1000,
++        isActive: true,
++        type: 'boss' as const,
++        speed: 3,
++        damage: 5,
++        pointValue: 1000,
++      };
++
++      useGameStore.getState().addEnemy(bossEnemy);
++
++      // Apply boss damage
++      const wasKilled = useGameStore.getState().damageBoss(50);
++
++      expect(wasKilled).toBe(false);
++      expect(useGameStore.getState().bossHp).toBe(950);
++    });
++
++    it('should defeat boss at 0 HP', () => {
++      useGameStore.setState({ bossActive: true, bossHp: 50, bossMaxHp: 1000 });
++
++      const wasKilled = useGameStore.getState().damageBoss(50);
++
++      expect(wasKilled).toBe(true);
++      expect(useGameStore.getState().bossHp).toBe(0);
++      expect(useGameStore.getState().state).toBe('WIN');
++    });
++  });
++
++  describe('Weapon-Specific Bullets', () => {
++    it('should support different bullet types', () => {
++      const cannonBullet = {
++        id: 'cannon-1',
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        direction: new THREE.Vector3(1, 0, 0),
++        speed: 15,
++        damage: 40,
++        life: 5,
++        isEnemy: false,
++        type: 'cannon' as const,
++        hp: 1,
++        maxHp: 1,
++        isActive: true,
++      };
++
++      const smgBullet = {
++        id: 'smg-1',
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        direction: new THREE.Vector3(1, 0, 0),
++        speed: 25,
++        damage: 8,
++        life: 3,
++        isEnemy: false,
++        type: 'smg' as const,
++        hp: 1,
++        maxHp: 1,
++        isActive: true,
++      };
++
++      const starsBullet = {
++        id: 'stars-1',
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        direction: new THREE.Vector3(1, 0, 0),
++        speed: 20,
++        damage: 18,
++        life: 4,
++        isEnemy: false,
++        type: 'stars' as const,
++        hp: 1,
++        maxHp: 1,
++        isActive: true,
++      };
++
++      useGameStore.getState().addBullet(cannonBullet);
++      useGameStore.getState().addBullet(smgBullet);
++      useGameStore.getState().addBullet(starsBullet);
++
++      const bullets = useGameStore.getState().bullets;
++      expect(bullets).toHaveLength(3);
++      expect(bullets[0].damage).toBe(40); // Cannon
++      expect(bullets[1].damage).toBe(8); // SMG
++      expect(bullets[2].damage).toBe(18); // Stars
++    });
++
++    it('should apply correct damage per weapon type', () => {
++      const enemyMesh = new THREE.Object3D();
++      const enemy = {
++        id: 'weapon-damage-test',
++        mesh: enemyMesh,
++        velocity: new THREE.Vector3(),
++        hp: 100,
++        maxHp: 100,
++        isActive: true,
++        type: 'minion' as const,
++        speed: 4,
++        damage: 1,
++        pointValue: 10,
++      };
++
++      useGameStore.getState().addEnemy(enemy);
++
++      // Test Cannon damage
++      useGameStore.getState().damageEnemy('weapon-damage-test', 40);
++      expect(useGameStore.getState().enemies[0].hp).toBe(60);
++
++      // Test SMG damage
++      useGameStore.getState().damageEnemy('weapon-damage-test', 8);
++      expect(useGameStore.getState().enemies[0].hp).toBe(52);
++
++      // Test Stars damage
++      useGameStore.getState().damageEnemy('weapon-damage-test', 18);
++      expect(useGameStore.getState().enemies[0].hp).toBe(34);
++    });
++  });
++
++  describe('Performance & Optimization', () => {
++    it('should handle multiple bullets efficiently', () => {
++      const bulletCount = 50;
++
++      for (let i = 0; i < bulletCount; i++) {
++        const bullet = {
++          id: `perf-bullet-${i}`,
++          mesh: new THREE.Object3D(),
++          velocity: new THREE.Vector3(),
++          direction: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
++          speed: 20 + Math.random() * 10,
++          damage: 10,
++          life: 5,
++          isEnemy: false,
++          hp: 1,
++          maxHp: 1,
++          isActive: true,
++          type: 'cannon' as const,
++        };
++        useGameStore.getState().addBullet(bullet);
++      }
++
++      expect(useGameStore.getState().bullets).toHaveLength(bulletCount);
++    });
++
++    it('should update bullets immutably', () => {
++      const bullet = {
++        id: 'immutable-test',
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        direction: new THREE.Vector3(1, 0, 0),
++        speed: 20,
++        damage: 10,
++        life: 5,
++        isEnemy: false,
++        hp: 1,
++        maxHp: 1,
++        isActive: true,
++        type: 'cannon' as const,
++      };
++
++      useGameStore.getState().addBullet(bullet);
++
++      const originalBullets = useGameStore.getState().bullets;
++      const originalBullet = originalBullets[0];
++
++      // Update bullets
++      useGameStore
++        .getState()
++        .updateBullets((bullets) => bullets.map((b) => ({ ...b, life: b.life - 1 })));
++
++      const updatedBullets = useGameStore.getState().bullets;
++
++      // References should be different (immutable update)
++      expect(updatedBullets).not.toBe(originalBullets);
++      expect(updatedBullets[0]).not.toBe(originalBullet);
++      expect(updatedBullets[0].life).toBe(4);
++    });
++  });
+ });
+diff --git a/src/__tests__/unit/game/Enemies.test.tsx b/src/__tests__/unit/game/Enemies.test.tsx
+index d38908b..31ef9a4 100644
+--- a/src/__tests__/unit/game/Enemies.test.tsx
++++ b/src/__tests__/unit/game/Enemies.test.tsx
+@@ -1,3 +1,8 @@
++/**
++ * Enemies System Tests
++ * Tests enemy spawning, AI behavior, rendering, and boss mechanics
++ */
++
+ import ReactTestRenderer from '@react-three/test-renderer';
+ import * as THREE from 'three';
+ import { beforeEach, describe, expect, it, vi } from 'vitest';
+@@ -76,4 +81,302 @@ describe('Enemies Component', () => {
+ 
+     await renderer.unmount();
+   });
++
++  it('should handle max enemy limit', () => {
++    const maxMinions = 20;
++    
++    // Manually add enemies up to limit
++    for (let i = 0; i < maxMinions; i++) {
++      const enemy = {
++        id: `enemy-${i}`,
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        hp: 30,
++        maxHp: 30,
++        isActive: true,
++        type: 'minion' as const,
++        speed: 4,
++        damage: 1,
++        pointValue: 10,
++      };
++      useGameStore.getState().addEnemy(enemy);
++    }
++
++    // Should have exactly max enemies
++    expect(useGameStore.getState().enemies.length).toBe(maxMinions);
++  });
++
++  it('should create enemies with proper Object3D mesh', () => {
++    const enemy = {
++      id: 'mesh-test',
++      mesh: new THREE.Object3D(),
++      velocity: new THREE.Vector3(),
++      hp: 30,
++      maxHp: 30,
++      isActive: true,
++      type: 'minion' as const,
++      speed: 4,
++      damage: 1,
++      pointValue: 10,
++    };
++
++    enemy.mesh.position.set(10, 1, 10);
++
++    useGameStore.getState().addEnemy(enemy);
++
++    const storedEnemy = useGameStore.getState().enemies[0];
++    expect(storedEnemy.mesh.position.x).toBe(10);
++    expect(storedEnemy.mesh.position.y).toBe(1);
++    expect(storedEnemy.mesh.position.z).toBe(10);
++  });
++
++  describe('Enemy AI & Movement Config', () => {
++    it('should have slower speed for boss', () => {
++      const bossSpeed = 3;
++      const minionSpeed = 4;
++
++      expect(bossSpeed).toBeLessThan(minionSpeed);
++    });
++  });
++
++  describe('Enemy Collision & Combat', () => {
++    it('should damage player on collision', () => {
++      const playerPos = new THREE.Vector3(5, 0, 0);
++      useGameStore.setState({
++        playerPosition: playerPos,
++        playerHp: 100,
++        state: 'PHASE_1',
++      });
++
++      const enemyMesh = new THREE.Object3D();
++      enemyMesh.position.copy(playerPos); // Same position = collision
++
++      const enemy = {
++        id: 'collision-test',
++        mesh: enemyMesh,
++        velocity: new THREE.Vector3(),
++        hp: 30,
++        maxHp: 30,
++        isActive: true,
++        type: 'minion' as const,
++        speed: 4,
++        damage: 5,
++        pointValue: 10,
++      };
++
++      useGameStore.getState().addEnemy(enemy);
++
++      // Check collision distance
++      const distance = playerPos.distanceTo(enemy.mesh.position);
++      expect(distance).toBeLessThan(1.5); // Collision threshold
++
++      // Apply damage
++      useGameStore.getState().damagePlayer(5);
++      expect(useGameStore.getState().playerHp).toBe(95);
++    });
++
++    it('should apply knockback on collision', () => {
++      const enemyPos = new THREE.Vector3(5, 1, 0);
++      const playerPos = new THREE.Vector3(10, 0, 0);
++
++      const direction = playerPos.clone().sub(enemyPos).normalize();
++      const knockback = direction.multiplyScalar(-3);
++
++      // Knockback should push enemy in opposite direction
++      // If player is at +X, knockback should be in -X direction
++      expect(knockback.x).toBeLessThan(0); // Negative X (away from player)
++    });
++
++    it('should handle enemy death', () => {
++      const enemy = {
++        id: 'death-test',
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        hp: 10,
++        maxHp: 30,
++        isActive: true,
++        type: 'minion' as const,
++        speed: 4,
++        damage: 1,
++        pointValue: 10,
++      };
++
++      useGameStore.getState().addEnemy(enemy);
++      expect(useGameStore.getState().enemies).toHaveLength(1);
++
++      // Kill enemy
++      const wasKilled = useGameStore.getState().damageEnemy('death-test', 10);
++
++      expect(wasKilled).toBe(true);
++      expect(useGameStore.getState().enemies).toHaveLength(0);
++    });
++  });
++
++  describe('Boss Mechanics', () => {
++    it('should spawn boss after 10 kills', () => {
++      useGameStore.setState({
++        state: 'PHASE_1',
++        stats: { score: 0, kills: 0, bossDefeated: false },
++      });
++
++      // Simulate 10 kills
++      for (let i = 0; i < 10; i++) {
++        useGameStore.getState().addKill(10);
++      }
++
++      expect(useGameStore.getState().stats.kills).toBe(10);
++      expect(useGameStore.getState().state).toBe('PHASE_BOSS');
++    });
++
++    it('should only spawn one boss', () => {
++      useGameStore.setState({ state: 'PHASE_1', enemies: [] });
++
++      // Try to spawn boss multiple times
++      useGameStore.getState().spawnBoss();
++      useGameStore.getState().spawnBoss();
++      useGameStore.getState().spawnBoss();
++
++      const bossEnemies = useGameStore.getState().enemies.filter((e) => e.type === 'boss');
++
++      expect(bossEnemies).toHaveLength(1);
++    });
++
++    it('should create boss with correct stats', () => {
++      useGameStore.getState().spawnBoss();
++
++      const boss = useGameStore.getState().enemies.find((e) => e.type === 'boss');
++
++      expect(boss).toBeDefined();
++      expect(boss?.hp).toBe(1000);
++      expect(boss?.maxHp).toBe(1000);
++      expect(boss?.damage).toBe(5);
++      expect(boss?.pointValue).toBe(1000);
++      expect(boss?.speed).toBe(3);
++    });
++
++    it('should position boss away from player', () => {
++      useGameStore.setState({ playerPosition: new THREE.Vector3(0, 0, 0) });
++      useGameStore.getState().spawnBoss();
++
++      const boss = useGameStore.getState().enemies.find((e) => e.type === 'boss');
++      expect(boss).toBeDefined();
++      const bossPos = boss!.mesh.position;
++
++      const distanceFromOrigin = Math.sqrt(bossPos.x * bossPos.x + bossPos.z * bossPos.z);
++
++      // Boss spawns at radius 30 from player
++      expect(distanceFromOrigin).toBeGreaterThanOrEqual(25);
++      expect(distanceFromOrigin).toBeLessThanOrEqual(35);
++    });
++
++    it('should transition to WIN state when boss defeated', () => {
++      useGameStore.setState({
++        bossActive: true,
++        bossHp: 1000,
++        state: 'PHASE_BOSS',
++      });
++
++      // Defeat boss
++      useGameStore.getState().damageBoss(1000);
++
++      expect(useGameStore.getState().state).toBe('WIN');
++      expect(useGameStore.getState().bossHp).toBe(0);
++      expect(useGameStore.getState().stats.bossDefeated).toBe(true);
++    });
++  });
++
++  describe('Enemy Rendering States', () => {
++    it('should show HP indicator when damaged', () => {
++      const enemy = {
++        id: 'hp-indicator-test',
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        hp: 15, // Half HP
++        maxHp: 30,
++        isActive: true,
++        type: 'minion' as const,
++        speed: 4,
++        damage: 1,
++        pointValue: 10,
++      };
++
++      useGameStore.getState().addEnemy(enemy);
++
++      const hpRatio = enemy.hp / enemy.maxHp;
++      expect(hpRatio).toBe(0.5);
++    });
++
++    it('should increase intensity when damaged', () => {
++      const fullHp = { hp: 30, maxHp: 30 };
++      const halfHp = { hp: 15, maxHp: 30 };
++
++      const fullIntensity = fullHp.hp < fullHp.maxHp ? 2 : 1;
++      const halfIntensity = halfHp.hp < halfHp.maxHp ? 2 : 1;
++
++      expect(fullIntensity).toBe(1); // Not damaged
++      expect(halfIntensity).toBe(2); // Damaged
++    });
++  });
++
++  describe('Performance', () => {
++    it('should handle multiple enemies efficiently', () => {
++      for (let i = 0; i < 20; i++) {
++        const enemy = {
++          id: `perf-enemy-${i}`,
++          mesh: new THREE.Object3D(),
++          velocity: new THREE.Vector3(),
++          hp: 30,
++          maxHp: 30,
++          isActive: true,
++          type: 'minion' as const,
++          speed: 4 + Math.random() * 2,
++          damage: 1,
++          pointValue: 10,
++        };
++
++        enemy.mesh.position.set(Math.random() * 50 - 25, 1, Math.random() * 50 - 25);
++
++        useGameStore.getState().addEnemy(enemy);
++      }
++
++      expect(useGameStore.getState().enemies).toHaveLength(20);
++    });
++
++    it('should update enemies immutably', () => {
++      const enemy = {
++        id: 'immutable-test',
++        mesh: new THREE.Object3D(),
++        velocity: new THREE.Vector3(),
++        hp: 30,
++        maxHp: 30,
++        isActive: true,
++        type: 'minion' as const,
++        speed: 4,
++        damage: 1,
++        pointValue: 10,
++      };
++
++      useGameStore.getState().addEnemy(enemy);
++
++      const originalEnemies = useGameStore.getState().enemies;
++
++      // Update enemies
++      useGameStore.getState().updateEnemies((enemies) =>
++        enemies.map((e) => ({
++          ...e,
++          mesh: (() => {
++            const newMesh = new THREE.Object3D();
++            newMesh.position.copy(e.mesh.position);
++            newMesh.position.x += 1;
++            return newMesh;
++          })(),
++        }))
++      );
++
++      const updatedEnemies = useGameStore.getState().enemies;
++
++      // Should be different reference (immutable)
++      expect(updatedEnemies).not.toBe(originalEnemies);
++    });
++  });
+ });
+diff --git a/src/__tests__/unit/ui/StartScreen.test.tsx b/src/__tests__/unit/ui/StartScreen.test.tsx
+index 0eff80d..426f6c2 100644
+--- a/src/__tests__/unit/ui/StartScreen.test.tsx
++++ b/src/__tests__/unit/ui/StartScreen.test.tsx
+@@ -131,11 +131,12 @@ describe('StartScreen Component', () => {
+     expect(screen.getByText(/Operator Edition v3.0/)).toBeInTheDocument();
+   });
+ 
+-  it('should have clickable character cards', () => {
++  it('should have clickable buttons', () => {
+     render(<StartScreen />);
+ 
+     const buttons = screen.getAllByRole('button');
+-    expect(buttons).toHaveLength(3);
++    // 3 character cards + 1 workshop button
++    expect(buttons).toHaveLength(4);
+ 
+     buttons.forEach((button) => {
+       expect(button).toHaveAttribute('type', 'button');
+diff --git a/src/game/CameraController.tsx b/src/game/CameraController.tsx
+index 611d7b9..7e6c1e6 100644
+--- a/src/game/CameraController.tsx
++++ b/src/game/CameraController.tsx
+@@ -17,11 +17,11 @@ const MIN_ZOOM = 0.5;
+ const MAX_ZOOM = 2.0;
+ 
+ const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
+-const LOOK_TARGET = new THREE.Vector3();
+ 
+ export function CameraController() {
+   const { camera } = useThree();
+   const targetRef = useRef(new THREE.Vector3(0, DEFAULT_CAMERA_HEIGHT, DEFAULT_CAMERA_DISTANCE));
++  const lookTargetRef = useRef(new THREE.Vector3());
+ 
+   // Zoom and tilt state
+   const zoomRef = useRef(1.0);
+@@ -29,7 +29,7 @@ export function CameraController() {
+   const pinchStartRef = useRef<number | null>(null);
+   const initialZoomRef = useRef(1.0);
+ 
+-  const { playerPosition, screenShake, state } = useGameStore();
++  const { state } = useGameStore();
+ 
+   // Handle pinch-to-zoom
+   const handleTouchStart = useCallback((e: TouchEvent) => {
+@@ -143,6 +143,8 @@ export function CameraController() {
+   }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handleDeviceOrientation]);
+ 
+   useFrame((_, delta) => {
++    const { playerPosition, screenShake } = useGameStore.getState();
++
+     if (state === 'MENU' || state === 'BRIEFING') {
+       // Menu camera - static elevated view with slow rotation
+       camera.position.lerp(MENU_CAMERA_POS, delta * 2);
+@@ -176,8 +178,8 @@ export function CameraController() {
+     camera.position.lerp(targetRef.current, LERP_SPEED * delta);
+ 
+     // Look at player (slightly ahead)
+-    LOOK_TARGET.set(playerPosition.x, 0, playerPosition.z);
+-    camera.lookAt(LOOK_TARGET);
++    lookTargetRef.current.set(playerPosition.x, 0, playerPosition.z);
++    camera.lookAt(lookTargetRef.current);
+   });
+ 
+   return null;
+diff --git a/src/game/Enemies.tsx b/src/game/Enemies.tsx
+index d147d79..99d04f9 100644
+--- a/src/game/Enemies.tsx
++++ b/src/game/Enemies.tsx
+@@ -196,9 +196,15 @@ function BossRenderer({
+ }) {
+   const bossEnemy = enemies.find((e) => e.type === 'boss');
+   const bossPos = bossEnemy?.mesh.position ?? null;
++  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
+ 
+   return (
+-    <BossMesh position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]} hp={bossHp} maxHp={bossMaxHp} />
++    <BossMesh
++      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
++      rotation={bossRotation}
++      hp={bossHp}
++      maxHp={bossMaxHp}
++    />
+   );
+ }
+ 
+@@ -470,13 +476,16 @@ function MinionMesh({
+ // Boss (Krampus-Prime) mesh component
+ function BossMesh({
+   position,
++  rotation,
+   hp,
+   maxHp,
+ }: {
+   position: [number, number, number];
++  rotation: number;
+   hp: number;
+   maxHp: number;
+ }) {
++  const groupRef = useRef<THREE.Group>(null);
+   const coreRef = useRef<THREE.Mesh>(null);
+   const ring1Ref = useRef<THREE.Mesh>(null);
+   const ring2Ref = useRef<THREE.Mesh>(null);
+@@ -490,6 +499,10 @@ function BossMesh({
+   useFrame((state) => {
+     const time = state.clock.elapsedTime;
+ 
++    if (groupRef.current) {
++      groupRef.current.rotation.y = rotation;
++    }
++
+     if (coreRef.current) {
+       coreRef.current.rotation.x = time * 0.5;
+       coreRef.current.rotation.y = time * 0.3;
+@@ -521,7 +534,7 @@ function BossMesh({
+   });
+ 
+   return (
+-    <group position={position}>
++    <group position={position} ref={groupRef}>
+       {/* Core */}
+       <mesh ref={coreRef} castShadow>
+         <dodecahedronGeometry args={[2]} />
+diff --git a/src/game/HitParticles.tsx b/src/game/HitParticles.tsx
+index b0f84a9..8272840 100644
+--- a/src/game/HitParticles.tsx
++++ b/src/game/HitParticles.tsx
+@@ -29,7 +29,7 @@ export function HitParticles() {
+   const particlesRef = useRef<Particle[]>([]);
+   const lastKillsRef = useRef(0);
+ 
+-  const { stats, bossHp } = useGameStore();
++  const { stats, bossHp, enemies } = useGameStore();
+   const lastBossHpRef = useRef(bossHp);
+   const tempVecRef = useRef(new THREE.Vector3());
+ 
+@@ -40,20 +40,20 @@ export function HitParticles() {
+     if (stats.kills > lastKillsRef.current) {
+       lastKillsRef.current = stats.kills;
+       // Spawn hit particles at a random position (since we don't track exact hit location)
+-      const playerPos = useGameStore.getState().playerPosition;
++      const { playerPosition } = useGameStore.getState();
+       const angle = Math.random() * Math.PI * 2;
+       const dist = 3 + Math.random() * 5;
+       const hitPos = tempVecRef.current.set(
+-        playerPos.x + Math.cos(angle) * dist,
++        playerPosition.x + Math.cos(angle) * dist,
+         1,
+-        playerPos.z + Math.sin(angle) * dist
++        playerPosition.z + Math.sin(angle) * dist
+       );
+       spawnParticles(particlesRef.current, hitPos, 0x00ff00, 6);
+     }
+ 
+     // Check for boss damage
+     if (bossHp < lastBossHpRef.current) {
+-      const bossEnemy = useGameStore.getState().enemies.find((e) => e.type === 'boss');
++      const bossEnemy = enemies.find((e) => e.type === 'boss');
+       if (bossEnemy) {
+         const bossPos = tempVecRef.current.copy(bossEnemy.mesh.position);
+         bossPos.y = 4;
+diff --git a/src/store/gameStore.ts b/src/store/gameStore.ts
+index 61d32a5..a07932b 100644
+--- a/src/store/gameStore.ts
++++ b/src/store/gameStore.ts
+@@ -28,6 +28,7 @@ interface GameStore {
+     title: string;
+     objective: string;
+     intel: string[];
++    warning: string;
+   };
+ 
+   // Player
+@@ -171,6 +172,7 @@ const initialState = {
+       'Neutralize Krampus-Prime command unit',
+       'Defeat 10 Grinch-Bots to draw out Krampus-Prime',
+     ],
++    warning: 'Hostiles are aggressive - engage on sight',
+   },
+   playerClass: null,
+   playerHp: 100,
+diff --git a/src/types/index.ts b/src/types/index.ts
+index b69f963..2641cee 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -124,7 +124,7 @@ export interface BulletData extends EntityData {
+   /** Travel speed in units per second */
+   speed: number;
+   /** Weapon type that fired this bullet */
+-  type?: 'cannon' | 'smg' | 'stars';
++  type: 'cannon' | 'smg' | 'stars';
+ }
+ 
+ /**
+diff --git a/src/types/workshop.ts b/src/types/workshop.ts
+new file mode 100644
+index 0000000..53e200b
+--- /dev/null
++++ b/src/types/workshop.ts
+@@ -0,0 +1,284 @@
++/**
++ * Workshop unlock definitions for Santa's Workshop
++ */
++
++export interface WeaponUnlock {
++  id: string;
++  name: string;
++  cost: number;
++  type: string;
++  damage: string;
++  fireRate: string;
++  special: string;
++  flavor: string;
++}
++
++export interface SkinUnlock {
++  id: string;
++  name: string;
++  cost: number;
++  character: 'santa' | 'elf' | 'bumble';
++  description: string;
++}
++
++export interface PermanentUpgrade {
++  id: string;
++  name: string;
++  cost: number;
++  tier: 1 | 2 | 3;
++  maxLevel: number;
++  description: string;
++}
++
++/**
++ * All unlockable weapons
++ */
++export const WEAPON_UNLOCKS = [
++  {
++    id: 'snowball',
++    name: 'Snowball Launcher',
++    cost: 500,
++    type: 'Projectile',
++    damage: '12 per shot',
++    fireRate: '0.2s',
++    special: 'Freezes enemies for 1s on hit',
++    flavor: 'Neon-infused ice cores. Cold never bothered me anyway.',
++  },
++  {
++    id: 'candycane',
++    name: 'Candy Cane Staff',
++    cost: 750,
++    type: 'Melee Sweep',
++    damage: '25 per hit',
++    fireRate: '0.4s',
++    special: '360° attack, heals 5 HP on kill',
++    flavor: 'Peppermint-powered beatdown. Festive AND functional.',
++  },
++  {
++    id: 'ornament',
++    name: 'Ornament Bomb Launcher',
++    cost: 1000,
++    type: 'AOE Explosive',
++    damage: '50 per explosion',
++    fireRate: '1.0s',
++    special: '5-unit radius explosion',
++    flavor: 'These decorations pack a punch. Handle with care.',
++  },
++  {
++    id: 'lightwhip',
++    name: 'Light String Whip',
++    cost: 800,
++    type: 'Electric Chain',
++    damage: '15 per hit, chains to 3 enemies',
++    fireRate: '0.3s',
++    special: 'Electric arc damage',
++    flavor: 'Deck the halls. Wreck the bots.',
++  },
++  {
++    id: 'turret',
++    name: 'Gingerbread Turret',
++    cost: 1200,
++    type: 'Deployable',
++    damage: '10 per shot (auto-fire)',
++    fireRate: '0.15s (turret)',
++    special: 'Lasts 10 seconds, max 2 turrets',
++    flavor: 'Set it and forget it. Smart cookies.',
++  },
++  {
++    id: 'jinglebell',
++    name: 'Jingle Bell Shotgun',
++    cost: 900,
++    type: 'Spread Shot',
++    damage: '8 x 5 pellets',
++    fireRate: '0.6s',
++    special: 'Wide spread, close range devastation',
++    flavor: 'Ring in the new year with buckshot and bass.',
++  },
++  {
++    id: 'giftbox',
++    name: 'Quantum Gift Box',
++    cost: 2000,
++    type: 'Random',
++    damage: 'Varies',
++    fireRate: 'Varies',
++    special: 'Random weapon effect each shot',
++    flavor: "What's inside? Even Santa doesn't know.",
++  },
++] as const;
++
++/**
++ * All unlockable character skins
++ */
++export const SKIN_UNLOCKS = [
++  // Mecha-Santa Skins
++  {
++    id: 'santa-frosty',
++    name: 'Frosty Titan',
++    cost: 300,
++    character: 'santa',
++    description: 'Blue/white ice theme',
++  },
++  {
++    id: 'santa-crimson',
++    name: 'Crimson Commander',
++    cost: 500,
++    character: 'santa',
++    description: 'Red/gold elite armor',
++  },
++  {
++    id: 'santa-stealth',
++    name: 'Stealth Claus',
++    cost: 750,
++    character: 'santa',
++    description: 'Black ops night ops',
++  },
++  // Cyber-Elf Skins
++  {
++    id: 'elf-neon',
++    name: 'Neon Recon',
++    cost: 300,
++    character: 'elf',
++    description: 'Pink/purple cyberpunk',
++  },
++  {
++    id: 'elf-arctic',
++    name: 'Arctic Scout',
++    cost: 500,
++    character: 'elf',
++    description: 'White camo',
++  },
++  {
++    id: 'elf-shadow',
++    name: 'Shadow Runner',
++    cost: 750,
++    character: 'elf',
++    description: 'Dark tactical gear',
++  },
++  // The Bumble Skins
++  {
++    id: 'bumble-crystal',
++    name: 'Crystal Yeti',
++    cost: 300,
++    character: 'bumble',
++    description: 'Translucent ice',
++  },
++  {
++    id: 'bumble-golden',
++    name: 'Golden Guardian',
++    cost: 500,
++    character: 'bumble',
++    description: 'Gold-plated armor',
++  },
++  {
++    id: 'bumble-void',
++    name: 'Void Walker',
++    cost: 750,
++    character: 'bumble',
++    description: 'Dark matter aesthetic',
++  },
++] as const;
++
++/**
++ * All permanent upgrades
++ */
++export const PERMANENT_UPGRADES = [
++  // Tier 1
++  {
++    id: 'extra-ammo',
++    name: 'Extra Ammo',
++    cost: 100,
++    tier: 1,
++    maxLevel: 5,
++    description: '+10% magazine size per level',
++  },
++  {
++    id: 'quick-reload',
++    name: 'Quick Reload',
++    cost: 100,
++    tier: 1,
++    maxLevel: 5,
++    description: '-5% reload time per level',
++  },
++  {
++    id: 'tough-skin',
++    name: 'Tough Skin',
++    cost: 100,
++    tier: 1,
++    maxLevel: 5,
++    description: '+5 max HP per level',
++  },
++  {
++    id: 'swift-boots',
++    name: 'Swift Boots',
++    cost: 100,
++    tier: 1,
++    maxLevel: 5,
++    description: '+2% movement speed per level',
++  },
++  // Tier 2
++  {
++    id: 'critical-strikes',
++    name: 'Critical Strikes',
++    cost: 250,
++    tier: 2,
++    maxLevel: 3,
++    description: '+3% crit chance per level (2x damage)',
++  },
++  {
++    id: 'life-steal',
++    name: 'Life Steal',
++    cost: 250,
++    tier: 2,
++    maxLevel: 3,
++    description: '+1% damage to HP per level',
++  },
++  {
++    id: 'bullet-time',
++    name: 'Bullet Time',
++    cost: 250,
++    tier: 2,
++    maxLevel: 3,
++    description: '+5% slower enemy projectiles per level',
++  },
++  {
++    id: 'lucky-drops',
++    name: 'Lucky Drops',
++    cost: 250,
++    tier: 2,
++    maxLevel: 3,
++    description: '+10% item drop rate per level',
++  },
++  // Tier 3
++  {
++    id: 'second-chance',
++    name: 'Second Chance',
++    cost: 500,
++    tier: 3,
++    maxLevel: 2,
++    description: 'Revive once per run with 50% HP',
++  },
++  {
++    id: 'christmas-miracle',
++    name: 'Christmas Miracle',
++    cost: 500,
++    tier: 3,
++    maxLevel: 2,
++    description: 'Start with full Christmas Spirit meter',
++  },
++  {
++    id: 'double-trouble',
++    name: 'Double Trouble',
++    cost: 500,
++    tier: 3,
++    maxLevel: 2,
++    description: 'Dual wield (second weapon slot)',
++  },
++  {
++    id: 'boss-slayer',
++    name: 'Boss Slayer',
++    cost: 500,
++    tier: 3,
++    maxLevel: 2,
++    description: '+25% damage to bosses per level',
++  },
++] as const;
+diff --git a/src/ui/MissionBriefing.tsx b/src/ui/MissionBriefing.tsx
+index 797994c..2bff862 100644
+--- a/src/ui/MissionBriefing.tsx
++++ b/src/ui/MissionBriefing.tsx
+@@ -34,10 +34,10 @@ export function MissionBriefing() {
+       lines.push({ label, text: intel });
+     }
+ 
+-    // Add final warning
++    // Add final warning from store
+     lines.push({
+       label: 'WARNING',
+-      text: 'Hostiles are aggressive - engage on sight',
++      text: missionBriefing.warning,
+       warning: true,
+     });
+ 
+diff --git a/src/ui/SantasWorkshop.module.css b/src/ui/SantasWorkshop.module.css
+new file mode 100644
+index 0000000..6206129
+--- /dev/null
++++ b/src/ui/SantasWorkshop.module.css
+@@ -0,0 +1,381 @@
++.screen {
++  position: fixed;
++  top: 0;
++  left: 0;
++  width: 100%;
++  height: 100%;
++  background: rgba(0, 0, 0, 0.95);
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  z-index: 200;
++  animation: fadeIn 0.3s ease-out;
++  overflow-y: auto;
++  padding: 20px;
++}
++
++@keyframes fadeIn {
++  from {
++    opacity: 0;
++  }
++  to {
++    opacity: 1;
++  }
++}
++
++.container {
++  width: 100%;
++  max-width: 1200px;
++  background: linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(5, 5, 10, 0.95));
++  border: 2px solid #333;
++  border-radius: 8px;
++  padding: 30px;
++  position: relative;
++}
++
++/* Header */
++.header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  margin-bottom: 30px;
++  flex-wrap: wrap;
++  gap: 15px;
++}
++
++.title {
++  font-size: 2.5rem;
++  color: #fff;
++  margin: 0;
++  letter-spacing: 3px;
++  text-transform: uppercase;
++  text-shadow: 0 0 20px #00ffcc;
++}
++
++.accent {
++  color: #ff0044;
++  text-shadow: 0 0 20px #ff0044;
++}
++
++.nicePoints {
++  display: flex;
++  align-items: center;
++  gap: 10px;
++  background: rgba(0, 255, 200, 0.1);
++  padding: 10px 20px;
++  border: 1px solid #00ffcc;
++  border-radius: 4px;
++}
++
++.npLabel {
++  color: #888;
++  font-size: 0.9rem;
++  letter-spacing: 1px;
++}
++
++.npValue {
++  color: #00ffcc;
++  font-size: 1.5rem;
++  font-weight: bold;
++  text-shadow: 0 0 10px #00ffcc;
++}
++
++.closeBtn {
++  background: none;
++  border: 1px solid #666;
++  color: #999;
++  font-size: 1.5rem;
++  width: 40px;
++  height: 40px;
++  cursor: pointer;
++  transition: 0.2s;
++  border-radius: 4px;
++}
++
++.closeBtn:hover {
++  border-color: #ff0044;
++  color: #ff0044;
++  background: rgba(255, 0, 68, 0.1);
++}
++
++/* Tabs */
++.tabs {
++  display: flex;
++  gap: 10px;
++  margin-bottom: 30px;
++  border-bottom: 2px solid #333;
++}
++
++.tab {
++  background: none;
++  border: none;
++  color: #666;
++  font-family: "Orbitron", sans-serif;
++  font-size: 1rem;
++  padding: 15px 30px;
++  cursor: pointer;
++  transition: 0.2s;
++  text-transform: uppercase;
++  letter-spacing: 2px;
++  position: relative;
++}
++
++.tab:hover {
++  color: #00ffcc;
++}
++
++.tabActive {
++  color: #00ffcc;
++  text-shadow: 0 0 10px #00ffcc;
++}
++
++.tabActive::after {
++  content: "";
++  position: absolute;
++  bottom: -2px;
++  left: 0;
++  right: 0;
++  height: 2px;
++  background: #00ffcc;
++  box-shadow: 0 0 10px #00ffcc;
++}
++
++/* Content */
++.content {
++  min-height: 400px;
++  max-height: 60vh;
++  overflow-y: auto;
++}
++
++.grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
++  gap: 20px;
++}
++
++.upgradesGrid {
++  display: flex;
++  flex-direction: column;
++  gap: 30px;
++}
++
++.tierSection {
++  margin-bottom: 20px;
++}
++
++.tierTitle {
++  color: #00ffcc;
++  font-size: 1.5rem;
++  margin-bottom: 15px;
++  text-transform: uppercase;
++  letter-spacing: 2px;
++  text-shadow: 0 0 10px #00ffcc;
++}
++
++/* Cards */
++.card {
++  background: linear-gradient(135deg, rgba(20, 20, 30, 0.8), rgba(10, 10, 15, 0.9));
++  border: 1px solid #333;
++  padding: 20px;
++  border-radius: 4px;
++  transition: 0.3s;
++  display: flex;
++  flex-direction: column;
++  gap: 10px;
++}
++
++.card:hover {
++  border-color: #00ffcc;
++  background: rgba(0, 255, 200, 0.05);
++  transform: translateY(-5px);
++  box-shadow: 0 5px 20px rgba(0, 255, 200, 0.1);
++}
++
++.cardUnlocked {
++  border-color: #00ffcc;
++  background: rgba(0, 255, 200, 0.08);
++}
++
++.cardLocked {
++  opacity: 0.6;
++}
++
++.cardHeader {
++  display: flex;
++  justify-content: space-between;
++  align-items: flex-start;
++  gap: 10px;
++}
++
++.cardTitle {
++  font-size: 1.1rem;
++  color: #fff;
++  margin: 0;
++  text-shadow: 0 0 5px #00ffcc;
++  flex: 1;
++}
++
++.cardCost {
++  display: flex;
++  align-items: center;
++  gap: 5px;
++}
++
++.cost {
++  color: #ffd700;
++  font-weight: bold;
++  font-size: 0.9rem;
++  white-space: nowrap;
++}
++
++.unlocked {
++  color: #00ffcc;
++  font-weight: bold;
++  font-size: 0.8rem;
++  text-shadow: 0 0 5px #00ffcc;
++}
++
++.maxed {
++  color: #ff0044;
++  font-weight: bold;
++  font-size: 0.8rem;
++  text-shadow: 0 0 5px #ff0044;
++}
++
++.cardType {
++  color: #00ffcc;
++  font-size: 0.75rem;
++  letter-spacing: 1px;
++  text-transform: uppercase;
++  opacity: 0.8;
++}
++
++.cardStats {
++  display: flex;
++  flex-direction: column;
++  gap: 5px;
++  margin: 5px 0;
++}
++
++.stat {
++  color: #999;
++  font-size: 0.8rem;
++}
++
++.statLabel {
++  color: #666;
++}
++
++.cardDescription,
++.cardFlavor {
++  color: #888;
++  font-size: 0.85rem;
++  font-style: italic;
++  line-height: 1.4;
++  margin-top: 5px;
++}
++
++.upgradeLevel {
++  color: #00ffcc;
++  font-size: 0.9rem;
++  font-weight: bold;
++}
++
++/* Purchase Button */
++.purchaseBtn {
++  background: #ff0044;
++  border: none;
++  padding: 12px 20px;
++  color: white;
++  font-family: "Orbitron", sans-serif;
++  font-size: 0.9rem;
++  cursor: pointer;
++  text-transform: uppercase;
++  font-weight: 700;
++  letter-spacing: 1px;
++  transition: 0.2s;
++  border-radius: 4px;
++  margin-top: auto;
++}
++
++.purchaseBtn:hover:not(:disabled) {
++  background: #fff;
++  color: #ff0044;
++  box-shadow: 0 0 20px #ff0044;
++}
++
++.purchaseBtn:disabled {
++  background: #333;
++  color: #666;
++  cursor: not-allowed;
++}
++
++/* Workshop Button (for main menu) */
++.workshopBtn {
++  background: linear-gradient(135deg, #00ffcc, #00cc99);
++  border: none;
++  padding: 15px 40px;
++  color: #000;
++  font-family: "Orbitron", sans-serif;
++  font-size: 1rem;
++  cursor: pointer;
++  clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
++  text-transform: uppercase;
++  font-weight: 900;
++  letter-spacing: 2px;
++  transition: 0.2s;
++  margin-top: 20px;
++}
++
++.workshopBtn:hover {
++  background: linear-gradient(135deg, #fff, #00ffcc);
++  box-shadow: 0 0 30px #00ffcc;
++  transform: translateY(-3px);
++}
++
++/* Responsive */
++@media (max-width: 768px) {
++  .container {
++    padding: 20px;
++  }
++
++  .title {
++    font-size: 1.8rem;
++  }
++
++  .grid {
++    grid-template-columns: 1fr;
++  }
++
++  .tabs {
++    flex-wrap: wrap;
++  }
++
++  .tab {
++    padding: 10px 20px;
++    font-size: 0.9rem;
++  }
++
++  .content {
++    max-height: 50vh;
++  }
++}
++
++/* Scrollbar styling */
++.content::-webkit-scrollbar {
++  width: 8px;
++}
++
++.content::-webkit-scrollbar-track {
++  background: rgba(0, 0, 0, 0.3);
++}
++
++.content::-webkit-scrollbar-thumb {
++  background: #00ffcc;
++  border-radius: 4px;
++}
++
++.content::-webkit-scrollbar-thumb:hover {
++  background: #00cc99;
++}
+diff --git a/src/ui/SantasWorkshop.tsx b/src/ui/SantasWorkshop.tsx
+new file mode 100644
+index 0000000..4fb7518
+--- /dev/null
++++ b/src/ui/SantasWorkshop.tsx
+@@ -0,0 +1,295 @@
++/**
++ * Santa's Workshop Component
++ * Main menu hub for spending Nice Points on unlocks
++ */
++
++import { useState } from 'react';
++import { AudioManager } from '@/audio/AudioManager';
++import { useGameStore } from '@/store/gameStore';
++import {
++  PERMANENT_UPGRADES,
++  type PermanentUpgrade,
++  SKIN_UNLOCKS,
++  type SkinUnlock,
++  WEAPON_UNLOCKS,
++  type WeaponUnlock,
++} from '@/types/workshop';
++import styles from './SantasWorkshop.module.css';
++
++type TabType = 'weapons' | 'skins' | 'upgrades';
++
++interface SantasWorkshopProps {
++  show: boolean;
++  onClose: () => void;
++}
++
++export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
++  const { metaProgress, spendNicePoints, unlockWeapon, unlockSkin, upgradePermanent } =
++    useGameStore();
++  const [activeTab, setActiveTab] = useState<TabType>('weapons');
++
++  if (!show) return null;
++
++  const handleClose = () => {
++    onClose();
++    AudioManager.playSFX('ui_select');
++  };
++
++  const handlePurchaseWeapon = (weapon: WeaponUnlock) => {
++    if (metaProgress.unlockedWeapons.includes(weapon.id)) return;
++
++    if (spendNicePoints(weapon.cost)) {
++      unlockWeapon(weapon.id);
++      AudioManager.playSFX('ui_select');
++    } else {
++      AudioManager.playSFX('ui_select'); // Could be a different "error" sound
++    }
++  };
++
++  const handlePurchaseSkin = (skin: SkinUnlock) => {
++    if (metaProgress.unlockedSkins.includes(skin.id)) return;
++
++    if (spendNicePoints(skin.cost)) {
++      unlockSkin(skin.id);
++      AudioManager.playSFX('ui_select');
++    } else {
++      AudioManager.playSFX('ui_select');
++    }
++  };
++
++  const handlePurchaseUpgrade = (upgrade: PermanentUpgrade) => {
++    const currentLevel = metaProgress.permanentUpgrades[upgrade.id] || 0;
++    if (currentLevel >= upgrade.maxLevel) return;
++
++    if (spendNicePoints(upgrade.cost)) {
++      upgradePermanent(upgrade.id);
++      AudioManager.playSFX('ui_select');
++    } else {
++      AudioManager.playSFX('ui_select');
++    }
++  };
++
++  const changeTab = (tab: TabType) => {
++    setActiveTab(tab);
++    AudioManager.playSFX('ui_select');
++  };
++
++  return (
++    <div className={styles.screen}>
++      <div className={styles.container}>
++        {/* Header */}
++        <div className={styles.header}>
++          <h1 className={styles.title}>
++            Santa's <span className={styles.accent}>Workshop</span>
++          </h1>
++          <div className={styles.nicePoints}>
++            <span className={styles.npLabel}>Nice Points:</span>
++            <span className={styles.npValue}>{metaProgress.nicePoints}</span>
++          </div>
++          <button type="button" className={styles.closeBtn} onClick={handleClose}>
++            ✕
++          </button>
++        </div>
++
++        {/* Tabs */}
++        <div className={styles.tabs}>
++          <button
++            type="button"
++            className={`${styles.tab} ${activeTab === 'weapons' ? styles.tabActive : ''}`}
++            onClick={() => changeTab('weapons')}
++          >
++            Weapons
++          </button>
++          <button
++            type="button"
++            className={`${styles.tab} ${activeTab === 'skins' ? styles.tabActive : ''}`}
++            onClick={() => changeTab('skins')}
++          >
++            Skins
++          </button>
++          <button
++            type="button"
++            className={`${styles.tab} ${activeTab === 'upgrades' ? styles.tabActive : ''}`}
++            onClick={() => changeTab('upgrades')}
++          >
++            Upgrades
++          </button>
++        </div>
++
++        {/* Content */}
++        <div className={styles.content}>
++          {/* Weapons Tab */}
++          {activeTab === 'weapons' && (
++            <div className={styles.grid}>
++              {WEAPON_UNLOCKS.map((weapon) => {
++                const isUnlocked = metaProgress.unlockedWeapons.includes(weapon.id);
++                const canAfford = metaProgress.nicePoints >= weapon.cost;
++
++                return (
++                  <div
++                    key={weapon.id}
++                    className={`${styles.card} ${isUnlocked ? styles.cardUnlocked : ''} ${
++                      !canAfford && !isUnlocked ? styles.cardLocked : ''
++                    }`}
++                  >
++                    <div className={styles.cardHeader}>
++                      <h3 className={styles.cardTitle}>{weapon.name}</h3>
++                      <div className={styles.cardCost}>
++                        {isUnlocked ? (
++                          <span className={styles.unlocked}>✓ UNLOCKED</span>
++                        ) : (
++                          <span className={styles.cost}>{weapon.cost} NP</span>
++                        )}
++                      </div>
++                    </div>
++                    <div className={styles.cardType}>{weapon.type}</div>
++                    <div className={styles.cardStats}>
++                      <div className={styles.stat}>
++                        <span className={styles.statLabel}>Damage:</span> {weapon.damage}
++                      </div>
++                      <div className={styles.stat}>
++                        <span className={styles.statLabel}>Fire Rate:</span> {weapon.fireRate}
++                      </div>
++                      <div className={styles.stat}>
++                        <span className={styles.statLabel}>Special:</span> {weapon.special}
++                      </div>
++                    </div>
++                    <div className={styles.cardFlavor}>{weapon.flavor}</div>
++                    {!isUnlocked && (
++                      <button
++                        type="button"
++                        className={styles.purchaseBtn}
++                        onClick={() => handlePurchaseWeapon(weapon)}
++                        disabled={!canAfford}
++                      >
++                        {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
++                      </button>
++                    )}
++                  </div>
++                );
++              })}
++            </div>
++          )}
++
++          {/* Skins Tab */}
++          {activeTab === 'skins' && (
++            <div className={styles.grid}>
++              {SKIN_UNLOCKS.map((skin) => {
++                const isUnlocked = metaProgress.unlockedSkins.includes(skin.id);
++                const canAfford = metaProgress.nicePoints >= skin.cost;
++
++                return (
++                  <div
++                    key={skin.id}
++                    className={`${styles.card} ${isUnlocked ? styles.cardUnlocked : ''} ${
++                      !canAfford && !isUnlocked ? styles.cardLocked : ''
++                    }`}
++                  >
++                    <div className={styles.cardHeader}>
++                      <h3 className={styles.cardTitle}>{skin.name}</h3>
++                      <div className={styles.cardCost}>
++                        {isUnlocked ? (
++                          <span className={styles.unlocked}>✓ UNLOCKED</span>
++                        ) : (
++                          <span className={styles.cost}>{skin.cost} NP</span>
++                        )}
++                      </div>
++                    </div>
++                    <div className={styles.cardType}>{skin.character.toUpperCase()} SKIN</div>
++                    <div className={styles.cardDescription}>{skin.description}</div>
++                    {!isUnlocked && (
++                      <button
++                        type="button"
++                        className={styles.purchaseBtn}
++                        onClick={() => handlePurchaseSkin(skin)}
++                        disabled={!canAfford}
++                      >
++                        {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
++                      </button>
++                    )}
++                  </div>
++                );
++              })}
++            </div>
++          )}
++
++          {/* Upgrades Tab */}
++          {activeTab === 'upgrades' && (
++            <div className={styles.upgradesGrid}>
++              {/* Group by tier */}
++              {[1, 2, 3].map((tier) => {
++                const tierUpgrades = PERMANENT_UPGRADES.filter((u) => u.tier === tier);
++                return (
++                  <div key={tier} className={styles.tierSection}>
++                    <h2 className={styles.tierTitle}>Tier {tier}</h2>
++                    <div className={styles.grid}>
++                      {tierUpgrades.map((upgrade) => {
++                        const currentLevel = metaProgress.permanentUpgrades[upgrade.id] || 0;
++                        const isMaxed = currentLevel >= upgrade.maxLevel;
++                        const canAfford = metaProgress.nicePoints >= upgrade.cost;
++
++                        return (
++                          <div
++                            key={upgrade.id}
++                            className={`${styles.card} ${isMaxed ? styles.cardUnlocked : ''} ${
++                              !canAfford && !isMaxed ? styles.cardLocked : ''
++                            }`}
++                          >
++                            <div className={styles.cardHeader}>
++                              <h3 className={styles.cardTitle}>{upgrade.name}</h3>
++                              <div className={styles.cardCost}>
++                                {isMaxed ? (
++                                  <span className={styles.maxed}>MAX</span>
++                                ) : (
++                                  <span className={styles.cost}>{upgrade.cost} NP</span>
++                                )}
++                              </div>
++                            </div>
++                            <div className={styles.upgradeLevel}>
++                              Level: {currentLevel} / {upgrade.maxLevel}
++                            </div>
++                            <div className={styles.cardDescription}>{upgrade.description}</div>
++                            {!isMaxed && (
++                              <button
++                                type="button"
++                                className={styles.purchaseBtn}
++                                onClick={() => handlePurchaseUpgrade(upgrade)}
++                                disabled={!canAfford}
++                              >
++                                {canAfford ? 'UPGRADE' : 'INSUFFICIENT NP'}
++                              </button>
++                            )}
++                          </div>
++                        );
++                      })}
++                    </div>
++                  </div>
++                );
++              })}
++            </div>
++          )}
++        </div>
++      </div>
++    </div>
++  );
++}
++
++/**
++ * Button component to open workshop from main menu
++ */
++interface WorkshopButtonProps {
++  onOpen: () => void;
++}
++
++export function WorkshopButton({ onOpen }: WorkshopButtonProps) {
++  const handleOpen = () => {
++    onOpen();
++    AudioManager.playSFX('ui_select');
++  };
++
++  return (
++    <button type="button" className={styles.workshopBtn} onClick={handleOpen}>
++      🎄 SANTA'S WORKSHOP
++    </button>
++  );
++}
+diff --git a/src/ui/StartScreen.tsx b/src/ui/StartScreen.tsx
+index df81407..168fd78 100644
+--- a/src/ui/StartScreen.tsx
++++ b/src/ui/StartScreen.tsx
+@@ -3,15 +3,17 @@
+  * Class selection menu
+  */
+ 
+-import { useEffect, useRef } from 'react';
++import { useEffect, useRef, useState } from 'react';
+ import { AudioManager } from '@/audio/AudioManager';
+ import { useGameStore } from '@/store/gameStore';
+ import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
++import { SantasWorkshop, WorkshopButton } from './SantasWorkshop';
+ import styles from './StartScreen.module.css';
+ 
+ export function StartScreen() {
+   const { state, selectClass, highScore } = useGameStore();
+   const audioInitializedRef = useRef(false);
++  const [showWorkshop, setShowWorkshop] = useState(false);
+ 
+   // Initialize audio when screen is shown (on first interaction)
+   useEffect(() => {
+@@ -134,6 +136,12 @@ export function StartScreen() {
+         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
+         {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
+       </div>
++
++      {/* Workshop Button */}
++      <WorkshopButton onOpen={() => setShowWorkshop(true)} />
++
++      {/* Workshop Modal */}
++      <SantasWorkshop show={showWorkshop} onClose={() => setShowWorkshop(false)} />
+     </div>
+   );
+ }

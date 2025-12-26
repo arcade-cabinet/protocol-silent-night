@@ -8,16 +8,37 @@ import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import type { BulletData } from '@/types';
+import type { BulletData, WeaponType } from '@/types';
+import { CONFIG } from '@/data';
 
-// Max bullets per type
-const MAX_CANNON_BULLETS = 30;
-const MAX_SMG_BULLETS = 60;
-const MAX_STAR_BULLETS = 45;
+// Max bullets per type from config
+const MAX_CANNON_BULLETS = CONFIG.BULLET_LIMITS.CANNON;
+const MAX_SMG_BULLETS = CONFIG.BULLET_LIMITS.SMG;
+const MAX_STAR_BULLETS = CONFIG.BULLET_LIMITS.STAR;
 
 // Reusable dummy object for matrix calculations
 const dummy = new THREE.Object3D();
 const zeroScale = new THREE.Vector3(0, 0, 0);
+
+// Map weapon types to visual categories
+function getVisualType(weaponType: WeaponType | undefined): 'cannon' | 'smg' | 'star' {
+  switch (weaponType) {
+    case 'cannon':
+    case 'ornament':
+    case 'snowball':
+      return 'cannon';
+    case 'smg':
+    case 'light_string':
+      return 'smg';
+    case 'star':
+    case 'jingle_bell':
+    case 'candy_cane':
+    case 'gingerbread':
+    case 'quantum_gift':
+    default:
+      return 'star';
+  }
+}
 
 export function Bullets() {
   const cannonRef = useRef<THREE.InstancedMesh>(null);
@@ -127,17 +148,24 @@ export function Bullets() {
             const enemyPos = (enemy.mesh as THREE.Object3D)?.position;
             if (enemyPos) {
               const dist = pos.distanceTo(enemyPos);
-              // Collision radius varies by bullet type
-              const hitRadius =
-                bullet.type === 'cannon' ? 1.8 : bullet.type === 'stars' ? 1.6 : 1.4;
+              // Collision radius varies by visual type and scale
+              const visualType = getVisualType(bullet.type);
+              const sizeScale = bullet.size || 1;
+              const baseRadius = visualType === 'cannon' ? 1.8 : visualType === 'star' ? 1.6 : 1.4;
+              const hitRadius = baseRadius * sizeScale;
+              
               if (dist < hitRadius) {
                 if (enemy.type === 'boss' && bossActive) {
                   damageBoss(bullet.damage);
                 } else {
                   damageEnemy(enemy.id, bullet.damage);
                 }
-                toRemove.push(bullet.id);
-                break;
+                
+                // Penetration check
+                if (!bullet.penetration) {
+                  toRemove.push(bullet.id);
+                  break;
+                }
               }
             }
           }
@@ -148,15 +176,16 @@ export function Bullets() {
 
       const activeBullets = updatedBullets.filter((b) => !toRemove.includes(b.id));
 
-      // Categorize bullets by type
+      // Categorize bullets by visual type
       const cannonBullets: BulletData[] = [];
       const smgBullets: BulletData[] = [];
       const starBullets: BulletData[] = [];
 
       for (const bullet of activeBullets) {
-        if (bullet.type === 'cannon') {
+        const visualType = getVisualType(bullet.type);
+        if (visualType === 'cannon') {
           cannonBullets.push(bullet);
-        } else if (bullet.type === 'smg') {
+        } else if (visualType === 'smg') {
           smgBullets.push(bullet);
         } else {
           starBullets.push(bullet);
@@ -188,22 +217,26 @@ export function Bullets() {
       };
 
       // Update Cannon bullets
-      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (_, d) => {
+      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (bullet, d) => {
         d.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
-        d.scale.setScalar(1 + Math.sin(time * 10) * 0.1); // Pulsing
+        const baseScale = 1 + Math.sin(time * 10) * 0.1;
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.setScalar(baseScale * sizeMultiplier);
       });
 
       // Update SMG bullets
       updateInstanceMesh(smgRef, smgBullets, MAX_SMG_BULLETS, (bullet, d) => {
         lookAtVecRef.current.copy((bullet.mesh as THREE.Object3D).position).add(bullet.direction);
         d.lookAt(lookAtVecRef.current);
-        d.scale.set(1, 1, 1.5); // Elongated for motion blur effect
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.set(sizeMultiplier, sizeMultiplier, 1.5 * sizeMultiplier);
       });
 
       // Update Star bullets
-      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (_, d) => {
+      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (bullet, d) => {
         d.rotation.set(0, 0, time * 15); // Fast spin
-        d.scale.setScalar(1);
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.setScalar(sizeMultiplier);
       });
 
       return activeBullets;

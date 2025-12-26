@@ -1,0 +1,28 @@
+{
+  "default": {
+    "lighting": {
+      "ambient": { "intensity": 0.1, "color": "#ffffff" },
+      "moonlight": {
+        "color": "#4455ff",
+        "intensity": 1.0,
+        "position": [-20, 50, -20],
+        "animation": { "intensityRange": [0.8, 1.2], "speed": 0.5 }
+      },
+      "rim": { "color": "#00ffcc", "intensity": 0.3, "position": [20, 30, 40] },
+      "hemisphere": { "skyColor": "#0a0a20", "groundColor": "#000000", "intensity": 0.4 },
+      "fog": { "color": "#050505", "density": 0.025 }
+    },
+    "sky": {
+      "sunAngle": 10,
+      "sunIntensity": 0.1,
+      "ambientLight": 0.2,
+      "starVisibility": 0.8,
+      "fogDensity": 0.3,
+      "weatherIntensity": 0.2,
+      "volumetricFog": { "color": "#0a0a20", "density": 0.015, "height": 20 }
+    },
+    "postProcessing": {
+      "bloom": { "luminanceThreshold": 0.2, "luminanceSmoothing": 0.9, "intensity": 1.2, "radius": 0.5 }
+    }
+  }
+}

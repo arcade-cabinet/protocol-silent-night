@@ -1,0 +1,252 @@
+diff --git a/src/game/CameraController.tsx b/src/game/CameraController.tsx
+index 611d7b9..d7fd766 100644
+--- a/src/game/CameraController.tsx
++++ b/src/game/CameraController.tsx
+@@ -18,6 +18,7 @@ const MAX_ZOOM = 2.0;
+ 
+ const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
+ const LOOK_TARGET = new THREE.Vector3();
++const ORIGIN = new THREE.Vector3(0, 0, 0);
+ 
+ export function CameraController() {
+   const { camera } = useThree();
+@@ -146,7 +147,7 @@ export function CameraController() {
+     if (state === 'MENU' || state === 'BRIEFING') {
+       // Menu camera - static elevated view with slow rotation
+       camera.position.lerp(MENU_CAMERA_POS, delta * 2);
+-      camera.lookAt(0, 0, 0);
++      camera.lookAt(ORIGIN);
+       return;
+     }
+ 
+@@ -155,7 +156,8 @@ export function CameraController() {
+     const cameraDistance = DEFAULT_CAMERA_DISTANCE * zoomRef.current;
+ 
+     // Calculate target position (following player + gyro offset)
+-    targetRef.current.set(
++    const target = targetRef.current;
++    target.set(
+       playerPosition.x + gyroOffsetRef.current.x,
+       cameraHeight,
+       playerPosition.z + cameraDistance + gyroOffsetRef.current.z
+@@ -163,9 +165,9 @@ export function CameraController() {
+ 
+     // Apply screen shake
+     if (screenShake > 0.01) {
+-      targetRef.current.x += (Math.random() - 0.5) * screenShake * 2;
+-      targetRef.current.y += (Math.random() - 0.5) * screenShake * 2;
+-      targetRef.current.z += (Math.random() - 0.5) * screenShake * 2;
++      target.x += (Math.random() - 0.5) * screenShake * 2;
++      target.y += (Math.random() - 0.5) * screenShake * 2;
++      target.z += (Math.random() - 0.5) * screenShake * 2;
+ 
+       // Decay shake using getState to avoid re-render cycles
+       const currentShake = useGameStore.getState().screenShake;
+@@ -173,7 +175,7 @@ export function CameraController() {
+     }
+ 
+     // Smooth follow
+-    camera.position.lerp(targetRef.current, LERP_SPEED * delta);
++    camera.position.lerp(target, LERP_SPEED * delta);
+ 
+     // Look at player (slightly ahead)
+     LOOK_TARGET.set(playerPosition.x, 0, playerPosition.z);
+diff --git a/src/game/Enemies.tsx b/src/game/Enemies.tsx
+index d147d79..de1aa54 100644
+--- a/src/game/Enemies.tsx
++++ b/src/game/Enemies.tsx
+@@ -184,7 +184,7 @@ export function Enemies() {
+   );
+ }
+ 
+-// Boss renderer component - extracted from IIFE for clarity
++// Boss renderer component
+ function BossRenderer({
+   enemies,
+   bossHp,
+@@ -196,9 +196,15 @@ function BossRenderer({
+ }) {
+   const bossEnemy = enemies.find((e) => e.type === 'boss');
+   const bossPos = bossEnemy?.mesh.position ?? null;
++  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
+ 
+   return (
+-    <BossMesh position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]} hp={bossHp} maxHp={bossMaxHp} />
++    <BossMesh
++      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
++      rotation={bossRotation}
++      hp={bossHp}
++      maxHp={bossMaxHp}
++    />
+   );
+ }
+ 
+@@ -225,13 +231,16 @@ function MinionMesh({
+   const isHurt = hp < maxHp * 0.5;
+   const isCritical = hp < maxHp * 0.25;
+ 
+-  useFrame((state) => {
++  useFrame((state, delta) => {
+     const time = state.clock.elapsedTime;
+     const uniqueOffset = position[0] * 0.1 + position[2] * 0.1; // Unique per enemy
+ 
+     if (groupRef.current) {
+-      // Apply the rotation from the parent
+-      groupRef.current.rotation.y = rotation;
++      // Smoothly rotate towards the target rotation
++      // Use lerpAngle for smooth wrapping rotation
++      const currentRot = groupRef.current.rotation.y;
++      groupRef.current.rotation.y = THREE.MathUtils.lerp(currentRot, rotation, delta * 10);
++      
+       // Slight sway
+       groupRef.current.rotation.z = Math.sin(time * 3 + uniqueOffset) * 0.05;
+     }
+@@ -470,13 +479,16 @@ function MinionMesh({
+ // Boss (Krampus-Prime) mesh component
+ function BossMesh({
+   position,
++  rotation,
+   hp,
+   maxHp,
+ }: {
+   position: [number, number, number];
++  rotation: number;
+   hp: number;
+   maxHp: number;
+ }) {
++  const groupRef = useRef<THREE.Group>(null);
+   const coreRef = useRef<THREE.Mesh>(null);
+   const ring1Ref = useRef<THREE.Mesh>(null);
+   const ring2Ref = useRef<THREE.Mesh>(null);
+@@ -487,9 +499,15 @@ function BossMesh({
+   const intensity = 2 + (1 - hpRatio) * 3; // Gets more intense as damaged
+   const pulseSpeed = 1 + (1 - hpRatio) * 2; // Faster pulse when low HP
+ 
+-  useFrame((state) => {
++  useFrame((state, delta) => {
+     const time = state.clock.elapsedTime;
+ 
++    if (groupRef.current) {
++      // Smoothly rotate towards the target rotation
++      const currentRot = groupRef.current.rotation.y;
++      groupRef.current.rotation.y = THREE.MathUtils.lerp(currentRot, rotation, delta * 5);
++    }
++
+     if (coreRef.current) {
+       coreRef.current.rotation.x = time * 0.5;
+       coreRef.current.rotation.y = time * 0.3;
+@@ -521,7 +539,7 @@ function BossMesh({
+   });
+ 
+   return (
+-    <group position={position}>
++    <group position={position} ref={groupRef}>
+       {/* Core */}
+       <mesh ref={coreRef} castShadow>
+         <dodecahedronGeometry args={[2]} />
+diff --git a/src/store/gameStore.ts b/src/store/gameStore.ts
+index 61d32a5..121b612 100644
+--- a/src/store/gameStore.ts
++++ b/src/store/gameStore.ts
+@@ -29,6 +29,7 @@ interface GameStore {
+     objective: string;
+     intel: string[];
+   };
++  getBriefingLines: () => { label: string; text: string; accent?: boolean; warning?: boolean }[];
+ 
+   // Player
+   playerClass: PlayerClassConfig | null;
+@@ -171,7 +172,7 @@ const initialState = {
+       'Neutralize Krampus-Prime command unit',
+       'Defeat 10 Grinch-Bots to draw out Krampus-Prime',
+     ],
+-  },
++  } as const,
+   playerClass: null,
+   playerHp: 100,
+   playerMaxHp: 100,
+@@ -214,6 +215,31 @@ declare global {
+ export const useGameStore = create<GameStore>((set, get) => ({
+   ...initialState,
+ 
++  getBriefingLines: () => {
++    const { missionBriefing, playerClass } = get();
++    const lines = [
++      { label: 'OPERATION', text: missionBriefing.title, accent: true },
++      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
++      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
++    ];
++
++    // Add intel lines
++    for (const [index, intel] of missionBriefing.intel.entries()) {
++      const label =
++        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
++      lines.push({ label, text: intel });
++    }
++
++    // Add final warning
++    lines.push({
++      label: 'WARNING',
++      text: 'Hostiles are aggressive - engage on sight',
++      warning: true,
++    });
++
++    return lines;
++  },
++
+   setState: (state) => set({ state }),
+ 
+   selectClass: (type) => {
+diff --git a/src/types/index.ts b/src/types/index.ts
+index b69f963..2641cee 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -124,7 +124,7 @@ export interface BulletData extends EntityData {
+   /** Travel speed in units per second */
+   speed: number;
+   /** Weapon type that fired this bullet */
+-  type?: 'cannon' | 'smg' | 'stars';
++  type: 'cannon' | 'smg' | 'stars';
+ }
+ 
+ /**
+diff --git a/src/ui/MissionBriefing.tsx b/src/ui/MissionBriefing.tsx
+index 797994c..9b9fc3d 100644
+--- a/src/ui/MissionBriefing.tsx
++++ b/src/ui/MissionBriefing.tsx
+@@ -16,33 +16,11 @@ interface BriefingLine {
+ }
+ 
+ export function MissionBriefing() {
+-  const { state, setState, playerClass, missionBriefing } = useGameStore();
++  const { state, setState, getBriefingLines } = useGameStore();
+   const [currentLine, setCurrentLine] = useState(0);
+   const [showButton, setShowButton] = useState(false);
+ 
+-  const briefingLines = useMemo(() => {
+-    const lines: BriefingLine[] = [
+-      { label: 'OPERATION', text: missionBriefing.title, accent: true },
+-      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
+-      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
+-    ];
+-
+-    // Add intel lines from store
+-    for (const [index, intel] of missionBriefing.intel.entries()) {
+-      const label =
+-        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+-      lines.push({ label, text: intel });
+-    }
+-
+-    // Add final warning
+-    lines.push({
+-      label: 'WARNING',
+-      text: 'Hostiles are aggressive - engage on sight',
+-      warning: true,
+-    });
+-
+-    return lines;
+-  }, [playerClass, missionBriefing]);
++  const briefingLines = useMemo(() => getBriefingLines(), [getBriefingLines]);
+ 
+   useEffect(() => {
+     if (state !== 'BRIEFING') return;

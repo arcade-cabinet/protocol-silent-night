@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CONFIG, PLAYER_CLASSES, type PlayerClassType } from '@/types';
+import { PLAYER_CLASSES, CONFIG } from '@/data';
+import type { PlayerClassType } from '@/types';
 
 describe('Game Constants', () => {
   describe('CONFIG', () => {
@@ -19,15 +20,16 @@ describe('Game Constants', () => {
       expect(CONFIG.SPAWN_INTERVAL).toBe(2500);
     });
 
-    it('should have color palette', () => {
-      expect(CONFIG.COLORS.SANTA).toBe(0xff0044);
-      expect(CONFIG.COLORS.ELF).toBe(0x00ffcc);
-      expect(CONFIG.COLORS.BUMBLE).toBe(0xeeeeee);
-      expect(CONFIG.COLORS.ENEMY_MINION).toBe(0x00ff00);
-      expect(CONFIG.COLORS.ENEMY_BOSS).toBe(0xff0044);
-      expect(CONFIG.COLORS.BULLET_PLAYER).toBe(0xffffaa);
-      expect(CONFIG.COLORS.BULLET_ENEMY).toBe(0xff0000);
-    });
+  it('should have color palette', () => {
+    // JSON colors are strings like "#ff0044"
+    expect(CONFIG.COLORS.SANTA).toBe('#ff0044');
+    expect(CONFIG.COLORS.ELF).toBe('#00ffcc');
+    expect(CONFIG.COLORS.BUMBLE).toBe('#eeeeee');
+    expect(CONFIG.COLORS.ENEMY_MINION).toBe('#00ff00');
+    expect(CONFIG.COLORS.ENEMY_BOSS).toBe('#ff0044');
+    expect(CONFIG.COLORS.BULLET_PLAYER).toBe('#ffffaa');
+    expect(CONFIG.COLORS.BULLET_ENEMY).toBe('#ff0000');
+  });
   });
 
   describe('PLAYER_CLASSES', () => {
@@ -39,7 +41,7 @@ describe('Game Constants', () => {
     });
 
     describe('Santa (Mecha-Santa)', () => {
-      const santa = PLAYER_CLASSES.santa;
+      const santa = PLAYER_CLASSES.santa as any;
 
       it('should have correct basic properties', () => {
         expect(santa.type).toBe('santa');
@@ -64,13 +66,13 @@ describe('Game Constants', () => {
       });
 
       it('should have red fur colors', () => {
-        expect(santa.furColor.base).toEqual([0.5, 0.05, 0.05]);
-        expect(santa.furColor.tip).toEqual([0.8, 0.2, 0.2]);
+        expect(santa.furOptions.baseColor).toBe('#cc1919');
+        expect(santa.furOptions.tipColor).toBe('#ff4d4d');
       });
     });
 
     describe('Elf (Cyber-Elf)', () => {
-      const elf = PLAYER_CLASSES.elf;
+      const elf = PLAYER_CLASSES.elf as any;
 
       it('should have correct basic properties', () => {
         expect(elf.type).toBe('elf');
@@ -95,8 +97,8 @@ describe('Game Constants', () => {
       });
 
       it('should have cyan fur colors', () => {
-        expect(elf.furColor.base).toEqual([0.0, 0.3, 0.25]);
-        expect(elf.furColor.tip).toEqual([0.2, 0.6, 0.5]);
+        expect(elf.furOptions.baseColor).toBe('#006659');
+        expect(elf.furOptions.tipColor).toBe('#33ccb3');
       });
 
       it('should be fastest character', () => {
@@ -111,7 +113,7 @@ describe('Game Constants', () => {
     });
 
     describe('Bumble (The Bumble)', () => {
-      const bumble = PLAYER_CLASSES.bumble;
+      const bumble = PLAYER_CLASSES.bumble as any;
 
       it('should have correct basic properties', () => {
         expect(bumble.type).toBe('bumble');
@@ -136,8 +138,8 @@ describe('Game Constants', () => {
       });
 
       it('should have white fur colors', () => {
-        expect(bumble.furColor.base).toEqual([0.7, 0.7, 0.7]);
-        expect(bumble.furColor.tip).toEqual([1.0, 1.0, 1.0]);
+        expect(bumble.furOptions.baseColor).toBe('#d9d9d9');
+        expect(bumble.furOptions.tipColor).toBe('#ffffff');
       });
 
       it('should be largest character', () => {

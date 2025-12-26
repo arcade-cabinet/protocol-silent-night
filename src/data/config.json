@@ -1,0 +1,20 @@
+{
+  "WORLD_SIZE": 80,
+  "WAVE_REQ": 10,
+  "MAX_MINIONS": 12,
+  "SPAWN_INTERVAL": 2500,
+  "BULLET_LIMITS": {
+    "CANNON": 30,
+    "SMG": 60,
+    "STAR": 45
+  },
+  "COLORS": {
+    "SANTA": "#ff0044",
+    "ELF": "#00ffcc",
+    "BUMBLE": "#eeeeee",
+    "ENEMY_MINION": "#00ff00",
+    "ENEMY_BOSS": "#ff0044",
+    "BULLET_PLAYER": "#ffffaa",
+    "BULLET_ENEMY": "#ff0000"
+  }
+}

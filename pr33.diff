@@ -1,0 +1,1508 @@
+diff --git a/e2e/character-skins.spec.ts b/e2e/character-skins.spec.ts
+new file mode 100644
+index 0000000..3aea4d6
+--- /dev/null
++++ b/e2e/character-skins.spec.ts
+@@ -0,0 +1,378 @@
++import { test, expect } from '@playwright/test';
++
++/**
++ * Character Skins System E2E Tests for Protocol: Silent Night
++ * 
++ * Tests the character skin selection system including:
++ * - Skin selector UI display
++ * - Unlocking skins with Nice Points
++ * - Visual rendering of different skins
++ * - Skin selection persistence
++ * 
++ * Requires: PLAYWRIGHT_MCP=true for full WebGL/canvas testing
++ */
++
++// Check if running with full MCP capabilities
++const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
++
++test.describe('Character Skins System Tests', () => {
++  test.beforeEach(async ({ page }) => {
++    // Listen for console errors
++    page.on('console', msg => {
++      if (msg.type() === 'error') {
++        console.log(`Console error: ${msg.text()}`);
++      }
++    });
++    
++    await page.goto('/');
++    
++    // Wait for game to load
++    await page.waitForTimeout(3000);
++  });
++
++  // ============================================
++  // Skin Selector UI Tests
++  // ============================================
++
++  test('should display skin selector when character is selected', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Skin selector modal should appear
++    await expect(page.getByText(/SELECT SKIN/i)).toBeVisible({ timeout: 5000 });
++    
++    // Check that Nice Points are displayed
++    await expect(page.getByText(/NICE POINTS/i)).toBeVisible();
++    
++    console.log('✓ Skin selector UI displayed');
++  });
++
++  test('should show all 3 Santa skins with correct names', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Check all skin names are visible
++    await expect(page.getByText('Classic Red')).toBeVisible();
++    await expect(page.getByText('Arctic Camo')).toBeVisible();
++    await expect(page.getByText('Gold Edition')).toBeVisible();
++    
++    console.log('✓ All Santa skins displayed');
++  });
++
++  test('should show all 3 Elf skins with correct names', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Elf
++    const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
++    await elfButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Check all skin names are visible
++    await expect(page.getByText('Forest Green')).toBeVisible();
++    await expect(page.getByText('Neon Cyan')).toBeVisible();
++    await expect(page.getByText('Shadow Ops')).toBeVisible();
++    
++    console.log('✓ All Elf skins displayed');
++  });
++
++  test('should show all 3 Bumble skins with correct names', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Bumble
++    const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
++    await bumbleButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Check all skin names are visible
++    await expect(page.getByText('Classic White')).toBeVisible();
++    await expect(page.getByText('Midnight Black')).toBeVisible();
++    await expect(page.getByText('Crystal Blue')).toBeVisible();
++    
++    console.log('✓ All Bumble skins displayed');
++  });
++
++  test('should show default skins as unlocked', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Classic Red should show UNLOCKED badge (it's free)
++    await expect(page.getByText('UNLOCKED')).toBeVisible();
++    
++    console.log('✓ Default skins shown as unlocked');
++  });
++
++  test('should show locked skins with Nice Point costs', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Premium skins should show cost
++    await expect(page.getByText(/500 NP/i)).toBeVisible();
++    await expect(page.getByText(/1000 NP/i)).toBeVisible();
++    
++    console.log('✓ Locked skins show Nice Point costs');
++  });
++
++  test('should close skin selector and start game', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Click continue button
++    const continueButton = page.getByRole('button', { name: /CONTINUE/i });
++    await expect(continueButton).toBeVisible();
++    await continueButton.click();
++    
++    // Should see mission briefing
++    await expect(page.getByRole('button', { name: /COMMENCE OPERATION/i })).toBeVisible({ timeout: 5000 });
++    
++    console.log('✓ Skin selector closes and game proceeds');
++  });
++
++  // ============================================
++  // Skin Unlock Tests (with Nice Points)
++  // ============================================
++
++  test('should unlock skin when player has enough Nice Points', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Give player Nice Points via console
++    await page.evaluate(() => {
++      if (window.useGameStore) {
++        const store = window.useGameStore.getState();
++        store.earnNicePoints(1000);
++      }
++    });
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Check that Nice Points are displayed (should be 1000)
++    await expect(page.getByText(/1000/i)).toBeVisible();
++    
++    // Find and click Arctic Camo skin (costs 500 NP)
++    const arcticSkin = page.locator('button:has-text("Arctic Camo")');
++    await arcticSkin.click();
++    
++    await page.waitForTimeout(500);
++    
++    // Skin should now be selected (check for checkmark or selected state)
++    // The skin card should be selected
++    const selectedSkin = page.locator('.selected:has-text("Arctic Camo")');
++    await expect(selectedSkin).toBeVisible({ timeout: 2000 });
++    
++    console.log('✓ Skin unlocked with Nice Points');
++  });
++
++  test('should not unlock skin when player lacks Nice Points', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Ensure player has 0 Nice Points
++    await page.evaluate(() => {
++      if (window.useGameStore) {
++        const store = window.useGameStore.getState();
++        // Reset to 0
++        store.updateMetaProgress((data: any) => ({ ...data, nicePoints: 0 }));
++      }
++    });
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Try to click expensive skin (Gold Edition - 1000 NP)
++    const goldSkin = page.locator('button:has-text("Gold Edition")');
++    
++    // Button should be disabled
++    await expect(goldSkin).toBeDisabled();
++    
++    console.log('✓ Cannot unlock skin without enough Nice Points');
++  });
++
++  // ============================================
++  // Visual Rendering Tests
++  // ============================================
++
++  test('should render Santa with Classic Red skin by default', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Select Santa with default skin
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Continue with default skin
++    const continueButton = page.getByRole('button', { name: /CONTINUE/i });
++    await continueButton.click();
++    
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 5000 });
++    await commenceButton.click();
++    
++    // Wait for game to render
++    await page.waitForTimeout(2000);
++    
++    // HUD should be visible indicating game is running
++    await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible();
++    
++    console.log('✓ Santa rendered with Classic Red skin');
++  });
++
++  test('should render different skins for each character', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    const characters = ['MECHA-SANTA', 'CYBER-ELF', 'BUMBLE'];
++    
++    for (const character of characters) {
++      console.log(`\nTesting ${character} with default skin...`);
++      
++      // Reload page for fresh test
++      await page.reload();
++      await page.waitForTimeout(3000);
++      
++      // Select character
++      const button = page.getByRole('button', { name: new RegExp(character, 'i') });
++      await expect(button).toBeVisible({ timeout: 15000 });
++      await button.click();
++      
++      await page.waitForTimeout(1000);
++      
++      // Continue with default skin
++      const continueButton = page.getByRole('button', { name: /CONTINUE/i });
++      await continueButton.click();
++      
++      // Start game
++      const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++      await expect(commenceButton).toBeVisible({ timeout: 5000 });
++      await commenceButton.click();
++      
++      // Wait for game to render
++      await page.waitForTimeout(2000);
++      
++      // Verify game is running
++      await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible();
++      
++      console.log(`  ✓ ${character} rendered successfully`);
++    }
++    
++    console.log('\n✓ All characters render with default skins');
++  });
++
++  // ============================================
++  // Skin Selection Visual Snapshot Tests
++  // ============================================
++
++  test('should capture skin selector UI for Santa', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    // Give player some Nice Points to show affordable/expensive states
++    await page.evaluate(() => {
++      if (window.useGameStore) {
++        const store = window.useGameStore.getState();
++        store.earnNicePoints(600);
++      }
++    });
++    
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await santaButton.click();
++    
++    await page.waitForTimeout(1000);
++    
++    // Wait for skin selector to be fully visible
++    await expect(page.getByText(/SELECT SKIN/i)).toBeVisible();
++    await page.waitForTimeout(500);
++    
++    // Take screenshot of skin selector
++    await page.screenshot({ path: 'screenshots/santa-skin-selector.png', fullPage: false });
++    
++    console.log('✓ Captured Santa skin selector screenshot');
++  });
++
++  test('should capture skin selector UI for all characters', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++    
++    const characters = [
++      { name: 'MECHA-SANTA', filename: 'santa' },
++      { name: 'CYBER-ELF', filename: 'elf' },
++      { name: 'BUMBLE', filename: 'bumble' }
++    ];
++    
++    // Give player Nice Points
++    await page.evaluate(() => {
++      if (window.useGameStore) {
++        const store = window.useGameStore.getState();
++        store.earnNicePoints(1500);
++      }
++    });
++    
++    for (const char of characters) {
++      console.log(`\nCapturing skin selector for ${char.name}...`);
++      
++      if (char.name !== 'MECHA-SANTA') {
++        await page.reload();
++        await page.waitForTimeout(3000);
++        
++        // Re-add Nice Points after reload
++        await page.evaluate(() => {
++          if (window.useGameStore) {
++            const store = window.useGameStore.getState();
++            store.earnNicePoints(1500);
++          }
++        });
++      }
++      
++      // Select character
++      const button = page.getByRole('button', { name: new RegExp(char.name, 'i') });
++      await expect(button).toBeVisible({ timeout: 15000 });
++      await button.click();
++      
++      await page.waitForTimeout(1000);
++      
++      // Wait for skin selector
++      await expect(page.getByText(/SELECT SKIN/i)).toBeVisible();
++      await page.waitForTimeout(500);
++      
++      // Take screenshot
++      await page.screenshot({ 
++        path: `screenshots/${char.filename}-skin-selector.png`, 
++        fullPage: false 
++      });
++      
++      console.log(`  ✓ Captured ${char.name} skin selector`);
++    }
++    
++    console.log('\n✓ All skin selector screenshots captured');
++  });
++});
+diff --git a/src/__tests__/unit/game/Bullets.test.tsx b/src/__tests__/unit/game/Bullets.test.tsx
+index 37c040a..6684255 100644
+--- a/src/__tests__/unit/game/Bullets.test.tsx
++++ b/src/__tests__/unit/game/Bullets.test.tsx
+@@ -19,6 +19,7 @@ describe('Bullets Component', () => {
+ 
+     // Use findAll and check if it has a count property which is characteristic of InstancedMesh
+     const instancedMeshes = renderer.scene.findAll(
++      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+       (node: any) => node.instance && node.instance.count !== undefined
+     );
+ 
+@@ -27,9 +28,12 @@ describe('Bullets Component', () => {
+ 
+     // Check counts
+     const cannon = instancedMeshes.find(
++      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+       (m: any) => m.instance.geometry.type === 'IcosahedronGeometry'
+     );
++    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+     const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry');
++    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+     const stars = instancedMeshes.find((m: any) => m.instance.geometry.type === 'ExtrudeGeometry');
+ 
+     if (cannon) expect(cannon.instance.count).toBe(30);
+@@ -96,6 +100,7 @@ describe('Bullets Component', () => {
+     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+     const renderer = (await ReactTestRenderer.create(<Bullets />)) as any;
+     const meshes = renderer.scene.findAll(
++      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+       (node: any) => node.instance && node.instance.count !== undefined
+     );
+ 
+diff --git a/src/__tests__/unit/game/CameraController.test.tsx b/src/__tests__/unit/game/CameraController.test.tsx
+index ccb22e9..589bc87 100644
+--- a/src/__tests__/unit/game/CameraController.test.tsx
++++ b/src/__tests__/unit/game/CameraController.test.tsx
+@@ -26,6 +26,7 @@ describe('CameraController Component', () => {
+     await renderer.advanceFrames(60, 0.1);
+ 
+     // Access camera from R3F state
++    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+     const camera = renderer.scene.instance.children[0]?.camera || (renderer.scene.allChildren.find((c: any) => c.instance.camera)?.instance.camera);
+     if (camera) {
+       expect(camera.position.x).toBeCloseTo(10, 0);
+diff --git a/src/__tests__/unit/game/Terrain.test.tsx b/src/__tests__/unit/game/Terrain.test.tsx
+index 7a2fbaf..e4f518a 100644
+--- a/src/__tests__/unit/game/Terrain.test.tsx
++++ b/src/__tests__/unit/game/Terrain.test.tsx
+@@ -24,6 +24,7 @@ describe('Terrain Component', () => {
+ 
+     // Check for instance.count to identify InstancedMesh
+     const instancedMeshes = renderer.scene.findAll(
++      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+       (node: any) => node.instance && node.instance.count !== undefined
+     );
+     expect(instancedMeshes.length).toBeGreaterThan(0);
+@@ -56,6 +57,7 @@ describe('Terrain Component', () => {
+     expect(state.obstacles.length).toBeGreaterThan(0);
+ 
+     // Check for meshes in the scene
++    // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+     const meshes = renderer.scene.findAll((node: any) => node.instance?.type === 'Mesh');
+     
+     // We expect one instanced mesh for terrain and one regular mesh for the obstacle
+@@ -70,6 +72,7 @@ describe('Terrain Component', () => {
+ 
+     // Spy on dispose methods of geometries and materials
+     const instancedMeshes = renderer.scene.findAll(
++      // biome-ignore lint/suspicious/noExplicitAny: test-renderer nodes have complex internal structures
+       (node: any) => node.instance && node.instance.count !== undefined
+     );
+     
+diff --git a/src/__tests__/unit/gameStore.test.ts b/src/__tests__/unit/gameStore.test.ts
+index c04b31d..d54e869 100644
+--- a/src/__tests__/unit/gameStore.test.ts
++++ b/src/__tests__/unit/gameStore.test.ts
+@@ -487,9 +487,9 @@ describe('GameStore - Meta Progression', () => {
+ 
+   it('should unlock skins', () => {
+     const { unlockSkin } = useGameStore.getState();
+-    unlockSkin('gold-santa');
++    unlockSkin('santa-gold');
+ 
+-    expect(useGameStore.getState().metaProgress.unlockedSkins).toContain('gold-santa');
++    expect(useGameStore.getState().metaProgress.unlockedSkins).toContain('santa-gold');
+   });
+ 
+   it('should upgrade permanent stats', () => {
+diff --git a/src/__tests__/unit/ui/StartScreen.test.tsx b/src/__tests__/unit/ui/StartScreen.test.tsx
+index 0eff80d..12f9fdc 100644
+--- a/src/__tests__/unit/ui/StartScreen.test.tsx
++++ b/src/__tests__/unit/ui/StartScreen.test.tsx
+@@ -82,6 +82,13 @@ describe('StartScreen Component', () => {
+     const santaButton = screen.getByRole('button', { name: /MECHA-SANTA/ });
+     await user.click(santaButton);
+ 
++    // After clicking Santa, skin selector should appear
++    expect(screen.getByText('SELECT SKIN')).toBeInTheDocument();
++    
++    // Click continue on skin selector
++    const continueButton = screen.getByRole('button', { name: /CONTINUE/ });
++    await user.click(continueButton);
++
+     const state = useGameStore.getState();
+     expect(state.playerClass?.type).toBe('santa');
+     expect(state.state).toBe('BRIEFING');
+@@ -94,6 +101,13 @@ describe('StartScreen Component', () => {
+     const elfButton = screen.getByRole('button', { name: /CYBER-ELF/ });
+     await user.click(elfButton);
+ 
++    // After clicking Elf, skin selector should appear
++    expect(screen.getByText('SELECT SKIN')).toBeInTheDocument();
++    
++    // Click continue on skin selector
++    const continueButton = screen.getByRole('button', { name: /CONTINUE/ });
++    await user.click(continueButton);
++
+     const state = useGameStore.getState();
+     expect(state.playerClass?.type).toBe('elf');
+     expect(state.state).toBe('BRIEFING');
+@@ -106,6 +120,13 @@ describe('StartScreen Component', () => {
+     const bumbleButton = screen.getByRole('button', { name: /BUMBLE/ });
+     await user.click(bumbleButton);
+ 
++    // After clicking Bumble, skin selector should appear
++    expect(screen.getByText('SELECT SKIN')).toBeInTheDocument();
++    
++    // Click continue on skin selector
++    const continueButton = screen.getByRole('button', { name: /CONTINUE/ });
++    await user.click(continueButton);
++
+     const state = useGameStore.getState();
+     expect(state.playerClass?.type).toBe('bumble');
+     expect(state.state).toBe('BRIEFING');
+@@ -134,8 +155,9 @@ describe('StartScreen Component', () => {
+   it('should have clickable character cards', () => {
+     render(<StartScreen />);
+ 
++    // Initially there are 3 character class buttons
+     const buttons = screen.getAllByRole('button');
+-    expect(buttons).toHaveLength(3);
++    expect(buttons.length).toBeGreaterThanOrEqual(3);
+ 
+     buttons.forEach((button) => {
+       expect(button).toHaveAttribute('type', 'button');
+diff --git a/src/characters/BumbleCharacter.tsx b/src/characters/BumbleCharacter.tsx
+index 2af1349..93389ce 100644
+--- a/src/characters/BumbleCharacter.tsx
++++ b/src/characters/BumbleCharacter.tsx
+@@ -15,7 +15,8 @@ import {
+ import { useFrame } from '@react-three/fiber';
+ import { useEffect, useMemo, useRef } from 'react';
+ import * as THREE from 'three';
+-import { PLAYER_CLASSES } from '@/types';
++import { useGameStore } from '@/store/gameStore';
++import { CHARACTER_SKINS, PLAYER_CLASSES, getDefaultSkin } from '@/types';
+ 
+ interface BumbleCharacterProps {
+   position?: [number, number, number];
+@@ -42,18 +43,23 @@ export function BumbleCharacter({
+   const furGroupsRef = useRef<THREE.Group[]>([]);
+ 
+   const config = PLAYER_CLASSES.bumble;
++  const selectedSkin = useGameStore((state) => state.selectedSkin);
++  
++  // Get skin config, defaulting to classic if none selected
++  const skinId = selectedSkin?.startsWith('bumble-') ? selectedSkin : getDefaultSkin('bumble');
++  const skinConfig = CHARACTER_SKINS[skinId];
+ 
+-  // Dense white fur for the Bumble
++  // Dense fur for the Bumble - using skin colors
+   const furOptions: FurOptions = useMemo(
+     () => ({
+-      baseColor: new THREE.Color(0.85, 0.85, 0.85), // White-gray base
+-      tipColor: new THREE.Color(1.0, 1.0, 1.0), // Pure white tips
++      baseColor: new THREE.Color(...skinConfig.furColor.base),
++      tipColor: new THREE.Color(...skinConfig.furColor.tip),
+       layerCount: 16, // Very dense fur
+       spacing: 0.035, // Longer fur
+       windStrength: 0.6,
+       gravityDroop: 0.05,
+     }),
+-    []
++    [skinConfig]
+   );
+ 
+   // Create articulated character using Strata
+@@ -61,7 +67,7 @@ export function BumbleCharacter({
+   useEffect(() => {
+     if (groupRef.current && !characterRef.current) {
+       const character = createCharacter({
+-        skinColor: config.color,
++        skinColor: skinConfig.color,
+         furOptions,
+         scale: config.scale,
+       });
+@@ -70,7 +76,7 @@ export function BumbleCharacter({
+       groupRef.current.add(character.root);
+ 
+       // Customize for Bumble appearance
+-      customizeBumbleAppearance(character.joints, config.scale);
++      customizeBumbleAppearance(character.joints, config.scale, skinConfig.color, skinConfig.accentColor || skinConfig.color);
+ 
+       // Cache fur groups for efficient updates
+       const furGroups: THREE.Group[] = [];
+@@ -93,9 +99,18 @@ export function BumbleCharacter({
+         furGroupsRef.current = [];
+       }
+     };
+-  }, [config.color, config.scale, furOptions]);
+-
+-  function customizeBumbleAppearance(joints: CharacterJoints, scale: number) {
++  }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
++
++  /**
++   * Customizes Bumble's appearance
++   * @param joints - Character joints
++   * @param scale - Character scale
++   * @param _primaryColor - Primary color (unused for Bumble)
++   * @param _accentColor - Accent color (unused for Bumble)
++   */
++  function customizeBumbleAppearance(joints: CharacterJoints, scale: number, _primaryColor: number, _accentColor: number) {
++    // Note: Bumble appearance is primarily defined by fur colors, which are applied via the fur options.
++    // Primary and accent colors are not used for additional customization on this character.
+     // Make hips larger for the Bumble's round body
+     if (joints.hips?.mesh) {
+       joints.hips.mesh.scale.set(1.4, 1.2, 1.3);
+diff --git a/src/characters/ElfCharacter.tsx b/src/characters/ElfCharacter.tsx
+index 17a89f6..4297f36 100644
+--- a/src/characters/ElfCharacter.tsx
++++ b/src/characters/ElfCharacter.tsx
+@@ -15,7 +15,8 @@ import {
+ import { useFrame } from '@react-three/fiber';
+ import { useEffect, useMemo, useRef } from 'react';
+ import * as THREE from 'three';
+-import { PLAYER_CLASSES } from '@/types';
++import { useGameStore } from '@/store/gameStore';
++import { CHARACTER_SKINS, PLAYER_CLASSES, getDefaultSkin } from '@/types';
+ 
+ interface ElfCharacterProps {
+   position?: [number, number, number];
+@@ -43,17 +44,22 @@ export function ElfCharacter({
+   const furGroupsRef = useRef<THREE.Group[]>([]);
+ 
+   const config = PLAYER_CLASSES.elf;
++  const selectedSkin = useGameStore((state) => state.selectedSkin);
++  
++  // Get skin config, defaulting to classic if none selected
++  const skinId = selectedSkin?.startsWith('elf-') ? selectedSkin : getDefaultSkin('elf');
++  const skinConfig = CHARACTER_SKINS[skinId];
+ 
+-  // Strata fur options for Elf's cyber-hair
++  // Strata fur options for Elf's cyber-hair - using skin colors
+   const furOptions: FurOptions = useMemo(
+     () => ({
+-      baseColor: new THREE.Color(0.0, 0.4, 0.35), // Cyan-teal base
+-      tipColor: new THREE.Color(0.2, 0.8, 0.7), // Lighter cyan tips
++      baseColor: new THREE.Color(...skinConfig.furColor.base),
++      tipColor: new THREE.Color(...skinConfig.furColor.tip),
+       layerCount: 6,
+       spacing: 0.012,
+       windStrength: 1.2, // More responsive
+     }),
+-    []
++    [skinConfig]
+   );
+ 
+   // Create articulated character using Strata
+@@ -70,7 +76,7 @@ export function ElfCharacter({
+       groupRef.current.add(character.root);
+ 
+       // Customize for Elf appearance
+-      customizeElfAppearance(character.joints, config.scale);
++      customizeElfAppearance(character.joints, config.scale, skinConfig.color, skinConfig.accentColor || skinConfig.color);
+ 
+       // Cache fur groups for efficient updates
+       const furGroups: THREE.Group[] = [];
+@@ -93,9 +99,17 @@ export function ElfCharacter({
+         furGroupsRef.current = [];
+       }
+     };
+-  }, [config.scale, furOptions]);
+-
+-  function customizeElfAppearance(joints: CharacterJoints, scale: number) {
++  }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
++
++  /**
++   * Customizes Elf's appearance
++   * @param joints - Character joints
++   * @param scale - Character scale
++   * @param primaryColor - Primary color for hair
++   * @param _accentColor - Accent color (reserved for future use)
++   */
++  function customizeElfAppearance(joints: CharacterJoints, scale: number, primaryColor: number, _accentColor: number) {
++    // Note: Elf primarily uses primaryColor for hair. Accent color not currently used but reserved for future details.
+     if (!joints.head?.mesh) return;
+ 
+     const headMesh = joints.head.mesh;
+@@ -156,9 +170,9 @@ export function ElfCharacter({
+     // Cyber hair (spiky mohawk style)
+     const hairGeo = new THREE.ConeGeometry(0.08 * scale, 0.18 * scale, 4);
+     const hairMat = new THREE.MeshStandardMaterial({
+-      color: 0x00aa88,
+-      emissive: 0x00ffcc,
+-      emissiveIntensity: 0.5,
++      color: primaryColor,
++      emissive: primaryColor,
++      emissiveIntensity: 0.4,
+     });
+ 
+     // Central mohawk spikes
+diff --git a/src/characters/SantaCharacter.tsx b/src/characters/SantaCharacter.tsx
+index 51093cd..ce4fda4 100644
+--- a/src/characters/SantaCharacter.tsx
++++ b/src/characters/SantaCharacter.tsx
+@@ -15,7 +15,8 @@ import {
+ import { useFrame } from '@react-three/fiber';
+ import { useEffect, useMemo, useRef } from 'react';
+ import * as THREE from 'three';
+-import { PLAYER_CLASSES } from '@/types';
++import { useGameStore } from '@/store/gameStore';
++import { CHARACTER_SKINS, PLAYER_CLASSES, getDefaultSkin } from '@/types';
+ 
+ interface SantaCharacterProps {
+   position?: [number, number, number];
+@@ -42,17 +43,22 @@ export function SantaCharacter({
+   const furGroupsRef = useRef<THREE.Group[]>([]);
+ 
+   const config = PLAYER_CLASSES.santa;
++  const selectedSkin = useGameStore((state) => state.selectedSkin);
++  
++  // Get skin config, defaulting to classic if none selected
++  const skinId = selectedSkin?.startsWith('santa-') ? selectedSkin : getDefaultSkin('santa');
++  const skinConfig = CHARACTER_SKINS[skinId];
+ 
+-  // Strata fur options for Santa's suit
++  // Strata fur options for Santa's suit - using skin colors
+   const furOptions: FurOptions = useMemo(
+     () => ({
+-      baseColor: new THREE.Color(0.8, 0.1, 0.1), // Red base
+-      tipColor: new THREE.Color(1.0, 0.3, 0.3), // Lighter red tips
++      baseColor: new THREE.Color(...skinConfig.furColor.base),
++      tipColor: new THREE.Color(...skinConfig.furColor.tip),
+       layerCount: 8,
+       spacing: 0.015,
+       windStrength: 0.3,
+     }),
+-    []
++    [skinConfig]
+   );
+ 
+   // Add Santa-specific details (hat, beard, belt, weapon)
+@@ -61,7 +67,7 @@ export function SantaCharacter({
+     if (groupRef.current && !characterRef.current) {
+       // Create the base character with Strata
+       const character = createCharacter({
+-        skinColor: config.color,
++        skinColor: skinConfig.color,
+         furOptions,
+         scale: config.scale,
+       });
+@@ -70,7 +76,7 @@ export function SantaCharacter({
+       groupRef.current.add(character.root);
+ 
+       // Customize for Santa appearance
+-      customizeSantaAppearance(character.joints, config.scale);
++      customizeSantaAppearance(character.joints, config.scale, skinConfig.color, skinConfig.accentColor || 0xffd700);
+ 
+       // Cache fur groups for efficient updates
+       const furGroups: THREE.Group[] = [];
+@@ -94,9 +100,9 @@ export function SantaCharacter({
+         furGroupsRef.current = [];
+       }
+     };
+-  }, [config.color, config.scale, furOptions]);
++  }, [config.scale, furOptions, skinConfig.color, skinConfig.accentColor]);
+ 
+-  function customizeSantaAppearance(joints: CharacterJoints, scale: number) {
++  function customizeSantaAppearance(joints: CharacterJoints, scale: number, primaryColor: number, accentColor: number) {
+     if (!joints.head?.mesh) return;
+ 
+     const headMesh = joints.head.mesh;
+@@ -125,8 +131,8 @@ export function SantaCharacter({
+     // Add hat
+     const hatGeo = new THREE.ConeGeometry(0.22 * scale, 0.4 * scale, 8);
+     const hatMat = new THREE.MeshStandardMaterial({
+-      color: config.color,
+-      emissive: config.color,
++      color: primaryColor,
++      emissive: primaryColor,
+       emissiveIntensity: 0.3,
+     });
+     const hat = new THREE.Mesh(hatGeo, hatMat);
+@@ -191,10 +197,10 @@ export function SantaCharacter({
+       // Belt buckle - ornate
+       const buckleGeo = new THREE.BoxGeometry(0.12 * scale, 0.1 * scale, 0.03);
+       const buckleMat = new THREE.MeshStandardMaterial({
+-        color: 0xffd700,
++        color: accentColor,
+         metalness: 0.95,
+         roughness: 0.1,
+-        emissive: 0xffa500,
++        emissive: accentColor,
+         emissiveIntensity: 0.2,
+       });
+       const buckle = new THREE.Mesh(buckleGeo, buckleMat);
+@@ -205,7 +211,7 @@ export function SantaCharacter({
+       const buckleDetailGeo = new THREE.BoxGeometry(0.06 * scale, 0.05 * scale, 0.015);
+       const buckleDetail = new THREE.Mesh(
+         buckleDetailGeo,
+-        new THREE.MeshBasicMaterial({ color: 0xffaa00 })
++        new THREE.MeshBasicMaterial({ color: accentColor })
+       );
+       buckleDetail.position.set(0, -0.15 * scale, 0.38 * scale);
+       joints.torso.mesh.add(buckleDetail);
+diff --git a/src/store/gameStore.ts b/src/store/gameStore.ts
+index 61d32a5..2e16585 100644
+--- a/src/store/gameStore.ts
++++ b/src/store/gameStore.ts
+@@ -12,8 +12,9 @@ import type {
+   PlayerClassConfig,
+   PlayerClassType,
+   RunProgressData,
++  SkinId,
+ } from '@/types';
+-import { CONFIG, PLAYER_CLASSES } from '@/types';
++import { CONFIG, PLAYER_CLASSES, getDefaultSkin } from '@/types';
+ import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
+ 
+ // Persistence keys
+@@ -32,11 +33,13 @@ interface GameStore {
+ 
+   // Player
+   playerClass: PlayerClassConfig | null;
++  selectedSkin: SkinId | null;
+   playerHp: number;
+   playerMaxHp: number;
+   playerPosition: THREE.Vector3;
+   playerRotation: number;
+   selectClass: (type: PlayerClassType) => void;
++  selectSkin: (skinId: SkinId) => void;
+   damagePlayer: (amount: number) => void;
+   setPlayerPosition: (position: THREE.Vector3) => void;
+   setPlayerRotation: (rotation: number) => void;
+@@ -51,7 +54,7 @@ interface GameStore {
+   earnNicePoints: (amount: number) => void;
+   spendNicePoints: (amount: number) => boolean;
+   unlockWeapon: (weaponId: string) => void;
+-  unlockSkin: (skinId: string) => void;
++  unlockSkin: (skinId: SkinId) => void;
+   upgradePermanent: (upgradeId: string) => void;
+   updateMetaProgress: (updater: (data: MetaProgressData) => MetaProgressData) => void;
+ 
+@@ -123,7 +126,7 @@ const loadMetaProgress = (): MetaProgressData => {
+     runsCompleted: 0,
+     bossesDefeated: 0,
+     unlockedWeapons: ['cannon', 'smg', 'star'], // Base weapons unlocked by default
+-    unlockedSkins: [],
++    unlockedSkins: ['santa-classic', 'elf-forest', 'bumble-classic'], // Default skins always unlocked
+     permanentUpgrades: {},
+     highScore: 0,
+     totalKills: 0,
+@@ -173,6 +176,7 @@ const initialState = {
+     ],
+   },
+   playerClass: null,
++  selectedSkin: null,
+   playerHp: 100,
+   playerMaxHp: 100,
+   playerPosition: new THREE.Vector3(0, 0, 0),
+@@ -218,8 +222,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
+ 
+   selectClass: (type) => {
+     const config = PLAYER_CLASSES[type];
++    const defaultSkin = getDefaultSkin(type);
+     set({
+       playerClass: config,
++      selectedSkin: defaultSkin,
+       playerHp: config.hp,
+       playerMaxHp: config.hp,
+       state: 'BRIEFING',
+@@ -237,6 +243,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
+     AudioManager.playSFX('ui_select');
+   },
+ 
++  selectSkin: (skinId) => {
++    set({ selectedSkin: skinId });
++    // Play UI select sound
++    AudioManager.playSFX('ui_select');
++  },
++
+   damagePlayer: (amount) => {
+     const { playerHp, state, metaProgress } = get();
+     if (state === 'GAME_OVER' || state === 'WIN') return;
+diff --git a/src/types/index.ts b/src/types/index.ts
+index b69f963..b72327f 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -16,6 +16,40 @@ export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' |
+  */
+ export type PlayerClassType = 'santa' | 'elf' | 'bumble';
+ 
++/**
++ * Character skin identifiers
++ */
++export type SkinId = 
++  | 'santa-classic' | 'santa-arctic' | 'santa-gold'
++  | 'elf-classic' | 'elf-neon' | 'elf-shadow'
++  | 'bumble-classic' | 'bumble-midnight' | 'bumble-crystal';
++
++/**
++ * Character skin configuration
++ * @interface SkinConfig
++ */
++export interface SkinConfig {
++  /** Unique skin identifier */
++  id: SkinId;
++  /** Character class this skin belongs to */
++  characterClass: PlayerClassType;
++  /** Display name for the skin */
++  name: string;
++  /** Nice Points cost to unlock (0 = default/free) */
++  cost: number;
++  /** Primary color as hex number */
++  color: number;
++  /** Secondary accent color */
++  accentColor?: number;
++  /** Fur rendering colors as RGB tuples (0-1 range) */
++  furColor: {
++    base: [number, number, number];
++    tip: [number, number, number];
++  };
++  /** Optional description */
++  description?: string;
++}
++
+ /**
+  * Configuration for a player character class
+  * @interface PlayerClassConfig
+@@ -312,3 +346,148 @@ export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
+     },
+   },
+ };
++
++/**
++ * Character skin definitions
++ * @constant
++ */
++export const CHARACTER_SKINS: Record<SkinId, SkinConfig> = {
++  // MECHA-SANTA Skins
++  'santa-classic': {
++    id: 'santa-classic',
++    characterClass: 'santa',
++    name: 'Classic Red',
++    cost: 0, // Default skin, always unlocked
++    color: 0xff0044,
++    accentColor: 0xffd700,
++    furColor: {
++      base: [0.5, 0.05, 0.05],
++      tip: [0.8, 0.2, 0.2],
++    },
++    description: 'Traditional red armor with gold accents',
++  },
++  'santa-arctic': {
++    id: 'santa-arctic',
++    characterClass: 'santa',
++    name: 'Arctic Camo',
++    cost: 500,
++    color: 0xccddff,
++    accentColor: 0x88aacc,
++    furColor: {
++      base: [0.7, 0.8, 0.9],
++      tip: [0.9, 0.95, 1.0],
++    },
++    description: 'Winter camouflage for stealth operations',
++  },
++  'santa-gold': {
++    id: 'santa-gold',
++    characterClass: 'santa',
++    name: 'Gold Edition',
++    cost: 1000,
++    color: 0xffd700,
++    accentColor: 0xffaa00,
++    furColor: {
++      base: [0.8, 0.6, 0.1],
++      tip: [1.0, 0.85, 0.3],
++    },
++    description: 'Prestigious gold plating for elite operators',
++  },
++
++  // CYBER-ELF Skins
++  'elf-classic': {
++    id: 'elf-classic',
++    characterClass: 'elf',
++    name: 'Forest Green',
++    cost: 0, // Default skin, always unlocked
++    color: 0x00cc66,
++    accentColor: 0x00ff88,
++    furColor: {
++      base: [0.0, 0.3, 0.15],
++      tip: [0.2, 0.6, 0.4],
++    },
++    description: 'Classic forest operations color scheme',
++  },
++  'elf-neon': {
++    id: 'elf-neon',
++    characterClass: 'elf',
++    name: 'Neon Cyan',
++    cost: 500,
++    color: 0x00ffcc,
++    accentColor: 0x00ffff,
++    furColor: {
++      base: [0.0, 0.5, 0.5],
++      tip: [0.3, 0.9, 0.9],
++    },
++    description: 'High-visibility cyberpunk aesthetic',
++  },
++  'elf-shadow': {
++    id: 'elf-shadow',
++    characterClass: 'elf',
++    name: 'Shadow Ops',
++    cost: 1000,
++    color: 0x1a1a2e,
++    accentColor: 0x6633cc,
++    furColor: {
++      base: [0.1, 0.1, 0.2],
++      tip: [0.3, 0.2, 0.5],
++    },
++    description: 'Covert operations stealth variant',
++  },
++
++  // THE BUMBLE Skins
++  'bumble-classic': {
++    id: 'bumble-classic',
++    characterClass: 'bumble',
++    name: 'Classic White',
++    cost: 0, // Default skin, always unlocked
++    color: 0xeeeeee,
++    accentColor: 0xffffff,
++    furColor: {
++      base: [0.7, 0.7, 0.7],
++      tip: [1.0, 1.0, 1.0],
++    },
++    description: 'Iconic white fur of the abominable snowman',
++  },
++  'bumble-midnight': {
++    id: 'bumble-midnight',
++    characterClass: 'bumble',
++    name: 'Midnight Black',
++    cost: 500,
++    color: 0x222222,
++    accentColor: 0x444444,
++    furColor: {
++      base: [0.1, 0.1, 0.1],
++      tip: [0.3, 0.3, 0.3],
++    },
++    description: 'Shadowy variant for night operations',
++  },
++  'bumble-crystal': {
++    id: 'bumble-crystal',
++    characterClass: 'bumble',
++    name: 'Crystal Blue',
++    cost: 1000,
++    color: 0x4466ff,
++    accentColor: 0x88aaff,
++    furColor: {
++      base: [0.3, 0.4, 0.8],
++      tip: [0.6, 0.7, 1.0],
++    },
++    description: 'Crystalline ice armor with blue glow',
++  },
++};
++
++/**
++ * Get skins for a specific character class
++ */
++export function getSkinsForCharacter(characterClass: PlayerClassType): SkinConfig[] {
++  return Object.values(CHARACTER_SKINS).filter(
++    (skin) => skin.characterClass === characterClass
++  );
++}
++
++/**
++ * Get default skin ID for a character class
++ */
++export function getDefaultSkin(characterClass: PlayerClassType): SkinId {
++  return `${characterClass}-classic` as SkinId;
++}
+diff --git a/src/ui/SkinSelector.module.css b/src/ui/SkinSelector.module.css
+new file mode 100644
+index 0000000..c395af2
+--- /dev/null
++++ b/src/ui/SkinSelector.module.css
+@@ -0,0 +1,242 @@
++.overlay {
++  position: fixed;
++  top: 0;
++  left: 0;
++  width: 100%;
++  height: 100%;
++  background: rgba(0, 0, 0, 0.95);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  z-index: 200;
++  animation: fadeIn 0.3s ease-out;
++}
++
++@keyframes fadeIn {
++  from {
++    opacity: 0;
++  }
++  to {
++    opacity: 1;
++  }
++}
++
++.modal {
++  background: linear-gradient(135deg, rgba(20, 20, 30, 0.98), rgba(10, 10, 20, 0.98));
++  border: 2px solid #00ffcc;
++  box-shadow: 0 0 40px rgba(0, 255, 200, 0.3);
++  padding: 30px;
++  max-width: 800px;
++  width: 90%;
++  max-height: 80vh;
++  overflow-y: auto;
++  clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
++  animation: slideUp 0.3s ease-out;
++}
++
++@keyframes slideUp {
++  from {
++    transform: translateY(30px);
++    opacity: 0;
++  }
++  to {
++    transform: translateY(0);
++    opacity: 1;
++  }
++}
++
++.header {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  margin-bottom: 30px;
++  padding-bottom: 20px;
++  border-bottom: 1px solid #333;
++}
++
++.title {
++  color: #00ffcc;
++  font-size: 1.8rem;
++  margin: 0;
++  letter-spacing: 3px;
++  text-shadow: 0 0 20px #00ffcc;
++}
++
++.points {
++  display: flex;
++  flex-direction: column;
++  align-items: flex-end;
++}
++
++.pointsLabel {
++  color: #666;
++  font-size: 0.7rem;
++  letter-spacing: 1px;
++  margin-bottom: 5px;
++}
++
++.pointsValue {
++  color: #ffd700;
++  font-size: 1.5rem;
++  font-weight: bold;
++  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
++}
++
++.skinGrid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
++  gap: 20px;
++  margin-bottom: 30px;
++}
++
++.skinCard {
++  background: linear-gradient(135deg, rgba(30, 30, 40, 0.9), rgba(20, 20, 30, 0.95));
++  border: 1px solid #333;
++  padding: 0;
++  cursor: pointer;
++  transition: 0.3s;
++  position: relative;
++  overflow: hidden;
++  clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
++}
++
++.skinCard:hover:not(:disabled),
++.skinCard:focus:not(:disabled) {
++  border-color: #00ffcc;
++  background: rgba(0, 255, 200, 0.05);
++  transform: translateY(-5px);
++  box-shadow: 0 5px 20px rgba(0, 255, 200, 0.2);
++  outline: none;
++}
++
++.skinCard.selected {
++  border-color: #00ffcc;
++  border-width: 2px;
++  box-shadow: 0 0 30px rgba(0, 255, 200, 0.3);
++}
++
++.skinCard.locked:disabled {
++  opacity: 0.5;
++  cursor: not-allowed;
++}
++
++.skinPreview {
++  width: 100%;
++  height: 150px;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  position: relative;
++  border-bottom: 1px solid #333;
++  /* backgroundColor is set via inline style in component */
++}
++
++.lockIcon {
++  font-size: 3rem;
++  opacity: 0.7;
++  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
++}
++
++.checkIcon {
++  position: absolute;
++  top: 10px;
++  right: 10px;
++  width: 30px;
++  height: 30px;
++  background: #00ffcc;
++  color: #000;
++  border-radius: 50%;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  font-weight: bold;
++  font-size: 1.2rem;
++  box-shadow: 0 0 15px rgba(0, 255, 200, 0.8);
++}
++
++.skinInfo {
++  padding: 15px;
++  text-align: center;
++}
++
++.skinName {
++  color: #fff;
++  font-size: 1rem;
++  font-weight: bold;
++  margin-bottom: 8px;
++  letter-spacing: 1px;
++}
++
++.skinDesc {
++  color: #666;
++  font-size: 0.75rem;
++  margin-bottom: 10px;
++  line-height: 1.4;
++}
++
++.skinCost {
++  font-size: 0.9rem;
++  font-weight: bold;
++  padding: 5px 10px;
++  border-radius: 3px;
++  display: inline-block;
++}
++
++.skinCost.affordable {
++  color: #00ffcc;
++  background: rgba(0, 255, 200, 0.1);
++  border: 1px solid #00ffcc;
++}
++
++.skinCost.expensive {
++  color: #ff4444;
++  background: rgba(255, 68, 68, 0.1);
++  border: 1px solid #ff4444;
++}
++
++.ownedBadge {
++  color: #ffd700;
++  font-size: 0.7rem;
++  font-weight: bold;
++  letter-spacing: 1px;
++  opacity: 0.7;
++}
++
++.closeButton {
++  width: 100%;
++  background: linear-gradient(135deg, #00ffcc, #00aa88);
++  border: none;
++  color: #000;
++  padding: 15px;
++  font-size: 1rem;
++  font-weight: bold;
++  letter-spacing: 2px;
++  cursor: pointer;
++  transition: 0.3s;
++  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
++}
++
++.closeButton:hover,
++.closeButton:focus {
++  background: linear-gradient(135deg, #00ffff, #00ccaa);
++  box-shadow: 0 0 20px rgba(0, 255, 200, 0.5);
++  outline: none;
++}
++
++@media (max-width: 768px) {
++  .modal {
++    padding: 20px;
++  }
++
++  .title {
++    font-size: 1.3rem;
++  }
++
++  .skinGrid {
++    grid-template-columns: 1fr;
++  }
++
++  .skinPreview {
++    height: 120px;
++  }
++}
+diff --git a/src/ui/SkinSelector.tsx b/src/ui/SkinSelector.tsx
+new file mode 100644
+index 0000000..7fb1985
+--- /dev/null
++++ b/src/ui/SkinSelector.tsx
+@@ -0,0 +1,115 @@
++/**
++ * Skin Selector Component
++ * Allows players to select and unlock character skins
++ */
++
++import { useGameStore } from '@/store/gameStore';
++import {
++  CHARACTER_SKINS,
++  type PlayerClassType,
++  type SkinId,
++  getSkinsForCharacter,
++} from '@/types';
++import styles from './SkinSelector.module.css';
++
++interface SkinSelectorProps {
++  characterClass: PlayerClassType;
++  onClose: () => void;
++}
++
++export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
++  const { selectedSkin, selectSkin, metaProgress, spendNicePoints, unlockSkin } = useGameStore();
++
++  const skins = getSkinsForCharacter(characterClass);
++  const unlockedSkins = metaProgress.unlockedSkins;
++  const nicePoints = metaProgress.nicePoints;
++
++  const handleSelectSkin = (skinId: SkinId) => {
++    const skin = CHARACTER_SKINS[skinId];
++    const isUnlocked = unlockedSkins.includes(skinId);
++
++    if (!isUnlocked) {
++      // Try to unlock
++      if (skin.cost <= nicePoints) {
++        if (spendNicePoints(skin.cost)) {
++          unlockSkin(skinId);
++          selectSkin(skinId);
++        }
++      }
++    } else {
++      // Already unlocked, just select
++      selectSkin(skinId);
++    }
++  };
++
++  return (
++    // biome-ignore lint/a11y/useSemanticElements: overlay is a common pattern for modals
++    <div
++      className={styles.overlay}
++      onClick={onClose}
++      onKeyDown={(e) => e.key === 'Escape' && onClose()}
++      role="button"
++      tabIndex={-1}
++      aria-label="Close skin selector"
++    >
++      {/* biome-ignore lint/a11y/noStaticElementInteractions: modal container stops propagation */}
++      <div
++        className={styles.modal}
++        onClick={(e) => e.stopPropagation()}
++        onKeyDown={(e) => e.stopPropagation()}
++        role="presentation"
++      >
++        <div className={styles.header}>
++          <h2 className={styles.title}>SELECT SKIN</h2>
++          <div className={styles.points}>
++            <span className={styles.pointsLabel}>NICE POINTS:</span>
++            <span className={styles.pointsValue}>{nicePoints}</span>
++          </div>
++        </div>
++
++        <div className={styles.skinGrid}>
++          {skins.map((skin) => {
++            const isUnlocked = unlockedSkins.includes(skin.id);
++            const isSelected = selectedSkin === skin.id;
++            const canAfford = nicePoints >= skin.cost;
++
++            return (
++              <button
++                key={skin.id}
++                type="button"
++                className={`${styles.skinCard} ${isSelected ? styles.selected : ''} ${
++                  !isUnlocked && !canAfford ? styles.locked : ''
++                }`}
++                onClick={() => handleSelectSkin(skin.id)}
++                disabled={!isUnlocked && !canAfford}
++              >
++                <div className={styles.skinPreview} style={{ backgroundColor: `#${skin.color.toString(16).padStart(6, '0')}` }}>
++                  {!isUnlocked && <div className={styles.lockIcon}>🔒</div>}
++                  {isSelected && <div className={styles.checkIcon}>✓</div>}
++                </div>
++                <div className={styles.skinInfo}>
++                  <div className={styles.skinName}>{skin.name}</div>
++                  {skin.description && (
++                    <div className={styles.skinDesc}>{skin.description}</div>
++                  )}
++                  {!isUnlocked && (
++                    <div className={`${styles.skinCost} ${canAfford ? styles.affordable : styles.expensive}`}>
++                      {skin.cost} NP
++                    </div>
++                  )}
++                  {isUnlocked && skin.cost > 0 && (
++                    <div className={styles.ownedBadge}>UNLOCKED</div>
++                  )}
++                </div>
++              </button>
++            );
++          })}
++        </div>
++
++        <button type="button" className={styles.closeButton} onClick={onClose}>
++          CONTINUE
++        </button>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/ui/StartScreen.tsx b/src/ui/StartScreen.tsx
+index df81407..6f21b3c 100644
+--- a/src/ui/StartScreen.tsx
++++ b/src/ui/StartScreen.tsx
+@@ -3,15 +3,18 @@
+  * Class selection menu
+  */
+ 
+-import { useEffect, useRef } from 'react';
++import { useEffect, useRef, useState } from 'react';
+ import { AudioManager } from '@/audio/AudioManager';
+ import { useGameStore } from '@/store/gameStore';
+ import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
++import { SkinSelector } from './SkinSelector';
+ import styles from './StartScreen.module.css';
+ 
+ export function StartScreen() {
+   const { state, selectClass, highScore } = useGameStore();
+   const audioInitializedRef = useRef(false);
++  const [showingSkinSelector, setShowingSkinSelector] = useState(false);
++  const [selectedClass, setSelectedClass] = useState<PlayerClassType | null>(null);
+ 
+   // Initialize audio when screen is shown (on first interaction)
+   useEffect(() => {
+@@ -52,8 +55,17 @@ export function StartScreen() {
+         console.warn('Audio initialization failed:', error);
+       });
+ 
+-    // Always proceed with class selection
+-    selectClass(type);
++    // Show skin selector first
++    setSelectedClass(type);
++    setShowingSkinSelector(true);
++  };
++
++  const handleCloseSkinSelector = () => {
++    setShowingSkinSelector(false);
++    // Proceed to game
++    if (selectedClass) {
++      selectClass(selectedClass);
++    }
+   };
+ 
+   return (
+@@ -134,6 +146,11 @@ export function StartScreen() {
+         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
+         {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
+       </div>
++
++      {/* Skin Selector Modal */}
++      {showingSkinSelector && selectedClass && (
++        <SkinSelector characterClass={selectedClass} onClose={handleCloseSkinSelector} />
++      )}
+     </div>
+   );
+ }
+diff --git a/src/ui/index.ts b/src/ui/index.ts
+index 6aa2ce5..c75cbd4 100644
+--- a/src/ui/index.ts
++++ b/src/ui/index.ts
+@@ -8,4 +8,5 @@ export { KillStreak } from './KillStreak';
+ export { LoadingScreen } from './LoadingScreen';
+ export { MessageOverlay } from './MessageOverlay';
+ export { MissionBriefing } from './MissionBriefing';
++export { SkinSelector } from './SkinSelector';
+ export { StartScreen } from './StartScreen';

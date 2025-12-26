@@ -1,0 +1,129 @@
+[
+  {
+    "id": "coal_fury",
+    "name": "Coal Fury",
+    "description": "+15% damage",
+    "icon": "🔥",
+    "rarity": "common",
+    "category": "offensive",
+    "maxStacks": 5,
+    "stats": { "damage": { "value": 0.15, "type": "percent" } }
+  },
+  {
+    "id": "rapid_fire",
+    "name": "Rapid Fire",
+    "description": "+20% fire rate",
+    "icon": "⚡",
+    "rarity": "common",
+    "category": "offensive",
+    "maxStacks": 4,
+    "stats": { "rof": { "value": 0.2, "type": "multiply" } }
+  },
+  {
+    "id": "frost_piercing",
+    "name": "Frost Piercing",
+    "description": "+25% critical chance",
+    "icon": "❄️",
+    "rarity": "rare",
+    "category": "offensive",
+    "maxStacks": 3,
+    "stats": { "critChance": { "value": 0.25, "type": "add" } }
+  },
+  {
+    "id": "star_explosion",
+    "name": "Star Explosion",
+    "description": "Projectiles explode on hit",
+    "icon": "💥",
+    "rarity": "legendary",
+    "category": "offensive",
+    "maxStacks": 1,
+    "special": ["aoe"]
+  },
+  {
+    "id": "candy_armor",
+    "name": "Candy Armor",
+    "description": "+50 max HP",
+    "icon": "🍬",
+    "rarity": "common",
+    "category": "defensive",
+    "maxStacks": 5,
+    "stats": { "hp": { "value": 50, "type": "add" } }
+  },
+  {
+    "id": "gingerbread_shield",
+    "name": "Gingerbread Shield",
+    "description": "Absorbs next hit every 10s",
+    "icon": "🛡️",
+    "rarity": "rare",
+    "category": "defensive",
+    "maxStacks": 2,
+    "special": ["shield"]
+  },
+  {
+    "id": "mistletoe_lifesteal",
+    "name": "Mistletoe Lifesteal",
+    "description": "8% damage dealt as healing",
+    "icon": "🌿",
+    "rarity": "epic",
+    "category": "defensive",
+    "maxStacks": 2,
+    "stats": { "lifesteal": { "value": 0.08, "type": "add" } }
+  },
+  {
+    "id": "reindeer_speed",
+    "name": "Reindeer Speed",
+    "description": "+12% movement speed",
+    "icon": "🦌",
+    "rarity": "common",
+    "category": "utility",
+    "maxStacks": 4,
+    "stats": { "speed": { "value": 0.12, "type": "percent" } }
+  },
+  {
+    "id": "christmas_spirit",
+    "name": "Christmas Spirit",
+    "description": "+30% XP gain",
+    "icon": "✨",
+    "rarity": "common",
+    "category": "utility",
+    "maxStacks": 3,
+    "stats": { "xpBonus": { "value": 0.3, "type": "add" } }
+  },
+  {
+    "id": "workshop_efficiency",
+    "name": "Workshop Efficiency",
+    "description": "+15% all stats",
+    "icon": "🔧",
+    "rarity": "legendary",
+    "category": "utility",
+    "maxStacks": 1,
+    "stats": {
+      "damage": { "value": 0.15, "type": "percent" },
+      "speed": { "value": 0.15, "type": "percent" },
+      "rof": { "value": 0.15, "type": "multiply" }
+    }
+  },
+  {
+    "id": "krampus_curse",
+    "name": "Krampus' Curse",
+    "description": "+50% damage, -25% HP",
+    "icon": "👹",
+    "rarity": "epic",
+    "category": "special",
+    "maxStacks": 1,
+    "stats": {
+      "damage": { "value": 0.5, "type": "percent" },
+      "hp": { "value": -0.25, "type": "percent" }
+    }
+  },
+  {
+    "id": "santas_blessing",
+    "name": "Santa's Blessing",
+    "description": "Revive once with 50% HP",
+    "icon": "🎅",
+    "rarity": "legendary",
+    "category": "special",
+    "maxStacks": 1,
+    "special": ["revive"]
+  }
+]

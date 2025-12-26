@@ -3,14 +3,17 @@
  * Class selection menu
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
-import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
+import type { PlayerClassType } from '@/types';
+import { PLAYER_CLASSES } from '@/data';
+import { SantasWorkshop, WorkshopButton } from '@/ui';
 import styles from './StartScreen.module.css';
 
 export function StartScreen() {
   const { state, selectClass, highScore } = useGameStore();
+  const [showWorkshop, setShowWorkshop] = useState(false);
   const audioInitializedRef = useRef(false);
 
   // Initialize audio when screen is shown (on first interaction)
@@ -61,7 +64,7 @@ export function StartScreen() {
       <h1 className={styles.title}>
         Protocol: <span className={styles.accent}>Silent Night</span>
       </h1>
-      <h3 className={styles.subtitle}>Operator Edition v3.0</h3>
+      <h3 className={styles.subtitle}>DDL Edition v4.0</h3>
 
       <div className={styles.classContainer}>
         {/* Santa Card */}
@@ -134,6 +137,9 @@ export function StartScreen() {
         <p>WASD or Arrow Keys to move • SPACE or Click to fire</p>
         {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
       </div>
+
+      <WorkshopButton onOpen={() => setShowWorkshop(true)} />
+      <SantasWorkshop show={showWorkshop} onClose={() => setShowWorkshop(false)} />
     </div>
   );
 }

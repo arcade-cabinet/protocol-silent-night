@@ -1,34 +1,39 @@
 /**
  * Lighting System
  * Provides atmospheric lighting for the game
+ * Data-driven configuration from themes.json
  */
 
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import type * as THREE from 'three';
+import * as THREE from 'three';
+import THEMES from '@/data/themes.json';
 
 export function Lighting() {
   const moonLightRef = useRef<THREE.DirectionalLight>(null);
+  const theme = THEMES.default.lighting;
 
   useFrame((state) => {
     // Subtle light animation
-    if (moonLightRef.current) {
+    if (moonLightRef.current && theme.moonlight.animation) {
       const time = state.clock.elapsedTime;
-      moonLightRef.current.intensity = 0.8 + Math.sin(time * 0.5) * 0.2;
+      const { intensityRange, speed } = theme.moonlight.animation;
+      const range = intensityRange[1] - intensityRange[0];
+      moonLightRef.current.intensity = intensityRange[0] + (Math.sin(time * speed) * 0.5 + 0.5) * range;
     }
   });
 
   return (
     <>
       {/* Ambient Light - Very dim for atmosphere */}
-      <ambientLight intensity={0.1} color={0xffffff} />
+      <ambientLight intensity={theme.ambient.intensity} color={theme.ambient.color} />
 
       {/* Blue Moonlight - Main directional light */}
       <directionalLight
         ref={moonLightRef}
-        color={0x4455ff}
-        intensity={1}
-        position={[-20, 50, -20]}
+        color={theme.moonlight.color}
+        intensity={theme.moonlight.intensity}
+        position={theme.moonlight.position as [number, number, number]}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -40,13 +45,17 @@ export function Lighting() {
       />
 
       {/* Rim Light - Subtle cyan from behind */}
-      <directionalLight color={0x00ffcc} intensity={0.3} position={[20, 30, 40]} />
+      <directionalLight 
+        color={theme.rim.color} 
+        intensity={theme.rim.intensity} 
+        position={theme.rim.position as [number, number, number]} 
+      />
 
       {/* Ground Bounce Light */}
-      <hemisphereLight args={[0x0a0a20, 0x000000, 0.4]} />
+      <hemisphereLight args={[theme.hemisphere.skyColor, theme.hemisphere.groundColor, theme.hemisphere.intensity]} />
 
       {/* Fog for depth */}
-      <fogExp2 attach="fog" args={[0x050505, 0.025]} />
+      <fogExp2 attach="fog" args={[theme.fog.color, theme.fog.density]} />
     </>
   );
 }

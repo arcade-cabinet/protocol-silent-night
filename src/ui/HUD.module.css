@@ -24,45 +24,49 @@
 }
 
 .panel {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 12px 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-  transform: skewX(-15deg);
+  border-left: 3px solid;
+  backdrop-filter: blur(8px);
+  font-family: 'Courier New', monospace;
 }
 
 .label {
-  font-size: 0.7rem;
-  color: #888;
+  font-size: 0.65rem;
+  color: #666;
   letter-spacing: 2px;
   margin-bottom: 5px;
+  text-transform: uppercase;
 }
 
 .value {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #fff;
   font-weight: bold;
   text-shadow: 0 0 10px currentColor;
 }
 
 .barWrap {
-  width: 200px;
-  height: 8px;
-  background: #333;
+  width: 180px;
+  height: 10px;
+  background: rgba(50, 50, 50, 0.8);
   margin-top: 5px;
+  border-radius: 2px;
+  overflow: hidden;
 }
 
 .hpBar {
   height: 100%;
   background: #00ffcc;
-  box-shadow: 0 0 15px #00ffcc;
-  transition: width 0.1s linear;
+  box-shadow: 0 0 15px currentColor;
+  transition: width 0.15s ease-out, background-color 0.3s ease;
 }
 
 .hpText {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #00ffcc;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .score {
@@ -70,4 +74,64 @@
   color: #00ffcc;
   margin-top: 5px;
   letter-spacing: 1px;
+}
+
+.upgradesRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.upgradeIcon {
+  position: relative;
+  font-size: 1.1rem;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.stackBadge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.55rem;
+  background: #ffd700;
+  color: #000;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.moreUpgrades {
+  font-size: 0.7rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+}
+
+.statsRow {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.statLabel {
+  font-size: 0.6rem;
+  color: #555;
+  letter-spacing: 1px;
+}
+
+.statValue {
+  font-size: 1rem;
+  color: #fff;
+  font-weight: bold;
 }

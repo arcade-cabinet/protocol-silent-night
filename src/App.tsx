@@ -12,10 +12,12 @@ import {
   HUD,
   InputControls,
   KillStreak,
+  LevelUpScreen,
   LoadingScreen,
   MessageOverlay,
   MissionBriefing,
   StartScreen,
+  WeaponHUD,
 } from '@/ui';
 
 export default function App() {
@@ -26,6 +28,7 @@ export default function App() {
 
       {/* UI Layer */}
       <HUD />
+      <WeaponHUD />
       <BossHUD />
       <MessageOverlay />
       <InputControls />
@@ -38,6 +41,7 @@ export default function App() {
       {/* Screens */}
       <StartScreen />
       <MissionBriefing />
+      <LevelUpScreen />
       <EndScreen />
       <LoadingScreen />
     </div>
