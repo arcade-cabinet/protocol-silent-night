@@ -72,8 +72,8 @@ export function GameScene() {
         {/* World */}
         <Terrain />
 
-        {/* Entities (only when game is active) */}
-        {state !== 'MENU' && (
+        {/* Entities (only when game is active - not menu or briefing) */}
+        {state !== 'MENU' && state !== 'BRIEFING' && (
           <>
             <PlayerController />
             <Bullets />

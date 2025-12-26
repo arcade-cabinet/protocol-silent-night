@@ -8,3 +8,4 @@ export { DamageFlash } from './DamageFlash';
 export { KillStreak } from './KillStreak';
 export { LoadingScreen } from './LoadingScreen';
 export { BossVignette } from './BossVignette';
+export { MissionBriefing } from './MissionBriefing';

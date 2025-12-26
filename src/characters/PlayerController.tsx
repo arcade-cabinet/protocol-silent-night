@@ -44,6 +44,15 @@ export function PlayerController() {
         return obj;
       };
 
+      // Determine bullet type from weapon
+      const bulletType = playerClass?.weaponType === 'cannon' ? 'cannon' 
+        : playerClass?.weaponType === 'smg' ? 'smg' 
+        : 'stars';
+      
+      // Weapon-specific parameters
+      const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
+      const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;
+
       // For star weapon, create spread pattern
       if (playerClass?.weaponType === 'star') {
         const angles = [-0.2, 0, 0.2];
@@ -54,30 +63,32 @@ export function PlayerController() {
           addBullet({
             id: `${id}-${angleOffset}`,
             mesh: createBulletMesh(spawnPosition),
-            velocity: spreadDir.clone().multiplyScalar(30),
+            velocity: spreadDir.clone().multiplyScalar(bulletSpeed),
             hp: 1,
             maxHp: 1,
             isActive: true,
             direction: spreadDir,
             isEnemy: false,
             damage,
-            life: 2.0,
-            speed: 30,
+            life: bulletLife,
+            speed: bulletSpeed,
+            type: 'stars',
           });
         }
       } else {
         addBullet({
           id,
           mesh: createBulletMesh(spawnPosition),
-          velocity: direction.clone().multiplyScalar(30),
+          velocity: direction.clone().multiplyScalar(bulletSpeed),
           hp: 1,
           maxHp: 1,
           isActive: true,
           direction,
           isEnemy: false,
           damage,
-          life: 2.0,
-          speed: 30,
+          life: bulletLife,
+          speed: bulletSpeed,
+          type: bulletType,
         });
       }
     },

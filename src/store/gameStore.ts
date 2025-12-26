@@ -101,6 +101,15 @@ const saveHighScore = (score: number): void => {
 
 const initialState = {
   state: 'MENU' as GameState,
+  missionBriefing: {
+    title: 'OPERATION: SILENT NIGHT',
+    objective: 'Neutralize hostile Grinch-Bots and eliminate Krampus-Prime',
+    intel: [
+      'Enemy forces: Grinch-Bot scouts + Krampus-Prime command unit',
+      'Hostiles are aggressive - eliminate on sight',
+      'Defeat 10 Grinch-Bots to draw out Krampus-Prime',
+    ],
+  },
   playerClass: null,
   playerHp: 100,
   playerMaxHp: 100,
@@ -143,7 +152,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerClass: config,
       playerHp: config.hp,
       playerMaxHp: config.hp,
-      state: 'PHASE_1',
+      state: 'BRIEFING',
       playerPosition: new THREE.Vector3(0, 0, 0),
       playerRotation: 0,
     });
@@ -287,6 +296,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!enemy) return false;
 
     const newHp = enemy.hp - damage;
+    
+    // Play hit sound
+    AudioManager.playSFX('enemy_hit');
+    
     if (newHp <= 0) {
       get().removeEnemy(id);
       get().addKill(enemy.pointValue);
@@ -339,12 +352,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       bossHp: 1000,
       bossMaxHp: 1000,
     });
+    
+    // Play boss music and announce
+    AudioManager.playSFX('boss_appear');
+    AudioManager.playMusic('boss');
   },
 
   damageBoss: (amount) => {
     const { bossHp } = get();
     const newHp = Math.max(0, bossHp - amount);
     set({ bossHp: newHp, screenShake: 0.3 });
+    
+    // Play boss hit sound
+    AudioManager.playSFX('boss_hit');
 
     if (newHp <= 0) {
       set({
@@ -353,6 +373,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         stats: { ...get().stats, bossDefeated: true },
       });
       get().updateHighScore();
+      
+      // Victory audio
+      AudioManager.playSFX('boss_defeated');
+      AudioManager.playSFX('victory');
+      AudioManager.playMusic('victory');
       return true;
     }
     return false;

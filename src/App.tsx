@@ -15,6 +15,7 @@ import {
   KillStreak,
   LoadingScreen,
   BossVignette,
+  MissionBriefing,
 } from '@/ui';
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
 
       {/* Screens */}
       <StartScreen />
+      <MissionBriefing />
       <EndScreen />
       <LoadingScreen />
     </div>

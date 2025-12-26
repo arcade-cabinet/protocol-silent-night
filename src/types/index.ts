@@ -9,7 +9,7 @@ import type * as THREE from 'three';
  * Game state machine states
  * @description Represents the current phase of the game
  */
-export type GameState = 'MENU' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' | 'GAME_OVER';
+export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' | 'GAME_OVER';
 
 /**
  * Available player character classes
@@ -167,9 +167,9 @@ export const CONFIG = {
   /** Kills required to trigger boss spawn */
   WAVE_REQ: 10,
   /** Maximum concurrent minions */
-  MAX_MINIONS: 15,
+  MAX_MINIONS: 12,
   /** Milliseconds between minion spawns */
-  SPAWN_INTERVAL: 2000,
+  SPAWN_INTERVAL: 2500,
   /** Color palette (hex values) */
   COLORS: {
     SANTA: 0xff0044,

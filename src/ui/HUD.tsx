@@ -10,14 +10,17 @@ import styles from './HUD.module.css';
 export function HUD() {
   const { state, playerHp, playerMaxHp, stats } = useGameStore();
 
-  if (state === 'MENU') return null;
+  // Hide HUD on menu and briefing screens
+  if (state === 'MENU' || state === 'BRIEFING') return null;
 
   const hpPercent = (playerHp / playerMaxHp) * 100;
   const killsToGo = Math.max(0, CONFIG.WAVE_REQ - stats.kills);
 
   const objective =
     state === 'PHASE_1'
-      ? `ELIMINATE ${killsToGo} MORE`
+      ? killsToGo > 0 
+        ? `ELIMINATE ${killsToGo} MORE GRINCH-BOTS`
+        : 'BOSS INCOMING...'
       : state === 'PHASE_BOSS'
         ? 'DESTROY KRAMPUS-PRIME'
         : state === 'WIN'

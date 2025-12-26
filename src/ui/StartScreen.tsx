@@ -3,6 +3,7 @@
  * Class selection menu
  */
 
+import { useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { PLAYER_CLASSES, type PlayerClassType } from '@/types';
 import { AudioManager } from '@/audio/AudioManager';
@@ -10,12 +11,46 @@ import styles from './StartScreen.module.css';
 
 export function StartScreen() {
   const { state, selectClass, highScore } = useGameStore();
+  const audioInitializedRef = useRef(false);
+
+  // Initialize audio when screen is shown (on any interaction)
+  useEffect(() => {
+    if (state !== 'MENU') return;
+
+    const initAudio = async () => {
+      if (!audioInitializedRef.current) {
+        await AudioManager.initialize();
+        audioInitializedRef.current = true;
+        // Play menu music after initialization
+        AudioManager.playMusic('menu');
+      }
+    };
+
+    // Listen for first interaction to init audio
+    const handleInteraction = () => {
+      initAudio();
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+
+    window.addEventListener('click', handleInteraction, { once: true });
+    window.addEventListener('touchstart', handleInteraction, { once: true });
+    window.addEventListener('keydown', handleInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+  }, [state]);
 
   if (state !== 'MENU') return null;
 
   const handleSelectClass = async (type: PlayerClassType) => {
     // Initialize audio on first user interaction
     await AudioManager.initialize();
+    audioInitializedRef.current = true;
     selectClass(type);
   };
 
