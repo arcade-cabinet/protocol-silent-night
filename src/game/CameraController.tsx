@@ -18,6 +18,7 @@ const MAX_ZOOM = 2.0;
 
 const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
 const LOOK_TARGET = new THREE.Vector3();
+const ORIGIN = new THREE.Vector3(0, 0, 0);
 
 export function CameraController() {
   const { camera } = useThree();
@@ -146,7 +147,7 @@ export function CameraController() {
     if (state === 'MENU' || state === 'BRIEFING') {
       // Menu camera - static elevated view with slow rotation
       camera.position.lerp(MENU_CAMERA_POS, delta * 2);
-      camera.lookAt(0, 0, 0);
+      camera.lookAt(ORIGIN);
       return;
     }
 
@@ -155,7 +156,8 @@ export function CameraController() {
     const cameraDistance = DEFAULT_CAMERA_DISTANCE * zoomRef.current;
 
     // Calculate target position (following player + gyro offset)
-    targetRef.current.set(
+    const target = targetRef.current;
+    target.set(
       playerPosition.x + gyroOffsetRef.current.x,
       cameraHeight,
       playerPosition.z + cameraDistance + gyroOffsetRef.current.z
@@ -163,9 +165,9 @@ export function CameraController() {
 
     // Apply screen shake
     if (screenShake > 0.01) {
-      targetRef.current.x += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.y += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.z += (Math.random() - 0.5) * screenShake * 2;
+      target.x += (Math.random() - 0.5) * screenShake * 2;
+      target.y += (Math.random() - 0.5) * screenShake * 2;
+      target.z += (Math.random() - 0.5) * screenShake * 2;
 
       // Decay shake using getState to avoid re-render cycles
       const currentShake = useGameStore.getState().screenShake;
@@ -173,7 +175,7 @@ export function CameraController() {
     }
 
     // Smooth follow
-    camera.position.lerp(targetRef.current, LERP_SPEED * delta);
+    camera.position.lerp(target, LERP_SPEED * delta);
 
     // Look at player (slightly ahead)
     LOOK_TARGET.set(playerPosition.x, 0, playerPosition.z);

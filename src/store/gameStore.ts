@@ -172,7 +172,7 @@ const initialState = {
       'Neutralize Krampus-Prime command unit',
       'Defeat 10 Grinch-Bots to draw out Krampus-Prime',
     ],
-  },
+  } as const,
   playerClass: null,
   playerHp: 100,
   playerMaxHp: 100,
