@@ -11,9 +11,10 @@ import type {
   MetaProgressData,
   PlayerClassConfig,
   PlayerClassType,
+  RoguelikeUpgrade,
   RunProgressData,
 } from '@/types';
-import { CONFIG, PLAYER_CLASSES } from '@/types';
+import { CONFIG, PLAYER_CLASSES, ROGUELIKE_UPGRADES } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 
 // Persistence keys
@@ -60,6 +61,17 @@ interface GameStore {
   gainXP: (amount: number) => void;
   levelUp: () => void;
   selectLevelUpgrade: (upgradeId: string) => void;
+  getEffectiveStats: () => {
+    damage: number;
+    speed: number;
+    rof: number;
+    critChance: number;
+    lifesteal: number;
+    xpBonus: number;
+    hasAoe: boolean;
+    hasShield: boolean;
+    hasRevive: boolean;
+  } | null;
 
   // Input
   input: InputState;
@@ -184,6 +196,11 @@ const initialState = {
     level: 1,
     selectedUpgrades: [],
     weaponEvolutions: [],
+    activeUpgrades: {},
+    wave: 1,
+    timeSurvived: 0,
+    pendingLevelUp: false,
+    upgradeChoices: [],
   },
   input: {
     movement: { x: 0, y: 0 },
@@ -230,6 +247,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         level: 1,
         selectedUpgrades: [],
         weaponEvolutions: [],
+        activeUpgrades: {},
+        wave: 1,
+        timeSurvived: 0,
+        pendingLevelUp: false,
+        upgradeChoices: [],
       },
     });
 
@@ -400,8 +422,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // Run-Progression Actions
   gainXP: (amount) => {
     const { runProgress } = get();
-    const newXP = runProgress.xp + amount;
-    // Simple level up curve: 100 * level
+    
+    // Apply XP bonus from upgrades (christmas_spirit)
+    const xpBonus = runProgress.activeUpgrades['christmas_spirit'] 
+      ? 1 + (runProgress.activeUpgrades['christmas_spirit'] * 0.3)
+      : 1;
+    const adjustedAmount = Math.floor(amount * xpBonus);
+    
+    const newXP = runProgress.xp + adjustedAmount;
+    // Level up curve: 100 * level (gets harder each level)
     const xpToNextLevel = runProgress.level * 100;
 
     if (newXP >= xpToNextLevel) {
@@ -424,19 +453,176 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   levelUp: () => {
-    // This will eventually trigger the LevelUp UI
+    const { runProgress } = get();
+    
+    // Generate 3 random upgrade choices with weighted rarity
+    const getRandomUpgrades = (): RoguelikeUpgrade[] => {
+      const available = ROGUELIKE_UPGRADES.filter((u) => {
+        const currentStacks = runProgress.activeUpgrades[u.id] || 0;
+        return currentStacks < u.maxStacks;
+      });
+
+      if (available.length === 0) return [];
+
+      // Weight by rarity (common more likely early, better upgrades later)
+      const levelBonus = Math.min(runProgress.level * 0.05, 0.3);
+      const weighted = available.flatMap((u) => {
+        let weight = 1;
+        switch (u.rarity) {
+          case 'common': weight = 4 - levelBonus * 4; break;
+          case 'rare': weight = 2 + levelBonus * 2; break;
+          case 'epic': weight = 1 + levelBonus * 3; break;
+          case 'legendary': weight = 0.3 + levelBonus * 2; break;
+        }
+        return Array(Math.max(1, Math.round(weight * 10))).fill(u);
+      });
+
+      const choices: RoguelikeUpgrade[] = [];
+      const usedIds = new Set<string>();
+      
+      while (choices.length < 3 && weighted.length > 0) {
+        const idx = Math.floor(Math.random() * weighted.length);
+        const upgrade = weighted[idx];
+        if (!usedIds.has(upgrade.id)) {
+          choices.push(upgrade);
+          usedIds.add(upgrade.id);
+        }
+        weighted.splice(idx, 1);
+      }
+
+      return choices;
+    };
+
+    const choices = getRandomUpgrades();
+    
+    set({
+      runProgress: {
+        ...runProgress,
+        pendingLevelUp: true,
+        upgradeChoices: choices,
+      },
+    });
+
     AudioManager.playSFX('ui_select');
-    // TODO: set state to SHOW_LEVEL_UP if we implement a separate state for it
   },
 
   selectLevelUpgrade: (upgradeId) => {
-    const { runProgress } = get();
+    const { runProgress, playerMaxHp, playerHp, playerClass } = get();
+    const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === upgradeId);
+    
+    if (!upgrade) return;
+
+    const currentStacks = runProgress.activeUpgrades[upgradeId] || 0;
+    const newActiveUpgrades = {
+      ...runProgress.activeUpgrades,
+      [upgradeId]: currentStacks + 1,
+    };
+
+    // Apply immediate effects
+    let newMaxHp = playerMaxHp;
+    let newHp = playerHp;
+
+    if (upgrade.effect.type === 'health' && !upgrade.effect.isPercent) {
+      newMaxHp += upgrade.effect.value;
+      newHp += upgrade.effect.value;
+    }
+
+    // Special: Krampus Curse reduces HP
+    if (upgrade.id === 'krampus_curse') {
+      const hpReduction = Math.floor(playerMaxHp * 0.25);
+      newMaxHp -= hpReduction;
+      newHp = Math.min(newHp, newMaxHp);
+    }
+
     set({
       runProgress: {
         ...runProgress,
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
+        activeUpgrades: newActiveUpgrades,
+        pendingLevelUp: false,
+        upgradeChoices: [],
       },
+      playerMaxHp: newMaxHp,
+      playerHp: newHp,
     });
+
+    AudioManager.playSFX('ui_select');
+  },
+
+  // Helper to calculate current stats with upgrades
+  getEffectiveStats: () => {
+    const { playerClass, runProgress } = get();
+    if (!playerClass) return null;
+
+    let damage = playerClass.damage;
+    let speed = playerClass.speed;
+    let rof = playerClass.rof;
+    let critChance = 0;
+    let lifesteal = 0;
+    let xpBonus = 0;
+    let hasAoe = false;
+    let hasShield = false;
+    let hasRevive = false;
+
+    for (const [id, stacks] of Object.entries(runProgress.activeUpgrades)) {
+      const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === id);
+      if (!upgrade) continue;
+
+      const value = upgrade.effect.value * stacks;
+
+      switch (upgrade.id) {
+        case 'coal_fury':
+          damage *= 1 + value;
+          break;
+        case 'rapid_fire':
+          rof *= 1 - value * 0.8; // Reduce delay
+          break;
+        case 'frost_piercing':
+          critChance += value;
+          break;
+        case 'naughty_list':
+          // Boss damage handled separately
+          break;
+        case 'star_explosion':
+          hasAoe = true;
+          break;
+        case 'reindeer_speed':
+          speed *= 1 + value;
+          break;
+        case 'christmas_spirit':
+          xpBonus += value;
+          break;
+        case 'mistletoe_lifesteal':
+          lifesteal += value;
+          break;
+        case 'gingerbread_shield':
+          hasShield = true;
+          break;
+        case 'workshop_efficiency':
+          damage *= 1 + value;
+          speed *= 1 + value;
+          rof *= 1 - value * 0.5;
+          break;
+        case 'krampus_curse':
+          damage *= 1 + value;
+          break;
+        case 'santas_blessing':
+          hasRevive = true;
+          break;
+      }
+    }
+
+    return {
+      damage: Math.round(damage),
+      speed,
+      rof: Math.max(0.05, rof),
+      critChance: Math.min(critChance, 1),
+      lifesteal,
+      xpBonus,
+      hasAoe,
+      hasShield,
+      hasRevive,
+    };
   },
 
   setMovement: (x, y) =>

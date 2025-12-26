@@ -220,6 +220,24 @@ export interface MetaProgressData {
 }
 
 /**
+ * Roguelike upgrade definition
+ */
+export interface RoguelikeUpgrade {
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // Emoji or symbol
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  category: 'offensive' | 'defensive' | 'utility' | 'special';
+  maxStacks: number;
+  effect: {
+    type: 'damage' | 'speed' | 'health' | 'rof' | 'lifesteal' | 'aoe' | 'crit' | 'shield' | 'xp' | 'special';
+    value: number;
+    isPercent?: boolean;
+  };
+}
+
+/**
  * Progress data for the current active run
  * @interface RunProgressData
  */
@@ -232,7 +250,167 @@ export interface RunProgressData {
   selectedUpgrades: string[];
   /** IDs of weapon evolutions unlocked this run */
   weaponEvolutions: string[];
+  /** Active upgrade effects (id -> stack count) */
+  activeUpgrades: Record<string, number>;
+  /** Current wave number */
+  wave: number;
+  /** Time survived in seconds */
+  timeSurvived: number;
+  /** Is level up choice pending */
+  pendingLevelUp: boolean;
+  /** Available upgrade choices */
+  upgradeChoices: RoguelikeUpgrade[];
 }
+
+/**
+ * Roguelike upgrade pool
+ */
+export const ROGUELIKE_UPGRADES: RoguelikeUpgrade[] = [
+  // Offensive
+  {
+    id: 'coal_fury',
+    name: 'Coal Fury',
+    description: '+15% damage',
+    icon: '🔥',
+    rarity: 'common',
+    category: 'offensive',
+    maxStacks: 5,
+    effect: { type: 'damage', value: 0.15, isPercent: true },
+  },
+  {
+    id: 'rapid_fire',
+    name: 'Rapid Fire',
+    description: '+20% fire rate',
+    icon: '⚡',
+    rarity: 'common',
+    category: 'offensive',
+    maxStacks: 4,
+    effect: { type: 'rof', value: 0.2, isPercent: true },
+  },
+  {
+    id: 'frost_piercing',
+    name: 'Frost Piercing',
+    description: '+25% critical chance',
+    icon: '❄️',
+    rarity: 'rare',
+    category: 'offensive',
+    maxStacks: 3,
+    effect: { type: 'crit', value: 0.25, isPercent: true },
+  },
+  {
+    id: 'naughty_list',
+    name: 'Naughty List',
+    description: '+40% damage to bosses',
+    icon: '📜',
+    rarity: 'epic',
+    category: 'offensive',
+    maxStacks: 2,
+    effect: { type: 'damage', value: 0.4, isPercent: true },
+  },
+  {
+    id: 'star_explosion',
+    name: 'Star Explosion',
+    description: 'Projectiles explode on hit',
+    icon: '💥',
+    rarity: 'legendary',
+    category: 'offensive',
+    maxStacks: 1,
+    effect: { type: 'aoe', value: 3 },
+  },
+  // Defensive
+  {
+    id: 'candy_armor',
+    name: 'Candy Armor',
+    description: '+20 max HP',
+    icon: '🍬',
+    rarity: 'common',
+    category: 'defensive',
+    maxStacks: 5,
+    effect: { type: 'health', value: 20 },
+  },
+  {
+    id: 'gingerbread_shield',
+    name: 'Gingerbread Shield',
+    description: 'Absorbs next hit every 10s',
+    icon: '🛡️',
+    rarity: 'rare',
+    category: 'defensive',
+    maxStacks: 2,
+    effect: { type: 'shield', value: 1 },
+  },
+  {
+    id: 'eggnog_regen',
+    name: 'Eggnog Regeneration',
+    description: 'Heal 1% HP per second',
+    icon: '🥛',
+    rarity: 'rare',
+    category: 'defensive',
+    maxStacks: 3,
+    effect: { type: 'health', value: 0.01, isPercent: true },
+  },
+  {
+    id: 'mistletoe_lifesteal',
+    name: 'Mistletoe Lifesteal',
+    description: '8% damage dealt as healing',
+    icon: '🌿',
+    rarity: 'epic',
+    category: 'defensive',
+    maxStacks: 2,
+    effect: { type: 'lifesteal', value: 0.08, isPercent: true },
+  },
+  // Utility
+  {
+    id: 'reindeer_speed',
+    name: 'Reindeer Speed',
+    description: '+12% movement speed',
+    icon: '🦌',
+    rarity: 'common',
+    category: 'utility',
+    maxStacks: 4,
+    effect: { type: 'speed', value: 0.12, isPercent: true },
+  },
+  {
+    id: 'christmas_spirit',
+    name: 'Christmas Spirit',
+    description: '+30% XP gain',
+    icon: '✨',
+    rarity: 'common',
+    category: 'utility',
+    maxStacks: 3,
+    effect: { type: 'xp', value: 0.3, isPercent: true },
+  },
+  {
+    id: 'workshop_efficiency',
+    name: 'Workshop Efficiency',
+    description: '+15% all stats',
+    icon: '🔧',
+    rarity: 'legendary',
+    category: 'utility',
+    maxStacks: 1,
+    effect: { type: 'special', value: 0.15, isPercent: true },
+  },
+  // Special
+  {
+    id: 'krampus_curse',
+    name: "Krampus' Curse",
+    description: '+50% damage, -25% HP',
+    icon: '👹',
+    rarity: 'epic',
+    category: 'special',
+    maxStacks: 1,
+    effect: { type: 'special', value: 0.5, isPercent: true },
+  },
+  {
+    id: 'santas_blessing',
+    name: "Santa's Blessing",
+    description: 'Revive once with 50% HP',
+    icon: '🎅',
+    rarity: 'legendary',
+    category: 'special',
+    maxStacks: 1,
+    effect: { type: 'special', value: 0.5, isPercent: true },
+  },
+];
 
 /**
  * Global game configuration constants

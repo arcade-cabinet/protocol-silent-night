@@ -105,25 +105,109 @@
   font-weight: bold;
 }
 
+/* Upgrades Section */
+.upgradesSection {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.upgradesLabel {
+  color: #666;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  font-family: 'Courier New', monospace;
+}
+
+.upgradesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 400px;
+}
+
+.upgradeItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.upgradeIcon {
+  font-size: 1rem;
+}
+
+.upgradeName {
+  font-size: 0.7rem;
+  color: #aaa;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+.upgradeStacks {
+  font-size: 0.65rem;
+  color: #ffd700;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+/* Nice Points */
+.nicePoints {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+  padding: 10px 20px;
+  background: rgba(0, 255, 204, 0.1);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  border-radius: 4px;
+}
+
+.npLabel {
+  color: #00ffcc;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  font-family: 'Courier New', monospace;
+}
+
+.npValue {
+  color: #00ffcc;
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
 .btn {
   background: #ff0044;
   border: none;
-  padding: 20px 60px;
+  padding: 18px 50px;
   color: white;
-  font-family: "Orbitron", sans-serif;
-  font-size: 1.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 1.2rem;
   cursor: pointer;
-  clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
   text-transform: uppercase;
   font-weight: 900;
   letter-spacing: 2px;
-  transition: 0.2s;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.win .btn {
+  background: #00cc88;
 }
 
 .btn:hover {
-  background: #fff;
-  color: #ff0044;
-  box-shadow: 0 0 40px #ff0044;
+  transform: scale(1.05);
+  box-shadow: 0 0 30px currentColor;
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 @media (max-width: 768px) {
@@ -138,5 +222,9 @@
   .statRow {
     font-size: 0.9rem;
     gap: 20px;
+  }
+  
+  .upgradesGrid {
+    max-width: 300px;
   }
 }

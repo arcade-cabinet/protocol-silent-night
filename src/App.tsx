@@ -12,6 +12,7 @@ import {
   HUD,
   InputControls,
   KillStreak,
+  LevelUpScreen,
   LoadingScreen,
   MessageOverlay,
   MissionBriefing,
@@ -38,6 +39,7 @@ export default function App() {
       {/* Screens */}
       <StartScreen />
       <MissionBriefing />
+      <LevelUpScreen />
       <EndScreen />
       <LoadingScreen />
     </div>

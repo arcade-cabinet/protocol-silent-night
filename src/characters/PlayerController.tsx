@@ -53,8 +53,11 @@ export function PlayerController() {
   const slideZRef = useRef(new THREE.Vector3());
   const moveVectorRef = useRef(new THREE.Vector3());
 
-  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet, obstacles } =
+  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet, obstacles, getEffectiveStats } =
     useGameStore();
+  
+  // Get effective stats with upgrades applied
+  const effectiveStats = getEffectiveStats();
 
   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
   const isFiring = input.isFiring;
@@ -125,9 +128,9 @@ export function PlayerController() {
 
     const { movement, isFiring: firing } = input;
 
-    // Movement with collision detection
+    // Movement with collision detection - use effective speed with upgrades
     if (movement.x !== 0 || movement.y !== 0) {
-      const speed = playerClass.speed * delta;
+      const speed = (effectiveStats?.speed ?? playerClass.speed) * delta;
       moveDirRef.current.set(movement.x, 0, movement.y).normalize();
 
       // Calculate potential new position
@@ -181,10 +184,11 @@ export function PlayerController() {
     setPlayerPosition(positionRef.current);
     setPlayerRotation(rotationRef.current);
 
-    // Firing
+    // Firing - use effective ROF and damage with upgrades
     if (firing) {
       const now = Date.now() / 1000;
-      if (now - lastFireTime.current >= playerClass.rof) {
+      const fireRate = effectiveStats?.rof ?? playerClass.rof;
+      if (now - lastFireTime.current >= fireRate) {
         lastFireTime.current = now;
 
         firePosRef.current.copy(positionRef.current);
@@ -193,7 +197,8 @@ export function PlayerController() {
         fireDirRef.current.set(0, 0, 1);
         fireDirRef.current.applyAxisAngle(upAxisRef.current, rotationRef.current);
 
-        fireBullet(firePosRef.current, fireDirRef.current, playerClass.damage);
+        const damage = effectiveStats?.damage ?? playerClass.damage;
+        fireBullet(firePosRef.current, fireDirRef.current, damage);
       }
     }
   });
