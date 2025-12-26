@@ -33,7 +33,7 @@ describe('HitParticles', () => {
       bossHp: 900,
       enemies: [
         {
-          id: 'boss',
+          id: 'boss-test',
           type: 'boss',
           mesh: new THREE.Object3D(),
           velocity: new THREE.Vector3(),

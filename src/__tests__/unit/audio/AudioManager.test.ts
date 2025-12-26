@@ -1,51 +1,6 @@
-import * as Tone from 'tone';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as Tone from 'tone';
 import { AudioManager, type MusicTrack } from '@/audio/AudioManager';
-
-// Mock Tone.js
-vi.mock('tone', () => {
-  const mockParam = {
-    value: 0,
-    rampTo: vi.fn(),
-  };
-
-  const synthMock = {
-    toDestination: vi.fn().mockReturnThis(),
-    triggerAttackRelease: vi.fn(),
-    dispose: vi.fn(),
-    volume: mockParam,
-  };
-
-  const MockSynth = vi.fn(() => synthMock);
-  const MockPolySynth = vi.fn(() => synthMock);
-  const MockFMSynth = vi.fn(() => synthMock);
-  const MockNoiseSynth = vi.fn(() => synthMock);
-
-  return {
-    start: vi.fn().mockResolvedValue(undefined),
-    now: vi.fn().mockReturnValue(0),
-    gainToDb: vi.fn().mockReturnValue(0),
-    getDestination: vi.fn().mockReturnValue({ volume: mockParam }),
-    getTransport: vi.fn().mockReturnValue({
-      start: vi.fn(),
-      stop: vi.fn(),
-      bpm: mockParam,
-    }),
-    Synth: MockSynth,
-    PolySynth: MockPolySynth,
-    FMSynth: MockFMSynth,
-    NoiseSynth: MockNoiseSynth,
-    Loop: class {
-      callback: (time: number) => void;
-      constructor(callback: (time: number) => void) {
-        this.callback = callback;
-      }
-      start = vi.fn().mockReturnThis();
-      stop = vi.fn().mockReturnThis();
-      dispose = vi.fn().mockReturnThis();
-    },
-  };
-});
 
 describe('AudioManager', () => {
   beforeEach(() => {

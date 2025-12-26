@@ -44,6 +44,52 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Mock Tone.js globally
+vi.mock('tone', () => {
+  const mockParam = {
+    value: 0,
+    rampTo: vi.fn(),
+  };
+
+  const synthMock = {
+    toDestination: vi.fn().mockReturnThis(),
+    triggerAttackRelease: vi.fn(),
+    dispose: vi.fn(),
+    volume: mockParam,
+  };
+
+  // Use functions that can be used as constructors
+  function MockSynth() { return synthMock; }
+  function MockPolySynth() { return synthMock; }
+  function MockFMSynth() { return synthMock; }
+  function MockNoiseSynth() { return synthMock; }
+
+  return {
+    start: vi.fn().mockResolvedValue(undefined),
+    now: vi.fn().mockReturnValue(0),
+    gainToDb: vi.fn().mockReturnValue(0),
+    getDestination: vi.fn().mockReturnValue({ volume: mockParam }),
+    getTransport: vi.fn().mockReturnValue({
+      start: vi.fn(),
+      stop: vi.fn(),
+      bpm: mockParam,
+    }),
+    Synth: MockSynth,
+    PolySynth: MockPolySynth,
+    FMSynth: MockFMSynth,
+    NoiseSynth: MockNoiseSynth,
+    Loop: class {
+      callback: (time: number) => void;
+      constructor(callback: (time: number) => void) {
+        this.callback = callback;
+      }
+      start = vi.fn().mockReturnThis();
+      stop = vi.fn().mockReturnThis();
+      dispose = vi.fn().mockReturnThis();
+    },
+  };
+});
+
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
@@ -82,6 +128,7 @@ HTMLCanvasElement.prototype.getContext = vi.fn().mockImplementation((contextType
       blendFunc: vi.fn(),
       depthFunc: vi.fn(),
       cullFace: vi.fn(),
+      getContextAttributes: vi.fn(() => ({})),
     };
   }
   return null;

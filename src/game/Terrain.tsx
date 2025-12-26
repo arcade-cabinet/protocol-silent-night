@@ -204,10 +204,15 @@ function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
     });
   }, [obstacle.color, obstacle.type]);
 
+  const posArray: [number, number, number] = useMemo(
+    () => [obstacle.position.x, obstacle.position.y, obstacle.position.z],
+    [obstacle.position]
+  );
+
   return (
     <mesh
       ref={meshRef}
-      position={obstacle.position}
+      position={posArray}
       geometry={geometry}
       material={material}
       castShadow
