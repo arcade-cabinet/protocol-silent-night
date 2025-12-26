@@ -41,13 +41,18 @@ export interface PlayerClassConfig {
   speed: number;
   rof: number;
   damage: number;
-  color: number;
+  color: string;
   scale: number;
   weaponType: WeaponType;
-  furColor: {
-    base: [number, number, number];
-    tip: [number, number, number];
+  furOptions: {
+    baseColor: string;
+    tipColor: string;
+    layerCount: number;
+    spacing: number;
+    windStrength: number;
+    gravityDroop?: number;
   };
+  customization?: Record<string, any>;
 }
 
 /**
@@ -208,11 +213,8 @@ export interface RoguelikeUpgrade {
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
   category: 'offensive' | 'defensive' | 'utility' | 'special' | 'christmas';
   maxStacks: number;
-  effect: {
-    type: 'damage' | 'speed' | 'health' | 'rof' | 'lifesteal' | 'aoe' | 'crit' | 'shield' | 'xp' | 'special';
-    value: number;
-    isPercent?: boolean;
-  };
+  stats?: Record<string, { value: number; type: 'multiply' | 'add' | 'percent' }>;
+  special?: string[];
 }
 
 /**
@@ -250,13 +252,13 @@ export interface SkinConfig {
   character: PlayerClassType;
   description: string;
   colors: {
-    skin?: number;
-    primary?: number;
-    secondary?: number;
-    accent?: number;
+    skin?: string;
+    primary?: string;
+    secondary?: string;
+    accent?: string;
     fur?: {
-      base: [number, number, number];
-      tip: [number, number, number];
+      baseColor: string;
+      tipColor: string;
     };
   };
 }
@@ -271,4 +273,18 @@ export interface PermanentUpgradeConfig {
   tier: 1 | 2 | 3;
   maxLevel: number;
   description: string;
+}
+
+/**
+ * Workshop weapon unlock
+ */
+export interface WeaponUnlock {
+  id: WeaponType;
+  name: string;
+  cost: number;
+  type: string;
+  damage: string;
+  fireRate: string;
+  special: string;
+  flavor: string;
 }

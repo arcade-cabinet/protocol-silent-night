@@ -47,10 +47,12 @@ interface GameStore {
   playerMaxHp: number;
   playerPosition: THREE.Vector3;
   playerRotation: number;
+  selectedSkin: string | null;
   selectClass: (type: PlayerClassType) => void;
   damagePlayer: (amount: number) => void;
   setPlayerPosition: (position: THREE.Vector3) => void;
   setPlayerRotation: (rotation: number) => void;
+  selectSkin: (skinId: string) => void;
 
   // Weapons
   currentWeapon: WeaponType;
@@ -159,7 +161,7 @@ const loadMetaProgress = (): MetaProgressData => {
     totalPointsEarned: 0,
     runsCompleted: 0,
     bossesDefeated: 0,
-    unlockedWeapons: ['cannon', 'smg', 'star'], // Base weapons unlocked by default
+    unlockedWeapons: ['cannon', 'smg', 'star'],
     unlockedSkins: [],
     permanentUpgrades: {},
     highScore: 0,
@@ -192,7 +194,7 @@ const saveHighScore = (score: number): void => {
   try {
     localStorage.setItem(HIGH_SCORE_KEY, score.toString());
   } catch {
-    // Silently fail if localStorage is not available
+    // Silently fail
   }
 };
 
@@ -214,6 +216,7 @@ const initialState = {
   playerMaxHp: 100,
   playerPosition: new THREE.Vector3(0, 0, 0),
   playerRotation: 0,
+  selectedSkin: null,
   currentWeapon: 'cannon' as WeaponType,
   currentEvolution: null,
   stats: { score: 0, kills: 0, bossDefeated: false },
@@ -264,6 +267,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerRotation: 0,
       currentWeapon: config.weaponType,
       currentEvolution: null,
+      selectedSkin: null,
       runProgress: {
         xp: 0,
         level: 1,
@@ -277,9 +281,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     });
 
-    // Play UI select sound
     AudioManager.playSFX('ui_select');
   },
+
+  selectSkin: (skinId) => set({ selectedSkin: skinId }),
 
   damagePlayer: (amount) => {
     const { playerHp, state, metaProgress } = get();
@@ -288,7 +293,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newHp = Math.max(0, playerHp - amount);
     set({ playerHp: newHp, screenShake: 0.5, damageFlash: true });
 
-    // Haptic and audio feedback
     if (amount >= 20) {
       triggerHaptic(HapticPatterns.DAMAGE_HEAVY);
       AudioManager.playSFX('player_damage_heavy');
@@ -297,7 +301,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('player_damage_light');
     }
 
-    // Clear damage flash after short delay
     setTimeout(() => {
       set({ damageFlash: false });
     }, 150);
@@ -321,7 +324,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setWeapon: (weaponType) => {
     const { metaProgress } = get();
-    // Check if weapon is unlocked
     if (metaProgress.unlockedWeapons.includes(weaponType)) {
       set({ currentWeapon: weaponType });
       AudioManager.playSFX('ui_select');
@@ -329,24 +331,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, enemies, lastKillTime, killStreak, metaProgress } = get();
+    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
-    // Kill streak: if within 2 seconds of last kill, increment streak
     const streakTimeout = 2000;
     const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
-    // Bonus points for kill streaks
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
 
-    // XP calculation: 10 XP per kill + streak bonus
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
-    // Nice Points calculation: matches points or uses a specific formula
-    // Kill streak bonuses (+5, +10, +25, +50 NP)
     let npStreakBonus = 0;
     if (newStreak === 2) npStreakBonus = 5;
     else if (newStreak === 3) npStreakBonus = 10;
@@ -361,12 +358,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...get().metaProgress, // Use fresh state from get() to avoid stale state bug
+        ...get().metaProgress,
         totalKills: metaProgress.totalKills + 1,
       },
     });
 
-    // Audio and haptic feedback
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
@@ -374,10 +370,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    // Check if we should spawn boss
     if (newKills >= CONFIG.WAVE_REQ && state === 'PHASE_1') {
-      // Check if boss is already active or any boss enemy exists
-      const hasBoss = enemies.some((e) => e.type === 'boss');
+      const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
       }
@@ -386,7 +380,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   resetStats: () => set({ stats: { score: 0, kills: 0, bossDefeated: false } }),
 
-  // Meta-Progression Actions
   earnNicePoints: (amount) => {
     const { metaProgress } = get();
     const updated = {
@@ -456,19 +449,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     saveMetaProgress(updated);
   },
 
-  // Run-Progression Actions
   gainXP: (amount) => {
     const { runProgress, state } = get();
     if (state === 'LEVEL_UP') return;
 
-    // Apply XP bonus from upgrades (christmas_spirit)
     const xpBonus = runProgress.activeUpgrades['christmas_spirit']
       ? 1 + runProgress.activeUpgrades['christmas_spirit'] * 0.3
       : 1;
     const adjustedAmount = Math.floor(amount * xpBonus);
 
     const newXP = runProgress.xp + adjustedAmount;
-    // Level up curve: 100 * level (gets harder each level)
     const xpToNextLevel = runProgress.level * 100;
 
     if (newXP >= xpToNextLevel) {
@@ -482,10 +472,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       get().levelUp();
     } else {
       set({
-        runProgress: {
-          ...runProgress,
-          xp: newXP,
-        },
+        runProgress: { ...runProgress, xp: newXP },
       });
     }
   },
@@ -493,7 +480,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
   levelUp: () => {
     const { runProgress } = get();
 
-    // Check for weapon evolution at level 10
     if (runProgress.level === 10) {
       const availableEvolution = get().checkEvolutionAvailability();
       if (availableEvolution) {
@@ -501,7 +487,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Generate 3 random upgrade choices with weighted rarity
     const getRandomUpgrades = (): RoguelikeUpgrade[] => {
       const available = ROGUELIKE_UPGRADES.filter((u) => {
         const currentStacks = runProgress.activeUpgrades[u.id] || 0;
@@ -510,23 +495,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       if (available.length === 0) return [];
 
-      // Weight by rarity (common more likely early, better upgrades later)
       const levelBonus = Math.min(runProgress.level * 0.05, 0.3);
       const weighted = available.flatMap((u) => {
         let weight = 1;
         switch (u.rarity) {
-          case 'common':
-            weight = Math.max(0.5, 4 - levelBonus * 4);
-            break;
-          case 'rare':
-            weight = 2 + levelBonus * 2;
-            break;
-          case 'epic':
-            weight = 1 + levelBonus * 3;
-            break;
-          case 'legendary':
-            weight = 0.3 + levelBonus * 2;
-            break;
+          case 'common': weight = Math.max(0.5, 4 - levelBonus * 4); break;
+          case 'rare': weight = 2 + levelBonus * 2; break;
+          case 'epic': weight = 1 + levelBonus * 3; break;
+          case 'legendary': weight = 0.3 + levelBonus * 2; break;
         }
         return Array(Math.max(1, Math.round(weight * 10))).fill(u);
       });
@@ -573,24 +549,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
       [upgradeId]: currentStacks + 1,
     };
 
-    // Apply immediate effects
     let newMaxHp = playerMaxHp;
     let newHp = playerHp;
 
-    if (upgrade.effect.type === 'health' && !upgrade.effect.isPercent) {
-      newMaxHp += upgrade.effect.value;
-      newHp += upgrade.effect.value;
-    }
-
-    // Special: Krampus Curse reduces HP
-    if (upgrade.id === 'krampus_curse') {
-      const hpReduction = Math.floor(playerMaxHp * 0.25);
-      newMaxHp -= hpReduction;
-      newHp = Math.min(newHp, newMaxHp);
+    if (upgrade.stats?.hp) {
+      const stat = upgrade.stats.hp;
+      if (stat.type === 'add') {
+        newMaxHp += stat.value;
+        newHp += stat.value;
+      } else if (stat.type === 'percent') {
+        const reduction = Math.floor(playerMaxHp * Math.abs(stat.value));
+        if (stat.value < 0) {
+          newMaxHp -= reduction;
+          newHp = Math.min(newHp, newMaxHp);
+        } else {
+          newMaxHp += reduction;
+          newHp += reduction;
+        }
+      }
     }
 
     set({
-      state: 'PHASE_1', // Return to game
+      state: 'PHASE_1',
       runProgress: {
         ...runProgress,
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
@@ -605,7 +585,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     AudioManager.playSFX('ui_select');
   },
 
-  // Helper to calculate current stats with upgrades
   getEffectiveStats: () => {
     const { playerClass, runProgress } = get();
     if (!playerClass) return null;
@@ -624,47 +603,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === id);
       if (!upgrade) continue;
 
-      const value = upgrade.effect.value * stacks;
+      if (upgrade.stats) {
+        for (const [stat, data] of Object.entries(upgrade.stats)) {
+          const totalValue = data.value * stacks;
+          switch (stat) {
+            case 'damage':
+              damage *= (1 + totalValue);
+              break;
+            case 'speed':
+              speed *= (1 + totalValue);
+              break;
+            case 'rof':
+              rof *= (1 - totalValue * 0.8);
+              break;
+            case 'critChance':
+              critChance += totalValue;
+              break;
+            case 'lifesteal':
+              lifesteal += totalValue;
+              break;
+            case 'xpBonus':
+              xpBonus += totalValue;
+              break;
+          }
+        }
+      }
 
-      switch (upgrade.id) {
-        case 'coal_fury':
-          damage *= 1 + value;
-          break;
-        case 'rapid_fire':
-          rof *= 1 - value * 0.8; // Reduce delay (0.8 factor to balance fire rate vs delay reduction)
-          break;
-        case 'frost_piercing':
-          critChance += value;
-          break;
-        case 'naughty_list':
-          // Boss damage handled separately
-          break;
-        case 'star_explosion':
-          hasAoe = true;
-          break;
-        case 'reindeer_speed':
-          speed *= 1 + value;
-          break;
-        case 'christmas_spirit':
-          xpBonus += value;
-          break;
-        case 'mistletoe_lifesteal':
-          lifesteal += value;
-          break;
-        case 'gingerbread_shield':
-          hasShield = true;
-          break;
-        case 'workshop_efficiency':
-          damage *= 1 + value;
-          speed *= 1 + value;
-          rof *= 1 - value * 0.5;
-          break;
-        case 'krampus_curse':
-          damage *= 1 + value;
-          break;
-        case 'santas_blessing':
-          hasRevive = true;
-          break;
+      if (upgrade.special) {
+        if (upgrade.special.includes('aoe')) hasAoe = true;
+        if (upgrade.special.includes('shield')) hasShield = true;
+        if (upgrade.special.includes('revive')) hasRevive = true;
       }
     }
 
@@ -681,16 +649,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
   },
 
-  // Weapon Evolution Actions
   evolveWeapon: (evolutionType) => {
     const { runProgress, playerClass } = get();
-
     if (!playerClass) return;
 
-    const evolution = WEAPON_EVOLUTIONS[evolutionType];
+    const evolution = WEAPON_EVOLUTIONS[evolutionType as keyof typeof WEAPON_EVOLUTIONS];
     if (!evolution) return;
 
-    // Add to weaponEvolutions array
     set({
       currentEvolution: evolutionType,
       runProgress: {
@@ -699,48 +664,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
     });
 
-    // Play evolution sound
     AudioManager.playSFX('ui_select');
     triggerHaptic(HapticPatterns.FIRE_HEAVY);
   },
 
   checkEvolutionAvailability: () => {
     const { runProgress, currentWeapon, currentEvolution } = get();
-
-    // Already evolved
     if (currentEvolution) return null;
-
-    // Need to be at least level 10
     if (runProgress.level < 10) return null;
 
-    // Find matching evolution for current weapon
     for (const [evolutionId, config] of Object.entries(WEAPON_EVOLUTIONS)) {
       if (config.baseWeapon === currentWeapon) {
-        // Check if level requirement is met
         if (runProgress.level >= config.minLevel) {
-          // Check required upgrades if any
           if (config.requiredUpgrades) {
             const hasAllUpgrades = config.requiredUpgrades.every((upgrade) =>
               runProgress.selectedUpgrades.includes(upgrade)
             );
             if (!hasAllUpgrades) continue;
           }
-
           return evolutionId as WeaponEvolutionType;
         }
       }
     }
-
     return null;
   },
 
   getWeaponModifiers: () => {
     const { currentWeapon, currentEvolution } = get();
-    const weaponConfig = WEAPONS[currentWeapon];
-
+    const weaponConfig = WEAPONS[currentWeapon as keyof typeof WEAPONS];
     if (!weaponConfig) return null;
 
-    // No evolution, return base weapon config as modifiers
     if (!currentEvolution) {
       return {
         damage: weaponConfig.damage,
@@ -749,16 +702,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     }
 
-    const evolution = WEAPON_EVOLUTIONS[currentEvolution];
-    if (!evolution) {
-      return {
-        damage: weaponConfig.damage,
-        rof: weaponConfig.rof,
-        speed: weaponConfig.speed,
-      };
-    }
+    const evolution = WEAPON_EVOLUTIONS[currentEvolution as keyof typeof WEAPON_EVOLUTIONS];
+    if (!evolution) return null;
 
-    // Apply evolution modifiers to base weapon stats
     const modifiers = evolution.modifiers;
     return {
       damage: Math.round(weaponConfig.damage * (modifiers.damageMultiplier || 1)),
@@ -767,41 +713,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
   },
 
-  setMovement: (x, y) =>
-    set((state) => ({
-      input: { ...state.input, movement: { x, y } },
-    })),
-
-  setFiring: (isFiring) =>
-    set((state) => ({
-      input: { ...state.input, isFiring },
-    })),
-
-  setJoystick: (active, origin) =>
-    set((state) => ({
-      input: {
-        ...state.input,
-        joystickActive: active,
-        joystickOrigin: origin || state.input.joystickOrigin,
-      },
-    })),
+  setMovement: (x, y) => set((state) => ({ input: { ...state.input, movement: { x, y } } })),
+  setFiring: (isFiring) => set((state) => ({ input: { ...state.input, isFiring } })),
+  setJoystick: (active, origin) => set((state) => ({ input: { ...state.input, joystickActive: active, joystickOrigin: origin || state.input.joystickOrigin } })),
 
   addBullet: (bullet) => {
-    set((state) => ({
-      bullets: [...state.bullets, bullet],
-    }));
-
-    // Play weapon-specific sound and haptic
+    set((state) => ({ bullets: [...state.bullets, bullet] }));
     const weaponType = bullet.type || 'cannon';
-    if (weaponType === 'smg' || weaponType === 'light_string') {
+    if (weaponType === 'smg' || (weaponType as string) === 'light_string') {
       AudioManager.playSFX('weapon_smg');
       triggerHaptic(HapticPatterns.FIRE_LIGHT);
-    } else if (
-      weaponType === 'star' ||
-      weaponType === 'jingle_bell' ||
-      weaponType === 'candy_cane' ||
-      weaponType === 'quantum_gift'
-    ) {
+    } else if (['star', 'jingle_bell', 'candy_cane', 'quantum_gift'].includes(weaponType)) {
       AudioManager.playSFX('weapon_stars');
       triggerHaptic(HapticPatterns.FIRE_MEDIUM);
     } else {
@@ -810,53 +732,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  removeBullet: (id) =>
-    set((state) => ({
-      bullets: state.bullets.filter((b) => b.id !== id),
-    })),
-
-  updateBullets: (updater) =>
-    set((state) => ({
-      bullets: updater(state.bullets),
-    })),
-
-  addEnemy: (enemy) =>
-    set((state) => ({
-      enemies: [...state.enemies, enemy],
-    })),
-
-  removeEnemy: (id) =>
-    set((state) => ({
-      enemies: state.enemies.filter((e) => e.id !== id),
-    })),
+  removeBullet: (id) => set((state) => ({ bullets: state.bullets.filter((b) => b.id !== id) })),
+  updateBullets: (updater) => set((state) => ({ bullets: updater(state.bullets) })),
+  addEnemy: (enemy) => set((state) => ({ enemies: [...state.enemies, enemy] })),
+  removeEnemy: (id) => set((state) => ({ enemies: state.enemies.filter((e) => e.id !== id) })),
 
   damageEnemy: (id, damage) => {
     const { enemies } = get();
     const enemy = enemies.find((e) => e.id === id);
     if (!enemy) return false;
-
     const newHp = enemy.hp - damage;
-
-    // Play hit sound
     AudioManager.playSFX('enemy_hit');
-
     if (newHp <= 0) {
       get().removeEnemy(id);
       get().addKill(enemy.pointValue);
       return true;
     }
-
-    set({
-      enemies: enemies.map((e) => (e.id === id ? { ...e, hp: newHp } : e)),
-    });
+    set({ enemies: enemies.map((e) => (e.id === id ? { ...e, hp: newHp } : e)) });
     return false;
   },
 
-  updateEnemies: (updater) =>
-    set((state) => ({
-      enemies: updater(state.enemies),
-    })),
-
+  updateEnemies: (updater) => set((state) => ({ enemies: updater(state.enemies) })),
   setObstacles: (obstacles) => set({ obstacles }),
 
   getBriefingLines: () => {
@@ -866,42 +762,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
       { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
     ];
-
-    // Add intel lines
     for (const [index, intel] of missionBriefing.intel.entries()) {
       const label = index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-
-    // Add final warning
-    lines.push({
-      label: 'WARNING',
-      text: 'Hostiles are aggressive - engage on sight',
-      warning: true,
-    });
-
+    lines.push({ label: 'WARNING', text: 'Hostiles are aggressive - engage on sight', warning: true });
     return lines;
   },
 
   spawnBoss: () => {
     const { enemies, addEnemy } = get();
-
-    // Check if boss already exists
     if (enemies.some((e) => e.type === 'boss')) return;
-
-    // Spawn boss at random position
     const angle = Math.random() * Math.PI * 2;
     const radius = 30;
     const position = new THREE.Vector3(Math.cos(angle) * radius, 4, Math.sin(angle) * radius);
-
-    // Add boss to enemies array for collision detection
     addEnemy({
       id: 'boss-krampus',
-      mesh: (() => {
-        const obj = new THREE.Object3D();
-        obj.position.copy(position);
-        return obj;
-      })(),
+      mesh: (() => { const obj = new THREE.Object3D(); obj.position.copy(position); return obj; })(),
       velocity: new THREE.Vector3(),
       hp: 1000,
       maxHp: 1000,
@@ -911,44 +788,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: 5,
       pointValue: 1000,
     });
-
-    set({
-      state: 'PHASE_BOSS',
-      bossActive: true,
-      bossHp: 1000,
-      bossMaxHp: 1000,
-    });
-
-    // Play boss music and announce
+    set({ state: 'PHASE_BOSS', bossActive: true, bossHp: 1000, bossMaxHp: 1000 });
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
   },
 
   damageBoss: (amount) => {
-    const { bossHp, metaProgress } = get();
+    const { bossHp } = get();
     const newHp = Math.max(0, bossHp - amount);
     set({ bossHp: newHp, screenShake: 0.3 });
-
-    // Play boss hit sound
     AudioManager.playSFX('boss_hit');
-
     if (newHp <= 0) {
-      const updatedMeta = {
-        ...get().metaProgress, // Fresh state
-        bossesDefeated: metaProgress.bossesDefeated + 1,
-        runsCompleted: metaProgress.runsCompleted + 1,
-        nicePoints: metaProgress.nicePoints + 500, // +500 NP bonus for boss defeat
-      };
-      set({
-        state: 'WIN',
-        bossActive: false,
-        stats: { ...get().stats, bossDefeated: true },
-        metaProgress: updatedMeta,
-      });
+      const updatedMeta = { ...get().metaProgress, bossesDefeated: get().metaProgress.bossesDefeated + 1, runsCompleted: get().metaProgress.runsCompleted + 1, nicePoints: get().metaProgress.nicePoints + 500 };
+      set({ state: 'WIN', bossActive: false, stats: { ...get().stats, bossDefeated: true }, metaProgress: updatedMeta });
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
-
-      // Victory audio
       AudioManager.playSFX('boss_defeated');
       AudioManager.playSFX('victory');
       AudioManager.playMusic('victory');
@@ -960,28 +814,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
   triggerShake: (intensity) => set({ screenShake: intensity }),
 
   updateHighScore: () => {
-    const { stats, highScore, metaProgress } = get();
+    const { stats, highScore } = get();
     if (stats.score > highScore) {
       saveHighScore(stats.score);
-      const updatedMeta = {
-        ...get().metaProgress, // Fresh state
-        highScore: stats.score,
-      };
+      const updatedMeta = { ...get().metaProgress, highScore: stats.score };
       set({ highScore: stats.score, metaProgress: updatedMeta });
       saveMetaProgress(updatedMeta);
     }
   },
 
-  reset: () =>
-    set({
-      ...initialState,
-      highScore: get().highScore, // Preserve high score
-      metaProgress: get().metaProgress, // Preserve meta progress
-      playerPosition: new THREE.Vector3(0, 0, 0),
-    }),
+  reset: () => set({ ...initialState, highScore: get().highScore, metaProgress: get().metaProgress, playerPosition: new THREE.Vector3(0, 0, 0) }),
 }));
 
-// Expose store on window for e2e testing
 if (typeof window !== 'undefined') {
   window.useGameStore = useGameStore;
 }

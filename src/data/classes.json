@@ -10,9 +10,19 @@
     "color": "#ff0044",
     "scale": 1.4,
     "weaponType": "cannon",
-    "furColor": {
-      "base": [0.5, 0.05, 0.05],
-      "tip": [0.8, 0.2, 0.2]
+    "furOptions": {
+      "baseColor": "#cc1919",
+      "tipColor": "#ff4d4d",
+      "layerCount": 8,
+      "spacing": 0.015,
+      "windStrength": 0.3
+    },
+    "customization": {
+      "beardColor": "#ffffff",
+      "eyeColor": "#00ffff",
+      "beltColor": "#111111",
+      "buckleColor": "#ffd700",
+      "noseColor": "#ffccaa"
     }
   },
   "elf": {
@@ -26,9 +36,18 @@
     "color": "#00ffcc",
     "scale": 0.8,
     "weaponType": "smg",
-    "furColor": {
-      "base": [0.0, 0.3, 0.25],
-      "tip": [0.2, 0.6, 0.5]
+    "furOptions": {
+      "baseColor": "#006659",
+      "tipColor": "#33ccb3",
+      "layerCount": 6,
+      "spacing": 0.012,
+      "windStrength": 1.2
+    },
+    "customization": {
+      "skinColor": "#ffe4c4",
+      "eyeColor": "#00ffff",
+      "accentColor": "#00ff88",
+      "hairColor": "#00ffcc"
     }
   },
   "bumble": {
@@ -42,9 +61,20 @@
     "color": "#eeeeee",
     "scale": 1.6,
     "weaponType": "star",
-    "furColor": {
-      "base": [0.7, 0.7, 0.7],
-      "tip": [1.0, 1.0, 1.0]
+    "furOptions": {
+      "baseColor": "#d9d9d9",
+      "tipColor": "#ffffff",
+      "layerCount": 16,
+      "spacing": 0.035,
+      "windStrength": 0.6,
+      "gravityDroop": 0.05
+    },
+    "customization": {
+      "hornColor": "#ccccaa",
+      "eyeColor": "#00ccff",
+      "snoutColor": "#333333",
+      "teethColor": "#ffffff",
+      "starColor": "#ffd700"
     }
   }
 }
