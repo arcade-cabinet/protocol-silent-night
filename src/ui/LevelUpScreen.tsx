@@ -29,7 +29,7 @@ export function LevelUpScreen() {
             >
               <div className={styles.icon}>{upgrade.icon}</div>
               <div className={styles.cardTitle}>{upgrade.name}</div>
-              <div className={styles.cardCategory}>{upgrade.category.toUpperCase()}</div>
+              <div className={styles.cardCategory}>{upgrade.category}</div>
               <div className={styles.cardDescription}>{upgrade.description}</div>
             </button>
           ))}

@@ -60,6 +60,7 @@ interface GameStore {
   runProgress: RunProgressData;
   upgradeStats: PlayerUpgradeStats;
   levelUpChoices: Upgrade[];
+  previousGameState: GameState | null;
   gainXP: (amount: number) => void;
   levelUp: () => void;
   selectLevelUpgrade: (upgradeId: string) => void;
@@ -188,6 +189,7 @@ const initialState = {
   },
   upgradeStats: getInitialUpgradeStats(),
   levelUpChoices: [],
+  previousGameState: null,
   input: {
     movement: { x: 0, y: 0 },
     isFiring: false,
@@ -665,6 +667,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerPosition: new THREE.Vector3(0, 0, 0),
       upgradeStats: getInitialUpgradeStats(),
       levelUpChoices: [],
+      previousGameState: null,
     }),
 }));
 

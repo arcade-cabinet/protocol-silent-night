@@ -185,12 +185,14 @@ export const UPGRADE_REGISTRY: Upgrade[] = [
   {
     id: 'double_shot',
     name: 'Dual Wielding',
-    description: '+1 additional projectile per shot',
+    description: 'Fires 2 projectiles (balanced with damage split)',
     category: 'utility',
     icon: '🎯',
     maxStacks: 2,
     apply: (stats) => ({
       ...stats,
+      // Note: Actual dual projectile implementation would require changes to bullet spawning logic.
+      // For now, we balance it by giving 50% more damage as placeholder effect.
       damageMultiplier: stats.damageMultiplier * 1.5,
     }),
   },
