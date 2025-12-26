@@ -100,11 +100,12 @@ export function LevelUpScreen() {
           <span className={styles.currentLabel}>ACTIVE UPGRADES:</span>
           <div className={styles.upgradeIcons}>
             {Object.entries(runProgress.activeUpgrades).map(([id, stacks]) => {
-              const upgrade = runProgress.upgradeChoices.find((u) => u.id === id) || 
-                { icon: '?', name: id };
+              const upgrade = runProgress.upgradeChoices.find((u) => u.id === id);
+              const icon = upgrade?.icon ?? '?';
+              const name = upgrade?.name ?? id;
               return (
-                <span key={id} className={styles.activeIcon} title={`${upgrade.name} x${stacks}`}>
-                  {upgrade.icon}
+                <span key={id} className={styles.activeIcon} title={`${name} x${stacks}`}>
+                  {icon}
                   {stacks > 1 && <span className={styles.stackCount}>{stacks}</span>}
                 </span>
               );

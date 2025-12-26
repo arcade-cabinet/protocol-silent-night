@@ -166,9 +166,8 @@ export function Terrain() {
 // Individual Christmas obstacle component for visual variety
 function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const lightRef = useRef<THREE.PointLight>(null);
 
-  // Animated glow effect
+  // Animated glow effect for fallback mesh
   useFrame((state) => {
     const time = state.clock.elapsedTime;
     const uniquePhase = obstacle.position.x * 0.1 + obstacle.position.z * 0.1;
@@ -176,10 +175,6 @@ function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
     if (meshRef.current) {
       const pulse = Math.sin(time * 2 + uniquePhase) * 0.15 + 0.85;
       (meshRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse * 0.4;
-    }
-    
-    if (lightRef.current) {
-      lightRef.current.intensity = (Math.sin(time * 3 + uniquePhase) * 0.3 + 0.7) * 0.8;
     }
   });
 

@@ -1,0 +1,1227 @@
+diff --git a/e2e/ai-feedback-address.spec.ts b/e2e/ai-feedback-address.spec.ts
+new file mode 100644
+index 0000000..be20bde
+--- /dev/null
++++ b/e2e/ai-feedback-address.spec.ts
+@@ -0,0 +1,127 @@
++import { test, expect, Page } from '@playwright/test';
++
++/**
++ * E2E tests for AI feedback addressments
++ */
++
++const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
++
++async function getGameState(page: Page) {
++  return page.evaluate(() => {
++    const store = (window as any).useGameStore;
++    if (!store) return null;
++    const state = store.getState();
++    return {
++      gameState: state.state,
++      playerClass: state.playerClass,
++      runProgress: state.runProgress,
++      enemies: state.enemies.map((e: any) => ({
++        id: e.id,
++        type: e.type,
++        rotation: e.mesh.rotation.y,
++        position: [e.mesh.position.x, e.mesh.position.y, e.mesh.position.z]
++      })),
++      playerPosition: [state.playerPosition.x, state.playerPosition.y, state.playerPosition.z],
++    };
++  });
++}
++
++test.describe('AI Feedback Implementation', () => {
++  test.beforeEach(async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(hasMcpSupport ? 3000 : 2500);
++  });
++
++  test('should have centralized briefing lines in store', async ({ page }) => {
++    // Select a class to trigger briefing
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Check briefing lines from store
++    const briefingLines = await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      return store.getState().getBriefingLines();
++    });
++
++    expect(briefingLines).toBeDefined();
++    expect(briefingLines.length).toBeGreaterThan(0);
++    expect(briefingLines[0].label).toBe('OPERATION');
++    expect(briefingLines[1].label).toBe('OPERATOR');
++    expect(briefingLines[1].text).toBe('MECHA-SANTA');
++  });
++
++  test('enemies should face the player', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(5000); // Wait longer for enemies to spawn and rotate
++
++    const state = await getGameState(page);
++    const enemies = state?.enemies || [];
++    const playerPos = state?.playerPosition || [0, 0, 0];
++
++    expect(enemies.length).toBeGreaterThan(0);
++
++    for (const enemy of enemies) {
++      // Calculate expected rotation to face player
++      const dx = playerPos[0] - enemy.position[0];
++      const dz = playerPos[2] - enemy.position[2];
++      const expectedRotation = Math.atan2(dx, dz);
++      
++      // Check if enemy rotation is close to expected rotation
++      // Allow for some difference due to smooth rotation (lerp)
++      const diff = Math.abs(enemy.rotation - expectedRotation);
++      const normalizedDiff = Math.atan2(Math.sin(diff), Math.cos(diff));
++      
++      // Tolerance 0.8 rad (~45 degrees) to allow for some lag/lerp
++      expect(Math.abs(normalizedDiff)).toBeLessThan(0.8);
++    }
++  });
++
++  test('boss should face the player', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    // Manually trigger boss spawn for testing
++    await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      store.getState().spawnBoss();
++    });
++
++    await page.waitForTimeout(2000);
++
++    const state = await getGameState(page);
++    const boss = state?.enemies.find((e: any) => e.type === 'boss');
++    const playerPos = state?.playerPosition || [0, 0, 0];
++
++    expect(boss).toBeDefined();
++
++    const dx = playerPos[0] - boss.position[0];
++    const dz = playerPos[2] - boss.position[2];
++    const expectedRotation = Math.atan2(dx, dz);
++    
++    const diff = Math.abs(boss.rotation - expectedRotation);
++    const normalizedDiff = Math.atan2(Math.sin(diff), Math.cos(diff));
++    
++    expect(Math.abs(normalizedDiff)).toBeLessThan(0.8);
++  });
++});
+diff --git a/e2e/weapon-evolution.spec.ts b/e2e/weapon-evolution.spec.ts
+new file mode 100644
+index 0000000..39c9eaf
+--- /dev/null
++++ b/e2e/weapon-evolution.spec.ts
+@@ -0,0 +1,422 @@
++import { test, expect, Page } from '@playwright/test';
++
++/**
++ * Weapon Evolution E2E Tests
++ * 
++ * Tests the weapon evolution system that transforms weapons
++ * when the player reaches level 10 with appropriate upgrades.
++ * 
++ * Requires WebGL/MCP support for full testing.
++ */
++
++// Check if running with full MCP capabilities
++const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
++
++// Helper to get game state from the store
++async function getGameState(page: Page) {
++  return page.evaluate(() => {
++    const store = (window as any).useGameStore;
++    if (!store) return null;
++    const state = store.getState();
++    return {
++      gameState: state.state,
++      playerClass: state.playerClass,
++      runProgress: state.runProgress,
++      currentEvolution: state.currentEvolution,
++      playerHp: state.playerHp,
++      score: state.stats.score,
++      kills: state.stats.kills,
++      bulletCount: state.bullets.length,
++    };
++  });
++}
++
++// Helper to trigger store actions
++async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
++  return page.evaluate(({ action, args }) => {
++    const store = (window as any).useGameStore;
++    if (!store) return false;
++    const state = store.getState();
++    if (typeof state[action] === 'function') {
++      state[action](...args);
++      return true;
++    }
++    return false;
++  }, { action, args });
++}
++
++// Helper to gain XP to reach a specific level
++async function gainXPToLevel(page: Page, targetLevel: number) {
++  return page.evaluate((level) => {
++    const store = (window as any).useGameStore;
++    if (!store) return false;
++    const state = store.getState();
++    
++    // Calculate total XP needed
++    let totalXP = 0;
++    for (let i = 1; i < level; i++) {
++      totalXP += i * 100; // 100 * level XP per level
++    }
++    
++    // Gain XP to reach target level
++    state.gainXP(totalXP);
++    return true;
++  }, targetLevel);
++}
++
++test.describe('Weapon Evolution System', () => {
++  test.beforeEach(async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(hasMcpSupport ? 3000 : 2500);
++  });
++
++  test('should track weapon evolution configuration', async ({ page }) => {
++    const hasEvolutions = await page.evaluate(() => {
++      // Check if WEAPON_EVOLUTIONS is available via the game store
++      const store = (window as any).useGameStore;
++      if (!store) return false;
++      return true;
++    });
++
++    // Verify game store is available (evolutions are defined in types)
++    expect(hasEvolutions).toBe(true);
++  });
++
++  test('should not evolve weapon before level 10', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa (cannon weapon)
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Gain XP to reach level 5
++    await gainXPToLevel(page, 5);
++    await page.waitForTimeout(500);
++
++    // Check evolution state
++    const state = await getGameState(page);
++    expect(state?.runProgress.level).toBeLessThan(10);
++    expect(state?.currentEvolution).toBeNull();
++    expect(state?.runProgress.weaponEvolutions).toHaveLength(0);
++  });
++
++  test('should evolve cannon to mega coal mortar at level 10', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa (cannon weapon)
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Gain XP to reach level 10
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    // Check evolution state
++    const state = await getGameState(page);
++    expect(state?.runProgress.level).toBeGreaterThanOrEqual(10);
++    expect(state?.currentEvolution).toBe('mega-coal-mortar');
++    expect(state?.runProgress.weaponEvolutions).toContain('mega-coal-mortar');
++
++    console.log('Evolved to:', state?.currentEvolution);
++  });
++
++  test('should evolve SMG to plasma storm at level 10', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Elf (SMG weapon)
++    const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
++    await expect(elfButton).toBeVisible({ timeout: 15000 });
++    await elfButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Gain XP to reach level 10
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    // Check evolution state
++    const state = await getGameState(page);
++    expect(state?.runProgress.level).toBeGreaterThanOrEqual(10);
++    expect(state?.currentEvolution).toBe('plasma-storm');
++    expect(state?.runProgress.weaponEvolutions).toContain('plasma-storm');
++
++    console.log('Evolved to:', state?.currentEvolution);
++  });
++
++  test('should evolve star to supernova burst at level 10', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Bumble (star weapon)
++    const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
++    await expect(bumbleButton).toBeVisible({ timeout: 15000 });
++    await bumbleButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Gain XP to reach level 10
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    // Check evolution state
++    const state = await getGameState(page);
++    expect(state?.runProgress.level).toBeGreaterThanOrEqual(10);
++    expect(state?.currentEvolution).toBe('supernova-burst');
++    expect(state?.runProgress.weaponEvolutions).toContain('supernova-burst');
++
++    console.log('Evolved to:', state?.currentEvolution);
++  });
++
++  test('should apply damage multiplier after evolution', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Get base damage
++    const baseDamage = await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      return store.getState().playerClass?.damage;
++    });
++
++    // Evolve weapon
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    // Get modified damage
++    const evolvedDamage = await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      return store.getState().getWeaponModifiers().damage;
++    });
++
++    // Mega Coal Mortar has 2x damage multiplier
++    expect(evolvedDamage).toBeGreaterThan(baseDamage);
++    expect(evolvedDamage).toBe(baseDamage * 2);
++
++    console.log(`Base damage: ${baseDamage}, Evolved damage: ${evolvedDamage}`);
++  });
++
++  test('should fire more projectiles after plasma storm evolution', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Elf
++    const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
++    await expect(elfButton).toBeVisible({ timeout: 15000 });
++    await elfButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Evolve weapon to Plasma Storm
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    // Clear bullets
++    await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      store.getState().updateBullets(() => []);
++    });
++
++    // Fire weapon
++    await page.keyboard.down('Space');
++    await page.waitForTimeout(200);
++    await page.keyboard.up('Space');
++    await page.waitForTimeout(100);
++
++    // Count bullets (should be 3 for burst fire)
++    const bulletCount = await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      return store.getState().bullets.length;
++    });
++
++    // Plasma Storm fires burst of 3
++    expect(bulletCount).toBeGreaterThanOrEqual(3);
++    console.log(`Bullets fired after evolution: ${bulletCount}`);
++  });
++
++  test('should fire 5 stars after supernova burst evolution', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Bumble
++    const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
++    await expect(bumbleButton).toBeVisible({ timeout: 15000 });
++    await bumbleButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Evolve weapon
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    // Clear bullets
++    await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      store.getState().updateBullets(() => []);
++    });
++
++    // Fire weapon
++    await page.keyboard.down('Space');
++    await page.waitForTimeout(200);
++    await page.keyboard.up('Space');
++    await page.waitForTimeout(100);
++
++    // Count bullets (should be 5 for supernova burst)
++    const bulletCount = await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      return store.getState().bullets.length;
++    });
++
++    // Supernova Burst fires 5 stars
++    expect(bulletCount).toBe(5);
++    console.log(`Stars fired after evolution: ${bulletCount}`);
++  });
++
++  test('should increase projectile size after evolution', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Evolve weapon
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    // Fire and check bullet size
++    await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      store.getState().updateBullets(() => []);
++    });
++
++    await page.keyboard.down('Space');
++    await page.waitForTimeout(200);
++    await page.keyboard.up('Space');
++    await page.waitForTimeout(100);
++
++    const bulletSize = await page.evaluate(() => {
++      const store = (window as any).useGameStore;
++      const bullets = store.getState().bullets;
++      return bullets.length > 0 ? bullets[0].size : null;
++    });
++
++    // Mega Coal Mortar has 2x size
++    expect(bulletSize).toBe(2);
++    console.log(`Bullet size after evolution: ${bulletSize}x`);
++  });
++
++  test('should not evolve weapon twice', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Evolve at level 10
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    const state1 = await getGameState(page);
++    const evolution1 = state1?.currentEvolution;
++
++    // Level up more
++    await gainXPToLevel(page, 15);
++    await page.waitForTimeout(1000);
++
++    const state2 = await getGameState(page);
++    const evolution2 = state2?.currentEvolution;
++
++    // Should still be same evolution
++    expect(evolution2).toBe(evolution1);
++    expect(state2?.runProgress.weaponEvolutions).toHaveLength(1);
++  });
++
++  test('should reset evolution on new game', async ({ page }) => {
++    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
++
++    // Select Santa
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
++    await expect(santaButton).toBeVisible({ timeout: 15000 });
++    await santaButton.click();
++
++    // Start game
++    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
++    await expect(commenceButton).toBeVisible({ timeout: 15000 });
++    await commenceButton.click();
++
++    await page.waitForTimeout(1000);
++
++    // Evolve weapon
++    await gainXPToLevel(page, 10);
++    await page.waitForTimeout(1000);
++
++    const state1 = await getGameState(page);
++    expect(state1?.currentEvolution).not.toBeNull();
++
++    // Reset game
++    await triggerStoreAction(page, 'reset');
++    await page.waitForTimeout(500);
++
++    const state2 = await getGameState(page);
++    expect(state2?.currentEvolution).toBeNull();
++    expect(state2?.runProgress.level).toBe(1);
++  });
++});
+diff --git a/src/characters/PlayerController.tsx b/src/characters/PlayerController.tsx
+index 528398b..b50020d 100644
+--- a/src/characters/PlayerController.tsx
++++ b/src/characters/PlayerController.tsx
+@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef } from 'react';
+ import * as THREE from 'three';
+ import { useGameStore } from '@/store/gameStore';
+ import type { ChristmasObstacle, PlayerClassType } from '@/types';
+-import { getBulletTypeFromWeapon } from '@/types';
++import { getBulletTypeFromWeapon, WEAPON_EVOLUTIONS } from '@/types';
+ import { BumbleCharacter } from './BumbleCharacter';
+ import { ElfCharacter } from './ElfCharacter';
+ import { SantaCharacter } from './SantaCharacter';
+@@ -53,8 +53,17 @@ export function PlayerController() {
+   const slideZRef = useRef(new THREE.Vector3());
+   const moveVectorRef = useRef(new THREE.Vector3());
+ 
+-  const { playerClass, input, state, setPlayerPosition, setPlayerRotation, addBullet, obstacles } =
+-    useGameStore();
++  const {
++    playerClass,
++    input,
++    state,
++    setPlayerPosition,
++    setPlayerRotation,
++    addBullet,
++    obstacles,
++    getWeaponModifiers,
++    currentEvolution,
++  } = useGameStore();
+ 
+   const isMoving = input.movement.x !== 0 || input.movement.y !== 0;
+   const isFiring = input.isFiring;
+@@ -75,12 +84,36 @@ export function PlayerController() {
+       const weaponType = playerClass?.weaponType || 'star';
+       const bulletType = getBulletTypeFromWeapon(weaponType);
+ 
+-      const bulletSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
++      // Get evolution modifiers
++      const evolutionConfig = currentEvolution ? WEAPON_EVOLUTIONS[currentEvolution] : null;
++
++      const baseSpeed = bulletType === 'smg' ? 45 : bulletType === 'stars' ? 35 : 25;
++      const bulletSpeed =
++        baseSpeed * (evolutionConfig?.modifiers.speedMultiplier || 1);
+       const bulletLife = bulletType === 'smg' ? 1.5 : bulletType === 'stars' ? 2.5 : 3.0;
+ 
+-      // For star weapon, create spread pattern
+-      if (weaponType === 'star') {
+-        const angles = [-0.2, 0, 0.2];
++      // Get projectile count and spread from evolution
++      const projectileCount = evolutionConfig?.modifiers.projectileCount || 3;
++      const spreadAngle = evolutionConfig?.modifiers.spreadAngle || 0.2;
++      const size = evolutionConfig?.modifiers.size || 1;
++      const penetration = evolutionConfig?.modifiers.penetration || false;
++      const explosive = evolutionConfig?.modifiers.explosive || false;
++
++      // For star weapon or evolved multi-projectile weapons, create spread pattern
++      if (weaponType === 'star' || (evolutionConfig && projectileCount > 1)) {
++        const count = weaponType === 'star' && !evolutionConfig ? 3 : projectileCount;
++        const angles: number[] = [];
++
++        // Generate angles for projectiles
++        if (count === 1) {
++          angles.push(0);
++        } else {
++          const angleStep = (spreadAngle * 2) / (count - 1);
++          for (let i = 0; i < count; i++) {
++            angles.push(-spreadAngle + i * angleStep);
++          }
++        }
++
+         for (const angleOffset of angles) {
+           const spreadDir = direction.clone();
+           spreadDir.applyAxisAngle(upAxisRef.current, angleOffset);
+@@ -97,7 +130,11 @@ export function PlayerController() {
+             damage,
+             life: bulletLife,
+             speed: bulletSpeed,
+-            type: 'stars',
++            type: weaponType === 'star' ? 'stars' : bulletType,
++            evolutionType: currentEvolution || undefined,
++            size,
++            penetration,
++            explosive,
+           });
+         }
+       } else {
+@@ -114,10 +151,14 @@ export function PlayerController() {
+           life: bulletLife,
+           speed: bulletSpeed,
+           type: bulletType,
++          evolutionType: currentEvolution || undefined,
++          size,
++          penetration,
++          explosive,
+         });
+       }
+     },
+-    [playerClass, addBullet]
++    [playerClass, addBullet, currentEvolution]
+   );
+ 
+   useFrame((_, delta) => {
+@@ -184,7 +225,9 @@ export function PlayerController() {
+     // Firing
+     if (firing) {
+       const now = Date.now() / 1000;
+-      if (now - lastFireTime.current >= playerClass.rof) {
++      // Use modified stats from evolution
++      const modifiedClass = getWeaponModifiers();
++      if (modifiedClass && now - lastFireTime.current >= modifiedClass.rof) {
+         lastFireTime.current = now;
+ 
+         firePosRef.current.copy(positionRef.current);
+@@ -193,7 +236,7 @@ export function PlayerController() {
+         fireDirRef.current.set(0, 0, 1);
+         fireDirRef.current.applyAxisAngle(upAxisRef.current, rotationRef.current);
+ 
+-        fireBullet(firePosRef.current, fireDirRef.current, playerClass.damage);
++        fireBullet(firePosRef.current, fireDirRef.current, modifiedClass.damage);
+       }
+     }
+   });
+diff --git a/src/game/Bullets.tsx b/src/game/Bullets.tsx
+index e742d6e..b3b796f 100644
+--- a/src/game/Bullets.tsx
++++ b/src/game/Bullets.tsx
+@@ -188,22 +188,26 @@ export function Bullets() {
+       };
+ 
+       // Update Cannon bullets
+-      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (_, d) => {
++      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (bullet, d) => {
+         d.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
+-        d.scale.setScalar(1 + Math.sin(time * 10) * 0.1); // Pulsing
++        const baseScale = 1 + Math.sin(time * 10) * 0.1;
++        const sizeMultiplier = bullet.size || 1;
++        d.scale.setScalar(baseScale * sizeMultiplier); // Pulsing with evolution size
+       });
+ 
+       // Update SMG bullets
+       updateInstanceMesh(smgRef, smgBullets, MAX_SMG_BULLETS, (bullet, d) => {
+         lookAtVecRef.current.copy((bullet.mesh as THREE.Object3D).position).add(bullet.direction);
+         d.lookAt(lookAtVecRef.current);
+-        d.scale.set(1, 1, 1.5); // Elongated for motion blur effect
++        const sizeMultiplier = bullet.size || 1;
++        d.scale.set(sizeMultiplier, sizeMultiplier, 1.5 * sizeMultiplier); // Elongated for motion blur effect
+       });
+ 
+       // Update Star bullets
+-      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (_, d) => {
++      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (bullet, d) => {
+         d.rotation.set(0, 0, time * 15); // Fast spin
+-        d.scale.setScalar(1);
++        const sizeMultiplier = bullet.size || 1;
++        d.scale.setScalar(sizeMultiplier);
+       });
+ 
+       return activeBullets;
+diff --git a/src/game/CameraController.tsx b/src/game/CameraController.tsx
+index 611d7b9..be49acb 100644
+--- a/src/game/CameraController.tsx
++++ b/src/game/CameraController.tsx
+@@ -29,7 +29,7 @@ export function CameraController() {
+   const pinchStartRef = useRef<number | null>(null);
+   const initialZoomRef = useRef(1.0);
+ 
+-  const { playerPosition, screenShake, state } = useGameStore();
++  const { state } = useGameStore();
+ 
+   // Handle pinch-to-zoom
+   const handleTouchStart = useCallback((e: TouchEvent) => {
+@@ -143,6 +143,8 @@ export function CameraController() {
+   }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handleDeviceOrientation]);
+ 
+   useFrame((_, delta) => {
++    const { playerPosition, screenShake } = useGameStore.getState();
++    
+     if (state === 'MENU' || state === 'BRIEFING') {
+       // Menu camera - static elevated view with slow rotation
+       camera.position.lerp(MENU_CAMERA_POS, delta * 2);
+diff --git a/src/game/Enemies.tsx b/src/game/Enemies.tsx
+index d147d79..451cb04 100644
+--- a/src/game/Enemies.tsx
++++ b/src/game/Enemies.tsx
+@@ -132,8 +132,11 @@ export function Enemies() {
+         tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
+         currentPos.add(tempVec);
+ 
+-        // Set rotation to face the player
+-        enemy.mesh.rotation.y = Math.atan2(direction.x, direction.z);
++        // Set rotation to face the player - smooth rotation
++        const targetRotation = Math.atan2(direction.x, direction.z);
++        const angleDiff =
++          ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
++        enemy.mesh.rotation.y += angleDiff * delta * 8;
+ 
+         // Collision with player - apply knockback and queue damage
+         const hitRadius = enemy.type === 'boss' ? 3 : 1.5;
+@@ -196,9 +199,15 @@ function BossRenderer({
+ }) {
+   const bossEnemy = enemies.find((e) => e.type === 'boss');
+   const bossPos = bossEnemy?.mesh.position ?? null;
++  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
+ 
+   return (
+-    <BossMesh position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]} hp={bossHp} maxHp={bossMaxHp} />
++    <BossMesh
++      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
++      rotation={bossRotation}
++      hp={bossHp}
++      maxHp={bossMaxHp}
++    />
+   );
+ }
+ 
+@@ -470,10 +479,12 @@ function MinionMesh({
+ // Boss (Krampus-Prime) mesh component
+ function BossMesh({
+   position,
++  rotation = 0,
+   hp,
+   maxHp,
+ }: {
+   position: [number, number, number];
++  rotation?: number;
+   hp: number;
+   maxHp: number;
+ }) {
+@@ -521,7 +532,7 @@ function BossMesh({
+   });
+ 
+   return (
+-    <group position={position}>
++    <group position={position} rotation={[0, rotation, 0]}>
+       {/* Core */}
+       <mesh ref={coreRef} castShadow>
+         <dodecahedronGeometry args={[2]} />
+diff --git a/src/store/gameStore.ts b/src/store/gameStore.ts
+index 61d32a5..b08cd66 100644
+--- a/src/store/gameStore.ts
++++ b/src/store/gameStore.ts
+@@ -2,6 +2,7 @@ import * as THREE from 'three';
+ import { create } from 'zustand';
+ import { AudioManager } from '@/audio/AudioManager';
+ import type {
++  BriefingLine,
+   BulletData,
+   ChristmasObstacle,
+   EnemyData,
+@@ -12,8 +13,9 @@ import type {
+   PlayerClassConfig,
+   PlayerClassType,
+   RunProgressData,
++  WeaponEvolutionType,
+ } from '@/types';
+-import { CONFIG, PLAYER_CLASSES } from '@/types';
++import { CONFIG, PLAYER_CLASSES, WEAPON_EVOLUTIONS } from '@/types';
+ import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
+ 
+ // Persistence keys
+@@ -61,6 +63,12 @@ interface GameStore {
+   levelUp: () => void;
+   selectLevelUpgrade: (upgradeId: string) => void;
+ 
++  // Weapon Evolution
++  currentEvolution: WeaponEvolutionType | null;
++  evolveWeapon: (evolutionType: WeaponEvolutionType) => void;
++  checkEvolutionAvailability: () => WeaponEvolutionType | null;
++  getWeaponModifiers: () => PlayerClassConfig | null;
++
+   // Input
+   input: InputState;
+   setMovement: (x: number, y: number) => void;
+@@ -71,6 +79,7 @@ interface GameStore {
+   bullets: BulletData[];
+   enemies: EnemyData[];
+   obstacles: ChristmasObstacle[];
++  getBriefingLines: () => BriefingLine[];
+   addBullet: (bullet: BulletData) => void;
+   removeBullet: (id: string) => void;
+   addEnemy: (enemy: EnemyData) => void;
+@@ -202,6 +211,7 @@ const initialState = {
+   damageFlash: false,
+   killStreak: 0,
+   lastKillTime: 0,
++  currentEvolution: null,
+ };
+ 
+ // Extend Window interface for e2e testing
+@@ -426,6 +436,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
+   levelUp: () => {
+     // This will eventually trigger the LevelUp UI
+     AudioManager.playSFX('ui_select');
++    
++    // Check if evolution is available at this level
++    const availableEvolution = get().checkEvolutionAvailability();
++    if (availableEvolution && !get().currentEvolution) {
++      get().evolveWeapon(availableEvolution);
++    }
+     // TODO: set state to SHOW_LEVEL_UP if we implement a separate state for it
+   },
+ 
+@@ -437,6 +453,88 @@ export const useGameStore = create<GameStore>((set, get) => ({
+         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
+       },
+     });
++
++    // Check if evolution is now available
++    const availableEvolution = get().checkEvolutionAvailability();
++    if (availableEvolution && !get().currentEvolution) {
++      get().evolveWeapon(availableEvolution);
++    }
++  },
++
++  // Weapon Evolution Actions
++  evolveWeapon: (evolutionType) => {
++    const { runProgress, playerClass } = get();
++    
++    if (!playerClass) return;
++    
++    const evolution = WEAPON_EVOLUTIONS[evolutionType];
++    if (!evolution) return;
++
++    // Add to weaponEvolutions array
++    set({
++      currentEvolution: evolutionType,
++      runProgress: {
++        ...runProgress,
++        weaponEvolutions: [...runProgress.weaponEvolutions, evolutionType],
++      },
++    });
++
++    // Play evolution sound
++    AudioManager.playSFX('ui_select');
++    triggerHaptic(HapticPatterns.FIRE_HEAVY);
++  },
++
++  checkEvolutionAvailability: () => {
++    const { runProgress, playerClass, currentEvolution } = get();
++    
++    // Already evolved
++    if (currentEvolution) return null;
++    
++    // Need to be at least level 10
++    if (runProgress.level < 10) return null;
++    
++    if (!playerClass) return null;
++
++    // Find matching evolution for current weapon
++    for (const [evolutionId, config] of Object.entries(WEAPON_EVOLUTIONS)) {
++      if (config.baseWeapon === playerClass.weaponType) {
++        // Check if level requirement is met
++        if (runProgress.level >= config.minLevel) {
++          // Check required upgrades if any
++          if (config.requiredUpgrades) {
++            const hasAllUpgrades = config.requiredUpgrades.every((upgrade) =>
++              runProgress.selectedUpgrades.includes(upgrade)
++            );
++            if (!hasAllUpgrades) continue;
++          }
++          
++          return evolutionId as WeaponEvolutionType;
++        }
++      }
++    }
++    
++    return null;
++  },
++
++  getWeaponModifiers: () => {
++    const { playerClass, currentEvolution } = get();
++    
++    if (!playerClass) return null;
++    
++    // No evolution, return base class
++    if (!currentEvolution) return playerClass;
++    
++    const evolution = WEAPON_EVOLUTIONS[currentEvolution];
++    if (!evolution) return playerClass;
++
++    // Apply evolution modifiers
++    const modifiers = evolution.modifiers;
++    return {
++      ...playerClass,
++      damage: Math.round(playerClass.damage * (modifiers.damageMultiplier || 1)),
++      rof: playerClass.rof * (modifiers.rofMultiplier || 1),
++      speed: playerClass.speed * (modifiers.speedMultiplier || 1),
++    };
+   },
+ 
+   setMovement: (x, y) =>
+@@ -526,6 +624,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
+ 
+   setObstacles: (obstacles) => set({ obstacles }),
+ 
++  getBriefingLines: () => {
++    const { missionBriefing, playerClass } = get();
++    const lines: BriefingLine[] = [
++      { label: 'OPERATION', text: missionBriefing.title, accent: true },
++      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
++      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
++    ];
++
++    // Add intel lines
++    for (const [index, intel] of missionBriefing.intel.entries()) {
++      const label =
++        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
++      lines.push({ label, text: intel });
++    }
++
++    // Add final warning
++    lines.push({
++      label: 'WARNING',
++      text: 'Hostiles are aggressive - engage on sight',
++      warning: true,
++    });
++
++    return lines;
++  },
++
+   spawnBoss: () => {
+     const { enemies, addEnemy } = get();
+ 
+diff --git a/src/types/index.ts b/src/types/index.ts
+index b69f963..a527c80 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -40,7 +40,7 @@ export interface PlayerClassConfig {
+   /** Character scale multiplier */
+   scale: number;
+   /** Weapon type determining projectile behavior */
+-  weaponType: 'cannon' | 'smg' | 'star';
++  weaponType: 'cannon' | 'smg' | 'star' | 'snowball' | 'candy-cane';
+   /** Fur rendering colors as RGB tuples (0-1 range) */
+   furColor: {
+     base: [number, number, number];
+@@ -48,12 +48,50 @@ export interface PlayerClassConfig {
+   };
+ }
+ 
++/**
++ * Weapon evolution identifiers
++ */
++export type WeaponEvolutionType =
++  | 'mega-coal-mortar'
++  | 'plasma-storm'
++  | 'supernova-burst'
++  | 'blizzard-cannon'
++  | 'peppermint-tornado';
++
++/**
++ * Configuration for weapon evolution
++ * @interface WeaponEvolutionConfig
++ */
++export interface WeaponEvolutionConfig {
++  /** Unique identifier for evolution */
++  id: WeaponEvolutionType;
++  /** Display name */
++  name: string;
++  /** Base weapon type that can evolve */
++  baseWeapon: PlayerClassConfig['weaponType'];
++  /** Minimum level required */
++  minLevel: number;
++  /** Required upgrade selections (if any) */
++  requiredUpgrades?: string[];
++  /** Stat modifiers applied on evolution */
++  modifiers: {
++    damageMultiplier?: number;
++    rofMultiplier?: number;
++    speedMultiplier?: number;
++    projectileCount?: number;
++    spreadAngle?: number;
++    size?: number;
++    penetration?: boolean;
++    explosive?: boolean;
++  };
++}
++
+ /**
+  * Helper to get bullet type from weapon type
+  */
+ export const getBulletTypeFromWeapon = (
+   weaponType: PlayerClassConfig['weaponType']
+-): 'cannon' | 'smg' | 'stars' => {
++): 'cannon' | 'smg' | 'stars' | 'snowball' | 'candy-cane' => {
+   switch (weaponType) {
+     case 'cannon':
+       return 'cannon';
+@@ -61,6 +99,10 @@ export const getBulletTypeFromWeapon = (
+       return 'smg';
+     case 'star':
+       return 'stars';
++    case 'snowball':
++      return 'snowball';
++    case 'candy-cane':
++      return 'candy-cane';
+     default:
+       return 'stars';
+   }
+@@ -124,7 +166,15 @@ export interface BulletData extends EntityData {
+   /** Travel speed in units per second */
+   speed: number;
+   /** Weapon type that fired this bullet */
+-  type?: 'cannon' | 'smg' | 'stars';
++  type?: 'cannon' | 'smg' | 'stars' | 'snowball' | 'candy-cane';
++  /** Evolution type if weapon is evolved */
++  evolutionType?: WeaponEvolutionType;
++  /** Size multiplier for visual scaling */
++  size?: number;
++  /** Whether bullet has penetration */
++  penetration?: boolean;
++  /** Whether bullet is explosive */
++  explosive?: boolean;
+ }
+ 
+ /**
+@@ -147,6 +197,17 @@ export interface EnemyData extends EntityData {
+   phase?: 'chase' | 'barrage';
+ }
+ 
++/**
++ * Data structure for mission briefing lines
++ * @interface BriefingLine
++ */
++export interface BriefingLine {
++  label: string;
++  text: string;
++  accent?: boolean;
++  warning?: boolean;
++}
++
+ /**
+  * Christmas object types with distinct appearances
+  */
+@@ -231,7 +292,7 @@ export interface RunProgressData {
+   /** IDs of upgrades selected during this run */
+   selectedUpgrades: string[];
+   /** IDs of weapon evolutions unlocked this run */
+-  weaponEvolutions: string[];
++  weaponEvolutions: WeaponEvolutionType[];
+ }
+ 
+ /**
+@@ -312,3 +373,67 @@ export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
+     },
+   },
+ };
++
++/**
++ * Weapon evolution configurations
++ * @constant
++ */
++export const WEAPON_EVOLUTIONS: Record<WeaponEvolutionType, WeaponEvolutionConfig> = {
++  'mega-coal-mortar': {
++    id: 'mega-coal-mortar',
++    name: 'Mega Coal Mortar',
++    baseWeapon: 'cannon',
++    minLevel: 10,
++    modifiers: {
++      damageMultiplier: 2.0,
++      size: 2.0,
++      explosive: true,
++      rofMultiplier: 0.8, // Slightly slower
++    },
++  },
++  'plasma-storm': {
++    id: 'plasma-storm',
++    name: 'Plasma Storm',
++    baseWeapon: 'smg',
++    minLevel: 10,
++    modifiers: {
++      damageMultiplier: 1.5,
++      projectileCount: 3, // Burst of 3
++      rofMultiplier: 1.2, // Faster fire rate
++    },
++  },
++  'supernova-burst': {
++    id: 'supernova-burst',
++    name: 'Supernova Burst',
++    baseWeapon: 'star',
++    minLevel: 10,
++    modifiers: {
++      damageMultiplier: 1.8,
++      projectileCount: 5, // More stars
++      spreadAngle: 0.3, // Wider spread
++      size: 1.5,
++    },
++  },
++  'blizzard-cannon': {
++    id: 'blizzard-cannon',
++    name: 'Blizzard Cannon',
++    baseWeapon: 'snowball',
++    minLevel: 10,
++    modifiers: {
++      damageMultiplier: 1.6,
++      speedMultiplier: 1.3,
++      penetration: true,
++    },
++  },
++  'peppermint-tornado': {
++    id: 'peppermint-tornado',
++    name: 'Peppermint Tornado',
++    baseWeapon: 'candy-cane',
++    minLevel: 10,
++    modifiers: {
++      damageMultiplier: 1.7,
++      projectileCount: 6, // Spiral pattern
++      speedMultiplier: 1.1,
++    },
++  },
++};
+diff --git a/src/ui/MissionBriefing.tsx b/src/ui/MissionBriefing.tsx
+index 797994c..7a63548 100644
+--- a/src/ui/MissionBriefing.tsx
++++ b/src/ui/MissionBriefing.tsx
+@@ -6,43 +6,18 @@
+ import { useEffect, useMemo, useState } from 'react';
+ import { AudioManager } from '@/audio/AudioManager';
+ import { useGameStore } from '@/store/gameStore';
++import type { BriefingLine } from '@/types';
+ import styles from './MissionBriefing.module.css';
+ 
+-interface BriefingLine {
+-  label: string;
+-  text: string;
+-  accent?: boolean;
+-  warning?: boolean;
+-}
+-
+ export function MissionBriefing() {
+-  const { state, setState, playerClass, missionBriefing } = useGameStore();
++  const state = useGameStore((s) => s.state);
++  const setState = useGameStore((s) => s.setState);
++  const getBriefingLines = useGameStore((s) => s.getBriefingLines);
++  
+   const [currentLine, setCurrentLine] = useState(0);
+   const [showButton, setShowButton] = useState(false);
+ 
+-  const briefingLines = useMemo(() => {
+-    const lines: BriefingLine[] = [
+-      { label: 'OPERATION', text: missionBriefing.title, accent: true },
+-      { label: 'OPERATOR', text: playerClass?.name || 'UNKNOWN' },
+-      { label: 'ROLE', text: playerClass?.role || 'UNKNOWN' },
+-    ];
+-
+-    // Add intel lines from store
+-    for (const [index, intel] of missionBriefing.intel.entries()) {
+-      const label =
+-        index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
+-      lines.push({ label, text: intel });
+-    }
+-
+-    // Add final warning
+-    lines.push({
+-      label: 'WARNING',
+-      text: 'Hostiles are aggressive - engage on sight',
+-      warning: true,
+-    });
+-
+-    return lines;
+-  }, [playerClass, missionBriefing]);
++  const briefingLines: BriefingLine[] = useMemo(() => getBriefingLines(), [getBriefingLines, state]);
+ 
+   useEffect(() => {
+     if (state !== 'BRIEFING') return;

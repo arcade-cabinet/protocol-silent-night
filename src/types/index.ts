@@ -9,12 +9,27 @@ import type * as THREE from 'three';
  * Game state machine states
  * @description Represents the current phase of the game
  */
-export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' | 'GAME_OVER';
+export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' | 'GAME_OVER' | 'LEVEL_UP';
 
 /**
  * Available player character classes
  */
 export type PlayerClassType = 'santa' | 'elf' | 'bumble';
+
+/**
+ * Weapon identifiers
+ */
+export type WeaponType =
+  | 'cannon'
+  | 'smg'
+  | 'star'
+  | 'snowball'
+  | 'candy_cane'
+  | 'ornament'
+  | 'light_string'
+  | 'gingerbread'
+  | 'jingle_bell'
+  | 'quantum_gift';
 
 /**
  * Configuration for a player character class
@@ -40,7 +55,7 @@ export interface PlayerClassConfig {
   /** Character scale multiplier */
   scale: number;
   /** Weapon type determining projectile behavior */
-  weaponType: 'cannon' | 'smg' | 'star';
+  weaponType: WeaponType;
   /** Fur rendering colors as RGB tuples (0-1 range) */
   furColor: {
     base: [number, number, number];
@@ -49,20 +64,64 @@ export interface PlayerClassConfig {
 }
 
 /**
+ * Weapon evolution identifiers
+ */
+export type WeaponEvolutionType =
+  | 'mega-coal-mortar'
+  | 'plasma-storm'
+  | 'supernova-burst'
+  | 'blizzard-cannon'
+  | 'peppermint-tornado';
+
+/**
+ * Configuration for weapon evolution
+ * @interface WeaponEvolutionConfig
+ */
+export interface WeaponEvolutionConfig {
+  /** Unique identifier for evolution */
+  id: WeaponEvolutionType;
+  /** Display name */
+  name: string;
+  /** Base weapon type that can evolve */
+  baseWeapon: WeaponType;
+  /** Minimum level required */
+  minLevel: number;
+  /** Required upgrade selections (if any) */
+  requiredUpgrades?: string[];
+  /** Stat modifiers applied on evolution */
+  modifiers: {
+    damageMultiplier?: number;
+    rofMultiplier?: number;
+    speedMultiplier?: number;
+    projectileCount?: number;
+    spreadAngle?: number;
+    size?: number;
+    penetration?: boolean;
+    explosive?: boolean;
+  };
+}
+
+/**
  * Helper to get bullet type from weapon type
  */
 export const getBulletTypeFromWeapon = (
-  weaponType: PlayerClassConfig['weaponType']
-): 'cannon' | 'smg' | 'stars' => {
+  weaponType: WeaponType
+): 'cannon' | 'smg' | 'star' => {
   switch (weaponType) {
     case 'cannon':
+    case 'ornament':
+    case 'snowball':
       return 'cannon';
     case 'smg':
+    case 'light_string':
       return 'smg';
     case 'star':
-      return 'stars';
+    case 'jingle_bell':
+    case 'candy_cane':
+    case 'gingerbread':
+    case 'quantum_gift':
     default:
-      return 'stars';
+      return 'star';
   }
 };
 
@@ -124,7 +183,17 @@ export interface BulletData extends EntityData {
   /** Travel speed in units per second */
   speed: number;
   /** Weapon type that fired this bullet */
-  type?: 'cannon' | 'smg' | 'stars';
+  type?: WeaponType;
+  /** Evolution type if weapon is evolved */
+  evolutionType?: WeaponEvolutionType;
+  /** Size multiplier for visual scaling */
+  size?: number;
+  /** Whether bullet has penetration */
+  penetration?: boolean;
+  /** Whether bullet is explosive */
+  explosive?: boolean;
+  /** Special bullet behavior */
+  behavior?: 'freeze' | 'melee' | 'aoe' | 'chain' | 'turret' | 'spread' | 'random';
 }
 
 /**
@@ -249,7 +318,7 @@ export interface RunProgressData {
   /** IDs of upgrades selected during this run */
   selectedUpgrades: string[];
   /** IDs of weapon evolutions unlocked this run */
-  weaponEvolutions: string[];
+  weaponEvolutions: WeaponEvolutionType[];
   /** Active upgrade effects (id -> stack count) */
   activeUpgrades: Record<string, number>;
   /** Current wave number */
@@ -261,6 +330,310 @@ export interface RunProgressData {
   /** Available upgrade choices */
   upgradeChoices: RoguelikeUpgrade[];
 }
+
+/**
+ * Data structure for mission briefing lines
+ * @interface BriefingLine
+ */
+export interface BriefingLine {
+  label: string;
+  text: string;
+  accent?: boolean;
+  warning?: boolean;
+}
+
+/**
+ * Global game configuration constants
+ */
+export const CONFIG = {
+  /** Size of the game world (NxN grid) */
+  WORLD_SIZE: 80,
+  /** Kills required to trigger boss spawn */
+  WAVE_REQ: 10,
+  /** Maximum concurrent minions */
+  MAX_MINIONS: 12,
+  /** Milliseconds between minion spawns */
+  SPAWN_INTERVAL: 2500,
+  /** Color palette (hex values) */
+  COLORS: {
+    SANTA: 0xff0044,
+    ELF: 0x00ffcc,
+    BUMBLE: 0xeeeeee,
+    ENEMY_MINION: 0x00ff00,
+    ENEMY_BOSS: 0xff0044,
+    BULLET_PLAYER: 0xffffaa,
+    BULLET_ENEMY: 0xff0000,
+  },
+} as const;
+
+/**
+ * Weapon configuration
+ * @interface WeaponConfig
+ */
+export interface WeaponConfig {
+  id: WeaponType;
+  name: string;
+  description: string;
+  cost: number;
+  icon: string;
+  damage: number;
+  rof: number;
+  speed: number;
+  life: number;
+  behavior?: BulletData['behavior'];
+  projectileCount?: number;
+  spreadAngle?: number;
+}
+
+/**
+ * Weapon configurations
+ * @constant
+ */
+export const WEAPONS: Record<WeaponType, WeaponConfig> = {
+  // Base weapons (free/unlocked by default via character selection)
+  cannon: {
+    id: 'cannon',
+    name: 'Coal Cannon',
+    description: 'Heavy siege weapon with explosive coal rounds',
+    cost: 0,
+    icon: '🎅',
+    damage: 40,
+    rof: 0.5,
+    speed: 25,
+    life: 3.0,
+  },
+  smg: {
+    id: 'smg',
+    name: 'Plasma SMG',
+    description: 'Rapid-fire energy weapon',
+    cost: 0,
+    icon: '⚡',
+    damage: 8,
+    rof: 0.1,
+    speed: 45,
+    life: 1.5,
+  },
+  star: {
+    id: 'star',
+    name: 'Star Thrower',
+    description: 'Triple-spread star projectiles',
+    cost: 0,
+    icon: '⭐',
+    damage: 18,
+    rof: 0.25,
+    speed: 35,
+    life: 2.5,
+    projectileCount: 3,
+    spreadAngle: 0.2,
+  },
+
+  // Unlockable weapons
+  snowball: {
+    id: 'snowball',
+    name: 'Snowball Launcher',
+    description: 'Freezes enemies on impact, slowing their movement',
+    cost: 500,
+    icon: '❄️',
+    damage: 25,
+    rof: 0.4,
+    speed: 30,
+    life: 2.5,
+    behavior: 'freeze',
+  },
+  candy_cane: {
+    id: 'candy_cane',
+    name: 'Candy Cane Staff',
+    description: '360° melee attack around the player',
+    cost: 750,
+    icon: '🍬',
+    damage: 35,
+    rof: 0.6,
+    speed: 0,
+    life: 0.5,
+    behavior: 'melee',
+  },
+  ornament: {
+    id: 'ornament',
+    name: 'Ornament Bomb',
+    description: 'Explosive projectile with area-of-effect damage',
+    cost: 1000,
+    icon: '🎄',
+    damage: 50,
+    rof: 0.8,
+    speed: 20,
+    life: 2.0,
+    behavior: 'aoe',
+  },
+  light_string: {
+    id: 'light_string',
+    name: 'Light String Whip',
+    description: 'Chain lightning that jumps between enemies',
+    cost: 800,
+    icon: '⚡',
+    damage: 30,
+    rof: 0.5,
+    speed: 40,
+    life: 2.0,
+    behavior: 'chain',
+  },
+  gingerbread: {
+    id: 'gingerbread',
+    name: 'Gingerbread Turret',
+    description: 'Deployable turret that auto-fires at enemies',
+    cost: 1200,
+    icon: '🍪',
+    damage: 15,
+    rof: 1.5,
+    speed: 0,
+    life: 10.0,
+    behavior: 'turret',
+  },
+  jingle_bell: {
+    id: 'jingle_bell',
+    name: 'Jingle Bell Shotgun',
+    description: 'Wide spread of projectiles for close range',
+    cost: 900,
+    icon: '🔔',
+    damage: 12,
+    rof: 0.7,
+    speed: 30,
+    life: 1.5,
+    behavior: 'spread',
+    projectileCount: 7,
+    spreadAngle: 0.4,
+  },
+  quantum_gift: {
+    id: 'quantum_gift',
+    name: 'Quantum Gift Box',
+    description: 'Random powerful effect with each shot',
+    cost: 2000,
+    icon: '🎁',
+    damage: 60,
+    rof: 1.0,
+    speed: 25,
+    life: 2.5,
+    behavior: 'random',
+  },
+};
+
+/**
+ * Player class definitions with stats and appearance
+ * @constant
+ */
+export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
+  santa: {
+    type: 'santa',
+    name: 'MECHA-SANTA',
+    role: 'Heavy Siege / Tank',
+    hp: 300,
+    speed: 9,
+    rof: 0.5,
+    damage: 40,
+    color: CONFIG.COLORS.SANTA,
+    scale: 1.4,
+    weaponType: 'cannon',
+    furColor: {
+      base: [0.5, 0.05, 0.05],
+      tip: [0.8, 0.2, 0.2],
+    },
+  },
+  elf: {
+    type: 'elf',
+    name: 'CYBER-ELF',
+    role: 'Recon / Scout',
+    hp: 100,
+    speed: 18,
+    rof: 0.1,
+    damage: 8,
+    color: CONFIG.COLORS.ELF,
+    scale: 0.8,
+    weaponType: 'smg',
+    furColor: {
+      base: [0.0, 0.3, 0.25],
+      tip: [0.2, 0.6, 0.5],
+    },
+  },
+  bumble: {
+    type: 'bumble',
+    name: 'THE BUMBLE',
+    role: 'Crowd Control / Bruiser',
+    hp: 200,
+    speed: 12,
+    rof: 0.25,
+    damage: 18,
+    color: CONFIG.COLORS.BUMBLE,
+    scale: 1.6,
+    weaponType: 'star',
+    furColor: {
+      base: [0.7, 0.7, 0.7],
+      tip: [1.0, 1.0, 1.0],
+    },
+  },
+};
+
+/**
+ * Weapon evolution configurations
+ * @constant
+ */
+export const WEAPON_EVOLUTIONS: Record<WeaponEvolutionType, WeaponEvolutionConfig> = {
+  'mega-coal-mortar': {
+    id: 'mega-coal-mortar',
+    name: 'Mega Coal Mortar',
+    baseWeapon: 'cannon',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 2.0,
+      size: 2.0,
+      explosive: true,
+      rofMultiplier: 0.8, // Slightly slower
+    },
+  },
+  'plasma-storm': {
+    id: 'plasma-storm',
+    name: 'Plasma Storm',
+    baseWeapon: 'smg',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.5,
+      projectileCount: 3, // Burst of 3
+      rofMultiplier: 1.2, // Faster fire rate
+    },
+  },
+  'supernova-burst': {
+    id: 'supernova-burst',
+    name: 'Supernova Burst',
+    baseWeapon: 'star',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.8,
+      projectileCount: 5, // More stars
+      spreadAngle: 0.3, // Wider spread
+      size: 1.5,
+    },
+  },
+  'blizzard-cannon': {
+    id: 'blizzard-cannon',
+    name: 'Blizzard Cannon',
+    baseWeapon: 'snowball',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.6,
+      speedMultiplier: 1.3,
+      penetration: true,
+    },
+  },
+  'peppermint-tornado': {
+    id: 'peppermint-tornado',
+    name: 'Peppermint Tornado',
+    baseWeapon: 'candy_cane',
+    minLevel: 10,
+    modifiers: {
+      damageMultiplier: 1.7,
+      projectileCount: 6, // Spiral pattern
+      speedMultiplier: 1.1,
+    },
+  },
+};
 
 /**
  * Roguelike upgrade pool
@@ -411,82 +784,3 @@ export const ROGUELIKE_UPGRADES: RoguelikeUpgrade[] = [
     effect: { type: 'special', value: 0.5, isPercent: true },
   },
 ];
-
-/**
- * Global game configuration constants
- */
-export const CONFIG = {
-  /** Size of the game world (NxN grid) */
-  WORLD_SIZE: 80,
-  /** Kills required to trigger boss spawn */
-  WAVE_REQ: 10,
-  /** Maximum concurrent minions */
-  MAX_MINIONS: 12,
-  /** Milliseconds between minion spawns */
-  SPAWN_INTERVAL: 2500,
-  /** Color palette (hex values) */
-  COLORS: {
-    SANTA: 0xff0044,
-    ELF: 0x00ffcc,
-    BUMBLE: 0xeeeeee,
-    ENEMY_MINION: 0x00ff00,
-    ENEMY_BOSS: 0xff0044,
-    BULLET_PLAYER: 0xffffaa,
-    BULLET_ENEMY: 0xff0000,
-  },
-} as const;
-
-/**
- * Player class definitions with stats and appearance
- * @constant
- */
-export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
-  santa: {
-    type: 'santa',
-    name: 'MECHA-SANTA',
-    role: 'Heavy Siege / Tank',
-    hp: 300,
-    speed: 9,
-    rof: 0.5,
-    damage: 40,
-    color: CONFIG.COLORS.SANTA,
-    scale: 1.4,
-    weaponType: 'cannon',
-    furColor: {
-      base: [0.5, 0.05, 0.05],
-      tip: [0.8, 0.2, 0.2],
-    },
-  },
-  elf: {
-    type: 'elf',
-    name: 'CYBER-ELF',
-    role: 'Recon / Scout',
-    hp: 100,
-    speed: 18,
-    rof: 0.1,
-    damage: 8,
-    color: CONFIG.COLORS.ELF,
-    scale: 0.8,
-    weaponType: 'smg',
-    furColor: {
-      base: [0.0, 0.3, 0.25],
-      tip: [0.2, 0.6, 0.5],
-    },
-  },
-  bumble: {
-    type: 'bumble',
-    name: 'THE BUMBLE',
-    role: 'Crowd Control / Bruiser',
-    hp: 200,
-    speed: 12,
-    rof: 0.25,
-    damage: 18,
-    color: CONFIG.COLORS.BUMBLE,
-    scale: 1.6,
-    weaponType: 'star',
-    furColor: {
-      base: [0.7, 0.7, 0.7],
-      tip: [1.0, 1.0, 1.0],
-    },
-  },
-};

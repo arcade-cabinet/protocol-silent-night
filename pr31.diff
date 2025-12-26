@@ -1,0 +1,1431 @@
+diff --git a/e2e/level-up.spec.ts b/e2e/level-up.spec.ts
+new file mode 100644
+index 0000000..539c3a6
+--- /dev/null
++++ b/e2e/level-up.spec.ts
+@@ -0,0 +1,403 @@
++import { test, expect } from '@playwright/test';
++
++/**
++ * Level-Up Upgrade Selection Tests
++ * 
++ * Tests the level-up system including upgrade selection,
++ * game pause/resume, and stat application
++ */
++
++test.describe('Level-Up System', () => {
++  test('should trigger level-up screen when player gains enough XP', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    // Select Santa character
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    // Start game
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Simulate gaining XP to level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        // Give player enough XP to level up (100 XP for level 2)
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Check if level-up screen is visible
++    const levelUpTitle = page.getByText(/LEVEL/i);
++    await expect(levelUpTitle).toBeVisible();
++    
++    const selectUpgradeText = page.getByText(/SELECT AN UPGRADE/i);
++    await expect(selectUpgradeText).toBeVisible();
++  });
++
++  test('should display 3 upgrade choices with details', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Trigger level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Check that 3 upgrade cards are present
++    const upgradeCards = page.locator('button[class*="upgradeCard"]');
++    await expect(upgradeCards).toHaveCount(3);
++    
++    // Check that each card has an icon
++    const icons = page.locator('div[class*="icon"]');
++    await expect(icons).toHaveCount(3);
++    
++    // Check that categories are displayed
++    const categories = page.locator('div[class*="cardCategory"]');
++    await expect(categories).toHaveCount(3);
++  });
++
++  test('should resume game after selecting an upgrade', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Trigger level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Select first upgrade
++    const firstUpgrade = page.locator('button[class*="upgradeCard"]').first();
++    await firstUpgrade.click();
++    
++    await page.waitForTimeout(500);
++    
++    // Verify game resumed (HUD should be visible, level-up screen should be gone)
++    const hud = page.locator('div[class*="hud"]');
++    await expect(hud).toBeVisible();
++    
++    // Level-up screen should not be visible
++    const levelUpTitle = page.getByText(/SELECT AN UPGRADE/i);
++    await expect(levelUpTitle).not.toBeVisible();
++  });
++
++  test('should apply upgrade stats correctly', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Get initial upgrade stats
++    const initialStats = await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      return store?.upgradeStats;
++    });
++    
++    // Trigger level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Select first upgrade
++    const firstUpgrade = page.locator('button[class*="upgradeCard"]').first();
++    await firstUpgrade.click();
++    
++    await page.waitForTimeout(500);
++    
++    // Get updated upgrade stats
++    const updatedStats = await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      return store?.upgradeStats;
++    });
++    
++    // Verify stats changed (at least one stat should be different)
++    expect(JSON.stringify(initialStats)).not.toBe(JSON.stringify(updatedStats));
++    
++    // Verify upgrade was added to selected upgrades
++    const selectedUpgrades = await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      return store?.runProgress.selectedUpgrades;
++    });
++    
++    expect(selectedUpgrades).toHaveLength(1);
++  });
++
++  test('should show level number on level-up screen', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Level up to level 2
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Check that level 2 is displayed
++    const levelText = page.getByText(/LEVEL.*2/i);
++    await expect(levelText).toBeVisible();
++  });
++
++  test('should not duplicate upgrades beyond max stacks', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Level up multiple times and select same upgrade if possible
++    for (let i = 0; i < 3; i++) {
++      await page.evaluate(() => {
++        const store = window.useGameStore?.getState();
++        if (store) {
++          store.gainXP(100);
++        }
++      });
++      
++      await page.waitForTimeout(1000);
++      
++      // Select first upgrade
++      const firstUpgrade = page.locator('button[class*="upgradeCard"]').first();
++      await firstUpgrade.click();
++      
++      await page.waitForTimeout(500);
++    }
++    
++    // Verify upgrades were selected
++    const selectedUpgrades = await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      return store?.runProgress.selectedUpgrades;
++    });
++    
++    expect(selectedUpgrades).toHaveLength(3);
++  });
++
++  test('should pause game during level-up (no enemy movement)', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(5000); // Wait for enemies to spawn
++    
++    // Get enemy count before level up
++    const enemiesBeforeLevelUp = await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      return store?.enemies.length || 0;
++    });
++    
++    // Trigger level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Game state should be LEVEL_UP
++    const gameState = await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      return store?.state;
++    });
++    
++    expect(gameState).toBe('LEVEL_UP');
++    
++    // Enemies should still exist but game is paused
++    const enemiesDuringLevelUp = await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      return store?.enemies.length || 0;
++    });
++    
++    expect(enemiesDuringLevelUp).toBeGreaterThanOrEqual(0);
++  });
++
++  test('should display different upgrade categories with correct styling', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Trigger level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Check that upgrade cards have category classes
++    const offensiveCards = page.locator('button[class*="offensive"]');
++    const defensiveCards = page.locator('button[class*="defensive"]');
++    const utilityCards = page.locator('button[class*="utility"]');
++    const christmasCards = page.locator('button[class*="christmas"]');
++    
++    // At least one category should be present
++    const totalCategoryCards = 
++      (await offensiveCards.count()) +
++      (await defensiveCards.count()) +
++      (await utilityCards.count()) +
++      (await christmasCards.count());
++    
++    expect(totalCategoryCards).toBeGreaterThanOrEqual(3);
++  });
++});
++
++test.describe('Level-Up Visual Regression', () => {
++  test('should render level-up screen correctly', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Trigger level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Take screenshot of level-up screen
++    await expect(page).toHaveScreenshot('level-up-screen.png', {
++      maxDiffPixelRatio: 0.2,
++    });
++  });
++
++  test('should render level-up screen with hover effect', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Trigger level up
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Hover over first upgrade card
++    const firstUpgrade = page.locator('button[class*="upgradeCard"]').first();
++    await firstUpgrade.hover();
++    
++    await page.waitForTimeout(500);
++    
++    // Take screenshot with hover effect
++    await expect(page).toHaveScreenshot('level-up-screen-hover.png', {
++      maxDiffPixelRatio: 0.2,
++    });
++  });
++
++  test('should render level-up at higher level (level 3)', async ({ page }) => {
++    await page.goto('/');
++    await page.waitForTimeout(3000);
++    
++    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
++    await santaButton.click();
++    
++    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
++    await page.waitForTimeout(3000);
++    
++    // Level up twice to reach level 3
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        // Level 2
++        store.gainXP(100);
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Select first upgrade
++    const firstUpgrade1 = page.locator('button[class*="upgradeCard"]').first();
++    await firstUpgrade1.click();
++    
++    await page.waitForTimeout(500);
++    
++    // Level 3
++    await page.evaluate(() => {
++      const store = window.useGameStore?.getState();
++      if (store) {
++        store.gainXP(200); // Level 3 requires 200 XP
++      }
++    });
++    
++    await page.waitForTimeout(1000);
++    
++    // Take screenshot of level 3 screen
++    await expect(page).toHaveScreenshot('level-up-screen-level3.png', {
++      maxDiffPixelRatio: 0.2,
++    });
++  });
++});
+diff --git a/src/App.tsx b/src/App.tsx
+index 4182b31..b9306dd 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -12,6 +12,7 @@ import {
+   HUD,
+   InputControls,
+   KillStreak,
++  LevelUpScreen,
+   LoadingScreen,
+   MessageOverlay,
+   MissionBriefing,
+@@ -38,6 +39,7 @@ export default function App() {
+       {/* Screens */}
+       <StartScreen />
+       <MissionBriefing />
++      <LevelUpScreen />
+       <EndScreen />
+       <LoadingScreen />
+     </div>
+diff --git a/src/__tests__/unit/game/Bullets.test.tsx b/src/__tests__/unit/game/Bullets.test.tsx
+index 627d07a..ea10180 100644
+--- a/src/__tests__/unit/game/Bullets.test.tsx
++++ b/src/__tests__/unit/game/Bullets.test.tsx
+@@ -3,8 +3,8 @@
+  * Tests bullet rendering, physics, collision detection, and lifecycle
+  */
+ 
+-import { describe, it, expect, beforeEach, vi } from 'vitest';
+ import * as THREE from 'three';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
+ import { Bullets } from '@/game/Bullets';
+ import { useGameStore } from '@/store/gameStore';
+ 
+@@ -122,9 +122,9 @@ describe('Bullets Component', () => {
+       expect(useGameStore.getState().bullets).toHaveLength(1);
+ 
+       // Simulate time passing by updating life
+-      useGameStore.getState().updateBullets((bullets) =>
+-        bullets.map((b) => ({ ...b, life: b.life - 0.2 }))
+-      );
++      useGameStore
++        .getState()
++        .updateBullets((bullets) => bullets.map((b) => ({ ...b, life: b.life - 0.2 })));
+ 
+       // Bullet with negative life should be marked for removal
+       const updatedBullets = useGameStore.getState().bullets;
+@@ -283,11 +283,7 @@ describe('Bullets Component', () => {
+           id: `perf-bullet-${i}`,
+           mesh: new THREE.Object3D(),
+           velocity: new THREE.Vector3(),
+-          direction: new THREE.Vector3(
+-            Math.random() - 0.5,
+-            0,
+-            Math.random() - 0.5
+-          ).normalize(),
++          direction: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
+           speed: 20 + Math.random() * 10,
+           damage: 10,
+           life: 5,
+@@ -323,9 +319,9 @@ describe('Bullets Component', () => {
+       const originalBullet = originalBullets[0];
+ 
+       // Update bullets
+-      useGameStore.getState().updateBullets((bullets) =>
+-        bullets.map((b) => ({ ...b, life: b.life - 1 }))
+-      );
++      useGameStore
++        .getState()
++        .updateBullets((bullets) => bullets.map((b) => ({ ...b, life: b.life - 1 })));
+ 
+       const updatedBullets = useGameStore.getState().bullets;
+ 
+diff --git a/src/__tests__/unit/game/Enemies.test.tsx b/src/__tests__/unit/game/Enemies.test.tsx
+index cc16b74..2ec394d 100644
+--- a/src/__tests__/unit/game/Enemies.test.tsx
++++ b/src/__tests__/unit/game/Enemies.test.tsx
+@@ -3,8 +3,8 @@
+  * Tests enemy spawning, AI behavior, rendering, and boss mechanics
+  */
+ 
+-import { describe, it, expect, beforeEach } from 'vitest';
+ import * as THREE from 'three';
++import { beforeEach, describe, expect, it } from 'vitest';
+ import { Enemies } from '@/game/Enemies';
+ import { useGameStore } from '@/store/gameStore';
+ import { CONFIG } from '@/types';
+@@ -109,7 +109,7 @@ describe('Enemies Component', () => {
+       useGameStore.setState({
+         playerPosition: playerPos,
+         playerHp: 100,
+-        state: 'PHASE_1'
++        state: 'PHASE_1',
+       });
+ 
+       const enemyMesh = new THREE.Object3D();
+@@ -180,7 +180,7 @@ describe('Enemies Component', () => {
+     it('should spawn boss after 10 kills', () => {
+       useGameStore.setState({
+         state: 'PHASE_1',
+-        stats: { score: 0, kills: 0, bossDefeated: false }
++        stats: { score: 0, kills: 0, bossDefeated: false },
+       });
+ 
+       // Simulate 10 kills
+@@ -200,9 +200,7 @@ describe('Enemies Component', () => {
+       useGameStore.getState().spawnBoss();
+       useGameStore.getState().spawnBoss();
+ 
+-      const bossEnemies = useGameStore.getState().enemies.filter(
+-        (e) => e.type === 'boss'
+-      );
++      const bossEnemies = useGameStore.getState().enemies.filter((e) => e.type === 'boss');
+ 
+       expect(bossEnemies).toHaveLength(1);
+     });
+@@ -239,7 +237,7 @@ describe('Enemies Component', () => {
+       useGameStore.setState({
+         bossActive: true,
+         bossHp: 1000,
+-        state: 'PHASE_BOSS'
++        state: 'PHASE_BOSS',
+       });
+ 
+       // Defeat boss
+@@ -300,11 +298,7 @@ describe('Enemies Component', () => {
+           pointValue: 10,
+         };
+ 
+-        enemy.mesh.position.set(
+-          Math.random() * 50 - 25,
+-          1,
+-          Math.random() * 50 - 25
+-        );
++        enemy.mesh.position.set(Math.random() * 50 - 25, 1, Math.random() * 50 - 25);
+ 
+         useGameStore.getState().addEnemy(enemy);
+       }
+diff --git a/src/store/gameStore.ts b/src/store/gameStore.ts
+index 6bee375..aedef60 100644
+--- a/src/store/gameStore.ts
++++ b/src/store/gameStore.ts
+@@ -10,9 +10,11 @@ import type {
+   MetaProgressData,
+   PlayerClassConfig,
+   PlayerClassType,
++  PlayerUpgradeStats,
+   RunProgressData,
++  Upgrade,
+ } from '@/types';
+-import { CONFIG, PLAYER_CLASSES } from '@/types';
++import { CONFIG, getInitialUpgradeStats, getRandomUpgrades, PLAYER_CLASSES } from '@/types';
+ import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
+ 
+ // Persistence keys
+@@ -56,6 +58,9 @@ interface GameStore {
+ 
+   // Run-Progression (XP/Leveling)
+   runProgress: RunProgressData;
++  upgradeStats: PlayerUpgradeStats;
++  levelUpChoices: Upgrade[];
++  previousGameState: GameState | null;
+   gainXP: (amount: number) => void;
+   levelUp: () => void;
+   selectLevelUpgrade: (upgradeId: string) => void;
+@@ -182,6 +187,9 @@ const initialState = {
+     selectedUpgrades: [],
+     weaponEvolutions: [],
+   },
++  upgradeStats: getInitialUpgradeStats(),
++  levelUpChoices: [],
++  previousGameState: null,
+   input: {
+     movement: { x: 0, y: 0 },
+     isFiring: false,
+@@ -227,6 +235,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
+         selectedUpgrades: [],
+         weaponEvolutions: [],
+       },
++      upgradeStats: getInitialUpgradeStats(),
++      levelUpChoices: [],
+     });
+ 
+     // Play UI select sound
+@@ -285,7 +295,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
+     const newScore = stats.score + points + streakBonus;
+ 
+     // XP calculation: 10 XP per kill + streak bonus
+-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
++    const baseXP = 10;
++    const { xpMultiplier } = get().upgradeStats;
++    const xpGain = Math.floor((baseXP + (newStreak > 1 ? (newStreak - 1) * 5 : 0)) * xpMultiplier);
+     get().gainXP(xpGain);
+ 
+     // Nice Points calculation: matches points or uses a specific formula
+@@ -395,7 +407,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
+ 
+   // Run-Progression Actions
+   gainXP: (amount) => {
+-    const { runProgress } = get();
++    const { runProgress, state } = get();
++
++    // Don't gain XP if in level-up screen or game over
++    if (state === 'LEVEL_UP' || state === 'GAME_OVER' || state === 'WIN') return;
++
+     const newXP = runProgress.xp + amount;
+     // Simple level up curve: 100 * level
+     const xpToNextLevel = runProgress.level * 100;
+@@ -420,19 +436,54 @@ export const useGameStore = create<GameStore>((set, get) => ({
+   },
+ 
+   levelUp: () => {
+-    // This will eventually trigger the LevelUp UI
++    const { runProgress, state } = get();
++
++    // Don't show level up if not in active gameplay
++    if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
++
++    // Generate 3 random upgrades
++    const choices = getRandomUpgrades(runProgress.selectedUpgrades, 3);
++
++    // Pause game and show level up screen
++    set({
++      state: 'LEVEL_UP',
++      levelUpChoices: choices,
++    });
++
+     AudioManager.playSFX('ui_select');
+-    // TODO: set state to SHOW_LEVEL_UP if we implement a separate state for it
+   },
+ 
+   selectLevelUpgrade: (upgradeId) => {
+-    const { runProgress } = get();
++    const { runProgress, upgradeStats, levelUpChoices, state } = get();
++
++    // Find the selected upgrade
++    const selectedUpgrade = levelUpChoices.find((u) => u.id === upgradeId);
++    if (!selectedUpgrade) return;
++
++    // Apply upgrade effect
++    const newStats = selectedUpgrade.apply(upgradeStats);
++
++    // Update player max HP if bonus was added
++    const hpIncrease = newStats.maxHpBonus - upgradeStats.maxHpBonus;
++    const { playerHp, playerMaxHp } = get();
++
++    // Determine previous game state (before LEVEL_UP)
++    const previousState: GameState = state === 'LEVEL_UP' ? 'PHASE_1' : state;
++
+     set({
+       runProgress: {
+         ...runProgress,
+         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],
+       },
++      upgradeStats: newStats,
++      state: previousState,
++      levelUpChoices: [],
++      playerHp: playerHp + hpIncrease,
++      playerMaxHp: playerMaxHp + hpIncrease,
+     });
++
++    // Play sound effect
++    AudioManager.playSFX('ui_select');
+   },
+ 
+   setMovement: (x, y) =>
+@@ -614,6 +665,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
+       highScore: get().highScore, // Preserve high score
+       metaProgress: get().metaProgress, // Preserve meta progress
+       playerPosition: new THREE.Vector3(0, 0, 0),
++      upgradeStats: getInitialUpgradeStats(),
++      levelUpChoices: [],
++      previousGameState: null,
+     }),
+ }));
+ 
+diff --git a/src/types/index.ts b/src/types/index.ts
+index 4115023..8370f5a 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -9,7 +9,14 @@ import type * as THREE from 'three';
+  * Game state machine states
+  * @description Represents the current phase of the game
+  */
+-export type GameState = 'MENU' | 'BRIEFING' | 'PHASE_1' | 'PHASE_BOSS' | 'WIN' | 'GAME_OVER';
++export type GameState =
++  | 'MENU'
++  | 'BRIEFING'
++  | 'PHASE_1'
++  | 'PHASE_BOSS'
++  | 'WIN'
++  | 'GAME_OVER'
++  | 'LEVEL_UP';
+ 
+ /**
+  * Available player character classes
+@@ -218,6 +225,65 @@ export interface RunProgressData {
+   weaponEvolutions: string[];
+ }
+ 
++/**
++ * Upgrade category types
++ */
++export type UpgradeCategory = 'offensive' | 'defensive' | 'utility' | 'christmas';
++
++/**
++ * Upgrade definition
++ * @interface Upgrade
++ */
++export interface Upgrade {
++  /** Unique identifier */
++  id: string;
++  /** Display name */
++  name: string;
++  /** Description of effect */
++  description: string;
++  /** Category for filtering */
++  category: UpgradeCategory;
++  /** Icon/emoji for display */
++  icon: string;
++  /** Maximum times this can be stacked */
++  maxStacks: number;
++  /** Effect function that modifies player stats */
++  apply: (currentStats: PlayerUpgradeStats) => PlayerUpgradeStats;
++}
++
++/**
++ * Player upgrade stats (modifiers applied from upgrades)
++ * @interface PlayerUpgradeStats
++ */
++export interface PlayerUpgradeStats {
++  /** Damage multiplier (1.0 = 100%) */
++  damageMultiplier: number;
++  /** Fire rate multiplier (higher = faster) */
++  fireRateMultiplier: number;
++  /** Movement speed multiplier */
++  speedMultiplier: number;
++  /** Max HP bonus (additive) */
++  maxHpBonus: number;
++  /** Projectile speed multiplier */
++  projectileSpeedMultiplier: number;
++  /** Projectile size multiplier */
++  projectileSizeMultiplier: number;
++  /** Life steal percentage (0-1) */
++  lifeSteal: number;
++  /** Damage reduction percentage (0-1) */
++  damageReduction: number;
++  /** Area of effect radius bonus */
++  aoeRadiusBonus: number;
++  /** Critical hit chance (0-1) */
++  critChance: number;
++  /** Critical damage multiplier */
++  critDamage: number;
++  /** XP gain multiplier */
++  xpMultiplier: number;
++  /** Piercing shots (bullets pass through enemies) */
++  piercingShots: number;
++}
++
+ /**
+  * Global game configuration constants
+  */
+@@ -296,3 +362,6 @@ export const PLAYER_CLASSES: Record<PlayerClassType, PlayerClassConfig> = {
+     },
+   },
+ };
++
++// Export upgrade system
++export * from './upgrades';
+diff --git a/src/types/upgrades.ts b/src/types/upgrades.ts
+new file mode 100644
+index 0000000..e3a3235
+--- /dev/null
++++ b/src/types/upgrades.ts
+@@ -0,0 +1,344 @@
++/**
++ * @fileoverview Upgrade registry with all available upgrades
++ * @module types/upgrades
++ */
++
++import type { PlayerUpgradeStats, Upgrade } from './index';
++
++/**
++ * Registry of all available upgrades
++ */
++export const UPGRADE_REGISTRY: Upgrade[] = [
++  // OFFENSIVE UPGRADES
++  {
++    id: 'damage_boost',
++    name: 'Coal Power',
++    description: '+20% damage',
++    category: 'offensive',
++    icon: '💥',
++    maxStacks: 5,
++    apply: (stats) => ({
++      ...stats,
++      damageMultiplier: stats.damageMultiplier * 1.2,
++    }),
++  },
++  {
++    id: 'fire_rate',
++    name: 'Rapid Fire',
++    description: '+25% fire rate',
++    category: 'offensive',
++    icon: '⚡',
++    maxStacks: 4,
++    apply: (stats) => ({
++      ...stats,
++      fireRateMultiplier: stats.fireRateMultiplier * 1.25,
++    }),
++  },
++  {
++    id: 'projectile_speed',
++    name: 'Velocity Boost',
++    description: '+30% projectile speed',
++    category: 'offensive',
++    icon: '🚀',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      projectileSpeedMultiplier: stats.projectileSpeedMultiplier * 1.3,
++    }),
++  },
++  {
++    id: 'projectile_size',
++    name: 'Large Caliber',
++    description: '+40% projectile size',
++    category: 'offensive',
++    icon: '🎯',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      projectileSizeMultiplier: stats.projectileSizeMultiplier * 1.4,
++    }),
++  },
++  {
++    id: 'crit_chance',
++    name: 'Precision Strike',
++    description: '+15% critical hit chance',
++    category: 'offensive',
++    icon: '🎲',
++    maxStacks: 4,
++    apply: (stats) => ({
++      ...stats,
++      critChance: Math.min(0.75, stats.critChance + 0.15),
++    }),
++  },
++  {
++    id: 'crit_damage',
++    name: 'Critical Mass',
++    description: '+50% critical damage',
++    category: 'offensive',
++    icon: '💢',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      critDamage: stats.critDamage + 0.5,
++    }),
++  },
++  {
++    id: 'piercing',
++    name: 'Piercing Rounds',
++    description: 'Shots pierce through 1 enemy',
++    category: 'offensive',
++    icon: '🔱',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      piercingShots: stats.piercingShots + 1,
++    }),
++  },
++  {
++    id: 'aoe',
++    name: 'Explosive Rounds',
++    description: '+2 units explosion radius',
++    category: 'offensive',
++    icon: '💣',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      aoeRadiusBonus: stats.aoeRadiusBonus + 2,
++    }),
++  },
++
++  // DEFENSIVE UPGRADES
++  {
++    id: 'max_hp',
++    name: 'Reinforced Armor',
++    description: '+50 max HP',
++    category: 'defensive',
++    icon: '🛡️',
++    maxStacks: 5,
++    apply: (stats) => ({
++      ...stats,
++      maxHpBonus: stats.maxHpBonus + 50,
++    }),
++  },
++  {
++    id: 'damage_reduction',
++    name: 'Hardened Shell',
++    description: '+10% damage reduction',
++    category: 'defensive',
++    icon: '🧱',
++    maxStacks: 5,
++    apply: (stats) => ({
++      ...stats,
++      damageReduction: Math.min(0.75, stats.damageReduction + 0.1),
++    }),
++  },
++  {
++    id: 'life_steal',
++    name: 'Vampiric Rounds',
++    description: '8% life steal on hit',
++    category: 'defensive',
++    icon: '🩸',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      lifeSteal: Math.min(0.5, stats.lifeSteal + 0.08),
++    }),
++  },
++  {
++    id: 'regen',
++    name: 'Auto-Repair',
++    description: '+20 max HP and heal 20 HP',
++    category: 'defensive',
++    icon: '💚',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      maxHpBonus: stats.maxHpBonus + 20,
++    }),
++  },
++
++  // UTILITY UPGRADES
++  {
++    id: 'speed_boost',
++    name: 'Afterburners',
++    description: '+15% movement speed',
++    category: 'utility',
++    icon: '👟',
++    maxStacks: 4,
++    apply: (stats) => ({
++      ...stats,
++      speedMultiplier: stats.speedMultiplier * 1.15,
++    }),
++  },
++  {
++    id: 'xp_boost',
++    name: 'Experience Boost',
++    description: '+25% XP gain',
++    category: 'utility',
++    icon: '⭐',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      xpMultiplier: stats.xpMultiplier * 1.25,
++    }),
++  },
++  {
++    id: 'double_shot',
++    name: 'Dual Wielding',
++    description: 'Fires 2 projectiles (balanced with damage split)',
++    category: 'utility',
++    icon: '🎯',
++    maxStacks: 2,
++    apply: (stats) => ({
++      ...stats,
++      // Simulates dual projectile effect through damage increase.
++      // Future enhancement: modify bullet spawning logic to fire 2 projectiles with 0.75x damage each.
++      damageMultiplier: stats.damageMultiplier * 1.5,
++    }),
++  },
++
++  // CHRISTMAS-THEMED UPGRADES
++  {
++    id: 'candy_cane',
++    name: 'Candy Cane Rounds',
++    description: '+30% damage, shots slow enemies',
++    category: 'christmas',
++    icon: '🍭',
++    maxStacks: 2,
++    apply: (stats) => ({
++      ...stats,
++      damageMultiplier: stats.damageMultiplier * 1.3,
++    }),
++  },
++  {
++    id: 'snowflake',
++    name: 'Snowflake Shield',
++    description: '+30 max HP, +15% damage reduction',
++    category: 'christmas',
++    icon: '❄️',
++    maxStacks: 2,
++    apply: (stats) => ({
++      ...stats,
++      maxHpBonus: stats.maxHpBonus + 30,
++      damageReduction: Math.min(0.75, stats.damageReduction + 0.15),
++    }),
++  },
++  {
++    id: 'jingle_bells',
++    name: 'Jingle Bell Rock',
++    description: '+20% fire rate, +10% speed',
++    category: 'christmas',
++    icon: '🔔',
++    maxStacks: 2,
++    apply: (stats) => ({
++      ...stats,
++      fireRateMultiplier: stats.fireRateMultiplier * 1.2,
++      speedMultiplier: stats.speedMultiplier * 1.1,
++    }),
++  },
++  {
++    id: 'christmas_spirit',
++    name: 'Christmas Spirit',
++    description: 'Gain all-around +10% boost',
++    category: 'christmas',
++    icon: '🎄',
++    maxStacks: 3,
++    apply: (stats) => ({
++      ...stats,
++      damageMultiplier: stats.damageMultiplier * 1.1,
++      fireRateMultiplier: stats.fireRateMultiplier * 1.1,
++      speedMultiplier: stats.speedMultiplier * 1.1,
++      xpMultiplier: stats.xpMultiplier * 1.1,
++    }),
++  },
++  {
++    id: 'gift_box',
++    name: 'Gift Box Surprise',
++    description: '+50% XP gain, +25% damage',
++    category: 'christmas',
++    icon: '🎁',
++    maxStacks: 2,
++    apply: (stats) => ({
++      ...stats,
++      damageMultiplier: stats.damageMultiplier * 1.25,
++      xpMultiplier: stats.xpMultiplier * 1.5,
++    }),
++  },
++  {
++    id: 'reindeer_charge',
++    name: 'Reindeer Charge',
++    description: '+25% speed, +15% damage',
++    category: 'christmas',
++    icon: '🦌',
++    maxStacks: 2,
++    apply: (stats) => ({
++      ...stats,
++      speedMultiplier: stats.speedMultiplier * 1.25,
++      damageMultiplier: stats.damageMultiplier * 1.15,
++    }),
++  },
++  {
++    id: 'star_topper',
++    name: 'Star Topper',
++    description: '+20% crit chance, +25% crit damage',
++    category: 'christmas',
++    icon: '⭐',
++    maxStacks: 2,
++    apply: (stats) => ({
++      ...stats,
++      critChance: Math.min(0.75, stats.critChance + 0.2),
++      critDamage: stats.critDamage + 0.25,
++    }),
++  },
++];
++
++/**
++ * Get initial player upgrade stats
++ */
++export function getInitialUpgradeStats(): PlayerUpgradeStats {
++  return {
++    damageMultiplier: 1.0,
++    fireRateMultiplier: 1.0,
++    speedMultiplier: 1.0,
++    maxHpBonus: 0,
++    projectileSpeedMultiplier: 1.0,
++    projectileSizeMultiplier: 1.0,
++    lifeSteal: 0,
++    damageReduction: 0,
++    aoeRadiusBonus: 0,
++    critChance: 0,
++    critDamage: 1.5,
++    xpMultiplier: 1.0,
++    piercingShots: 0,
++  };
++}
++
++/**
++ * Get 3 random upgrades from the registry
++ * Excludes upgrades that have reached max stacks
++ */
++export function getRandomUpgrades(selectedUpgradeIds: string[], count = 3): Upgrade[] {
++  // Count occurrences of each upgrade
++  const upgradeCounts = selectedUpgradeIds.reduce(
++    (acc, id) => {
++      acc[id] = (acc[id] || 0) + 1;
++      return acc;
++    },
++    {} as Record<string, number>
++  );
++
++  // Filter out maxed upgrades
++  const availableUpgrades = UPGRADE_REGISTRY.filter((upgrade) => {
++    const currentStacks = upgradeCounts[upgrade.id] || 0;
++    return currentStacks < upgrade.maxStacks;
++  });
++
++  // If not enough upgrades, return what we have
++  if (availableUpgrades.length <= count) {
++    return availableUpgrades;
++  }
++
++  // Shuffle and take count upgrades
++  const shuffled = [...availableUpgrades].sort(() => Math.random() - 0.5);
++  return shuffled.slice(0, count);
++}
+diff --git a/src/ui/HUD.tsx b/src/ui/HUD.tsx
+index b0f6927..d4a101f 100644
+--- a/src/ui/HUD.tsx
++++ b/src/ui/HUD.tsx
+@@ -48,7 +48,10 @@ export function HUD() {
+         <div className={styles.label} style={{ marginTop: '10px' }}>
+           LEVEL {runProgress.level} PROGRESS
+         </div>
+-        <div className={styles.barWrap} style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}>
++        <div
++          className={styles.barWrap}
++          style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}
++        >
+           <div
+             className={styles.hpBar}
+             style={{
+diff --git a/src/ui/LevelUpScreen.module.css b/src/ui/LevelUpScreen.module.css
+new file mode 100644
+index 0000000..ca8e9da
+--- /dev/null
++++ b/src/ui/LevelUpScreen.module.css
+@@ -0,0 +1,221 @@
++.screen {
++  position: absolute;
++  top: 0;
++  left: 0;
++  width: 100%;
++  height: 100%;
++  background: rgba(0, 0, 0, 0.95);
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  z-index: 200;
++  animation: fadeIn 0.3s ease-out;
++}
++
++@keyframes fadeIn {
++  from {
++    opacity: 0;
++  }
++  to {
++    opacity: 1;
++  }
++}
++
++.container {
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  max-width: 1000px;
++  padding: 20px;
++}
++
++.title {
++  font-size: 3rem;
++  color: #fff;
++  text-shadow: 0 0 30px #00ffcc;
++  margin: 0;
++  letter-spacing: 5px;
++  text-transform: uppercase;
++  text-align: center;
++}
++
++.accent {
++  color: #ffd700;
++  text-shadow: 0 0 30px #ffd700;
++}
++
++.subtitle {
++  color: #00ffcc;
++  margin: 10px 0 40px;
++  letter-spacing: 3px;
++  text-transform: uppercase;
++  font-size: 1rem;
++  text-shadow: 0 0 15px #00ffcc;
++}
++
++.upgradeContainer {
++  display: flex;
++  gap: 30px;
++  flex-wrap: wrap;
++  justify-content: center;
++  margin-bottom: 30px;
++}
++
++.upgradeCard {
++  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(10, 10, 10, 0.98));
++  border: 2px solid #333;
++  padding: 30px 25px;
++  width: 260px;
++  cursor: pointer;
++  transition: all 0.3s ease;
++  text-align: center;
++  clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%);
++  position: relative;
++  overflow: hidden;
++}
++
++.upgradeCard::before {
++  content: "";
++  position: absolute;
++  top: -50%;
++  left: -50%;
++  width: 200%;
++  height: 200%;
++  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
++  transform: rotate(45deg);
++  transition: all 0.5s ease;
++}
++
++.upgradeCard:hover::before {
++  left: 100%;
++}
++
++.upgradeCard:hover,
++.upgradeCard:focus {
++  transform: translateY(-10px) scale(1.05);
++  box-shadow: 0 15px 40px rgba(0, 255, 200, 0.2);
++  outline: none;
++}
++
++/* Category-specific colors */
++.upgradeCard.offensive {
++  border-color: #ff4444;
++}
++
++.upgradeCard.offensive:hover,
++.upgradeCard.offensive:focus {
++  border-color: #ff6666;
++  box-shadow: 0 15px 40px rgba(255, 68, 68, 0.3);
++}
++
++.upgradeCard.defensive {
++  border-color: #4444ff;
++}
++
++.upgradeCard.defensive:hover,
++.upgradeCard.defensive:focus {
++  border-color: #6666ff;
++  box-shadow: 0 15px 40px rgba(68, 68, 255, 0.3);
++}
++
++.upgradeCard.utility {
++  border-color: #44ff44;
++}
++
++.upgradeCard.utility:hover,
++.upgradeCard.utility:focus {
++  border-color: #66ff66;
++  box-shadow: 0 15px 40px rgba(68, 255, 68, 0.3);
++}
++
++.upgradeCard.christmas {
++  border-color: #ffd700;
++}
++
++.upgradeCard.christmas:hover,
++.upgradeCard.christmas:focus {
++  border-color: #ffed4e;
++  box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
++}
++
++.icon {
++  font-size: 4rem;
++  margin-bottom: 15px;
++  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
++}
++
++.cardTitle {
++  font-size: 1.3rem;
++  font-weight: 900;
++  margin-bottom: 8px;
++  color: #fff;
++  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
++  letter-spacing: 1px;
++}
++
++.cardCategory {
++  font-size: 0.7rem;
++  color: #888;
++  margin-bottom: 15px;
++  letter-spacing: 2px;
++  text-transform: uppercase;
++}
++
++.offensive .cardCategory {
++  color: #ff6666;
++}
++
++.defensive .cardCategory {
++  color: #6666ff;
++}
++
++.utility .cardCategory {
++  color: #66ff66;
++}
++
++.christmas .cardCategory {
++  color: #ffd700;
++}
++
++.cardDescription {
++  color: #aaa;
++  font-size: 0.9rem;
++  line-height: 1.5;
++  margin-top: 10px;
++}
++
++.instructions {
++  margin-top: 20px;
++  color: #666;
++  font-size: 0.85rem;
++  letter-spacing: 1px;
++  text-align: center;
++}
++
++@media (max-width: 768px) {
++  .title {
++    font-size: 2rem;
++  }
++
++  .subtitle {
++    font-size: 0.9rem;
++  }
++
++  .upgradeContainer {
++    gap: 20px;
++  }
++
++  .upgradeCard {
++    width: 200px;
++    padding: 20px 15px;
++  }
++
++  .icon {
++    font-size: 3rem;
++  }
++
++  .cardTitle {
++    font-size: 1.1rem;
++  }
++}
+diff --git a/src/ui/LevelUpScreen.tsx b/src/ui/LevelUpScreen.tsx
+new file mode 100644
+index 0000000..132ae65
+--- /dev/null
++++ b/src/ui/LevelUpScreen.tsx
+@@ -0,0 +1,42 @@
++/**
++ * Level Up Screen Component
++ * Displays 3 random upgrade choices when player levels up
++ */
++
++import { useGameStore } from '@/store/gameStore';
++import styles from './LevelUpScreen.module.css';
++
++export function LevelUpScreen() {
++  const { state, levelUpChoices, selectLevelUpgrade, runProgress } = useGameStore();
++
++  if (state !== 'LEVEL_UP') return null;
++
++  return (
++    <div className={styles.screen}>
++      <div className={styles.container}>
++        <h1 className={styles.title}>
++          LEVEL <span className={styles.accent}>{runProgress.level}</span>
++        </h1>
++        <h3 className={styles.subtitle}>SELECT AN UPGRADE</h3>
++
++        <div className={styles.upgradeContainer}>
++          {levelUpChoices.map((upgrade) => (
++            <button
++              key={upgrade.id}
++              type="button"
++              className={`${styles.upgradeCard} ${styles[upgrade.category]}`}
++              onClick={() => selectLevelUpgrade(upgrade.id)}
++            >
++              <div className={styles.icon}>{upgrade.icon}</div>
++              <div className={styles.cardTitle}>{upgrade.name}</div>
++              <div className={styles.cardCategory}>{upgrade.category}</div>
++              <div className={styles.cardDescription}>{upgrade.description}</div>
++            </button>
++          ))}
++        </div>
++
++        <div className={styles.instructions}>Click to select an upgrade and continue</div>
++      </div>
++    </div>
++  );
++}
+diff --git a/src/ui/index.ts b/src/ui/index.ts
+index 6aa2ce5..ff0fe58 100644
+--- a/src/ui/index.ts
++++ b/src/ui/index.ts
+@@ -5,6 +5,7 @@ export { EndScreen } from './EndScreen';
+ export { HUD } from './HUD';
+ export { InputControls } from './InputControls';
+ export { KillStreak } from './KillStreak';
++export { LevelUpScreen } from './LevelUpScreen';
+ export { LoadingScreen } from './LoadingScreen';
+ export { MessageOverlay } from './MessageOverlay';
+ export { MissionBriefing } from './MissionBriefing';

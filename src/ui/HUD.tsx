@@ -44,7 +44,7 @@ export function HUD() {
           <div className={styles.hpBar} style={{ width: `${hpPercent}%`, backgroundColor: hpColor }} />
         </div>
         <div className={styles.hpText} style={{ color: hpColor }}>
-          HP: {Math.ceil(playerHp)} / {playerMaxHp}
+          HP: {Math.floor(playerHp)} / {playerMaxHp}
         </div>
 
         <div className={styles.label} style={{ marginTop: '10px' }}>

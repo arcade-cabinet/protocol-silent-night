@@ -289,9 +289,9 @@ function InstancedMinions({ minions }: { minions: { mesh: THREE.Object3D; hp: nu
 
   return (
     <group>
-      <instancedMesh ref={bodyRef} args={[bodyGeo, bodyMat, MAX_MINIONS]} castShadow frustumCulled={false} />
-      <instancedMesh ref={headRef} args={[headGeo, headMat, MAX_MINIONS]} castShadow frustumCulled={false} />
-      <instancedMesh ref={eyeRef} args={[eyeGeo, eyeMat, MAX_MINIONS]} frustumCulled={false} />
+      <instancedMesh ref={bodyRef} args={[bodyGeo, bodyMat, MAX_MINIONS]} castShadow />
+      <instancedMesh ref={headRef} args={[headGeo, headMat, MAX_MINIONS]} castShadow />
+      <instancedMesh ref={eyeRef} args={[eyeGeo, eyeMat, MAX_MINIONS]} />
       
       {/* Single shared light for all minions - better than per-minion lights */}
       <pointLight color={CONFIG.COLORS.ENEMY_MINION} intensity={1.5} distance={30} position={[0, 2, 0]} />
@@ -789,10 +789,12 @@ function BossMesh({
         ))}
 
         {/* Demonic tongue */}
-        <mesh ref={tongueRef} position={[0, -0.45, 0.9]} rotation={[0.3, 0, 0]}>
-          <boxGeometry args={[0.2, 0.08, 0.6]} />
-          <meshStandardMaterial color={0x660033} emissive={0xff0066} emissiveIntensity={0.5} />
-        </mesh>
+        {rage > 0.5 && (
+          <mesh ref={tongueRef} position={[0, -0.45, 0.9]} rotation={[0.3, 0, 0]}>
+            <boxGeometry args={[0.2, 0.08, 0.6]} />
+            <meshStandardMaterial color={0x660033} emissive={0xff0066} emissiveIntensity={0.5} />
+          </mesh>
+        )}
 
         {/* Glowing eyes - cybernetic */}
         <mesh position={[0.35, 0.15, 0.55]}>

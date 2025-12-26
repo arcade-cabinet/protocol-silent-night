@@ -469,7 +469,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const weighted = available.flatMap((u) => {
         let weight = 1;
         switch (u.rarity) {
-          case 'common': weight = 4 - levelBonus * 4; break;
+          case 'common': weight = Math.max(0.5, 4 - levelBonus * 4); break;
           case 'rare': weight = 2 + levelBonus * 2; break;
           case 'epic': weight = 1 + levelBonus * 3; break;
           case 'legendary': weight = 0.3 + levelBonus * 2; break;
@@ -507,7 +507,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   selectLevelUpgrade: (upgradeId) => {
-    const { runProgress, playerMaxHp, playerHp, playerClass } = get();
+    const { runProgress, playerMaxHp, playerHp } = get();
     const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === upgradeId);
     
     if (!upgrade) return;
@@ -575,7 +575,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           damage *= 1 + value;
           break;
         case 'rapid_fire':
-          rof *= 1 - value * 0.8; // Reduce delay
+          rof *= 1 - value * 0.8; // Reduce delay (0.8 factor to balance fire rate vs delay reduction)
           break;
         case 'frost_piercing':
           critChance += value;
@@ -613,7 +613,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     return {
-      damage: Math.round(damage),
+      damage,
       speed,
       rof: Math.max(0.05, rof),
       critChance: Math.min(critChance, 1),
