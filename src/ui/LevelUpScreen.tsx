@@ -11,10 +11,6 @@ export function LevelUpScreen() {
 
   if (state !== 'LEVEL_UP') return null;
 
-  const handleSelectUpgrade = (upgradeId: string) => {
-    selectLevelUpgrade(upgradeId);
-  };
-
   return (
     <div className={styles.screen}>
       <div className={styles.container}>
@@ -29,7 +25,7 @@ export function LevelUpScreen() {
               key={upgrade.id}
               type="button"
               className={`${styles.upgradeCard} ${styles[upgrade.category]}`}
-              onClick={() => handleSelectUpgrade(upgrade.id)}
+              onClick={() => selectLevelUpgrade(upgrade.id)}
             >
               <div className={styles.icon}>{upgrade.icon}</div>
               <div className={styles.cardTitle}>{upgrade.name}</div>

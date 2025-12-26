@@ -308,7 +308,6 @@ export function getInitialUpgradeStats(): PlayerUpgradeStats {
     critDamage: 1.5,
     xpMultiplier: 1.0,
     piercingShots: 0,
-    christmasSpiritCharge: 0,
   };
 }
 

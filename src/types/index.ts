@@ -282,8 +282,6 @@ export interface PlayerUpgradeStats {
   xpMultiplier: number;
   /** Piercing shots (bullets pass through enemies) */
   piercingShots: number;
-  /** Christmas spirit meter (special ability) */
-  christmasSpiritCharge: number;
 }
 
 /**
