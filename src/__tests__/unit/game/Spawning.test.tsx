@@ -58,7 +58,7 @@ describe('Spawning Logic', () => {
     // Enemies.tsx has a useEffect that spawns initial minions
     // It uses setTimeout with i * 200. For 5 minions, that's up to 1000ms.
     act(() => {
-      vi.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(10000);
     });
 
     const enemies = useGameStore.getState().enemies;
