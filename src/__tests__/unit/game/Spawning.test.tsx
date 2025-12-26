@@ -1,4 +1,4 @@
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import * as THREE from 'three';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Enemies } from '@/game/Enemies';
@@ -44,12 +44,9 @@ describe('Spawning Logic', () => {
   });
 
   it('Enemies should spawn when state transitions to PHASE_1', async () => {
+    vi.useFakeTimers();
     // Start in MENU
     useGameStore.setState({ state: 'MENU' });
-
-    // Render Enemies (it shouldn't render anything but its effects should run)
-    // Actually, GameScene only renders Enemies when state is not MENU/BRIEFING.
-    // So we need to set state to something else, or render it directly.
 
     render(<Enemies />);
 
@@ -59,15 +56,14 @@ describe('Spawning Logic', () => {
     });
 
     // Enemies.tsx has a useEffect that spawns initial minions
-    // It uses setTimeout, so we need to wait.
+    // It uses setTimeout with i * 200. For 5 minions, that's up to 1000ms.
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
 
-    await waitFor(
-      () => {
-        const enemies = useGameStore.getState().enemies;
-        expect(enemies.length).toBeGreaterThan(0);
-      },
-      { timeout: 5000 }
-    );
+    const enemies = useGameStore.getState().enemies;
+    expect(enemies.length).toBeGreaterThan(0);
+    vi.useRealTimers();
   });
 
   it('Obstacles should spawn if noise is above threshold', async () => {
