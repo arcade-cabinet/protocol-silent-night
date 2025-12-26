@@ -131,23 +131,6 @@ export const getBulletTypeFromWeapon = (
 export type EnemyType = 'minion' | 'boss';
 
 /**
- * Configuration for enemy types
- * @interface EnemyConfig
- */
-export interface EnemyConfig {
-  /** Enemy type identifier */
-  type: EnemyType;
-  /** Maximum health points */
-  hp: number;
-  /** Movement speed in units per second */
-  speed: number;
-  /** Contact damage to player */
-  damage: number;
-  /** Score points awarded when killed */
-  pointValue: number;
-}
-
-/**
  * Base entity data shared by all game entities
  * @interface EntityData
  */
@@ -297,7 +280,7 @@ export interface RoguelikeUpgrade {
   description: string;
   icon: string; // Emoji or symbol
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  category: 'offensive' | 'defensive' | 'utility' | 'special';
+  category: 'offensive' | 'defensive' | 'utility' | 'special' | 'christmas';
   maxStacks: number;
   effect: {
     type: 'damage' | 'speed' | 'health' | 'rof' | 'lifesteal' | 'aoe' | 'crit' | 'shield' | 'xp' | 'special';
@@ -782,5 +765,26 @@ export const ROGUELIKE_UPGRADES: RoguelikeUpgrade[] = [
     category: 'special',
     maxStacks: 1,
     effect: { type: 'special', value: 0.5, isPercent: true },
+  },
+  // Reconciled from PR 31
+  {
+    id: 'projectile_speed',
+    name: 'Velocity Boost',
+    description: '+30% projectile speed',
+    category: 'offensive',
+    icon: '🚀',
+    rarity: 'rare',
+    maxStacks: 3,
+    effect: { type: 'speed', value: 0.3, isPercent: true }, // Applied to projectiles
+  },
+  {
+    id: 'projectile_size',
+    name: 'Large Caliber',
+    description: '+40% projectile size',
+    category: 'offensive',
+    icon: '🎯',
+    rarity: 'rare',
+    maxStacks: 3,
+    effect: { type: 'special', value: 0.4, isPercent: true }, // Custom handling for size
   },
 ];

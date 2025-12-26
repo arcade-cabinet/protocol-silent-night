@@ -338,8 +338,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
-    // Nice Points calculation: 1 Nice Point per 10 points scored
-    const npGain = Math.floor((points + streakBonus) / 10);
+    // Nice Points calculation: matches points or uses a specific formula
+    // Kill streak bonuses (+5, +10, +25, +50 NP)
+    let npStreakBonus = 0;
+    if (newStreak === 2) npStreakBonus = 5;
+    else if (newStreak === 3) npStreakBonus = 10;
+    else if (newStreak === 4) npStreakBonus = 25;
+    else if (newStreak >= 5) npStreakBonus = 50;
+
+    const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
 
     set({
@@ -347,7 +354,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...metaProgress,
+        ...get().metaProgress, // Use fresh state from get() to avoid stale state bug
         totalKills: metaProgress.totalKills + 1,
       },
     });
@@ -477,7 +484,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   levelUp: () => {
-    const { runProgress, state } = get();
+    const { runProgress } = get();
 
     // Check for weapon evolution at level 10
     if (runProgress.level === 10) {
@@ -920,9 +927,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (newHp <= 0) {
       const updatedMeta = {
-        ...metaProgress,
+        ...get().metaProgress, // Fresh state
         bossesDefeated: metaProgress.bossesDefeated + 1,
         runsCompleted: metaProgress.runsCompleted + 1,
+        nicePoints: metaProgress.nicePoints + 500, // +500 NP bonus for boss defeat
       };
       set({
         state: 'WIN',
@@ -949,7 +957,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (stats.score > highScore) {
       saveHighScore(stats.score);
       const updatedMeta = {
-        ...metaProgress,
+        ...get().metaProgress, // Fresh state
         highScore: stats.score,
       };
       set({ highScore: stats.score, metaProgress: updatedMeta });
