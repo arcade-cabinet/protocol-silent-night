@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
-import { WEAPONS } from '@/data/weapons';
+import { WEAPONS } from '@/data';
 import type { WeaponType } from '@/types';
 import styles from './WeaponShop.module.css';
 

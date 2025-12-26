@@ -9,8 +9,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import type { ChristmasObstacle, PlayerClassType, WeaponType } from '@/types';
-import WEAPONS_DATA from '@/data/weapons.json';
-const { evolutions: WEAPON_EVOLUTIONS, weapons: WEAPONS } = WEAPONS_DATA;
+import { WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
 import { StrataCharacter } from './StrataCharacter';
 
 let bulletIdCounter = 0;

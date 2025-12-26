@@ -5,6 +5,7 @@
 
 import { useGameStore } from '@/store/gameStore';
 import type { RoguelikeUpgrade } from '@/types';
+import { ROGUELIKE_UPGRADES } from '@/data';
 import styles from './LevelUpScreen.module.css';
 
 export function LevelUpScreen() {
@@ -100,7 +101,7 @@ export function LevelUpScreen() {
           <span className={styles.currentLabel}>ACTIVE UPGRADES:</span>
           <div className={styles.upgradeIcons}>
             {Object.entries(runProgress.activeUpgrades).map(([id, stacks]) => {
-              const upgrade = runProgress.upgradeChoices.find((u) => u.id === id);
+              const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === id);
               const icon = upgrade?.icon ?? '?';
               const name = upgrade?.name ?? id;
               return (

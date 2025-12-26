@@ -10,8 +10,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
-import { type ChristmasObjectType, type ChristmasObstacle } from '@/types';
-import { TERRAIN_CONFIG, OBSTACLE_TYPES } from '@/data/terrain';
+import { type ChristmasObstacle } from '@/types';
+import { CONFIG, TERRAIN_CONFIG, OBSTACLE_TYPES } from '@/data';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);

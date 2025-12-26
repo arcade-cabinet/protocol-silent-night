@@ -6,13 +6,11 @@
 import { useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
-import {
-  PERMANENT_UPGRADES,
-  SKIN_UNLOCKS,
-  WEAPON_UNLOCKS,
-} from '@/data/workshop';
+import { WORKSHOP } from '@/data';
 import type { PermanentUpgradeConfig, SkinConfig, WeaponUnlock } from '@/types';
 import styles from './SantasWorkshop.module.css';
+
+const { upgrades: PERMANENT_UPGRADES, skins: SKIN_UNLOCKS, weapons: WEAPON_UNLOCKS } = WORKSHOP;
 
 type TabType = 'weapons' | 'skins' | 'upgrades';
 

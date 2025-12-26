@@ -9,7 +9,7 @@ import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData, WeaponType } from '@/types';
-import CONFIG from '@/data/config.json';
+import { CONFIG } from '@/data';
 
 // Max bullets per type from config
 const MAX_CANNON_BULLETS = CONFIG.BULLET_LIMITS.CANNON;

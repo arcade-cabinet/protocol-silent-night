@@ -100,7 +100,7 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    expect(screen.getByText('BOSS DEFEATED')).toBeInTheDocument();
+    expect(screen.getByText('KRAMPUS DEFEATED')).toBeInTheDocument();
     expect(screen.getByText('YES')).toBeInTheDocument();
   });
 
@@ -110,7 +110,7 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    expect(screen.getByText('BOSS DEFEATED')).toBeInTheDocument();
+    expect(screen.getByText('KRAMPUS DEFEATED')).toBeInTheDocument();
     expect(screen.getByText('NO')).toBeInTheDocument();
   });
 
@@ -122,7 +122,7 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    expect(screen.getByText('★ NEW HIGH SCORE ★')).toBeInTheDocument();
+    expect(screen.getByText('NEW HIGH SCORE')).toBeInTheDocument();
   });
 
   it('should not display new high score when not beaten', () => {
@@ -134,12 +134,22 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    expect(screen.queryByText('★ NEW HIGH SCORE ★')).not.toBeInTheDocument();
+    expect(screen.queryByText('NEW HIGH SCORE')).not.toBeInTheDocument();
   });
 
-  it('should have re-deploy button', () => {
+  it('should have play again button on win', () => {
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().setState('WIN');
+
+    render(<EndScreen />);
+
+    const button = screen.getByRole('button', { name: /PLAY AGAIN/ });
+    expect(button).toBeInTheDocument();
+  });
+
+  it('should have re-deploy button on loss', () => {
+    useGameStore.getState().selectClass('santa');
+    useGameStore.getState().damagePlayer(300);
 
     render(<EndScreen />);
 
@@ -147,14 +157,14 @@ describe('EndScreen Component', () => {
     expect(button).toBeInTheDocument();
   });
 
-  it('should reset game when re-deploy clicked', async () => {
+  it('should reset game when play again clicked', async () => {
     const user = userEvent.setup();
     useGameStore.getState().selectClass('santa');
     useGameStore.getState().setState('WIN');
 
     render(<EndScreen />);
 
-    const button = screen.getByRole('button', { name: /RE-DEPLOY/ });
+    const button = screen.getByRole('button', { name: /PLAY AGAIN/ });
     await user.click(button);
 
     expect(useGameStore.getState().state).toBe('MENU');

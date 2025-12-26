@@ -9,10 +9,9 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import CONFIG from '@/data/config.json';
-import ENEMIES_DATA from '@/data/enemies.json';
+import { CONFIG, ENEMIES } from '@/data';
 
-const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES_DATA;
+const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES;
 
 let enemyIdCounter = 0;
 

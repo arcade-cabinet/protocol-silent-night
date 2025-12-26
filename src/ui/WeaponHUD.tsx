@@ -5,7 +5,7 @@
 
 import { useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
-import { WEAPONS } from '@/data/weapons';
+import { WEAPONS } from '@/data';
 import styles from './WeaponHUD.module.css';
 
 export function WeaponHUD() {

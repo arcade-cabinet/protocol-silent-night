@@ -4,9 +4,11 @@
  */
 
 import { useGameStore } from '@/store/gameStore';
-import { SKIN_UNLOCKS } from '@/data/workshop';
-import type { PlayerClassType } from '@/types';
+import { WORKSHOP } from '@/data';
+import type { PlayerClassType, SkinConfig } from '@/types';
 import styles from './SkinSelector.module.css';
+
+const { skins: SKIN_UNLOCKS } = WORKSHOP;
 
 interface SkinSelectorProps {
   characterClass: PlayerClassType;
@@ -14,14 +16,15 @@ interface SkinSelectorProps {
 }
 
 export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
-  const { metaProgress, spendNicePoints, unlockWeapon, unlockSkin } = useGameStore();
+  const { selectedSkin, selectSkin, metaProgress, spendNicePoints, unlockSkin } = useGameStore();
 
-  const skins = SKIN_UNLOCKS.filter(s => s.character === characterClass);
+  const skinConfigs = WORKSHOP.skins as SkinConfig[];
+  const skins = skinConfigs.filter(s => s.character === characterClass);
   const unlockedSkins = metaProgress.unlockedSkins;
   const nicePoints = metaProgress.nicePoints;
 
   const handleSelectSkin = (skinId: string) => {
-    const skin = SKIN_UNLOCKS.find(s => s.id === skinId);
+    const skin = skinConfigs.find(s => s.id === skinId);
     if (!skin) return;
     
     const isUnlocked = unlockedSkins.includes(skinId);
@@ -31,11 +34,12 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
       if (skin.cost <= nicePoints) {
         if (spendNicePoints(skin.cost)) {
           unlockSkin(skinId);
+          selectSkin(skinId);
         }
       }
     } else {
-      // Already unlocked, logic for selecting it would go here
-      // For now we just unlock
+      // Already unlocked, select it
+      selectSkin(skinId);
     }
   };
 
@@ -65,15 +69,16 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
         </div>
 
         <div className={styles.skinGrid}>
-          {skins.map((skin) => {
+            {skins.map((skin) => {
             const isUnlocked = unlockedSkins.includes(skin.id);
+            const isSelected = selectedSkin === skin.id;
             const canAfford = nicePoints >= skin.cost;
 
             return (
               <button
                 key={skin.id}
                 type="button"
-                className={`${styles.skinCard} ${isUnlocked ? styles.unlocked : ''} ${
+                className={`${styles.skinCard} ${isSelected ? styles.selected : ''} ${
                   !isUnlocked && !canAfford ? styles.locked : ''
                 }`}
                 onClick={() => handleSelectSkin(skin.id)}
@@ -81,6 +86,7 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
               >
                 <div className={styles.skinPreview}>
                   {!isUnlocked && <div className={styles.lockIcon}>🔒</div>}
+                  {isSelected && <div className={styles.checkIcon}>✓</div>}
                 </div>
                 <div className={styles.skinInfo}>
                   <div className={styles.skinName}>{skin.name}</div>

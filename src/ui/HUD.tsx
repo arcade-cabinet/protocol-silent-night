@@ -4,8 +4,7 @@
  */
 
 import { useGameStore } from '@/store/gameStore';
-import { CONFIG } from '@/data/config';
-import { ROGUELIKE_UPGRADES } from '@/data/upgrades';
+import { CONFIG, ROGUELIKE_UPGRADES } from '@/data';
 import styles from './HUD.module.css';
 
 export function HUD() {

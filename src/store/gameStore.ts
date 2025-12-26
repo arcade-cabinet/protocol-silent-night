@@ -17,16 +17,16 @@ import type {
   WeaponEvolutionType,
   WeaponType,
 } from '@/types';
-import CONFIG from '@/data/config.json';
-import CLASSES from '@/data/classes.json';
-import UPGRADES from '@/data/upgrades.json';
-import WEAPONS_DATA from '@/data/weapons.json';
-import BRIEFING from '@/data/briefing.json';
-const { weapons: WEAPONS, evolutions: WEAPON_EVOLUTIONS } = WEAPONS_DATA;
+import { 
+  CONFIG, 
+  PLAYER_CLASSES, 
+  ROGUELIKE_UPGRADES, 
+  WEAPONS, 
+  WEAPON_EVOLUTIONS, 
+  ENEMIES, 
+  BRIEFING 
+} from '@/data';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
-
-const PLAYER_CLASSES = CLASSES as Record<PlayerClassType, PlayerClassConfig>;
-const ROGUELIKE_UPGRADES = UPGRADES as RoguelikeUpgrade[];
 
 // Persistence keys
 const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
@@ -496,6 +496,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           case 'rare': weight = 2 + levelBonus * 2; break;
           case 'epic': weight = 1 + levelBonus * 3; break;
           case 'legendary': weight = 0.3 + levelBonus * 2; break;
+          default: weight = 1;
         }
         return Array(Math.max(1, Math.round(weight * 10))).fill(u);
       });
@@ -769,10 +770,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const angle = Math.random() * Math.PI * 2;
     const radius = 30;
     const position = new THREE.Vector3(Math.cos(angle) * radius, 4, Math.sin(angle) * radius);
-    const bossConfig = ENEMIES_DATA.boss;
+    const bossConfig = ENEMIES.boss;
+    const mesh = new THREE.Object3D();
+    mesh.position.copy(position);
     addEnemy({
       id: 'boss-krampus',
-      mesh: (() => { const obj = new THREE.Object3D(); obj.position.copy(position); return obj; })(),
+      mesh,
       velocity: new THREE.Vector3(),
       hp: bossConfig.hp,
       maxHp: bossConfig.hp,
@@ -782,7 +785,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    set({ state: 'PHASE_BOSS', bossActive: true, bossHp: bossConfig.hp, bossMaxHp: bossConfig.hp });
+    set({
+      state: 'PHASE_BOSS',
+      bossActive: true,
+      bossHp: bossConfig.hp,
+      bossMaxHp: bossConfig.hp,
+    });
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
   },
@@ -793,7 +801,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ bossHp: newHp, screenShake: 0.3 });
     AudioManager.playSFX('boss_hit');
     if (newHp <= 0) {
-      const updatedMeta = { ...get().metaProgress, bossesDefeated: get().metaProgress.bossesDefeated + 1, runsCompleted: get().metaProgress.runsCompleted + 1, nicePoints: get().metaProgress.nicePoints + 500 };
+      const updatedMeta = { 
+      ...get().metaProgress, 
+      bossesDefeated: get().metaProgress.bossesDefeated + 1, 
+      runsCompleted: get().metaProgress.runsCompleted + 1, 
+      nicePoints: get().metaProgress.nicePoints + 500 
+    };
       set({ state: 'WIN', bossActive: false, stats: { ...get().stats, bossDefeated: true }, metaProgress: updatedMeta });
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
@@ -817,7 +830,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  reset: () => set({ ...initialState, highScore: get().highScore, metaProgress: get().metaProgress, playerPosition: new THREE.Vector3(0, 0, 0) }),
+  reset: () => set({ 
+    ...initialState, 
+    highScore: get().highScore, 
+    metaProgress: get().metaProgress, 
+    playerPosition: new THREE.Vector3(0, 0, 0) 
+  }),
 }));
 
 if (typeof window !== 'undefined') {
