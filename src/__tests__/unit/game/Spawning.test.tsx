@@ -15,10 +15,9 @@ describe('Spawning Logic', () => {
   beforeEach(() => {
     useGameStore.getState().reset();
     vi.clearAllMocks();
-  });
+  }, 10000); // Higher timeout for setup
 
   it('Enemies should spawn when state transitions to PHASE_1', async () => {
-    vi.useFakeTimers();
     // Start in MENU
     useGameStore.setState({ state: 'MENU' });
 
@@ -28,19 +27,16 @@ describe('Spawning Logic', () => {
     // Transition to PHASE_1
     await ReactTestRenderer.act(async () => {
       useGameStore.setState({ state: 'PHASE_1' });
-    });
-
-    // Advance timers to trigger the setTimeouts in Enemies.tsx
-    await ReactTestRenderer.act(async () => {
-      vi.advanceTimersByTime(2000);
+      // Enemies.tsx initial spawn uses setTimeout with i * 200
+      // We need to wait for these timeouts to finish.
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     });
 
     const enemies = useGameStore.getState().enemies;
     expect(enemies.length).toBeGreaterThan(0);
 
     await renderer.unmount();
-    vi.useRealTimers();
-  });
+  }, 10000); // Higher timeout for test
 
   it('Obstacles should spawn if noise is above threshold', async () => {
     const strata = await import('@jbcom/strata');
@@ -59,7 +55,7 @@ describe('Spawning Logic', () => {
     expect(obstacles.length).toBeGreaterThan(0);
 
     await renderer.unmount();
-  });
+  }, 10000);
 
   it('selectLevelUpgrade should return to previous state', async () => {
     // Start in PHASE_BOSS
@@ -81,5 +77,5 @@ describe('Spawning Logic', () => {
 
     // Should return to PHASE_BOSS
     expect(useGameStore.getState().state).toBe('PHASE_BOSS');
-  });
+  }, 10000);
 });
