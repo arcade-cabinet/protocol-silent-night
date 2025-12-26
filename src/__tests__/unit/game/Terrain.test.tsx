@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { Terrain } from '@/game/Terrain';
 import { useGameStore } from '@/store/gameStore';
-import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 
 // Mock R3F
@@ -46,8 +45,7 @@ describe('Terrain', () => {
 
     render(<Terrain />);
     
-    const state = useGameStore.getState();
-    expect(state.obstacles.length).toBeGreaterThan(0);
+    expect(useGameStore.getState().obstacles.length).toBeGreaterThan(0);
   });
 
   it('should update material time in useFrame', () => {
