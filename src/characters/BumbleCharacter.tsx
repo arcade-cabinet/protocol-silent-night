@@ -38,8 +38,6 @@ export function BumbleCharacter({
   } | null>(null);
   const muzzleRef = useRef<THREE.PointLight | null>(null);
   const starMeshRef = useRef<THREE.Mesh | null>(null);
-  // Cache fur groups to avoid traversing scene graph every frame
-  const furGroupsRef = useRef<THREE.Group[]>([]);
 
   const config = PLAYER_CLASSES.bumble;
 
@@ -64,8 +62,8 @@ export function BumbleCharacter({
         skinColor: config.color,
         furOptions,
         scale: config.scale,
-        
-        
+        includeMuzzle: false,
+        includeTail: false,
       });
 
       characterRef.current = character;
@@ -73,26 +71,12 @@ export function BumbleCharacter({
 
       // Customize for Bumble appearance
       customizeBumbleAppearance(character.joints, config.scale);
-
-      // Cache fur groups for efficient updates
-      const furGroups: THREE.Group[] = [];
-      for (const joint of Object.values(character.joints)) {
-        if (joint?.mesh) {
-          joint.mesh.traverse((child) => {
-            if (child instanceof THREE.Group && child.userData.isFurGroup) {
-              furGroups.push(child);
-            }
-          });
-        }
-      }
-      furGroupsRef.current = furGroups;
     }
 
     return () => {
       if (characterRef.current && groupRef.current) {
         groupRef.current.remove(characterRef.current.root);
         characterRef.current = null;
-        furGroupsRef.current = [];
       }
     };
   }, [config.color, config.scale, furOptions]);
@@ -238,10 +222,8 @@ export function BumbleCharacter({
       // Use Strata's animateCharacter with heavier motion
       animateCharacter(characterRef.current, time * 0.7); // Slower animation
 
-      // Update fur uniforms using cached groups (avoids traversal every frame)
-      for (const furGroup of furGroupsRef.current) {
-        updateFurUniforms(furGroup, time);
-      }
+      // Update fur uniforms (optimized in core to use caching)
+      updateFurUniforms(characterRef.current.root, time);
 
       // Heavy breathing when idle - only animate Y to preserve non-uniform scale
       if (joints.torso?.mesh) {

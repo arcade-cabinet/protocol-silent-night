@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
+const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variations
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {

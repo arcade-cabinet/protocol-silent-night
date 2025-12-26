@@ -39,8 +39,6 @@ export function ElfCharacter({
   const muzzleRef = useRef<THREE.PointLight | null>(null);
   const weaponGroupRef = useRef<THREE.Group | null>(null);
   const earsRef = useRef<{ left: THREE.Mesh; right: THREE.Mesh } | null>(null);
-  // Cache fur groups to avoid traversing scene graph every frame
-  const furGroupsRef = useRef<THREE.Group[]>([]);
 
   const config = PLAYER_CLASSES.elf;
 
@@ -64,7 +62,7 @@ export function ElfCharacter({
         skinColor: 0xffe4c4, // Skin tone
         furOptions,
         scale: config.scale,
-        
+        includeMuzzle: false,
       });
 
       characterRef.current = character;
@@ -72,26 +70,12 @@ export function ElfCharacter({
 
       // Customize for Elf appearance
       customizeElfAppearance(character.joints, config.scale);
-
-      // Cache fur groups for efficient updates
-      const furGroups: THREE.Group[] = [];
-      for (const joint of Object.values(character.joints)) {
-        if (joint?.mesh) {
-          joint.mesh.traverse((child) => {
-            if (child instanceof THREE.Group && child.userData.isFurGroup) {
-              furGroups.push(child);
-            }
-          });
-        }
-      }
-      furGroupsRef.current = furGroups;
     }
 
     return () => {
       if (characterRef.current && groupRef.current) {
         groupRef.current.remove(characterRef.current.root);
         characterRef.current = null;
-        furGroupsRef.current = [];
       }
     };
   }, [config.scale, furOptions]);
@@ -264,10 +248,8 @@ export function ElfCharacter({
       // Use Strata's animateCharacter
       animateCharacter(characterRef.current, time);
 
-      // Update fur uniforms using cached groups (avoids traversal every frame)
-      for (const furGroup of furGroupsRef.current) {
-        updateFurUniforms(furGroup, time);
-      }
+      // Update fur uniforms (optimized in core to use caching)
+      updateFurUniforms(characterRef.current.root, time);
 
       // Ear twitch
       if (earsRef.current) {
