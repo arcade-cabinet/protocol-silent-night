@@ -1,41 +1,15 @@
-import { act, render } from '@testing-library/react';
+import ReactTestRenderer from '@react-three/test-renderer';
 import * as THREE from 'three';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Enemies } from '@/game/Enemies';
 import { Terrain } from '@/game/Terrain';
 import { useGameStore } from '@/store/gameStore';
 
-// Mock R3F
-vi.mock('@react-three/fiber', () => ({
-  useFrame: vi.fn((_cb) => {
-    // We can manually trigger the callback in tests if needed
-    return null;
-  }),
-  useThree: vi.fn(() => ({
-    camera: new THREE.PerspectiveCamera(),
-    scene: new THREE.Scene(),
-    gl: {
-      capabilities: { isWebGL2: true },
-      setAnimationLoop: vi.fn(),
-    },
-  })),
-}));
-
 // Mock Strata
 vi.mock('@jbcom/strata', () => ({
   noise3D: vi.fn(() => 0),
   fbm: vi.fn(() => 0),
 }));
-
-// Mock InstancedMinions and other subcomponents to avoid R3F rendering issues in unit tests
-vi.mock('@/game/Enemies', async () => {
-  const actual = await vi.importActual('@/game/Enemies');
-  return {
-    ...actual,
-    InstancedMinions: () => null,
-    BossRenderer: () => null,
-  };
-});
 
 describe('Spawning Logic', () => {
   beforeEach(() => {
@@ -44,26 +18,24 @@ describe('Spawning Logic', () => {
   });
 
   it('Enemies should spawn when state transitions to PHASE_1', async () => {
-    vi.useFakeTimers();
     // Start in MENU
     useGameStore.setState({ state: 'MENU' });
 
-    render(<Enemies />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types
+    const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
     // Transition to PHASE_1
-    act(() => {
+    await ReactTestRenderer.act(async () => {
       useGameStore.setState({ state: 'PHASE_1' });
-    });
-
-    // Enemies.tsx has a useEffect that spawns initial minions
-    // It uses setTimeout with i * 200. For 5 minions, that's up to 1000ms.
-    act(() => {
-      vi.advanceTimersByTime(10000);
+      // Enemies.tsx initial spawn uses setTimeout with i * 200
+      // We need to wait for these timeouts to finish.
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     });
 
     const enemies = useGameStore.getState().enemies;
     expect(enemies.length).toBeGreaterThan(0);
-    vi.useRealTimers();
+
+    await renderer.unmount();
   });
 
   it('Obstacles should spawn if noise is above threshold', async () => {
@@ -71,10 +43,18 @@ describe('Spawning Logic', () => {
     // Mock noise to be high
     vi.mocked(strata.noise3D).mockReturnValue(0.95);
 
-    render(<Terrain />);
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types
+    const renderer = (await ReactTestRenderer.create(<Terrain />)) as any;
+
+    // Wait for useEffect to run and update state
+    await ReactTestRenderer.act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    });
 
     const obstacles = useGameStore.getState().obstacles;
     expect(obstacles.length).toBeGreaterThan(0);
+
+    await renderer.unmount();
   });
 
   it('selectLevelUpgrade should return to previous state', async () => {
@@ -92,7 +72,7 @@ describe('Spawning Logic', () => {
     const data = await import('@/data');
     // biome-ignore lint/suspicious/noExplicitAny: necessary for mock data
     (data.ROGUELIKE_UPGRADES as any).push(mockUpgrade);
-    
+
     useGameStore.getState().selectLevelUpgrade('test');
 
     // Should return to PHASE_BOSS
