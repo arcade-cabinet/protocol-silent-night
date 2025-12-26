@@ -2,49 +2,43 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { LevelUpScreen } from '@/ui/LevelUpScreen';
 import { useGameStore } from '@/store/gameStore';
-import type { RoguelikeUpgrade } from '@/types';
+import type { RoguelikeUpgrade, GameState, RunProgressData } from '@/types';
 
 describe('LevelUpScreen Component', () => {
   beforeEach(() => {
     useGameStore.getState().reset();
   });
 
-  it('should not render when state is MENU', () => {
-    useGameStore.setState({
-      state: 'MENU',
-      runProgress: {
-        xp: 0,
-        level: 1,
-        selectedUpgrades: [],
-        weaponEvolutions: [],
-        activeUpgrades: {},
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: [],
-      },
-    });
+  const setupTestState = (
+    state: GameState,
+    runProgressOverrides: Partial<RunProgressData> = {}
+  ) => {
+    const defaultRunProgress: RunProgressData = {
+      xp: 0,
+      level: 1,
+      selectedUpgrades: [],
+      weaponEvolutions: [],
+      activeUpgrades: {},
+      wave: 1,
+      timeSurvived: 0,
+      pendingLevelUp: false,
+      upgradeChoices: [],
+    };
 
+    useGameStore.setState({
+      state,
+      runProgress: { ...defaultRunProgress, ...runProgressOverrides },
+    });
+  };
+
+  it('should not render when state is MENU', () => {
+    setupTestState('MENU', { pendingLevelUp: true });
     render(<LevelUpScreen />);
     expect(screen.queryByText('CHOOSE YOUR UPGRADE')).toBeNull();
   });
 
   it('should not render when pendingLevelUp is false', () => {
-    useGameStore.setState({
-      state: 'LEVEL_UP',
-      runProgress: {
-        xp: 0,
-        level: 2,
-        selectedUpgrades: [],
-        weaponEvolutions: [],
-        activeUpgrades: {},
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: false,
-        upgradeChoices: [],
-      },
-    });
-
+    setupTestState('LEVEL_UP', { level: 2, pendingLevelUp: false });
     render(<LevelUpScreen />);
     expect(screen.queryByText('CHOOSE YOUR UPGRADE')).toBeNull();
   });
@@ -62,25 +56,16 @@ describe('LevelUpScreen Component', () => {
       },
     ];
 
-    useGameStore.setState({
-      state: 'LEVEL_UP',
-      runProgress: {
-        xp: 0,
-        level: 2,
-        selectedUpgrades: [],
-        weaponEvolutions: [],
-        activeUpgrades: {},
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: mockUpgrades,
-      },
+    setupTestState('LEVEL_UP', {
+      level: 2,
+      pendingLevelUp: true,
+      upgradeChoices: mockUpgrades,
     });
 
     render(<LevelUpScreen />);
-    expect(screen.getByText('CHOOSE YOUR UPGRADE')).toBeDefined();
-    expect(screen.getByText('LEVEL 2')).toBeDefined();
-    expect(screen.getByText('Test Upgrade 1')).toBeDefined();
+    expect(screen.getByText('CHOOSE YOUR UPGRADE')).not.toBeNull();
+    expect(screen.getByText('LEVEL 2')).not.toBeNull();
+    expect(screen.getByText('Test Upgrade 1')).not.toBeNull();
   });
 
   it('should display upgrade choices correctly', () => {
@@ -105,29 +90,20 @@ describe('LevelUpScreen Component', () => {
       },
     ];
 
-    useGameStore.setState({
-      state: 'LEVEL_UP',
-      runProgress: {
-        xp: 0,
-        level: 3,
-        selectedUpgrades: [],
-        weaponEvolutions: [],
-        activeUpgrades: {},
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: mockUpgrades,
-      },
+    setupTestState('LEVEL_UP', {
+      level: 3,
+      pendingLevelUp: true,
+      upgradeChoices: mockUpgrades,
     });
 
     render(<LevelUpScreen />);
     
-    expect(screen.getByText('Damage Boost')).toBeDefined();
-    expect(screen.getByText('Shield Wall')).toBeDefined();
-    expect(screen.getByText('Increases damage')).toBeDefined();
-    expect(screen.getByText('Adds protection')).toBeDefined();
-    expect(screen.getByText('COMMON')).toBeDefined();
-    expect(screen.getByText('RARE')).toBeDefined();
+    expect(screen.getByText('Damage Boost')).not.toBeNull();
+    expect(screen.getByText('Shield Wall')).not.toBeNull();
+    expect(screen.getByText('Increases damage')).not.toBeNull();
+    expect(screen.getByText('Adds protection')).not.toBeNull();
+    expect(screen.getByText('COMMON')).not.toBeNull();
+    expect(screen.getByText('RARE')).not.toBeNull();
   });
 
   it('should call selectLevelUpgrade when upgrade is clicked', () => {
@@ -145,27 +121,18 @@ describe('LevelUpScreen Component', () => {
       },
     ];
 
-    useGameStore.setState({
-      state: 'LEVEL_UP',
-      runProgress: {
-        xp: 0,
-        level: 2,
-        selectedUpgrades: [],
-        weaponEvolutions: [],
-        activeUpgrades: {},
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: mockUpgrades,
-      },
+    setupTestState('LEVEL_UP', {
+      level: 2,
+      pendingLevelUp: true,
+      upgradeChoices: mockUpgrades,
     });
 
     render(<LevelUpScreen />);
     
     const upgradeButton = screen.getByText('Coal Fury').closest('button');
-    expect(upgradeButton).toBeDefined();
+    expect(upgradeButton).not.toBeNull();
     
-    fireEvent.click(upgradeButton!);
+    fireEvent.click(upgradeButton as HTMLElement);
     
     const state = useGameStore.getState();
     // After selecting, pendingLevelUp should be false and state should return to PHASE_1
@@ -187,25 +154,18 @@ describe('LevelUpScreen Component', () => {
       },
     ];
 
-    useGameStore.setState({
-      state: 'LEVEL_UP',
-      runProgress: {
-        xp: 0,
-        level: 3,
-        selectedUpgrades: ['stackable-upgrade'],
-        weaponEvolutions: [],
-        activeUpgrades: { 'stackable-upgrade': 2 },
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: mockUpgrades,
-      },
+    setupTestState('LEVEL_UP', {
+      level: 3,
+      selectedUpgrades: ['stackable-upgrade'],
+      activeUpgrades: { 'stackable-upgrade': 2 },
+      pendingLevelUp: true,
+      upgradeChoices: mockUpgrades,
     });
 
     render(<LevelUpScreen />);
     
     // Should show 2/5 (current stacks / max stacks)
-    expect(screen.getByText('2/5')).toBeDefined();
+    expect(screen.getByText('2/5')).not.toBeNull();
   });
 
   it('should display active upgrades section', () => {
@@ -221,67 +181,28 @@ describe('LevelUpScreen Component', () => {
       },
     ];
 
-    useGameStore.setState({
-      state: 'LEVEL_UP',
-      runProgress: {
-        xp: 0,
-        level: 4,
-        selectedUpgrades: ['test-upgrade-1'],
-        weaponEvolutions: [],
-        activeUpgrades: { 'test-upgrade-1': 2 },
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: mockUpgrades,
-      },
+    setupTestState('LEVEL_UP', {
+      level: 4,
+      selectedUpgrades: ['test-upgrade-1'],
+      activeUpgrades: { 'test-upgrade-1': 2 },
+      pendingLevelUp: true,
+      upgradeChoices: mockUpgrades,
     });
 
     render(<LevelUpScreen />);
     
-    expect(screen.getByText('ACTIVE UPGRADES:')).toBeDefined();
+    expect(screen.getByText('ACTIVE UPGRADES:')).not.toBeNull();
   });
 
   it('should not render in PHASE_1 state (regression test for bug fix)', () => {
-    // This tests the fix: previously the screen would incorrectly show when
-    // state was NOT PHASE_1/PHASE_BOSS due to inverted logic
-    useGameStore.setState({
-      state: 'PHASE_1',
-      runProgress: {
-        xp: 0,
-        level: 2,
-        selectedUpgrades: [],
-        weaponEvolutions: [],
-        activeUpgrades: {},
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: [],
-      },
-    });
-
+    setupTestState('PHASE_1', { level: 2, pendingLevelUp: true });
     render(<LevelUpScreen />);
-    // Should NOT render because state is PHASE_1, not LEVEL_UP
     expect(screen.queryByText('CHOOSE YOUR UPGRADE')).toBeNull();
   });
 
   it('should not render in PHASE_BOSS state (regression test)', () => {
-    useGameStore.setState({
-      state: 'PHASE_BOSS',
-      runProgress: {
-        xp: 0,
-        level: 5,
-        selectedUpgrades: [],
-        weaponEvolutions: [],
-        activeUpgrades: {},
-        wave: 1,
-        timeSurvived: 0,
-        pendingLevelUp: true,
-        upgradeChoices: [],
-      },
-    });
-
+    setupTestState('PHASE_BOSS', { level: 5, pendingLevelUp: true });
     render(<LevelUpScreen />);
-    // Should NOT render because state is PHASE_BOSS, not LEVEL_UP
     expect(screen.queryByText('CHOOSE YOUR UPGRADE')).toBeNull();
   });
 });
