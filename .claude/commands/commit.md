@@ -35,9 +35,13 @@ Create well-formatted commits following conventional commit standards.
    - ⚡️ `perf`: Performance
    - ✅ `test`: Tests
    - 🔧 `chore`: Tooling/config
+   - Emojis are visual hints and **not** part of the `type` token (e.g. `feat`, `fix`).
 
 5. **Create Commit Message**
-   - Format: `<emoji> <type>: <description>`
+   - Preferred format: `<emoji> <type>: <description>`
+     - Example: `✨ feat: add weapon evolution system`
+   - Alternative (when emojis or scopes are needed): `<type>(<scope>): <description>`
+     - Example: `feat(weapons): add evolution system`
    - Keep first line under 72 characters
    - Use present tense, imperative mood
 
