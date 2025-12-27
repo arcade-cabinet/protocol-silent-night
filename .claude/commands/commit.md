@@ -17,7 +17,7 @@ Create well-formatted commits following conventional commit standards.
    ```bash
    git status
    ```
-   - If no files staged, stage all modified files
+   - If no files are staged, analyze un-staged changes and stage only files relevant to a single logical change.
 
 3. **Analyze Changes**
    ```bash
