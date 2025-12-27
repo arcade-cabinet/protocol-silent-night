@@ -178,10 +178,10 @@ jobs:
           fromJSON(steps.detect.outputs.structured_output).is_flaky == true
         env:
           GH_TOKEN: ${{ github.token }}
+          STRUCTURED_OUTPUT: ${{ steps.detect.outputs.structured_output }}
         run: |
-          OUTPUT='${{ steps.detect.outputs.structured_output }}'
-          CONFIDENCE=$(echo "$OUTPUT" | jq -r '.confidence')
-          SUMMARY=$(echo "$OUTPUT" | jq -r '.summary')
+          CONFIDENCE=$(echo "$STRUCTURED_OUTPUT" | jq -r '.confidence')
+          SUMMARY=$(echo "$STRUCTURED_OUTPUT" | jq -r '.summary')
 
           pr_number=${{ github.event.workflow_run.pull_requests[0].number }}
 
