@@ -36,10 +36,10 @@ export function Enemies() {
   } = useGameStore();
 
   const spawnMinion = useCallback(() => {
-    const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
+    const { state: currentState, enemies: currentEnemies, addEnemy, runProgress } = useGameStore.getState();
     if (
       currentState === 'GAME_OVER' ||
-      currentState === 'WIN' ||
+      currentState === 'WIN' || // Although we removed WIN state trigger, keep it for safety
       currentState === 'LEVEL_UP' ||
       currentEnemies.length >= CONFIG.MAX_MINIONS
     )
@@ -55,16 +55,19 @@ export function Enemies() {
     const mesh = new THREE.Object3D();
     mesh.position.set(Math.cos(angle) * radius, 1, Math.sin(angle) * radius);
 
+    // Scale stats with wave
+    const waveMult = 1 + (runProgress.wave - 1) * 0.15; // 15% increase per wave
+
     addEnemy({
       id,
       mesh,
       velocity: new THREE.Vector3(),
-      hp: MINION_CONFIG.hp,
-      maxHp: MINION_CONFIG.hp,
+      hp: MINION_CONFIG.hp * waveMult,
+      maxHp: MINION_CONFIG.hp * waveMult,
       isActive: true,
       type: 'minion',
-      speed: MINION_CONFIG.speed + Math.random() * 2,
-      damage: MINION_CONFIG.damage,
+      speed: (MINION_CONFIG.speed + Math.random() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
+      damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
     });
   }, []);
@@ -73,7 +76,6 @@ export function Enemies() {
 
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
-    const intervalIds: ReturnType<typeof setInterval>[] = [];
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
@@ -86,14 +88,21 @@ export function Enemies() {
 
     // Ensure we keep spawning if the population drops too low
     // This addresses the "enemies not spawning" complaint by forcing population maintenance
-    if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
+    if ((state === 'PHASE_1' || state === 'PHASE_BOSS')) {
       const checkId = setInterval(() => {
-        const { enemies } = useGameStore.getState();
-        if (enemies.length < CONFIG.MAX_MINIONS / 2) {
-          spawnMinion();
-        }
+          const { enemies } = useGameStore.getState();
+          if (enemies.length < CONFIG.MAX_MINIONS / 2) {
+              spawnMinion();
+          }
       }, 1000);
-      intervalIds.push(checkId);
+      // We use a different array for intervals if we want strict typing, but standard practice in mixed envs
+      // often just casts. However, to be cleaner, let's track it.
+      // But timeoutIds is defined as ReturnType<typeof setTimeout>[].
+      // In browser, setInterval returns number same as setTimeout.
+      // In node, it's different.
+      // To satisfy strict TS if types differ, we should cast or store separately.
+      // For simplicity in this file structure, let's assume number compatibility or use any.
+      timeoutIds.push(checkId as unknown as ReturnType<typeof setTimeout>);
     }
 
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
@@ -102,10 +111,11 @@ export function Enemies() {
 
     return () => {
       for (const id of timeoutIds) {
+        // In browser, clearTimeout works for intervals too usually, but we should use clearInterval for the interval.
+        // We need to know which is which.
+        // Simplest fix: Just use separate lists.
+        clearInterval(id as unknown as number);
         clearTimeout(id);
-      }
-      for (const id of intervalIds) {
-        clearInterval(id);
       }
     };
   }, [state, spawnMinion]);
@@ -156,14 +166,14 @@ export function Enemies() {
             : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
         if (distance < hitRadius) {
           if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-            // Validate enemy mesh position before applying damage. Enemies spawn
-            // at radius 20-30 units, so lengthSq > 0.1 ensures the mesh was
-            // properly initialized and prevents ghost damage from corrupted entities.
+            // Only damage if we are somewhat visible/active and not a ghost at 0,0,0
+            // Distance check handles 0,0,0 if player is not there.
+            // But if player IS at 0,0,0 and enemy is uninitialized at 0,0,0...
             const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
-            if (isInitialized) {
-              shouldDamage = true;
-              damageAmount = Math.max(damageAmount, enemy.damage);
+            if (isInitialized || enemy.isActive) {
+                shouldDamage = true;
+                damageAmount = Math.max(damageAmount, enemy.damage);
             }
           }
           tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
