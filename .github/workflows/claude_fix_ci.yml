@@ -1,0 +1,190 @@
+# Claude Auto-Fix CI Failures
+#
+# Automatically analyzes and fixes CI failures on PRs
+
+name: Claude Auto-Fix CI
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  id-token: write
+
+jobs:
+  auto-fix:
+    name: Analyze & Fix CI Failure
+    if: |
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.pull_requests[0] != null &&
+      !startsWith(github.event.workflow_run.head_branch, 'claude/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get CI failure details
+        id: failure_details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }}
+            });
+
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: ${{ github.event.workflow_run.id }}
+            });
+
+            const failedJobs = jobs.data.jobs.filter(job => job.conclusion === 'failure');
+
+            let errorLogs = [];
+            for (const job of failedJobs.slice(0, 3)) {
+              try {
+                const logs = await github.rest.actions.downloadJobLogsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  job_id: job.id
+                });
+                const logLines = logs.data.split('\n');
+                const truncatedLogs = logLines.slice(-300).join('\n');
+                errorLogs.push({
+                  jobName: job.name,
+                  logs: truncatedLogs
+                });
+              } catch (e) {
+                errorLogs.push({
+                  jobName: job.name,
+                  logs: `Failed to fetch logs: ${e.message}`
+                });
+              }
+            }
+
+            return {
+              runUrl: run.data.html_url,
+              failedJobs: failedJobs.map(j => j.name),
+              errorLogs: errorLogs,
+              prNumber: ${{ github.event.workflow_run.pull_requests[0].number }},
+              branch: '${{ github.event.workflow_run.head_branch }}'
+            };
+
+      - name: Run Claude to fix CI
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          additional_permissions: |
+            actions: read
+
+          prompt: |
+            ## 🔧 CI Failure Auto-Fix
+
+            **Failed CI Run:** ${{ fromJSON(steps.failure_details.outputs.result).runUrl }}
+            **Failed Jobs:** ${{ join(fromJSON(steps.failure_details.outputs.result).failedJobs, ', ') }}
+            **PR:** #${{ fromJSON(steps.failure_details.outputs.result).prNumber }}
+            **Branch:** ${{ fromJSON(steps.failure_details.outputs.result).branch }}
+
+            ## Project: Protocol: Silent Night
+
+            Commands:
+            - Types: `npm run typecheck`
+            - Unit tests: `npm test`
+            - Build: `npm run build`
+            - E2E tests: `npm run test:e2e`
+
+            ## Error Logs
+
+            ```json
+            ${{ toJSON(fromJSON(steps.failure_details.outputs.result).errorLogs) }}
+            ```
+
+            ## Instructions
+
+            1. Analyze the error logs
+            2. Identify the root cause
+            3. Make the fix
+            4. Verify with relevant command
+            5. Commit and push
+            6. Comment on PR explaining the fix
+
+          claude_args: |
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(npm:*),Bash(git:*),Bash(gh:*),Bash(cat:*),Bash(ls:*),Bash(rg:*),Bash(tsc:*),Bash(vitest:*)"
+
+  detect-flaky:
+    name: Detect Flaky Tests
+    if: |
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.pull_requests[0] != null
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Analyze for flaky tests
+        id: detect
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          additional_permissions: |
+            actions: read
+
+          prompt: |
+            Check CI logs: `gh run view ${{ github.event.workflow_run.id }} --log-failed`
+
+            Determine if this is a flaky test failure:
+            - Timeout errors
+            - Race conditions
+            - Network errors
+            - Timing-sensitive assertions
+
+            Return: is_flaky (bool), confidence (0-1), summary (string)
+
+          claude_args: |
+            --json-schema '{"type":"object","properties":{"is_flaky":{"type":"boolean"},"confidence":{"type":"number","minimum":0,"maximum":1},"summary":{"type":"string"}},"required":["is_flaky","confidence","summary"]}'
+            --allowedTools "Read,Bash(gh:*)"
+
+      - name: Comment on PR about flaky test
+        if: |
+          steps.detect.outputs.structured_output != '' &&
+          fromJSON(steps.detect.outputs.structured_output).is_flaky == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          OUTPUT='${{ steps.detect.outputs.structured_output }}'
+          CONFIDENCE=$(echo "$OUTPUT" | jq -r '.confidence')
+          SUMMARY=$(echo "$OUTPUT" | jq -r '.summary')
+
+          pr_number=${{ github.event.workflow_run.pull_requests[0].number }}
+
+          gh pr comment "$pr_number" --body "$(cat <<EOF
+          ## 🔄 Possible Flaky Test Detected
+
+          **Analysis**: $SUMMARY
+          **Confidence**: $CONFIDENCE
+
+          Consider re-running the workflow.
+
+          [View run](${{ github.event.workflow_run.html_url }})
+          EOF
+          )"
