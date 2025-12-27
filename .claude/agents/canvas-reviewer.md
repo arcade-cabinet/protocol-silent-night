@@ -95,3 +95,4 @@ For each issue:
 2. **Location**: File and line
 3. **Impact**: FPS drop, visual artifacts, etc.
 4. **Fix**: Correct implementation
+5. **Priority**: Severity/urgency of the issue (e.g., High, Medium, Low)
