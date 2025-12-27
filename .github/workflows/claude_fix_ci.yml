@@ -24,6 +24,11 @@ jobs:
       github.event.workflow_run.pull_requests[0] != null &&
       !startsWith(github.event.workflow_run.head_branch, 'claude/')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -145,6 +150,11 @@ jobs:
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.pull_requests[0] != null
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: read
+      id-token: write
 
     steps:
       - name: Checkout repository
