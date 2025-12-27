@@ -87,10 +87,10 @@ export function Enemies() {
     // This addresses the "enemies not spawning" complaint by forcing population maintenance
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS')) {
       const checkId = setInterval(() => {
-          const { enemies } = useGameStore.getState();
-          if (enemies.length < CONFIG.MAX_MINIONS / 2) {
-              spawnMinion();
-          }
+        const { enemies } = useGameStore.getState();
+        if (enemies.length < CONFIG.MAX_MINIONS / 2) {
+          spawnMinion();
+        }
       }, 1000);
       intervalIds.push(checkId);
     }
