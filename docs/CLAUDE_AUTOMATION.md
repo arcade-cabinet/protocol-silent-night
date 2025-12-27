@@ -70,7 +70,7 @@ Create a branch and pull request with proper formatting.
 ### `/release`
 Prepare a new version release with CHANGELOG.
 
-### `/optimize <file>`
+### `/optimize <file-or-pattern>`
 Analyze code for performance optimizations.
 
 ## Specialized Agents
