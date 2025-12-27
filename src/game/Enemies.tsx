@@ -86,7 +86,7 @@ export function Enemies() {
 
     // Ensure we keep spawning if the population drops too low
     // This addresses the "enemies not spawning" complaint by forcing population maintenance
-    if ((state === 'PHASE_1' || state === 'PHASE_BOSS')) {
+    if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
       const checkId = setInterval(() => {
         const { enemies } = useGameStore.getState();
         if (enemies.length < CONFIG.MAX_MINIONS / 2) {
