@@ -1,0 +1,15 @@
+{
+	"hooks": {
+		"PostToolUse": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "pnpm biome check --write {{filepath}}"
+					}
+				],
+				"matcher": "Edit|Write|MultiEdit"
+			}
+		]
+	}
+}
