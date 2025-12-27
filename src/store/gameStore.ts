@@ -27,6 +27,7 @@ import type {
   WeaponType,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
+import { generateChecksum, verifyChecksum } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -159,7 +160,25 @@ const loadMetaProgress = (): MetaProgressData => {
   try {
     const stored = localStorage.getItem(META_PROGRESS_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      // Check if it's the old format (direct JSON) or new format (with checksum)
+      // Try parsing as simple JSON first
+      const parsed = JSON.parse(stored);
+
+      // If it has 'data' and 'hash', it's the new format
+      if (parsed && typeof parsed === 'object' && 'hash' in parsed && 'data' in parsed) {
+        const jsonString = JSON.stringify(parsed.data);
+        if (verifyChecksum(jsonString, parsed.hash)) {
+          return parsed.data;
+        } else {
+          console.warn('Tampered save data detected! Resetting progress.');
+          // Sentinel: Fall through to return default (reset)
+        }
+      } else {
+        // Legacy format - accept it once, it will be upgraded on next save
+        // Or strictly reject it? For now, let's accept it to avoid wiping users on update
+        // Sentinel decision: Upgrade on next save
+        return parsed;
+      }
     }
   } catch (e) {
     console.error('Failed to load meta progress:', e);
@@ -182,7 +201,12 @@ const loadMetaProgress = (): MetaProgressData => {
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(data));
+    const jsonString = JSON.stringify(data);
+    const payload = {
+      data,
+      hash: generateChecksum(jsonString)
+    };
+    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(payload));
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
