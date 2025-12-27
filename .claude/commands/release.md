@@ -30,26 +30,11 @@ Prepare and create a new version release.
      - Removed
    - Follow [Keep a Changelog](https://keepachangelog.com/) format
 
-4. **Bump Version**
-   - Update version in `package.json`
-
-5. **Run Final Checks**
+4. **Run Final Checks**
    ```bash
    npm run typecheck
    npm test
    npm run build
-   ```
-
-6. **Create Release Commit**
-   ```bash
-   git add .
-   git commit -m "🔖 chore: release v<version>"
-   ```
-
-7. **Create Git Tag**
-   ```bash
-   git tag v<version>
-   ```
 
 8. **Create GitHub Release**
    ```bash
