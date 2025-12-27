@@ -5,7 +5,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "npx prettier --write {{filepath}}"
+						"command": "pnpm biome check --write {{filepath}}"
 					}
 				],
 				"matcher": "Edit|Write|MultiEdit"

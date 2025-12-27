@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git:*),Bash(npm:*)
+allowed-tools: Bash(git:*),Bash(pnpm:*)
 description: Create well-formatted commits with conventional messages
 ---
 
@@ -10,8 +10,8 @@ Create well-formatted commits following conventional commit standards.
 ## Process
 
 1. **Pre-commit Checks** (unless `--no-verify` specified)
-   - Run `npm run typecheck` for type errors
-   - Run `npm test` to verify tests pass
+   - Run `pnpm run typecheck` for type errors
+   - Run `pnpm test` to verify tests pass
 
 2. **Check Staged Files**
    ```bash

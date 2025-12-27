@@ -1,5 +1,5 @@
 ---
-allowed-tools: Edit,Write,Read,Bash(git:*),Bash(gh:*),Bash(npm:*)
+allowed-tools: Edit,Write,Read,Bash(git:*),Bash(gh:*),Bash(pnpm:*)
 description: Prepare a new version release
 ---
 
@@ -12,7 +12,7 @@ Prepare and create a new version release.
 1. **Check Current State**
    ```bash
    git log --oneline -20
-   npm version
+   pnpm version
    ```
 
 2. **Determine Version Bump**
@@ -28,15 +28,23 @@ Prepare and create a new version release.
      - Changed
      - Fixed
      - Removed
-   - Follow [Keep a Changelog](https://keepachangelog.com/) format
+     - Follow [Keep a Changelog](https://keepachangelog.com/) format
 
 4. **Run Final Checks**
    ```bash
-   npm run typecheck
-   npm test
-   npm run build
+   pnpm run typecheck
+   pnpm test
+   pnpm run build
+   ```
 
-8. **Create GitHub Release**
+5. **Create Release Commit and Tag**
+   - After updating `CHANGELOG.md`, stage it (`git add CHANGELOG.md`).
+   - Use `pnpm version` to atomically bump the version, create a release commit, and tag it.
+   ```bash
+   pnpm version <major|minor|patch> -m "🔖 chore: release v%s"
+   ```
+
+6. **Create GitHub Release**
    ```bash
    gh release create v<version> --generate-notes
    ```

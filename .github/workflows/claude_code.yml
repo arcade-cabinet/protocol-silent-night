@@ -96,13 +96,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run Claude Code
         uses: anthropics/claude-code-action@v1
@@ -112,7 +116,7 @@ jobs:
             actions: read
 
           claude_args: |
-            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(npm:*),Bash(npx:*),Bash(node:*),Bash(git:*),Bash(gh:*),Bash(cat:*),Bash(ls:*),Bash(head:*),Bash(tail:*),Bash(grep:*),Bash(rg:*),Bash(find:*),Bash(mkdir:*),Bash(rm:*),Bash(cp:*),Bash(mv:*),Bash(touch:*),Bash(echo:*),Bash(curl:*),Bash(which:*),Bash(pwd:*),Bash(wc:*),Bash(sort:*),Bash(diff:*),Bash(jq:*),Bash(tsc:*),Bash(vitest:*),Bash(playwright:*),Bash(vite:*),WebFetch,NotebookEditCell"
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(pnpm:*),Bash(npx:*),Bash(node:*),Bash(git:*),Bash(gh:*),Bash(cat:*),Bash(ls:*),Bash(head:*),Bash(tail:*),Bash(grep:*),Bash(rg:*),Bash(find:*),Bash(mkdir:*),Bash(rm:*),Bash(cp:*),Bash(mv:*),Bash(touch:*),Bash(echo:*),Bash(curl:*),Bash(which:*),Bash(pwd:*),Bash(wc:*),Bash(sort:*),Bash(diff:*),Bash(jq:*),Bash(tsc:*),Bash(vitest:*),Bash(playwright:*),Bash(vite:*),WebFetch,NotebookEditCell"
 
   # ============================================
   # AUTO PR REVIEW: With progress tracking
@@ -262,13 +266,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run Maintenance Check
         uses: anthropics/claude-code-action@v1
@@ -281,15 +289,15 @@ jobs:
             ## Weekly Maintenance Tasks
 
             1. **Dependency Audit**
-               - Run `npm audit` to check for vulnerabilities
-               - Check for outdated packages with `npm outdated`
+               - Run `pnpm audit` to check for vulnerabilities
+               - Check for outdated packages with `pnpm outdated`
 
             2. **Code Health**
-               - Run `npm run typecheck` for type errors
+               - Run `pnpm run typecheck` for type errors
                - Check for TODO/FIXME comments: `rg "TODO|FIXME" src/`
 
             3. **Test Health**
-               - Run `npm test` and report results
+               - Run `pnpm test` and report results
                - Check test coverage
 
             4. **Issue Hygiene**
@@ -299,7 +307,7 @@ jobs:
             Create a single issue titled "Weekly Maintenance Report - [DATE]" summarizing findings.
 
           claude_args: |
-            --allowedTools "Read,Glob,Grep,LS,Bash(npm:*),Bash(gh:*),Bash(git:*),Bash(rg:*),Bash(cat:*),Bash(ls:*)"
+            --allowedTools "Read,Glob,Grep,LS,Bash(pnpm:*),Bash(gh:*),Bash(git:*),Bash(rg:*),Bash(cat:*),Bash(ls:*)"
 
   # ============================================
   # SECURITY AUDIT: Manual trigger
@@ -319,13 +327,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run Security Audit
         uses: anthropics/claude-code-action@v1
@@ -337,7 +349,7 @@ jobs:
 
             ## Security Audit
 
-            1. **Dependencies**: Run `npm audit`
+            1. **Dependencies**: Run `pnpm audit`
             2. **Secrets**: Search for hardcoded keys/tokens
             3. **localStorage**: Check data validation
             4. **Build**: Check for exposed source maps
@@ -346,7 +358,7 @@ jobs:
             Rate findings: CRITICAL, HIGH, MEDIUM, LOW
 
           claude_args: |
-            --allowedTools "Read,Glob,Grep,LS,Bash(npm:*),Bash(gh:*),Bash(rg:*),Bash(cat:*),Bash(ls:*)"
+            --allowedTools "Read,Glob,Grep,LS,Bash(pnpm:*),Bash(gh:*),Bash(rg:*),Bash(cat:*),Bash(ls:*)"
 
   # ============================================
   # DEPENDENCY UPDATE: Manual trigger
@@ -366,10 +378,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
 
       - name: Update Dependencies
         uses: anthropics/claude-code-action@v1
@@ -381,10 +397,10 @@ jobs:
 
             ## Dependency Update
 
-            1. Check `npm outdated`
+            1. Check `pnpm outdated`
             2. Update patch/minor versions safely
-            3. Run `npm install`, `npm run typecheck`, `npm test`
+            3. Run `pnpm install`, `pnpm run typecheck`, `pnpm test`
             4. Create PR with changes
 
           claude_args: |
-            --allowedTools "Edit,Write,Read,Glob,LS,Bash(npm:*),Bash(git:*),Bash(gh:*),Bash(cat:*),Bash(ls:*)"
+            --allowedTools "Edit,Write,Read,Glob,LS,Bash(pnpm:*),Bash(git:*),Bash(gh:*),Bash(cat:*),Bash(ls:*)"

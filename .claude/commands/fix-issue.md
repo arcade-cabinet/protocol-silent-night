@@ -1,5 +1,5 @@
 ---
-allowed-tools: Edit,Write,Read,Glob,Grep,LS,Bash(npm:*),Bash(git:*),Bash(gh:*)
+allowed-tools: Edit,Write,Read,Glob,Grep,LS,Bash(pnpm:*),Bash(git:*),Bash(gh:*)
 description: Analyze and fix a GitHub issue
 ---
 
@@ -29,8 +29,8 @@ Analyze and fix the GitHub issue: $ARGUMENTS
    - Add comments if logic is complex
 
 5. **Test the Fix**
-   - Run `npm test` for unit tests
-   - Run `npm run build` to verify build
+   - Run `pnpm test` for unit tests
+   - Run `pnpm run build` to verify build
    - Manually verify if possible
 
 6. **Prepare the Commit**

@@ -106,7 +106,7 @@ Go to Actions → Claude Code → Run workflow:
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
-        "hooks": [{ "type": "command", "command": "npx prettier --write {{filepath}}" }]
+        "hooks": [{ "type": "command", "command": "pnpm biome check --write {{filepath}}" }]
       }
     ]
   }

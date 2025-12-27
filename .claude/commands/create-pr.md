@@ -1,5 +1,5 @@
 ---
-allowed-tools: Edit,Write,Read,Bash(git:*),Bash(gh:*),Bash(npm:*)
+allowed-tools: Edit,Write,Read,Bash(git:*),Bash(gh:*),Bash(pnpm:*)
 description: Create a pull request with proper formatting
 ---
 
@@ -11,9 +11,9 @@ Create a new branch, commit changes, and submit a pull request.
 
 1. **Pre-flight Checks**
    ```bash
-   npm run typecheck
-   npm test
-   npm run build
+   pnpm run typecheck
+   pnpm test
+   pnpm run build
    ```
 
 2. **Create Branch** (if needed)
