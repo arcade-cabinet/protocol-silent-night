@@ -156,12 +156,12 @@ export function Enemies() {
             : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
         if (distance < hitRadius) {
           if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-            // Only damage if we are somewhat visible/active and not a ghost at 0,0,0
-            // Distance check handles 0,0,0 if player is not there.
-            // But if player IS at 0,0,0 and enemy is uninitialized at 0,0,0...
+            // Only damage if enemy is not at origin (0,0,0) - prevents ghost damage
+            // from uninitialized enemies. Position length check ensures the enemy
+            // has moved from the default spawn position.
             const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
-            if (isInitialized && enemy.isActive) {
+            if (isInitialized) {
                 shouldDamage = true;
                 damageAmount = Math.max(damageAmount, enemy.damage);
             }
