@@ -24,9 +24,14 @@ export const PLAYER_CLASSES = CLASSES_DATA as Record<PlayerClassType, PlayerClas
 export const ROGUELIKE_UPGRADES = UPGRADES_DATA as RoguelikeUpgrade[];
 export const WEAPONS = WEAPONS_DATA.weapons as Record<string, WeaponConfig>;
 export const WEAPON_EVOLUTIONS = WEAPONS_DATA.evolutions as Record<string, WeaponEvolutionConfig>;
-export const ENEMIES = ENEMIES_DATA as Record<EnemyType, EnemyConfig> & { spawnConfig: Record<string, number> };
+export const ENEMIES = ENEMIES_DATA as Record<EnemyType, EnemyConfig> & {
+  spawnConfig: Record<string, number>;
+};
 export const TERRAIN_CONFIG = TERRAIN_DATA.terrain;
-export const OBSTACLE_TYPES = TERRAIN_DATA.obstacles as unknown as Record<string, ObstacleTypeConfig>;
+export const OBSTACLE_TYPES = TERRAIN_DATA.obstacles as unknown as Record<
+  string,
+  ObstacleTypeConfig
+>;
 export const WORKSHOP = WORKSHOP_DATA;
 export const BRIEFING = BRIEFING_DATA;
 export const THEMES = THEMES_DATA;
