@@ -9,7 +9,7 @@
     "detailHeightMultiplier": 1.5,
     "baseElevation": -3,
     "glitchChance": 0.005,
-    "obstacleThreshold": 0.65
+    "obstacleThreshold": 0.4
   },
   "obstacles": {
     "present_red": {
