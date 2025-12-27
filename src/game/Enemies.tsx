@@ -157,7 +157,7 @@ export function Enemies() {
             // But if player IS at 0,0,0 and enemy is uninitialized at 0,0,0...
             const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
-            if (isInitialized || enemy.isActive) {
+            if (isInitialized && enemy.isActive) {
                 shouldDamage = true;
                 damageAmount = Math.max(damageAmount, enemy.damage);
             }
