@@ -73,6 +73,7 @@ export function Enemies() {
 
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+    const intervalIds: ReturnType<typeof setInterval>[] = [];
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
@@ -92,7 +93,7 @@ export function Enemies() {
               spawnMinion();
           }
       }, 1000);
-      timeoutIds.push(checkId);
+      intervalIds.push(checkId);
     }
 
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
@@ -102,6 +103,9 @@ export function Enemies() {
     return () => {
       for (const id of timeoutIds) {
         clearTimeout(id);
+      }
+      for (const id of intervalIds) {
+        clearInterval(id);
       }
     };
   }, [state, spawnMinion]);
