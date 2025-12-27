@@ -166,4 +166,24 @@ describe('HUD Component', () => {
 
     expect(screen.getByText(/HP: 100 \/ 100/)).toBeInTheDocument();
   });
+
+  it('should have accessible progress bars for health and xp', () => {
+    const store = useGameStore.getState();
+    store.selectClass('santa');
+    store.setState('PHASE_1');
+
+    render(<HUD />);
+
+    const healthBar = screen.getByRole('progressbar', { name: /health/i });
+    expect(healthBar).toBeInTheDocument();
+    expect(healthBar).toHaveAttribute('aria-valuenow', '300');
+    expect(healthBar).toHaveAttribute('aria-valuemin', '0');
+    expect(healthBar).toHaveAttribute('aria-valuemax', '300');
+
+    const xpBar = screen.getByRole('progressbar', { name: /experience/i });
+    expect(xpBar).toBeInTheDocument();
+    expect(xpBar).toHaveAttribute('aria-valuenow', '0');
+    expect(xpBar).toHaveAttribute('aria-valuemin', '0');
+    expect(xpBar).toHaveAttribute('aria-valuemax', '100'); // Level 1 (100 xp)
+  });
 });
