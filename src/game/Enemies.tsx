@@ -156,14 +156,14 @@ export function Enemies() {
             : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
         if (distance < hitRadius) {
           if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-            // Only damage if enemy is not at origin (0,0,0) - prevents ghost damage
-            // from uninitialized enemies. Position length check ensures the enemy
-            // has moved from the default spawn position.
+            // Validate enemy mesh position before applying damage. Enemies spawn
+            // at radius 20-30 units, so lengthSq > 0.1 ensures the mesh was
+            // properly initialized and prevents ghost damage from corrupted entities.
             const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
             if (isInitialized) {
-                shouldDamage = true;
-                damageAmount = Math.max(damageAmount, enemy.damage);
+              shouldDamage = true;
+              damageAmount = Math.max(damageAmount, enemy.damage);
             }
           }
           tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
