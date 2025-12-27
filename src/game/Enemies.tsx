@@ -83,6 +83,18 @@ export function Enemies() {
       }
     }
 
+    // Ensure we keep spawning if the population drops too low
+    // This addresses the "enemies not spawning" complaint by forcing population maintenance
+    if ((state === 'PHASE_1' || state === 'PHASE_BOSS')) {
+      const checkId = setInterval(() => {
+          const { enemies } = useGameStore.getState();
+          if (enemies.length < CONFIG.MAX_MINIONS / 2) {
+              spawnMinion();
+          }
+      }, 1000);
+      timeoutIds.push(checkId);
+    }
+
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
     }
@@ -140,8 +152,15 @@ export function Enemies() {
             : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
         if (distance < hitRadius) {
           if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-            shouldDamage = true;
-            damageAmount = Math.max(damageAmount, enemy.damage);
+            // Only damage if we are somewhat visible/active and not a ghost at 0,0,0
+            // Distance check handles 0,0,0 if player is not there.
+            // But if player IS at 0,0,0 and enemy is uninitialized at 0,0,0...
+            const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
+
+            if (isInitialized || enemy.isActive) {
+                shouldDamage = true;
+                damageAmount = Math.max(damageAmount, enemy.damage);
+            }
           }
           tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
           currentPos.add(tempVec);
