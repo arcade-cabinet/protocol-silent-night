@@ -5,7 +5,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "npx prettier --write"
+						"command": "npx prettier --write {{filepath}}"
 					}
 				],
 				"matcher": "Edit|Write|MultiEdit"
