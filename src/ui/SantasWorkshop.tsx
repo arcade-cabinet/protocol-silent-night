@@ -87,14 +87,18 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             <span className={styles.npLabel}>Nice Points:</span>
             <span className={styles.npValue}>{metaProgress.nicePoints}</span>
           </div>
-          <button type="button" className={styles.closeBtn} onClick={handleClose}>
+          <button type="button" className={styles.closeBtn} onClick={handleClose} aria-label="Close Workshop">
             ✕
           </button>
         </div>
 
-        <div className={styles.tabs}>
+        <div className={styles.tabs} role="tablist">
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'weapons'}
+            aria-controls="panel-weapons"
+            id="tab-weapons"
             className={`${styles.tab} ${activeTab === 'weapons' ? styles.tabActive : ''}`}
             onClick={() => changeTab('weapons')}
           >
@@ -102,6 +106,10 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'skins'}
+            aria-controls="panel-skins"
+            id="tab-skins"
             className={`${styles.tab} ${activeTab === 'skins' ? styles.tabActive : ''}`}
             onClick={() => changeTab('skins')}
           >
@@ -109,6 +117,10 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeTab === 'upgrades'}
+            aria-controls="panel-upgrades"
+            id="tab-upgrades"
             className={`${styles.tab} ${activeTab === 'upgrades' ? styles.tabActive : ''}`}
             onClick={() => changeTab('upgrades')}
           >
@@ -116,7 +128,12 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        <div className={styles.content}>
+        <div
+          className={styles.content}
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+        >
           {activeTab === 'weapons' && (
             <div className={styles.grid}>
               {WEAPON_UNLOCKS.map((weapon) => {
