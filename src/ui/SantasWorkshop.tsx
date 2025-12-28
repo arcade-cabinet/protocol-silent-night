@@ -92,9 +92,13 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        <div className={styles.tabs}>
+        <div className={styles.tabs} role="tablist" aria-label="Workshop Categories">
           <button
             type="button"
+            role="tab"
+            id="tab-weapons"
+            aria-selected={activeTab === 'weapons'}
+            aria-controls="panel-weapons"
             className={`${styles.tab} ${activeTab === 'weapons' ? styles.tabActive : ''}`}
             onClick={() => changeTab('weapons')}
           >
@@ -102,6 +106,10 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
           <button
             type="button"
+            role="tab"
+            id="tab-skins"
+            aria-selected={activeTab === 'skins'}
+            aria-controls="panel-skins"
             className={`${styles.tab} ${activeTab === 'skins' ? styles.tabActive : ''}`}
             onClick={() => changeTab('skins')}
           >
@@ -109,6 +117,10 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
           <button
             type="button"
+            role="tab"
+            id="tab-upgrades"
+            aria-selected={activeTab === 'upgrades'}
+            aria-controls="panel-upgrades"
             className={`${styles.tab} ${activeTab === 'upgrades' ? styles.tabActive : ''}`}
             onClick={() => changeTab('upgrades')}
           >
@@ -118,7 +130,12 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
 
         <div className={styles.content}>
           {activeTab === 'weapons' && (
-            <div className={styles.grid}>
+            <div
+              className={styles.grid}
+              role="tabpanel"
+              id="panel-weapons"
+              aria-labelledby="tab-weapons"
+            >
               {WEAPON_UNLOCKS.map((weapon) => {
                 const isUnlocked = metaProgress.unlockedWeapons.includes(weapon.id);
                 const canAfford = metaProgress.nicePoints >= weapon.cost;
@@ -170,7 +187,12 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           )}
 
           {activeTab === 'skins' && (
-            <div className={styles.grid}>
+            <div
+              className={styles.grid}
+              role="tabpanel"
+              id="panel-skins"
+              aria-labelledby="tab-skins"
+            >
               {SKIN_UNLOCKS.map((skin) => {
                 const isUnlocked = metaProgress.unlockedSkins.includes(skin.id);
                 const canAfford = metaProgress.nicePoints >= skin.cost;
@@ -211,7 +233,12 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           )}
 
           {activeTab === 'upgrades' && (
-            <div className={styles.upgradesGrid}>
+            <div
+              className={styles.upgradesGrid}
+              role="tabpanel"
+              id="panel-upgrades"
+              aria-labelledby="tab-upgrades"
+            >
               {[1, 2, 3].map((tier) => {
                 const tierUpgrades = PERMANENT_UPGRADES.filter((u) => u.tier === tier);
                 return (
