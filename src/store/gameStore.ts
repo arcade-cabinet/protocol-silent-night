@@ -27,6 +27,7 @@ import type {
   WeaponType,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
+import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -156,16 +157,7 @@ interface GameStore {
 
 // Load meta-progression from localStorage
 const loadMetaProgress = (): MetaProgressData => {
-  try {
-    const stored = localStorage.getItem(META_PROGRESS_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (e) {
-    console.error('Failed to load meta progress:', e);
-  }
-
-  return {
+  const defaultProgress: MetaProgressData = {
     nicePoints: 0,
     totalPointsEarned: 0,
     runsCompleted: 0,
@@ -177,12 +169,34 @@ const loadMetaProgress = (): MetaProgressData => {
     totalKills: 0,
     totalDeaths: 0,
   };
+
+  try {
+    const stored = localStorage.getItem(META_PROGRESS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Check if it's the old format (direct object) or new format (with checksum)
+      if (parsed.checksum && parsed.data) {
+        const validated = unwrapWithChecksum<MetaProgressData>(parsed);
+        if (validated) return validated;
+      } else {
+        // Migration strategy: Accept legacy data but save in new format next time
+        // We could also reject it, but that would wipe legitimate saves.
+        // For a security improvement, we'll accept it once.
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load meta progress:', e);
+  }
+
+  return defaultProgress;
 };
 
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(data));
+    const wrapped = wrapWithChecksum(data);
+    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(wrapped));
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
@@ -192,7 +206,20 @@ const saveMetaProgress = (data: MetaProgressData): void => {
 const loadHighScore = (): number => {
   try {
     const stored = localStorage.getItem(HIGH_SCORE_KEY);
-    return stored ? Number.parseInt(stored, 10) : 0;
+    if (!stored) return 0;
+
+    // Try parsing as JSON first (new format)
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.checksum && parsed.data !== undefined) {
+        const validated = unwrapWithChecksum<number>(parsed);
+        return validated !== null ? validated : 0;
+      }
+    } catch {
+      // Not JSON, fall back to simple number parsing (legacy)
+    }
+
+    return Number.parseInt(stored, 10) || 0;
   } catch {
     return 0;
   }
@@ -201,7 +228,8 @@ const loadHighScore = (): number => {
 // Save high score to localStorage
 const saveHighScore = (score: number): void => {
   try {
-    localStorage.setItem(HIGH_SCORE_KEY, score.toString());
+    const wrapped = wrapWithChecksum(score);
+    localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(wrapped));
   } catch {
     // Silently fail
   }
