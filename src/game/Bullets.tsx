@@ -42,7 +42,10 @@ export function Bullets() {
   const tempVecRef = useRef(new THREE.Vector3());
   const lookAtVecRef = useRef(new THREE.Vector3());
 
-  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } = useGameStore();
+  // Optimization: Use selectors for stable actions to avoid re-renders
+  const updateBullets = useGameStore((state) => state.updateBullets);
+  const damageEnemy = useGameStore((state) => state.damageEnemy);
+  const damageBoss = useGameStore((state) => state.damageBoss);
 
   // Coal Cannon geometry - large glowing coal chunk
   const cannonGeometry = useMemo(() => {
@@ -117,7 +120,9 @@ export function Bullets() {
   );
 
   useFrame((state, delta) => {
-    const { state: gameState } = useGameStore.getState();
+    // Optimization: Access high-frequency state transiently inside useFrame
+    const { state: gameState, enemies, bossActive } = useGameStore.getState();
+
     if (
       gameState === 'LEVEL_UP' ||
       gameState === 'MENU' ||

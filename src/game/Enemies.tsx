@@ -24,16 +24,16 @@ export function Enemies() {
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
 
-  const {
-    state,
-    enemies,
-    updateEnemies,
-    playerPosition,
-    damagePlayer,
-    bossActive,
-    bossHp,
-    bossMaxHp,
-  } = useGameStore();
+  // Optimization: Selectors for essential state updates
+  const enemies = useGameStore((state) => state.enemies);
+  const state = useGameStore((state) => state.state);
+  const bossActive = useGameStore((state) => state.bossActive);
+  const bossHp = useGameStore((state) => state.bossHp);
+  const bossMaxHp = useGameStore((state) => state.bossMaxHp);
+
+  // Optimization: Selectors for stable actions
+  const updateEnemies = useGameStore((state) => state.updateEnemies);
+  const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
     const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
@@ -99,6 +99,9 @@ export function Enemies() {
   const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
+    // Optimization: Access high-frequency state transiently
+    const { playerPosition } = useGameStore.getState();
+
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
 
     if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
