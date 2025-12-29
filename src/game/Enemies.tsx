@@ -76,6 +76,7 @@ export function Enemies() {
 
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+    const intervalIds: ReturnType<typeof setInterval>[] = [];
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
@@ -87,7 +88,6 @@ export function Enemies() {
     }
 
     // Ensure we keep spawning if the population drops too low
-    // This addresses the "enemies not spawning" complaint by forcing population maintenance
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS')) {
       const checkId = setInterval(() => {
           const { enemies } = useGameStore.getState();
@@ -95,14 +95,7 @@ export function Enemies() {
               spawnMinion();
           }
       }, 1000);
-      // We use a different array for intervals if we want strict typing, but standard practice in mixed envs
-      // often just casts. However, to be cleaner, let's track it.
-      // But timeoutIds is defined as ReturnType<typeof setTimeout>[].
-      // In browser, setInterval returns number same as setTimeout.
-      // In node, it's different.
-      // To satisfy strict TS if types differ, we should cast or store separately.
-      // For simplicity in this file structure, let's assume number compatibility or use any.
-      timeoutIds.push(checkId as unknown as ReturnType<typeof setTimeout>);
+      intervalIds.push(checkId);
     }
 
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
@@ -111,11 +104,10 @@ export function Enemies() {
 
     return () => {
       for (const id of timeoutIds) {
-        // In browser, clearTimeout works for intervals too usually, but we should use clearInterval for the interval.
-        // We need to know which is which.
-        // Simplest fix: Just use separate lists.
-        clearInterval(id as unknown as number);
         clearTimeout(id);
+      }
+      for (const id of intervalIds) {
+        clearInterval(id);
       }
     };
   }, [state, spawnMinion]);

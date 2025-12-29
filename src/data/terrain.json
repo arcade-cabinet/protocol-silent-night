@@ -1,6 +1,6 @@
 {
   "terrain": {
-    "gridSize": 80,
+    "gridSize": 60,
     "cubeSize": 1.8,
     "cubeHeight": 4,
     "noiseScale": 0.1,

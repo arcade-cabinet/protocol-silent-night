@@ -429,14 +429,13 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
+    expect(state?.gameState).toBe('LEVEL_UP');
     expect(state?.bossHp).toBe(0);
 
-    // Verify victory screen - use heading role for specificity
-    await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
-      timeout: 5000,
+    // Verify mission briefing or level up screen - use specific label selector
+    await expect(page.getByText(/CHOOSE UPGRADE/i)).toBeVisible({
+      timeout: 10000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -687,19 +686,20 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(1000);
 
-    // Step 6: Victory
+    // Step 6: Victory (now transitions to LEVEL_UP in endless mode)
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
-    await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
+    expect(state?.gameState).toBe('LEVEL_UP');
+    await expect(page.getByText(/CHOOSE UPGRADE/i)).toBeVisible({
       timeout: 5000,
     });
 
-    // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    // Step 7: Select an upgrade to continue
+    const upgradeButton = page.getByRole('button').first();
+    await upgradeButton.click();
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
-    expect(state?.gameState).toBe('MENU');
+    expect(state?.gameState).toBe('PHASE_1');
   });
 
   test('should complete entire game as Elf', async ({ page }) => {
@@ -731,7 +731,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
+    expect(state?.gameState).toBe('LEVEL_UP');
   });
 
   test('should complete entire game as Bumble', async ({ page }) => {
@@ -763,7 +763,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
+    expect(state?.gameState).toBe('LEVEL_UP');
   });
 });
 

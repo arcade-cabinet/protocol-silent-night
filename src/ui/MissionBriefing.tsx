@@ -56,13 +56,13 @@ export function MissionBriefing() {
       setCurrentLine((prev) => {
         if (prev >= briefingLines.length - 1) {
           clearInterval(interval);
-          timeoutId = setTimeout(() => setShowButton(true), 500);
+          timeoutId = setTimeout(() => setShowButton(true), 100);
           return prev;
         }
         AudioManager.playSFX('ui_click');
         return prev + 1;
       });
-    }, 600);
+    }, 100);
 
     return () => {
       clearInterval(interval);
