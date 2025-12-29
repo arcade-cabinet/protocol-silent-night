@@ -27,6 +27,7 @@ import type {
   WeaponType,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
+import { validateAndUnwrap, wrapAndSecure } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -159,7 +160,23 @@ const loadMetaProgress = (): MetaProgressData => {
   try {
     const stored = localStorage.getItem(META_PROGRESS_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      // Try to unwrap as secured data first
+      const secured = validateAndUnwrap<MetaProgressData>(stored);
+      if (secured) {
+        return secured;
+      }
+
+      // Fallback: Check if it's legacy data (plain JSON)
+      // We try to parse it and check for a known property
+      try {
+        const raw = JSON.parse(stored);
+        if (raw && typeof raw === 'object' && 'nicePoints' in raw) {
+          // It's likely legacy data, so we accept it (and it will be secured on next save)
+          return raw as MetaProgressData;
+        }
+      } catch {
+        // Ignore JSON parse error here, return default
+      }
     }
   } catch (e) {
     console.error('Failed to load meta progress:', e);
@@ -182,7 +199,8 @@ const loadMetaProgress = (): MetaProgressData => {
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(data));
+    const secured = wrapAndSecure(data);
+    localStorage.setItem(META_PROGRESS_KEY, secured);
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
@@ -825,7 +843,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-    lines.push({ label: 'WARNING', text: (missionBriefing as unknown as { warning: string }).warning, warning: true });
+    lines.push({
+      label: 'WARNING',
+      text: (missionBriefing as unknown as { warning: string }).warning,
+      warning: true,
+    });
     return lines;
   },
 

@@ -7,11 +7,7 @@ import { useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { WORKSHOP } from '@/data';
 import { useGameStore } from '@/store/gameStore';
-import type { 
-  WeaponUnlock, 
-  SkinConfig, 
-  PermanentUpgradeConfig 
-} from '@/types';
+import type { PermanentUpgradeConfig, SkinConfig, WeaponUnlock } from '@/types';
 import styles from './SantasWorkshop.module.css';
 
 const WEAPON_UNLOCKS = WORKSHOP.weapons as WeaponUnlock[];
