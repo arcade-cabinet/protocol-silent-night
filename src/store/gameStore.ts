@@ -27,7 +27,7 @@ import type {
   WeaponType,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
-import { generateChecksum, verifyChecksum } from '@/utils/security';
+import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -157,34 +157,7 @@ interface GameStore {
 
 // Load meta-progression from localStorage
 const loadMetaProgress = (): MetaProgressData => {
-  try {
-    const stored = localStorage.getItem(META_PROGRESS_KEY);
-    if (stored) {
-      // Check if it's the old format (direct JSON) or new format (with checksum)
-      // Try parsing as simple JSON first
-      const parsed = JSON.parse(stored);
-
-      // If it has 'data' and 'hash', it's the new format
-      if (parsed && typeof parsed === 'object' && 'hash' in parsed && 'data' in parsed) {
-        const jsonString = JSON.stringify(parsed.data);
-        if (verifyChecksum(jsonString, parsed.hash)) {
-          return parsed.data;
-        } else {
-          console.warn('Tampered save data detected! Resetting progress.');
-          // Sentinel: Fall through to return default (reset)
-        }
-      } else {
-        // Legacy format - accept it once, it will be upgraded on next save
-        // Or strictly reject it? For now, let's accept it to avoid wiping users on update
-        // Sentinel decision: Upgrade on next save
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.error('Failed to load meta progress:', e);
-  }
-
-  return {
+  const defaultProgress: MetaProgressData = {
     nicePoints: 0,
     totalPointsEarned: 0,
     runsCompleted: 0,
@@ -196,17 +169,32 @@ const loadMetaProgress = (): MetaProgressData => {
     totalKills: 0,
     totalDeaths: 0,
   };
+
+  try {
+    const stored = localStorage.getItem(META_PROGRESS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Check if it's the old format (direct object) or new format (with checksum)
+      if (parsed.checksum && parsed.data) {
+        const validated = unwrapWithChecksum<MetaProgressData>(parsed);
+        if (validated) return validated;
+      } else {
+        // Migration strategy: Accept legacy data but save in new format next time
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load meta progress:', e);
+  }
+
+  return defaultProgress;
 };
 
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    const jsonString = JSON.stringify(data);
-    const payload = {
-      data,
-      hash: generateChecksum(jsonString)
-    };
-    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(payload));
+    const wrapped = wrapWithChecksum(data);
+    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(wrapped));
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
@@ -216,7 +204,20 @@ const saveMetaProgress = (data: MetaProgressData): void => {
 const loadHighScore = (): number => {
   try {
     const stored = localStorage.getItem(HIGH_SCORE_KEY);
-    return stored ? Number.parseInt(stored, 10) : 0;
+    if (!stored) return 0;
+
+    // Try parsing as JSON first (new format)
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.checksum && parsed.data !== undefined) {
+        const validated = unwrapWithChecksum<number>(parsed);
+        return validated !== null ? validated : 0;
+      }
+    } catch {
+      // Not JSON, fall back to simple number parsing (legacy)
+    }
+
+    return Number.parseInt(stored, 10) || 0;
   } catch {
     return 0;
   }
@@ -225,7 +226,8 @@ const loadHighScore = (): number => {
 // Save high score to localStorage
 const saveHighScore = (score: number): void => {
   try {
-    localStorage.setItem(HIGH_SCORE_KEY, score.toString());
+    const wrapped = wrapWithChecksum(score);
+    localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(wrapped));
   } catch {
     // Silently fail
   }
@@ -852,7 +854,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-    lines.push({ label: 'WARNING', text: (missionBriefing as unknown as { warning: string }).warning, warning: true });
+    lines.push({
+      label: 'WARNING',
+      text: (missionBriefing as unknown as { warning: string }).warning,
+      warning: true,
+    });
     return lines;
   },
 
@@ -906,7 +912,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const updatedMeta = {
         ...get().metaProgress,
         bossesDefeated: get().metaProgress.bossesDefeated + 1,
-        // Runs completed logic might need to change if endless, but keep it for now as "Boss Defeated" marker
         runsCompleted: get().metaProgress.runsCompleted + 1,
         nicePoints: get().metaProgress.nicePoints + 500,
       };
@@ -919,20 +924,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
         previousState: 'PHASE_1', // After level up, go back to PHASE_1
         bossActive: false,
         runProgress: {
-            ...get().runProgress,
-            wave: currentWave + 1,
-            // We do NOT reset xp or level, just wave
+          ...get().runProgress,
+          wave: currentWave + 1,
+          // We do NOT reset xp or level, just wave
         },
-        stats: { ...get().stats, bossDefeated: true }, // Keep bossDefeated as true for achievement tracking? Or reset?
+        stats: { ...get().stats, bossDefeated: true },
         metaProgress: updatedMeta,
       });
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
-      AudioManager.playSFX('victory'); // Maybe a shorter stinger?
-      // AudioManager.playMusic('victory'); // Don't stop the flow too much, or play stinger then back to game music
-
+      AudioManager.playSFX('victory');
       return true;
     }
     return false;
