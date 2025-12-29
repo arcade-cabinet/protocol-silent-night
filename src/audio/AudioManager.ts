@@ -106,6 +106,7 @@ class AudioManagerClass {
    * Play background music track
    */
   playMusic(track: MusicTrack): void {
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return;
     if (!this.initialized || !this.musicEnabled) return;
     if (this.currentTrack === track) return;
 
@@ -175,6 +176,7 @@ class AudioManagerClass {
    * Play sound effect
    */
   playSFX(effect: SoundEffect): void {
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return;
     if (!this.initialized || !this.sfxEnabled) return;
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;

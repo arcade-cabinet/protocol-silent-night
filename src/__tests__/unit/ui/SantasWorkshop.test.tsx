@@ -24,6 +24,12 @@ describe('SantasWorkshop Component', () => {
         unlockedWeapons: [],
         unlockedSkins: [],
         permanentUpgrades: {},
+        totalPointsEarned: 1000,
+        runsCompleted: 0,
+        bossesDefeated: 0,
+        highScore: 0,
+        totalKills: 0,
+        totalDeaths: 0,
       },
     });
   });

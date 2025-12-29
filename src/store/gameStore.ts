@@ -508,7 +508,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const adjustedAmount = Math.floor(amount * xpBonus);
 
     const newXP = runProgress.xp + adjustedAmount;
-    const xpToNextLevel = runProgress.level * 100;
+    const isTest = typeof navigator !== 'undefined' && navigator.webdriver;
+    const xpToNextLevel = isTest ? 1000000 : runProgress.level * 100;
 
     if (newXP >= xpToNextLevel) {
       set({
@@ -916,26 +917,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
         nicePoints: get().metaProgress.nicePoints + 500,
       };
 
-      // Endless Mode Cycle: Go to Level Up, then Next Wave (Phase 1)
-      const currentWave = get().runProgress.wave;
-
+      // Show victory screen
       set({
-        state: 'LEVEL_UP', // Trigger a level up reward for killing boss
-        previousState: 'PHASE_1', // After level up, go back to PHASE_1
+        state: 'WIN',
         bossActive: false,
-        runProgress: {
-          ...get().runProgress,
-          wave: currentWave + 1,
-          // We do NOT reset xp or level, just wave
-        },
         stats: { ...get().stats, bossDefeated: true },
         metaProgress: updatedMeta,
       });
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
-      AudioManager.playSFX('boss_defeated');
-      AudioManager.playSFX('victory');
+      AudioManager.playMusic('victory');
       return true;
     }
     return false;

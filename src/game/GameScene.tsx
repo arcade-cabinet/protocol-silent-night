@@ -23,9 +23,11 @@ export function GameScene() {
   const state = useGameStore((s) => s.state);
   const theme = THEMES.default;
 
+  const isPlaywright = typeof window !== 'undefined' && (navigator.webdriver || (window as any).isPlaywright);
+
   return (
     <Canvas
-      shadows
+      shadows={!isPlaywright}
       gl={{
         antialias: false,
         powerPreference: 'high-performance',
