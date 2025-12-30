@@ -78,9 +78,9 @@ describe('Spawning Logic', () => {
     expect(useGameStore.getState().state).toBe('LEVEL_UP');
 
     const choices = useGameStore.getState().runProgress.upgradeChoices;
-    if (choices.length > 0) {
-        useGameStore.getState().selectLevelUpgrade(choices[0].id);
-        expect(useGameStore.getState().state).toBe('PHASE_BOSS');
-    }
+    expect(choices.length).toBeGreaterThan(0);
+
+    useGameStore.getState().selectLevelUpgrade(choices[0].id);
+    expect(useGameStore.getState().state).toBe('PHASE_BOSS');
   }, 10000);
 });

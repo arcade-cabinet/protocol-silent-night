@@ -901,35 +901,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (newHp <= 0) {
+      const { runProgress, stats } = get();
       const updatedMeta = {
         ...get().metaProgress,
         bossesDefeated: get().metaProgress.bossesDefeated + 1,
-        // Runs completed logic might need to change if endless, but keep it for now as "Boss Defeated" marker
-        runsCompleted: get().metaProgress.runsCompleted + 1,
         nicePoints: get().metaProgress.nicePoints + 500,
       };
 
-      // Endless Mode Cycle: Go to Level Up, then Next Wave (Phase 1)
-      const currentWave = get().runProgress.wave;
+      // Remove boss enemy
+      get().removeEnemy('boss-krampus');
 
+      // Endless mode: Increment wave and prepare for level up
       set({
-        state: 'LEVEL_UP', // Trigger a level up reward for killing boss
-        previousState: 'PHASE_1', // After level up, go back to PHASE_1
         bossActive: false,
-        runProgress: {
-            ...get().runProgress,
-            wave: currentWave + 1,
-            // We do NOT reset xp or level, just wave
-        },
-        stats: { ...get().stats, bossDefeated: true }, // Keep bossDefeated as true for achievement tracking? Or reset?
+        stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
+        runProgress: {
+          ...runProgress,
+          wave: runProgress.wave + 1,
+        },
       });
+
+      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
+      get().levelUp();
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
-      AudioManager.playSFX('victory'); // Maybe a shorter stinger?
-      // AudioManager.playMusic('victory'); // Don't stop the flow too much, or play stinger then back to game music
 
       return true;
     }
