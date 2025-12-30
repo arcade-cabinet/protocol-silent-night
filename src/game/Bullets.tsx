@@ -7,6 +7,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useShallow } from 'zustand/react/shallow';
 import { CONFIG } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData, WeaponType } from '@/types';
@@ -42,7 +43,15 @@ export function Bullets() {
   const tempVecRef = useRef(new THREE.Vector3());
   const lookAtVecRef = useRef(new THREE.Vector3());
 
-  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } = useGameStore();
+  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } = useGameStore(
+    useShallow((state) => ({
+      updateBullets: state.updateBullets,
+      enemies: state.enemies,
+      damageEnemy: state.damageEnemy,
+      bossActive: state.bossActive,
+      damageBoss: state.damageBoss,
+    }))
+  );
 
   // Coal Cannon geometry - large glowing coal chunk
   const cannonGeometry = useMemo(() => {

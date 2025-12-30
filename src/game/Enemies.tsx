@@ -8,6 +8,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { useShallow } from 'zustand/react/shallow';
 import { CONFIG, ENEMIES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 
@@ -28,12 +29,21 @@ export function Enemies() {
     state,
     enemies,
     updateEnemies,
-    playerPosition,
     damagePlayer,
     bossActive,
     bossHp,
     bossMaxHp,
-  } = useGameStore();
+  } = useGameStore(
+    useShallow((state) => ({
+      state: state.state,
+      enemies: state.enemies,
+      updateEnemies: state.updateEnemies,
+      damagePlayer: state.damagePlayer,
+      bossActive: state.bossActive,
+      bossHp: state.bossHp,
+      bossMaxHp: state.bossMaxHp,
+    }))
+  );
 
   const spawnMinion = useCallback(() => {
     const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
@@ -117,11 +127,12 @@ export function Enemies() {
     updateEnemies((currentEnemies) => {
       let shouldDamage = false;
       let damageAmount = 0;
+      const currentPlayerPos = useGameStore.getState().playerPosition;
 
       for (const enemy of currentEnemies) {
         const currentPos = enemy.mesh.position;
 
-        toPlayer.copy(playerPosition).sub(currentPos);
+        toPlayer.copy(currentPlayerPos).sub(currentPos);
         const distance = toPlayer.length();
         direction.copy(toPlayer).normalize();
 

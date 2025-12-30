@@ -4,14 +4,27 @@ import { useGameStore } from '@/store/gameStore';
 import styles from './HUD.module.css';
 
 export function HUD() {
-  const { state, playerHp, playerMaxHp, stats, runProgress, metaProgress } = useGameStore(
+  const {
+    state,
+    playerHp,
+    playerMaxHp,
+    score,
+    kills,
+    level,
+    xp,
+    nicePoints,
+    activeUpgrades,
+  } = useGameStore(
     useShallow((state) => ({
       state: state.state,
       playerHp: state.playerHp,
       playerMaxHp: state.playerMaxHp,
-      stats: state.stats,
-      runProgress: state.runProgress,
-      metaProgress: state.metaProgress,
+      score: state.stats.score,
+      kills: state.stats.kills,
+      level: state.runProgress.level,
+      xp: state.runProgress.xp,
+      nicePoints: state.metaProgress.nicePoints,
+      activeUpgrades: state.runProgress.activeUpgrades,
     }))
   );
 
@@ -20,9 +33,9 @@ export function HUD() {
 
   const hpPercent = (playerHp / playerMaxHp) * 100;
   const hpColor = hpPercent > 60 ? '#00ff66' : hpPercent > 30 ? '#ffaa00' : '#ff3333';
-  const xpToNextLevel = runProgress.level * 100;
-  const xpPercent = (runProgress.xp / xpToNextLevel) * 100;
-  const killsToGo = Math.max(0, CONFIG.WAVE_REQ - stats.kills);
+  const xpToNextLevel = level * 100;
+  const xpPercent = (xp / xpToNextLevel) * 100;
+  const killsToGo = Math.max(0, CONFIG.WAVE_REQ - kills);
 
   const getObjectiveText = () => {
     if (state === 'PHASE_1') {
@@ -38,7 +51,7 @@ export function HUD() {
   };
 
   const objective = getObjectiveText();
-  const activeUpgradeIds = Object.keys(runProgress.activeUpgrades);
+  const activeUpgradeIds = Object.keys(activeUpgrades);
 
   return (
     <div className={styles.hud}>
@@ -63,14 +76,14 @@ export function HUD() {
         </div>
 
         <div className={styles.label} style={{ marginTop: '10px' }}>
-          LEVEL {runProgress.level}
+          LEVEL {level}
         </div>
         <div
           className={styles.barWrap}
           style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}
           role="progressbar"
           aria-label="Experience"
-          aria-valuenow={runProgress.xp}
+          aria-valuenow={xp}
           aria-valuemin={0}
           aria-valuemax={xpToNextLevel}
         >
@@ -84,7 +97,7 @@ export function HUD() {
           />
         </div>
         <div className={styles.hpText} style={{ color: '#ffd700' }}>
-          XP: {runProgress.xp} / {xpToNextLevel}
+          XP: {xp} / {xpToNextLevel}
         </div>
 
         {/* Active Upgrades */}
@@ -92,7 +105,7 @@ export function HUD() {
           <div className={styles.upgradesRow}>
             {activeUpgradeIds.slice(0, 6).map((id) => {
               const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === id);
-              const stacks = runProgress.activeUpgrades[id];
+              const stacks = activeUpgrades[id];
               return (
                 <span key={id} className={styles.upgradeIcon} title={upgrade?.name || id}>
                   {upgrade?.icon || '?'}
@@ -116,18 +129,18 @@ export function HUD() {
         <div className={styles.statsRow}>
           <span className={styles.stat}>
             <span className={styles.statLabel}>SCORE</span>
-            <span className={styles.statValue}>{stats.score}</span>
+            <span className={styles.statValue}>{score}</span>
           </span>
           <span className={styles.stat}>
             <span className={styles.statLabel}>KILLS</span>
-            <span className={styles.statValue}>{stats.kills}</span>
+            <span className={styles.statValue}>{kills}</span>
           </span>
         </div>
         <div
           className={styles.score}
           style={{ color: '#00ffcc', fontSize: '0.85rem', marginTop: '8px' }}
         >
-          NICE POINTS: {metaProgress.nicePoints}
+          NICE POINTS: {nicePoints}
         </div>
       </div>
     </div>

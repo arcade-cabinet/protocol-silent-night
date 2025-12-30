@@ -6,6 +6,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 
 interface Particle {
@@ -29,7 +30,12 @@ export function HitParticles() {
   const particlesRef = useRef<Particle[]>([]);
   const lastKillsRef = useRef(0);
 
-  const { stats, bossHp } = useGameStore();
+  const { kills, bossHp } = useGameStore(
+    useShallow((state) => ({
+      kills: state.stats.kills,
+      bossHp: state.bossHp,
+    }))
+  );
   const lastBossHpRef = useRef(bossHp);
   const tempVecRef = useRef(new THREE.Vector3());
 
@@ -47,8 +53,8 @@ export function HitParticles() {
       return;
 
     // Check for new kill (enemy death particle burst)
-    if (stats.kills > lastKillsRef.current) {
-      lastKillsRef.current = stats.kills;
+    if (kills > lastKillsRef.current) {
+      lastKillsRef.current = kills;
       // Spawn hit particles at a random position (since we don't track exact hit location)
       const playerPos = useGameStore.getState().playerPosition;
       const angle = Math.random() * Math.PI * 2;

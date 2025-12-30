@@ -6,6 +6,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 
 const DEFAULT_CAMERA_HEIGHT = 25;
@@ -29,7 +30,11 @@ export function CameraController() {
   const pinchStartRef = useRef<number | null>(null);
   const initialZoomRef = useRef(1.0);
 
-  const { playerPosition, screenShake, state } = useGameStore();
+  const { state } = useGameStore(
+    useShallow((state) => ({
+      state: state.state,
+    }))
+  );
 
   // Handle pinch-to-zoom
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -157,20 +162,20 @@ export function CameraController() {
     const cameraDistance = DEFAULT_CAMERA_DISTANCE * zoomRef.current;
 
     // Calculate target position (following player + gyro offset)
+    const { playerPosition: currentPlayerPos, screenShake: currentShake } = useGameStore.getState();
     targetRef.current.set(
-      playerPosition.x + gyroOffsetRef.current.x,
+      currentPlayerPos.x + gyroOffsetRef.current.x,
       cameraHeight,
-      playerPosition.z + cameraDistance + gyroOffsetRef.current.z
+      currentPlayerPos.z + cameraDistance + gyroOffsetRef.current.z
     );
 
     // Apply screen shake
-    if (screenShake > 0.01) {
-      targetRef.current.x += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.y += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.z += (Math.random() - 0.5) * screenShake * 2;
+    if (currentShake > 0.01) {
+      targetRef.current.x += (Math.random() - 0.5) * currentShake * 2;
+      targetRef.current.y += (Math.random() - 0.5) * currentShake * 2;
+      targetRef.current.z += (Math.random() - 0.5) * currentShake * 2;
 
       // Decay shake using getState to avoid re-render cycles
-      const currentShake = useGameStore.getState().screenShake;
       useGameStore.setState({ screenShake: currentShake * 0.9 });
     }
 
@@ -178,7 +183,7 @@ export function CameraController() {
     camera.position.lerp(targetRef.current, LERP_SPEED * delta);
 
     // Look at player (slightly ahead)
-    LOOK_TARGET.set(playerPosition.x, 0, playerPosition.z);
+    LOOK_TARGET.set(currentPlayerPos.x, 0, currentPlayerPos.z);
     camera.lookAt(LOOK_TARGET);
   });
 

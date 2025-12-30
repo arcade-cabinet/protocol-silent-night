@@ -3,26 +3,28 @@
  * Shows current weapon and allows switching during gameplay
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { WEAPONS } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import styles from './WeaponHUD.module.css';
 
 export function WeaponHUD() {
-  const { state, currentWeapon, metaProgress, setWeapon } = useGameStore(
+  const { state, currentWeapon, unlockedWeaponIds, setWeapon } = useGameStore(
     useShallow((state) => ({
       state: state.state,
       currentWeapon: state.currentWeapon,
-      metaProgress: state.metaProgress,
+      unlockedWeaponIds: state.metaProgress.unlockedWeapons,
       setWeapon: state.setWeapon,
     }))
   );
 
   const currentWeaponConfig = WEAPONS[currentWeapon as keyof typeof WEAPONS];
-  const unlockedWeapons = metaProgress.unlockedWeapons
-    .map((id) => WEAPONS[id as keyof typeof WEAPONS])
-    .filter(Boolean);
+  const unlockedWeapons = useMemo(
+    () =>
+      unlockedWeaponIds.map((id) => WEAPONS[id as keyof typeof WEAPONS]).filter(Boolean),
+    [unlockedWeaponIds]
+  );
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

@@ -3,11 +3,19 @@
  * Adds a pulsing red vignette during boss phase for tension
  */
 
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 import styles from './BossVignette.module.css';
 
 export function BossVignette() {
-  const { bossActive, bossHp, bossMaxHp, state } = useGameStore();
+  const { bossActive, bossHp, bossMaxHp, state } = useGameStore(
+    useShallow((state) => ({
+      bossActive: state.bossActive,
+      bossHp: state.bossHp,
+      bossMaxHp: state.bossMaxHp,
+      state: state.state,
+    }))
+  );
 
   if (!bossActive || state === 'WIN' || state === 'GAME_OVER') return null;
 

@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 import styles from './InputControls.module.css';
 
@@ -12,7 +13,17 @@ export function InputControls() {
   const joystickBaseRef = useRef<HTMLDivElement>(null);
   const joystickKnobRef = useRef<HTMLDivElement>(null);
 
-  const { state, setMovement, setFiring, setJoystick, input } = useGameStore();
+  const { state, setMovement, setFiring, setJoystick, joystickActive, joystickOrigin } =
+    useGameStore(
+      useShallow((state) => ({
+        state: state.state,
+        setMovement: state.setMovement,
+        setFiring: state.setFiring,
+        setJoystick: state.setJoystick,
+        joystickActive: state.input.joystickActive,
+        joystickOrigin: state.input.joystickOrigin,
+      }))
+    );
 
   // Keyboard input
   useEffect(() => {
@@ -101,13 +112,13 @@ export function InputControls() {
 
   const handleJoystickMove = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      if (!input.joystickActive) return;
+      if (!joystickActive) return;
 
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 
-      const dx = clientX - input.joystickOrigin.x;
-      const dy = clientY - input.joystickOrigin.y;
+      const dx = clientX - joystickOrigin.x;
+      const dy = clientY - joystickOrigin.y;
 
       const maxDist = 50;
       const dist = Math.min(Math.sqrt(dx * dx + dy * dy), maxDist);
@@ -120,11 +131,11 @@ export function InputControls() {
 
       // Update knob position
       if (joystickKnobRef.current) {
-        joystickKnobRef.current.style.left = `${input.joystickOrigin.x + normalizedX * maxDist}px`;
-        joystickKnobRef.current.style.top = `${input.joystickOrigin.y + normalizedY * maxDist}px`;
+        joystickKnobRef.current.style.left = `${joystickOrigin.x + normalizedX * maxDist}px`;
+        joystickKnobRef.current.style.top = `${joystickOrigin.y + normalizedY * maxDist}px`;
       }
     },
-    [input.joystickActive, input.joystickOrigin, setMovement]
+    [joystickActive, joystickOrigin, setMovement]
   );
 
   const handleJoystickEnd = useCallback(() => {
