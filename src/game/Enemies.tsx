@@ -6,7 +6,7 @@
  */
 
 import { useFrame } from '@react-three/fiber';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { CONFIG, ENEMIES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
@@ -300,6 +300,121 @@ function BossRenderer({
   );
 }
 
+// Helper component for boss arms to reduce duplication
+const BossArm = React.forwardRef<
+  THREE.Group,
+  {
+    position: [number, number, number];
+    forearmOffset: [number, number, number];
+    side: 'left' | 'right';
+    baseColor: number;
+    emissiveColor: number;
+    intensity: number;
+    chainRefs?: React.MutableRefObject<(THREE.Mesh | null)[]>;
+  }
+>(({ position, forearmOffset, side, baseColor, emissiveColor, intensity, chainRefs }, ref) => {
+  return (
+    <group ref={ref} position={position}>
+      <mesh castShadow>
+        <capsuleGeometry args={[0.35, 1.2, 6, 12]} />
+        <meshStandardMaterial
+          color={baseColor}
+          emissive={emissiveColor}
+          emissiveIntensity={intensity * 0.15}
+          metalness={0.3}
+          roughness={0.7}
+        />
+      </mesh>
+      <group position={forearmOffset}>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.3, 1, 6, 12]} />
+          <meshStandardMaterial
+            color={0x111111}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.2}
+            metalness={0.85}
+            roughness={0.2}
+          />
+        </mesh>
+        {side === 'left' &&
+          chainRefs &&
+          [0, -0.4, -0.8].map((y) => {
+            const idx = y === 0 ? 0 : y === -0.4 ? 1 : 2;
+            return (
+              <mesh
+                key={`chain-l-${y}`}
+                position={[0.1, y, 0.3]}
+                ref={(el) => {
+                  if (el) {
+                    chainRefs.current[idx] = el;
+                  }
+                }}
+              >
+                <torusGeometry args={[0.4 + idx * 0.05, 0.04, 6, 12]} />
+                <meshStandardMaterial color={0x444444} metalness={0.95} roughness={0.3} />
+              </mesh>
+            );
+          })}
+        {side === 'right' && (
+          <group position={[0, -0.6, 0.4]} rotation={[0.3, 0, 0.2]}>
+            <mesh>
+              <cylinderGeometry args={[0.08, 0.08, 2, 8]} />
+              <meshStandardMaterial color={0x330011} emissive={0xff0044} emissiveIntensity={0.3} />
+            </mesh>
+            <mesh position={[0, 1.2, 0.3]} rotation={[0.8, 0, 0]}>
+              <boxGeometry args={[0.08, 1, 0.4]} />
+              <meshStandardMaterial
+                color={0xffffff}
+                emissive={emissiveColor}
+                emissiveIntensity={0.5}
+                metalness={0.9}
+              />
+            </mesh>
+          </group>
+        )}
+      </group>
+    </group>
+  );
+});
+
+// Helper component for boss legs to reduce duplication
+const BossLeg = React.forwardRef<
+  THREE.Group,
+  {
+    position: [number, number, number];
+    baseColor: number;
+    emissiveColor: number;
+    intensity: number;
+  }
+>(({ position, baseColor, emissiveColor, intensity }, ref) => {
+  return (
+    <group ref={ref} position={position}>
+      <mesh castShadow>
+        <capsuleGeometry args={[0.4, 1.2, 6, 12]} />
+        <meshStandardMaterial
+          color={baseColor}
+          emissive={emissiveColor}
+          emissiveIntensity={intensity * 0.1}
+          metalness={0.3}
+          roughness={0.7}
+        />
+      </mesh>
+      <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}>
+        <mesh castShadow>
+          <capsuleGeometry args={[0.3, 1.2, 6, 12]} />
+          <meshStandardMaterial
+            color={baseColor}
+            emissive={emissiveColor}
+            emissiveIntensity={intensity * 0.1}
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+      </group>
+    </group>
+  );
+});
+
 function BossMesh({
   position,
   rotation = 0,
@@ -529,134 +644,39 @@ function BossMesh({
           </mesh>
         </group>
       </group>
-      <group ref={leftArmRef} position={[1.6, 1, 0]}>
-        <mesh castShadow>
-          <capsuleGeometry args={[0.35, 1.2, 6, 12]} />
-          <meshStandardMaterial
-            color={baseColor}
-            emissive={emissiveColor}
-            emissiveIntensity={intensity * 0.15}
-            metalness={0.3}
-            roughness={0.7}
-          />
-        </mesh>
-        <group position={[0.2, -1.2, 0]}>
-          <mesh castShadow>
-            <capsuleGeometry args={[0.3, 1, 6, 12]} />
-            <meshStandardMaterial
-              color={0x111111}
-              emissive={emissiveColor}
-              emissiveIntensity={intensity * 0.2}
-              metalness={0.85}
-              roughness={0.2}
-            />
-          </mesh>
-        </group>
-        {[0, -0.4, -0.8].map((y) => {
-          const idx = y === 0 ? 0 : y === -0.4 ? 1 : 2;
-          return (
-            <mesh
-              key={`chain-l-${y}`}
-              position={[0.1, y, 0.3]}
-              ref={(el) => {
-                if (el) {
-                  chainRefs.current[idx] = el;
-                }
-              }}
-            >
-              <torusGeometry args={[0.4 + idx * 0.05, 0.04, 6, 12]} />
-              <meshStandardMaterial color={0x444444} metalness={0.95} roughness={0.3} />
-            </mesh>
-          );
-        })}
-      </group>
-      <group ref={rightArmRef} position={[-1.6, 1, 0]}>
-        <mesh castShadow>
-          <capsuleGeometry args={[0.35, 1.2, 6, 12]} />
-          <meshStandardMaterial
-            color={baseColor}
-            emissive={emissiveColor}
-            emissiveIntensity={intensity * 0.15}
-            metalness={0.3}
-            roughness={0.7}
-          />
-        </mesh>
-        <group position={[-0.2, -1.2, 0]}>
-          <mesh castShadow>
-            <capsuleGeometry args={[0.3, 1, 6, 12]} />
-            <meshStandardMaterial
-              color={0x111111}
-              emissive={emissiveColor}
-              emissiveIntensity={intensity * 0.2}
-              metalness={0.85}
-              roughness={0.2}
-            />
-          </mesh>
-          <group position={[0, -0.6, 0.4]} rotation={[0.3, 0, 0.2]}>
-            <mesh>
-              <cylinderGeometry args={[0.08, 0.08, 2, 8]} />
-              <meshStandardMaterial color={0x330011} emissive={0xff0044} emissiveIntensity={0.3} />
-            </mesh>
-            <mesh position={[0, 1.2, 0.3]} rotation={[0.8, 0, 0]}>
-              <boxGeometry args={[0.08, 1, 0.4]} />
-              <meshStandardMaterial
-                color={0xffffff}
-                emissive={emissiveColor}
-                emissiveIntensity={0.5}
-                metalness={0.9}
-              />
-            </mesh>
-          </group>
-        </group>
-      </group>
-      <group ref={leftLegRef} position={[0.6, -2, 0]}>
-        <mesh castShadow>
-          <capsuleGeometry args={[0.4, 1.2, 6, 12]} />
-          <meshStandardMaterial
-            color={baseColor}
-            emissive={emissiveColor}
-            emissiveIntensity={intensity * 0.1}
-            metalness={0.3}
-            roughness={0.7}
-          />
-        </mesh>
-        <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}>
-          <mesh castShadow>
-            <capsuleGeometry args={[0.3, 1.2, 6, 12]} />
-            <meshStandardMaterial
-              color={baseColor}
-              emissive={emissiveColor}
-              emissiveIntensity={intensity * 0.1}
-              metalness={0.3}
-              roughness={0.7}
-            />
-          </mesh>
-        </group>
-      </group>
-      <group ref={rightLegRef} position={[-0.6, -2, 0]}>
-        <mesh castShadow>
-          <capsuleGeometry args={[0.4, 1.2, 6, 12]} />
-          <meshStandardMaterial
-            color={baseColor}
-            emissive={emissiveColor}
-            emissiveIntensity={intensity * 0.1}
-            metalness={0.3}
-            roughness={0.7}
-          />
-        </mesh>
-        <group position={[0, -1.3, 0.3]} rotation={[-0.4, 0, 0]}>
-          <mesh castShadow>
-            <capsuleGeometry args={[0.3, 1.2, 6, 12]} />
-            <meshStandardMaterial
-              color={baseColor}
-              emissive={emissiveColor}
-              emissiveIntensity={intensity * 0.1}
-              metalness={0.3}
-              roughness={0.7}
-            />
-          </mesh>
-        </group>
-      </group>
+      <BossArm
+        ref={leftArmRef}
+        position={[1.6, 1, 0]}
+        forearmOffset={[0.2, -1.2, 0]}
+        side="left"
+        baseColor={baseColor}
+        emissiveColor={emissiveColor}
+        intensity={intensity}
+        chainRefs={chainRefs}
+      />
+      <BossArm
+        ref={rightArmRef}
+        position={[-1.6, 1, 0]}
+        forearmOffset={[-0.2, -1.2, 0]}
+        side="right"
+        baseColor={baseColor}
+        emissiveColor={emissiveColor}
+        intensity={intensity}
+      />
+      <BossLeg
+        ref={leftLegRef}
+        position={[0.6, -2, 0]}
+        baseColor={baseColor}
+        emissiveColor={emissiveColor}
+        intensity={intensity}
+      />
+      <BossLeg
+        ref={rightLegRef}
+        position={[-0.6, -2, 0]}
+        baseColor={baseColor}
+        emissiveColor={emissiveColor}
+        intensity={intensity}
+      />
       <pointLight
         color={new THREE.Color(emissiveColor)}
         intensity={intensity * 3}
