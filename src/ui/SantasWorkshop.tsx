@@ -3,7 +3,7 @@
  * Main menu hub for spending Nice Points on unlocks
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { WORKSHOP } from '@/data';
 import { useGameStore } from '@/store/gameStore';
@@ -29,6 +29,36 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
   const { metaProgress, spendNicePoints, unlockWeapon, unlockSkin, upgradePermanent } =
     useGameStore();
   const [activeTab, setActiveTab] = useState<TabType>('weapons');
+
+  // Handle keyboard navigation for tabs
+  useEffect(() => {
+    if (!show) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const tabs: TabType[] = ['weapons', 'skins', 'upgrades'];
+        const currentIndex = tabs.indexOf(activeTab);
+        let nextIndex: number;
+
+        if (e.key === 'ArrowRight') {
+          nextIndex = (currentIndex + 1) % tabs.length;
+        } else {
+          nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        }
+
+        const nextTab = tabs[nextIndex];
+        setActiveTab(nextTab);
+        AudioManager.playSFX('ui_select');
+        
+        // Focus the next tab button
+        const nextTabButton = document.getElementById(`tab-${nextTab}`);
+        nextTabButton?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [show, activeTab]);
 
   if (!show) return null;
 
@@ -77,17 +107,22 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
   };
 
   return (
-    <div className={styles.screen}>
+    <div className={styles.screen} role="dialog" aria-modal="true" aria-labelledby="workshop-title">
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>
+          <h1 className={styles.title} id="workshop-title">
             Santa's <span className={styles.accent}>Workshop</span>
           </h1>
           <div className={styles.nicePoints}>
             <span className={styles.npLabel}>Nice Points:</span>
             <span className={styles.npValue}>{metaProgress.nicePoints}</span>
           </div>
-          <button type="button" className={styles.closeBtn} onClick={handleClose}>
+          <button 
+            type="button" 
+            className={styles.closeBtn} 
+            onClick={handleClose}
+            aria-label="Close Workshop"
+          >
             ✕
           </button>
         </div>
@@ -99,6 +134,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             id="tab-weapons"
             aria-selected={activeTab === 'weapons'}
             aria-controls="panel-weapons"
+            tabIndex={activeTab === 'weapons' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'weapons' ? styles.tabActive : ''}`}
             onClick={() => changeTab('weapons')}
           >
@@ -110,6 +146,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             id="tab-skins"
             aria-selected={activeTab === 'skins'}
             aria-controls="panel-skins"
+            tabIndex={activeTab === 'skins' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'skins' ? styles.tabActive : ''}`}
             onClick={() => changeTab('skins')}
           >
@@ -121,6 +158,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             id="tab-upgrades"
             aria-selected={activeTab === 'upgrades'}
             aria-controls="panel-upgrades"
+            tabIndex={activeTab === 'upgrades' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'upgrades' ? styles.tabActive : ''}`}
             onClick={() => changeTab('upgrades')}
           >
@@ -129,167 +167,164 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
         </div>
 
         <div className={styles.content}>
-          {activeTab === 'weapons' && (
-            <div
-              className={styles.grid}
-              role="tabpanel"
-              id="panel-weapons"
-              aria-labelledby="tab-weapons"
-            >
-              {WEAPON_UNLOCKS.map((weapon) => {
-                const isUnlocked = metaProgress.unlockedWeapons.includes(weapon.id);
-                const canAfford = metaProgress.nicePoints >= weapon.cost;
+          <div
+            className={styles.grid}
+            role="tabpanel"
+            id="panel-weapons"
+            aria-labelledby="tab-weapons"
+            style={{ display: activeTab === 'weapons' ? 'grid' : 'none' }}
+          >
+            {WEAPON_UNLOCKS.map((weapon) => {
+              const isUnlocked = metaProgress.unlockedWeapons.includes(weapon.id);
+              const canAfford = metaProgress.nicePoints >= weapon.cost;
 
-                return (
-                  <div
-                    key={weapon.id}
-                    className={`${styles.card} ${isUnlocked ? styles.cardUnlocked : ''} ${
-                      !canAfford && !isUnlocked ? styles.cardLocked : ''
-                    }`}
-                  >
-                    <div className={styles.cardHeader}>
-                      <h3 className={styles.cardTitle}>{weapon.name}</h3>
-                      <div className={styles.cardCost}>
-                        {isUnlocked ? (
-                          <span className={styles.unlocked}>✓ UNLOCKED</span>
-                        ) : (
-                          <span className={styles.cost}>{weapon.cost} NP</span>
-                        )}
-                      </div>
+              return (
+                <div
+                  key={weapon.id}
+                  className={`${styles.card} ${isUnlocked ? styles.cardUnlocked : ''} ${
+                    !canAfford && !isUnlocked ? styles.cardLocked : ''
+                  }`}
+                >
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>{weapon.name}</h3>
+                    <div className={styles.cardCost}>
+                      {isUnlocked ? (
+                        <span className={styles.unlocked}>✓ UNLOCKED</span>
+                      ) : (
+                        <span className={styles.cost}>{weapon.cost} NP</span>
+                      )}
                     </div>
-                    <div className={styles.cardType}>{weapon.type}</div>
-                    <div className={styles.cardStats}>
-                      <div className={styles.stat}>
-                        <span className={styles.statLabel}>Damage:</span> {weapon.damage}
-                      </div>
-                      <div className={styles.stat}>
-                        <span className={styles.statLabel}>Fire Rate:</span> {weapon.fireRate}
-                      </div>
-                      <div className={styles.stat}>
-                        <span className={styles.statLabel}>Special:</span> {weapon.special}
-                      </div>
-                    </div>
-                    <div className={styles.cardFlavor}>{weapon.flavor}</div>
-                    {!isUnlocked && (
-                      <button
-                        type="button"
-                        className={styles.purchaseBtn}
-                        onClick={() => handlePurchaseWeapon(weapon)}
-                        disabled={!canAfford}
-                      >
-                        {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
-                      </button>
-                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-
-          {activeTab === 'skins' && (
-            <div
-              className={styles.grid}
-              role="tabpanel"
-              id="panel-skins"
-              aria-labelledby="tab-skins"
-            >
-              {SKIN_UNLOCKS.map((skin) => {
-                const isUnlocked = metaProgress.unlockedSkins.includes(skin.id);
-                const canAfford = metaProgress.nicePoints >= skin.cost;
-
-                return (
-                  <div
-                    key={skin.id}
-                    className={`${styles.card} ${isUnlocked ? styles.cardUnlocked : ''} ${
-                      !canAfford && !isUnlocked ? styles.cardLocked : ''
-                    }`}
-                  >
-                    <div className={styles.cardHeader}>
-                      <h3 className={styles.cardTitle}>{skin.name}</h3>
-                      <div className={styles.cardCost}>
-                        {isUnlocked ? (
-                          <span className={styles.unlocked}>✓ UNLOCKED</span>
-                        ) : (
-                          <span className={styles.cost}>{skin.cost} NP</span>
-                        )}
-                      </div>
+                  <div className={styles.cardType}>{weapon.type}</div>
+                  <div className={styles.cardStats}>
+                    <div className={styles.stat}>
+                      <span className={styles.statLabel}>Damage:</span> {weapon.damage}
                     </div>
-                    <div className={styles.cardType}>{skin.character.toUpperCase()} SKIN</div>
-                    <div className={styles.cardDescription}>{skin.description}</div>
-                    {!isUnlocked && (
-                      <button
-                        type="button"
-                        className={styles.purchaseBtn}
-                        onClick={() => handlePurchaseSkin(skin)}
-                        disabled={!canAfford}
-                      >
-                        {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
-                      </button>
-                    )}
+                    <div className={styles.stat}>
+                      <span className={styles.statLabel}>Fire Rate:</span> {weapon.fireRate}
+                    </div>
+                    <div className={styles.stat}>
+                      <span className={styles.statLabel}>Special:</span> {weapon.special}
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                  <div className={styles.cardFlavor}>{weapon.flavor}</div>
+                  {!isUnlocked && (
+                    <button
+                      type="button"
+                      className={styles.purchaseBtn}
+                      onClick={() => handlePurchaseWeapon(weapon)}
+                      disabled={!canAfford}
+                    >
+                      {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-          {activeTab === 'upgrades' && (
-            <div
-              className={styles.upgradesGrid}
-              role="tabpanel"
-              id="panel-upgrades"
-              aria-labelledby="tab-upgrades"
-            >
-              {[1, 2, 3].map((tier) => {
-                const tierUpgrades = PERMANENT_UPGRADES.filter((u) => u.tier === tier);
-                return (
-                  <div key={tier} className={styles.tierSection}>
-                    <h2 className={styles.tierTitle}>Tier {tier}</h2>
-                    <div className={styles.grid}>
-                      {tierUpgrades.map((upgrade) => {
-                        const currentLevel = metaProgress.permanentUpgrades[upgrade.id] || 0;
-                        const isMaxed = currentLevel >= upgrade.maxLevel;
-                        const canAfford = metaProgress.nicePoints >= upgrade.cost;
+          <div
+            className={styles.grid}
+            role="tabpanel"
+            id="panel-skins"
+            aria-labelledby="tab-skins"
+            style={{ display: activeTab === 'skins' ? 'grid' : 'none' }}
+          >
+            {SKIN_UNLOCKS.map((skin) => {
+              const isUnlocked = metaProgress.unlockedSkins.includes(skin.id);
+              const canAfford = metaProgress.nicePoints >= skin.cost;
 
-                        return (
-                          <div
-                            key={upgrade.id}
-                            className={`${styles.card} ${isMaxed ? styles.cardUnlocked : ''} ${
-                              !canAfford && !isMaxed ? styles.cardLocked : ''
-                            }`}
-                          >
-                            <div className={styles.cardHeader}>
-                              <h3 className={styles.cardTitle}>{upgrade.name}</h3>
-                              <div className={styles.cardCost}>
-                                {isMaxed ? (
-                                  <span className={styles.maxed}>MAX</span>
-                                ) : (
-                                  <span className={styles.cost}>{upgrade.cost} NP</span>
-                                )}
-                              </div>
+              return (
+                <div
+                  key={skin.id}
+                  className={`${styles.card} ${isUnlocked ? styles.cardUnlocked : ''} ${
+                    !canAfford && !isUnlocked ? styles.cardLocked : ''
+                  }`}
+                >
+                  <div className={styles.cardHeader}>
+                    <h3 className={styles.cardTitle}>{skin.name}</h3>
+                    <div className={styles.cardCost}>
+                      {isUnlocked ? (
+                        <span className={styles.unlocked}>✓ UNLOCKED</span>
+                      ) : (
+                        <span className={styles.cost}>{skin.cost} NP</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.cardType}>{skin.character.toUpperCase()} SKIN</div>
+                  <div className={styles.cardDescription}>{skin.description}</div>
+                  {!isUnlocked && (
+                    <button
+                      type="button"
+                      className={styles.purchaseBtn}
+                      onClick={() => handlePurchaseSkin(skin)}
+                      disabled={!canAfford}
+                    >
+                      {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div
+            className={styles.upgradesGrid}
+            role="tabpanel"
+            id="panel-upgrades"
+            aria-labelledby="tab-upgrades"
+            style={{ display: activeTab === 'upgrades' ? 'flex' : 'none' }}
+          >
+            {[1, 2, 3].map((tier) => {
+              const tierUpgrades = PERMANENT_UPGRADES.filter((u) => u.tier === tier);
+              return (
+                <div key={tier} className={styles.tierSection}>
+                  <h2 className={styles.tierTitle}>Tier {tier}</h2>
+                  <div className={styles.grid}>
+                    {tierUpgrades.map((upgrade) => {
+                      const currentLevel = metaProgress.permanentUpgrades[upgrade.id] || 0;
+                      const isMaxed = currentLevel >= upgrade.maxLevel;
+                      const canAfford = metaProgress.nicePoints >= upgrade.cost;
+
+                      return (
+                        <div
+                          key={upgrade.id}
+                          className={`${styles.card} ${isMaxed ? styles.cardUnlocked : ''} ${
+                            !canAfford && !isMaxed ? styles.cardLocked : ''
+                          }`}
+                        >
+                          <div className={styles.cardHeader}>
+                            <h3 className={styles.cardTitle}>{upgrade.name}</h3>
+                            <div className={styles.cardCost}>
+                              {isMaxed ? (
+                                <span className={styles.maxed}>MAX</span>
+                              ) : (
+                                <span className={styles.cost}>{upgrade.cost} NP</span>
+                              )}
                             </div>
-                            <div className={styles.upgradeLevel}>
-                              Level: {currentLevel} / {upgrade.maxLevel}
-                            </div>
-                            <div className={styles.cardDescription}>{upgrade.description}</div>
-                            {!isMaxed && (
-                              <button
-                                type="button"
-                                className={styles.purchaseBtn}
-                                onClick={() => handlePurchaseUpgrade(upgrade)}
-                                disabled={!canAfford}
-                              >
-                                {canAfford ? 'UPGRADE' : 'INSUFFICIENT NP'}
-                              </button>
-                            )}
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className={styles.upgradeLevel}>
+                            Level: {currentLevel} / {upgrade.maxLevel}
+                          </div>
+                          <div className={styles.cardDescription}>{upgrade.description}</div>
+                          {!isMaxed && (
+                            <button
+                              type="button"
+                              className={styles.purchaseBtn}
+                              onClick={() => handlePurchaseUpgrade(upgrade)}
+                              disabled={!canAfford}
+                            >
+                              {canAfford ? 'UPGRADE' : 'INSUFFICIENT NP'}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
