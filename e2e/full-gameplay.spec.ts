@@ -93,25 +93,6 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
   return getGameState(page);
 }
 
-// Helper to handle level up if it occurs
-async function handleLevelUpIfPresent(page: Page) {
-  const state = await page.evaluate(() => {
-    const store = (window as any).useGameStore;
-    return store?.getState().state;
-  });
-
-  if (state === 'LEVEL_UP') {
-    // Look for upgrade buttons - they are cards in a grid
-    // Wait for the level up screen to be visible
-    await expect(page.locator('text=CHOOSE YOUR UPGRADE')).toBeVisible({ timeout: 5000 });
-    
-    // Click any upgrade card (they are buttons)
-    const upgradeButton = page.locator('button').filter({ has: page.locator('h3') }).first();
-    await upgradeButton.click();
-    await page.waitForTimeout(500);
-  }
-}
-
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
@@ -220,7 +201,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await expect(page.getByRole('heading', { name: 'OPERATOR DOWN' })).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY|PLAY AGAIN/i })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should accumulate score and kills', async ({ page }) => {
@@ -411,7 +392,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
     }
 
     await page.waitForTimeout(1000);
-    await handleLevelUpIfPresent(page);
 
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
@@ -440,7 +420,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(100);
     }
     await page.waitForTimeout(1000);
-    await handleLevelUpIfPresent(page);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -457,7 +436,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY|PLAY AGAIN/i })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -620,7 +599,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Click re-deploy
-    await page.getByRole('button', { name: /RE-DEPLOY|PLAY AGAIN/i }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -655,7 +634,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Reset
-    await page.getByRole('button', { name: /RE-DEPLOY|PLAY AGAIN/i }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
     await page.waitForTimeout(1000);
 
     // Start new game
@@ -700,7 +679,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 4: Boss phase
     await page.waitForTimeout(1000);
-    await handleLevelUpIfPresent(page);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
@@ -717,7 +695,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY|PLAY AGAIN/i }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
@@ -744,7 +722,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
-    await handleLevelUpIfPresent(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -777,7 +754,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
-    await handleLevelUpIfPresent(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');

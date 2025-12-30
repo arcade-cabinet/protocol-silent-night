@@ -168,11 +168,8 @@ test.describe('Protocol: Silent Night', () => {
     await expect(page.getByText(/CURRENT OBJECTIVE/i)).toBeVisible();
     await expect(page.getByText(/SCORE/i)).toBeVisible();
 
-    // Fire button should be visible for touch controls (only on mobile)
-    const isMobile = await page.evaluate(() => window.innerWidth < 1024);
-    if (isMobile) {
-      await expect(page.getByRole('button', { name: /FIRE/i })).toBeVisible();
-    }
+    // Fire button should be visible for touch controls
+    await expect(page.getByRole('button', { name: /FIRE/i })).toBeVisible();
   });
 
   test('should persist high score to localStorage', async ({ page }) => {

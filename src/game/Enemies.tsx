@@ -24,15 +24,16 @@ export function Enemies() {
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
 
-  // Optimization: Select only what is needed for rendering
-  const state = useGameStore((state) => state.state);
-  const bossActive = useGameStore((state) => state.bossActive);
-  const bossHp = useGameStore((state) => state.bossHp);
-  const bossMaxHp = useGameStore((state) => state.bossMaxHp);
-
-  // Note: We subscribe to enemies to ensure we render new ones when spawned/died
-  const enemies = useGameStore((state) => state.enemies);
-  const damagePlayer = useGameStore((state) => state.damagePlayer);
+  const {
+    state,
+    enemies,
+    updateEnemies,
+    playerPosition,
+    damagePlayer,
+    bossActive,
+    bossHp,
+    bossMaxHp,
+  } = useGameStore();
 
   const spawnMinion = useCallback(() => {
     const { state: currentState, enemies: currentEnemies, addEnemy, runProgress } = useGameStore.getState();
@@ -94,6 +95,13 @@ export function Enemies() {
               spawnMinion();
           }
       }, 1000);
+      // We use a different array for intervals if we want strict typing, but standard practice in mixed envs
+      // often just casts. However, to be cleaner, let's track it.
+      // But timeoutIds is defined as ReturnType<typeof setTimeout>[].
+      // In browser, setInterval returns number same as setTimeout.
+      // In node, it's different.
+      // To satisfy strict TS if types differ, we should cast or store separately.
+      // For simplicity in this file structure, let's assume number compatibility or use any.
       timeoutIds.push(checkId as unknown as ReturnType<typeof setTimeout>);
     }
 
@@ -103,6 +111,9 @@ export function Enemies() {
 
     return () => {
       for (const id of timeoutIds) {
+        // In browser, clearTimeout works for intervals too usually, but we should use clearInterval for the interval.
+        // We need to know which is which.
+        // Simplest fix: Just use separate lists.
         clearInterval(id as unknown as number);
         clearTimeout(id);
       }
@@ -114,12 +125,9 @@ export function Enemies() {
   const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
-    // Optimization: Access transient state
-    const { state: gameState, playerPosition, enemies: currentEnemies } = useGameStore.getState();
+    if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
 
-    if (gameState !== 'PHASE_1' && gameState !== 'PHASE_BOSS') return;
-
-    if (gameState === 'PHASE_1' || gameState === 'PHASE_BOSS') {
+    if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
       spawnTimerRef.current += delta * 1000;
       if (spawnTimerRef.current >= CONFIG.SPAWN_INTERVAL) {
         spawnTimerRef.current = 0;
@@ -132,50 +140,54 @@ export function Enemies() {
     const tempVec = tempVecRef.current;
     const now = Date.now();
 
-    let shouldDamage = false;
-    let damageAmount = 0;
+    updateEnemies((currentEnemies) => {
+      let shouldDamage = false;
+      let damageAmount = 0;
 
-    // Optimization: Mutate enemy positions directly without triggering store updates
-    for (const enemy of currentEnemies) {
-      const currentPos = enemy.mesh.position;
+      for (const enemy of currentEnemies) {
+        const currentPos = enemy.mesh.position;
 
-      toPlayer.copy(playerPosition).sub(currentPos);
-      const distance = toPlayer.length();
-      direction.copy(toPlayer).normalize();
+        toPlayer.copy(playerPosition).sub(currentPos);
+        const distance = toPlayer.length();
+        direction.copy(toPlayer).normalize();
 
-      const moveSpeed = enemy.type === 'boss' ? BOSS_CONFIG.speed : enemy.speed;
-      tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
-      currentPos.add(tempVec);
-
-      const targetRotation = Math.atan2(direction.x, direction.z);
-      const angleDiff =
-        ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
-      enemy.mesh.rotation.y += angleDiff * delta * 8;
-
-      const hitRadius =
-        enemy.type === 'boss'
-          ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
-          : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
-      if (distance < hitRadius) {
-        if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-          // Only damage if we are somewhat visible/active and not a ghost at 0,0,0
-          // Enemies spawn at radius 20-30 units; this check protects against mesh corruption
-          const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
-
-          if (isInitialized || enemy.isActive) {
-            shouldDamage = true;
-            damageAmount = Math.max(damageAmount, enemy.damage);
-          }
-        }
-        tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
+        const moveSpeed = enemy.type === 'boss' ? BOSS_CONFIG.speed : enemy.speed;
+        tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
         currentPos.add(tempVec);
-      }
-    }
 
-    if (shouldDamage) {
-      lastDamageTimeRef.current = now;
-      damagePlayer(damageAmount);
-    }
+        const targetRotation = Math.atan2(direction.x, direction.z);
+        const angleDiff =
+          ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
+        enemy.mesh.rotation.y += angleDiff * delta * 8;
+
+        const hitRadius =
+          enemy.type === 'boss'
+            ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
+            : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
+        if (distance < hitRadius) {
+          if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
+            // Only damage if we are somewhat visible/active and not a ghost at 0,0,0
+            // Distance check handles 0,0,0 if player is not there.
+            // But if player IS at 0,0,0 and enemy is uninitialized at 0,0,0...
+            const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
+
+            if (isInitialized || enemy.isActive) {
+                shouldDamage = true;
+                damageAmount = Math.max(damageAmount, enemy.damage);
+            }
+          }
+          tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
+          currentPos.add(tempVec);
+        }
+      }
+
+      if (shouldDamage) {
+        lastDamageTimeRef.current = now;
+        damagePlayer(damageAmount);
+      }
+
+      return currentEnemies;
+    });
   });
 
   const minions = enemies.filter((e) => e.type === 'minion');

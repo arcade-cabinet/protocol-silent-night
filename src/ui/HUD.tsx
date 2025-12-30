@@ -1,19 +1,14 @@
-import { useShallow } from 'zustand/react/shallow';
+/**
+ * HUD Component
+ * Displays player health, current objective, and active upgrades
+ */
+
 import { CONFIG, ROGUELIKE_UPGRADES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import styles from './HUD.module.css';
 
 export function HUD() {
-  const { state, playerHp, playerMaxHp, stats, runProgress, metaProgress } = useGameStore(
-    useShallow((state) => ({
-      state: state.state,
-      playerHp: state.playerHp,
-      playerMaxHp: state.playerMaxHp,
-      stats: state.stats,
-      runProgress: state.runProgress,
-      metaProgress: state.metaProgress,
-    }))
-  );
+  const { state, playerHp, playerMaxHp, stats, runProgress, metaProgress } = useGameStore();
 
   // Hide HUD on menu and briefing screens
   if (state === 'MENU' || state === 'BRIEFING') return null;

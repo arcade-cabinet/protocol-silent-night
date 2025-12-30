@@ -3,19 +3,11 @@
  * Displays boss health bar when boss is active
  */
 
-import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 import styles from './BossHUD.module.css';
 
 export function BossHUD() {
-  const { bossActive, bossHp, bossMaxHp, state } = useGameStore(
-    useShallow((state) => ({
-      bossActive: state.bossActive,
-      bossHp: state.bossHp,
-      bossMaxHp: state.bossMaxHp,
-      state: state.state,
-    }))
-  );
+  const { bossActive, bossHp, bossMaxHp, state } = useGameStore();
 
   if (!bossActive || state === 'WIN' || state === 'GAME_OVER') return null;
 
