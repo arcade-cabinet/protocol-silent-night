@@ -273,10 +273,6 @@ export function StrataCharacter({
           weaponGroupRef.current.position.z += Math.sin(time * 20) * 0.02;
         }
       }
-
-      if (muzzleRef.current) {
-        muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
-      }
     }
   });
 
