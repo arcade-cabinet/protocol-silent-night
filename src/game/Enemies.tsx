@@ -248,6 +248,7 @@ function InstancedMinions({
         eyeRef.current.setMatrixAt(i, dummy.matrix);
       } else {
         dummy.position.set(0, -1000, 0);
+        dummy.rotation.set(0, 0, 0);
         dummy.scale.setScalar(0);
         dummy.updateMatrix();
         bodyRef.current.setMatrixAt(i, dummy.matrix);
@@ -287,27 +288,18 @@ function BossRenderer({
   bossMaxHp: number;
 }) {
   const bossEnemy = enemies.find((e) => e.type === 'boss');
-  const bossPos = bossEnemy?.mesh.position ?? null;
-  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
 
-  return (
-    <BossMesh
-      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
-      rotation={bossRotation}
-      hp={bossHp}
-      maxHp={bossMaxHp}
-    />
-  );
+  if (!bossEnemy) return null;
+
+  return <BossMesh bossMesh={bossEnemy.mesh} hp={bossHp} maxHp={bossMaxHp} />;
 }
 
 function BossMesh({
-  position,
-  rotation = 0,
+  bossMesh,
   hp,
   maxHp,
 }: {
-  position: [number, number, number];
-  rotation?: number;
+  bossMesh: THREE.Object3D;
   hp: number;
   maxHp: number;
 }) {
@@ -334,7 +326,10 @@ function BossMesh({
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
-      groupRef.current.position.y = position[1] + Math.sin(time * 1.5) * 0.3;
+      groupRef.current.position.x = bossMesh.position.x;
+      groupRef.current.position.z = bossMesh.position.z;
+      groupRef.current.position.y = bossMesh.position.y + Math.sin(time * 1.5) * 0.3;
+      groupRef.current.rotation.y = bossMesh.rotation.y;
     }
 
     if (bodyRef.current) {
@@ -374,7 +369,7 @@ function BossMesh({
   });
 
   return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]}>
+    <group ref={groupRef}>
       <group ref={bodyRef}>
         <mesh castShadow>
           <boxGeometry args={[2.5, 3, 1.8]} />

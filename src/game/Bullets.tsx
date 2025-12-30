@@ -226,9 +226,12 @@ export function Bullets() {
           const bullet = bullets[i];
           const pos = (bullet.mesh as THREE.Object3D).position;
           dummy.position.copy(pos);
+          dummy.rotation.set(0, 0, 0); // Reset rotation before updateLogic
+          dummy.scale.set(1, 1, 1); // Reset scale before updateLogic
           updateLogic(bullet, dummy);
         } else {
           dummy.position.set(0, -1000, 0);
+          dummy.rotation.set(0, 0, 0);
           dummy.scale.copy(zeroScale);
         }
         dummy.updateMatrix();
