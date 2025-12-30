@@ -1,18 +1,17 @@
-import { useShallow } from 'zustand/react/shallow';
 import { CONFIG, ROGUELIKE_UPGRADES } from '@/data';
-import { useGameStore } from '@/store/gameStore';
+import { useGameStoreShallow } from '@/store/useGameStoreShallow';
 import styles from './HUD.module.css';
 
 export function HUD() {
-  const { state, playerHp, playerMaxHp, stats, runProgress, metaProgress } = useGameStore(
-    useShallow((state) => ({
+  const { state, playerHp, playerMaxHp, stats, runProgress, metaProgress } = useGameStoreShallow(
+    (state) => ({
       state: state.state,
       playerHp: state.playerHp,
       playerMaxHp: state.playerMaxHp,
       stats: state.stats,
       runProgress: state.runProgress,
       metaProgress: state.metaProgress,
-    }))
+    })
   );
 
   // Hide HUD on menu and briefing screens
