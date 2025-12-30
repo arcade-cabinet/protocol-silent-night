@@ -941,8 +941,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   reset: () =>
     set({
       ...initialState,
-      highScore: loadHighScore(),
-      metaProgress: loadMetaProgress(),
+      highScore: get().highScore,
+      metaProgress: get().metaProgress,
       playerPosition: new THREE.Vector3(0, 0, 0),
     }),
 }));
