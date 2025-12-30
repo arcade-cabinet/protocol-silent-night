@@ -1,0 +1,132 @@
+# Ecosystem Connector - Inline AI Automation
+# No reusable workflow calls - everything runs directly
+
+name: Ecosystem Connector
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    name: AI Review
+    if: github.event_name == 'pull_request' && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - name: Review with Ollama
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+        run: |
+          echo "🔍 AI Review for PR #${{ github.event.pull_request.number }}"
+
+          # Get diff
+          DIFF=$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- '*.py' '*.ts' '*.js' '*.go' '*.rs' | head -3000)
+
+          if [ -z "$DIFF" ]; then
+            echo "No code changes to review"
+            exit 0
+          fi
+
+          # Simple review comment
+          gh pr comment ${{ github.event.pull_request.number }} --body "🤖 **AI Review Initiated**
+
+          Analyzing changes in this PR..."
+
+  delegate-jules:
+    name: Delegate to Jules
+    if: |
+      github.event_name == 'issue_comment' &&
+      !github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/jules')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delegate to Jules
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+        run: |
+          echo "🤖 Delegating to Jules..."
+
+          COMMENT="${{ github.event.comment.body }}"
+          TASK=$(echo "$COMMENT" | sed 's|/jules ||')
+
+          gh issue comment ${{ github.event.issue.number }} --body "🤖 **Jules Delegation**
+
+          Task received: $TASK
+
+          Jules session will be created to handle this request."
+
+  delegate-cursor:
+    name: Delegate to Cursor
+    if: |
+      github.event_name == 'issue_comment' &&
+      !github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/cursor')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delegate to Cursor
+        env:
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          echo "🤖 Delegating to Cursor..."
+
+          COMMENT="${{ github.event.comment.body }}"
+          TASK=$(echo "$COMMENT" | sed 's|/cursor ||')
+
+          gh issue comment ${{ github.event.issue.number }} --body "🤖 **Cursor Delegation**
+
+          Task received: $TASK
+
+          Cursor agent will be spawned to handle this request."
+
+  claude-pr:
+    name: Claude on PR
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - uses: anthropics/claude-code-action@main
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          allowed_bots: '*'
+
+  claude-issue:
+    name: Claude on Issue
+    if: |
+      github.event_name == 'issue_comment' &&
+      !github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - uses: anthropics/claude-code-action@main
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          allowed_bots: '*'

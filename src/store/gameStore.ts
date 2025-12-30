@@ -853,7 +853,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-    lines.push({ label: 'WARNING', text: (missionBriefing as unknown as { warning: string }).warning, warning: true });
+    lines.push({
+      label: 'WARNING',
+      text: (missionBriefing as unknown as { warning: string }).warning,
+      warning: true,
+    });
     return lines;
   },
 
