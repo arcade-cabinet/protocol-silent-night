@@ -165,7 +165,7 @@ export function Enemies() {
   return (
     <group ref={groupRef}>
       <InstancedMinions minions={minions} />
-      {bossActive && <BossRenderer enemies={enemies} bossHp={bossHp} bossMaxHp={bossMaxHp} />}
+      {bossActive && <BossRenderer bossHp={bossHp} bossMaxHp={bossMaxHp} />}
     </group>
   );
 }
@@ -282,22 +282,14 @@ function InstancedMinions({
 }
 
 function BossRenderer({
-  enemies,
   bossHp,
   bossMaxHp,
 }: {
-  enemies: { type: string; mesh: THREE.Object3D }[];
   bossHp: number;
   bossMaxHp: number;
 }) {
-  const bossEnemy = enemies.find((e) => e.type === 'boss');
-  const bossPos = bossEnemy?.mesh.position ?? null;
-  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
-
   return (
     <BossMesh
-      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
-      rotation={bossRotation}
       hp={bossHp}
       maxHp={bossMaxHp}
     />
@@ -305,13 +297,9 @@ function BossRenderer({
 }
 
 function BossMesh({
-  position,
-  rotation = 0,
   hp,
   maxHp,
 }: {
-  position: [number, number, number];
-  rotation?: number;
   hp: number;
   maxHp: number;
 }) {
@@ -337,8 +325,16 @@ function BossMesh({
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    if (groupRef.current) {
-      groupRef.current.position.y = position[1] + Math.sin(time * 1.5) * 0.3;
+    // Optimization: Read boss position transiently from store
+    const { enemies } = useGameStore.getState();
+    const bossEnemy = enemies.find((e) => e.type === 'boss');
+
+    if (groupRef.current && bossEnemy) {
+      const bossPos = bossEnemy.mesh.position;
+      const bossRotation = bossEnemy.mesh.rotation.y;
+
+      groupRef.current.position.set(bossPos.x, 4 + Math.sin(time * 1.5) * 0.3, bossPos.z);
+      groupRef.current.rotation.y = bossRotation;
     }
 
     if (bodyRef.current) {
@@ -378,7 +374,7 @@ function BossMesh({
   });
 
   return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]}>
+    <group ref={groupRef}>
       <group ref={bodyRef}>
         <mesh castShadow>
           <boxGeometry args={[2.5, 3, 1.8]} />
