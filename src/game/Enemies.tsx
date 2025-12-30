@@ -24,16 +24,15 @@ export function Enemies() {
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
 
-  const {
-    state,
-    enemies,
-    updateEnemies,
-    playerPosition,
-    damagePlayer,
-    bossActive,
-    bossHp,
-    bossMaxHp,
-  } = useGameStore();
+  // Optimization: Select only what is needed for rendering
+  const state = useGameStore((state) => state.state);
+  const bossActive = useGameStore((state) => state.bossActive);
+  const bossHp = useGameStore((state) => state.bossHp);
+  const bossMaxHp = useGameStore((state) => state.bossMaxHp);
+
+  // Note: We subscribe to enemies to ensure we render new ones when spawned/died
+  const enemies = useGameStore((state) => state.enemies);
+  const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
     const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
@@ -99,9 +98,12 @@ export function Enemies() {
   const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
-    if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
+    // Optimization: Access transient state
+    const { state: gameState, playerPosition, enemies: currentEnemies } = useGameStore.getState();
 
-    if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
+    if (gameState !== 'PHASE_1' && gameState !== 'PHASE_BOSS') return;
+
+    if (gameState === 'PHASE_1' || gameState === 'PHASE_BOSS') {
       spawnTimerRef.current += delta * 1000;
       if (spawnTimerRef.current >= CONFIG.SPAWN_INTERVAL) {
         spawnTimerRef.current = 0;
@@ -114,47 +116,44 @@ export function Enemies() {
     const tempVec = tempVecRef.current;
     const now = Date.now();
 
-    updateEnemies((currentEnemies) => {
-      let shouldDamage = false;
-      let damageAmount = 0;
+    let shouldDamage = false;
+    let damageAmount = 0;
 
-      for (const enemy of currentEnemies) {
-        const currentPos = enemy.mesh.position;
+    // Optimization: Mutate enemy positions directly without triggering store updates
+    for (const enemy of currentEnemies) {
+      const currentPos = enemy.mesh.position;
 
-        toPlayer.copy(playerPosition).sub(currentPos);
-        const distance = toPlayer.length();
-        direction.copy(toPlayer).normalize();
+      toPlayer.copy(playerPosition).sub(currentPos);
+      const distance = toPlayer.length();
+      direction.copy(toPlayer).normalize();
 
-        const moveSpeed = enemy.type === 'boss' ? BOSS_CONFIG.speed : enemy.speed;
-        tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
-        currentPos.add(tempVec);
+      const moveSpeed = enemy.type === 'boss' ? BOSS_CONFIG.speed : enemy.speed;
+      tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
+      currentPos.add(tempVec);
 
-        const targetRotation = Math.atan2(direction.x, direction.z);
-        const angleDiff =
-          ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
-        enemy.mesh.rotation.y += angleDiff * delta * 8;
+      const targetRotation = Math.atan2(direction.x, direction.z);
+      const angleDiff =
+        ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
+      enemy.mesh.rotation.y += angleDiff * delta * 8;
 
-        const hitRadius =
-          enemy.type === 'boss'
-            ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
-            : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
-        if (distance < hitRadius) {
-          if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-            shouldDamage = true;
-            damageAmount = Math.max(damageAmount, enemy.damage);
-          }
-          tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
-          currentPos.add(tempVec);
+      const hitRadius =
+        enemy.type === 'boss'
+          ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
+          : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
+      if (distance < hitRadius) {
+        if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
+          shouldDamage = true;
+          damageAmount = Math.max(damageAmount, enemy.damage);
         }
+        tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
+        currentPos.add(tempVec);
       }
+    }
 
-      if (shouldDamage) {
-        lastDamageTimeRef.current = now;
-        damagePlayer(damageAmount);
-      }
-
-      return currentEnemies;
-    });
+    if (shouldDamage) {
+      lastDamageTimeRef.current = now;
+      damagePlayer(damageAmount);
+    }
   });
 
   const minions = enemies.filter((e) => e.type === 'minion');
