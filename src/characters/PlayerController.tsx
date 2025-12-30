@@ -7,7 +7,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { TERRAIN_CONFIG, WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
+import { WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import { type ChristmasObstacle, getBulletTypeFromWeapon, type WeaponType } from '@/types';
 import { StrataCharacter } from './StrataCharacter';
@@ -189,8 +189,7 @@ export function PlayerController() {
       newPositionRef.current.copy(positionRef.current).add(moveVectorRef.current);
 
       // Clamp to world bounds
-      // Calculate dynamic bound based on terrain size
-      const worldBound = (TERRAIN_CONFIG.gridSize * TERRAIN_CONFIG.cubeSize) / 2 - 2; // -2 for safety margin
+      const worldBound = 35;
       newPositionRef.current.x = THREE.MathUtils.clamp(
         newPositionRef.current.x,
         -worldBound,

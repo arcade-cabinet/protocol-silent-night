@@ -7,7 +7,11 @@ import { useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { WORKSHOP } from '@/data';
 import { useGameStore } from '@/store/gameStore';
-import type { WeaponUnlock, SkinConfig, PermanentUpgradeConfig } from '@/types';
+import type {
+  WeaponUnlock,
+  SkinConfig,
+  PermanentUpgradeConfig
+} from '@/types';
 import styles from './SantasWorkshop.module.css';
 
 const WEAPON_UNLOCKS = WORKSHOP.weapons as WeaponUnlock[];
@@ -83,18 +87,14 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             <span className={styles.npLabel}>Nice Points:</span>
             <span className={styles.npValue}>{metaProgress.nicePoints}</span>
           </div>
-          <button type="button" className={styles.closeBtn} onClick={handleClose} aria-label="Close Workshop">
+          <button type="button" className={styles.closeBtn} onClick={handleClose}>
             ✕
           </button>
         </div>
 
-        <div className={styles.tabs} role="tablist" aria-label="Workshop Categories">
+        <div className={styles.tabs}>
           <button
             type="button"
-            role="tab"
-            id="tab-weapons"
-            aria-selected={activeTab === 'weapons'}
-            aria-controls="panel-weapons"
             className={`${styles.tab} ${activeTab === 'weapons' ? styles.tabActive : ''}`}
             onClick={() => changeTab('weapons')}
           >
@@ -102,10 +102,6 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
           <button
             type="button"
-            role="tab"
-            id="tab-skins"
-            aria-selected={activeTab === 'skins'}
-            aria-controls="panel-skins"
             className={`${styles.tab} ${activeTab === 'skins' ? styles.tabActive : ''}`}
             onClick={() => changeTab('skins')}
           >
@@ -113,10 +109,6 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
           <button
             type="button"
-            role="tab"
-            id="tab-upgrades"
-            aria-selected={activeTab === 'upgrades'}
-            aria-controls="panel-upgrades"
             className={`${styles.tab} ${activeTab === 'upgrades' ? styles.tabActive : ''}`}
             onClick={() => changeTab('upgrades')}
           >
@@ -124,19 +116,9 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        <div
-          className={styles.content}
-          role="tabpanel"
-          id={`panel-${activeTab}`}
-          aria-labelledby={`tab-${activeTab}`}
-        >
+        <div className={styles.content}>
           {activeTab === 'weapons' && (
-            <div
-              className={styles.grid}
-              role="tabpanel"
-              id="panel-weapons"
-              aria-labelledby="tab-weapons"
-            >
+            <div className={styles.grid}>
               {WEAPON_UNLOCKS.map((weapon) => {
                 const isUnlocked = metaProgress.unlockedWeapons.includes(weapon.id);
                 const canAfford = metaProgress.nicePoints >= weapon.cost;
@@ -188,12 +170,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           )}
 
           {activeTab === 'skins' && (
-            <div
-              className={styles.grid}
-              role="tabpanel"
-              id="panel-skins"
-              aria-labelledby="tab-skins"
-            >
+            <div className={styles.grid}>
               {SKIN_UNLOCKS.map((skin) => {
                 const isUnlocked = metaProgress.unlockedSkins.includes(skin.id);
                 const canAfford = metaProgress.nicePoints >= skin.cost;
@@ -234,12 +211,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           )}
 
           {activeTab === 'upgrades' && (
-            <div
-              className={styles.upgradesGrid}
-              role="tabpanel"
-              id="panel-upgrades"
-              aria-labelledby="tab-upgrades"
-            >
+            <div className={styles.upgradesGrid}>
               {[1, 2, 3].map((tier) => {
                 const tierUpgrades = PERMANENT_UPGRADES.filter((u) => u.tier === tier);
                 return (

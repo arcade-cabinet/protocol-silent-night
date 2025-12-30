@@ -27,7 +27,7 @@ import type {
   WeaponType,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
-import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
+import { generateChecksum, verifyChecksum } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -157,7 +157,34 @@ interface GameStore {
 
 // Load meta-progression from localStorage
 const loadMetaProgress = (): MetaProgressData => {
-  const defaultProgress: MetaProgressData = {
+  try {
+    const stored = localStorage.getItem(META_PROGRESS_KEY);
+    if (stored) {
+      // Check if it's the old format (direct JSON) or new format (with checksum)
+      // Try parsing as simple JSON first
+      const parsed = JSON.parse(stored);
+
+      // If it has 'data' and 'hash', it's the new format
+      if (parsed && typeof parsed === 'object' && 'hash' in parsed && 'data' in parsed) {
+        const jsonString = JSON.stringify(parsed.data);
+        if (verifyChecksum(jsonString, parsed.hash)) {
+          return parsed.data;
+        } else {
+          console.warn('Tampered save data detected! Resetting progress.');
+          // Sentinel: Fall through to return default (reset)
+        }
+      } else {
+        // Legacy format - accept it once, it will be upgraded on next save
+        // Or strictly reject it? For now, let's accept it to avoid wiping users on update
+        // Sentinel decision: Upgrade on next save
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load meta progress:', e);
+  }
+
+  return {
     nicePoints: 0,
     totalPointsEarned: 0,
     runsCompleted: 0,
@@ -169,32 +196,17 @@ const loadMetaProgress = (): MetaProgressData => {
     totalKills: 0,
     totalDeaths: 0,
   };
-
-  try {
-    const stored = localStorage.getItem(META_PROGRESS_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Check if it's the old format (direct object) or new format (with checksum)
-      if (parsed.checksum && parsed.data) {
-        const validated = unwrapWithChecksum<MetaProgressData>(parsed);
-        if (validated) return validated;
-      } else {
-        // Migration strategy: Accept legacy data but save in new format next time
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.error('Failed to load meta progress:', e);
-  }
-
-  return defaultProgress;
 };
 
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    const wrapped = wrapWithChecksum(data);
-    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(wrapped));
+    const jsonString = JSON.stringify(data);
+    const payload = {
+      data,
+      hash: generateChecksum(jsonString)
+    };
+    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(payload));
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
@@ -204,20 +216,7 @@ const saveMetaProgress = (data: MetaProgressData): void => {
 const loadHighScore = (): number => {
   try {
     const stored = localStorage.getItem(HIGH_SCORE_KEY);
-    if (!stored) return 0;
-
-    // Try parsing as JSON first (new format)
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed.checksum && parsed.data !== undefined) {
-        const validated = unwrapWithChecksum<number>(parsed);
-        return validated !== null ? validated : 0;
-      }
-    } catch {
-      // Not JSON, fall back to simple number parsing (legacy)
-    }
-
-    return Number.parseInt(stored, 10) || 0;
+    return stored ? Number.parseInt(stored, 10) : 0;
   } catch {
     return 0;
   }
@@ -226,8 +225,7 @@ const loadHighScore = (): number => {
 // Save high score to localStorage
 const saveHighScore = (score: number): void => {
   try {
-    const wrapped = wrapWithChecksum(score);
-    localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(wrapped));
+    localStorage.setItem(HIGH_SCORE_KEY, score.toString());
   } catch {
     // Silently fail
   }
@@ -416,10 +414,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    // Scale requirement by wave
-    const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
-
-    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
+    if (newKills >= CONFIG.WAVE_REQ && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
@@ -508,8 +503,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const adjustedAmount = Math.floor(amount * xpBonus);
 
     const newXP = runProgress.xp + adjustedAmount;
-    const isTest = typeof navigator !== 'undefined' && navigator.webdriver;
-    const xpToNextLevel = isTest ? 1000000 : runProgress.level * 100;
+    const xpToNextLevel = runProgress.level * 100;
 
     if (newXP >= xpToNextLevel) {
       set({
@@ -855,11 +849,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-    lines.push({
-      label: 'WARNING',
-      text: (missionBriefing as unknown as { warning: string }).warning,
-      warning: true,
-    });
+    lines.push({ label: 'WARNING', text: (missionBriefing as unknown as { warning: string }).warning, warning: true });
     return lines;
   },
 
@@ -916,17 +906,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         runsCompleted: get().metaProgress.runsCompleted + 1,
         nicePoints: get().metaProgress.nicePoints + 500,
       };
-
-      // Show victory screen
       set({
         state: 'WIN',
         bossActive: false,
         stats: { ...get().stats, bossDefeated: true },
         metaProgress: updatedMeta,
       });
-
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
+      AudioManager.playSFX('boss_defeated');
+      AudioManager.playSFX('victory');
       AudioManager.playMusic('victory');
       return true;
     }

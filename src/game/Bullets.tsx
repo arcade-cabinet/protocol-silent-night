@@ -42,10 +42,7 @@ export function Bullets() {
   const tempVecRef = useRef(new THREE.Vector3());
   const lookAtVecRef = useRef(new THREE.Vector3());
 
-  // Optimization: Select only stable actions
-  const updateBullets = useGameStore((state) => state.updateBullets);
-  const damageEnemy = useGameStore((state) => state.damageEnemy);
-  const damageBoss = useGameStore((state) => state.damageBoss);
+  const { updateBullets, enemies, damageEnemy, bossActive, damageBoss } = useGameStore();
 
   // Coal Cannon geometry - large glowing coal chunk
   const cannonGeometry = useMemo(() => {
@@ -120,9 +117,7 @@ export function Bullets() {
   );
 
   useFrame((state, delta) => {
-    // Optimization: Access transient state directly to avoid re-renders
-    const { state: gameState, bullets, enemies, bossActive } = useGameStore.getState();
-
+    const { state: gameState } = useGameStore.getState();
     if (
       gameState === 'LEVEL_UP' ||
       gameState === 'MENU' ||
@@ -136,128 +131,120 @@ export function Bullets() {
 
     if (!cannonRef.current || !smgRef.current || !starRef.current) return;
 
-    // Optimization: Mutate bullets in place and only update store for removals
     const toRemove: string[] = [];
-    const activeBullets: BulletData[] = [];
 
-    // Iterate over bullets directly from store state (which is mutable if not freezed)
-    // Note: We are mutating the properties of objects inside the array, but not the array itself
-    // unless we call set()
-    for (const bullet of bullets) {
-      const pos = (bullet.mesh as THREE.Object3D).position;
-      tempVecRef.current.copy(bullet.direction).multiplyScalar(bullet.speed * delta);
-      pos.add(tempVecRef.current);
+    // Update bullets and categorize by type
+    updateBullets((currentBullets) => {
+      const updatedBullets = currentBullets.map((bullet) => {
+        const pos = (bullet.mesh as THREE.Object3D).position;
+        tempVecRef.current.copy(bullet.direction).multiplyScalar(bullet.speed * delta);
+        pos.add(tempVecRef.current);
 
-      bullet.life -= delta;
+        const newLife = bullet.life - delta;
 
-      if (bullet.life <= 0 || pos.length() > 50) {
-        toRemove.push(bullet.id);
-        continue; // Skip collision check if dead
-      }
+        if (newLife <= 0 || pos.length() > 50) {
+          toRemove.push(bullet.id);
+          return { ...bullet, life: newLife };
+        }
 
-      let hit = false;
-      // Collision with enemies
-      if (!bullet.isEnemy) {
-        for (const enemy of enemies) {
-          const enemyPos = (enemy.mesh as THREE.Object3D)?.position;
-          if (enemyPos) {
-            const dist = pos.distanceTo(enemyPos);
-            // Collision radius varies by visual type and scale
-            const visualType = getVisualType(bullet.type);
-            const sizeScale = bullet.size || 1;
-            const baseRadius = visualType === 'cannon' ? 1.8 : visualType === 'star' ? 1.6 : 1.4;
-            const hitRadius = baseRadius * sizeScale;
+        // Collision with enemies
+        if (!bullet.isEnemy) {
+          for (const enemy of enemies) {
+            const enemyPos = (enemy.mesh as THREE.Object3D)?.position;
+            if (enemyPos) {
+              const dist = pos.distanceTo(enemyPos);
+              // Collision radius varies by visual type and scale
+              const visualType = getVisualType(bullet.type);
+              const sizeScale = bullet.size || 1;
+              const baseRadius = visualType === 'cannon' ? 1.8 : visualType === 'star' ? 1.6 : 1.4;
+              const hitRadius = baseRadius * sizeScale;
 
-            if (dist < hitRadius) {
-              if (enemy.type === 'boss' && bossActive) {
-                damageBoss(bullet.damage);
-              } else {
-                damageEnemy(enemy.id, bullet.damage);
-              }
+              if (dist < hitRadius) {
+                if (enemy.type === 'boss' && bossActive) {
+                  damageBoss(bullet.damage);
+                } else {
+                  damageEnemy(enemy.id, bullet.damage);
+                }
 
-              // Penetration check
-              if (!bullet.penetration) {
-                toRemove.push(bullet.id);
-                hit = true;
-                break;
+                // Penetration check
+                if (!bullet.penetration) {
+                  toRemove.push(bullet.id);
+                  break;
+                }
               }
             }
           }
         }
-      }
 
-      if (!hit) {
-        activeBullets.push(bullet);
-      }
-    }
+        return { ...bullet, life: newLife };
+      });
 
-    // Only update store if bullets were removed
-    if (toRemove.length > 0) {
-      updateBullets((current) => current.filter((b) => !toRemove.includes(b.id)));
-    }
+      const activeBullets = updatedBullets.filter((b) => !toRemove.includes(b.id));
 
-    // Categorize bullets by visual type for rendering
-    // We use the local activeBullets list which reflects current positions
-    const cannonBullets: BulletData[] = [];
-    const smgBullets: BulletData[] = [];
-    const starBullets: BulletData[] = [];
+      // Categorize bullets by visual type
+      const cannonBullets: BulletData[] = [];
+      const smgBullets: BulletData[] = [];
+      const starBullets: BulletData[] = [];
 
-    for (const bullet of activeBullets) {
-      const visualType = getVisualType(bullet.type);
-      if (visualType === 'cannon') {
-        cannonBullets.push(bullet);
-      } else if (visualType === 'smg') {
-        smgBullets.push(bullet);
-      } else {
-        starBullets.push(bullet);
-      }
-    }
-
-    // Helper to update instanced mesh
-    const updateInstanceMesh = (
-      ref: React.RefObject<THREE.InstancedMesh | null>,
-      bullets: BulletData[],
-      maxCount: number,
-      updateLogic: (bullet: BulletData, dummy: THREE.Object3D) => void
-    ) => {
-      if (!ref.current || typeof ref.current.setMatrixAt !== 'function') return;
-      for (let i = 0; i < maxCount; i++) {
-        if (i < bullets.length) {
-          const bullet = bullets[i];
-          const pos = (bullet.mesh as THREE.Object3D).position;
-          dummy.position.copy(pos);
-          updateLogic(bullet, dummy);
+      for (const bullet of activeBullets) {
+        const visualType = getVisualType(bullet.type);
+        if (visualType === 'cannon') {
+          cannonBullets.push(bullet);
+        } else if (visualType === 'smg') {
+          smgBullets.push(bullet);
         } else {
-          dummy.position.set(0, -1000, 0);
-          dummy.scale.copy(zeroScale);
+          starBullets.push(bullet);
         }
-        dummy.updateMatrix();
-        ref.current.setMatrixAt(i, dummy.matrix);
       }
-      ref.current.instanceMatrix.needsUpdate = true;
-    };
 
-    // Update Cannon bullets
-    updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (bullet, d) => {
-      d.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
-      const baseScale = 1 + Math.sin(time * 10) * 0.1;
-      const sizeMultiplier = bullet.size || 1;
-      d.scale.setScalar(baseScale * sizeMultiplier);
-    });
+      // Helper to update instanced mesh
+      const updateInstanceMesh = (
+        ref: React.RefObject<THREE.InstancedMesh | null>,
+        bullets: BulletData[],
+        maxCount: number,
+        updateLogic: (bullet: BulletData, dummy: THREE.Object3D) => void
+      ) => {
+        if (!ref.current || typeof ref.current.setMatrixAt !== 'function') return;
+        for (let i = 0; i < maxCount; i++) {
+          if (i < bullets.length) {
+            const bullet = bullets[i];
+            const pos = (bullet.mesh as THREE.Object3D).position;
+            dummy.position.copy(pos);
+            updateLogic(bullet, dummy);
+          } else {
+            dummy.position.set(0, -1000, 0);
+            dummy.scale.copy(zeroScale);
+          }
+          dummy.updateMatrix();
+          ref.current.setMatrixAt(i, dummy.matrix);
+        }
+        ref.current.instanceMatrix.needsUpdate = true;
+      };
 
-    // Update SMG bullets
-    updateInstanceMesh(smgRef, smgBullets, MAX_SMG_BULLETS, (bullet, d) => {
-      lookAtVecRef.current.copy((bullet.mesh as THREE.Object3D).position).add(bullet.direction);
-      d.lookAt(lookAtVecRef.current);
-      const sizeMultiplier = bullet.size || 1;
-      d.scale.set(sizeMultiplier, sizeMultiplier, 1.5 * sizeMultiplier);
-    });
+      // Update Cannon bullets
+      updateInstanceMesh(cannonRef, cannonBullets, MAX_CANNON_BULLETS, (bullet, d) => {
+        d.rotation.set(time * 3, time * 2, time * 4); // Tumbling coal
+        const baseScale = 1 + Math.sin(time * 10) * 0.1;
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.setScalar(baseScale * sizeMultiplier);
+      });
 
-    // Update Star bullets
-    updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (bullet, d) => {
-      d.rotation.set(0, 0, time * 15); // Fast spin
-      const sizeMultiplier = bullet.size || 1;
-      d.scale.setScalar(sizeMultiplier);
+      // Update SMG bullets
+      updateInstanceMesh(smgRef, smgBullets, MAX_SMG_BULLETS, (bullet, d) => {
+        lookAtVecRef.current.copy((bullet.mesh as THREE.Object3D).position).add(bullet.direction);
+        d.lookAt(lookAtVecRef.current);
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.set(sizeMultiplier, sizeMultiplier, 1.5 * sizeMultiplier);
+      });
+
+      // Update Star bullets
+      updateInstanceMesh(starRef, starBullets, MAX_STAR_BULLETS, (bullet, d) => {
+        d.rotation.set(0, 0, time * 15); // Fast spin
+        const sizeMultiplier = bullet.size || 1;
+        d.scale.setScalar(sizeMultiplier);
+      });
+
+      return activeBullets;
     });
   });
 

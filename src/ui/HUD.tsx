@@ -1,19 +1,14 @@
-import { useShallow } from 'zustand/react/shallow';
+/**
+ * HUD Component
+ * Displays player health, current objective, and active upgrades
+ */
+
 import { CONFIG, ROGUELIKE_UPGRADES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import styles from './HUD.module.css';
 
 export function HUD() {
-  const { state, playerHp, playerMaxHp, stats, runProgress, metaProgress } = useGameStore(
-    useShallow((state) => ({
-      state: state.state,
-      playerHp: state.playerHp,
-      playerMaxHp: state.playerMaxHp,
-      stats: state.stats,
-      runProgress: state.runProgress,
-      metaProgress: state.metaProgress,
-    }))
-  );
+  const { state, playerHp, playerMaxHp, stats, runProgress, metaProgress } = useGameStore();
 
   // Hide HUD on menu and briefing screens
   if (state === 'MENU' || state === 'BRIEFING') return null;
@@ -45,14 +40,7 @@ export function HUD() {
       {/* Health & XP Panel */}
       <div className={styles.panel} style={{ borderColor: '#00ffcc' }}>
         <div className={styles.label}>OPERATOR STATUS</div>
-        <div
-          className={styles.barWrap}
-          role="progressbar"
-          aria-label="Health"
-          aria-valuenow={Math.floor(playerHp)}
-          aria-valuemin={0}
-          aria-valuemax={playerMaxHp}
-        >
+        <div className={styles.barWrap}>
           <div
             className={styles.hpBar}
             style={{ width: `${hpPercent}%`, backgroundColor: hpColor }}
@@ -68,11 +56,6 @@ export function HUD() {
         <div
           className={styles.barWrap}
           style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}
-          role="progressbar"
-          aria-label="Experience"
-          aria-valuenow={runProgress.xp}
-          aria-valuemin={0}
-          aria-valuemax={xpToNextLevel}
         >
           <div
             className={styles.hpBar}

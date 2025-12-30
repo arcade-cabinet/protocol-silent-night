@@ -17,7 +17,7 @@ describe('Game Constants', () => {
     });
 
     it('should have spawn interval', () => {
-      expect(CONFIG.SPAWN_INTERVAL).toBe(1500);
+      expect(CONFIG.SPAWN_INTERVAL).toBe(2500);
     });
 
     it('should have color palette', () => {
