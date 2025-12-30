@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { calculateChecksum, unwrapWithChecksum, verifyChecksum, wrapWithChecksum } from '@/utils/security';
 import { useGameStore } from '@/store/gameStore';
 
