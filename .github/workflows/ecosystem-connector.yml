@@ -52,6 +52,9 @@ jobs:
       contains(github.event.comment.body, '/jules')
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
       - name: Delegate to Jules
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
@@ -84,6 +87,9 @@ jobs:
       contains(github.event.comment.body, '/cursor')
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
       - name: Delegate to Cursor
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
