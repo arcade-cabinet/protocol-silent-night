@@ -85,15 +85,15 @@ export default defineConfig({
   webServer: hasMcpSupport
     ? {
         // MCP mode: Use dev server for interactive testing
-        command: 'npm run dev',
+        command: 'pnpm dev',
         url: 'http://localhost:3000',
         reuseExistingServer: false,
         timeout: 120000,
       }
     : {
         // CI mode: Use production preview
-        command: 'npm run build && pnpm preview',
-        url: 'http://localhost:4173',
+        command: 'pnpm preview --port 3000',
+        url: 'http://localhost:3000',
         reuseExistingServer: !isCI,
         timeout: 120000,
       },

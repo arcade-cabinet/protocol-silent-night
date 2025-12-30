@@ -142,6 +142,8 @@ export function StrataCharacter({
             return group;
           }
           case 'pointLight': {
+            // Muzzle flash light disabled to fix WebGL uniform overflow
+            if (custom.name === 'muzzle_flash') return null;
             if (scaledArgs && scaledArgs.length >= 3) {
               const light = new THREE.PointLight(
                 scaledArgs[0] as string | number,
