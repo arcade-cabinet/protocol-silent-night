@@ -284,8 +284,6 @@ export function Bullets() {
         frustumCulled={false}
       />
 
-      {/* Global bullet glow light */}
-      <pointLight color={0xffaa44} intensity={0.3} distance={10} position={[0, 2, 0]} />
     </group>
   );
 }

@@ -400,12 +400,6 @@ function BossMesh({
           <dodecahedronGeometry args={[0.4]} />
           <meshBasicMaterial color={emissiveColor} />
         </mesh>
-        <pointLight
-          color={emissiveColor}
-          intensity={intensity * 2}
-          distance={8}
-          position={[0, 0.2, 1.2]}
-        />
         {[-0.6, -0.2, 0.2, 0.6].map((y) => (
           <mesh key={`rib-${y}`} position={[0, y, 0.9]} castShadow>
             <boxGeometry args={[2.2, 0.15, 0.1]} />
@@ -498,12 +492,6 @@ function BossMesh({
           <sphereGeometry args={[0.18, 8, 8]} />
           <meshBasicMaterial color={eyeColor} />
         </mesh>
-        <pointLight
-          color={eyeColor}
-          intensity={intensity * 1.5}
-          distance={6}
-          position={[0, 0.15, 0.8]}
-        />
         <group position={[0.5, 0.5, -0.1]} rotation={[0.3, 0.4, 0.2]}>
           <mesh castShadow>
             <coneGeometry args={[0.2, 1.5, 6]} />
@@ -657,12 +645,6 @@ function BossMesh({
           </mesh>
         </group>
       </group>
-      <pointLight
-        color={new THREE.Color(emissiveColor)}
-        intensity={intensity * 3}
-        distance={15}
-        position={[0, 0, 0]}
-      />
       <mesh position={[0, 5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1.8, 2, 32, 1, 0, Math.PI * 2 * hpRatio]} />
         <meshBasicMaterial
