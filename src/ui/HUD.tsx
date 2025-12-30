@@ -40,7 +40,14 @@ export function HUD() {
       {/* Health & XP Panel */}
       <div className={styles.panel} style={{ borderColor: '#00ffcc' }}>
         <div className={styles.label}>OPERATOR STATUS</div>
-        <div className={styles.barWrap}>
+        <div
+          className={styles.barWrap}
+          role="progressbar"
+          aria-label="Health"
+          aria-valuenow={Math.floor(playerHp)}
+          aria-valuemin={0}
+          aria-valuemax={playerMaxHp}
+        >
           <div
             className={styles.hpBar}
             style={{ width: `${hpPercent}%`, backgroundColor: hpColor }}
@@ -55,6 +62,11 @@ export function HUD() {
         </div>
         <div
           className={styles.barWrap}
+          role="progressbar"
+          aria-label="Experience"
+          aria-valuenow={runProgress.xp}
+          aria-valuemin={0}
+          aria-valuemax={xpToNextLevel}
           style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}
         >
           <div
