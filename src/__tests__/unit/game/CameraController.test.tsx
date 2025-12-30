@@ -32,7 +32,7 @@ describe('CameraController Component', () => {
         renderer.scene.allChildren.find(
           // biome-ignore lint/suspicious/noExplicitAny: test-renderer internals
           (c: any) => (c as any).instance.camera
-        // biome-ignore lint/suspicious/noExplicitAny: test-renderer internals
+          // biome-ignore lint/suspicious/noExplicitAny: test-renderer internals
         ) as any
       )?.instance.camera;
     if (camera) {
