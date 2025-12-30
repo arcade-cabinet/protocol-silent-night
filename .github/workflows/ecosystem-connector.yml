@@ -49,7 +49,6 @@ jobs:
     name: Delegate to Jules
     if: |
       github.event_name == 'issue_comment' &&
-      !github.event.issue.pull_request &&
       contains(github.event.comment.body, '/jules')
     runs-on: ubuntu-latest
     steps:
@@ -63,17 +62,25 @@ jobs:
           COMMENT="${{ github.event.comment.body }}"
           TASK=$(echo "$COMMENT" | sed 's|/jules ||')
           
-          gh issue comment ${{ github.event.issue.number }} --body "🤖 **Jules Delegation**
-          
-          Task received: $TASK
-          
-          Jules session will be created to handle this request."
+          # Determine if this is a PR or issue
+          if [ -n "${{ github.event.issue.pull_request }}" ]; then
+            gh pr comment ${{ github.event.issue.number }} --body "🤖 **Jules Delegation**
+            
+            Task received: $TASK
+            
+            Jules will rebase and fix this PR."
+          else
+            gh issue comment ${{ github.event.issue.number }} --body "🤖 **Jules Delegation**
+            
+            Task received: $TASK
+            
+            Jules session will be created to handle this request."
+          fi
 
   delegate-cursor:
     name: Delegate to Cursor
     if: |
       github.event_name == 'issue_comment' &&
-      !github.event.issue.pull_request &&
       contains(github.event.comment.body, '/cursor')
     runs-on: ubuntu-latest
     steps:
@@ -87,11 +94,20 @@ jobs:
           COMMENT="${{ github.event.comment.body }}"
           TASK=$(echo "$COMMENT" | sed 's|/cursor ||')
           
-          gh issue comment ${{ github.event.issue.number }} --body "🤖 **Cursor Delegation**
-          
-          Task received: $TASK
-          
-          Cursor agent will be spawned to handle this request."
+          # Determine if this is a PR or issue
+          if [ -n "${{ github.event.issue.pull_request }}" ]; then
+            gh pr comment ${{ github.event.issue.number }} --body "🤖 **Cursor Delegation**
+            
+            Task received: $TASK
+            
+            Cursor agent will work on this PR."
+          else
+            gh issue comment ${{ github.event.issue.number }} --body "🤖 **Cursor Delegation**
+            
+            Task received: $TASK
+            
+            Cursor agent will be spawned to handle this request."
+          fi
 
   claude-pr:
     name: Claude on PR
