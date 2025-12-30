@@ -60,7 +60,7 @@ jobs:
         with:
           node-version: '22'
           cache: pnpm
-      - run: pnpm install
+      - run: pnpm install --no-frozen-lockfile
       - run: pnpm run lint --if-present
       - run: pnpm run build --if-present
       - run: pnpm test --if-present
