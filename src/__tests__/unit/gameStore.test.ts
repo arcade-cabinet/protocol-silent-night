@@ -405,7 +405,8 @@ describe('GameStore - High Score', () => {
     addKill(1000);
     updateHighScore();
 
-    expect(localStorage.getItem('protocol-silent-night-highscore')).toBe('1000');
+    const stored = JSON.parse(localStorage.getItem('protocol-silent-night-highscore') || '{}');
+    expect(stored.data).toBe(1000);
   });
 
   it('should load high score from localStorage on init', () => {
@@ -416,7 +417,8 @@ describe('GameStore - High Score', () => {
     updateHighScore();
 
     // Verify it was persisted
-    expect(localStorage.getItem('protocol-silent-night-highscore')).toBe('2500');
+    const stored = JSON.parse(localStorage.getItem('protocol-silent-night-highscore') || '{}');
+    expect(stored.data).toBe(2500);
 
     // Reset the store - high score should persist
     reset();
