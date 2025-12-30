@@ -4,17 +4,20 @@
  */
 
 import { useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { WEAPONS } from '@/data';
-import { useGameStoreShallow } from '@/store/useGameStoreShallow';
+import { useGameStore } from '@/store/gameStore';
 import styles from './WeaponHUD.module.css';
 
 export function WeaponHUD() {
-  const { state, currentWeapon, metaProgress, setWeapon } = useGameStoreShallow((state) => ({
-    state: state.state,
-    currentWeapon: state.currentWeapon,
-    metaProgress: state.metaProgress,
-    setWeapon: state.setWeapon,
-  }));
+  const { state, currentWeapon, metaProgress, setWeapon } = useGameStore(
+    useShallow((state) => ({
+      state: state.state,
+      currentWeapon: state.currentWeapon,
+      metaProgress: state.metaProgress,
+      setWeapon: state.setWeapon,
+    }))
+  );
 
   const currentWeaponConfig = WEAPONS[currentWeapon as keyof typeof WEAPONS];
   const unlockedWeapons = metaProgress.unlockedWeapons

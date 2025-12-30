@@ -235,6 +235,7 @@ export function StrataCharacter({
     // 3. Cache fur groups
     const furGroups: THREE.Group[] = [];
     character.root.traverse((child) => {
+      // biome-ignore lint/suspicious/noExplicitAny: userData is any in Three.js
       if (child instanceof THREE.Group && (child as any).userData.isFurGroup) {
         furGroups.push(child as THREE.Group);
       }
