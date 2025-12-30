@@ -273,9 +273,10 @@ export function StrataCharacter({
         }
       }
 
-      if (muzzleRef.current) {
-        muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
-      }
+      // Muzzle flash light disabled to fix WebGL uniform overflow
+      // if (muzzleRef.current) {
+      //   muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
+      // }
     }
   });
 
