@@ -16,6 +16,7 @@ import type { ChristmasObstacle } from '@/types';
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const setObstacles = useGameStore((state) => state.setObstacles);
+  const playerPosition = useGameStore((state) => state.playerPosition);
 
   // Create geometry and material
   const geometry = useMemo(
@@ -143,9 +144,11 @@ export function Terrain() {
       {/* Limit rendering to nearby obstacles for performance optimization */}
       {obstacles
         .filter((obstacle) => {
-          // Only render obstacles within visible range (~100 units from origin)
-          const dist = Math.sqrt(obstacle.position.x ** 2 + obstacle.position.z ** 2);
-          return dist < 150;
+          // Only render obstacles within visible range (~150 units from player)
+          const dx = obstacle.position.x - playerPosition.x;
+          const dz = obstacle.position.z - playerPosition.z;
+          const distSq = dx * dx + dz * dz;
+          return distSq < 150 * 150; // Use squared distance for performance
         })
         .map((obstacle) => (
           <ChristmasObstacleMesh

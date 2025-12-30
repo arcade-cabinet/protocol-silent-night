@@ -272,11 +272,6 @@ export function StrataCharacter({
           weaponGroupRef.current.position.z += Math.sin(time * 20) * 0.02;
         }
       }
-
-      // Muzzle flash light disabled to fix WebGL uniform overflow
-      // if (muzzleRef.current) {
-      //   muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
-      // }
     }
   });
 
