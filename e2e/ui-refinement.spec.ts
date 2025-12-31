@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * UI Component Refinement Tests
@@ -11,6 +11,18 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
+
+// Helper to wait for loading screen to be fully gone
+async function waitForLoadingComplete(page: Page) {
+  // Wait for loading screen to detach with longer timeout for CI
+  await page.waitForSelector('[data-testid="loading-screen"]', { state: 'detached', timeout: 10000 }).catch(() => {});
+
+  // Extra wait for any animations and React re-renders
+  await page.waitForTimeout(2000);
+
+  // Wait for at least one character button to be visible and stable
+  await page.getByRole('button', { name: /MECHA-SANTA|CYBER-ELF|BUMBLE/ }).first().waitFor({ state: 'visible', timeout: 10000 });
+}
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
@@ -30,21 +42,22 @@ test.describe('UI Component Refinement', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    await waitForLoadingComplete(page);
   });
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
+      await page.waitForSelector('h1', { timeout: 10000 });
 
       // Verify title is visible
       const title = page.locator('h1');
-      await expect(title).toBeVisible();
+      await expect(title).toBeVisible({ timeout: 10000 });
       await expect(title).toContainText('Protocol');
 
       // Verify subtitle
       const subtitle = page.locator('h3');
-      await expect(subtitle).toBeVisible();
+      await expect(subtitle).toBeVisible({ timeout: 10000 });
       await expect(subtitle).toContainText('DDL Edition');
 
       // Screenshot for visual inspection (MCP mode)
@@ -227,7 +240,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 5000 });
+      // Explicitly wait for the title to be visible (handles slow CI runners)
+      await page.waitForSelector('h1', { state: 'visible', timeout: 10000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {

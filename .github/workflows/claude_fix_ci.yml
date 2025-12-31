@@ -39,7 +39,7 @@ jobs:
 
       - name: Checkout repository
         if: steps.security.outputs.is_fork == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
@@ -50,7 +50,7 @@ jobs:
 
       - name: Setup Node.js
         if: steps.security.outputs.is_fork == 'false'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -62,7 +62,7 @@ jobs:
       - name: Get CI failure details
         if: steps.security.outputs.is_fork == 'false'
         id: failure_details
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         with:
@@ -181,7 +181,7 @@ jobs:
 
       - name: Checkout repository
         if: steps.security.outputs.is_fork == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Analyze for flaky tests
         if: steps.security.outputs.is_fork == 'false'
