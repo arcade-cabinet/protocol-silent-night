@@ -1,3 +1,0 @@
-## 2024-05-23 - [Optimizing R3F Components with Zustand]
-**Learning:** React components subscribing to a Zustand store without selectors (i.e., `useStore()`) will re-render on *every* state update. In a game loop where state updates happen every frame (e.g., player position, bullet updates), this causes the entire component tree to re-render 60 times per second, leading to massive performance degradation.
-**Action:** Always use specific selectors for stable values (e.g., `useStore(state => state.action)`) and access high-frequency/transient state directly via `useStore.getState()` inside `useFrame` loops, bypassing the React render cycle entirely.

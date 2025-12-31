@@ -168,11 +168,20 @@ const loadMetaProgress = (): MetaProgressData => {
 
       // Fallback: Check if it's legacy data (plain JSON)
       // We try to parse it and check for a known property
+      // Only do this if we are reasonably sure it is NOT a corrupted secured object
       try {
         const raw = JSON.parse(stored);
-        if (raw && typeof raw === 'object' && 'nicePoints' in raw) {
-          // It's likely legacy data, so we accept it (and it will be secured on next save)
-          return raw as MetaProgressData;
+        // If it has 'checksum' property, it was intended to be secured but failed validation
+        // In that case, we should NOT treat it as legacy, but as corrupted.
+        if (raw && typeof raw === 'object') {
+          if ('checksum' in raw) {
+            console.warn('Secured data validation failed. Treating as corrupted.');
+            return initialMetaProgress;
+          }
+          if ('nicePoints' in raw) {
+            // It's likely legacy data, so we accept it (and it will be secured on next save)
+            return raw as MetaProgressData;
+          }
         }
       } catch {
         // Ignore JSON parse error here, return default

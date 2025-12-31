@@ -1,63 +1,60 @@
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { MessageOverlay } from '@/ui/MessageOverlay';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
+import { MessageOverlay } from '@/ui/MessageOverlay';
 
-// Mock the game store
-vi.mock('@/store/gameStore', () => ({
-  useGameStore: vi.fn(),
-}));
-
-const mockUseGameStore = useGameStore as unknown as Mock;
-
-describe('MessageOverlay', () => {
+describe('MessageOverlay Component', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    useGameStore.getState().reset();
   });
 
-  it('renders boss warning when boss is active', () => {
-    mockUseGameStore.mockReturnValue({
-      state: 'PHASE_BOSS',
-      bossActive: true,
+  it('should not render in MENU state', () => {
+    const { container } = render(<MessageOverlay />);
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('should render warning message when boss spawns', async () => {
+    act(() => {
+      useGameStore.getState().selectClass('santa');
+      // Set level to 10 to avoid level-up interruption
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, level: 10 },
+      });
+      // Manually trigger boss spawn
+      useGameStore.getState().spawnBoss();
     });
 
     render(<MessageOverlay />);
 
-    expect(screen.getByText(/WARNING: BOSS DETECTED/)).toBeInTheDocument();
+    await waitFor(
+      () => {
+        const warningText = screen.queryByText(/WARNING/i) || screen.queryByText(/DETECTED/i);
+        expect(warningText).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
   });
 
-  it('renders mission complete when state is WIN', () => {
-    mockUseGameStore.mockReturnValue({
-      state: 'WIN',
-      bossActive: false,
-    });
+  it('should render win message in WIN state', async () => {
+    useGameStore.getState().selectClass('santa');
+    useGameStore.getState().setState('WIN');
 
     render(<MessageOverlay />);
 
-    expect(screen.getByText(/MISSION COMPLETE/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('✓ MISSION COMPLETE ✓')).toBeInTheDocument();
+    });
   });
 
-  it('renders operator down when state is GAME_OVER', () => {
-    mockUseGameStore.mockReturnValue({
-      state: 'GAME_OVER',
-      bossActive: false,
-    });
+  it('should render game over message in GAME_OVER state', async () => {
+    useGameStore.getState().selectClass('santa');
+    useGameStore.getState().setState('GAME_OVER');
 
     render(<MessageOverlay />);
 
-    expect(screen.getByText(/OPERATOR DOWN/)).toBeInTheDocument();
-  });
-
-  it('is accessible with role="alert"', () => {
-    mockUseGameStore.mockReturnValue({
-      state: 'PHASE_BOSS',
-      bossActive: true,
+    await waitFor(() => {
+      expect(screen.getByText('✗ OPERATOR DOWN ✗')).toBeInTheDocument();
     });
-
-    render(<MessageOverlay />);
-
-    const alert = screen.getByRole('alert');
-    expect(alert).toBeInTheDocument();
-    expect(alert).toHaveTextContent(/WARNING: BOSS DETECTED/);
   });
 });

@@ -132,7 +132,7 @@
         {
           "name": "muzzle_flash",
           "type": "pointLight",
-          "args": ["#ffd700", 0, 4],
+          "args": ["#ffd700", 1, 4],
           "position": [0, 0, 0]
         }
       ]

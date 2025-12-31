@@ -40,13 +40,5 @@ export function MessageOverlay() {
 
   if (!message || !visible) return null;
 
-  return (
-    <div
-      role="alert"
-      aria-live="assertive"
-      className={`${styles.overlay} ${state === 'WIN' ? styles.win : ''}`}
-    >
-      {message}
-    </div>
-  );
+  return <div className={`${styles.overlay} ${state === 'WIN' ? styles.win : ''}`}>{message}</div>;
 }

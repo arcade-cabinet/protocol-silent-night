@@ -16,7 +16,6 @@ import type { ChristmasObstacle } from '@/types';
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const setObstacles = useGameStore((state) => state.setObstacles);
-  const playerPosition = useGameStore((state) => state.playerPosition);
 
   // Create geometry and material
   const geometry = useMemo(
@@ -141,21 +140,12 @@ export function Terrain() {
       />
 
       {/* Christmas-themed obstacles (rendered as individual meshes for better visual variety) */}
-      {/* Limit rendering to nearby obstacles for performance optimization */}
-      {obstacles
-        .filter((obstacle) => {
-          // Only render obstacles within visible range (~150 units from player)
-          const dx = obstacle.position.x - playerPosition.x;
-          const dz = obstacle.position.z - playerPosition.z;
-          const distSq = dx * dx + dz * dz;
-          return distSq < 150 * 150; // Use squared distance for performance
-        })
-        .map((obstacle) => (
-          <ChristmasObstacleMesh
-            key={`${obstacle.position.x}-${obstacle.position.z}`}
-            obstacle={obstacle}
-          />
-        ))}
+      {obstacles.map((obstacle) => (
+        <ChristmasObstacleMesh
+          key={`${obstacle.position.x}-${obstacle.position.z}`}
+          obstacle={obstacle}
+        />
+      ))}
 
       {/* Grid Floor Helper - darker for cyberpunk vibe */}
       <gridHelper args={[200, 100, 0x001111, 0x000505]} position={[0, -2, 0]} />
@@ -268,6 +258,12 @@ function CyberpunkTree({
         <octahedronGeometry args={[0.2]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
+      <pointLight
+        color={0xffd700}
+        intensity={0.5}
+        distance={4}
+        position={[0, height / 2 + 0.3, 0]}
+      />
 
       {/* Ornament lights */}
       {[0, 1, 2].map((i) => {
@@ -348,6 +344,9 @@ function CyberpunkPresent({
         <torusGeometry args={[0.15, 0.05, 8, 16]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
+
+      {/* Glow */}
+      <pointLight color={colorHex} intensity={0.4} distance={3} position={[0, height / 2, 0]} />
     </group>
   );
 }
@@ -390,6 +389,8 @@ function CyberpunkCandyCane({
         <torusGeometry args={[0.15, 0.05, 8, 8, Math.PI]} />
         <meshBasicMaterial color={0xff0066} />
       </mesh>
+
+      <pointLight color={0xff0066} intensity={0.3} distance={3} position={[0, height / 2, 0]} />
     </group>
   );
 }
@@ -435,6 +436,13 @@ function CyberpunkPillar({
         <cylinderGeometry args={[0.5, 0.6, 0.2, 6]} />
         <meshStandardMaterial color={0x002222} emissive={0x00ffcc} emissiveIntensity={0.5} />
       </mesh>
+
+      <pointLight
+        color={0x00ffcc}
+        intensity={0.6}
+        distance={5}
+        position={[0, height / 2 + 0.5, 0]}
+      />
     </group>
   );
 }
