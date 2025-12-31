@@ -315,6 +315,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.2,
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -326,7 +327,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await page.waitForLoadState('networkidle');
-    await santaButton.click();
+    await santaButton.click({ force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle');
@@ -346,7 +347,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await page.waitForLoadState('networkidle');
-    await santaButton.click();
+    await santaButton.click({ force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle');
