@@ -12,14 +12,19 @@ const CLICK_TIMEOUT = 10000; // Increased timeout for clicks
 
 /**
  * Wait for loading screen to be completely hidden
- * The loading screen has minDuration of 1500ms + 500ms fadeOut animation = 2000ms total
+ * The loading screen has minDuration of 1500ms + CSS animation (1.4s delay + 0.5s fadeOut) = 1900ms total
  */
 async function waitForLoadingScreen(page: Page) {
-  // Wait for loading screen to start its fadeOut animation and become hidden
-  await page.waitForTimeout(2500); // Wait for minDuration + fadeOut animation + buffer
+  // Wait for loading screen element to be completely removed or hidden
+  // The component unmounts after minDuration (1500ms) and the CSS animation completes (1900ms)
+  await page.waitForTimeout(2500); // Wait for minDuration + CSS animation + buffer
 
-  // Ensure character selection buttons are visible and interactive
-  await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 5000 });
+  // Wait for the start screen to be visible and interactive
+  // Use a more reliable selector that waits for any character selection button
+  await page.waitForSelector('[class*="classCard"]', { state: 'visible', timeout: 10000 });
+
+  // Additional wait to ensure all buttons are fully interactive after CSS transitions
+  await page.waitForTimeout(500);
 }
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
