@@ -72,12 +72,12 @@ export function HUD() {
         </div>
         <div
           className={styles.barWrap}
-          style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}
           role="progressbar"
           aria-label="Experience"
           aria-valuenow={runProgress.xp}
           aria-valuemin={0}
           aria-valuemax={xpToNextLevel}
+          style={{ height: '6px', backgroundColor: 'rgba(255, 215, 0, 0.1)' }}
         >
           <div
             className={styles.hpBar}
