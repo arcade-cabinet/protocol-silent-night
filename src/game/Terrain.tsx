@@ -6,7 +6,7 @@
 
 import { fbm, noise3D } from '@jbcom/strata';
 import { useFrame } from '@react-three/fiber';
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { OBSTACLE_TYPES, TERRAIN_CONFIG } from '@/data';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
@@ -164,7 +164,11 @@ export function Terrain() {
 }
 
 // Individual Christmas obstacle component for visual variety
-function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
+const ChristmasObstacleMesh = memo(function ChristmasObstacleMesh({
+  obstacle,
+}: {
+  obstacle: ChristmasObstacle;
+}) {
   const posArray: [number, number, number] = useMemo(
     () => [obstacle.position.x, obstacle.position.y, obstacle.position.z],
     [obstacle.position]
@@ -189,7 +193,7 @@ function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
 
   // Fallback to Present if unknown type (better than just a box)
   return <CyberpunkPresent position={posArray} height={obstacle.height} color={obstacle.color} />;
-}
+});
 
 // Cyberpunk Christmas Tree - Holographic with neon decorations
 function CyberpunkTree({
