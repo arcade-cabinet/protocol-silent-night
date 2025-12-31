@@ -47,12 +47,11 @@ describe('SeededRandom Security', () => {
 
   it('should fall back to Math.random if crypto is not available', () => {
     const originalCrypto = window.crypto;
-    // @ts-expect-error
     Object.defineProperty(window, 'crypto', { value: undefined, writable: true });
 
     const mathRandomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
-    const _rng = new SeededRandom();
+    new SeededRandom();
 
     expect(mathRandomSpy).toHaveBeenCalled();
 
