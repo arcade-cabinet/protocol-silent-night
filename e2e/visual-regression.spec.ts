@@ -84,7 +84,7 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Select Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+    await elfButton.click({ noWaitAfter: true });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -106,7 +106,7 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Select Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.click();
+    await bumbleButton.click({ noWaitAfter: true });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -239,7 +239,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+    await elfButton.click({ noWaitAfter: true });
 
     // Wait for and click "COMMENCE OPERATION" button
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -320,7 +320,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 10000 });
-    await santaButton.click({ timeout: 15000 });
+    await santaButton.click({ noWaitAfter: true });
 
     // Wait for and click "COMMENCE OPERATION" button
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -343,7 +343,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 10000 });
-    await santaButton.click({ timeout: 15000 });
+    await santaButton.click({ noWaitAfter: true });
 
     // Wait for and click "COMMENCE OPERATION" button
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
