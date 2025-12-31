@@ -31,6 +31,7 @@
     "react-three-fiber"
   ],
   "license": "MIT",
+  "packageManager": "pnpm@10.26.0",
   "dependencies": {
     "@jbcom/strata": "^1.4.10",
     "@react-three/drei": "^10.7.7",
