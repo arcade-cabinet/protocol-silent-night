@@ -343,7 +343,15 @@ export class SeededRandom {
   private state: number;
 
   constructor(seed?: number) {
-    this.state = seed ?? Math.floor(Math.random() * 999999);
+    if (seed !== undefined) {
+      this.state = seed;
+    } else if (typeof window !== 'undefined' && window.crypto) {
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      this.state = array[0] % 999999;
+    } else {
+      this.state = Math.floor(Math.random() * 999999);
+    }
   }
 
   /**
