@@ -272,8 +272,15 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
-    await page.waitForTimeout(5000);
+    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+    await santaButton.scrollIntoViewIfNeeded();
+    await santaButton.click();
+
+    // Wait for the FIRE button to appear as confirmation of game start
+    const fireButton = page.getByRole('button', { name: /FIRE/ });
+    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+
+    await page.waitForTimeout(2000); // Allow render to settle
     
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
