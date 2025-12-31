@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { calculateChecksum, validateAndUnwrap, wrapAndSecure } from '@/utils/security';
 
 describe('Security Utils', () => {
