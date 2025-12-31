@@ -189,6 +189,61 @@
         "projectileCount": 6,
         "speedMultiplier": 1.1
       }
+    },
+    "holiday-supernova": {
+      "id": "holiday-supernova",
+      "name": "Holiday Supernova",
+      "baseWeapon": "ornament",
+      "minLevel": 10,
+      "modifiers": {
+        "damageMultiplier": 2.5,
+        "size": 3.0,
+        "explosive": true
+      }
+    },
+    "tesla-tinsel": {
+      "id": "tesla-tinsel",
+      "name": "Tesla Tinsel",
+      "baseWeapon": "light_string",
+      "minLevel": 10,
+      "modifiers": {
+        "damageMultiplier": 1.9,
+        "projectileCount": 4,
+        "rofMultiplier": 1.4
+      }
+    },
+    "frosted-fortress": {
+      "id": "frosted-fortress",
+      "name": "Frosted Fortress",
+      "baseWeapon": "gingerbread",
+      "minLevel": 10,
+      "modifiers": {
+        "damageMultiplier": 2.2,
+        "size": 1.8,
+        "hasShield": true
+      }
+    },
+    "cathedral-chimes": {
+      "id": "cathedral-chimes",
+      "name": "Cathedral Chimes",
+      "baseWeapon": "jingle_bell",
+      "minLevel": 10,
+      "modifiers": {
+        "damageMultiplier": 1.5,
+        "projectileCount": 12,
+        "spreadAngle": 0.6
+      }
+    },
+    "ultimate-present": {
+      "id": "ultimate-present",
+      "name": "The Ultimate Present",
+      "baseWeapon": "quantum_gift",
+      "minLevel": 10,
+      "modifiers": {
+        "damageMultiplier": 3.0,
+        "rofMultiplier": 1.5,
+        "size": 2.5
+      }
     }
   }
 }
