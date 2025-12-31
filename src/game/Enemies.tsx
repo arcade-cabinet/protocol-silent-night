@@ -82,6 +82,18 @@ export function Enemies() {
       }
     }
 
+    // Ensure we keep spawning if the population drops too low
+    // This addresses the "enemies not spawning" complaint by forcing population maintenance
+    if ((state === 'PHASE_1' || state === 'PHASE_BOSS')) {
+      const checkId = setInterval(() => {
+          const { enemies } = useGameStore.getState();
+          if (enemies.length < CONFIG.MAX_MINIONS / 2) {
+              spawnMinion();
+          }
+      }, 1000);
+      timeoutIds.push(checkId);
+    }
+
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
     }
@@ -136,14 +148,25 @@ export function Enemies() {
         ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
       enemy.mesh.rotation.y += angleDiff * delta * 8;
 
-      const hitRadius =
-        enemy.type === 'boss'
-          ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
-          : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
-      if (distance < hitRadius) {
-        if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-          shouldDamage = true;
-          damageAmount = Math.max(damageAmount, enemy.damage);
+        const hitRadius =
+          enemy.type === 'boss'
+            ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
+            : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
+        if (distance < hitRadius) {
+          if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
+            // Only damage if enemy is properly initialized (not at origin 0,0,0).
+            // Enemies spawn at radius 20-30 units, so lengthSq > 0.1 ensures proper initialization.
+            // This prevents "ghost damage" from corrupted or uninitialized enemy meshes.
+            const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
+
+            if (isInitialized) {
+              shouldDamage = true;
+              damageAmount = Math.max(damageAmount, enemy.damage);
+            }
+          }
+          tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
+          currentPos.add(tempVec);
+        }
         }
         tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
         currentPos.add(tempVec);
