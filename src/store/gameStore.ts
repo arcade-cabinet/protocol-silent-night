@@ -408,7 +408,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    if (newKills >= CONFIG.WAVE_REQ && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
+    // Scale requirement by wave
+    const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
+
+    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
@@ -901,20 +904,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const updatedMeta = {
         ...get().metaProgress,
         bossesDefeated: get().metaProgress.bossesDefeated + 1,
+        // Runs completed logic might need to change if endless, but keep it for now as "Boss Defeated" marker
         runsCompleted: get().metaProgress.runsCompleted + 1,
         nicePoints: get().metaProgress.nicePoints + 500,
       };
+
+      // Endless Mode Cycle: Go to Level Up, then Next Wave (Phase 1)
+      const currentWave = get().runProgress.wave;
+
       set({
-        state: 'WIN',
+        state: 'LEVEL_UP', // Trigger a level up reward for killing boss
+        previousState: 'PHASE_1', // After level up, go back to PHASE_1
         bossActive: false,
-        stats: { ...get().stats, bossDefeated: true },
+        runProgress: {
+            ...get().runProgress,
+            wave: currentWave + 1,
+            // We do NOT reset xp or level, just wave
+        },
+        stats: { ...get().stats, bossDefeated: true }, // Keep bossDefeated as true for achievement tracking? Or reset?
         metaProgress: updatedMeta,
       });
+
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
-      AudioManager.playSFX('victory');
-      AudioManager.playMusic('victory');
+      AudioManager.playSFX('victory'); // Maybe a shorter stinger?
+      // AudioManager.playMusic('victory'); // Don't stop the flow too much, or play stinger then back to game music
+
       return true;
     }
     return false;
