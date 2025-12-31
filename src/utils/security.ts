@@ -14,11 +14,9 @@ export const calculateChecksum = (data: string): string => {
   let hash = FNV_OFFSET_BASIS;
   for (let i = 0; i < data.length; i++) {
     hash ^= data.charCodeAt(i);
-    // Force 32-bit unsigned integer multiplication simulation
-    // Use BigInt for accurate large number multiplication if Math.imul behavior is inconsistent
-    // or stick to Math.imul which is standard for 32-bit int multiplication in JS.
-    // Reverting to Math.imul(hash, FNV_PRIME) as it is the standard way to implement FNV-1a in JS.
-    hash = Math.imul(hash, FNV_PRIME) >>> 0;
+    // Use the same formula as main for backward compatibility with existing saves.
+    // (hash * FNV_PRIME) >>> 0 is what was previously used.
+    hash = (hash * FNV_PRIME) >>> 0;
   }
   return hash.toString(16);
 };
