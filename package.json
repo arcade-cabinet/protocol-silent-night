@@ -35,7 +35,7 @@
   "dependencies": {
     "@jbcom/strata": "^1.4.10",
     "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.4.2",
+    "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
     "@react-three/rapier": "^2.2.0",
     "postprocessing": "^6.38.2",
