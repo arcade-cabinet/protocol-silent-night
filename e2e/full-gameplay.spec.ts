@@ -1,5 +1,4 @@
 import { test, expect, Page } from '@playwright/test';
-import { safeClick, selectCharacterAndStart } from './helpers';
 
 /**
  * Full Gameplay E2E Tests
@@ -105,7 +104,14 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     expect(state?.gameState).toBe('MENU');
     
     // Select Santa
-    await selectCharacterAndStart(page, 'MECHA-SANTA');
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
+    await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await page.waitForLoadState('networkidle');
+    await commenceButton.click();
 
     // Wait for game to start
     await page.waitForTimeout(2000);
