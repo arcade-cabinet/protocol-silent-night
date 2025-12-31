@@ -27,7 +27,7 @@ import type {
   WeaponType,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
-import { generateChecksum, verifyChecksum } from '@/utils/security';
+import { calculateChecksum, verifyChecksum } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -160,53 +160,59 @@ const loadMetaProgress = (): MetaProgressData => {
   try {
     const stored = localStorage.getItem(META_PROGRESS_KEY);
     if (stored) {
-      // Check if it's the old format (direct JSON) or new format (with checksum)
-      // Try parsing as simple JSON first
-      const parsed = JSON.parse(stored);
-
-      // If it has 'data' and 'hash', it's the new format
-      if (parsed && typeof parsed === 'object' && 'hash' in parsed && 'data' in parsed) {
-        const jsonString = JSON.stringify(parsed.data);
-        if (verifyChecksum(jsonString, parsed.hash)) {
-          return parsed.data;
-        } else {
-          console.warn('Tampered save data detected! Resetting progress.');
-          // Sentinel: Fall through to return default (reset)
+      // Check if it's the new secure format
+      try {
+        const parsed = JSON.parse(stored);
+        // If it has checksum field, verify it
+        if (parsed.checksum && parsed.data) {
+          if (verifyChecksum(parsed.data, parsed.checksum)) {
+            return JSON.parse(parsed.data);
+          } else {
+            console.error('Security violation: Save data tampering detected');
+            // We could return default state here, but for now we'll fall through to legacy check
+            // or just reset if we want strict security.
+            // Strict security:
+            // return getDefaultMetaProgress();
+          }
         }
-      } else {
-        // Legacy format - accept it once, it will be upgraded on next save
-        // Or strictly reject it? For now, let's accept it to avoid wiping users on update
-        // Sentinel decision: Upgrade on next save
-        return parsed;
+
+        // Backward compatibility: If it's a direct object (legacy save), allow it but it will be upgraded on next save
+        // We assume valid save data has 'nicePoints' property
+        if ('nicePoints' in parsed) {
+          return parsed;
+        }
+      } catch (e) {
+        // Parsing error
+        console.warn('Invalid save data format', e);
       }
     }
   } catch (e) {
     console.error('Failed to load meta progress:', e);
   }
 
-  return {
-    nicePoints: 0,
-    totalPointsEarned: 0,
-    runsCompleted: 0,
-    bossesDefeated: 0,
-    unlockedWeapons: ['cannon', 'smg', 'star'],
-    unlockedSkins: [],
-    permanentUpgrades: {},
-    highScore: 0,
-    totalKills: 0,
-    totalDeaths: 0,
-  };
+  return getDefaultMetaProgress();
 };
+
+const getDefaultMetaProgress = (): MetaProgressData => ({
+  nicePoints: 0,
+  totalPointsEarned: 0,
+  runsCompleted: 0,
+  bossesDefeated: 0,
+  unlockedWeapons: ['cannon', 'smg', 'star'],
+  unlockedSkins: [],
+  permanentUpgrades: {},
+  highScore: 0,
+  totalKills: 0,
+  totalDeaths: 0,
+});
 
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    const jsonString = JSON.stringify(data);
-    const payload = {
-      data,
-      hash: generateChecksum(jsonString)
-    };
-    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(payload));
+    const json = JSON.stringify(data);
+    const checksum = calculateChecksum(json);
+    const storageData = JSON.stringify({ data: json, checksum });
+    localStorage.setItem(META_PROGRESS_KEY, storageData);
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
@@ -849,7 +855,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         index === 0 ? 'PRIMARY OBJECTIVE' : index === 1 ? 'SECONDARY OBJECTIVE' : 'INTEL';
       lines.push({ label, text: intel });
     }
-    lines.push({ label: 'WARNING', text: (missionBriefing as unknown as { warning: string }).warning, warning: true });
+    lines.push({
+      label: 'WARNING',
+      text: (missionBriefing as unknown as { warning: string }).warning,
+      warning: true,
+    });
     return lines;
   },
 
