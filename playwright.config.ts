@@ -92,7 +92,7 @@ export default defineConfig({
       }
     : {
         // CI mode: Use production preview
-        command: 'npm run build && pnpm preview',
+        command: 'pnpm build && pnpm preview',
         url: 'http://localhost:4173',
         reuseExistingServer: !isCI,
         timeout: 120000,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateChecksum, validateAndUnwrap, wrapAndSecure } from '@/utils/security';
+import { calculateChecksum, unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
 
 describe('Security Utils', () => {
   const testData = { name: 'Sentinel', role: 'Security' };
@@ -19,46 +19,35 @@ describe('Security Utils', () => {
     });
   });
 
-  describe('wrapAndSecure', () => {
-    it('should wrap data with checksum and timestamp', () => {
-      const securedString = wrapAndSecure(testData);
-      const secured = JSON.parse(securedString);
+  describe('wrapWithChecksum', () => {
+    it('should wrap data with checksum', () => {
+      const wrapped = wrapWithChecksum(testData);
 
-      expect(secured).toHaveProperty('data');
-      expect(secured).toHaveProperty('checksum');
-      expect(secured).toHaveProperty('timestamp');
-      expect(secured.data).toEqual(testData);
+      expect(wrapped).toHaveProperty('data');
+      expect(wrapped).toHaveProperty('checksum');
+      expect(wrapped.data).toEqual(testData);
     });
   });
 
-  describe('validateAndUnwrap', () => {
+  describe('unwrapWithChecksum', () => {
     it('should return data if checksum matches', () => {
-      const securedString = wrapAndSecure(testData);
-      const result = validateAndUnwrap(securedString);
+      const wrapped = wrapWithChecksum(testData);
+      const result = unwrapWithChecksum(wrapped);
       expect(result).toEqual(testData);
     });
 
     it('should return null if checksum does not match', () => {
-      const securedString = wrapAndSecure(testData);
-      const secured = JSON.parse(securedString);
+      const wrapped = wrapWithChecksum(testData);
 
       // Tamper with the data
-      secured.data.name = 'Hacker';
+      wrapped.data.name = 'Hacker';
 
-      const tamperedString = JSON.stringify(secured);
-      const result = validateAndUnwrap(tamperedString);
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null for invalid JSON', () => {
-      const result = validateAndUnwrap('invalid-json');
+      const result = unwrapWithChecksum(wrapped);
       expect(result).toBeNull();
     });
 
     it('should return null for data missing security fields', () => {
-      const plainJson = JSON.stringify(testData);
-      const result = validateAndUnwrap(plainJson);
+      const result = unwrapWithChecksum({ data: testData } as any);
       expect(result).toBeNull();
     });
   });

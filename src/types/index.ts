@@ -342,8 +342,8 @@ export const getBulletTypeFromWeapon = (weaponType: WeaponType): 'cannon' | 'smg
 export class SeededRandom {
   private state: number;
 
-  constructor(seed: number) {
-    this.state = seed || Math.floor(Math.random() * 999999);
+  constructor(seed?: number) {
+    this.state = seed ?? Math.floor(Math.random() * 999999);
   }
 
   /**

@@ -15,7 +15,9 @@ export const calculateChecksum = (data: string): string => {
   for (let i = 0; i < data.length; i++) {
     hash ^= data.charCodeAt(i);
     // Force 32-bit unsigned integer multiplication simulation
-    // We use Math.imul for better performance if available, or manual bit shifting
+    // Use BigInt for accurate large number multiplication if Math.imul behavior is inconsistent
+    // or stick to Math.imul which is standard for 32-bit int multiplication in JS.
+    // Reverting to Math.imul(hash, FNV_PRIME) as it is the standard way to implement FNV-1a in JS.
     hash = Math.imul(hash, FNV_PRIME) >>> 0;
   }
   return hash.toString(16);
@@ -29,48 +31,7 @@ export const verifyChecksum = (data: string, checksum: string): boolean => {
 };
 
 /**
- * Wraps data with a checksum and timestamp for storage.
- * Returns a JSON string.
- */
-export const wrapAndSecure = <T>(data: T): string => {
-  const jsonString = JSON.stringify(data);
-  const checksum = calculateChecksum(jsonString);
-  return JSON.stringify({
-    data,
-    checksum,
-    timestamp: Date.now(),
-  });
-};
-
-/**
- * Validates and unwraps data with a checksum.
- * Expects a JSON string.
- * Returns null if validation fails.
- */
-export const validateAndUnwrap = <T>(securedString: string): T | null => {
-  try {
-    if (!securedString) return null;
-    const secured = JSON.parse(securedString);
-    
-    if (!secured || typeof secured !== 'object') return null;
-
-    const { data, checksum } = secured;
-    if (data === undefined || checksum === undefined) return null;
-
-    const calculated = calculateChecksum(JSON.stringify(data));
-    if (calculated !== checksum) {
-      console.warn('Security: Data integrity check failed. Possible tampering detected.');
-      return null;
-    }
-
-    return data;
-  } catch (e) {
-    return null;
-  }
-};
-
-/**
- * Legacy support for wrapWithChecksum
+ * Wraps data with a checksum for storage.
  */
 export const wrapWithChecksum = <T>(data: T): { data: T; checksum: string } => {
   const jsonString = JSON.stringify(data);
@@ -79,7 +40,8 @@ export const wrapWithChecksum = <T>(data: T): { data: T; checksum: string } => {
 };
 
 /**
- * Legacy support for unwrapWithChecksum
+ * Validates and unwraps data with a checksum.
+ * Returns null if validation fails.
  */
 export const unwrapWithChecksum = <T>(storedData: { data: T; checksum: string }): T | null => {
   if (!storedData || typeof storedData !== 'object') return null;

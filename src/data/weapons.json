@@ -134,7 +134,7 @@
     "harpoon": {
       "id": "harpoon",
       "name": "Mistletoe Harpoon",
-      "description": "Long-range piercing projectile that heals on hit",
+      "description": "Long-range piercing projectile with high penetration",
       "cost": 1500,
       "icon": "🏹",
       "damage": 45,

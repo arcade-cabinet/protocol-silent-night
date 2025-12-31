@@ -66,12 +66,12 @@ runs:
         set +e
         
         # Fetch base branch
-        git fetch origin "${INPUT_BASE:-main}" 2>/dev/null || true
-        git branch "${INPUT_BASE:-main}" FETCH_HEAD 2>/dev/null || true
+        git fetch origin "${INPUT_BASE:-main}" || true
+        git branch "${INPUT_BASE:-main}" FETCH_HEAD || true
         
         # Get the diff
-        git diff "${INPUT_BASE:-main}"...HEAD > /tmp/pr_diff.txt 2>/dev/null || \
-          git diff HEAD~1 > /tmp/pr_diff.txt 2>/dev/null || \
+        git diff "${INPUT_BASE:-main}"...HEAD > /tmp/pr_diff.txt || \
+          git diff HEAD~1 > /tmp/pr_diff.txt || \
           echo "No diff available" > /tmp/pr_diff.txt
         
         # Truncate to 50KB
@@ -110,7 +110,7 @@ runs:
                 ],
                 stream: false
               }')" \
-            "$OLLAMA_HOST/api/chat" 2>/dev/null) || RESPONSE=""
+            "$OLLAMA_HOST/api/chat") || RESPONSE=""
           
           if [ -n "$RESPONSE" ]; then
             REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // empty')
