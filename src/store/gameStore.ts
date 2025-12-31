@@ -840,11 +840,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return true;
     }
 
-    // Revert to immutable update to fix state management issues
-    // The mutation optimization was causing E2E test failures due to improper state updates
-    set({
-      enemies: enemies.map((e) => (e.id === id ? { ...e, hp: newHp } : e)),
-    });
+    // Optimization: Mutate HP in place to avoid re-rendering the entire enemy list
+    // This works because rendering handles visual updates in useFrame via ref
+    enemy.hp = newHp;
     return false;
   },
 
