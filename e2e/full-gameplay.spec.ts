@@ -7,7 +7,19 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
-const CLICK_TIMEOUT = 5000;
+const CLICK_TIMEOUT = 10000; // Increased timeout for clicks
+
+/**
+ * Wait for loading screen to be completely hidden
+ * The loading screen has minDuration of 1500ms + 500ms fadeOut animation = 2000ms total
+ */
+async function waitForLoadingScreen(page: Page) {
+  // Wait for loading screen to start its fadeOut animation and become hidden
+  await page.waitForTimeout(2500); // Wait for minDuration + fadeOut animation + buffer
+
+  // Ensure character selection buttons are visible and interactive
+  await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 5000 });
+}
 
 // Helper to get game state from the store
 async function getGameState(page: Page) {
@@ -98,24 +110,24 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+    await waitForLoadingScreen(page);
+
     // Verify we're at menu
     let state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
-    
+
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
-    await santaButton.click({ force: true, timeout: CLICK_TIMEOUT });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click({ force: true, timeout: CLICK_TIMEOUT });
+    await commenceButton.click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to start
     await page.waitForTimeout(2000);
@@ -131,15 +143,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -160,15 +172,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should survive longer due to high HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -191,15 +203,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -220,15 +232,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should accumulate score and kills', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -254,16 +266,16 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
     // Select Elf
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(2000);
 
@@ -275,15 +287,15 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -304,15 +316,15 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should die quickly with low HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -329,16 +341,16 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should complete full game loop with Bumble', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
     // Select Bumble
-    await page.getByRole('button', { name: /BUMBLE/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(2000);
 
@@ -350,15 +362,15 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should fire spread pattern weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /BUMBLE/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -379,15 +391,15 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should have balanced survivability', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /BUMBLE/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -411,15 +423,15 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 test.describe('Full Gameplay - Boss Battle', () => {
   test('should spawn boss after 10 kills', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -443,15 +455,15 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should defeat boss and win game', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -482,15 +494,15 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should show boss health decreasing', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -522,15 +534,15 @@ test.describe('Full Gameplay - Boss Battle', () => {
 test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -559,15 +571,15 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
   test('should reset streak after timeout', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -593,15 +605,15 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
   test('should apply streak bonus to score', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -633,16 +645,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 test.describe('Full Gameplay - Game Reset', () => {
   test('should reset game and return to menu', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
     // Play a game
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -655,7 +667,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Click re-deploy
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ timeout: CLICK_TIMEOUT });
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -668,16 +680,16 @@ test.describe('Full Gameplay - Game Reset', () => {
 
   test('should preserve high score after reset', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
     // Play and get a score
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -693,17 +705,17 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Reset
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ timeout: CLICK_TIMEOUT });
     await page.waitForTimeout(1000);
 
     // Start new game
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(2000);
 
@@ -719,17 +731,17 @@ test.describe('Full Gameplay - Game Reset', () => {
 test.describe('Full Gameplay - Complete Playthrough', () => {
   test('should complete entire game as Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
     // Step 1: Character Selection - verify start screen is showing
     await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Step 2: Game starts
     await page.waitForTimeout(2000);
@@ -760,7 +772,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ timeout: CLICK_TIMEOUT });
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
@@ -769,15 +781,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(2000);
 
@@ -804,15 +816,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Bumble', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /BUMBLE/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(2000);
 
@@ -841,15 +853,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 test.describe('Full Gameplay - Input Controls', () => {
   test('should respond to WASD movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -872,15 +884,15 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should respond to arrow key movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -900,15 +912,15 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should fire with spacebar', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 
@@ -937,15 +949,15 @@ test.describe('Full Gameplay - Input Controls', () => {
   test('should show touch controls on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: CLICK_TIMEOUT });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     await page.waitForTimeout(3000);
 

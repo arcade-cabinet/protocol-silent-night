@@ -1,22 +1,33 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
- * 
+ *
  * Uses Playwright's screenshot comparison to validate visual rendering
  * of 3D game components, characters, and gameplay scenarios.
- * 
+ *
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
+const CLICK_TIMEOUT = 10000; // Increased timeout for clicks
+
+/**
+ * Wait for loading screen to be completely hidden
+ * The loading screen has minDuration of 1500ms + 500ms fadeOut animation = 2000ms total
+ */
+async function waitForLoadingScreen(page: Page) {
+  // Wait for loading screen to start its fadeOut animation and become hidden
+  await page.waitForTimeout(2500); // Wait for minDuration + fadeOut animation + buffer
+
+  // Ensure character selection buttons are visible and interactive
+  await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 5000 });
+}
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
-    
-    // Wait for fonts and styles to load
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
     
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
@@ -26,7 +37,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
     
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
@@ -36,7 +47,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
     
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
@@ -46,7 +57,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
     
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
@@ -58,17 +69,18 @@ test.describe('Visual Regression - Character Selection', () => {
 test.describe('Visual Regression - Game Start', () => {
   test('should render Santa gameplay correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
     // Wait for briefing screen to appear
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and render
     await page.waitForTimeout(6000);
@@ -81,17 +93,18 @@ test.describe('Visual Regression - Game Start', () => {
 
   test('should render Elf gameplay correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     // Select Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click({ force: true });
+    await elfButton.click({ timeout: CLICK_TIMEOUT });
 
     // Wait for briefing screen to appear
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and render
     await page.waitForTimeout(6000);
@@ -104,17 +117,18 @@ test.describe('Visual Regression - Game Start', () => {
 
   test('should render Bumble gameplay correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     // Select Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.click({ force: true });
+    await bumbleButton.click({ timeout: CLICK_TIMEOUT });
 
     // Wait for briefing screen to appear
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and render
     await page.waitForTimeout(6000);
@@ -129,13 +143,14 @@ test.describe('Visual Regression - Game Start', () => {
 test.describe('Visual Regression - HUD Elements', () => {
   test('should render HUD correctly during gameplay', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
-    // Wait for briefing screen to appear and stabilize
-    await page.waitForTimeout(4000);
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
@@ -145,13 +160,14 @@ test.describe('Visual Regression - HUD Elements', () => {
 
   test('should render score and objectives correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
-    // Wait for briefing screen to appear and stabilize
-    await page.waitForTimeout(4000);
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Move and fire to generate some score
     await page.keyboard.press('Space');
@@ -166,13 +182,14 @@ test.describe('Visual Regression - HUD Elements', () => {
 test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
-    // Wait for briefing screen to appear and stabilize
-    await page.waitForTimeout(4000);
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Move character
     await page.keyboard.down('w');
@@ -186,13 +203,14 @@ test.describe('Visual Regression - Game Movement', () => {
 
   test('should render firing animation correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
-    // Wait for briefing screen to appear and stabilize
-    await page.waitForTimeout(4000);
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Fire weapon
     await page.keyboard.press('Space');
@@ -207,13 +225,14 @@ test.describe('Visual Regression - Game Movement', () => {
 test.describe('Visual Regression - Combat Scenarios', () => {
   test('should render combat with enemies', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
-    // Wait for briefing screen to appear and stabilize
-    await page.waitForTimeout(6000);
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(3000);
 
     // Wait for enemies to spawn and engage
     await page.keyboard.down('Space');
@@ -227,13 +246,14 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
   test('should render player taking damage', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click({ force: true });
+    await elfButton.click({ timeout: CLICK_TIMEOUT });
 
-    // Wait for briefing screen to appear and stabilize
-    await page.waitForTimeout(6000);
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(3000);
 
     // Wait for potential damage from enemies
     await page.waitForTimeout(5000);
@@ -247,14 +267,15 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 test.describe('Visual Regression - End Game States', () => {
   test('should render game over screen', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     // Start game
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
-    // Wait for briefing screen to appear and stabilize
-    await page.waitForTimeout(4000);
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Trigger game over by evaluating state (for testing purposes)
     await page.evaluate(() => {
@@ -282,10 +303,7 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-
-    // Wait for character selection buttons to be visible
-    await page.waitForSelector('button:has-text("MECHA-SANTA")', { timeout: 10000 });
-    await page.waitForTimeout(2000);
+    await waitForLoadingScreen(page);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -296,17 +314,17 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true, timeout: 5000 });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
     // Wait for briefing screen to appear
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: 5000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load
     await page.waitForTimeout(6000);
@@ -319,17 +337,17 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForLoadingScreen(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true, timeout: 5000 });
+    await santaButton.click({ timeout: CLICK_TIMEOUT });
 
     // Wait for briefing screen to appear
-    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+    await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: 5000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and touch controls to appear
     await page.waitForTimeout(6000);
