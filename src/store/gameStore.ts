@@ -840,9 +840,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return true;
     }
 
-    // Optimization: Mutate HP in place to avoid re-rendering the entire enemy list
-    // This works because rendering handles visual updates in useFrame via ref
-    enemy.hp = newHp;
+    set({
+      enemies: enemies.map((e) => (e.id === id ? { ...e, hp: newHp } : e)),
+    });
     return false;
   },
 
