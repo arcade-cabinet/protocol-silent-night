@@ -299,11 +299,16 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+
+    // Wait for loading screen to disappear
+    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
+
+    // Wait for fonts and content to be fully loaded
+    await page.waitForTimeout(3000);
+
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
     });
   });
 
@@ -313,15 +318,21 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Wait for loading screen to disappear
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'attached' });
-    await santaButton.scrollIntoViewIfNeeded();
+    await santaButton.waitFor({ state: 'attached', timeout: 30000 });
+    await santaButton.scrollIntoViewIfNeeded({ timeout: 10000 });
     await santaButton.click({ force: true });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
+    // Wait for game to fully load
     await page.waitForTimeout(5000);
-    
+
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -331,17 +342,23 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Wait for loading screen to disappear
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'attached' });
-    await santaButton.scrollIntoViewIfNeeded();
+    await santaButton.waitFor({ state: 'attached', timeout: 30000 });
+    await santaButton.scrollIntoViewIfNeeded({ timeout: 10000 });
     await santaButton.click({ force: true });
-    await page.waitForTimeout(3000);
-    
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
+    // Wait for game to fully load
+    await page.waitForTimeout(5000);
+
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });

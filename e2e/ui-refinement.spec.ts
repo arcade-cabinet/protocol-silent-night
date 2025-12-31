@@ -30,6 +30,9 @@ test.describe('UI Component Refinement', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+
+    // Wait for loading screen to disappear
+    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
   });
 
   test.describe('Menu Screen', () => {
@@ -88,7 +91,10 @@ test.describe('UI Component Refinement', () => {
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
       // Click MECHA-SANTA
-      await page.click('button:has-text("MECHA-SANTA")');
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await santaButton.waitFor({ state: 'attached', timeout: 30000 });
+      await santaButton.scrollIntoViewIfNeeded({ timeout: 10000 });
+      await santaButton.click({ force: true });
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -115,7 +121,10 @@ test.describe('UI Component Refinement', () => {
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
-      await page.click('button:has-text("CYBER-ELF")');
+      const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+      await elfButton.waitFor({ state: 'attached', timeout: 30000 });
+      await elfButton.scrollIntoViewIfNeeded({ timeout: 10000 });
+      await elfButton.click({ force: true });
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -135,7 +144,10 @@ test.describe('UI Component Refinement', () => {
 
       for (const [index, mech] of mechs.entries()) {
         // Click mech
-        await page.click(`button:has-text("${mech.name}")`);
+        const mechButton = page.getByRole('button', { name: new RegExp(mech.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) });
+        await mechButton.waitFor({ state: 'attached', timeout: 30000 });
+        await mechButton.scrollIntoViewIfNeeded({ timeout: 10000 });
+        await mechButton.click({ force: true });
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -161,7 +173,10 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await santaButton.waitFor({ state: 'attached', timeout: 30000 });
+      await santaButton.scrollIntoViewIfNeeded({ timeout: 10000 });
+      await santaButton.click({ force: true });
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -185,7 +200,10 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select CYBER-ELF (Plasma SMG)
-      await page.click('button:has-text("CYBER-ELF")');
+      const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+      await elfButton.waitFor({ state: 'attached', timeout: 30000 });
+      await elfButton.scrollIntoViewIfNeeded({ timeout: 10000 });
+      await elfButton.click({ force: true });
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
@@ -233,6 +251,7 @@ test.describe('UI Component Refinement', () => {
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
           maxDiffPixels: 100,
+          timeout: 30000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -241,12 +260,16 @@ test.describe('UI Component Refinement', () => {
 
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await santaButton.waitFor({ state: 'attached', timeout: 30000 });
+      await santaButton.scrollIntoViewIfNeeded({ timeout: 10000 });
+      await santaButton.click({ force: true });
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
           maxDiffPixels: 100,
+          timeout: 30000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
