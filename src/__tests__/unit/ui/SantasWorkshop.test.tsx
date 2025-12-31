@@ -38,8 +38,9 @@ describe('SantasWorkshop Component', () => {
     render(<SantasWorkshop show={true} onClose={onCloseMock} />);
 
     // Check for tablist
-    const tablist = screen.getByRole('tablist');
+    const tablist = screen.getByLabelText('Workshop Categories');
     expect(tablist).toBeInTheDocument();
+    expect(tablist).toHaveAttribute('role', 'tablist');
 
     // Check for tabs
     const tabs = screen.getAllByRole('tab');

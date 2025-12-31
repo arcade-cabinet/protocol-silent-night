@@ -913,6 +913,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       // Endless mode: Increment wave and prepare for level up
       set({
+        state: 'PHASE_1',
         bossActive: false,
         stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
