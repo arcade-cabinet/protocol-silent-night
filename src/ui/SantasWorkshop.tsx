@@ -158,7 +158,12 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        <div className={styles.content}>
+        <div
+          className={styles.content}
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+        >
           {activeTab === 'weapons' && (
             <div
               className={styles.grid}
