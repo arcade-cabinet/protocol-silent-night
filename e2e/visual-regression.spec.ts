@@ -298,9 +298,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    // Wait for loading screen to be completely gone
+    // Wait for loading screen to be completely gone and animations to complete
     await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000); // Increased to allow fadeIn (500ms) + transitions (300ms) to complete
+
+    // Wait for character buttons to be ready
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 5000 });
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -311,13 +314,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    // Wait for loading screen to be completely gone
+    // Wait for loading screen to be completely gone and animations to complete
     await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000); // Increased to allow fadeIn (500ms) + transitions (300ms) to complete
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible();
-    await santaButton.click();
+    await santaButton.waitFor({ state: 'visible', timeout: 5000 });
+    await santaButton.click({ timeout: 15000 });
 
     // Wait for and click "COMMENCE OPERATION" button
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -334,13 +337,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    // Wait for loading screen to be completely gone
+    // Wait for loading screen to be completely gone and animations to complete
     await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000); // Increased to allow fadeIn (500ms) + transitions (300ms) to complete
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible();
-    await santaButton.click();
+    await santaButton.waitFor({ state: 'visible', timeout: 5000 });
+    await santaButton.click({ timeout: 15000 });
 
     // Wait for and click "COMMENCE OPERATION" button
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });

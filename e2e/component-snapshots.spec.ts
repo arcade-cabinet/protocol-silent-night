@@ -12,7 +12,10 @@ const VISUAL_THRESHOLD = 0.2;
 // Helper to wait for loading screen to be fully gone
 async function waitForLoadingComplete(page: Page) {
   await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000); // Increased to allow fadeIn (500ms) + transitions (300ms) to complete
+
+  // Wait for at least one character button to be visible and stable
+  await page.getByRole('button', { name: /MECHA-SANTA|CYBER-ELF|BUMBLE/ }).first().waitFor({ state: 'visible', timeout: 5000 });
 }
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
