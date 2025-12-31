@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { safeClick, selectCharacterAndStart } from './helpers';
 
 /**
  * UI Component Refinement Tests
