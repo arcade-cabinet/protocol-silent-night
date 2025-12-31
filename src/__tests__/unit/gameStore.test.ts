@@ -1,6 +1,29 @@
 import * as THREE from 'three';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value.toString();
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    length: 0,
+    key: vi.fn((index: number) => Object.keys(store)[index] || null),
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
 
 describe('GameStore - Player Management', () => {
   beforeEach(() => {
@@ -405,7 +428,9 @@ describe('GameStore - High Score', () => {
     addKill(1000);
     updateHighScore();
 
-    expect(localStorage.getItem('protocol-silent-night-highscore')).toBe('1000');
+    const stored = JSON.parse(localStorage.getItem('protocol-silent-night-highscore') || '{}');
+    expect(stored.data).toBe(1000);
+    expect(stored.checksum).toBeDefined();
   });
 
   it('should load high score from localStorage on init', () => {
@@ -416,7 +441,9 @@ describe('GameStore - High Score', () => {
     updateHighScore();
 
     // Verify it was persisted
-    expect(localStorage.getItem('protocol-silent-night-highscore')).toBe('2500');
+    const stored = JSON.parse(localStorage.getItem('protocol-silent-night-highscore') || '{}');
+    expect(stored.data).toBe(2500);
+    expect(stored.checksum).toBeDefined();
 
     // Reset the store - high score should persist
     reset();

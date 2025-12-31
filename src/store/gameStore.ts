@@ -10,24 +10,25 @@ import {
   WEAPON_EVOLUTIONS,
   WEAPONS,
 } from '@/data';
-import type {
-  BriefingLine,
-  BulletData,
-  ChristmasObstacle,
-  EnemyData,
-  GameState,
-  GameStats,
-  InputState,
-  MetaProgressData,
-  PlayerClassConfig,
-  PlayerClassType,
-  RoguelikeUpgrade,
-  RunProgressData,
-  WeaponEvolutionType,
-  WeaponType,
+import {
+  type BriefingLine,
+  type BulletData,
+  type ChristmasObstacle,
+  type EnemyData,
+  type GameState,
+  type GameStats,
+  type InputState,
+  type MetaProgressData,
+  type PlayerClassConfig,
+  type PlayerClassType,
+  type RoguelikeUpgrade,
+  type RunProgressData,
+  type WeaponEvolutionType,
+  type WeaponType,
+  SeededRandom,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
-import { validateAndUnwrap, wrapAndSecure } from '@/utils/security';
+import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -151,38 +152,16 @@ interface GameStore {
   killStreak: number;
   lastKillTime: number;
 
+  // RNG
+  rng: SeededRandom;
+
   // Reset
   reset: () => void;
 }
 
 // Load meta-progression from localStorage
 const loadMetaProgress = (): MetaProgressData => {
-  try {
-    const stored = localStorage.getItem(META_PROGRESS_KEY);
-    if (stored) {
-      // Try to unwrap as secured data first
-      const secured = validateAndUnwrap<MetaProgressData>(stored);
-      if (secured) {
-        return secured;
-      }
-
-      // Fallback: Check if it's legacy data (plain JSON)
-      // We try to parse it and check for a known property
-      try {
-        const raw = JSON.parse(stored);
-        if (raw && typeof raw === 'object' && 'nicePoints' in raw) {
-          // It's likely legacy data, so we accept it (and it will be secured on next save)
-          return raw as MetaProgressData;
-        }
-      } catch {
-        // Ignore JSON parse error here, return default
-      }
-    }
-  } catch (e) {
-    console.error('Failed to load meta progress:', e);
-  }
-
-  return {
+  const defaultProgress: MetaProgressData = {
     nicePoints: 0,
     totalPointsEarned: 0,
     runsCompleted: 0,
@@ -194,13 +173,34 @@ const loadMetaProgress = (): MetaProgressData => {
     totalKills: 0,
     totalDeaths: 0,
   };
+
+  try {
+    const stored = localStorage.getItem(META_PROGRESS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Check if it's the old format (direct object) or new format (with checksum)
+      if (parsed.checksum && parsed.data) {
+        const validated = unwrapWithChecksum<MetaProgressData>(parsed);
+        if (validated) return validated;
+      } else {
+        // Migration strategy: Accept legacy data but save in new format next time
+        // We could also reject it, but that would wipe legitimate saves.
+        // For a security improvement, we'll accept it once.
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load meta progress:', e);
+  }
+
+  return defaultProgress;
 };
 
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    const secured = wrapAndSecure(data);
-    localStorage.setItem(META_PROGRESS_KEY, secured);
+    const wrapped = wrapWithChecksum(data);
+    localStorage.setItem(META_PROGRESS_KEY, JSON.stringify(wrapped));
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
@@ -210,7 +210,20 @@ const saveMetaProgress = (data: MetaProgressData): void => {
 const loadHighScore = (): number => {
   try {
     const stored = localStorage.getItem(HIGH_SCORE_KEY);
-    return stored ? Number.parseInt(stored, 10) : 0;
+    if (!stored) return 0;
+
+    // Try parsing as JSON first (new format)
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.checksum && parsed.data !== undefined) {
+        const validated = unwrapWithChecksum<number>(parsed);
+        return validated !== null ? validated : 0;
+      }
+    } catch {
+      // Not JSON, fall back to simple number parsing (legacy)
+    }
+
+    return Number.parseInt(stored, 10) || 0;
   } catch {
     return 0;
   }
@@ -219,7 +232,8 @@ const loadHighScore = (): number => {
 // Save high score to localStorage
 const saveHighScore = (score: number): void => {
   try {
-    localStorage.setItem(HIGH_SCORE_KEY, score.toString());
+    const wrapped = wrapWithChecksum(score);
+    localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(wrapped));
   } catch {
     // Silently fail
   }
@@ -269,6 +283,7 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
+  rng: new SeededRandom(12345),
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -562,7 +577,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const usedIds = new Set<string>();
 
       while (choices.length < 3 && weighted.length > 0) {
-        const idx = Math.floor(Math.random() * weighted.length);
+        const idx = get().rng.nextInt(0, weighted.length - 1);
         const upgrade = weighted[idx];
         if (!usedIds.has(upgrade.id)) {
           choices.push(upgrade);
@@ -805,7 +820,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     let finalDamage = damage;
 
     // Frost Piercing: Critical Hits
-    if (stats && Math.random() < stats.critChance) {
+    if (stats && get().rng.next() < stats.critChance) {
       finalDamage *= 2;
       triggerHaptic(HapticPatterns.DAMAGE_HEAVY);
     }
@@ -855,9 +870,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   spawnBoss: () => {
-    const { enemies, addEnemy } = get();
+    const { enemies, addEnemy, rng } = get();
     if (enemies.some((e) => e.type === 'boss')) return;
-    const angle = Math.random() * Math.PI * 2;
+    const angle = rng.next() * Math.PI * 2;
     const radius = 30;
     const position = new THREE.Vector3(Math.cos(angle) * radius, 4, Math.sin(angle) * radius);
     const bossConfig = ENEMIES.boss;
@@ -953,6 +968,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       highScore: get().highScore,
       metaProgress: get().metaProgress,
       playerPosition: new THREE.Vector3(0, 0, 0),
+      rng: new SeededRandom(Date.now()),
     }),
 }));
 

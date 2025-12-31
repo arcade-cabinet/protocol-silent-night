@@ -27,25 +27,40 @@ jobs:
       id-token: write
 
     steps:
+      - name: Security Check
+        id: security
+        run: |
+          if [ "${{ github.event.workflow_run.head_repository.full_name }}" != "${{ github.repository }}" ]; then
+            echo "⚠️ Fork PR detected. Skipping auto-fix for security."
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout repository
+        if: steps.security.outputs.is_fork == 'false'
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
       - name: Setup pnpm
+        if: steps.security.outputs.is_fork == 'false'
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
+        if: steps.security.outputs.is_fork == 'false'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        if: steps.security.outputs.is_fork == 'false'
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Get CI failure details
+        if: steps.security.outputs.is_fork == 'false'
         id: failure_details
         uses: actions/github-script@v7
         env:
@@ -99,6 +114,7 @@ jobs:
             };
 
       - name: Run Claude to fix CI
+        if: steps.security.outputs.is_fork == 'false'
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -153,10 +169,22 @@ jobs:
       id-token: write
 
     steps:
+      - name: Security Check
+        id: security
+        run: |
+          if [ "${{ github.event.workflow_run.head_repository.full_name }}" != "${{ github.repository }}" ]; then
+            echo "⚠️ Fork PR detected. Skipping flaky test detection."
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout repository
+        if: steps.security.outputs.is_fork == 'false'
         uses: actions/checkout@v4
 
       - name: Analyze for flaky tests
+        if: steps.security.outputs.is_fork == 'false'
         id: detect
         uses: anthropics/claude-code-action@v1
         with:

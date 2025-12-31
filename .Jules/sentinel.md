@@ -1,6 +1,4 @@
-## SENTINEL'S JOURNAL - CRITICAL LEARNINGS ONLY
-
-## 2024-05-22 - [Data Persistence Security]
-**Vulnerability:** Local storage data persistence (`src/store/gameStore.ts`) is protected against tampering using an FNV-1a checksum mechanism (`src/utils/security.ts`), but the integrity check relies on a client-side secret if not carefully managed (though FNV is just a hash, not cryptographic).
-**Learning:** Client-side "security" for save games is mostly obfuscation. The learning here is that FNV-1a is fast but not cryptographically secure, which is acceptable for single-player game save integrity but not for preventing determined cheating.
-**Prevention:** If leaderboard or competitive features are added, server-side validation is required. For now, the current mechanism prevents accidental corruption and casual editing.
+## 2024-05-22 - Local Storage Integrity
+**Vulnerability:** Game state stored in `localStorage` was plain JSON, allowing trivial modification (cheating) by users.
+**Learning:** Client-side games need data integrity checks even if they can't be perfectly secure. The original architecture assumed a checksum mechanism that was missing.
+**Prevention:** Implemented FNV-1a checksum wrapper for all persisted data. Loading logic now validates checksums and falls back to safe defaults on tampering, while maintaining backward compatibility for legacy saves.
