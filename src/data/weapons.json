@@ -130,6 +130,19 @@
       "life": 2.5,
       "behavior": "random",
       "bulletType": "star"
+    },
+    "harpoon": {
+      "id": "harpoon",
+      "name": "Mistletoe Harpoon",
+      "description": "Long-range piercing projectile that heals on hit",
+      "cost": 1500,
+      "icon": "🏹",
+      "damage": 45,
+      "rof": 0.6,
+      "speed": 60,
+      "life": 4.0,
+      "penetration": true,
+      "bulletType": "smg"
     }
   },
   "evolutions": {
@@ -188,6 +201,17 @@
         "damageMultiplier": 1.7,
         "projectileCount": 6,
         "speedMultiplier": 1.1
+      }
+    },
+    "winter-solstice-spear": {
+      "id": "winter-solstice-spear",
+      "name": "Winter Solstice Spear",
+      "baseWeapon": "harpoon",
+      "minLevel": 10,
+      "modifiers": {
+        "damageMultiplier": 2.2,
+        "speedMultiplier": 1.5,
+        "size": 2.0
       }
     }
   }
