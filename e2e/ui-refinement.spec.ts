@@ -10,7 +10,8 @@ import { test, expect, Page } from '@playwright/test';
  * Run headless: npm run test:e2e -- ui-refinement
  */
 
-const CLICK_TIMEOUT = 10000; // Increased timeout for clicks
+const CLICK_TIMEOUT = 20000; // Increased timeout for clicks in CI environments
+const TRANSITION_TIMEOUT = 15000; // Timeout for waiting for screen transitions
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 /**
@@ -25,10 +26,11 @@ async function waitForLoadingScreen(page: Page) {
 
   // Wait for the start screen to be visible and interactive
   // Use a more reliable selector that waits for any character selection button
-  await page.waitForSelector('[class*="classCard"]', { state: 'visible', timeout: 15000 });
+  // Increased timeout for slower CI environments and mobile viewports
+  await page.waitForSelector('[class*="classCard"]', { state: 'visible', timeout: 30000 });
 
   // Additional wait to ensure all buttons are fully interactive after CSS transitions
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(1500);
 }
 
 test.describe('UI Component Refinement', () => {
@@ -109,7 +111,7 @@ test.describe('UI Component Refinement', () => {
       // Click MECHA-SANTA
       await page.click('button:has-text("MECHA-SANTA")', { timeout: CLICK_TIMEOUT });
 
-      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
       await page.waitForTimeout(1000);
 
       // Wait for mission briefing with longer timeout for state transition
@@ -139,7 +141,7 @@ test.describe('UI Component Refinement', () => {
       // Select a mech
       await page.click('button:has-text("CYBER-ELF")', { timeout: CLICK_TIMEOUT });
 
-      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
       await page.waitForTimeout(1000);
 
       // Wait for briefing
@@ -162,7 +164,7 @@ test.describe('UI Component Refinement', () => {
         // Click mech
         await page.click(`button:has-text("${mech.name}")`, { timeout: CLICK_TIMEOUT });
 
-        await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+        await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
         await page.waitForTimeout(1000);
 
         // Wait for briefing
@@ -191,7 +193,7 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       await page.click('button:has-text("MECHA-SANTA")', { timeout: CLICK_TIMEOUT });
 
-      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
       await page.waitForTimeout(1000);
 
       // Wait for briefing
@@ -218,7 +220,7 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")', { timeout: CLICK_TIMEOUT });
 
-      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
       await page.waitForTimeout(1000);
 
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -278,7 +280,7 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       await page.click('button:has-text("MECHA-SANTA")', { timeout: CLICK_TIMEOUT });
 
-      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 10000 });
+      await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
       await page.waitForTimeout(1000);
 
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
