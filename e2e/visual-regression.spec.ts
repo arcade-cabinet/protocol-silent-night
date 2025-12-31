@@ -282,10 +282,14 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
+
+    // Wait for character selection buttons to be visible
+    await page.waitForSelector('button:has-text("MECHA-SANTA")', { timeout: 10000 });
     await page.waitForTimeout(2000);
-    
+
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 15000,
     });
   });
 
@@ -295,13 +299,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ force: true, timeout: 5000 });
 
     // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
     await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: 5000 });
 
     // Wait for game to fully load
     await page.waitForTimeout(6000);
@@ -317,13 +322,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true });
+    await santaButton.click({ force: true, timeout: 5000 });
 
     // Wait for briefing screen to appear
+    await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: 5000 });
     await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: 5000 });
 
     // Wait for game to fully load and touch controls to appear
     await page.waitForTimeout(6000);
