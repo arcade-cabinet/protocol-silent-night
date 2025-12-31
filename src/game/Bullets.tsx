@@ -21,15 +21,23 @@ const dummy = new THREE.Object3D();
 const zeroScale = new THREE.Vector3(0, 0, 0);
 
 // Map weapon types to visual categories
-function getVisualType(weaponType: WeaponType | undefined): 'cannon' | 'smg' | 'star' {
+function getVisualType(weaponType: WeaponType | undefined): 'cannon' | 'smg' | 'star' | 'bell' | 'cane' | 'gingerbread' {
   switch (weaponType) {
     case 'cannon':
     case 'ornament':
+      return 'cannon';
     case 'snowball':
       return 'cannon';
     case 'smg':
     case 'light_string':
       return 'smg';
+    case 'jingle_bell':
+      return 'bell';
+    case 'candy_cane':
+      return 'cane';
+    case 'gingerbread':
+    case 'quantum_gift':
+      return 'gingerbread';
     default:
       return 'star';
   }
@@ -39,6 +47,9 @@ export function Bullets() {
   const cannonRef = useRef<THREE.InstancedMesh>(null);
   const smgRef = useRef<THREE.InstancedMesh>(null);
   const starRef = useRef<THREE.InstancedMesh>(null);
+  const bellRef = useRef<THREE.InstancedMesh>(null);
+  const caneRef = useRef<THREE.InstancedMesh>(null);
+  const gingerbreadRef = useRef<THREE.InstancedMesh>(null);
   const tempVecRef = useRef(new THREE.Vector3());
   const lookAtVecRef = useRef(new THREE.Vector3());
 
@@ -119,6 +130,58 @@ export function Bullets() {
     []
   );
 
+  // Jingle Bell geometry - small sphere with a ring
+  const bellGeometry = useMemo(() => {
+    const geo = new THREE.SphereGeometry(0.2, 8, 8);
+    return geo;
+  }, []);
+
+  const bellMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0xffd700,
+        emissive: 0xffaa00,
+        emissiveIntensity: 1,
+        metalness: 0.9,
+        roughness: 0.1,
+      }),
+    []
+  );
+
+  // Candy Cane geometry - small bent cylinder
+  const caneGeometry = useMemo(() => {
+    const geo = new THREE.CapsuleGeometry(0.1, 0.4, 4, 8);
+    return geo;
+  }, []);
+
+  const caneMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xff0044,
+        emissiveIntensity: 0.5,
+        roughness: 0.2,
+      }),
+    []
+  );
+
+  // Gingerbread geometry - simple cross shape
+  const gingerbreadGeometry = useMemo(() => {
+    const geo = new THREE.BoxGeometry(0.4, 0.4, 0.15);
+    return geo;
+  }, []);
+
+  const gingerbreadMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: 0x8b4513,
+        emissive: 0xffaa00,
+        emissiveIntensity: 0.2,
+        roughness: 0.8,
+      }),
+    []
+  );
+
   useFrame((state, delta) => {
     // Optimization: Access transient state directly to avoid re-renders
     const { state: gameState, bullets, enemies, bossActive } = useGameStore.getState();
@@ -134,7 +197,7 @@ export function Bullets() {
 
     const time = state.clock.elapsedTime;
 
-    if (!cannonRef.current || !smgRef.current || !starRef.current) return;
+    if (!cannonRef.current || !smgRef.current || !starRef.current || !bellRef.current || !caneRef.current || !gingerbreadRef.current) return;
 
     // Optimization: Mutate bullets in place and only update store for removals
     const toRemove: string[] = [];
@@ -201,6 +264,9 @@ export function Bullets() {
     const cannonBullets: BulletData[] = [];
     const smgBullets: BulletData[] = [];
     const starBullets: BulletData[] = [];
+    const bellBullets: BulletData[] = [];
+    const caneBullets: BulletData[] = [];
+    const gingerbreadBullets: BulletData[] = [];
 
     for (const bullet of activeBullets) {
       const visualType = getVisualType(bullet.type);
@@ -208,6 +274,12 @@ export function Bullets() {
         cannonBullets.push(bullet);
       } else if (visualType === 'smg') {
         smgBullets.push(bullet);
+      } else if (visualType === 'bell') {
+        bellBullets.push(bullet);
+      } else if (visualType === 'cane') {
+        caneBullets.push(bullet);
+      } else if (visualType === 'gingerbread') {
+        gingerbreadBullets.push(bullet);
       } else {
         starBullets.push(bullet);
       }
@@ -259,6 +331,27 @@ export function Bullets() {
       const sizeMultiplier = bullet.size || 1;
       d.scale.setScalar(sizeMultiplier);
     });
+
+    // Update Bell bullets
+    updateInstanceMesh(bellRef, bellBullets, MAX_STAR_BULLETS, (bullet, d) => {
+      d.rotation.set(Math.sin(time * 10) * 0.5, 0, Math.cos(time * 10) * 0.5); // Swinging bell
+      const sizeMultiplier = bullet.size || 1;
+      d.scale.setScalar(sizeMultiplier);
+    });
+
+    // Update Cane bullets
+    updateInstanceMesh(caneRef, caneBullets, MAX_STAR_BULLETS, (bullet, d) => {
+      d.rotation.set(time * 5, time * 2, 0); // Spinning cane
+      const sizeMultiplier = bullet.size || 1;
+      d.scale.setScalar(sizeMultiplier);
+    });
+
+    // Update Gingerbread bullets
+    updateInstanceMesh(gingerbreadRef, gingerbreadBullets, MAX_STAR_BULLETS, (bullet, d) => {
+      d.rotation.set(0, time * 4, 0); // Flat spin
+      const sizeMultiplier = bullet.size || 1;
+      d.scale.setScalar(sizeMultiplier);
+    });
   });
 
   return (
@@ -281,6 +374,27 @@ export function Bullets() {
       <instancedMesh
         ref={starRef}
         args={[starGeometry, starMaterial, MAX_STAR_BULLETS]}
+        frustumCulled={false}
+      />
+
+      {/* Jingle Bell projectiles */}
+      <instancedMesh
+        ref={bellRef}
+        args={[bellGeometry, bellMaterial, MAX_STAR_BULLETS]}
+        frustumCulled={false}
+      />
+
+      {/* Candy Cane projectiles */}
+      <instancedMesh
+        ref={caneRef}
+        args={[caneGeometry, caneMaterial, MAX_STAR_BULLETS]}
+        frustumCulled={false}
+      />
+
+      {/* Gingerbread projectiles */}
+      <instancedMesh
+        ref={gingerbreadRef}
+        args={[gingerbreadGeometry, gingerbreadMaterial, MAX_STAR_BULLETS]}
         frustumCulled={false}
       />
 
