@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [main, master]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -18,9 +14,8 @@ jobs:
     name: Detect Stack
     runs-on: ubuntu-latest
     outputs:
-      has_node: ${{ steps.detect.outputs.has_node }}
-      has_pnpm: ${{ steps.detect.outputs.has_pnpm }}
       has_rust: ${{ steps.detect.outputs.has_rust }}
+      has_node: ${{ steps.detect.outputs.has_node }}
       has_python: ${{ steps.detect.outputs.has_python }}
       has_go: ${{ steps.detect.outputs.has_go }}
       has_docs: ${{ steps.detect.outputs.has_docs }}
@@ -29,9 +24,8 @@ jobs:
       - name: Detect project type
         id: detect
         run: |
-          echo "has_node=$([[ -f package.json ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "has_pnpm=$([[ -f pnpm-lock.yaml ]] && echo true || echo false)" >> $GITHUB_OUTPUT
           echo "has_rust=$([[ -f Cargo.toml ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "has_node=$([[ -f package.json ]] && echo true || echo false)" >> $GITHUB_OUTPUT
           echo "has_python=$([[ -f pyproject.toml || -f setup.py || -f requirements.txt ]] && echo true || echo false)" >> $GITHUB_OUTPUT
           echo "has_go=$([[ -f go.mod ]] && echo true || echo false)" >> $GITHUB_OUTPUT
           echo "has_docs=$([[ -d docs ]] && echo true || echo false)" >> $GITHUB_OUTPUT
@@ -59,50 +53,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install pnpm
-        if: needs.detect-stack.outputs.has_pnpm == 'true'
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: 10
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+          version: 9
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: ${{ needs.detect-stack.outputs.has_pnpm == 'true' && 'pnpm' || 'npm' }}
-      - name: Install dependencies
-        run: |
-          if [[ "${{ needs.detect-stack.outputs.has_pnpm }}" == "true" ]]; then
-            pnpm install --no-frozen-lockfile
-          else
-            npm install
-          fi
-      - name: Lint
-        run: |
-          if [[ "${{ needs.detect-stack.outputs.has_pnpm }}" == "true" ]]; then
-            pnpm run lint || true
-          else
-            npm run lint --if-present || true
-          fi
-      - name: Build
-        run: |
-          if [[ "${{ needs.detect-stack.outputs.has_pnpm }}" == "true" ]]; then
-            pnpm run build || true
-          else
-            npm run build --if-present || true
-          fi
-      - name: Test
-        run: |
-          if [[ "${{ needs.detect-stack.outputs.has_pnpm }}" == "true" ]]; then
-            pnpm test || true
-          else
-            npm test --if-present || true
-          fi
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-dist
-          path: dist/
-          retention-days: 1
+          cache: pnpm
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm run lint || true
+      - run: pnpm run build || true
+      - run: pnpm test || true
 
   python:
     name: Python
