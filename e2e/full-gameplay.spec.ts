@@ -9,11 +9,14 @@ import { test, expect, Page } from '@playwright/test';
 
 // Helper to wait for loading screen to be fully gone
 async function waitForLoadingComplete(page: Page) {
-  await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
-  await page.waitForTimeout(1000); // Increased to allow fadeIn (500ms) + transitions (300ms) to complete
+  // Wait for loading screen to detach with longer timeout for CI
+  await page.waitForSelector('[data-testid="loading-screen"]', { state: 'detached', timeout: 10000 }).catch(() => {});
+
+  // Extra wait for any animations and React re-renders
+  await page.waitForTimeout(2000);
 
   // Wait for at least one character button to be visible and stable
-  await page.getByRole('button', { name: /MECHA-SANTA|CYBER-ELF|BUMBLE/ }).first().waitFor({ state: 'visible', timeout: 5000 });
+  await page.getByRole('button', { name: /MECHA-SANTA|CYBER-ELF|BUMBLE/ }).first().waitFor({ state: 'visible', timeout: 10000 });
 }
 
 // Helper to get game state from the store
