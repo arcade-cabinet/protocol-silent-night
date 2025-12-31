@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpers';
+import { selectCharacterAndStart, setupMobileViewport } from './helpers';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
