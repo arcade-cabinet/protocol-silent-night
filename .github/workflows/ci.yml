@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 20
-  PNPM_VERSION: 10
+  NODE_VERSION: "20"
+  PNPM_VERSION: "10"
 
 jobs:
   pipeline:
