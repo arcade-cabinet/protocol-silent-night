@@ -56,9 +56,7 @@ export function SkinSelector({ characterClass, onClose }: SkinSelectorProps) {
         aria-labelledby="skin-selector-title"
       >
         <div className={styles.header}>
-          <h2 id="skin-selector-title" className={styles.title}>
-            SELECT SKIN
-          </h2>
+          <h2 id="skin-selector-title" className={styles.title}>SELECT SKIN</h2>
           <div className={styles.points}>
             <span className={styles.pointsLabel}>NICE POINTS:</span>
             <span className={styles.pointsValue}>{nicePoints}</span>
