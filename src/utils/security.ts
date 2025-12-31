@@ -29,7 +29,48 @@ export const verifyChecksum = (data: string, checksum: string): boolean => {
 };
 
 /**
- * Wraps data with a checksum for storage.
+ * Wraps data with a checksum and timestamp for storage.
+ * Returns a JSON string.
+ */
+export const wrapAndSecure = <T>(data: T): string => {
+  const jsonString = JSON.stringify(data);
+  const checksum = calculateChecksum(jsonString);
+  return JSON.stringify({
+    data,
+    checksum,
+    timestamp: Date.now(),
+  });
+};
+
+/**
+ * Validates and unwraps data with a checksum.
+ * Expects a JSON string.
+ * Returns null if validation fails.
+ */
+export const validateAndUnwrap = <T>(securedString: string): T | null => {
+  try {
+    if (!securedString) return null;
+    const secured = JSON.parse(securedString);
+    
+    if (!secured || typeof secured !== 'object') return null;
+
+    const { data, checksum } = secured;
+    if (data === undefined || checksum === undefined) return null;
+
+    const calculated = calculateChecksum(JSON.stringify(data));
+    if (calculated !== checksum) {
+      console.warn('Security: Data integrity check failed. Possible tampering detected.');
+      return null;
+    }
+
+    return data;
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
+ * Legacy support for wrapWithChecksum
  */
 export const wrapWithChecksum = <T>(data: T): { data: T; checksum: string } => {
   const jsonString = JSON.stringify(data);
@@ -38,8 +79,7 @@ export const wrapWithChecksum = <T>(data: T): { data: T; checksum: string } => {
 };
 
 /**
- * Validates and unwraps data with a checksum.
- * Returns null if validation fails.
+ * Legacy support for unwrapWithChecksum
  */
 export const unwrapWithChecksum = <T>(storedData: { data: T; checksum: string }): T | null => {
   if (!storedData || typeof storedData !== 'object') return null;
