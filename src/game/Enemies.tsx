@@ -35,10 +35,10 @@ export function Enemies() {
   const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
-    const { state: currentState, enemies: currentEnemies, addEnemy } = useGameStore.getState();
+    const { state: currentState, enemies: currentEnemies, addEnemy, runProgress } = useGameStore.getState();
     if (
       currentState === 'GAME_OVER' ||
-      currentState === 'WIN' ||
+      currentState === 'WIN' || // Although we removed WIN state trigger, keep it for safety
       currentState === 'LEVEL_UP' ||
       currentEnemies.length >= CONFIG.MAX_MINIONS
     )
@@ -54,16 +54,19 @@ export function Enemies() {
     const mesh = new THREE.Object3D();
     mesh.position.set(Math.cos(angle) * radius, 1, Math.sin(angle) * radius);
 
+    // Scale stats with wave
+    const waveMult = 1 + (runProgress.wave - 1) * 0.15; // 15% increase per wave
+
     addEnemy({
       id,
       mesh,
       velocity: new THREE.Vector3(),
-      hp: MINION_CONFIG.hp,
-      maxHp: MINION_CONFIG.hp,
+      hp: MINION_CONFIG.hp * waveMult,
+      maxHp: MINION_CONFIG.hp * waveMult,
       isActive: true,
       type: 'minion',
-      speed: MINION_CONFIG.speed + Math.random() * 2,
-      damage: MINION_CONFIG.damage,
+      speed: (MINION_CONFIG.speed + Math.random() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
+      damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
     });
   }, []);
@@ -72,6 +75,7 @@ export function Enemies() {
 
   useEffect(() => {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+    const intervalIds: ReturnType<typeof setInterval>[] = [];
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
@@ -82,6 +86,18 @@ export function Enemies() {
       }
     }
 
+    // Ensure we keep spawning if the population drops too low
+    // This addresses the "enemies not spawning" complaint by forcing population maintenance
+    if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
+      const checkId = setInterval(() => {
+        const { enemies } = useGameStore.getState();
+        if (enemies.length < CONFIG.MAX_MINIONS / 2) {
+          spawnMinion();
+        }
+      }, 1000);
+      intervalIds.push(checkId);
+    }
+
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
     }
@@ -89,6 +105,9 @@ export function Enemies() {
     return () => {
       for (const id of timeoutIds) {
         clearTimeout(id);
+      }
+      for (const id of intervalIds) {
+        clearInterval(id);
       }
     };
   }, [state, spawnMinion]);
@@ -142,8 +161,15 @@ export function Enemies() {
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
         if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-          shouldDamage = true;
-          damageAmount = Math.max(damageAmount, enemy.damage);
+          // Only damage if enemy is properly initialized (not at origin 0,0,0).
+          // Enemies spawn at radius 20-30 units, so lengthSq > 0.1 ensures proper initialization.
+          // This prevents "ghost damage" from corrupted or uninitialized enemy meshes.
+          const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
+
+          if (isInitialized) {
+            shouldDamage = true;
+            damageAmount = Math.max(damageAmount, enemy.damage);
+          }
         }
         tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
         currentPos.add(tempVec);

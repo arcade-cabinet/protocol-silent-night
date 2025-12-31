@@ -1,7 +1,7 @@
 # Logs
 logs
 *.log
-pnpm-debug.log*
+npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
@@ -47,8 +47,7 @@ web_modules/
 # TypeScript cache
 *.tsbuildinfo
 
-# Optional pnpm/npm cache directory
-.pnpm-store
+# Optional npm cache directory
 .npm
 
 # Optional eslint cache
@@ -60,7 +59,7 @@ web_modules/
 # Optional REPL history
 .node_repl_history
 
-# Output of 'pnpm pack'
+# Output of 'npm pack'
 *.tgz
 
 # Yarn Integrity file

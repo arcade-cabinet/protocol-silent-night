@@ -187,37 +187,8 @@ function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
     return <CyberpunkPillar position={posArray} height={obstacle.height} />;
   }
 
-  // Default fallback with its own animation
-  return <FallbackObstacle position={posArray} height={obstacle.height} color={obstacle.color} />;
-}
-
-function FallbackObstacle({
-  position,
-  height,
-  color,
-}: {
-  position: [number, number, number];
-  height: number;
-  color: THREE.Color;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    const time = state.clock.elapsedTime;
-    const uniquePhase = position[0] * 0.1 + position[2] * 0.1;
-
-    if (meshRef.current) {
-      const pulse = Math.sin(time * 2 + uniquePhase) * 0.15 + 0.85;
-      (meshRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = pulse * 0.4;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} position={position} castShadow receiveShadow>
-      <boxGeometry args={[1, height, 1]} />
-      <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.2} />
-    </mesh>
-  );
+  // Fallback to Present if unknown type (better than just a box)
+  return <CyberpunkPresent position={posArray} height={obstacle.height} color={obstacle.color} />;
 }
 
 // Cyberpunk Christmas Tree - Holographic with neon decorations
@@ -323,23 +294,23 @@ function CyberpunkPresent({
         />
       </mesh>
 
-      {/* Ribbon cross - vertical */}
+      {/* Ribbon cross - vertical - Made thicker for better visibility */}
       <mesh position={[0, 0, 0.76]}>
-        <boxGeometry args={[0.2, height + 0.1, 0.02]} />
+        <boxGeometry args={[0.4, height + 0.1, 0.05]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
       <mesh position={[0, 0, -0.76]}>
-        <boxGeometry args={[0.2, height + 0.1, 0.02]} />
+        <boxGeometry args={[0.4, height + 0.1, 0.05]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
 
-      {/* Ribbon cross - horizontal */}
+      {/* Ribbon cross - horizontal - Made thicker for better visibility */}
       <mesh position={[0.76, 0, 0]}>
-        <boxGeometry args={[0.02, height + 0.1, 0.2]} />
+        <boxGeometry args={[0.05, height + 0.1, 0.4]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
       <mesh position={[-0.76, 0, 0]}>
-        <boxGeometry args={[0.02, height + 0.1, 0.2]} />
+        <boxGeometry args={[0.05, height + 0.1, 0.4]} />
         <meshBasicMaterial color={0xffd700} />
       </mesh>
 

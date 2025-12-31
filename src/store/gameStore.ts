@@ -408,7 +408,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    if (newKills >= CONFIG.WAVE_REQ && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
+    // Scale requirement by wave
+    const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
+
+    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
@@ -898,23 +901,35 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (newHp <= 0) {
+      const { runProgress, stats } = get();
       const updatedMeta = {
         ...get().metaProgress,
         bossesDefeated: get().metaProgress.bossesDefeated + 1,
-        runsCompleted: get().metaProgress.runsCompleted + 1,
         nicePoints: get().metaProgress.nicePoints + 500,
       };
+
+      // Remove boss enemy
+      get().removeEnemy('boss-krampus');
+
+      // Endless mode: Increment wave and prepare for level up
       set({
-        state: 'WIN',
+        state: 'PHASE_1',
         bossActive: false,
-        stats: { ...get().stats, bossDefeated: true },
+        stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
+        runProgress: {
+          ...runProgress,
+          wave: runProgress.wave + 1,
+        },
       });
+
+      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
+      get().levelUp();
+
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
-      AudioManager.playSFX('victory');
-      AudioManager.playMusic('victory');
+
       return true;
     }
     return false;
