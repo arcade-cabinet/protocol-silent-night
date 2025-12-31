@@ -77,11 +77,12 @@ export function StrataCharacter({
 
   const applyCustomizations = useCallback(
     (joints: CharacterJoints, customizations: CustomizationConfig[], scale: number) => {
-      function createObjectFromConfig(custom: CustomizationConfig, scale: number): THREE.Object3D | null {
+      function createObjectFromConfig(
+        custom: CustomizationConfig,
+        scale: number
+      ): THREE.Object3D | null {
         let geometry: THREE.BufferGeometry | null = null;
-        const scaledArgs = custom.args?.map((arg) =>
-          typeof arg === 'number' ? arg * scale : arg
-        );
+        const scaledArgs = custom.args?.map((arg) => (typeof arg === 'number' ? arg * scale : arg));
 
         switch (custom.type) {
           case 'sphere':
@@ -234,6 +235,7 @@ export function StrataCharacter({
     // 3. Cache fur groups
     const furGroups: THREE.Group[] = [];
     character.root.traverse((child) => {
+      // biome-ignore lint/suspicious/noExplicitAny: userData is any in Three.js
       if (child instanceof THREE.Group && (child as any).userData.isFurGroup) {
         furGroups.push(child as THREE.Group);
       }
@@ -271,10 +273,6 @@ export function StrataCharacter({
         if (isFiring) {
           weaponGroupRef.current.position.z += Math.sin(time * 20) * 0.02;
         }
-      }
-
-      if (muzzleRef.current) {
-        muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
       }
     }
   });

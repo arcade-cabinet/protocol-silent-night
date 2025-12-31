@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 import styles from './MessageOverlay.module.css';
 
@@ -11,7 +12,12 @@ export function MessageOverlay() {
   const [message, setMessage] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
 
-  const { state, bossActive } = useGameStore();
+  const { state, bossActive } = useGameStore(
+    useShallow((state) => ({
+      state: state.state,
+      bossActive: state.bossActive,
+    }))
+  );
 
   // Show boss warning
   useEffect(() => {
@@ -40,5 +46,13 @@ export function MessageOverlay() {
 
   if (!message || !visible) return null;
 
-  return <div className={`${styles.overlay} ${state === 'WIN' ? styles.win : ''}`}>{message}</div>;
+  return (
+    <div
+      role="alert"
+      aria-live="assertive"
+      className={`${styles.overlay} ${state === 'WIN' ? styles.win : ''}`}
+    >
+      {message}
+    </div>
+  );
 }
