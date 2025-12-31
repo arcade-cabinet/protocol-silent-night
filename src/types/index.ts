@@ -335,3 +335,36 @@ export const getBulletTypeFromWeapon = (weaponType: WeaponType): 'cannon' | 'smg
       return 'star';
   }
 };
+
+/**
+ * Seeded pseudo-random number generator for deterministic gameplay.
+ */
+export class SeededRandom {
+  private state: number;
+
+  constructor(seed: number) {
+    this.state = seed || Math.floor(Math.random() * 999999);
+  }
+
+  /**
+   * Returns a random float between 0 and 1.
+   */
+  next(): number {
+    this.state = (this.state * 9301 + 49297) % 233280;
+    return this.state / 233280;
+  }
+
+  /**
+   * Returns a random integer between min (inclusive) and max (inclusive).
+   */
+  nextInt(min: number, max: number): number {
+    return Math.floor(this.next() * (max - min + 1)) + min;
+  }
+
+  /**
+   * Returns a random element from an array.
+   */
+  pick<T>(array: T[]): T {
+    return array[this.nextInt(0, array.length - 1)];
+  }
+}

@@ -10,21 +10,22 @@ import {
   WEAPON_EVOLUTIONS,
   WEAPONS,
 } from '@/data';
-import type {
-  BriefingLine,
-  BulletData,
-  ChristmasObstacle,
-  EnemyData,
-  GameState,
-  GameStats,
-  InputState,
-  MetaProgressData,
-  PlayerClassConfig,
-  PlayerClassType,
-  RoguelikeUpgrade,
-  RunProgressData,
-  WeaponEvolutionType,
-  WeaponType,
+import {
+  type BriefingLine,
+  type BulletData,
+  type ChristmasObstacle,
+  type EnemyData,
+  type GameState,
+  type GameStats,
+  type InputState,
+  type MetaProgressData,
+  type PlayerClassConfig,
+  type PlayerClassType,
+  type RoguelikeUpgrade,
+  type RunProgressData,
+  type WeaponEvolutionType,
+  type WeaponType,
+  SeededRandom,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
@@ -150,6 +151,9 @@ interface GameStore {
   // Kill Streak
   killStreak: number;
   lastKillTime: number;
+
+  // RNG
+  rng: SeededRandom;
 
   // Reset
   reset: () => void;
@@ -279,6 +283,7 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
+  rng: new SeededRandom(12345),
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -569,7 +574,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const usedIds = new Set<string>();
 
       while (choices.length < 3 && weighted.length > 0) {
-        const idx = Math.floor(Math.random() * weighted.length);
+        const idx = get().rng.nextInt(0, weighted.length - 1);
         const upgrade = weighted[idx];
         if (!usedIds.has(upgrade.id)) {
           choices.push(upgrade);
@@ -812,7 +817,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     let finalDamage = damage;
 
     // Frost Piercing: Critical Hits
-    if (stats && Math.random() < stats.critChance) {
+    if (stats && get().rng.next() < stats.critChance) {
       finalDamage *= 2;
       triggerHaptic(HapticPatterns.DAMAGE_HEAVY);
     }
@@ -862,9 +867,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   spawnBoss: () => {
-    const { enemies, addEnemy } = get();
+    const { enemies, addEnemy, rng } = get();
     if (enemies.some((e) => e.type === 'boss')) return;
-    const angle = Math.random() * Math.PI * 2;
+    const angle = rng.next() * Math.PI * 2;
     const radius = 30;
     const position = new THREE.Vector3(Math.cos(angle) * radius, 4, Math.sin(angle) * radius);
     const bossConfig = ENEMIES.boss;
@@ -948,6 +953,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       highScore: get().highScore,
       metaProgress: get().metaProgress,
       playerPosition: new THREE.Vector3(0, 0, 0),
+      rng: new SeededRandom(Date.now()),
     }),
 }));
 
