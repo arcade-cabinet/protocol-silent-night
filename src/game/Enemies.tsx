@@ -88,16 +88,6 @@ export function Enemies() {
 
     // Ensure we keep spawning if the population drops too low
     // This addresses the "enemies not spawning" complaint by forcing population maintenance
-    if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
-      const checkId = setInterval(() => {
-        const { enemies } = useGameStore.getState();
-        if (enemies.length < CONFIG.MAX_MINIONS / 2) {
-          spawnMinion();
-        }
-      }, 1000);
-      intervalIds.push(checkId);
-    }
-
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
     }
@@ -126,7 +116,20 @@ export function Enemies() {
       spawnTimerRef.current += delta * 1000;
       if (spawnTimerRef.current >= CONFIG.SPAWN_INTERVAL) {
         spawnTimerRef.current = 0;
-        spawnMinion();
+        
+        // Root cause fix: Spawn multiple minions if population is low
+        // This ensures the game feels active even after large clear-outs
+        const { enemies: currentEnemies } = useGameStore.getState();
+        const currentCount = currentEnemies.filter(e => e.type === 'minion').length;
+        const room = CONFIG.MAX_MINIONS - currentCount;
+        
+        if (room > 0) {
+          // Spawn at least 1, up to 3 if there's lots of room
+          const toSpawn = Math.min(3, room);
+          for (let i = 0; i < toSpawn; i++) {
+            spawnMinion();
+          }
+        }
       }
     }
 
