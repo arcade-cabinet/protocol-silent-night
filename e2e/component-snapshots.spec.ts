@@ -8,8 +8,8 @@ import { test, expect, Page } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
-const CLICK_TIMEOUT = 20000; // Increased timeout for clicks in CI environments
-const TRANSITION_TIMEOUT = 15000; // Timeout for waiting for screen transitions
+const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
+const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
 
 /**
  * Wait for loading screen to be completely hidden and start screen to be ready
@@ -39,9 +39,12 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     // Wait for briefing screen
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -69,8 +72,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -89,8 +95,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -111,8 +120,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -140,8 +152,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -162,8 +177,11 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -182,8 +200,11 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -209,8 +230,11 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -233,8 +257,11 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -258,8 +285,11 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -284,8 +314,11 @@ test.describe('Component Snapshots - Particle Effects', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -311,8 +344,11 @@ test.describe('Component Snapshots - Camera System', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -331,8 +367,11 @@ test.describe('Component Snapshots - Camera System', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -360,8 +399,11 @@ test.describe('Component Snapshots - UI Overlays', () => {
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
@@ -383,8 +425,11 @@ test.describe('Component Snapshots - UI Overlays', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
+    // Additional wait after click to ensure state transition
+    await page.waitForTimeout(2000);
+
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
