@@ -24,15 +24,14 @@ export function Enemies() {
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
 
-  // Optimization: Selectors for essential state updates
-  const enemies = useGameStore((state) => state.enemies);
+  // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
   const bossActive = useGameStore((state) => state.bossActive);
   const bossHp = useGameStore((state) => state.bossHp);
   const bossMaxHp = useGameStore((state) => state.bossMaxHp);
 
-  // Optimization: Selectors for stable actions
-  const updateEnemies = useGameStore((state) => state.updateEnemies);
+  // Note: We subscribe to enemies to ensure we render new ones when spawned/died
+  const enemies = useGameStore((state) => state.enemies);
   const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
@@ -99,12 +98,12 @@ export function Enemies() {
   const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
-    // Optimization: Access high-frequency state transiently
-    const { playerPosition } = useGameStore.getState();
+    // Optimization: Access transient state
+    const { state: gameState, playerPosition, enemies: currentEnemies } = useGameStore.getState();
 
-    if (state !== 'PHASE_1' && state !== 'PHASE_BOSS') return;
+    if (gameState !== 'PHASE_1' && gameState !== 'PHASE_BOSS') return;
 
-    if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
+    if (gameState === 'PHASE_1' || gameState === 'PHASE_BOSS') {
       spawnTimerRef.current += delta * 1000;
       if (spawnTimerRef.current >= CONFIG.SPAWN_INTERVAL) {
         spawnTimerRef.current = 0;
@@ -117,47 +116,44 @@ export function Enemies() {
     const tempVec = tempVecRef.current;
     const now = Date.now();
 
-    updateEnemies((currentEnemies) => {
-      let shouldDamage = false;
-      let damageAmount = 0;
+    let shouldDamage = false;
+    let damageAmount = 0;
 
-      for (const enemy of currentEnemies) {
-        const currentPos = enemy.mesh.position;
+    // Optimization: Mutate enemy positions directly without triggering store updates
+    for (const enemy of currentEnemies) {
+      const currentPos = enemy.mesh.position;
 
-        toPlayer.copy(playerPosition).sub(currentPos);
-        const distance = toPlayer.length();
-        direction.copy(toPlayer).normalize();
+      toPlayer.copy(playerPosition).sub(currentPos);
+      const distance = toPlayer.length();
+      direction.copy(toPlayer).normalize();
 
-        const moveSpeed = enemy.type === 'boss' ? BOSS_CONFIG.speed : enemy.speed;
-        tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
-        currentPos.add(tempVec);
+      const moveSpeed = enemy.type === 'boss' ? BOSS_CONFIG.speed : enemy.speed;
+      tempVec.copy(direction).multiplyScalar(moveSpeed * delta);
+      currentPos.add(tempVec);
 
-        const targetRotation = Math.atan2(direction.x, direction.z);
-        const angleDiff =
-          ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
-        enemy.mesh.rotation.y += angleDiff * delta * 8;
+      const targetRotation = Math.atan2(direction.x, direction.z);
+      const angleDiff =
+        ((targetRotation - enemy.mesh.rotation.y + Math.PI) % (Math.PI * 2)) - Math.PI;
+      enemy.mesh.rotation.y += angleDiff * delta * 8;
 
-        const hitRadius =
-          enemy.type === 'boss'
-            ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
-            : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
-        if (distance < hitRadius) {
-          if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-            shouldDamage = true;
-            damageAmount = Math.max(damageAmount, enemy.damage);
-          }
-          tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
-          currentPos.add(tempVec);
+      const hitRadius =
+        enemy.type === 'boss'
+          ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
+          : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
+      if (distance < hitRadius) {
+        if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
+          shouldDamage = true;
+          damageAmount = Math.max(damageAmount, enemy.damage);
         }
+        tempVec.copy(direction).multiplyScalar(ENEMY_SPAWN_CONFIG.knockbackForce);
+        currentPos.add(tempVec);
       }
+    }
 
-      if (shouldDamage) {
-        lastDamageTimeRef.current = now;
-        damagePlayer(damageAmount);
-      }
-
-      return currentEnemies;
-    });
+    if (shouldDamage) {
+      lastDamageTimeRef.current = now;
+      damagePlayer(damageAmount);
+    }
   });
 
   const minions = enemies.filter((e) => e.type === 'minion');
@@ -165,7 +161,7 @@ export function Enemies() {
   return (
     <group ref={groupRef}>
       <InstancedMinions minions={minions} />
-      {bossActive && <BossRenderer bossHp={bossHp} bossMaxHp={bossMaxHp} />}
+      {bossActive && <BossRenderer enemies={enemies} bossHp={bossHp} bossMaxHp={bossMaxHp} />}
     </group>
   );
 }
@@ -282,14 +278,22 @@ function InstancedMinions({
 }
 
 function BossRenderer({
+  enemies,
   bossHp,
   bossMaxHp,
 }: {
+  enemies: { type: string; mesh: THREE.Object3D }[];
   bossHp: number;
   bossMaxHp: number;
 }) {
+  const bossEnemy = enemies.find((e) => e.type === 'boss');
+  const bossPos = bossEnemy?.mesh.position ?? null;
+  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
+
   return (
     <BossMesh
+      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
+      rotation={bossRotation}
       hp={bossHp}
       maxHp={bossMaxHp}
     />
@@ -297,9 +301,13 @@ function BossRenderer({
 }
 
 function BossMesh({
+  position,
+  rotation = 0,
   hp,
   maxHp,
 }: {
+  position: [number, number, number];
+  rotation?: number;
   hp: number;
   maxHp: number;
 }) {
@@ -325,16 +333,8 @@ function BossMesh({
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    // Optimization: Read boss position transiently from store
-    const { enemies } = useGameStore.getState();
-    const bossEnemy = enemies.find((e) => e.type === 'boss');
-
-    if (groupRef.current && bossEnemy) {
-      const bossPos = bossEnemy.mesh.position;
-      const bossRotation = bossEnemy.mesh.rotation.y;
-
-      groupRef.current.position.set(bossPos.x, 4 + Math.sin(time * 1.5) * 0.3, bossPos.z);
-      groupRef.current.rotation.y = bossRotation;
+    if (groupRef.current) {
+      groupRef.current.position.y = position[1] + Math.sin(time * 1.5) * 0.3;
     }
 
     if (bodyRef.current) {
@@ -374,7 +374,7 @@ function BossMesh({
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={position} rotation={[0, rotation, 0]}>
       <group ref={bodyRef}>
         <mesh castShadow>
           <boxGeometry args={[2.5, 3, 1.8]} />
@@ -400,12 +400,6 @@ function BossMesh({
           <dodecahedronGeometry args={[0.4]} />
           <meshBasicMaterial color={emissiveColor} />
         </mesh>
-        <pointLight
-          color={emissiveColor}
-          intensity={intensity * 2}
-          distance={8}
-          position={[0, 0.2, 1.2]}
-        />
         {[-0.6, -0.2, 0.2, 0.6].map((y) => (
           <mesh key={`rib-${y}`} position={[0, y, 0.9]} castShadow>
             <boxGeometry args={[2.2, 0.15, 0.1]} />
@@ -498,12 +492,6 @@ function BossMesh({
           <sphereGeometry args={[0.18, 8, 8]} />
           <meshBasicMaterial color={eyeColor} />
         </mesh>
-        <pointLight
-          color={eyeColor}
-          intensity={intensity * 1.5}
-          distance={6}
-          position={[0, 0.15, 0.8]}
-        />
         <group position={[0.5, 0.5, -0.1]} rotation={[0.3, 0.4, 0.2]}>
           <mesh castShadow>
             <coneGeometry args={[0.2, 1.5, 6]} />
@@ -657,12 +645,6 @@ function BossMesh({
           </mesh>
         </group>
       </group>
-      <pointLight
-        color={new THREE.Color(emissiveColor)}
-        intensity={intensity * 3}
-        distance={15}
-        position={[0, 0, 0]}
-      />
       <mesh position={[0, 5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[1.8, 2, 32, 1, 0, Math.PI * 2 * hpRatio]} />
         <meshBasicMaterial
