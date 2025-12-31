@@ -27,7 +27,7 @@ import type {
   WeaponType,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
-import { calculateChecksum, verifyChecksum } from '@/utils/security';
+import { validateAndUnwrap, wrapAndSecure } from '@/utils/security';
 
 // Extend Window interface for e2e testing
 declare global {
@@ -160,59 +160,47 @@ const loadMetaProgress = (): MetaProgressData => {
   try {
     const stored = localStorage.getItem(META_PROGRESS_KEY);
     if (stored) {
-      // Check if it's the new secure format
-      try {
-        const parsed = JSON.parse(stored);
-        // If it has checksum field, verify it
-        if (parsed.checksum && parsed.data) {
-          if (verifyChecksum(parsed.data, parsed.checksum)) {
-            return JSON.parse(parsed.data);
-          } else {
-            console.error('Security violation: Save data tampering detected');
-            // We could return default state here, but for now we'll fall through to legacy check
-            // or just reset if we want strict security.
-            // Strict security:
-            // return getDefaultMetaProgress();
-          }
-        }
+      // Try to unwrap as secured data first
+      const secured = validateAndUnwrap<MetaProgressData>(stored);
+      if (secured) {
+        return secured;
+      }
 
-        // Backward compatibility: If it's a direct object (legacy save), allow it but it will be upgraded on next save
-        // We assume valid save data has 'nicePoints' property
-        if ('nicePoints' in parsed) {
-          return parsed;
+      // Fallback: Check if it's legacy data (plain JSON)
+      // We try to parse it and check for a known property
+      try {
+        const raw = JSON.parse(stored);
+        if (raw && typeof raw === 'object' && 'nicePoints' in raw) {
+          // It's likely legacy data, so we accept it (and it will be secured on next save)
+          return raw as MetaProgressData;
         }
-      } catch (e) {
-        // Parsing error
-        console.warn('Invalid save data format', e);
+      } catch {
+        // Ignore JSON parse error here, return default
       }
     }
   } catch (e) {
     console.error('Failed to load meta progress:', e);
   }
 
-  return getDefaultMetaProgress();
+  return {
+    nicePoints: 0,
+    totalPointsEarned: 0,
+    runsCompleted: 0,
+    bossesDefeated: 0,
+    unlockedWeapons: ['cannon', 'smg', 'star'],
+    unlockedSkins: [],
+    permanentUpgrades: {},
+    highScore: 0,
+    totalKills: 0,
+    totalDeaths: 0,
+  };
 };
-
-const getDefaultMetaProgress = (): MetaProgressData => ({
-  nicePoints: 0,
-  totalPointsEarned: 0,
-  runsCompleted: 0,
-  bossesDefeated: 0,
-  unlockedWeapons: ['cannon', 'smg', 'star'],
-  unlockedSkins: [],
-  permanentUpgrades: {},
-  highScore: 0,
-  totalKills: 0,
-  totalDeaths: 0,
-});
 
 // Save meta-progression to localStorage
 const saveMetaProgress = (data: MetaProgressData): void => {
   try {
-    const json = JSON.stringify(data);
-    const checksum = calculateChecksum(json);
-    const storageData = JSON.stringify({ data: json, checksum });
-    localStorage.setItem(META_PROGRESS_KEY, storageData);
+    const secured = wrapAndSecure(data);
+    localStorage.setItem(META_PROGRESS_KEY, secured);
   } catch (e) {
     console.error('Failed to save meta progress:', e);
   }
