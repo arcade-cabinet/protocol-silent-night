@@ -72,6 +72,34 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
     AudioManager.playSFX('ui_select');
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, currentTab: TabType) => {
+    const tabs: TabType[] = ['weapons', 'skins', 'upgrades'];
+    const currentIndex = tabs.indexOf(currentTab);
+    let nextIndex = currentIndex;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        break;
+      case 'ArrowRight':
+        nextIndex = (currentIndex + 1) % tabs.length;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = tabs.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    const nextTab = tabs[nextIndex];
+    changeTab(nextTab);
+    document.getElementById(`tab-${nextTab}`)?.focus();
+  };
+
   return (
     <div className={styles.screen}>
       <div className={styles.container}>
@@ -95,8 +123,10 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             id="tab-weapons"
             aria-selected={activeTab === 'weapons'}
             aria-controls="panel-weapons"
+            tabIndex={activeTab === 'weapons' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'weapons' ? styles.tabActive : ''}`}
             onClick={() => changeTab('weapons')}
+            onKeyDown={(e) => handleKeyDown(e, 'weapons')}
           >
             Weapons
           </button>
@@ -106,8 +136,10 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             id="tab-skins"
             aria-selected={activeTab === 'skins'}
             aria-controls="panel-skins"
+            tabIndex={activeTab === 'skins' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'skins' ? styles.tabActive : ''}`}
             onClick={() => changeTab('skins')}
+            onKeyDown={(e) => handleKeyDown(e, 'skins')}
           >
             Skins
           </button>
@@ -117,8 +149,10 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             id="tab-upgrades"
             aria-selected={activeTab === 'upgrades'}
             aria-controls="panel-upgrades"
+            tabIndex={activeTab === 'upgrades' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'upgrades' ? styles.tabActive : ''}`}
             onClick={() => changeTab('upgrades')}
+            onKeyDown={(e) => handleKeyDown(e, 'upgrades')}
           >
             Upgrades
           </button>
