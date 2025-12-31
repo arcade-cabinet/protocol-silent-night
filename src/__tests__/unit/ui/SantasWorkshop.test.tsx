@@ -21,9 +21,15 @@ describe('SantasWorkshop Component', () => {
     useGameStore.setState({
       metaProgress: {
         nicePoints: 1000,
+        totalPointsEarned: 1000,
+        runsCompleted: 0,
+        bossesDefeated: 0,
         unlockedWeapons: [],
         unlockedSkins: [],
         permanentUpgrades: {},
+        highScore: 0,
+        totalKills: 0,
+        totalDeaths: 0,
       },
     });
   });

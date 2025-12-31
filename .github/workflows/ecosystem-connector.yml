@@ -57,11 +57,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
           GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
           echo "🤖 Delegating to Jules..."
 
-          COMMENT="${{ github.event.comment.body }}"
-          TASK=$(echo "$COMMENT" | sed 's|/jules ||')
+          TASK=$(echo "$COMMENT_BODY" | sed 's|/jules ||')
 
           gh issue comment ${{ github.event.issue.number }} --body "🤖 **Jules Delegation**
 
@@ -81,11 +81,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
           echo "🤖 Delegating to Cursor..."
 
-          COMMENT="${{ github.event.comment.body }}"
-          TASK=$(echo "$COMMENT" | sed 's|/cursor ||')
+          TASK=$(echo "$COMMENT_BODY" | sed 's|/cursor ||')
 
           gh issue comment ${{ github.event.issue.number }} --body "🤖 **Cursor Delegation**
 
