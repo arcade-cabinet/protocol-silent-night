@@ -63,9 +63,11 @@ test.describe('Visual Regression - Game Start', () => {
     
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     // Wait for game to load
@@ -84,9 +86,11 @@ test.describe('Visual Regression - Game Start', () => {
     
     // Select Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await page.waitForLoadState('networkidle');
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     // Wait for game to load
@@ -105,9 +109,11 @@ test.describe('Visual Regression - Game Start', () => {
     
     // Select Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await page.waitForLoadState('networkidle');
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     // Wait for game to load
@@ -127,9 +133,11 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.waitForTimeout(2000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(3000);
     
@@ -145,9 +153,11 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.waitForTimeout(2000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(3000);
     
@@ -168,9 +178,11 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(2000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(3000);
     
@@ -190,9 +202,11 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(2000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(3000);
     
@@ -213,9 +227,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(2000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(5000);
     
@@ -235,9 +251,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(2000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await page.waitForLoadState('networkidle');
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(5000);
     
@@ -258,9 +276,11 @@ test.describe('Visual Regression - End Game States', () => {
 
     // Start game
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(3000);
     
@@ -305,9 +325,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(2000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(5000);
     
@@ -323,9 +345,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(2000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(3000);
     

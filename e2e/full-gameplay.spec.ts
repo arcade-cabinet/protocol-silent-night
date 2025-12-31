@@ -105,12 +105,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible();
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await page.waitForLoadState('networkidle');
     await commenceButton.click();
 
     // Wait for game to start
@@ -130,9 +130,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -157,9 +159,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -186,9 +190,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -213,9 +219,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -246,9 +254,11 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.waitForTimeout(2000);
 
     // Select Elf
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
@@ -264,9 +274,11 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -291,9 +303,11 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -315,9 +329,11 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.waitForTimeout(2000);
 
     // Select Bumble
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
@@ -333,9 +349,11 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -360,9 +378,11 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -390,9 +410,11 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -420,9 +442,11 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -457,9 +481,11 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -495,9 +521,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -530,9 +558,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -562,9 +592,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -601,9 +633,11 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(2000);
 
     // Play a game
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -634,9 +668,11 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(2000);
 
     // Play and get a score
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -657,9 +693,11 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(1000);
 
     // Start new game
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
@@ -681,9 +719,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 1: Character Selection - verify start screen is showing
     await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     // Step 2: Game starts
@@ -727,9 +767,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
@@ -760,9 +802,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
@@ -795,9 +839,11 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -824,9 +870,11 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -850,9 +898,11 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -885,9 +935,11 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);

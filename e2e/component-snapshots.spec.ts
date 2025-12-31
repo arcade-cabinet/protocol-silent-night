@@ -17,9 +17,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(5000);
@@ -44,9 +46,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(2000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await page.waitForLoadState('networkidle');
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(5000);
@@ -62,9 +66,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(2000);
 
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await page.waitForLoadState('networkidle');
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(5000);
@@ -82,9 +88,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(5000);
@@ -109,9 +117,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(5000);
@@ -129,9 +139,11 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
@@ -147,6 +159,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
     await page.waitForTimeout(8000);
     
@@ -168,9 +181,11 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -190,9 +205,11 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(2000);
     
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await page.waitForLoadState('networkidle');
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -213,9 +230,11 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(2000);
     
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await page.waitForLoadState('networkidle');
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -237,6 +256,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
     await page.waitForTimeout(8000);
     
@@ -258,9 +278,11 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -276,9 +298,11 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
@@ -303,9 +327,11 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.waitForTimeout(2000);
     
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await page.waitForLoadState('networkidle');
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(8000);
@@ -324,9 +350,11 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.waitForTimeout(2000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.waitForLoadState('networkidle');
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(5000);
