@@ -47,7 +47,7 @@ test.describe('Character Class Tests', () => {
     await expect(page.getByText(/Heavy Siege \/ Tank/i)).toBeVisible();
     
     // Click to start
-    await santaButton.click({ noWaitAfter: true });
+    await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -71,7 +71,7 @@ test.describe('Character Class Tests', () => {
     // Start game with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
     await expect(santaButton).toBeVisible({ timeout: 15000 });
-    await santaButton.click({ noWaitAfter: true });
+    await santaButton.click();
     
     // Wait for game to start
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
@@ -146,7 +146,7 @@ test.describe('Character Class Tests', () => {
     await expect(page.getByText(/Recon \/ Scout/i)).toBeVisible();
     
     // Click to start
-    await elfButton.click({ noWaitAfter: true });
+    await elfButton.click();
     
     // Start screen should disappear
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
@@ -165,7 +165,7 @@ test.describe('Character Class Tests', () => {
     // Start game with Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
     await expect(elfButton).toBeVisible({ timeout: 15000 });
-    await elfButton.click({ noWaitAfter: true });
+    await elfButton.click();
     
     // Wait for game to start
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
@@ -242,7 +242,7 @@ test.describe('Character Class Tests', () => {
     await expect(page.getByText(/Crowd Control \/ Bruiser/i)).toBeVisible();
     
     // Click to start
-    await bumbleButton.click({ noWaitAfter: true });
+    await bumbleButton.click();
     
     // Start screen should disappear
     await expect(bumbleButton).not.toBeVisible({ timeout: 5000 });
@@ -261,7 +261,7 @@ test.describe('Character Class Tests', () => {
     // Start game with Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
     await expect(bumbleButton).toBeVisible({ timeout: 15000 });
-    await bumbleButton.click({ noWaitAfter: true });
+    await bumbleButton.click();
     
     // Wait for game to start
     await expect(bumbleButton).not.toBeVisible({ timeout: 5000 });
@@ -327,7 +327,7 @@ test.describe('Character Class Tests', () => {
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
     await expect(santaButton).toBeVisible({ timeout: 15000 });
-    await santaButton.click({ noWaitAfter: true });
+    await santaButton.click();
     
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -358,7 +358,7 @@ test.describe('Character Class Tests', () => {
     // Start game with Elf (fast firing for quick kills)
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
     await expect(elfButton).toBeVisible({ timeout: 15000 });
-    await elfButton.click({ noWaitAfter: true });
+    await elfButton.click();
     
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
