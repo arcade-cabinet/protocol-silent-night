@@ -23,8 +23,8 @@ describe('Bullets Component', () => {
       (node: any) => node.instance && node.instance.count !== undefined
     );
 
-    // 3 types: cannon, smg, stars
-    expect(instancedMeshes.length).toBe(3);
+    // 6 types: cannon, smg, stars, bell, cane, gingerbread
+    expect(instancedMeshes.length).toBe(6);
 
     // Check counts
     const cannon = instancedMeshes.find(
@@ -32,13 +32,22 @@ describe('Bullets Component', () => {
       (m: any) => m.instance.geometry.type === 'IcosahedronGeometry'
     );
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-    const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry');
+    const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry' && m.instance.material.type === 'MeshBasicMaterial');
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const stars = instancedMeshes.find((m: any) => m.instance.geometry.type === 'ExtrudeGeometry');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const bell = instancedMeshes.find((m: any) => m.instance.geometry.type === 'SphereGeometry');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const cane = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry' && m.instance.material.type === 'MeshStandardMaterial');
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const gingerbread = instancedMeshes.find((m: any) => m.instance.geometry.type === 'BoxGeometry');
 
     if (cannon) expect(cannon.instance.count).toBe(30);
     if (smg) expect(smg.instance.count).toBe(60);
     if (stars) expect(stars.instance.count).toBe(45);
+    if (bell) expect(bell.instance.count).toBe(45);
+    if (cane) expect(cane.instance.count).toBe(45);
+    if (gingerbread) expect(gingerbread.instance.count).toBe(45);
 
     await renderer.unmount();
   });
@@ -106,7 +115,7 @@ describe('Bullets Component', () => {
     );
 
     // Verify we found the meshes
-    expect(meshes.length).toBe(3);
+    expect(meshes.length).toBe(6);
 
     await renderer.unmount();
 
