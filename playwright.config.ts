@@ -40,13 +40,13 @@ export default defineConfig({
     headless: !hasMcpSupport,
     // Video recording with MCP for debugging
     video: hasMcpSupport ? 'on-first-retry' : 'off',
-    // Increased action timeout for WebGL rendering
-    actionTimeout: 10000,
+    // Increased action timeout for WebGL rendering and CI font loading
+    actionTimeout: 30000,
   },
   // Expect options for visual regression
   expect: {
-    // Timeout for expect() calls
-    timeout: 10000,
+    // Timeout for expect() calls - increased for font loading in CI
+    timeout: 30000,
     // Screenshot comparison settings
     toHaveScreenshot: {
       // Maximum number of pixels that can differ
@@ -55,6 +55,8 @@ export default defineConfig({
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
+      // Timeout for screenshot operations - increased for font loading
+      timeout: 30000,
     },
   },
   // Configure projects for major browsers
