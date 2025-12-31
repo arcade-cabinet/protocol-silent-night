@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * UI Component Refinement Tests
@@ -11,6 +11,12 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
+
+// Helper to wait for loading screen to be fully gone
+async function waitForLoadingComplete(page: Page) {
+  await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(500);
+}
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
@@ -30,6 +36,7 @@ test.describe('UI Component Refinement', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    await waitForLoadingComplete(page);
   });
 
   test.describe('Menu Screen', () => {

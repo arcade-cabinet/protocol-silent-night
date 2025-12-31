@@ -297,8 +297,11 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+
+    // Wait for loading screen to be completely gone
+    await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
+
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -307,9 +310,13 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(3000);
+
+    // Wait for loading screen to be completely gone
+    await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await expect(santaButton).toBeVisible();
     await santaButton.click();
 
     // Wait for and click "COMMENCE OPERATION" button
@@ -326,9 +333,13 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(3000);
+
+    // Wait for loading screen to be completely gone
+    await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(500);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await expect(santaButton).toBeVisible();
     await santaButton.click();
 
     // Wait for and click "COMMENCE OPERATION" button

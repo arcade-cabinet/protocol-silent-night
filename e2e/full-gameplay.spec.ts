@@ -2,10 +2,16 @@ import { test, expect, Page } from '@playwright/test';
 
 /**
  * Full Gameplay E2E Tests
- * 
+ *
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */
+
+// Helper to wait for loading screen to be fully gone
+async function waitForLoadingComplete(page: Page) {
+  await page.waitForSelector('[class*="LoadingScreen"]', { state: 'detached', timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(500);
+}
 
 // Helper to get game state from the store
 async function getGameState(page: Page) {
@@ -857,9 +863,11 @@ test.describe('Full Gameplay - Input Controls', () => {
   test('should show touch controls on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await expect(santaButton).toBeVisible();
+    await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
