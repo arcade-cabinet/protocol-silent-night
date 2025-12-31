@@ -117,14 +117,11 @@ jobs:
         run: |
           TASK=$(echo "$COMMENT" | sed 's/@cascade//' | xargs)
           
-        # Determine optimal agent
-        AGENT="manual"
-        REASON="Default"
-        
-        # Sanitize task for logging
-        echo "Processing task: ${TASK:0:100}..."
-        
-        if echo "$TASK" | grep -qiE "(explain|what is|how does|why|describe|question)"; then
+          # Determine optimal agent
+          AGENT="manual"
+          REASON="Default"
+          
+          if echo "$TASK" | grep -qiE "(explain|what is|how does|why|describe|question)"; then
             AGENT="ollama"
             REASON="Quick question detected"
           elif echo "$TASK" | grep -qiE "(refactor|rename|migrate|bulk|across files)"; then
