@@ -11,7 +11,7 @@
       "flavor": "Neon-infused ice cores. Cold never bothered me anyway."
     },
     {
-      "id": "candycane",
+      "id": "candy_cane",
       "name": "Candy Cane Staff",
       "cost": 750,
       "type": "Melee Sweep",
@@ -31,7 +31,7 @@
       "flavor": "These decorations pack a punch. Handle with care."
     },
     {
-      "id": "lightwhip",
+      "id": "light_string",
       "name": "Light String Whip",
       "cost": 800,
       "type": "Electric Chain",
@@ -41,7 +41,7 @@
       "flavor": "Deck the halls. Wreck the bots."
     },
     {
-      "id": "turret",
+      "id": "gingerbread",
       "name": "Gingerbread Turret",
       "cost": 1200,
       "type": "Deployable",
@@ -51,7 +51,7 @@
       "flavor": "Set it and forget it. Smart cookies."
     },
     {
-      "id": "jinglebell",
+      "id": "jingle_bell",
       "name": "Jingle Bell Shotgun",
       "cost": 900,
       "type": "Spread Shot",
@@ -61,7 +61,7 @@
       "flavor": "Ring in the new year with buckshot and bass."
     },
     {
-      "id": "giftbox",
+      "id": "quantum_gift",
       "name": "Quantum Gift Box",
       "cost": 2000,
       "type": "Random",

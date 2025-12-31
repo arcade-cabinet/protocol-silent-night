@@ -235,6 +235,7 @@ export function StrataCharacter({
     // 3. Cache fur groups
     const furGroups: THREE.Group[] = [];
     character.root.traverse((child) => {
+      // biome-ignore lint/suspicious/noExplicitAny: userData is any in Three.js
       if (child instanceof THREE.Group && (child as any).userData.isFurGroup) {
         furGroups.push(child as THREE.Group);
       }
@@ -272,10 +273,6 @@ export function StrataCharacter({
         if (isFiring) {
           weaponGroupRef.current.position.z += Math.sin(time * 20) * 0.02;
         }
-      }
-
-      if (muzzleRef.current) {
-        muzzleRef.current.intensity = isFiring ? Math.random() * 3 + 2 : 0;
       }
     }
   });
