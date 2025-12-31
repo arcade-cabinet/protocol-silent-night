@@ -231,7 +231,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(3000);
     
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await expect(elfButton).toBeVisible();
     await elfButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForTimeout(5000);
     
     // Wait for potential damage from enemies
@@ -296,18 +300,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
-    await santaButton.scrollIntoViewIfNeeded();
+    await expect(santaButton).toBeVisible();
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
-    // Wait for the FIRE button to appear as confirmation of game start
-    const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
-
-    await page.waitForTimeout(2000); // Allow render to settle
+    await page.waitForTimeout(5000);
     
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
