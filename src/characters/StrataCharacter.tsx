@@ -234,7 +234,7 @@ export function StrataCharacter({
     // 3. Cache fur groups
     const furGroups: THREE.Group[] = [];
     character.root.traverse((child) => {
-      if (child instanceof THREE.Group && (child as any).userData.isFurGroup) {
+      if (child instanceof THREE.Group && child.userData.isFurGroup) {
         furGroups.push(child as THREE.Group);
       }
     });
