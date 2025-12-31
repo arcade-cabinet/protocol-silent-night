@@ -9,13 +9,18 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeOut 0.5s ease-out 1.4s forwards;
+  animation: disablePointer 0s linear 1.3s forwards, fadeOut 0.5s ease-out 1.4s forwards;
+}
+
+@keyframes disablePointer {
+  to {
+    pointer-events: none;
+  }
 }
 
 @keyframes fadeOut {
   to {
     opacity: 0;
-    pointer-events: none;
   }
 }
 
