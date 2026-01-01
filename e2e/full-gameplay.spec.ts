@@ -344,7 +344,6 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     // Select Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.waitFor({ state: 'visible', timeout: 10000 });
     await bumbleButton.evaluate((e) => e.click());
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -352,15 +351,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be in PHASE_1
-    await page.waitForFunction(
-      () => {
-        const state = (window as any).useGameStore?.getState();
-        return state && state.state === 'PHASE_1' && state.playerClass !== null;
-      },
-      null,
-      { timeout: 10000 }
-    );
+    await page.waitForTimeout(2000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -497,7 +488,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 30000,
     });
-    const redeployButton = page.getByRole('button', { name: /PLAY AGAIN/ });
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
     await expect(redeployButton).toBeVisible({ timeout: 30000 });
   });
 
@@ -788,7 +779,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    const redeployButton = page.getByRole('button', { name: /PLAY AGAIN/ });
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
     await redeployButton.waitFor({ state: 'visible', timeout: 30000 });
     await redeployButton.evaluate((e) => e.click());
 

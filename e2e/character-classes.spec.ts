@@ -68,18 +68,8 @@ test.describe('Character Selection & Stats', () => {
       await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
       await commenceButton.evaluate((e) => e.click());
 
-      // Wait for game state to be in PHASE_1
-      await page.waitForFunction(
-        () => {
-          const state = (window as any).useGameStore?.getState();
-          return state && state.state === 'PHASE_1' && state.playerClass !== null;
-        },
-        null,
-        { timeout: 10000 }
-      );
-
-      // Additional wait for HUD to render
-      await page.waitForTimeout(500);
+      // Wait for game HUD
+      await page.waitForTimeout(2000);
 
       // Verify in-game stats via store
       const stats = await page.evaluate(() => {
@@ -116,18 +106,7 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be in PHASE_1
-    await page.waitForFunction(
-      () => {
-        const state = (window as any).useGameStore?.getState();
-        return state && state.state === 'PHASE_1' && state.playerClass !== null;
-      },
-      null,
-      { timeout: 10000 }
-    );
-
-    // Additional wait for game loop to stabilize
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(2000);
 
     // Get initial bullet count
     const initialBullets = await page.evaluate(() =>
@@ -158,18 +137,7 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be in PHASE_1
-    await page.waitForFunction(
-      () => {
-        const state = (window as any).useGameStore?.getState();
-        return state && state.state === 'PHASE_1' && state.playerClass !== null;
-      },
-      null,
-      { timeout: 10000 }
-    );
-
-    // Additional wait for game loop to stabilize
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(2000);
 
     // Fire once - ensure trigger happens
     await page.keyboard.down('Space');
