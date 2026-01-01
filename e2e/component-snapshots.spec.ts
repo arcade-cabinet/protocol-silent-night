@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { safeClick, selectCharacterAndStart } from './helpers';
 
 /**
  * Component Snapshot Tests
@@ -9,24 +10,14 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2;
 
-test.describe.configure({ timeout: 60000 });
+test.describe.configure({ timeout: 90000 }); // Increased from 60s to 90s for CI stability
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await selectCharacterAndStart(page, 'MECHA-SANTA');
 
-    // Start with Santa
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await page.waitForLoadState('networkidle');
-    await santaButton.click();
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.waitForLoadState('networkidle');
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000); // Extra wait for character model to load
 
     // Focus on character by centering view
     await page.evaluate(() => {

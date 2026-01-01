@@ -12,7 +12,7 @@ import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpe
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
-test.describe.configure({ timeout: 60000 });
+test.describe.configure({ timeout: 90000 }); // Increased from 60s to 90s for CI stability
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {

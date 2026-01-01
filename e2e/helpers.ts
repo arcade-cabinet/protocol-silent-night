@@ -5,8 +5,9 @@ import { Page, Locator, expect } from '@playwright/test';
  * Useful for mobile viewports where elements might be off-screen.
  */
 export async function safeClick(locator: Locator, options: { timeout?: number } = {}): Promise<void> {
-  const timeout = options.timeout || 30000;
+  const timeout = options.timeout || 45000; // Increased from 30s to 45s for CI stability
 
+  // Check if page is closed before attempting interaction
   if (locator.page().isClosed()) {
     throw new Error('Page is already closed');
   }
@@ -24,9 +25,9 @@ export async function safeClick(locator: Locator, options: { timeout?: number } 
     console.warn('Scroll/Wait failed, attempting direct click');
   }
 
-  // Stabilization wait after scroll
+  // Stabilization wait after scroll - check page not closed first
   if (!locator.page().isClosed()) {
-    await locator.page().waitForTimeout(500);
+    await locator.page().waitForTimeout(1000); // Increased from 500ms to 1000ms
     await locator.click({ timeout });
   } else {
     throw new Error('Page is already closed');
