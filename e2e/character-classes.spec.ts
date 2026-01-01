@@ -68,8 +68,18 @@ test.describe('Character Selection & Stats', () => {
       await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
       await commenceButton.evaluate((e) => e.click());
 
-      // Wait for game HUD
-      await page.waitForTimeout(2000);
+      // Wait for game state to be in a playable phase
+      await page.waitForFunction(
+        () => {
+          const state = (window as any).useGameStore?.getState();
+          return state && state.state === 'PHASE_1' && state.playerClass !== null;
+        },
+        null,
+        { timeout: 10000 }
+      );
+
+      // Additional wait for HUD to render
+      await page.waitForTimeout(500);
 
       // Verify in-game stats via store
       const stats = await page.evaluate(() => {
@@ -106,7 +116,18 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game state to be in a playable phase
+    await page.waitForFunction(
+      () => {
+        const state = (window as any).useGameStore?.getState();
+        return state && state.state === 'PHASE_1' && state.playerClass !== null;
+      },
+      null,
+      { timeout: 10000 }
+    );
+
+    // Additional wait for game loop to stabilize
+    await page.waitForTimeout(1000);
 
     // Get initial bullet count
     const initialBullets = await page.evaluate(() =>
@@ -123,7 +144,7 @@ test.describe('Weapon Mechanics', () => {
     await page.waitForFunction(
       () => (window as any).useGameStore.getState().bullets.length > 0,
       null,
-      { timeout: 5000 }
+      { timeout: 10000 }
     );
 
     // Stop firing
@@ -148,7 +169,18 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game state to be in a playable phase
+    await page.waitForFunction(
+      () => {
+        const state = (window as any).useGameStore?.getState();
+        return state && state.state === 'PHASE_1' && state.playerClass !== null;
+      },
+      null,
+      { timeout: 10000 }
+    );
+
+    // Additional wait for game loop to stabilize
+    await page.waitForTimeout(1000);
 
     // Directly trigger firing via store to avoid keyboard timing issues in CI
     await page.evaluate(() => {
@@ -159,7 +191,7 @@ test.describe('Weapon Mechanics', () => {
     await page.waitForFunction(
       () => (window as any).useGameStore.getState().bullets.length >= 3,
       null,
-      { timeout: 5000 }
+      { timeout: 10000 }
     );
 
     // Stop firing
