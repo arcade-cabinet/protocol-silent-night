@@ -1,5 +1,4 @@
 import { test, expect, Page } from '@playwright/test';
-import { selectCharacterAndStart } from './helpers';
 
 /**
  * Full Gameplay E2E Tests
@@ -7,8 +6,6 @@ import { selectCharacterAndStart } from './helpers';
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */
-
-test.describe.configure({ timeout: 120000 }); // Increased to 120s for CI stability
 
 // Helper to get game state from the store
 async function getGameState(page: Page) {
@@ -258,7 +255,18 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
     await page.goto('/');
-    await selectCharacterAndStart(page, 'CYBER-ELF', { waitForStableGame: true });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    // Select Elf
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
+    await page.waitForTimeout(2000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -343,7 +351,17 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should fire spread pattern weapon', async ({ page }) => {
     await page.goto('/');
-    await selectCharacterAndStart(page, 'BUMBLE', { waitForStableGame: true });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('button', { name: /BUMBLE/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.waitForLoadState('networkidle');
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
+    await page.waitForTimeout(3000);
 
     // Verify Bumble's stats - 200 HP, medium speed
     const state = await getGameState(page);
