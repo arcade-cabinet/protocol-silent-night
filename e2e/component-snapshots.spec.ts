@@ -344,15 +344,13 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await page.waitForTimeout(5000);
 
-    // Trigger kill streak by rapid kills with small delays to avoid audio timing conflicts
-    await page.evaluate(async () => {
+    // Trigger kill streak by rapid kills
+    await page.evaluate(() => {
       // @ts-ignore
       const store = window.useGameStore?.getState();
       if (store) {
         store.addKill(50);
-        await new Promise(resolve => setTimeout(resolve, 100));
         store.addKill(50);
-        await new Promise(resolve => setTimeout(resolve, 100));
         store.addKill(50);
       }
     });
