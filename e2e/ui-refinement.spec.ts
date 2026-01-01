@@ -163,7 +163,7 @@ test.describe('UI Component Refinement', () => {
         { name: 'THE BUMBLE', role: 'Crowd Control / Bruiser' },
       ];
 
-      for (const mech of mechs) {
+      for (const [index, mech] of mechs.entries()) {
         // Click mech
         await page.click(`button:has-text("${mech.name}")`, { timeout: CLICK_TIMEOUT });
 
@@ -180,8 +180,8 @@ test.describe('UI Component Refinement', () => {
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
         await expect(page.locator(`text=${mech.role}`)).toBeVisible();
 
-        // Go back to menu for next iteration
-        if (mech.name !== 'THE BUMBLE') {
+        // Go back to menu for next iteration, unless it's the last one
+        if (index < mechs.length - 1) {
           await page.reload();
           await waitForLoadingScreen(page);
         }
@@ -276,7 +276,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 5000 });
+      // Loading screen already waited in beforeEach, just verify h1 is visible
+      await expect(page.locator('h1')).toBeVisible({ timeout: 5000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {

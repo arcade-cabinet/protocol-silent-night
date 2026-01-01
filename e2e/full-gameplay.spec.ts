@@ -549,12 +549,12 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
-    // Game is in endless mode, so defeating boss triggers level up
-    expect(state?.gameState).toBe('LEVEL_UP');
+    // First boss defeat in wave 1 triggers WIN state
+    expect(state?.gameState).toBe('WIN');
     expect(state?.bossHp).toBe(0);
 
-    // Verify level up screen appears after boss defeat
-    await expect(page.locator('text=/CHOOSE YOUR UPGRADE/i')).toBeVisible({
+    // Verify win screen appears after boss defeat
+    await expect(page.locator('text=/MISSION ACCOMPLISHED/i')).toBeVisible({
       timeout: 5000,
     });
   });
@@ -905,8 +905,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Game is in endless mode, so defeating boss triggers level up
-    expect(state?.gameState).toBe('LEVEL_UP');
+    // First boss defeat in wave 1 triggers WIN state
+    expect(state?.gameState).toBe('WIN');
   });
 
   test('should complete entire game as Bumble', async ({ page }) => {
@@ -944,8 +944,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Game is in endless mode, so defeating boss triggers level up
-    expect(state?.gameState).toBe('LEVEL_UP');
+    // First boss defeat in wave 1 triggers WIN state
+    expect(state?.gameState).toBe('WIN');
   });
 });
 
