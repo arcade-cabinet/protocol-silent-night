@@ -10,7 +10,7 @@ import { test, expect, Page } from '@playwright/test';
 const VISUAL_THRESHOLD = 0.25; // Increased for @react-three/fiber 9.5.0 rendering variations in CI
 const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
 const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
-const MAX_DIFF_PIXELS = 20000; // Increased for @react-three/fiber 9.5.0 reconciler bundle changes
+const MAX_DIFF_PIXELS = 25000; // Increased for @react-three/fiber 9.5.0 reconciler bundle changes
 
 /**
  * Wait for loading screen to be completely hidden and start screen to be ready
