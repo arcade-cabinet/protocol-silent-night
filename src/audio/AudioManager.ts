@@ -43,6 +43,10 @@ class AudioManagerClass {
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
 
+  // Track last SFX timestamp to prevent Tone.js timing conflicts
+  private lastSfxTime = 0;
+  private readonly minSfxInterval = 0.001; // 1ms minimum between SFX calls
+
   /**
    * Initialize audio system. Must be called after user interaction.
    */
@@ -179,7 +183,14 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    const now = Tone.now();
+    let now = Tone.now();
+
+    // Ensure monotonically increasing timestamps to prevent Tone.js timing errors
+    // when multiple SFX are triggered in rapid succession
+    if (now <= this.lastSfxTime) {
+      now = this.lastSfxTime + this.minSfxInterval;
+    }
+    this.lastSfxTime = now;
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
