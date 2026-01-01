@@ -59,7 +59,7 @@
   border: 1px solid #333;
   padding: 20px;
   width: 200px;
-  min-height: 180px; /* Ensure consistent height across environments */
+  min-height: 165px; /* Match baseline snapshots (167px total with borders) */
   cursor: pointer;
   transition: 0.3s;
   text-align: center;
