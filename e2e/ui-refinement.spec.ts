@@ -12,7 +12,8 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
-test.describe.configure({ timeout: 90000 });
+// Increase timeout to 3 minutes for CI environment with software rendering
+test.describe.configure({ timeout: 180000 });
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {

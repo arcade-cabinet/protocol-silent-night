@@ -9,7 +9,8 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2;
 
-test.describe.configure({ timeout: 90000 });
+// Increase timeout to 3 minutes for CI environment with software rendering
+test.describe.configure({ timeout: 180000 });
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {

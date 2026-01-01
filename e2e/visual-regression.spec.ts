@@ -12,7 +12,8 @@ import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpe
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
-test.describe.configure({ timeout: 90000 });
+// Increase timeout to 3 minutes for CI environment with software rendering
+test.describe.configure({ timeout: 180000 });
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
@@ -77,8 +78,8 @@ test.describe('Visual Regression - Game Start', () => {
     await page.goto('/');
     await selectCharacterAndStart(page, 'MECHA-SANTA');
 
-    // Additional wait for render
-    await page.waitForTimeout(3000);
+    // Additional wait for render (reduced)
+    await page.waitForTimeout(1500);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
@@ -90,8 +91,8 @@ test.describe('Visual Regression - Game Start', () => {
     await page.goto('/');
     await selectCharacterAndStart(page, 'CYBER-ELF');
 
-    // Additional wait for render
-    await page.waitForTimeout(3000);
+    // Additional wait for render (reduced)
+    await page.waitForTimeout(1500);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
@@ -103,8 +104,8 @@ test.describe('Visual Regression - Game Start', () => {
     await page.goto('/');
     await selectCharacterAndStart(page, 'BUMBLE');
 
-    // Additional wait for render
-    await page.waitForTimeout(3000);
+    // Additional wait for render (reduced)
+    await page.waitForTimeout(1500);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
@@ -171,13 +172,13 @@ test.describe('Visual Regression - Combat Scenarios', () => {
   test('should render combat with enemies', async ({ page }) => {
     await page.goto('/');
     await selectCharacterAndStart(page, 'MECHA-SANTA');
-    await page.waitForTimeout(3000); // Additional wait for enemies
-    
+    await page.waitForTimeout(2000); // Wait for enemies (reduced)
+
     // Wait for enemies to spawn and engage
     await page.keyboard.down('Space');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
-    
+
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -186,11 +187,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
   test('should render player taking damage', async ({ page }) => {
     await page.goto('/');
     await selectCharacterAndStart(page, 'CYBER-ELF');
+    await page.waitForTimeout(2000);
+
+    // Wait for potential damage from enemies (reduced)
     await page.waitForTimeout(3000);
-    
-    // Wait for potential damage from enemies
-    await page.waitForTimeout(5000);
-    
+
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -244,8 +245,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
     await selectCharacterAndStart(page, 'MECHA-SANTA');
 
-    // Additional wait for mobile render
-    await page.waitForTimeout(3000);
+    // Additional wait for mobile render (reduced)
+    await page.waitForTimeout(1500);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,

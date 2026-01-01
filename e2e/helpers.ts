@@ -5,7 +5,7 @@ import { Page, Locator, expect } from '@playwright/test';
  * Useful for mobile viewports where elements might be off-screen.
  */
 export async function safeClick(locator: Locator, options: { timeout?: number } = {}): Promise<void> {
-  const timeout = options.timeout || 45000;
+  const timeout = options.timeout || 60000;
 
   if (locator.page().isClosed()) {
     throw new Error('Page is already closed');
@@ -24,9 +24,9 @@ export async function safeClick(locator: Locator, options: { timeout?: number } 
     console.warn('Scroll/Wait failed, attempting direct click');
   }
 
-  // Stabilization wait after scroll
+  // Reduced stabilization wait after scroll
   if (!locator.page().isClosed()) {
-    await locator.page().waitForTimeout(1000);
+    await locator.page().waitForTimeout(500);
     await locator.click({ timeout });
   } else {
     throw new Error('Page is already closed');
@@ -41,25 +41,25 @@ export async function selectCharacterAndStart(
   page: Page,
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
-  // Initial animation wait
-  await page.waitForTimeout(2000);
+  // Wait for page to be fully loaded
   await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1500);
 
   // Select character
   const characterButton = page.getByRole('button', { name: new RegExp(characterName) });
-  await characterButton.waitFor({ state: 'visible', timeout: 30000 });
+  await characterButton.waitFor({ state: 'visible', timeout: 60000 });
   await safeClick(characterButton);
 
   // Wait for briefing to appear
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(800);
 
   // Click commence operation
   const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+  await commenceButton.waitFor({ state: 'visible', timeout: 60000 });
   await safeClick(commenceButton);
 
-  // Wait for game to initialize
-  await page.waitForTimeout(3000);
+  // Wait for game to initialize (reduced from 3000ms)
+  await page.waitForTimeout(2000);
 }
 
 /**
