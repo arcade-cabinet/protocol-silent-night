@@ -33,7 +33,7 @@ describe('CameraController Component', () => {
     }
     const camera =
       renderer.scene.instance.children[0]?.camera ||
-      (renderer.scene.allChildren.find((c): c is R3FNode =>
+      (renderer.scene.allChildren.find((c: unknown): c is R3FNode =>
         Boolean((c as R3FNode).instance?.camera)
       ) as R3FNode | undefined)?.instance?.camera;
     if (camera) {
