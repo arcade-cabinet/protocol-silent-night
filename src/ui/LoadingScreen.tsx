@@ -37,7 +37,7 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
       clearInterval(interval);
       clearTimeout(timer);
     };
-  }, [minDuration]);
+  }, [minDuration, rng]);
 
   if (!isVisible) return null;
 
