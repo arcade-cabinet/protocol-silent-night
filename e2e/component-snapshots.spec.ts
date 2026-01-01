@@ -333,7 +333,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
   test('should render kill streak notification', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.evaluate((e) => e.click());
 
@@ -343,18 +343,20 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await commenceButton.evaluate((e) => e.click());
 
     await page.waitForTimeout(5000);
-    
-    // Trigger kill streak by rapid kills
-    await page.evaluate(() => {
+
+    // Trigger kill streak by rapid kills with small delays to avoid audio timing conflicts
+    await page.evaluate(async () => {
       // @ts-ignore
       const store = window.useGameStore?.getState();
       if (store) {
         store.addKill(50);
+        await new Promise(resolve => setTimeout(resolve, 100));
         store.addKill(50);
+        await new Promise(resolve => setTimeout(resolve, 100));
         store.addKill(50);
       }
     });
-    
+
     await page.waitForTimeout(1000);
     
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
