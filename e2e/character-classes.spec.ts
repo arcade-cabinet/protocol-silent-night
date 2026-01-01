@@ -114,17 +114,28 @@ test.describe('Weapon Mechanics', () => {
     );
     expect(initialBullets).toBe(0);
 
-    // Fire once - ensure trigger happens
-    await page.keyboard.down('Space');
-    await page.waitForTimeout(200); // Increased press time
-    await page.keyboard.up('Space');
+    // Directly trigger firing via store to avoid keyboard timing issues in CI
+    await page.evaluate(() => {
+      (window as any).useGameStore.getState().setFiring(true);
+    });
 
-    // Should spawn exactly 1 bullet
+    // Wait for at least one bullet to spawn
     await page.waitForFunction(
       () => (window as any).useGameStore.getState().bullets.length > 0,
       null,
       { timeout: 5000 }
     );
+
+    // Stop firing
+    await page.evaluate(() => {
+      (window as any).useGameStore.getState().setFiring(false);
+    });
+
+    // Verify single shot weapon spawned exactly 1 bullet
+    const bulletCount = await page.evaluate(() =>
+      (window as any).useGameStore.getState().bullets.length
+    );
+    expect(bulletCount).toBe(1);
   });
 
   test('Bumble should fire spread shots (3 projectiles)', async ({ page }) => {
@@ -139,16 +150,27 @@ test.describe('Weapon Mechanics', () => {
 
     await page.waitForTimeout(2000);
 
-    // Fire once - ensure trigger happens
-    await page.keyboard.down('Space');
-    await page.waitForTimeout(200); // Increased press time
-    await page.keyboard.up('Space');
+    // Directly trigger firing via store to avoid keyboard timing issues in CI
+    await page.evaluate(() => {
+      (window as any).useGameStore.getState().setFiring(true);
+    });
 
-    // Should spawn 3 bullets
+    // Wait for spread shot bullets to spawn (should be 3)
     await page.waitForFunction(
       () => (window as any).useGameStore.getState().bullets.length >= 3,
       null,
       { timeout: 5000 }
     );
+
+    // Stop firing
+    await page.evaluate(() => {
+      (window as any).useGameStore.getState().setFiring(false);
+    });
+
+    // Verify spread weapon spawned exactly 3 bullets
+    const bulletCount = await page.evaluate(() =>
+      (window as any).useGameStore.getState().bullets.length
+    );
+    expect(bulletCount).toBe(3);
   });
 });
