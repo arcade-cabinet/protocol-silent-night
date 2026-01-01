@@ -3,9 +3,9 @@
  * Shows while WebGL context and assets are loading
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './LoadingScreen.module.css';
-import { useGameStore } from '../store/gameStore';
+import { SeededRandom } from '../types';
 
 interface LoadingScreenProps {
   minDuration?: number;
@@ -14,7 +14,8 @@ interface LoadingScreenProps {
 export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
-  const rng = useGameStore((state) => state.rng);
+  // Use a separate RNG instance for UI animations to avoid affecting game state
+  const uiRng = useRef(new SeededRandom(42)); // Fixed seed for consistent UI animation
 
   useEffect(() => {
     // Simulate loading progress
@@ -24,7 +25,7 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
           clearInterval(interval);
           return 100;
         }
-        return prev + rng.next() * 15;
+        return prev + uiRng.current.next() * 15;
       });
     }, 100);
 
@@ -37,7 +38,6 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
       clearInterval(interval);
       clearTimeout(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minDuration]);
 
   if (!isVisible) return null;
