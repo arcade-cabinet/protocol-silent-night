@@ -42,7 +42,8 @@ async function startGame(page: Page, characterName: RegExp | string) {
   // Ensure button is ready for interaction
   await commenceBtn.waitFor({ state: 'attached', timeout: 5000 });
   await page.waitForTimeout(500); // Brief pause for any animations to settle
-  await commenceBtn.click({ timeout: 15000 });
+  // Use noWaitAfter to prevent waiting for navigation events (this is a SPA state change)
+  await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
   // Wait for game to load (HUD score visible)
   await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });

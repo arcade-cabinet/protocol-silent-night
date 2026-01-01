@@ -22,7 +22,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
 
@@ -51,7 +51,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
 
@@ -71,7 +71,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
 
@@ -93,7 +93,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
     
@@ -122,7 +122,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
     
@@ -144,7 +144,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
     
@@ -184,7 +184,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
     
@@ -208,7 +208,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
     
@@ -233,7 +233,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
     
@@ -279,7 +279,7 @@ test.describe('Component Snapshots - Camera System', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
     
@@ -299,7 +299,7 @@ test.describe('Component Snapshots - Camera System', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
     
@@ -328,7 +328,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(8000);
     
@@ -351,7 +351,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000 });
+    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
     

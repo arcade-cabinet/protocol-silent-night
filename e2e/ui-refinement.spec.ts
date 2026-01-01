@@ -170,7 +170,7 @@ test.describe('UI Component Refinement', () => {
       // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
       const commenceBtn = page.locator('button:has-text("COMMENCE OPERATION")');
       await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceBtn.click({ timeout: 15000 });
+      await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
