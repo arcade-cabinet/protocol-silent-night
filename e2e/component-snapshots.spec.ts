@@ -15,23 +15,18 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
 
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
-    await santaButton.click({ timeout: 60000 });
+    await page.waitForLoadState('networkidle');
+    await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
-    await commenceButton.click({ timeout: 60000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
-    await page.waitForTimeout(7000); // Extended wait for WebGL rendering
+    await page.waitForTimeout(5000);
 
     // Focus on character by centering view
     await page.evaluate(() => {
@@ -44,7 +39,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 

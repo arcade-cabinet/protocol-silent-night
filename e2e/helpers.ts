@@ -5,7 +5,7 @@ import { Page, Locator, expect } from '@playwright/test';
  * Useful for mobile viewports where elements might be off-screen.
  */
 export async function safeClick(locator: Locator, options: { timeout?: number } = {}): Promise<void> {
-  const timeout = options.timeout || 60000;
+  const timeout = options.timeout || 45000;
 
   if (locator.page().isClosed()) {
     throw new Error('Page is already closed');
@@ -42,26 +42,17 @@ export async function selectCharacterAndStart(
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000); // Wait for initial animations
 
   // Select character
   const characterButton = page.getByRole('button', { name: new RegExp(characterName) });
-  await characterButton.waitFor({ state: 'visible', timeout: 15000 });
-  await page.waitForTimeout(1000); // Wait for element stability
-  await safeClick(characterButton, { timeout: 60000 });
+  await safeClick(characterButton);
 
-  // Wait for briefing screen
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
-
-  // Click commence operation with increased robustness
+  // Click commence operation
   const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-  await page.waitForTimeout(1000); // Wait for element stability
-  await safeClick(commenceButton, { timeout: 60000 });
+  await safeClick(commenceButton);
 
   // Wait for game to initialize
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(2000);
 }
 
 /**

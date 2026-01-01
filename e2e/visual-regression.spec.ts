@@ -29,29 +29,21 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000); // Wait for animations to complete
+    await page.waitForTimeout(2000);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1000); // Additional wait for stability
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000, // Increased timeout for screenshot stability
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000); // Wait for animations to complete
+    await page.waitForTimeout(2000);
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1000); // Additional wait for stability
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000, // Increased timeout for screenshot stability
     });
   });
 
