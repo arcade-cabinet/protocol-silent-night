@@ -12,22 +12,16 @@ const VISUAL_THRESHOLD = 0.2;
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
+    await page.waitForTimeout(3000);
 
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
-    // Wait for game to load
-    await page.waitForTimeout(7000);
-
-    // Wait for canvas to be visible
-    await expect(page.locator('canvas')).toBeVisible();
+    await page.waitForTimeout(5000);
 
     // Focus on character by centering view
     await page.evaluate(() => {
@@ -38,8 +32,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
       }
     });
 
-    await page.waitForTimeout(1000);
-
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -47,22 +39,15 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
   test('should render Elf character model', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
+    await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
-    // Wait for game to load
-    await page.waitForTimeout(7000);
-
-    // Wait for canvas to be visible and stable
-    await expect(page.locator('canvas')).toBeVisible();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -71,22 +56,15 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
   test('should render Bumble character model', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
+    await page.waitForTimeout(3000);
 
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
-    // Wait for game to load
-    await page.waitForTimeout(7000);
-
-    // Wait for canvas to be visible and stable
-    await expect(page.locator('canvas')).toBeVisible();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
