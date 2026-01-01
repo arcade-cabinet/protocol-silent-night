@@ -24,9 +24,8 @@ export async function safeClick(locator: Locator, options: { timeout?: number } 
     console.warn('Scroll/Wait failed, attempting direct click');
   }
 
-  // Stabilization wait after scroll
+  // Click the element
   if (!locator.page().isClosed()) {
-    await locator.page().waitForTimeout(1000);
     await locator.click({ timeout });
   } else {
     throw new Error('Page is already closed');
@@ -41,8 +40,7 @@ export async function selectCharacterAndStart(
   page: Page,
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
-  // Initial animation wait
-  await page.waitForTimeout(2000);
+  // Wait for initial page load
   await page.waitForLoadState('networkidle');
 
   // Select character
@@ -50,16 +48,16 @@ export async function selectCharacterAndStart(
   await characterButton.waitFor({ state: 'visible', timeout: 30000 });
   await safeClick(characterButton);
 
-  // Wait for briefing to appear
-  await page.waitForTimeout(1000);
-
-  // Click commence operation
+  // Click commence operation - wait for it to be visible
   const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
   await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
   await safeClick(commenceButton);
 
-  // Wait for game to initialize
-  await page.waitForTimeout(3000);
+  // Wait for game state to transition - look for game UI elements
+  await page.waitForSelector('text=OPERATOR STATUS', { timeout: 30000 }).catch(() => {
+    // Fallback: short fixed wait if selector not found
+    return page.waitForTimeout(2000);
+  });
 }
 
 /**

@@ -244,8 +244,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
     await selectCharacterAndStart(page, 'MECHA-SANTA');
 
-    // Additional wait for mobile render
-    await page.waitForTimeout(3000);
+    // Wait for game canvas to be ready
+    await page.waitForSelector('canvas', { state: 'visible', timeout: 10000 });
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -259,6 +259,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
+    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
