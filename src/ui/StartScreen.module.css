@@ -61,7 +61,7 @@
   width: 200px;
   height: 167px; /* Fixed height to match baseline snapshots and prevent layout shifts */
   cursor: pointer;
-  transition: 0.3s;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s, box-shadow 0.3s;
   text-align: center;
   clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
   display: flex;
