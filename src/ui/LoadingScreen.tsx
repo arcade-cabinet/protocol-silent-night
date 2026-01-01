@@ -16,17 +16,22 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
   // Use a separate RNG instance for UI animations to avoid affecting game state
   const uiRng = useRef(new SeededRandom(42)); // Fixed seed for consistent UI animation
+  const startTime = useRef(Date.now());
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
-    // Simulate loading progress
+    // Simulate loading progress with time-based guarantee
     intervalId = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           return 100;
         }
-        return prev + uiRng.current.next() * 15;
+        // Ensure progress correlates with elapsed time to guarantee completion
+        const elapsed = Date.now() - startTime.current;
+        const minProgress = Math.min(95, (elapsed / minDuration) * 100);
+        const randomIncrement = uiRng.current.next() * 15;
+        return Math.max(minProgress, prev + randomIncrement);
       });
     }, 100);
 
