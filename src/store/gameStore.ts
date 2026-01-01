@@ -780,7 +780,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
   },
 
-  setMovement: (x, y) => set((state) => ({ input: { ...state.input, movement: { x, y } } })),
+  setMovement: (x, y) => {
+    // Security: Validate input to prevent NaN/Infinity from breaking physics
+    const cleanX = Number.isFinite(x) ? Math.max(-1, Math.min(1, x)) : 0;
+    const cleanY = Number.isFinite(y) ? Math.max(-1, Math.min(1, y)) : 0;
+    set((state) => ({ input: { ...state.input, movement: { x: cleanX, y: cleanY } } }));
+  },
   setFiring: (isFiring) => set((state) => ({ input: { ...state.input, isFiring } })),
   setJoystick: (active, origin) =>
     set((state) => ({
