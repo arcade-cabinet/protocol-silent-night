@@ -1,11 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
+import { waitForLoadingScreen } from './test-utils';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
- * 
+ *
  * Uses Playwright's screenshot comparison to validate visual rendering
  * of 3D game components, characters, and gameplay scenarios.
- * 
+ *
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
@@ -84,6 +85,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
+    await waitForLoadingScreen(page);
     await disableAnimations(page);
     await page.waitForTimeout(2000);
 
@@ -97,6 +99,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
+    await waitForLoadingScreen(page);
     await disableAnimations(page);
     await page.waitForTimeout(2000);
 

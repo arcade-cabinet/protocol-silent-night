@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForLoadingScreen } from './test-utils';
 
 /**
  * UI Component Refinement Tests
@@ -30,6 +31,7 @@ test.describe('UI Component Refinement', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    await waitForLoadingScreen(page);
   });
 
   test.describe('Menu Screen', () => {

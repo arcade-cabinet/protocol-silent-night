@@ -18,11 +18,12 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const uiRng = useRef(new SeededRandom(42)); // Fixed seed for consistent UI animation
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
     // Simulate loading progress
-    const interval = setInterval(() => {
+    intervalId = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval);
           return 100;
         }
         return prev + uiRng.current.next() * 15;
@@ -31,11 +32,12 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
 
     // Hide after minimum duration
     const timer = setTimeout(() => {
+      setProgress(100); // Ensure progress is complete
       setIsVisible(false);
     }, minDuration);
 
     return () => {
-      clearInterval(interval);
+      clearInterval(intervalId);
       clearTimeout(timer);
     };
   }, [minDuration]);
