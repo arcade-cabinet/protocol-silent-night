@@ -890,14 +890,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    const isLeveling = get().state === 'LEVEL_UP';
-    set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+    set({
+      state: 'PHASE_BOSS',
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-    }));
+    });
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
   },
