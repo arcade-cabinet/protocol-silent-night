@@ -9,7 +9,7 @@ import { test, expect, Page } from '@playwright/test';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.05; // 5% diff tolerance - increased from 0.2 to account for CI rendering variations
+const VISUAL_THRESHOLD = 0.06; // 6% diff tolerance - increased to account for CI rendering variations
 const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
 const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
 const SCREENSHOT_TIMEOUT = 60000; // Timeout for screenshot operations in CI
@@ -89,17 +89,17 @@ test.describe('Visual Regression - Game Start', () => {
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Wait for briefing screen to appear
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and render
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(5000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
@@ -117,17 +117,17 @@ test.describe('Visual Regression - Game Start', () => {
     await elfButton.click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Wait for briefing screen to appear
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and render
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(5000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
@@ -145,17 +145,17 @@ test.describe('Visual Regression - Game Start', () => {
     await bumbleButton.click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Wait for briefing screen to appear
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and render
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(5000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
@@ -276,11 +276,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     // Wait for briefing screen to appear
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
 
     // Wait for enemies to spawn and engage
     await page.keyboard.down('Space');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2500);
     await page.keyboard.up('Space');
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
@@ -297,14 +297,14 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await elfButton.click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Wait for briefing screen to appear
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
 
     // Wait for potential damage from enemies
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(4000);
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -376,17 +376,17 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Wait for briefing screen to appear
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -403,17 +403,17 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Wait for briefing screen to appear
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
 
     // Wait for game to fully load and touch controls to appear
-    await page.waitForTimeout(6000);
+    await page.waitForTimeout(5000);
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });

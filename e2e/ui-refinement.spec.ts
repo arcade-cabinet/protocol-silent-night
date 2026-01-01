@@ -112,10 +112,10 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("MECHA-SANTA")', { timeout: CLICK_TIMEOUT });
 
       // Additional wait after click to ensure state transition
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -145,10 +145,10 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("CYBER-ELF")', { timeout: CLICK_TIMEOUT });
 
       // Additional wait after click to ensure state transition
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
@@ -171,10 +171,10 @@ test.describe('UI Component Refinement', () => {
         await page.click(`button:has-text("${mech.name}")`, { timeout: CLICK_TIMEOUT });
 
         // Additional wait after click to ensure state transition
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1500);
 
         await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1500);
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
@@ -203,10 +203,10 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("MECHA-SANTA")', { timeout: CLICK_TIMEOUT });
 
       // Additional wait after click to ensure state transition
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
@@ -215,7 +215,7 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("COMMENCE OPERATION")', { timeout: CLICK_TIMEOUT });
 
       // Wait for game HUD to appear
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       // Check for HUD elements
       const hudStats = page.locator('text=/HP:|AMMO:|SPEED:/', { timeout: 3000 }).first();
@@ -233,16 +233,16 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("CYBER-ELF")', { timeout: CLICK_TIMEOUT });
 
       // Additional wait after click to ensure state transition
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
       await page.click('button:has-text("COMMENCE OPERATION")', { timeout: CLICK_TIMEOUT });
 
       // Wait for HUD
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       // Check for weapon display
       const weaponDisplay = page.locator('text=/Plasma|Coal|Star/').first();
@@ -296,10 +296,10 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("MECHA-SANTA")', { timeout: CLICK_TIMEOUT });
 
       // Additional wait after click to ensure state transition
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1500);
 
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
 
