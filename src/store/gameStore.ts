@@ -241,6 +241,15 @@ const saveHighScore = (score: number): void => {
 
 const initialMetaProgress = loadMetaProgress();
 
+// Helper to get deterministic seed for E2E tests
+const getInitialSeed = (): number => {
+  // Use fixed seed for E2E tests to ensure deterministic behavior
+  // Playwright sets navigator.webdriver to true, allowing us to detect automated testing
+  const isAutomated = typeof window !== 'undefined' && window.navigator.webdriver === true;
+  // Use a fixed seed for E2E tests (based on branch name, truncated to safe integer)
+  return isAutomated ? 577482274 : Date.now();
+};
+
 const initialState = {
   state: 'MENU' as GameState,
   previousState: 'MENU' as GameState,
@@ -283,7 +292,7 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
-  rng: new SeededRandom(12345),
+  rng: new SeededRandom(getInitialSeed()),
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -963,18 +972,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   reset: () => {
-    // Use fixed seed for E2E tests to ensure deterministic behavior
-    // Playwright sets navigator.webdriver to true, allowing us to detect automated testing
-    const isAutomated = typeof window !== 'undefined' && window.navigator.webdriver === true;
-    // Use a fixed seed for E2E tests (based on branch name, truncated to safe integer)
-    const seed = isAutomated ? 577482274 : Date.now();
-
     return set({
       ...initialState,
       highScore: get().highScore,
       metaProgress: get().metaProgress,
       playerPosition: new THREE.Vector3(0, 0, 0),
-      rng: new SeededRandom(seed),
+      rng: new SeededRandom(getInitialSeed()),
     });
   },
 }));
