@@ -13,6 +13,7 @@ interface LoadingScreenProps {
 
 export function LoadingScreen({ minDuration = 500 }: LoadingScreenProps) {
   const [isVisible, setIsVisible] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [progress, setProgress] = useState(0);
   // Use a separate RNG instance for UI animations to avoid affecting game state
   const uiRng = useRef(new SeededRandom(42)); // Fixed seed for consistent UI animation
@@ -35,22 +36,31 @@ export function LoadingScreen({ minDuration = 500 }: LoadingScreenProps) {
       });
     }, 100);
 
-    // Hide after minimum duration
-    const timer = setTimeout(() => {
+    // Start fade out slightly before minDuration to allow CSS animation to complete
+    const fadeOutTimer = setTimeout(() => {
       setProgress(100); // Ensure progress is complete
+      setIsFadingOut(true);
+    }, Math.max(0, minDuration - 100)); // Start fading 100ms before removal
+
+    // Hide after minimum duration + animation time
+    const hideTimer = setTimeout(() => {
       setIsVisible(false);
-    }, minDuration);
+    }, minDuration + 500); // Give extra time for CSS animation to complete
 
     return () => {
       clearInterval(intervalId);
-      clearTimeout(timer);
+      clearTimeout(fadeOutTimer);
+      clearTimeout(hideTimer);
     };
   }, [minDuration]);
 
   if (!isVisible) return null;
 
   return (
-    <div className={styles.screen}>
+    <div
+      className={styles.screen}
+      style={{ pointerEvents: isFadingOut ? 'none' : 'auto' }}
+    >
       <div className={styles.content}>
         <h1 className={styles.title}>
           PROTOCOL: <span className={styles.accent}>SILENT NIGHT</span>
