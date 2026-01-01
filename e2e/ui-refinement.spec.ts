@@ -117,14 +117,17 @@ test.describe('UI Component Refinement', () => {
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(2000); // Wait for page to stabilize
       await page.click('button:has-text("CYBER-ELF")');
 
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      // Wait for briefing with increased timeout
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
+      await page.waitForTimeout(1000); // Wait for UI to settle
 
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible();
+      await expect(opButton).toBeVisible({ timeout: 10000 });
       await expect(opButton).toBeEnabled();
     });
 

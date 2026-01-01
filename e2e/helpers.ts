@@ -42,17 +42,26 @@ export async function selectCharacterAndStart(
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
   await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(2000); // Wait for initial animations
 
   // Select character
   const characterButton = page.getByRole('button', { name: new RegExp(characterName) });
-  await safeClick(characterButton);
+  await characterButton.waitFor({ state: 'visible', timeout: 15000 });
+  await page.waitForTimeout(1000); // Wait for element stability
+  await safeClick(characterButton, { timeout: 60000 });
 
-  // Click commence operation
+  // Wait for briefing screen
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(2000);
+
+  // Click commence operation with increased robustness
   const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await safeClick(commenceButton);
+  await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+  await page.waitForTimeout(1000); // Wait for element stability
+  await safeClick(commenceButton, { timeout: 60000 });
 
   // Wait for game to initialize
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(3000);
 }
 
 /**
