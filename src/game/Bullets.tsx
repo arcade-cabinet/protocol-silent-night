@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { CONFIG } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import type { BulletData, WeaponType } from '@/types';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 // Max bullets per type from config
 const MAX_CANNON_BULLETS = CONFIG.BULLET_LIMITS.CANNON;
@@ -191,7 +192,8 @@ export function Bullets() {
       gameState === 'MENU' ||
       gameState === 'BRIEFING' ||
       gameState === 'GAME_OVER' ||
-      gameState === 'WIN'
+      gameState === 'WIN' ||
+      isGamePausedForScreenshot()
     )
       return;
 

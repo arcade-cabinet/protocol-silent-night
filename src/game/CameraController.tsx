@@ -7,6 +7,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 const DEFAULT_CAMERA_HEIGHT = 25;
 const DEFAULT_CAMERA_DISTANCE = 20;
@@ -143,6 +144,7 @@ export function CameraController() {
   }, [handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, handleDeviceOrientation]);
 
   useFrame((_, delta) => {
+    if (isGamePausedForScreenshot()) return;
     if (state === 'MENU' || state === 'BRIEFING') {
       // Menu camera - static elevated view with slow rotation
       camera.position.lerp(MENU_CAMERA_POS, delta * 2);

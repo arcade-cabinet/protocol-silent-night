@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { TERRAIN_CONFIG, WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import { type ChristmasObstacle, getBulletTypeFromWeapon, type WeaponType } from '@/types';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 import { StrataCharacter } from './StrataCharacter';
 
 let bulletIdCounter = 0;
@@ -173,7 +174,8 @@ export function PlayerController() {
       !playerClass ||
       state === 'GAME_OVER' ||
       state === 'WIN' ||
-      state === 'LEVEL_UP'
+      state === 'LEVEL_UP' ||
+      isGamePausedForScreenshot()
     )
       return;
 

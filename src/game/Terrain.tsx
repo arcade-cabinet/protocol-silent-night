@@ -12,6 +12,7 @@ import { OBSTACLE_TYPES, TERRAIN_CONFIG } from '@/data';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
 import type { ChristmasObstacle } from '@/types';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -124,6 +125,7 @@ export function Terrain() {
   }, [matrices]);
 
   useFrame((state) => {
+    if (isGamePausedForScreenshot()) return;
     if (material.uniforms) {
       material.uniforms.time.value = state.clock.elapsedTime;
     }
@@ -202,6 +204,7 @@ function CyberpunkTree({
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
+    if (isGamePausedForScreenshot()) return;
     if (groupRef.current) {
       // Subtle sway
       groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.02;
@@ -272,6 +275,7 @@ function CyberpunkPresent({
   const boxRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
+    if (isGamePausedForScreenshot()) return;
     if (boxRef.current) {
       const pulse = Math.sin(state.clock.elapsedTime * 3 + position[0] + position[2]) * 0.1 + 0.9;
       boxRef.current.scale.setScalar(pulse);

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { CONFIG, ENEMIES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES;
 
@@ -121,6 +122,7 @@ export function Enemies() {
     const { state: gameState, playerPosition, enemies: currentEnemies } = useGameStore.getState();
 
     if (gameState !== 'PHASE_1' && gameState !== 'PHASE_BOSS') return;
+    if (isGamePausedForScreenshot()) return;
 
     if (gameState === 'PHASE_1' || gameState === 'PHASE_BOSS') {
       spawnTimerRef.current += delta * 1000;
@@ -232,6 +234,7 @@ function InstancedMinions({
   const eyeMat = useMemo(() => new THREE.MeshBasicMaterial({ color: 0xff3300 }), []);
 
   useFrame((state) => {
+    if (isGamePausedForScreenshot()) return;
     const time = state.clock.elapsedTime;
 
     if (!bodyRef.current || !headRef.current || !eyeRef.current) return;
@@ -357,6 +360,7 @@ function BossMesh({
   const eyeColor = hpRatio > 0.5 ? 0xff0044 : hpRatio > 0.25 ? 0xffaa00 : 0xffffff;
 
   useFrame((state) => {
+    if (isGamePausedForScreenshot()) return;
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {
