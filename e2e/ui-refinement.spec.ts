@@ -183,8 +183,7 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration
         if (mech.name !== 'THE BUMBLE') {
           await page.reload();
-          await page.waitForSelector('h1', { timeout: 10000 });
-          await page.waitForTimeout(1000); // Extra wait after reload
+          await waitForLoadingScreen(page);
         }
       }
     });
