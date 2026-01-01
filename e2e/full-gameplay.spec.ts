@@ -344,7 +344,6 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     // Select Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.waitFor({ state: 'visible', timeout: 10000 });
     await bumbleButton.evaluate((e) => e.click());
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -352,8 +351,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to enter PHASE_1
-    await waitForGameState(page, 'PHASE_1', 15000);
+    await page.waitForTimeout(2000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -466,25 +464,21 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to enter PHASE_1
-    await waitForGameState(page, 'PHASE_1', 15000);
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
-
-    // Wait for boss phase to activate
-    await waitForGameState(page, 'PHASE_BOSS', 15000);
+    await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
 
     // Damage boss until defeated
     await triggerStoreAction(page, 'damageBoss', 1000);
-
-    // Wait for WIN state
-    await waitForGameState(page, 'WIN', 15000);
+    await page.waitForTimeout(1000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -756,27 +750,28 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Step 2: Game starts - wait for PHASE_1
-    await waitForGameState(page, 'PHASE_1', 15000);
+    // Step 2: Game starts
+    await page.waitForTimeout(2000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
     // Step 3: Combat phase - kill enemies
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
 
-    // Step 4: Boss phase - wait for transition
-    await waitForGameState(page, 'PHASE_BOSS', 15000);
+    // Step 4: Boss phase
+    await page.waitForTimeout(1000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 30000 });
 
     // Step 5: Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
+    await page.waitForTimeout(1000);
 
-    // Step 6: Victory - wait for WIN state
-    await waitForGameState(page, 'WIN', 15000);
+    // Step 6: Victory
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
