@@ -119,12 +119,11 @@ test.describe('Weapon Mechanics', () => {
     await page.keyboard.up('Space');
 
     // Should spawn exactly 1 bullet
-    // Note: This test is tricky because bullets move/despawn,
-    // so we check immediately after firing
-    const bulletCount = await page.evaluate(() =>
-      (window as any).useGameStore.getState().bullets.length
+    await page.waitForFunction(
+      () => (window as any).useGameStore.getState().bullets.length > 0,
+      null,
+      { timeout: 5000 }
     );
-    expect(bulletCount).toBeGreaterThan(0);
   });
 
   test('Bumble should fire spread shots (3 projectiles)', async ({ page }) => {
@@ -145,9 +144,10 @@ test.describe('Weapon Mechanics', () => {
     await page.keyboard.up('Space');
 
     // Should spawn 3 bullets
-    const bulletCount = await page.evaluate(() =>
-      (window as any).useGameStore.getState().bullets.length
+    await page.waitForFunction(
+      () => (window as any).useGameStore.getState().bullets.length >= 3,
+      null,
+      { timeout: 5000 }
     );
-    expect(bulletCount).toBeGreaterThanOrEqual(3);
   });
 });

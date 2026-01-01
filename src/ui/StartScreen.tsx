@@ -46,15 +46,16 @@ export function StartScreen() {
   if (state !== 'MENU') return null;
 
   const handleSelectClass = async (type: PlayerClassType) => {
-    // Ensure audio is initialized before proceeding
-    try {
-      await AudioManager.initialize();
-      audioInitializedRef.current = true;
-    } catch (error) {
-      console.warn('Audio initialization failed:', error);
-    }
+    // Ensure audio is initialized, but don't block on it
+    AudioManager.initialize()
+      .then(() => {
+        audioInitializedRef.current = true;
+      })
+      .catch((error) => {
+        console.warn('Audio initialization failed:', error);
+      });
 
-    // Proceed with class selection after audio is ready
+    // Always proceed with class selection
     selectClass(type);
   };
 

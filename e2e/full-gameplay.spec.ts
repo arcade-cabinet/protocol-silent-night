@@ -38,17 +38,15 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     if (!store) return false;
     const state = store.getState();
     if (typeof state[action] === 'function') {
-      state[action](...args);
-      return true;
+      const ret = state[action](...args);
+      return ret === undefined ? true : ret;
     }
     return false;
   }, { action, args });
 
-  // Add small delay for audio stability on specific actions
-  // This prevents race conditions with Web Audio API scheduling in CI
-  if (action === 'addKill' || action === 'damagePlayer') {
-    await page.waitForTimeout(20);
-  }
+  // Wait for state to update and settle
+  // This prevents race conditions with state updates and audio scheduling in CI
+  await page.waitForTimeout(100);
 
   return result;
 }
@@ -586,8 +584,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Wait for streak to timeout (5+ seconds to match new timeout)
-    await page.waitForTimeout(5500);
+    // Wait for streak to timeout (2+ seconds)
+    await page.waitForTimeout(2500);
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
