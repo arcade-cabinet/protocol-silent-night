@@ -33,7 +33,7 @@ async function getGameState(page: Page) {
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  return page.evaluate(({ action, args }) => {
+  const result = await page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
     if (!store) return false;
     const state = store.getState();
@@ -43,6 +43,14 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     }
     return false;
   }, { action, args });
+
+  // Add small delay for audio stability on specific actions
+  // This prevents race conditions with Web Audio API scheduling in CI
+  if (action === 'addKill' || action === 'damagePlayer') {
+    await page.waitForTimeout(20);
+  }
+
+  return result;
 }
 
 // Helper to wait for game state
