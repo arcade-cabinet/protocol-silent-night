@@ -212,7 +212,21 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await setupMobileViewport(page);
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
+
+    // Wait for animations and rendering to complete
+    await page.waitForTimeout(3000);
+
+    // Ensure all images/assets are loaded
+    await page.evaluate(() => {
+      return Promise.all(
+        Array.from(document.images)
+          .filter(img => !img.complete)
+          .map(img => new Promise(resolve => {
+            img.onload = img.onerror = resolve;
+          }))
+      );
+    });
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixels: 1000,
@@ -226,9 +240,12 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render mobile gameplay correctly', async ({ page }) => {
     await setupMobileViewport(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
     await selectCharacterAndStart(page, 'MECHA-SANTA');
 
-    // Additional wait for mobile render
+    // Additional wait for mobile render and game initialization
     await page.waitForTimeout(3000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
@@ -239,10 +256,16 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await setupMobileViewport(page);
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
     await selectCharacterAndStart(page, 'MECHA-SANTA');
 
-    // Touch controls should be visible
+    // Wait for touch controls to appear
     const fireButton = page.getByRole('button', { name: /FIRE/ });
+    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(1000);
+
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
