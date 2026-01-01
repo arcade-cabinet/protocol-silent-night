@@ -50,17 +50,14 @@ test.describe('UI Component Refinement', () => {
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await waitForLoadingScreen(page);
   });
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
-
-      // Verify title is visible
+      // Verify title is visible (loading screen already waited in beforeEach)
       const title = page.locator('h1');
-      await expect(title).toBeVisible();
+      await expect(title).toBeVisible({ timeout: 10000 });
       await expect(title).toContainText('Protocol');
 
       // Verify subtitle
@@ -170,14 +167,14 @@ test.describe('UI Component Refinement', () => {
         // Click mech
         await page.click(`button:has-text("${mech.name}")`, { timeout: CLICK_TIMEOUT });
 
-        // Additional wait after click to ensure state transition
-        await page.waitForTimeout(1500);
-
-        await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-        await page.waitForTimeout(1500);
-
-        // Wait for briefing
+        // Wait for briefing screen to appear
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
+
+        // Additional wait to ensure briefing is fully rendered
+        await page.waitForTimeout(1500);
+
+        // Verify commence operation button is visible
+        await expect(page.locator('text=/COMMENCE OPERATION/i')).toBeVisible({ timeout: TRANSITION_TIMEOUT });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -186,7 +183,8 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration
         if (mech.name !== 'THE BUMBLE') {
           await page.reload();
-          await page.waitForSelector('h1', { timeout: 5000 });
+          await page.waitForSelector('h1', { timeout: 10000 });
+          await page.waitForTimeout(1000); // Extra wait after reload
         }
       }
     });

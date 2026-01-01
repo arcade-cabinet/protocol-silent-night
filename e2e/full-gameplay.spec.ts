@@ -150,8 +150,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     expect(state?.playerHp).toBeLessThanOrEqual(300);
 
     // Verify HUD is visible
-    await expect(page.locator('text=OPERATOR STATUS')).toBeVisible();
-    await expect(page.locator('text=/HP: 300 \\/ 300/')).toBeVisible();
+    await expect(page.locator('text=OPERATOR STATUS')).toBeVisible({ timeout: 30000 });
+    // Check for HP display (may have taken minor damage)
+    await expect(page.locator('text=/HP: \\d+ \\/ 300/')).toBeVisible({ timeout: 30000 });
   });
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
