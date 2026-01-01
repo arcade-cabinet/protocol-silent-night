@@ -870,7 +870,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   spawnBoss: () => {
-    const { enemies, addEnemy, rng, state: currentState, runProgress } = get();
+    const { enemies, addEnemy, rng } = get();
     if (enemies.some((e) => e.type === 'boss')) return;
     const angle = rng.next() * Math.PI * 2;
     const radius = 30;
@@ -890,20 +890,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-
-    // If we're leveling up when boss spawns, clear the level up state and transition to boss
-    // The level up will be re-triggered after boss defeat if still pending
-    const wasLeveling = currentState === 'LEVEL_UP';
+    const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
       state: 'PHASE_BOSS',
-      previousState: wasLeveling ? 'PHASE_1' : state.previousState,
+      previousState: isLeveling ? 'LEVEL_UP' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-      // Clear pending level up if we were leveling - it will be retriggered after boss
-      runProgress: wasLeveling
-        ? { ...runProgress, pendingLevelUp: false, upgradeChoices: [] }
-        : runProgress,
     }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
