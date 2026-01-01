@@ -32,9 +32,15 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+
+    // Wait for element to be visible and stable
+    await santaCard.waitFor({ state: 'visible' });
+    await page.waitForTimeout(1000); // Wait for animations to settle
+
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -43,9 +49,15 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+
+    // Wait for element to be visible and stable
+    await elfCard.waitFor({ state: 'visible' });
+    await page.waitForTimeout(1000); // Wait for animations to settle
+
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -54,9 +66,15 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
+
+    // Wait for element to be visible and stable
+    await bumbleCard.waitFor({ state: 'visible' });
+    await page.waitForTimeout(1000); // Wait for animations to settle
+
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
