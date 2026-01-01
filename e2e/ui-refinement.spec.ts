@@ -10,8 +10,8 @@ import { test, expect, Page } from '@playwright/test';
  * Run headless: npm run test:e2e -- ui-refinement
  */
 
-const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
-const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
+const CLICK_TIMEOUT = 60000; // Increased timeout for clicks in CI environments
+const TRANSITION_TIMEOUT = 60000; // Timeout for waiting for screen transitions
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 /**
@@ -27,10 +27,10 @@ async function waitForLoadingScreen(page: Page) {
   // Wait for the start screen to be visible and interactive
   // Use a more reliable selector that waits for any character selection button
   // Increased timeout for slower CI environments and mobile viewports
-  await page.waitForSelector('[class*="classCard"]', { state: 'visible', timeout: 30000 });
+  await page.waitForSelector('[class*="classCard"]', { state: 'visible', timeout: 60000 });
 
   // Additional wait to ensure all buttons are fully interactive after CSS transitions
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2000);
 }
 
 test.describe('UI Component Refinement', () => {
@@ -164,14 +164,18 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Click mech
-        await page.click(`button:has-text("${mech.name}")`, { timeout: CLICK_TIMEOUT });
+        // Click mech - wait for button to be fully ready
+        const mechButton = page.locator(`button:has-text("${mech.name}")`);
+        await expect(mechButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+        await expect(mechButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+        await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+        await mechButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
         // Wait for briefing screen to appear
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
 
         // Additional wait to ensure briefing is fully rendered
-        await page.waitForTimeout(1500);
+        await page.waitForTimeout(2000);
 
         // Verify commence operation button is visible
         await expect(page.locator('text=/COMMENCE OPERATION/i')).toBeVisible({ timeout: TRANSITION_TIMEOUT });

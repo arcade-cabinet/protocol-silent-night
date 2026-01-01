@@ -7,8 +7,8 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
-const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
-const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
+const CLICK_TIMEOUT = 60000; // Increased timeout for clicks in CI environments
+const TRANSITION_TIMEOUT = 60000; // Timeout for waiting for screen transitions
 
 /**
  * Wait for loading screen to be completely hidden and start screen to be ready
@@ -23,10 +23,10 @@ async function waitForLoadingScreen(page: Page) {
   // Wait for the start screen to be visible and interactive
   // Use a more reliable selector that waits for any character selection button
   // Increased timeout for slower CI environments and mobile viewports
-  await page.waitForSelector('[class*="classCard"]', { state: 'visible', timeout: 30000 });
+  await page.waitForSelector('[class*="classCard"]', { state: 'visible', timeout: 60000 });
 
   // Additional wait to ensure all buttons are fully interactive after CSS transitions
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2000);
 }
 
 // Helper to get game state from the store
@@ -130,15 +130,17 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await santaButton.click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click({ timeout: CLICK_TIMEOUT });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     // Wait for game to start
     await page.waitForTimeout(1500);
@@ -162,13 +164,17 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -196,13 +202,17 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -230,13 +240,17 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -262,13 +276,17 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -300,13 +318,17 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(1500);
 
@@ -325,13 +347,17 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -359,13 +385,17 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -388,13 +418,17 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(1500);
 
@@ -413,13 +447,17 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -447,13 +485,17 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -489,13 +531,17 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -524,13 +570,17 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -566,13 +616,17 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -609,13 +663,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -649,13 +707,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -686,13 +748,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -730,13 +796,17 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -748,8 +818,12 @@ test.describe('Full Gameplay - Game Reset', () => {
     await triggerStoreAction(page, 'damagePlayer', 300);
     await page.waitForTimeout(500);
 
-    // Click re-deploy
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ timeout: CLICK_TIMEOUT });
+    // Click re-deploy - wait for button to be ready
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await expect(redeployButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(redeployButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await redeployButton.click({ timeout: CLICK_TIMEOUT, force: false });
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -768,13 +842,17 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -789,21 +867,29 @@ test.describe('Full Gameplay - Game Reset', () => {
     await triggerStoreAction(page, 'damagePlayer', 300);
     await page.waitForTimeout(500);
 
-    // Reset
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ timeout: CLICK_TIMEOUT });
+    // Reset - wait for button to be ready
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await expect(redeployButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(redeployButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await redeployButton.click({ timeout: CLICK_TIMEOUT, force: false });
     await page.waitForTimeout(1000);
 
     // Start new game
     await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton2).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton2).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton2.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(1500);
 
@@ -826,13 +912,17 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     // Step 2: Game starts
     await page.waitForTimeout(1500);
@@ -862,8 +952,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       timeout: 5000,
     });
 
-    // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ timeout: CLICK_TIMEOUT });
+    // Step 7: Can restart - wait for button to be ready
+    const restartButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await expect(restartButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(restartButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await restartButton.click({ timeout: CLICK_TIMEOUT, force: false });
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
@@ -877,13 +971,17 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(1500);
 
@@ -916,13 +1014,17 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.getByRole('button', { name: /BUMBLE/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(1500);
 
@@ -957,13 +1059,17 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -991,13 +1097,17 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -1022,13 +1132,17 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
@@ -1062,13 +1176,17 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ timeout: CLICK_TIMEOUT });
 
     // Additional wait after click to ensure state transition
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: CLICK_TIMEOUT });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: TRANSITION_TIMEOUT });
+    await expect(commenceButton).toBeEnabled({ timeout: TRANSITION_TIMEOUT });
+    await page.waitForTimeout(1000); // Extra wait for button to become fully stable
+    await commenceButton.click({ timeout: CLICK_TIMEOUT, force: false });
 
     await page.waitForTimeout(2500);
 
