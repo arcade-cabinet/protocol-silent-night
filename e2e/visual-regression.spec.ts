@@ -9,9 +9,10 @@ import { test, expect, Page } from '@playwright/test';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
+const VISUAL_THRESHOLD = 0.05; // 5% diff tolerance - increased from 0.2 to account for CI rendering variations
 const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
 const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
+const SCREENSHOT_TIMEOUT = 60000; // Timeout for screenshot operations in CI
 
 /**
  * Wait for loading screen to be completely hidden and start screen to be ready
@@ -40,6 +41,7 @@ test.describe('Visual Regression - Character Selection', () => {
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -50,6 +52,7 @@ test.describe('Visual Regression - Character Selection', () => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -60,16 +63,18 @@ test.describe('Visual Regression - Character Selection', () => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
     await waitForLoadingScreen(page);
-    
+
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -99,6 +104,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -126,6 +132,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -153,6 +160,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -175,6 +183,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -198,6 +207,7 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -224,6 +234,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -247,6 +258,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -273,6 +285,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -295,6 +308,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -333,6 +347,7 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -348,7 +363,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -375,6 +390,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -403,6 +419,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });

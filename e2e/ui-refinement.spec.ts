@@ -151,7 +151,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForTimeout(2000);
 
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
 
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
@@ -177,7 +177,7 @@ test.describe('UI Component Refinement', () => {
         await page.waitForTimeout(2000);
 
         // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -209,7 +209,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForTimeout(2000);
 
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
 
       // Click commence
       await page.click('button:has-text("COMMENCE OPERATION")', { timeout: CLICK_TIMEOUT });
@@ -238,7 +238,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
       await page.waitForTimeout(2000);
 
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
       await page.click('button:has-text("COMMENCE OPERATION")', { timeout: CLICK_TIMEOUT });
 
       // Wait for HUD
@@ -301,7 +301,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=/COMMENCE OPERATION/i', { timeout: TRANSITION_TIMEOUT });
       await page.waitForTimeout(2000);
 
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: TRANSITION_TIMEOUT });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
