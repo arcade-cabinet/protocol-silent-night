@@ -916,7 +916,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (newHp <= 0) {
-      const { runProgress, stats } = get();
+      const { stats } = get();
       const updatedMeta = {
         ...get().metaProgress,
         bossesDefeated: get().metaProgress.bossesDefeated + 1,
