@@ -37,7 +37,8 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
       clearInterval(interval);
       clearTimeout(timer);
     };
-  }, [minDuration, rng]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minDuration]);
 
   if (!isVisible) return null;
 
