@@ -11,7 +11,7 @@ interface LoadingScreenProps {
   minDuration?: number;
 }
 
-export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
+export function LoadingScreen({ minDuration = process.env.NODE_ENV === 'test' ? 100 : 1500 }: LoadingScreenProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   // Use a separate RNG instance for UI animations to avoid affecting game state
