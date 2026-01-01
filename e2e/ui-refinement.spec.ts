@@ -12,20 +12,6 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
-// Helper to wait for page to be ready
-async function waitForPageReady(page: any) {
-  // Try to wait for loading screen, but don't fail if it's already gone
-  try {
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
-    await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
-  } catch (e) {
-    // Loading screen may have already disappeared, that's fine
-  }
-  // Wait for character selection to be ready
-  await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
-}
-
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
@@ -43,7 +29,7 @@ test.describe('UI Component Refinement', () => {
     });
 
     await page.goto('/');
-    await waitForPageReady(page);
+    await page.waitForLoadState('networkidle');
   });
 
   test.describe('Menu Screen', () => {
