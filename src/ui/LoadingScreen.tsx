@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from './LoadingScreen.module.css';
+import { useGameStore } from '../store/gameStore';
 
 interface LoadingScreenProps {
   minDuration?: number;
@@ -13,6 +14,7 @@ interface LoadingScreenProps {
 export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
+  const rng = useGameStore((state) => state.rng);
 
   useEffect(() => {
     // Simulate loading progress
@@ -22,7 +24,7 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
           clearInterval(interval);
           return 100;
         }
-        return prev + Math.random() * 15;
+        return prev + rng.next() * 15;
       });
     }, 100);
 
