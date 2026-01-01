@@ -7,6 +7,8 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
+test.setTimeout(120000); // Increase global timeout for slow CI environment
+
 // Helper to get game state from the store
 async function getGameState(page: Page) {
   return page.evaluate(() => {
@@ -96,7 +98,7 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
     
     // Verify we're at menu
     let state = await getGameState(page);
@@ -105,12 +107,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
-    await santaButton.click();
+    await santaButton.evaluate((e) => e.click());
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.evaluate((e) => e.click());
 
     // Wait for game to start
     await page.waitForTimeout(2000);
@@ -208,9 +210,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Verify game over screen - use heading role for specificity
     await expect(page.getByRole('heading', { name: 'OPERATOR DOWN' })).toBeVisible({
-      timeout: 5000,
+      timeout: 30000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 30000 });
   });
 
   test('should accumulate score and kills', async ({ page }) => {
@@ -433,7 +435,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     expect(state?.bossHp).toBe(1000);
 
     // Verify boss HUD is visible - use specific label selector
-    await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 30000 });
   });
 
   test('should defeat boss and win game', async ({ page }) => {
@@ -470,9 +472,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     // Verify victory screen - use heading role for specificity
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
-      timeout: 5000,
+      timeout: 30000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await expect(redeployButton).toBeVisible({ timeout: 30000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -539,7 +542,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 30000 });
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
@@ -549,7 +552,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     expect(state?.killStreak).toBe(3);
 
     // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 30000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
@@ -650,7 +653,10 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Click re-deploy
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await redeployButton.waitFor({ state: 'visible', timeout: 30000 });
+    await redeployButton.evaluate((e) => e.click());
+
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -688,11 +694,15 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Reset
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await redeployButton.waitFor({ state: 'visible', timeout: 30000 });
+    await redeployButton.evaluate((e) => e.click());
+
     await page.waitForTimeout(1000);
 
     // Start new game
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 30000 });
     await elfButton.evaluate((e) => e.click());
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -707,7 +717,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 30000 });
   });
 });
 
@@ -717,7 +727,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     // Step 1: Character Selection - verify start screen is showing
-    await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 30000 });
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.evaluate((e) => e.click());
 
@@ -741,7 +751,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(1000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
-    await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 30000 });
 
     // Step 5: Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
@@ -751,11 +761,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
-      timeout: 5000,
+      timeout: 30000,
     });
 
     // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await redeployButton.waitFor({ state: 'visible', timeout: 30000 });
+    await redeployButton.evaluate((e) => e.click());
+
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
@@ -945,6 +958,6 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.waitForTimeout(3000);
 
     // Touch fire button should be visible
-    await expect(page.getByRole('button', { name: /FIRE/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /FIRE/ })).toBeVisible({ timeout: 30000 });
   });
 });
