@@ -34,8 +34,8 @@ test.describe('Character Selection & Stats', () => {
       description: 'Low HP, high mobility. Rapid-fire plasma weapon.'
     },
     {
-      name: 'BUMBLE',
-      role: 'BRUISER',
+      name: 'THE BUMBLE',
+      role: 'Crowd Control / Bruiser',
       hp: '200',
       speed: 'MEDIUM',
       weapon: 'STAR THROWER',
@@ -67,8 +67,8 @@ test.describe('Character Selection & Stats', () => {
       await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
       await commenceButton.evaluate((e) => e.click());
 
-      // Wait for game HUD and state to settle
-      await page.waitForTimeout(3000);
+      // Wait for game HUD
+      await page.waitForTimeout(2000);
 
       // Verify in-game stats via store
       const stats = await page.evaluate(() => {
@@ -105,8 +105,7 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to fully initialize
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
 
     // Get initial bullet count
     const initialBullets = await page.evaluate(() =>
@@ -114,9 +113,9 @@ test.describe('Weapon Mechanics', () => {
     );
     expect(initialBullets).toBe(0);
 
-    // Fire once
+    // Fire once - ensure trigger happens
     await page.keyboard.down('Space');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200); // Increased press time
     await page.keyboard.up('Space');
 
     // Should spawn exactly 1 bullet
@@ -137,12 +136,11 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to fully initialize
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
 
-    // Fire once
+    // Fire once - ensure trigger happens
     await page.keyboard.down('Space');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200); // Increased press time
     await page.keyboard.up('Space');
 
     // Should spawn 3 bullets

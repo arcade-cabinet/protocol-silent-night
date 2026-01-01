@@ -456,8 +456,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to fully initialize
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
@@ -743,8 +742,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Step 2: Game starts - wait for game to fully initialize
-    await page.waitForTimeout(5000);
+    // Step 2: Game starts
+    await page.waitForTimeout(2000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
@@ -794,8 +793,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to fully initialize
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
@@ -830,8 +828,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to fully initialize
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
