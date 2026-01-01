@@ -10,7 +10,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { CONFIG, ENEMIES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
-import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES;
 
@@ -118,9 +117,6 @@ export function Enemies() {
   const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
-    // Pause game loop for E2E screenshot capture
-    if (isGamePausedForScreenshot()) return;
-
     // Optimization: Access transient state
     const { state: gameState, playerPosition, enemies: currentEnemies } = useGameStore.getState();
 
@@ -236,9 +232,6 @@ function InstancedMinions({
   const eyeMat = useMemo(() => new THREE.MeshBasicMaterial({ color: 0xff3300 }), []);
 
   useFrame((state) => {
-    // Pause game loop for E2E screenshot capture
-    if (isGamePausedForScreenshot()) return;
-
     const time = state.clock.elapsedTime;
 
     if (!bodyRef.current || !headRef.current || !eyeRef.current) return;
@@ -364,9 +357,6 @@ function BossMesh({
   const eyeColor = hpRatio > 0.5 ? 0xff0044 : hpRatio > 0.25 ? 0xffaa00 : 0xffffff;
 
   useFrame((state) => {
-    // Pause game loop for E2E screenshot capture
-    if (isGamePausedForScreenshot()) return;
-
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {

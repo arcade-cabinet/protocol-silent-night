@@ -7,7 +7,6 @@ import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 interface Particle {
   id: number;
@@ -35,9 +34,6 @@ export function HitParticles() {
   const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
-    // Pause game loop for E2E screenshot capture
-    if (isGamePausedForScreenshot()) return;
-
     if (!meshRef.current) return;
 
     const { state: gameState } = useGameStore.getState();
