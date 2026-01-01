@@ -120,8 +120,8 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to start
-    await page.waitForTimeout(2000);
+    // Wait for game to start and settle
+    await page.waitForTimeout(3000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
@@ -268,7 +268,8 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start and settle
+    await page.waitForTimeout(3000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -343,7 +344,8 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start and settle
+    await page.waitForTimeout(3000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -470,7 +472,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     // Damage boss until defeated
     await triggerStoreAction(page, 'damageBoss', 1000);
-    await page.waitForTimeout(1000);
+
+    // Wait for WIN state to settle
+    await page.waitForTimeout(2000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -584,7 +588,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Wait for streak to timeout (5+ seconds - increased from 2s for CI stability)
+    // Wait for streak to timeout (5+ seconds to match gameStore.ts timeout)
     await page.waitForTimeout(5500);
 
     // Next kill should start new streak
@@ -716,7 +720,8 @@ test.describe('Full Gameplay - Game Reset', () => {
     await commenceButton2.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton2.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start and settle
+    await page.waitForTimeout(3000);
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -743,7 +748,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.evaluate((e) => e.click());
 
     // Step 2: Game starts
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
@@ -761,7 +766,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 5: Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
-    await page.waitForTimeout(1000);
+
+    // Wait for WIN state to fully transition and settle
+    await page.waitForTimeout(2000);
 
     // Step 6: Victory
     state = await getGameState(page);
@@ -793,7 +800,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start and settle
+    await page.waitForTimeout(3000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
@@ -828,7 +836,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start and settle
+    await page.waitForTimeout(3000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
