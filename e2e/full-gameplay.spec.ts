@@ -111,7 +111,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click({ timeout: 15000 });
+    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
 
     // Wait for game to start
     await page.waitForTimeout(2000);
