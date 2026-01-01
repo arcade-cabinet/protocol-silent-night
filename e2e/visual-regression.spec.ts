@@ -313,29 +313,17 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await page.waitForTimeout(5000);
 
-    // Pause game loop to get stable screenshot
-    await page.evaluate(() => {
-      type GameWindow = Window & {
-        __pauseGameForScreenshot?: boolean;
-      };
-      (window as GameWindow).__pauseGameForScreenshot = true;
-    });
-
-    await page.waitForTimeout(500);
+    // Pause game for stable screenshot
+    await page.evaluate(() => { window.__pauseGameForScreenshot = true; });
+    await page.waitForTimeout(500); // Wait for freeze
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.4, // Higher threshold for mobile gameplay due to WebGL rendering variations
-      timeout: 30000,
+      maxDiffPixelRatio: VISUAL_THRESHOLD,
       animations: 'disabled',
     });
 
-    // Resume game loop
-    await page.evaluate(() => {
-      type GameWindow = Window & {
-        __pauseGameForScreenshot?: boolean;
-      };
-      (window as GameWindow).__pauseGameForScreenshot = false;
-    });
+    // Resume game
+    await page.evaluate(() => { window.__pauseGameForScreenshot = false; });
   });
 
   test('should render touch controls on mobile', async ({ page }) => {

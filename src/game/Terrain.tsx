@@ -126,6 +126,7 @@ export function Terrain() {
 
   useFrame((state) => {
     if (isGamePausedForScreenshot()) return;
+
     if (material.uniforms) {
       material.uniforms.time.value = state.clock.elapsedTime;
     }
@@ -205,6 +206,7 @@ function CyberpunkTree({
 
   useFrame((state) => {
     if (isGamePausedForScreenshot()) return;
+
     if (groupRef.current) {
       // Subtle sway
       groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.02;
@@ -276,6 +278,7 @@ function CyberpunkPresent({
 
   useFrame((state) => {
     if (isGamePausedForScreenshot()) return;
+
     if (boxRef.current) {
       const pulse = Math.sin(state.clock.elapsedTime * 3 + position[0] + position[2]) * 0.1 + 0.9;
       boxRef.current.scale.setScalar(pulse);

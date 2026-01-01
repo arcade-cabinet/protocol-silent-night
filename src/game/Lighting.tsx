@@ -16,6 +16,7 @@ export function Lighting() {
 
   useFrame((state) => {
     if (isGamePausedForScreenshot()) return;
+
     // Subtle light animation
     if (moonLightRef.current && theme.moonlight.animation) {
       const time = state.clock.elapsedTime;

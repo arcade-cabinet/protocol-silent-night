@@ -169,13 +169,14 @@ export function PlayerController() {
   );
 
   useFrame((_, delta) => {
+    if (isGamePausedForScreenshot()) return;
+
     if (
       !groupRef.current ||
       !playerClass ||
       state === 'GAME_OVER' ||
       state === 'WIN' ||
-      state === 'LEVEL_UP' ||
-      isGamePausedForScreenshot()
+      state === 'LEVEL_UP'
     )
       return;
 

@@ -118,11 +118,12 @@ export function Enemies() {
   const tempVecRef = useRef(new THREE.Vector3());
 
   useFrame((_, delta) => {
+    if (isGamePausedForScreenshot()) return;
+
     // Optimization: Access transient state
     const { state: gameState, playerPosition, enemies: currentEnemies } = useGameStore.getState();
 
     if (gameState !== 'PHASE_1' && gameState !== 'PHASE_BOSS') return;
-    if (isGamePausedForScreenshot()) return;
 
     if (gameState === 'PHASE_1' || gameState === 'PHASE_BOSS') {
       spawnTimerRef.current += delta * 1000;
@@ -235,6 +236,7 @@ function InstancedMinions({
 
   useFrame((state) => {
     if (isGamePausedForScreenshot()) return;
+
     const time = state.clock.elapsedTime;
 
     if (!bodyRef.current || !headRef.current || !eyeRef.current) return;
@@ -361,6 +363,7 @@ function BossMesh({
 
   useFrame((state) => {
     if (isGamePausedForScreenshot()) return;
+
     const time = state.clock.elapsedTime;
 
     if (groupRef.current) {

@@ -36,6 +36,7 @@ export function HitParticles() {
 
   useFrame((_, delta) => {
     if (isGamePausedForScreenshot()) return;
+
     if (!meshRef.current) return;
 
     const { state: gameState } = useGameStore.getState();

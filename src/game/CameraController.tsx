@@ -145,6 +145,7 @@ export function CameraController() {
 
   useFrame((_, delta) => {
     if (isGamePausedForScreenshot()) return;
+
     if (state === 'MENU' || state === 'BRIEFING') {
       // Menu camera - static elevated view with slow rotation
       camera.position.lerp(MENU_CAMERA_POS, delta * 2);

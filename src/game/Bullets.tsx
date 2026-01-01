@@ -184,6 +184,8 @@ export function Bullets() {
   );
 
   useFrame((state, delta) => {
+    if (isGamePausedForScreenshot()) return;
+
     // Optimization: Access transient state directly to avoid re-renders
     const { state: gameState, bullets, enemies, bossActive } = useGameStore.getState();
 
@@ -192,8 +194,7 @@ export function Bullets() {
       gameState === 'MENU' ||
       gameState === 'BRIEFING' ||
       gameState === 'GAME_OVER' ||
-      gameState === 'WIN' ||
-      isGamePausedForScreenshot()
+      gameState === 'WIN'
     )
       return;
 

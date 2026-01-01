@@ -254,6 +254,7 @@ export function StrataCharacter({
 
   useFrame((state) => {
     if (isGamePausedForScreenshot()) return;
+
     const time = state.clock.elapsedTime;
 
     if (characterRef.current) {
