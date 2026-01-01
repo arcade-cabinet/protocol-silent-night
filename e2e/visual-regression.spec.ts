@@ -275,10 +275,16 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+    await page.waitForTimeout(3000);
+
+    // Wait for page to be fully loaded and stable
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 60000, // Increase screenshot timeout to 60s
+      animations: 'disabled',
     });
   });
 
@@ -286,7 +292,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
 
     // Wait for any overlays to disappear
@@ -307,10 +313,31 @@ test.describe('Visual Regression - Responsive Design', () => {
     }, { timeout: 5000 }).catch(() => {});
     await commenceBtn.evaluate((e: HTMLElement) => e.click());
 
-    await page.waitForTimeout(5000);
-    
+    // Wait for game to fully initialize and animations to stabilize
+    await page.waitForTimeout(8000);
+
+    // Pause game loop to get stable screenshot
+    await page.evaluate(() => {
+      type GameWindow = Window & {
+        __pauseGameForScreenshot?: boolean;
+      };
+      (window as GameWindow).__pauseGameForScreenshot = true;
+    });
+
+    await page.waitForTimeout(500);
+
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 60000, // Increase screenshot timeout to 60s
+      animations: 'disabled',
+    });
+
+    // Resume game loop
+    await page.evaluate(() => {
+      type GameWindow = Window & {
+        __pauseGameForScreenshot?: boolean;
+      };
+      (window as GameWindow).__pauseGameForScreenshot = false;
     });
   });
 
