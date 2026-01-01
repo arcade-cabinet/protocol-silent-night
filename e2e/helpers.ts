@@ -6,8 +6,9 @@ import { Page, Locator, expect } from '@playwright/test';
  */
 export async function safeClick(locator: Locator, options: { timeout?: number } = {}): Promise<void> {
   const timeout = options.timeout || 45000;
+  const page = locator.page();
 
-  if (locator.page().isClosed()) {
+  if (!page || page.isClosed()) {
     throw new Error('Page is already closed');
   }
 
@@ -17,14 +18,14 @@ export async function safeClick(locator: Locator, options: { timeout?: number } 
     await locator.scrollIntoViewIfNeeded({ timeout });
   } catch (e) {
     // Check if page closed during wait/scroll
-    if (locator.page().isClosed()) {
+    if (!page || page.isClosed()) {
       throw new Error('Page is already closed');
     }
     // Fallback: try clicking without scrolling if scroll fails
     console.warn('Scroll/Wait failed, attempting direct click');
   }
 
-  if (locator.page().isClosed()) {
+  if (!page || page.isClosed()) {
     throw new Error('Page is already closed');
   }
 
@@ -39,14 +40,14 @@ export async function selectCharacterAndStart(
   page: Page,
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
-  // Check if page is still open before proceeding
+  // Check if page is open
   if (page.isClosed()) {
-    throw new Error('Page was closed before character selection');
+    throw new Error('Page is already closed');
   }
 
   // Initial animation wait - reduced
-  await page.waitForTimeout(1000);
-  await page.waitForLoadState('networkidle', { timeout: 30000 });
+  await page.waitForTimeout(1500);
+  await page.waitForLoadState('networkidle');
 
   // Select character
   const characterButton = page.getByRole('button', { name: new RegExp(characterName) });
@@ -58,12 +59,11 @@ export async function selectCharacterAndStart(
     // Wait for briefing screen selector instead of fixed wait
     await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
   } catch {
-    await page.waitForTimeout(500);
-  }
-
-  // Check if page is still open
-  if (page.isClosed()) {
-    throw new Error('Page closed after character selection');
+    // Check if page is still open
+    if (page.isClosed()) {
+      throw new Error('Page closed while waiting for briefing');
+    }
+    await page.waitForTimeout(800);
   }
 
   // Click commence operation
@@ -75,10 +75,12 @@ export async function selectCharacterAndStart(
   try {
     // Wait for game HUD or canvas instead of fixed wait
     await page.waitForSelector('canvas', { timeout: 15000 });
-    // Additional short wait for canvas to be ready
-    await page.waitForTimeout(1000);
   } catch {
-    await page.waitForTimeout(1500);
+    // Check if page is still open
+    if (page.isClosed()) {
+      throw new Error('Page closed while waiting for game init');
+    }
+    await page.waitForTimeout(2000);
   }
 }
 
