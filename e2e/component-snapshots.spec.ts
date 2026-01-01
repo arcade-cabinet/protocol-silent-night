@@ -9,9 +9,6 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2;
 
-// Increase timeout for all component snapshot tests due to WebGL rendering and waits
-test.setTimeout(60000);
-
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');

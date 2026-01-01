@@ -14,14 +14,8 @@ export async function safeClick(locator: Locator, options: { timeout?: number } 
     console.warn('Scroll into view failed, attempting direct click');
   }
 
-  // Stabilization wait after scroll - with error handling for closed pages
-  try {
-    await locator.page().waitForTimeout(500);
-  } catch (e) {
-    // If page is closed, fail fast
-    throw new Error(`Page was closed during safeClick: ${e}`);
-  }
-
+  // Stabilization wait after scroll
+  await locator.page().waitForTimeout(500);
   await locator.click({ timeout });
 }
 

@@ -12,9 +12,6 @@ import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpe
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
-// Increase timeout for all visual regression tests due to WebGL rendering
-test.setTimeout(60000);
-
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
