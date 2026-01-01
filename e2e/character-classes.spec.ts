@@ -50,9 +50,10 @@ test.describe('Character Class Tests', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // Start screen should disappear
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });

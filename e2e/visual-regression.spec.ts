@@ -35,11 +35,14 @@ async function startGame(page: Page, characterName: RegExp | string) {
   await charButton.click({ force: true, timeout: 15000 });
 
   // Click COMMENCE OPERATION on the briefing screen
-  // Wait specifically for the briefing screen to appear first
-  await page.waitForTimeout(1000); // Allow briefing transition
+  // The button appears after briefing lines animate (7 lines * 600ms + 500ms = ~4.7s)
+  // Use Playwright's smart waiting instead of fixed timeout
   const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await commenceBtn.waitFor({ state: 'visible', timeout: 20000 });
-  await commenceBtn.click();
+  await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
+  // Ensure button is ready for interaction
+  await commenceBtn.waitFor({ state: 'attached', timeout: 5000 });
+  await page.waitForTimeout(500); // Brief pause for any animations to settle
+  await commenceBtn.click({ timeout: 15000 });
 
   // Wait for game to load (HUD score visible)
   await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });

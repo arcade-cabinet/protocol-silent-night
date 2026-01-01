@@ -139,9 +139,10 @@ test.describe('Protocol: Silent Night', () => {
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // HUD should appear
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
@@ -159,9 +160,10 @@ test.describe('Protocol: Silent Night', () => {
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // Verify HUD elements
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
@@ -183,9 +185,10 @@ test.describe('Protocol: Silent Night', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to start
     await expect(commenceButton).not.toBeVisible({ timeout: 5000 });
