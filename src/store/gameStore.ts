@@ -962,14 +962,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  reset: () =>
-    set({
+  reset: () => {
+    // Use fixed seed for E2E tests to ensure deterministic behavior
+    // Playwright sets navigator.webdriver to true, allowing us to detect automated testing
+    const isAutomated = typeof window !== 'undefined' && window.navigator.webdriver === true;
+    const seed = isAutomated ? 12463160577482274073 : Date.now();
+
+    return set({
       ...initialState,
       highScore: get().highScore,
       metaProgress: get().metaProgress,
       playerPosition: new THREE.Vector3(0, 0, 0),
-      rng: new SeededRandom(Date.now()),
-    }),
+      rng: new SeededRandom(seed),
+    });
+  },
 }));
 
 // Expose store on window for e2e testing
