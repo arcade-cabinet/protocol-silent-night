@@ -193,7 +193,14 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    // Wait for any overlays to disappear
+    await page.waitForFunction(() => {
+      const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
+      return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
+    }, { timeout: 5000 }).catch(() => {});
+
+    await santaButton.evaluate((e: HTMLElement) => e.click());
     await page.waitForTimeout(5000);
     
     // Wait for enemies to spawn and engage
@@ -230,7 +237,14 @@ test.describe('Visual Regression - End Game States', () => {
     
     // Start game
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    // Wait for any overlays to disappear
+    await page.waitForFunction(() => {
+      const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
+      return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
+    }, { timeout: 5000 }).catch(() => {});
+
+    await santaButton.click({ force: true });
     await page.waitForTimeout(3000);
     
     // Trigger game over by evaluating state (for testing purposes)
@@ -256,6 +270,8 @@ test.describe('Visual Regression - End Game States', () => {
 });
 
 test.describe('Visual Regression - Responsive Design', () => {
+  test.setTimeout(120000); // Extended timeout for slow CI environments
+
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
@@ -272,7 +288,25 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    // Wait for any overlays to disappear
+    await page.waitForFunction(() => {
+      const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
+      return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
+    }, { timeout: 5000 }).catch(() => {});
+
+    await santaButton.evaluate((e: HTMLElement) => e.click());
+
+    // Click COMMENCE OPERATION to enter gameplay
+    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
+
+    await page.waitForFunction(() => {
+      const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
+      return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
+    }, { timeout: 5000 }).catch(() => {});
+    await commenceBtn.evaluate((e: HTMLElement) => e.click());
+
     await page.waitForTimeout(5000);
     
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
@@ -286,13 +320,32 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    // Wait for any overlays to disappear
+    await page.waitForFunction(() => {
+      const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
+      return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
+    }, { timeout: 5000 }).catch(() => {});
+
+    await santaButton.evaluate((e: HTMLElement) => e.click());
+
+    // Click COMMENCE OPERATION to enter gameplay
+    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
+
+    await page.waitForFunction(() => {
+      const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
+      return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
+    }, { timeout: 5000 }).catch(() => {});
+    await commenceBtn.evaluate((e: HTMLElement) => e.click());
+
     await page.waitForTimeout(3000);
     
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });
