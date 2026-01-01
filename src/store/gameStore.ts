@@ -877,8 +877,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
     const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+      state: 'PHASE_BOSS',
+      previousState: isLeveling ? state.state : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,

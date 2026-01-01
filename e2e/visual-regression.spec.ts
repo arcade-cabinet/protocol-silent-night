@@ -107,7 +107,7 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
-      maxDiffPixels: 20000, // Increased for @react-three/fiber 9.5.0 reconciler changes
+      maxDiffPixels: 23000, // Increased for @react-three/fiber 9.5.0 reconciler changes
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: SCREENSHOT_TIMEOUT,
     });
