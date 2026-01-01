@@ -7,8 +7,6 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
-test.describe.configure({ timeout: 90000 }); // Increased from default to 90s for CI stability
-
 // Helper to get game state from the store
 async function getGameState(page: Page) {
   return page.evaluate(() => {
@@ -95,7 +93,7 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
   return getGameState(page);
 }
 
-test.describe.configure({ timeout: 60000 });
+test.describe.configure({ timeout: 90000 });
 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
