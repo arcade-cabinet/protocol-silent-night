@@ -14,6 +14,7 @@ import { useFrame } from '@react-three/fiber';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { PlayerClassConfig } from '@/types';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 interface StrataCharacterProps {
   config: PlayerClassConfig;
@@ -252,6 +253,9 @@ export function StrataCharacter({
   }, [config, furOptions, applyCustomizations]);
 
   useFrame((state) => {
+    // Pause game loop for E2E screenshot capture
+    if (isGamePausedForScreenshot()) return;
+
     const time = state.clock.elapsedTime;
 
     if (characterRef.current) {

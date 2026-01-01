@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { TERRAIN_CONFIG, WEAPON_EVOLUTIONS, WEAPONS } from '@/data';
 import { useGameStore } from '@/store/gameStore';
 import { type ChristmasObstacle, getBulletTypeFromWeapon, type WeaponType } from '@/types';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 import { StrataCharacter } from './StrataCharacter';
 
 let bulletIdCounter = 0;
@@ -168,6 +169,9 @@ export function PlayerController() {
   );
 
   useFrame((_, delta) => {
+    // Pause game loop for E2E screenshot capture
+    if (isGamePausedForScreenshot()) return;
+
     if (
       !groupRef.current ||
       !playerClass ||

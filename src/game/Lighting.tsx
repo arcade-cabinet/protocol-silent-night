@@ -8,12 +8,16 @@ import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import type * as THREE from 'three';
 import THEMES from '@/data/themes.json';
+import { isGamePausedForScreenshot } from '@/utils/screenshot';
 
 export function Lighting() {
   const moonLightRef = useRef<THREE.DirectionalLight>(null);
   const theme = THEMES.default.lighting;
 
   useFrame((state) => {
+    // Pause game loop for E2E screenshot capture
+    if (isGamePausedForScreenshot()) return;
+
     // Subtle light animation
     if (moonLightRef.current && theme.moonlight.animation) {
       const time = state.clock.elapsedTime;
