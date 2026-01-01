@@ -18,7 +18,9 @@ test.setTimeout(60000);
  * Helper to start the game with a specific character
  * Handles loading screens, character selection, and briefing sequence
  */
-async function startGame(page: Page, characterName: RegExp | string) {
+async function startGame(page: Page, characterName: RegExp | string, options: { isMobile?: boolean } = {}) {
+  const timeout = options.isMobile ? 30000 : 15000;
+
   // Wait for loading screen to disappear
   await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 30000 });
 
@@ -32,13 +34,13 @@ async function startGame(page: Page, characterName: RegExp | string) {
   // Click character - handle potential navigation or state change
   await Promise.all([
     page.waitForNavigation({ timeout: 5000 }).catch(() => {}),
-    charButton.click({ force: true, timeout: 15000 })
+    charButton.click({ force: true, timeout: timeout })
   ]);
 
   // Click COMMENCE OPERATION on the briefing screen
   const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await commenceBtn.waitFor({ state: 'visible', timeout: 15000 });
-  await commenceBtn.click();
+  await commenceBtn.waitFor({ state: 'visible', timeout: timeout });
+  await commenceBtn.click({ timeout: timeout });
 
   // Wait for game to load (HUD score visible)
   await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });
@@ -248,7 +250,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    await startGame(page, /MECHA-SANTA/);
+    await startGame(page, /MECHA-SANTA/, { isMobile: true });
 
     // Wait specifically for mobile UI elements
     await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 10000 }).catch(() => {});
@@ -263,7 +265,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    await startGame(page, /MECHA-SANTA/);
+    await startGame(page, /MECHA-SANTA/, { isMobile: true });
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
