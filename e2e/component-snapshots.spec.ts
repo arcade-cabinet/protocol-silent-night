@@ -7,7 +7,7 @@ import { test, expect, Page } from '@playwright/test';
  * using Playwright's visual comparison capabilities
  */
 
-const VISUAL_THRESHOLD = 0.22; // Increased slightly for CI rendering variations
+const VISUAL_THRESHOLD = 0.25; // Increased for @react-three/fiber 9.5.0 rendering variations in CI
 const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
 const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
 
