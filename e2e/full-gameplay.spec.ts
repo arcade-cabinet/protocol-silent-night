@@ -218,6 +218,14 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await expect(page.getByRole('heading', { name: 'OPERATOR DOWN' })).toBeVisible({
       timeout: 30000,
     });
+
+    // Wait for game over state or trigger win condition explicitly to ensure UI is ready
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      const currentState = store?.getState().state;
+      return currentState === 'WIN' || currentState === 'GAME_OVER';
+    }, { timeout: 60000 });
+
     await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 30000 });
   });
 
@@ -456,42 +464,21 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game to start
-    await page.waitForFunction(
-      () => {
-        const state = (window as any).useGameStore?.getState();
-        return state && state.state === 'PHASE_1' && state.playerClass !== null;
-      },
-      null,
-      { timeout: 10000 }
-    );
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(100);
     }
-
-    // Wait for boss to activate
-    await page.waitForFunction(
-      () => (window as any).useGameStore?.getState()?.bossActive === true,
-      null,
-      { timeout: 10000 }
-    );
+    await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
 
     // Damage boss until defeated
     await triggerStoreAction(page, 'damageBoss', 1000);
-
-    // Wait for WIN state
-    await page.waitForFunction(
-      () => (window as any).useGameStore?.getState()?.state === 'WIN',
-      null,
-      { timeout: 10000 }
-    );
+    await page.waitForTimeout(1000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -763,15 +750,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Step 2: Game starts - wait for proper state
-    await page.waitForFunction(
-      () => {
-        const state = (window as any).useGameStore?.getState();
-        return state && state.state === 'PHASE_1' && state.playerClass !== null;
-      },
-      null,
-      { timeout: 10000 }
-    );
+    // Step 2: Game starts
+    await page.waitForTimeout(2000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
@@ -781,28 +761,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(100);
     }
 
-    // Step 4: Boss phase - wait for transition
-    await page.waitForFunction(
-      () => {
-        const state = (window as any).useGameStore?.getState();
-        return state && state.state === 'PHASE_BOSS' && state.bossActive === true;
-      },
-      null,
-      { timeout: 10000 }
-    );
+    // Step 4: Boss phase
+    await page.waitForTimeout(1000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 30000 });
 
     // Step 5: Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
-
-    // Wait for WIN state
-    await page.waitForFunction(
-      () => (window as any).useGameStore?.getState()?.state === 'WIN',
-      null,
-      { timeout: 10000 }
-    );
+    await page.waitForTimeout(1000);
 
     // Step 6: Victory
     state = await getGameState(page);
