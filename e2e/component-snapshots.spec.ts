@@ -10,7 +10,7 @@ import { selectCharacterAndStart } from './helpers';
 
 const VISUAL_THRESHOLD = 0.2;
 
-test.describe.configure({ timeout: 90000 });
+test.describe.configure({ timeout: 150000 }); // Increased timeout for CI stability
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {

@@ -39,9 +39,14 @@ export async function selectCharacterAndStart(
   page: Page,
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
+  // Check if page is still open before proceeding
+  if (page.isClosed()) {
+    throw new Error('Page was closed before character selection');
+  }
+
   // Initial animation wait - reduced
-  await page.waitForTimeout(1500);
-  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
+  await page.waitForLoadState('networkidle', { timeout: 30000 });
 
   // Select character
   const characterButton = page.getByRole('button', { name: new RegExp(characterName) });
@@ -53,7 +58,12 @@ export async function selectCharacterAndStart(
     // Wait for briefing screen selector instead of fixed wait
     await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
   } catch {
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(500);
+  }
+
+  // Check if page is still open
+  if (page.isClosed()) {
+    throw new Error('Page closed after character selection');
   }
 
   // Click commence operation
@@ -65,8 +75,10 @@ export async function selectCharacterAndStart(
   try {
     // Wait for game HUD or canvas instead of fixed wait
     await page.waitForSelector('canvas', { timeout: 15000 });
+    // Additional short wait for canvas to be ready
+    await page.waitForTimeout(1000);
   } catch {
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
   }
 }
 
