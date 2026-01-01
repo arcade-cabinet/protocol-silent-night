@@ -59,9 +59,9 @@
   border: 1px solid #333;
   padding: 20px;
   width: 200px;
-  height: 167px; /* Fixed height to match baseline snapshots and prevent layout shifts */
+  min-height: 180px; /* Ensure consistent height across environments */
   cursor: pointer;
-  transition: border-color 0.3s, background 0.3s, transform 0.3s, box-shadow 0.3s;
+  transition: 0.3s;
   text-align: center;
   clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
   display: flex;

@@ -42,7 +42,6 @@ class AudioManagerClass {
     new Map();
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
-  private lastSfxTime = 0; // Track last SFX trigger time to prevent timing conflicts
 
   /**
    * Initialize audio system. Must be called after user interaction.
@@ -182,11 +181,6 @@ class AudioManagerClass {
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
     const now = Tone.now();
 
-    // Add small buffer (10ms) to prevent timing conflicts when called rapidly
-    const timeOffset = Math.max(0, this.lastSfxTime + 0.01 - now);
-    const scheduledTime = now + timeOffset;
-    this.lastSfxTime = scheduledTime;
-
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
 
@@ -195,18 +189,18 @@ class AudioManagerClass {
     if (effectData.sequence) {
       // @ts-expect-error
       for (const [note, duration, delay = 0] of effectData.sequence) {
-        sfxSynth.triggerAttackRelease(note, duration, scheduledTime + delay);
+        sfxSynth.triggerAttackRelease(note, duration, now + delay);
       }
     } else {
       // @ts-expect-error
       if (effectData.note) {
         // @ts-expect-error
-        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, scheduledTime);
+        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
       }
       // @ts-expect-error
       if (effectData.noise) {
         // @ts-expect-error
-        noiseSynth.triggerAttackRelease(effectData.duration, scheduledTime);
+        noiseSynth.triggerAttackRelease(effectData.duration, now);
       }
     }
   }

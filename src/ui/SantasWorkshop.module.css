@@ -333,7 +333,7 @@
   text-transform: uppercase;
   font-weight: 900;
   letter-spacing: 2px;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.2s, outline 0.2s;
+  transition: 0.2s;
   margin-top: 20px;
 }
 
