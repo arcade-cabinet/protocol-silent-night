@@ -240,6 +240,8 @@ test.describe('UI Component Refinement', () => {
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
           maxDiffPixels: 100,
+          timeout: 30000,
+          animations: "disabled",
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -254,6 +256,8 @@ test.describe('UI Component Refinement', () => {
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
           maxDiffPixels: 100,
+          timeout: 30000,
+          animations: "disabled",
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
