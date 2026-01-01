@@ -16,12 +16,18 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.goto('/');
     // Wait for loading screen to disappear - critical for slow CI environments
     // Using a very long timeout as SwiftShader compilation can be slow
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
+    // Wait for character selection to be ready by waiting for a character button
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
     // Additional wait for transition animation
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
   });
 
   test('should match character selection screen', async ({ page }) => {
@@ -64,10 +70,16 @@ test.describe('Visual Regression - Character Selection', () => {
 test.describe('Visual Regression - Game Start', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
+    // Wait for character selection to be ready
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
   });
 
   test('should render Santa gameplay correctly', async ({ page }) => {
@@ -127,10 +139,16 @@ test.describe('Visual Regression - Game Start', () => {
 test.describe('Visual Regression - HUD Elements', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
+    // Wait for character selection to be ready
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
   });
 
   test('should render HUD correctly during gameplay', async ({ page }) => {
@@ -164,10 +182,16 @@ test.describe('Visual Regression - HUD Elements', () => {
 test.describe('Visual Regression - Game Movement', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
+    // Wait for character selection to be ready
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
   });
 
   test('should render character movement correctly', async ({ page }) => {
@@ -205,10 +229,16 @@ test.describe('Visual Regression - Game Movement', () => {
 test.describe('Visual Regression - Combat Scenarios', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
+    // Wait for character selection to be ready
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
   });
 
   test('should render combat with enemies', async ({ page }) => {
@@ -245,10 +275,16 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 test.describe('Visual Regression - End Game States', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
+    // Wait for character selection to be ready
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
   });
 
   test('should render game over screen', async ({ page }) => {
@@ -281,22 +317,21 @@ test.describe('Visual Regression - End Game States', () => {
 });
 
 test.describe('Visual Regression - Responsive Design', () => {
-  test.beforeEach(async ({ page }) => {
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
-      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
-    }
-  });
-
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
 
+    // Wait for character selection to be ready
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForLoadState('networkidle');
     await page.waitForFunction(() => document.fonts.ready);
 
@@ -310,9 +345,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
@@ -329,9 +368,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
+    // Try to wait for loading screen, but don't fail if it's already gone
+    try {
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      await loadingScreen.waitFor({ state: 'visible', timeout: 2000 });
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    } catch (e) {
+      // Loading screen may have already disappeared, that's fine
     }
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
