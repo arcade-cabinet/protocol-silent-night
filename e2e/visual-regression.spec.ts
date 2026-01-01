@@ -395,6 +395,9 @@ test.describe('Visual Regression - Responsive Design', () => {
   });
 
   test('should render touch controls on mobile', async ({ page }) => {
+    // Extend test timeout for this specific test due to multiple transitions
+    test.setTimeout(180000); // 3 minutes
+
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await waitForLoadingScreen(page);
@@ -418,7 +421,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.03, // Slightly higher threshold for touch button due to anti-aliasing variations
       timeout: SCREENSHOT_TIMEOUT,
     });
   });

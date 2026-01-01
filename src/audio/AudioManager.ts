@@ -171,6 +171,10 @@ class AudioManagerClass {
     this.currentTrack = null;
   }
 
+  // Track last SFX time to prevent timing conflicts
+  private lastSFXTime = 0;
+  private sfxCallCount = 0;
+
   /**
    * Play sound effect
    */
@@ -179,8 +183,18 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    // Add small offset to prevent timing conflicts when called rapidly
-    const now = Tone.now() + 0.01;
+
+    // Add progressive offset to prevent timing conflicts when called rapidly
+    // Each call within 100ms gets an additional offset
+    const currentTime = Tone.now();
+    if (currentTime - this.lastSFXTime < 0.1) {
+      this.sfxCallCount++;
+    } else {
+      this.sfxCallCount = 0;
+    }
+    this.lastSFXTime = currentTime;
+
+    const now = currentTime + (this.sfxCallCount * 0.05);
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
