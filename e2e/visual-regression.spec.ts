@@ -32,6 +32,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    // Wait for card to be fully rendered and stable
+    await page.waitForTimeout(1000);
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
@@ -43,6 +45,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+    // Wait for card to be fully rendered and stable
+    await page.waitForTimeout(1000);
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
@@ -54,6 +58,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
+    // Wait for card to be fully rendered and stable
+    await page.waitForTimeout(1000);
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
