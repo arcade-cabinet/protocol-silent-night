@@ -906,29 +906,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ...get().metaProgress,
         bossesDefeated: get().metaProgress.bossesDefeated + 1,
         nicePoints: get().metaProgress.nicePoints + 500,
+        runsCompleted: get().metaProgress.runsCompleted + 1,
       };
 
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Endless mode: Increment wave and prepare for level up
-      set({
-        state: 'PHASE_1',
-        bossActive: false,
-        stats: { ...stats, bossDefeated: true },
-        metaProgress: updatedMeta,
-        runProgress: {
-          ...runProgress,
-          wave: runProgress.wave + 1,
-        },
-      });
+      // First wave: WIN state
+      if (runProgress.wave === 1) {
+        set({
+          state: 'WIN',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+        });
+      } else {
+        // Endless mode: Increment wave and prepare for level up
+        set({
+          state: 'PHASE_1',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+          runProgress: {
+            ...runProgress,
+            wave: runProgress.wave + 1,
+          },
+        });
 
-      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-      get().levelUp();
+        // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
+        get().levelUp();
+      }
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
+      AudioManager.playMusic('victory');
 
       return true;
     }
