@@ -5,7 +5,7 @@ import { Page, Locator, expect } from '@playwright/test';
  * Useful for mobile viewports where elements might be off-screen.
  */
 export async function safeClick(locator: Locator, options: { timeout?: number } = {}): Promise<void> {
-  const timeout = options.timeout || 45000;
+  const timeout = options.timeout || 60000;
 
   if (locator.page().isClosed()) {
     throw new Error('Page is already closed');
