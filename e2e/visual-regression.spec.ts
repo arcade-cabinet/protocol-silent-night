@@ -32,20 +32,9 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
-    // Wait for card to be fully rendered and animations to settle
-    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(3000); // Increased wait for WebGL to settle
-
-    // Use page.screenshot() instead of element screenshot to avoid stability checks
-    const boundingBox = await santaCard.boundingBox();
-    expect(boundingBox).toBeTruthy();
-    const screenshot = await page.screenshot({
-      clip: boundingBox!,
-      animations: 'disabled',
-    });
-
-    expect(screenshot).toMatchSnapshot('santa-card.png', {
+    await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -54,20 +43,9 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
-    // Wait for card to be fully rendered and animations to settle
-    await elfCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(3000); // Increased wait for WebGL to settle
-
-    // Use page.screenshot() instead of element screenshot to avoid stability checks
-    const boundingBox = await elfCard.boundingBox();
-    expect(boundingBox).toBeTruthy();
-    const screenshot = await page.screenshot({
-      clip: boundingBox!,
-      animations: 'disabled',
-    });
-
-    expect(screenshot).toMatchSnapshot('elf-card.png', {
+    await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -76,20 +54,9 @@ test.describe('Visual Regression - Character Selection', () => {
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 45000 });
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
-    // Wait for card to be fully rendered and animations to settle
-    await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(3000); // Increased wait for WebGL to settle
-
-    // Use page.screenshot() instead of element screenshot to avoid stability checks
-    const boundingBox = await bumbleCard.boundingBox();
-    expect(boundingBox).toBeTruthy();
-    const screenshot = await page.screenshot({
-      clip: boundingBox!,
-      animations: 'disabled',
-    });
-
-    expect(screenshot).toMatchSnapshot('bumble-card.png', {
+    await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });

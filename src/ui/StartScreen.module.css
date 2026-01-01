@@ -59,9 +59,9 @@
   border: 1px solid #333;
   padding: 20px;
   width: 200px;
-  min-height: 165px; /* Match baseline snapshots (167px total with borders) */
+  min-height: 180px; /* Ensure consistent height across environments */
   cursor: pointer;
-  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  transition: 0.3s;
   text-align: center;
   clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
   display: flex;
