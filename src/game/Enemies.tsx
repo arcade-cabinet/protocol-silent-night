@@ -6,7 +6,7 @@
  */
 
 import { useFrame } from '@react-three/fiber';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { CONFIG, ENEMIES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
@@ -27,18 +27,18 @@ export function Enemies() {
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
   const bossActive = useGameStore((state) => state.bossActive);
-  const bossHp = useGameStore((state) => state.bossHp);
-  const bossMaxHp = useGameStore((state) => state.bossMaxHp);
 
-  // Note: We subscribe to enemies to ensure we render new ones when spawned/died
-  const enemies = useGameStore((state) => state.enemies);
+  // NOTE: We do NOT subscribe to enemies here to avoid re-rendering the entire component tree
+  // whenever an enemy spawns or dies. Rendering updates are handled in useFrame loops
+  // accessing transient state via useGameStore.getState().
+
   const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
     const { state: currentState, enemies: currentEnemies, addEnemy, runProgress } = useGameStore.getState();
     if (
       currentState === 'GAME_OVER' ||
-      currentState === 'WIN' || // Although we removed WIN state trigger, keep it for safety
+      currentState === 'WIN' ||
       currentState === 'LEVEL_UP' ||
       currentEnemies.length >= CONFIG.MAX_MINIONS
     )
@@ -87,7 +87,6 @@ export function Enemies() {
     }
 
     // Ensure we keep spawning if the population drops too low
-    // This addresses the "enemies not spawning" complaint by forcing population maintenance
     if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
       const checkId = setInterval(() => {
         const { enemies } = useGameStore.getState();
@@ -161,9 +160,7 @@ export function Enemies() {
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
         if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-          // Only damage if enemy is properly initialized (not at origin 0,0,0).
-          // Enemies spawn at radius 20-30 units, so lengthSq > 0.1 ensures proper initialization.
-          // This prevents "ghost damage" from corrupted or uninitialized enemy meshes.
+          // Only damage if enemy is properly initialized
           const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
           if (isInitialized) {
@@ -182,21 +179,15 @@ export function Enemies() {
     }
   });
 
-  const minions = enemies.filter((e) => e.type === 'minion');
-
   return (
     <group ref={groupRef}>
-      <InstancedMinions minions={minions} />
-      {bossActive && <BossRenderer enemies={enemies} bossHp={bossHp} bossMaxHp={bossMaxHp} />}
+      <InstancedMinions />
+      {bossActive && <BossRenderer />}
     </group>
   );
 }
 
-function InstancedMinions({
-  minions,
-}: {
-  minions: { mesh: THREE.Object3D; hp: number; maxHp: number }[];
-}) {
+const InstancedMinions = memo(function InstancedMinions() {
   const bodyRef = useRef<THREE.InstancedMesh>(null);
   const headRef = useRef<THREE.InstancedMesh>(null);
   const eyeRef = useRef<THREE.InstancedMesh>(null);
@@ -233,34 +224,42 @@ function InstancedMinions({
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
+    // Optimization: Access store directly in useFrame
+    const enemies = useGameStore.getState().enemies;
+
+    // We filter in the frame loop, which is efficient for <100 entities
+    // This allows us to avoid re-rendering the component when the enemy list changes
+    let minionIndex = 0;
 
     if (!bodyRef.current || !headRef.current || !eyeRef.current) return;
 
-    for (let i = 0; i < CONFIG.MAX_MINIONS + 5; i++) {
-      if (i < minions.length) {
-        const minion = minions[i];
-        const pos = minion.mesh.position;
-        const rot = minion.mesh.rotation.y;
-        const hpRatio = minion.hp / minion.maxHp;
-        const uniqueOffset = i * 0.3;
+    for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+        if (enemy.type !== 'minion') continue;
+
+        const pos = enemy.mesh.position;
+        const rot = enemy.mesh.rotation.y;
+        const hpRatio = enemy.hp / enemy.maxHp;
+        // Use minionIndex for offsets to keep animations consistent
+        const uniqueOffset = minionIndex * 0.3;
 
         dummy.position.set(pos.x, pos.y + 0.5 + Math.sin(time * 8 + uniqueOffset) * 0.08, pos.z);
         dummy.rotation.set(0.15, rot, Math.sin(time * 3 + uniqueOffset) * 0.05);
         dummy.scale.setScalar(1);
         dummy.updateMatrix();
-        bodyRef.current.setMatrixAt(i, dummy.matrix);
+        bodyRef.current.setMatrixAt(minionIndex, dummy.matrix);
 
         if (hpRatio < 0.5) {
           tempColor.setHex(hpRatio < 0.25 ? 0x441100 : 0x332200);
         } else {
           tempColor.setHex(0x112211);
         }
-        bodyRef.current.setColorAt(i, tempColor);
+        bodyRef.current.setColorAt(minionIndex, tempColor);
 
         dummy.position.set(pos.x, pos.y + 1.1 + Math.sin(time * 8 + uniqueOffset) * 0.08, pos.z);
         dummy.rotation.set(0, rot, Math.sin(time * 3 + uniqueOffset) * 0.05);
         dummy.updateMatrix();
-        headRef.current.setMatrixAt(i, dummy.matrix);
+        headRef.current.setMatrixAt(minionIndex, dummy.matrix);
 
         const eyeOffsetX = Math.sin(rot) * 0.17;
         const eyeOffsetZ = Math.cos(rot) * 0.17;
@@ -271,15 +270,19 @@ function InstancedMinions({
         );
         dummy.scale.setScalar(1);
         dummy.updateMatrix();
-        eyeRef.current.setMatrixAt(i, dummy.matrix);
-      } else {
+        eyeRef.current.setMatrixAt(minionIndex, dummy.matrix);
+
+        minionIndex++;
+    }
+
+    // Hide unused instances
+    for (let i = minionIndex; i < CONFIG.MAX_MINIONS + 5; i++) {
         dummy.position.set(0, -1000, 0);
         dummy.scale.setScalar(0);
         dummy.updateMatrix();
         bodyRef.current.setMatrixAt(i, dummy.matrix);
         headRef.current.setMatrixAt(i, dummy.matrix);
         eyeRef.current.setMatrixAt(i, dummy.matrix);
-      }
     }
 
     bodyRef.current.instanceMatrix.needsUpdate = true;
@@ -301,39 +304,24 @@ function InstancedMinions({
       />
     </group>
   );
-}
+});
 
-function BossRenderer({
-  enemies,
-  bossHp,
-  bossMaxHp,
-}: {
-  enemies: { type: string; mesh: THREE.Object3D }[];
-  bossHp: number;
-  bossMaxHp: number;
-}) {
-  const bossEnemy = enemies.find((e) => e.type === 'boss');
-  const bossPos = bossEnemy?.mesh.position ?? null;
-  const bossRotation = bossEnemy?.mesh.rotation.y ?? 0;
+const BossRenderer = memo(function BossRenderer() {
+  const bossHp = useGameStore((state) => state.bossHp);
+  const bossMaxHp = useGameStore((state) => state.bossMaxHp);
 
   return (
     <BossMesh
-      position={[bossPos?.x ?? 0, 4, bossPos?.z ?? 0]}
-      rotation={bossRotation}
       hp={bossHp}
       maxHp={bossMaxHp}
     />
   );
-}
+});
 
 function BossMesh({
-  position,
-  rotation = 0,
   hp,
   maxHp,
 }: {
-  position: [number, number, number];
-  rotation?: number;
   hp: number;
   maxHp: number;
 }) {
@@ -359,8 +347,15 @@ function BossMesh({
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
-    if (groupRef.current) {
-      groupRef.current.position.y = position[1] + Math.sin(time * 1.5) * 0.3;
+    // Optimization: Access boss position directly
+    const enemies = useGameStore.getState().enemies;
+    const boss = enemies.find(e => e.type === 'boss');
+
+    if (groupRef.current && boss) {
+      // Sync visual position with logical physics position
+      // Hardcode Y to 4 as per original visual design
+      groupRef.current.position.set(boss.mesh.position.x, 4 + Math.sin(time * 1.5) * 0.3, boss.mesh.position.z);
+      groupRef.current.rotation.y = boss.mesh.rotation.y;
     }
 
     if (bodyRef.current) {
@@ -400,7 +395,7 @@ function BossMesh({
   });
 
   return (
-    <group ref={groupRef} position={position} rotation={[0, rotation, 0]}>
+    <group ref={groupRef} position={[0, 4, 0]}>
       <group ref={bodyRef}>
         <mesh castShadow>
           <boxGeometry args={[2.5, 3, 1.8]} />
