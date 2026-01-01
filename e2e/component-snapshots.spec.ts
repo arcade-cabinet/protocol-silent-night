@@ -16,9 +16,10 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await waitForLoadingScreen(page);
     await page.waitForTimeout(3000);
 
-    // Start with Santa
+    // Start with Santa - wait for button to be ready
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+    await santaButton.click({ timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
@@ -50,7 +51,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+    await elfButton.waitFor({ state: 'visible', timeout: 10000 });
+    await elfButton.click({ timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
@@ -73,7 +75,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(3000);
 
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.click();
+    await bumbleButton.waitFor({ state: 'visible', timeout: 10000 });
+    await bumbleButton.click({ timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
@@ -228,7 +231,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+    await elfButton.waitFor({ state: 'visible', timeout: 10000 });
+    await elfButton.click({ timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
@@ -256,7 +260,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(3000);
 
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.click();
+    await bumbleButton.waitFor({ state: 'visible', timeout: 10000 });
+    await bumbleButton.click({ timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
@@ -363,7 +368,8 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+    await elfButton.waitFor({ state: 'visible', timeout: 10000 });
+    await elfButton.click({ timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
