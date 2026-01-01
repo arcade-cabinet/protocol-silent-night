@@ -26,16 +26,10 @@ describe('CameraController Component', () => {
     await renderer.advanceFrames(60, 0.1);
 
     // Access camera from R3F state
-    interface R3FNode {
-      instance?: {
-        camera?: unknown;
-      };
-    }
     const camera =
       renderer.scene.instance.children[0]?.camera ||
-      (renderer.scene.allChildren.find((c: unknown): c is R3FNode =>
-        Boolean((c as R3FNode).instance?.camera)
-      ) as R3FNode | undefined)?.instance?.camera;
+      (renderer.scene.allChildren.find((c: { instance: { camera: THREE.Camera } }) => c.instance.camera) as { instance: { camera: THREE.Camera } })?.instance
+        .camera;
     if (camera) {
       expect(camera.position.x).toBeCloseTo(10, 0);
       expect(camera.position.z).toBeGreaterThan(10);

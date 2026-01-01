@@ -14,7 +14,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders boss warning when boss is active', () => {
-    vi.mocked(useGameStore).mockReturnValue({
+    (useGameStore as unknown as Mock).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
     });
@@ -25,7 +25,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders mission complete when state is WIN', () => {
-    vi.mocked(useGameStore).mockReturnValue({
+    (useGameStore as unknown as Mock).mockReturnValue({
       state: 'WIN',
       bossActive: false,
     });
@@ -36,7 +36,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders operator down when state is GAME_OVER', () => {
-    vi.mocked(useGameStore).mockReturnValue({
+    (useGameStore as unknown as Mock).mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
     });
@@ -47,7 +47,7 @@ describe('MessageOverlay', () => {
   });
 
   it('is accessible with role="alert"', () => {
-    vi.mocked(useGameStore).mockReturnValue({
+    (useGameStore as unknown as Mock).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
     });
