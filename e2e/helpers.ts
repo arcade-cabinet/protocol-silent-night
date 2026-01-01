@@ -26,7 +26,7 @@ export async function safeClick(locator: Locator, options: { timeout?: number } 
 
   // Stabilization wait after scroll
   if (!locator.page().isClosed()) {
-    await locator.page().waitForTimeout(500);
+    await locator.page().waitForTimeout(1000);
     await locator.click({ timeout });
   } else {
     throw new Error('Page is already closed');
@@ -42,7 +42,7 @@ export async function selectCharacterAndStart(
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
   // Initial animation wait
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2000);
   await page.waitForLoadState('networkidle');
 
   // Select character
@@ -51,7 +51,7 @@ export async function selectCharacterAndStart(
   await safeClick(characterButton);
 
   // Wait for briefing to appear
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1000);
 
   // Click commence operation
   const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -59,7 +59,7 @@ export async function selectCharacterAndStart(
   await safeClick(commenceButton);
 
   // Wait for game to initialize
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(3000);
 }
 
 /**

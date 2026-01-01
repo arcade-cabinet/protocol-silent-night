@@ -245,7 +245,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await selectCharacterAndStart(page, 'MECHA-SANTA');
 
     // Additional wait for mobile render
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
