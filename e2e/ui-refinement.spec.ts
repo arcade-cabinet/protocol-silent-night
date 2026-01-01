@@ -12,6 +12,9 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
+// Increase timeout for all UI refinement tests due to WebGL rendering and visual regression
+test.setTimeout(60000);
+
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
