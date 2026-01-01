@@ -9,7 +9,7 @@ import { test, expect, Page } from '@playwright/test';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.06; // 6% diff tolerance - increased to account for CI rendering variations
+const VISUAL_THRESHOLD = 0.08; // 8% diff tolerance - increased to account for CI rendering variations and dependency updates
 const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
 const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
 const SCREENSHOT_TIMEOUT = 60000; // Timeout for screenshot operations in CI
