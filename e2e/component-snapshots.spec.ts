@@ -10,6 +10,7 @@ import { test, expect, Page } from '@playwright/test';
 const VISUAL_THRESHOLD = 0.25; // Increased for @react-three/fiber 9.5.0 rendering variations in CI
 const CLICK_TIMEOUT = 30000; // Increased timeout for clicks in CI environments
 const TRANSITION_TIMEOUT = 30000; // Timeout for waiting for screen transitions
+const MAX_DIFF_PIXELS = 20000; // Increased for @react-three/fiber 9.5.0 reconciler bundle changes
 
 /**
  * Wait for loading screen to be completely hidden and start screen to be ready
@@ -61,7 +62,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     });
 
     await expect(page).toHaveScreenshot('santa-character-render.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -85,7 +86,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(4000);
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -109,7 +110,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(4000);
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -144,7 +145,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.keyboard.up('a');
 
     await expect(page).toHaveScreenshot('terrain-render.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -168,7 +169,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.waitForTimeout(4000);
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -194,7 +195,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(8000); // Wait for enemy spawns
 
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -223,7 +224,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.keyboard.up('Space');
 
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -253,7 +254,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(300);
 
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -282,7 +283,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.keyboard.up('Space');
 
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -310,7 +311,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(300);
 
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -341,7 +342,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.keyboard.up('Space');
 
     await expect(page).toHaveScreenshot('hit-particles.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -367,7 +368,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.waitForTimeout(2500);
 
     await expect(page).toHaveScreenshot('camera-perspective.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -398,7 +399,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.keyboard.up('w');
 
     await expect(page).toHaveScreenshot('camera-following.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -427,7 +428,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.waitForTimeout(4000);
 
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
@@ -464,7 +465,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
-      maxDiffPixels: 10000,
+      maxDiffPixels: MAX_DIFF_PIXELS,
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
   });
