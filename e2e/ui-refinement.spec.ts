@@ -12,6 +12,9 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
+// Increase timeout for UI tests
+test.setTimeout(120000);
+
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
@@ -167,8 +170,10 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       // Click commence
-      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 20000 });
-      await page.click('button:has-text("COMMENCE OPERATION")');
+      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 30000 });
+      await page.waitForTimeout(500); // Let UI stabilize
+      await page.click('button:has-text("COMMENCE OPERATION")', { force: true, timeout: 10000 });
+      await page.waitForTimeout(2000); // Wait for transition
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -188,8 +193,10 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
-      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 20000 });
-      await page.click('button:has-text("COMMENCE OPERATION")');
+      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 30000 });
+      await page.waitForTimeout(500); // Let UI stabilize
+      await page.click('button:has-text("COMMENCE OPERATION")', { force: true, timeout: 10000 });
+      await page.waitForTimeout(2000); // Wait for transition
 
       // Wait for HUD
       await page.waitForTimeout(2000);

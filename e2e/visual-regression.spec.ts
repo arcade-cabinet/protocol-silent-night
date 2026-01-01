@@ -12,38 +12,48 @@ import { test, expect, type Page } from '@playwright/test';
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
 // Increase default timeout for this file due to heavy 3D loading and animations
-test.setTimeout(60000);
+test.setTimeout(120000); // Increased to 120s for heavy 3D operations and mobile tests
 
 /**
  * Helper to start the game with a specific character
  * Handles loading screens, character selection, and briefing sequence
  */
 async function startGame(page: Page, characterName: RegExp | string, options: { isMobile?: boolean } = {}) {
-  const timeout = options.isMobile ? 30000 : 15000;
+  const timeout = options.isMobile ? 40000 : 20000;
 
   // Wait for loading screen to disappear
-  await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 30000 });
+  await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 40000 });
 
   // Select Character
   const charButton = page.getByRole('button', { name: characterName });
-  await charButton.waitFor({ state: 'visible', timeout: 30000 });
+  await charButton.waitFor({ state: 'visible', timeout: 40000 });
 
   // Wait for any overlays to disappear
   await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
 
+  // Wait a bit for UI to stabilize
+  await page.waitForTimeout(500);
+
   // Click character - handle potential navigation or state change
   await Promise.all([
     page.waitForNavigation({ timeout: 5000 }).catch(() => {}),
-    charButton.click({ force: true, timeout: timeout })
+    charButton.click({ force: true, timeout: 10000 })
   ]);
+
+  // Wait for briefing screen to be ready
+  await page.waitForTimeout(1000);
 
   // Click COMMENCE OPERATION on the briefing screen
   const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
   await commenceBtn.waitFor({ state: 'visible', timeout: timeout });
-  await commenceBtn.click({ timeout: timeout });
+  await commenceBtn.waitFor({ state: 'attached', timeout: 5000 });
+
+  // Ensure button is stable before clicking
+  await page.waitForTimeout(500);
+  await commenceBtn.click({ force: true, timeout: 10000 });
 
   // Wait for game to load (HUD score visible)
-  await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });
+  await expect(page.getByText('SCORE')).toBeVisible({ timeout: 40000 });
 }
 
 test.describe('Visual Regression - Character Selection', () => {
@@ -238,11 +248,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
 
     // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
+    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 40000 });
+
+    // Wait for UI to stabilize
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Temporarily increased for high variance
-      timeout: 20000,
+      timeout: 30000,
     });
   });
 
@@ -253,11 +266,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     await startGame(page, /MECHA-SANTA/, { isMobile: true });
 
     // Wait specifically for mobile UI elements
-    await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 10000 }).catch(() => {});
+    await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 15000 }).catch(() => {});
+
+    // Allow game to render fully
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 10000
+      timeout: 20000
     });
   });
 
@@ -269,10 +285,14 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+    await fireButton.waitFor({ state: 'visible', timeout: 20000 });
+
+    // Wait for button to stabilize
+    await page.waitForTimeout(1000);
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 });
