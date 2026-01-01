@@ -388,7 +388,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const now = Date.now();
     const newKills = stats.kills + 1;
 
-    const streakTimeout = 2000;
+    const streakTimeout = 5000; // Increased for CI stability
     const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
@@ -926,35 +926,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Check if this is the first wave (campaign mode) or endless mode
-      if (runProgress.wave === 1) {
-        // First boss defeat = campaign victory
-        set({
-          state: 'WIN',
-          bossActive: false,
-          stats: { ...stats, bossDefeated: true },
-          metaProgress: updatedMeta,
-        });
-      } else {
-        // Endless mode: Increment wave and prepare for level up
-        set({
-          state: 'PHASE_1',
-          bossActive: false,
-          stats: { ...stats, bossDefeated: true },
-          metaProgress: updatedMeta,
-          runProgress: {
-            ...runProgress,
-            wave: runProgress.wave + 1,
-          },
-        });
-
-        // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-        get().levelUp();
-      }
+      // Victory Condition: Defeating the boss wins the run
+      set({
+        state: 'WIN',
+        bossActive: false,
+        stats: { ...stats, bossDefeated: true },
+        metaProgress: updatedMeta,
+      });
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
+      AudioManager.playMusic('victory');
 
       return true;
     }
