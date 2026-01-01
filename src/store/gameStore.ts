@@ -966,7 +966,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Use fixed seed for E2E tests to ensure deterministic behavior
     // Playwright sets navigator.webdriver to true, allowing us to detect automated testing
     const isAutomated = typeof window !== 'undefined' && window.navigator.webdriver === true;
-    const seed = isAutomated ? 12463160577482274073 : Date.now();
+    // Use a fixed seed for E2E tests (based on branch name, truncated to safe integer)
+    const seed = isAutomated ? 577482274 : Date.now();
 
     return set({
       ...initialState,
