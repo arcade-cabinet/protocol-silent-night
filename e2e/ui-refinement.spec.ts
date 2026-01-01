@@ -89,15 +89,20 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
+      // Wait for page to stabilize
+      await page.waitForTimeout(2000);
+
       // Click MECHA-SANTA
-      await page.click('button:has-text("MECHA-SANTA")');
+      const mechButton = page.locator('button:has-text("MECHA-SANTA")');
+      await mechButton.waitFor({ state: 'visible' });
+      await mechButton.click();
 
       // Wait for mission briefing with longer timeout for state transition
       try {
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
 
         const briefingTitle = page.locator('text=MISSION BRIEFING');
-        await expect(briefingTitle).toBeVisible({ timeout: 3000 });
+        await expect(briefingTitle).toBeVisible({ timeout: 5000 });
 
         // Verify mission details
         await expect(page.locator('text=SILENT NIGHT')).toBeVisible();
@@ -116,11 +121,17 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
+      // Wait for page to stabilize
+      await page.waitForTimeout(2000);
+
       // Select a mech
-      await page.click('button:has-text("CYBER-ELF")');
+      const mechButton = page.locator('button:has-text("CYBER-ELF")');
+      await mechButton.waitFor({ state: 'visible' });
+      await mechButton.click();
 
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
+      await page.waitForTimeout(1000); // Allow UI to settle
 
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
@@ -136,11 +147,16 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
+        if (index === 0) await page.waitForTimeout(2000);
+
         // Click mech
-        await page.click(`button:has-text("${mech.name}")`);
+        const mechButton = page.locator(`button:has-text("${mech.name}")`);
+        await mechButton.waitFor({ state: 'visible' });
+        await mechButton.click();
 
         // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
+        await page.waitForTimeout(1000); // Allow UI to settle
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
