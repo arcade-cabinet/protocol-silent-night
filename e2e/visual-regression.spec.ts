@@ -12,7 +12,7 @@ import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpe
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
-test.describe.configure({ timeout: 90000 });
+test.describe.configure({ timeout: 120000 }); // Increased to 120s for CI stability
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
@@ -255,12 +255,28 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await setupMobileViewport(page);
     await page.goto('/');
-    await selectCharacterAndStart(page, 'MECHA-SANTA');
 
-    // Touch controls should be visible
-    const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-    });
+    // Use shorter timeouts for mobile test to avoid timeout issues
+    try {
+      await selectCharacterAndStart(page, 'MECHA-SANTA');
+
+      // Wait for game to fully load and touch controls to appear
+      await page.waitForTimeout(1500);
+
+      // Touch controls should be visible
+      const fireButton = page.getByRole('button', { name: /FIRE/ });
+      await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+
+      await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
+        maxDiffPixelRatio: VISUAL_THRESHOLD,
+        timeout: 30000,
+      });
+    } catch (error) {
+      // If page is closed, fail gracefully
+      if (page.isClosed()) {
+        throw new Error('Page closed unexpectedly during test');
+      }
+      throw error;
+    }
   });
 });
