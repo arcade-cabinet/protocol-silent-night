@@ -270,11 +270,15 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(5000);
-    
+
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -284,11 +288,15 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(3000);
-    
+
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
