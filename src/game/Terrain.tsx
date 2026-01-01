@@ -17,6 +17,7 @@ export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const setObstacles = useGameStore((state) => state.setObstacles);
   const playerPosition = useGameStore((state) => state.playerPosition);
+  const rng = useGameStore((state) => state.rng);
 
   // Create geometry and material
   const geometry = useMemo(
@@ -84,7 +85,7 @@ export function Terrain() {
           }
 
           const hRange = config.heightRange;
-          const obstacleHeight = hRange[0] + Math.random() * (hRange[1] - hRange[0]);
+          const obstacleHeight = hRange[0] + rng.next() * (hRange[1] - hRange[0]);
 
           dummy.position.y = h + (config.yOffset || obstacleHeight / 2);
 
@@ -107,7 +108,7 @@ export function Terrain() {
     }
 
     return { matrices, count: instanceCount, obstacles: obstacleList };
-  }, []);
+  }, [rng]);
 
   // Sync obstacles to store and apply matrices to instanced mesh
   useEffect(() => {

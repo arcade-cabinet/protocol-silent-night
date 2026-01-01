@@ -165,9 +165,10 @@ export function CameraController() {
 
     // Apply screen shake
     if (screenShake > 0.01) {
-      targetRef.current.x += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.y += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.z += (Math.random() - 0.5) * screenShake * 2;
+      const { rng } = useGameStore.getState();
+      targetRef.current.x += (rng.next() - 0.5) * screenShake * 2;
+      targetRef.current.y += (rng.next() - 0.5) * screenShake * 2;
+      targetRef.current.z += (rng.next() - 0.5) * screenShake * 2;
 
       // Decay shake using getState to avoid re-render cycles
       const currentShake = useGameStore.getState().screenShake;

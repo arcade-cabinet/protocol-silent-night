@@ -35,7 +35,7 @@ export function Enemies() {
   const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
-    const { state: currentState, enemies: currentEnemies, addEnemy, runProgress } = useGameStore.getState();
+    const { state: currentState, enemies: currentEnemies, addEnemy, runProgress, rng } = useGameStore.getState();
     if (
       currentState === 'GAME_OVER' ||
       currentState === 'WIN' || // Although we removed WIN state trigger, keep it for safety
@@ -45,10 +45,10 @@ export function Enemies() {
       return;
 
     const id = `minion-${enemyIdCounter++}`;
-    const angle = Math.random() * Math.PI * 2;
+    const angle = rng.next() * Math.PI * 2;
     const radius =
       ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin +
-      Math.random() *
+      rng.next() *
         (ENEMY_SPAWN_CONFIG.minionSpawnRadiusMax - ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin);
 
     const mesh = new THREE.Object3D();
@@ -65,7 +65,7 @@ export function Enemies() {
       maxHp: MINION_CONFIG.hp * waveMult,
       isActive: true,
       type: 'minion',
-      speed: (MINION_CONFIG.speed + Math.random() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
+      speed: (MINION_CONFIG.speed + rng.next() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
       damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
     });
