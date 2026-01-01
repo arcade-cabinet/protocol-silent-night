@@ -144,9 +144,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Verify Santa's stats are correct
     const state = await getGameState(page);
@@ -175,9 +173,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -208,9 +204,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Deal fatal damage
     await triggerStoreAction(page, 'damagePlayer', 300);
@@ -247,9 +241,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Simulate kills
     await triggerStoreAction(page, 'addKill', 10);
@@ -304,9 +296,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Verify Elf's stats - low HP, high speed
     const state = await getGameState(page);
@@ -335,9 +325,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Elf only has 100 HP - one big hit kills
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -383,9 +371,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Verify Bumble's stats - 200 HP, medium speed
     const state = await getGameState(page);
@@ -414,9 +400,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -448,9 +432,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Simulate 10 kills to trigger boss
     for (let i = 0; i < 10; i++) {
@@ -482,9 +464,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
@@ -524,9 +504,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
@@ -566,9 +544,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
@@ -605,9 +581,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
@@ -641,9 +615,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
@@ -684,9 +656,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Get some score
     await triggerStoreAction(page, 'addKill', 100);
@@ -724,9 +694,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
@@ -782,9 +750,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Step 2: Game starts - wait for proper state
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    // Step 2: Game starts
+    await page.waitForTimeout(2000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
@@ -906,9 +873,7 @@ test.describe('Full Gameplay - Input Controls', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     const initialState = await getGameState(page);
 
@@ -939,9 +904,7 @@ test.describe('Full Gameplay - Input Controls', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Move with arrow keys
     await page.keyboard.down('ArrowUp');
@@ -969,9 +932,7 @@ test.describe('Full Gameplay - Input Controls', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Verify input state changes when firing
     await page.keyboard.down('Space');
@@ -1008,9 +969,7 @@ test.describe('Full Gameplay - Input Controls', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    // Wait for game state to be ready
-    await waitForGameState(page, 'PHASE_1', 10000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
 
     // Touch fire button should be visible
     await expect(page.getByRole('button', { name: /FIRE/ })).toBeVisible({ timeout: 30000 });

@@ -89,7 +89,7 @@ export function EndScreen() {
       </div>
 
       <button className={styles.btn} onClick={handleReplay} type="button">
-        RE-DEPLOY
+        {isWin ? 'PLAY AGAIN' : 'RE-DEPLOY'}
       </button>
     </div>
   );
