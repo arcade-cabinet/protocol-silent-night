@@ -7,29 +7,30 @@ import { Page, Locator, expect } from '@playwright/test';
 export async function safeClick(locator: Locator, options: { timeout?: number } = {}): Promise<void> {
   const timeout = options.timeout || 30000;
 
-  try {
-    // Check if page is closed before attempting interaction
-    if (locator.page().isClosed()) {
-      throw new Error('Page is already closed');
-    }
-
-    await locator.scrollIntoViewIfNeeded({ timeout });
-  } catch (e) {
-    if (e.message.includes('Page is already closed')) {
-      throw e;
-    }
-    // Fallback: try clicking without scrolling if scroll fails
-    console.warn('Scroll into view failed, attempting direct click');
-  }
-
-  // Check again before wait
   if (locator.page().isClosed()) {
     throw new Error('Page is already closed');
   }
 
+  try {
+    // Ensure element is visible and clickable before attempting
+    await locator.waitFor({ state: 'visible', timeout });
+    await locator.scrollIntoViewIfNeeded({ timeout });
+  } catch (e) {
+    // Check if page closed during wait/scroll
+    if (locator.page().isClosed()) {
+      throw new Error('Page is already closed');
+    }
+    // Fallback: try clicking without scrolling if scroll fails
+    console.warn('Scroll/Wait failed, attempting direct click');
+  }
+
   // Stabilization wait after scroll
-  await locator.page().waitForTimeout(500);
-  await locator.click({ timeout });
+  if (!locator.page().isClosed()) {
+    await locator.page().waitForTimeout(500);
+    await locator.click({ timeout });
+  } else {
+    throw new Error('Page is already closed');
+  }
 }
 
 /**
