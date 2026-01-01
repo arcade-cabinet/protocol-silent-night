@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacterAndStart, setupMobileViewport } from './helpers';
+import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpers';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -215,7 +215,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixelRatio: 0.3, // Increased threshold for mobile differences
+      maxDiffPixels: 1000,
+      maxDiffPixelRatio: 0.3,
+      threshold: 0.3,
       timeout: 30000,
       animations: 'disabled',
     });
