@@ -282,6 +282,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Higher threshold for mobile menu due to rendering variations
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -314,6 +315,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
