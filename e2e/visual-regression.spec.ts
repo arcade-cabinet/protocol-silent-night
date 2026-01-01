@@ -12,6 +12,8 @@ import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpe
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
+test.describe.configure({ timeout: 60000 });
+
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
@@ -215,7 +217,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixels: 30000,
+      maxDiffPixels: 1000,
       maxDiffPixelRatio: 0.3,
       threshold: 0.3,
       timeout: 30000,

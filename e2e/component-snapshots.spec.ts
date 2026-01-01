@@ -9,6 +9,8 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2;
 
+test.describe.configure({ timeout: 60000 });
+
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');

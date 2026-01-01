@@ -8,10 +8,23 @@ export async function safeClick(locator: Locator, options: { timeout?: number } 
   const timeout = options.timeout || 30000;
 
   try {
+    // Check if page is closed before attempting interaction
+    if (locator.page().isClosed()) {
+      throw new Error('Page is already closed');
+    }
+
     await locator.scrollIntoViewIfNeeded({ timeout });
   } catch (e) {
+    if (e.message.includes('Page is already closed')) {
+      throw e;
+    }
     // Fallback: try clicking without scrolling if scroll fails
     console.warn('Scroll into view failed, attempting direct click');
+  }
+
+  // Check again before wait
+  if (locator.page().isClosed()) {
+    throw new Error('Page is already closed');
   }
 
   // Stabilization wait after scroll

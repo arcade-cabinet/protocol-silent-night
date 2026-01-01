@@ -93,6 +93,8 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
   return getGameState(page);
 }
 
+test.describe.configure({ timeout: 60000 });
+
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');

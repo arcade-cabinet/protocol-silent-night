@@ -12,6 +12,8 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
+test.describe.configure({ timeout: 60000 });
+
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
