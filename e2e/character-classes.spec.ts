@@ -67,8 +67,8 @@ test.describe('Character Selection & Stats', () => {
       await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
       await commenceButton.evaluate((e) => e.click());
 
-      // Wait for game HUD and full initialization
-      await page.waitForTimeout(3500);
+      // Wait for game HUD and state to settle
+      await page.waitForTimeout(3000);
 
       // Verify in-game stats via store
       const stats = await page.evaluate(() => {
@@ -105,7 +105,8 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(3500);
+    // Wait for game to fully initialize
+    await page.waitForTimeout(3000);
 
     // Get initial bullet count
     const initialBullets = await page.evaluate(() =>
@@ -136,7 +137,8 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(3500);
+    // Wait for game to fully initialize
+    await page.waitForTimeout(3000);
 
     // Fire once
     await page.keyboard.down('Space');
