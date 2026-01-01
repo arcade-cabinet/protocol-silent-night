@@ -120,10 +120,9 @@ test.describe('UI Component Refinement', () => {
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
-      // Check for operation button - wait longer for animation to complete
-      // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
+      // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible({ timeout: 20000 });
+      await expect(opButton).toBeVisible();
       await expect(opButton).toBeEnabled();
     });
 

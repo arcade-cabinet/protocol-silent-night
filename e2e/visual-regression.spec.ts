@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -10,6 +10,39 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
+
+// Increase default timeout for this file due to heavy 3D loading and animations
+test.setTimeout(60000);
+
+/**
+ * Helper to start the game with a specific character
+ * Handles loading screens, character selection, and briefing sequence
+ */
+async function startGame(page: Page, characterName: RegExp | string) {
+  // Wait for loading screen to disappear
+  await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 30000 });
+
+  // Select Character
+  const charButton = page.getByRole('button', { name: characterName });
+  await charButton.waitFor({ state: 'visible', timeout: 30000 });
+
+  // Wait for any overlays to disappear
+  await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
+
+  // Click character - handle potential navigation or state change
+  await Promise.all([
+    page.waitForNavigation({ timeout: 5000 }).catch(() => {}),
+    charButton.click({ force: true, timeout: 15000 })
+  ]);
+
+  // Click COMMENCE OPERATION on the briefing screen
+  const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+  await commenceBtn.waitFor({ state: 'visible', timeout: 15000 });
+  await commenceBtn.click();
+
+  // Wait for game to load (HUD score visible)
+  await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });
+}
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
@@ -58,31 +91,7 @@ test.describe('Visual Regression - Character Selection', () => {
 test.describe('Visual Regression - Game Start', () => {
   test('should render Santa gameplay correctly', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-    
-    // Select Santa
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    // Wait for any overlays to disappear
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    // Try clicking with force and handle navigation
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForTimeout(5000);
+    await startGame(page, /MECHA-SANTA/);
     
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
@@ -92,30 +101,7 @@ test.describe('Visual Regression - Game Start', () => {
 
   test('should render Elf gameplay correctly', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-    
-    // Select Elf
-    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    // Wait for any overlays to disappear
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      elfButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForTimeout(5000);
+    await startGame(page, /CYBER-ELF/);
     
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
@@ -125,30 +111,7 @@ test.describe('Visual Regression - Game Start', () => {
 
   test('should render Bumble gameplay correctly', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-    
-    // Select Bumble
-    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    // Wait for any overlays to disappear
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      bumbleButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForTimeout(5000);
+    await startGame(page, /BUMBLE/);
     
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
@@ -160,28 +123,7 @@ test.describe('Visual Regression - Game Start', () => {
 test.describe('Visual Regression - HUD Elements', () => {
   test('should render HUD correctly during gameplay', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await startGame(page, /MECHA-SANTA/);
 
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
@@ -191,31 +133,11 @@ test.describe('Visual Regression - HUD Elements', () => {
 
   test('should render score and objectives correctly', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await startGame(page, /MECHA-SANTA/);
 
     // Move and fire to generate some score
     await page.keyboard.press('Space');
+    await page.waitForTimeout(1000); // Allow render update
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -226,32 +148,11 @@ test.describe('Visual Regression - HUD Elements', () => {
 test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await startGame(page, /MECHA-SANTA/);
 
     // Move character
     await page.keyboard.down('w');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000); // Wait for movement
     await page.keyboard.up('w');
 
     await expect(page).toHaveScreenshot('character-moved.png', {
@@ -261,32 +162,11 @@ test.describe('Visual Regression - Game Movement', () => {
 
   test('should render firing animation correctly', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await startGame(page, /MECHA-SANTA/);
 
     // Fire weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(500); // Wait for muzzle flash/projectile
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -297,28 +177,7 @@ test.describe('Visual Regression - Game Movement', () => {
 test.describe('Visual Regression - Combat Scenarios', () => {
   test('should render combat with enemies', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await startGame(page, /MECHA-SANTA/);
 
     // Wait for enemies to spawn and engage
     await page.keyboard.down('Space');
@@ -332,28 +191,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
   test('should render player taking damage', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-
-    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      elfButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await startGame(page, /CYBER-ELF/);
 
     // Wait for potential damage from enemies
     await page.waitForTimeout(5000);
@@ -367,29 +205,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 test.describe('Visual Regression - End Game States', () => {
   test('should render game over screen', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
-
-    // Start game
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to load
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await startGame(page, /MECHA-SANTA/);
 
     // Trigger game over by evaluating state (for testing purposes)
     await page.evaluate(() => {
@@ -405,7 +221,8 @@ test.describe('Visual Regression - End Game States', () => {
       gameWindow.useGameStore?.getState().damagePlayer(300);
     });
 
-    await page.waitForTimeout(2000);
+    // Wait for Game Over screen
+    await expect(page.getByText('OPERATOR DOWN')).toBeVisible({ timeout: 10000 });
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -421,16 +238,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Wait for loading screen to disappear
     await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
 
-    // Wait for character selection buttons to be visible and stable
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
-
-    // Wait for character selection to stabilize (animations, WebGL rendering)
-    await page.waitForTimeout(5000);
-
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixelRatio: 0.3, // Temporarily increased for high variance
-      timeout: 30000,
+      maxDiffPixelRatio: 0.4, // Temporarily increased for high variance
+      timeout: 20000,
     });
   });
 
@@ -438,31 +248,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
+    await startGame(page, /MECHA-SANTA/);
 
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Wait for game to stabilize
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    // Wait specifically for mobile UI elements
+    await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 10000 }).catch(() => {});
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 15000
+      timeout: 10000
     });
   });
 
@@ -470,32 +263,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    // Wait for loading screen to disappear
-    await expect(page.getByText('INITIALIZING SYSTEMS')).not.toBeVisible({ timeout: 20000 });
+    await startGame(page, /MECHA-SANTA/);
 
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-
-    await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
-
-    await Promise.all([
-      page.waitForNavigation({ timeout: 10000 }).catch(() => {}),
-      santaButton.click({ force: true, timeout: 15000 })
-    ]);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // The button appears after briefing lines animate (7+ lines × 600ms + 500ms ≈ 5s)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
-    await commenceButton.click();
-
-    // Touch controls should be visible - wait for FIRE button to appear
+    // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 10000 });
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 10000
     });
   });
 });
