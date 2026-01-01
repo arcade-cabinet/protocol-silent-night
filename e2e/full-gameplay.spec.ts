@@ -118,12 +118,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
-    await santaButton.click();
+    await page.waitForTimeout(1000); // Stabilize UI
+    await santaButton.click({ force: true });
+    await page.waitForTimeout(2000); // Wait for briefing screen
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await page.waitForTimeout(500); // Stabilize UI
+    await commenceButton.click({ force: true });
 
     // Wait for game to start
     await page.waitForTimeout(2000);

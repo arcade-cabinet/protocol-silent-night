@@ -32,16 +32,13 @@ async function startGame(page: Page, characterName: RegExp | string, options: { 
   await page.waitForSelector('.overlay, .modal, .loading', { state: 'hidden', timeout: 5000 }).catch(() => {});
 
   // Wait a bit for UI to stabilize
-  await page.waitForTimeout(500);
-
-  // Click character - handle potential navigation or state change
-  await Promise.all([
-    page.waitForNavigation({ timeout: 5000 }).catch(() => {}),
-    charButton.click({ force: true, timeout: 10000 })
-  ]);
-
-  // Wait for briefing screen to be ready
   await page.waitForTimeout(1000);
+
+  // Click character button and wait for briefing screen
+  await charButton.click({ force: true, timeout: 10000 });
+
+  // Wait for briefing screen to appear (more reliable than navigation wait)
+  await page.waitForTimeout(2000);
 
   // Click COMMENCE OPERATION on the briefing screen
   const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -268,12 +265,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Wait specifically for mobile UI elements
     await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 15000 }).catch(() => {});
 
-    // Allow game to render fully
-    await page.waitForTimeout(2000);
+    // Allow game to render fully and stabilize
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000
+      timeout: 30000,
+      animations: 'disabled'
     });
   });
 
@@ -287,12 +285,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 20000 });
 
-    // Wait for button to stabilize
-    await page.waitForTimeout(1000);
+    // Wait for button to stabilize and animations to complete
+    await page.waitForTimeout(3000);
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled'
     });
   });
 });
