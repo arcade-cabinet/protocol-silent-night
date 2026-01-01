@@ -36,16 +36,16 @@ export function LoadingScreen({ minDuration = 500 }: LoadingScreenProps) {
       });
     }, 100);
 
-    // Start fade out slightly before minDuration to allow CSS animation to complete
+    // Start fade out when minDuration is reached
     const fadeOutTimer = setTimeout(() => {
       setProgress(100); // Ensure progress is complete
       setIsFadingOut(true);
-    }, Math.max(0, minDuration - 100)); // Start fading 100ms before removal
+    }, minDuration);
 
-    // Hide after minimum duration + animation time
+    // Hide after fade out animation completes (300ms transition)
     const hideTimer = setTimeout(() => {
       setIsVisible(false);
-    }, minDuration + 500); // Give extra time for CSS animation to complete
+    }, minDuration + 300); // Match CSS transition duration
 
     return () => {
       clearInterval(intervalId);
@@ -58,8 +58,7 @@ export function LoadingScreen({ minDuration = 500 }: LoadingScreenProps) {
 
   return (
     <div
-      className={styles.screen}
-      style={{ pointerEvents: isFadingOut ? 'none' : 'auto' }}
+      className={`${styles.screen} ${isFadingOut ? styles.fadingOut : ''}`}
     >
       <div className={styles.content}>
         <h1 className={styles.title}>
