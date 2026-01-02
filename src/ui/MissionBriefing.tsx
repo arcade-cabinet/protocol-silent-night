@@ -44,6 +44,9 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
+  // Check if running in E2E test environment (outside effect to avoid recreating on every render)
+  const isE2E = typeof window !== 'undefined' && (window as any).__E2E_TESTING__;
+
   useEffect(() => {
     if (state !== 'BRIEFING') return;
 
@@ -51,18 +54,15 @@ export function MissionBriefing() {
     setCurrentLine(0);
     setShowButton(false);
 
-    // Check if running in E2E test environment
-    const isE2E = typeof window !== 'undefined' && (window as any).__E2E_TESTING__;
-
     // In E2E mode, skip animations and show everything immediately
     if (isE2E) {
-      // Use a microtask to ensure state reset completes first
-      Promise.resolve().then(() => {
+      // Use setTimeout to ensure state updates are batched and committed
+      const timeoutId = setTimeout(() => {
         setCurrentLine(briefingLines.length - 1);
         setShowButton(true);
-      });
+      }, 0);
       AudioManager.playSFX('ui_click');
-      return;
+      return () => clearTimeout(timeoutId);
     }
 
     // Play briefing sound
@@ -86,7 +86,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines]);
+  }, [state, briefingLines, isE2E]);
 
   if (state !== 'BRIEFING') return null;
 
