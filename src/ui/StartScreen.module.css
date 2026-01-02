@@ -65,11 +65,16 @@
 }
 
 .classCard:hover,
-.classCard:focus {
+.classCard:focus-visible {
   border-color: #00ffcc;
   background: rgba(0, 255, 200, 0.05);
   transform: translateY(-10px);
   box-shadow: 0 10px 30px rgba(0, 255, 200, 0.1);
+  outline: 2px solid #00ffcc;
+  outline-offset: 4px;
+}
+
+.classCard:focus:not(:focus-visible) {
   outline: none;
 }
 
