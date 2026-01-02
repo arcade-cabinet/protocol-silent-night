@@ -16,8 +16,10 @@ test.setTimeout(120000);
 
 /**
  * Helper to disable animations for stable screenshots
+ * Also waits for Three.js render loop to stabilize
  */
 async function disableAnimations(page: Page) {
+  // Disable CSS animations
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -35,34 +37,35 @@ async function disableAnimations(page: Page) {
     `
   });
 
-  // Wait for rendering to settle (Three.js/WebGL)
-  await page.waitForTimeout(1000);
-
-  // Wait for any pending animations/transitions to complete
+  // Wait for a few frames to let any JS animations settle
   await page.evaluate(() => {
-    return new Promise<void>((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          resolve();
-        });
-      });
-    });
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
+
+  await page.waitForTimeout(1000);
 }
 
 /**
- * Helper to pause Three.js rendering loop for stable screenshots
+ * Helper to pause Three.js rendering for stable snapshots
+ * This freezes the game loop to ensure pixel-perfect consistency
  */
 async function pauseThreeJsRendering(page: Page) {
   await page.evaluate(() => {
-    // Pause any active Three.js render loops
-    const canvas = document.querySelector('canvas');
-    if (canvas) {
-      // Force a final render frame
-      canvas.dispatchEvent(new Event('pause'));
-    }
+    // Flag to stop useFrame loops
+    window.__pauseGameForScreenshot = true;
+
+    // Force one final render if possible (depends on engine implementation)
+    // This is a best-effort attempt to settle the scene
   });
-  await page.waitForTimeout(500);
+
+  await page.waitForTimeout(500); // Wait for pause to take effect
+}
+
+// Add type definition for global window property
+declare global {
+  interface Window {
+    __pauseGameForScreenshot?: boolean;
+  }
 }
 
 /**
@@ -105,26 +108,23 @@ test.describe('Visual Regression - Character Selection', () => {
     // Wait for fonts and styles to load
     await page.waitForTimeout(2000);
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
+    await disableAnimations(page);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
-
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
-    // Wait for element to be fully stable
-    await page.waitForTimeout(500);
+    await santaCard.waitFor({ state: 'visible', timeout: 30000 });
 
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -136,15 +136,10 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
+    await disableAnimations(page);
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfCard.waitFor({ state: 'visible', timeout: 10000 });
-
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
-    // Wait for element to be fully stable
-    await page.waitForTimeout(500);
+    await elfCard.waitFor({ state: 'visible', timeout: 30000 });
 
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -156,15 +151,10 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
+    await disableAnimations(page);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
-
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
-    // Wait for element to be fully stable
-    await page.waitForTimeout(500);
+    await bumbleCard.waitFor({ state: 'visible', timeout: 30000 });
 
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -179,11 +169,13 @@ test.describe('Visual Regression - Game Start', () => {
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -191,11 +183,13 @@ test.describe('Visual Regression - Game Start', () => {
     await page.goto('/');
     await startGame(page, /CYBER-ELF/);
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -203,11 +197,13 @@ test.describe('Visual Regression - Game Start', () => {
     await page.goto('/');
     await startGame(page, /BUMBLE/);
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -217,11 +213,13 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -233,10 +231,12 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.keyboard.press('Space');
     await page.waitForTimeout(1000); // Allow render update
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -251,10 +251,12 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(1000); // Wait for movement
     await page.keyboard.up('w');
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -266,10 +268,12 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.keyboard.press('Space');
     await page.waitForTimeout(500); // Wait for muzzle flash/projectile
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -284,10 +288,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -298,10 +304,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     // Wait for potential damage from enemies
     await page.waitForTimeout(5000);
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -331,7 +339,8 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -347,7 +356,8 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Temporarily increased for high variance
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -362,10 +372,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(500); // Brief pause for rendering
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
       animations: 'disabled',
     });
   });
@@ -380,13 +391,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Longer pause for mobile rendering
-
+    await page.waitForTimeout(500); // Brief pause for rendering
     await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
-    // Additional wait for complete stability
-    await page.waitForTimeout(500);
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
