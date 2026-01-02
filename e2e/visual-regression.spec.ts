@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
-const SCREENSHOT_TIMEOUT = 30000; // 30s timeout for screenshots due to continuous game loop rendering
+const SCREENSHOT_TIMEOUT = 30000; // 30s timeout for screenshots to allow for stabilization
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
@@ -296,12 +296,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000); // Increased wait for full render
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Increased threshold for mobile specific rendering variances
       animations: 'disabled',
-      timeout: 30000, // Increased timeout for screenshot
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -311,6 +311,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
+    // Note: scrollIntoViewIfNeeded is removed based on feedback that it was causing timeouts
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 }); // Increased timeout and force click
@@ -333,6 +334,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
+    // Note: scrollIntoViewIfNeeded is removed based on feedback that it was causing timeouts
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 });

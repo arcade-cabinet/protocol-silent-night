@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
-const SCREENSHOT_TIMEOUT = 30000; // 30s timeout for screenshots due to continuous game loop rendering
+const SCREENSHOT_TIMEOUT = 30000;
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
