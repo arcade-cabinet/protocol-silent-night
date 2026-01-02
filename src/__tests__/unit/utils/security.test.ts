@@ -47,7 +47,6 @@ describe('Security Utils', () => {
     });
 
     it('should return null for data missing security fields', () => {
-      // biome-ignore lint/suspicious/noExplicitAny: testing invalid input type
       const result = unwrapWithChecksum({ data: testData } as any);
       expect(result).toBeNull();
     });
