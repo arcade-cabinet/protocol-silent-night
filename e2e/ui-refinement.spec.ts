@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * UI Component Refinement Tests
@@ -11,6 +11,22 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
+
+/**
+ * Helper to disable all CSS animations and transitions for consistent screenshots
+ */
+async function disableAnimations(page: Page) {
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+    `
+  });
+}
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
@@ -229,10 +245,17 @@ test.describe('UI Component Refinement', () => {
     test('should match menu screen snapshot', async ({ page }) => {
       await page.waitForSelector('h1', { timeout: 5000 });
 
+      // Wait for animations to settle
+      await page.waitForTimeout(2000);
+
+      // Disable animations for consistent screenshots
+      await disableAnimations(page);
+
       // Take snapshot for visual regression
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
           maxDiffPixels: 100,
+          timeout: 20000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -244,9 +267,16 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("MECHA-SANTA")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
+      // Wait for animations to settle
+      await page.waitForTimeout(2000);
+
+      // Disable animations for consistent screenshots
+      await disableAnimations(page);
+
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
           maxDiffPixels: 100,
+          timeout: 20000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });

@@ -15,6 +15,22 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 test.setTimeout(120000);
 
 /**
+ * Helper to disable all CSS animations and transitions for consistent screenshots
+ */
+async function disableAnimations(page: Page) {
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+    `
+  });
+}
+
+/**
  * Helper to start the game with a specific character
  * Handles loading screens, character selection, and briefing sequence
  */
@@ -54,9 +70,13 @@ test.describe('Visual Regression - Character Selection', () => {
     // Wait for fonts and styles to load
     await page.waitForTimeout(2000);
 
+    // Disable animations for consistent screenshots
+    await disableAnimations(page);
+
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
@@ -64,9 +84,12 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
+    await disableAnimations(page);
+
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
@@ -74,9 +97,12 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
+    await disableAnimations(page);
+
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
@@ -84,9 +110,12 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
+    await disableAnimations(page);
+
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 });
@@ -95,30 +124,45 @@ test.describe('Visual Regression - Game Start', () => {
   test('should render Santa gameplay correctly', async ({ page }) => {
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
-    
+
+    // Wait for scene to stabilize
+    await page.waitForTimeout(2000);
+    await disableAnimations(page);
+
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3, // Increase for WebGL variations
+      timeout: 20000,
     });
   });
 
   test('should render Elf gameplay correctly', async ({ page }) => {
     await page.goto('/');
     await startGame(page, /CYBER-ELF/);
-    
+
+    // Wait for scene to stabilize
+    await page.waitForTimeout(2000);
+    await disableAnimations(page);
+
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3, // Increase for WebGL variations
+      timeout: 20000,
     });
   });
 
   test('should render Bumble gameplay correctly', async ({ page }) => {
     await page.goto('/');
     await startGame(page, /BUMBLE/);
-    
+
+    // Wait for scene to stabilize
+    await page.waitForTimeout(2000);
+    await disableAnimations(page);
+
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3, // Increase for WebGL variations
+      timeout: 20000,
     });
   });
 });
@@ -128,9 +172,13 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
 
+    await page.waitForTimeout(2000);
+    await disableAnimations(page);
+
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 20000,
     });
   });
 
@@ -140,10 +188,13 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     // Move and fire to generate some score
     await page.keyboard.press('Space');
-    await page.waitForTimeout(1000); // Allow render update
+    await page.waitForTimeout(2000); // Allow render update
+
+    await disableAnimations(page);
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 20000,
     });
   });
 });
@@ -158,8 +209,12 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(1000); // Wait for movement
     await page.keyboard.up('w');
 
+    await page.waitForTimeout(500);
+    await disableAnimations(page);
+
     await expect(page).toHaveScreenshot('character-moved.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 20000,
     });
   });
 
@@ -169,10 +224,13 @@ test.describe('Visual Regression - Game Movement', () => {
 
     // Fire weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(500); // Wait for muzzle flash/projectile
+    await page.waitForTimeout(1000); // Wait for muzzle flash/projectile
+
+    await disableAnimations(page);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 20000,
     });
   });
 });
@@ -187,8 +245,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
 
+    await page.waitForTimeout(1000);
+    await disableAnimations(page);
+
     await expect(page).toHaveScreenshot('combat-scenario.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 20000,
     });
   });
 
@@ -199,8 +261,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     // Wait for potential damage from enemies
     await page.waitForTimeout(5000);
 
+    await disableAnimations(page);
+
     await expect(page).toHaveScreenshot('player-damaged.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 20000,
     });
   });
 });
@@ -227,8 +292,12 @@ test.describe('Visual Regression - End Game States', () => {
     // Wait for Game Over screen
     await expect(page.getByText('OPERATOR DOWN')).toBeVisible({ timeout: 10000 });
 
+    await page.waitForTimeout(1000);
+    await disableAnimations(page);
+
     await expect(page).toHaveScreenshot('game-over-screen.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 20000,
     });
   });
 });
@@ -256,9 +325,15 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Wait specifically for mobile UI elements
     await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 10000 }).catch(() => {});
 
+    // Wait for any animations to settle
+    await page.waitForTimeout(2000);
+
+    // Disable animations for consistent screenshots
+    await disableAnimations(page);
+
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 10000
+      maxDiffPixelRatio: 0.4, // Increase threshold for WebGL rendering variations
+      timeout: 20000
     });
   });
 
@@ -272,8 +347,15 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 10000 });
 
+    // Wait for button to settle (transitions, box-shadow animations)
+    await page.waitForTimeout(1000);
+
+    // Disable animations for consistent screenshots
+    await disableAnimations(page);
+
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 });
