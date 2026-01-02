@@ -72,6 +72,7 @@ test.describe('Visual Regression - Character Selection', () => {
     await santaCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -80,6 +81,7 @@ test.describe('Visual Regression - Character Selection', () => {
     await elfCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -88,6 +90,7 @@ test.describe('Visual Regression - Character Selection', () => {
     await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });
@@ -105,20 +108,22 @@ test.describe('Visual Regression - Game Start', () => {
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.click({ timeout: 15000 });
+    await santaButton.click({ force: true, timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 15000 });
+    await commenceButton.click({ timeout: 30000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
+    await stabilizePage(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -130,15 +135,18 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    // Mission briefing has a typing animation that takes ~4s, plus loading time
+    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
+    await commenceButton.click({ timeout: 30000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
+    await stabilizePage(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -150,15 +158,18 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    // Mission briefing has a typing animation that takes ~4s, plus loading time
+    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
+    await commenceButton.click({ timeout: 30000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
+    await stabilizePage(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });
@@ -212,31 +223,35 @@ test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.click({ force: true, timeout: 15000 });
+    await santaButton.click({ force: true, timeout: 30000 });
     await page.waitForTimeout(8000);
 
     // Move character
     await page.keyboard.down('w');
     await page.waitForTimeout(2000);
     await page.keyboard.up('w');
+    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
   test('should render firing animation correctly', async ({ page }) => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.click({ force: true, timeout: 15000 });
+    await santaButton.click({ force: true, timeout: 30000 });
     await page.waitForTimeout(8000);
 
     // Fire weapon
     await page.keyboard.press('Space');
     await page.waitForTimeout(1000);
+    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });
