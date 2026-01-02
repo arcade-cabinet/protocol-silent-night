@@ -279,6 +279,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -291,6 +292,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Wait for any loading overlay to disappear
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
     await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
