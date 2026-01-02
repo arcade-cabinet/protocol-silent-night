@@ -299,6 +299,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await waitForGameReady(page);
 
     await selectCharacter(page, 'MECHA-SANTA', true);
+    await commenceOperation(page);
 
     // Wait for game to initialize
     await page.waitForLoadState('networkidle');
@@ -315,6 +316,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await waitForGameReady(page);
 
     await selectCharacter(page, 'MECHA-SANTA', true);
+    await commenceOperation(page);
     await page.waitForTimeout(10000);
 
     // Touch controls should be visible
