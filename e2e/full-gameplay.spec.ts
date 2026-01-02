@@ -737,9 +737,9 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
-    await commenceButton.click();
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton2.waitFor({ state: 'visible', timeout: 10000 });
+    await commenceButton2.click();
 
     await page.waitForTimeout(2000);
 
