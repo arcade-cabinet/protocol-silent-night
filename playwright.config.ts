@@ -50,8 +50,8 @@ export default defineConfig({
     // Screenshot comparison settings
     toHaveScreenshot: {
       timeout: 120000,
-      // Maximum number of pixels that can differ
-      maxDiffPixels: 100,
+      // Maximum number of pixels that can differ (increased for CI rendering differences)
+      maxDiffPixels: 150,
       // Animation handling
       animations: 'disabled',
       // CSS media features
