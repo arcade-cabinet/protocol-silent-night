@@ -488,7 +488,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 30000,
     });
-    const redeployButton = page.getByRole('button', { name: /PLAY AGAIN/ });
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
     await expect(redeployButton).toBeVisible({ timeout: 30000 });
   });
 
@@ -779,7 +779,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    const redeployButton = page.getByRole('button', { name: /PLAY AGAIN/ });
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
     await redeployButton.waitFor({ state: 'visible', timeout: 30000 });
     await redeployButton.evaluate((e) => e.click());
 

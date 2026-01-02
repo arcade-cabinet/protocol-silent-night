@@ -58,7 +58,6 @@ test.describe('Character Selection & Stats', () => {
 
       // Select character
       await charButton.evaluate((e) => e.click());
-      await page.waitForTimeout(500); // Allow state transition
 
       // Should show mission briefing
       await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
@@ -115,14 +114,10 @@ test.describe('Weapon Mechanics', () => {
     );
     expect(initialBullets).toBe(0);
 
-    // Fire once - trigger via store (more reliable than keyboard in headless mode)
-    await page.evaluate(() => {
-      (window as any).useGameStore.getState().setFiring(true);
-    });
-    await page.waitForTimeout(200); // Allow bullet to spawn
-    await page.evaluate(() => {
-      (window as any).useGameStore.getState().setFiring(false);
-    });
+    // Fire once - ensure trigger happens
+    await page.keyboard.down('Space');
+    await page.waitForTimeout(200); // Increased press time
+    await page.keyboard.up('Space');
 
     // Should spawn exactly 1 bullet
     await page.waitForFunction(
@@ -144,14 +139,10 @@ test.describe('Weapon Mechanics', () => {
 
     await page.waitForTimeout(2000);
 
-    // Fire once - trigger via store (more reliable than keyboard in headless mode)
-    await page.evaluate(() => {
-      (window as any).useGameStore.getState().setFiring(true);
-    });
-    await page.waitForTimeout(200); // Allow bullets to spawn
-    await page.evaluate(() => {
-      (window as any).useGameStore.getState().setFiring(false);
-    });
+    // Fire once - ensure trigger happens
+    await page.keyboard.down('Space');
+    await page.waitForTimeout(200); // Increased press time
+    await page.keyboard.up('Space');
 
     // Should spawn 3 bullets
     await page.waitForFunction(
