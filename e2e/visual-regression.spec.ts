@@ -65,16 +65,8 @@ async function pauseThreeJsRendering(page: Page) {
 declare global {
   interface Window {
     __pauseGameForScreenshot?: boolean;
-    __E2E_TEST__?: boolean;
   }
 }
-
-// Set deterministic RNG flag before each test
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__E2E_TEST__ = true;
-  });
-});
 
 /**
  * Helper to start the game with a specific character
@@ -378,9 +370,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Wait specifically for mobile UI elements
     await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 10000 }).catch(() => {});
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Brief pause for rendering
-    await disableAnimations(page);
     await pauseThreeJsRendering(page);
+    await page.waitForTimeout(500); // Add stability wait
+    await disableAnimations(page);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -399,8 +391,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Brief pause for rendering
     await disableAnimations(page);
+    await page.waitForTimeout(300); // Add stability wait
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,

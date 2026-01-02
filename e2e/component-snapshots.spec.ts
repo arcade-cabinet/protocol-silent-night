@@ -9,20 +9,6 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2;
 
-// Add type definition for global window property
-declare global {
-  interface Window {
-    __E2E_TEST__?: boolean;
-  }
-}
-
-// Set deterministic RNG flag before each test
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__E2E_TEST__ = true;
-  });
-});
-
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
