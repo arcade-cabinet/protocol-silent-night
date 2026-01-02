@@ -104,7 +104,8 @@ test.describe('UI Component Refinement', () => {
       // Click MECHA-SANTA
       const mechBtn = page.locator('button:has-text("MECHA-SANTA")');
       await waitForOverlays(page);
-      await mechBtn.evaluate((e: HTMLElement) => e.click());
+      await mechBtn.waitFor({ state: 'visible', timeout: 30000 });
+      await mechBtn.click();
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -133,7 +134,8 @@ test.describe('UI Component Refinement', () => {
       // Select a mech
       const mechBtn = page.locator('button:has-text("CYBER-ELF")');
       await waitForOverlays(page);
-      await mechBtn.evaluate((e: HTMLElement) => e.click());
+      await mechBtn.waitFor({ state: 'visible', timeout: 30000 });
+      await mechBtn.click();
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
@@ -156,7 +158,8 @@ test.describe('UI Component Refinement', () => {
         // Click mech
         const mechBtn = page.locator(`button:has-text("${mech.name}")`);
         await waitForOverlays(page);
-        await mechBtn.evaluate((e: HTMLElement) => e.click());
+        await mechBtn.waitFor({ state: 'visible', timeout: 30000 });
+        await mechBtn.click();
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
@@ -184,7 +187,8 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       const mechBtn = page.locator('button:has-text("MECHA-SANTA")');
       await waitForOverlays(page);
-      await mechBtn.evaluate((e: HTMLElement) => e.click());
+      await mechBtn.waitFor({ state: 'visible', timeout: 30000 });
+      await mechBtn.click();
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
@@ -192,7 +196,7 @@ test.describe('UI Component Refinement', () => {
       // Click commence
       const commenceBtn = page.locator('button:has-text("COMMENCE OPERATION")');
       await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceBtn.evaluate((e: HTMLElement) => e.click());
+      await commenceBtn.click();
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -212,13 +216,14 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       const mechBtn = page.locator('button:has-text("CYBER-ELF")');
       await waitForOverlays(page);
-      await mechBtn.evaluate((e: HTMLElement) => e.click());
+      await mechBtn.waitFor({ state: 'visible', timeout: 30000 });
+      await mechBtn.click();
 
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
       const commenceBtn = page.locator('button:has-text("COMMENCE OPERATION")');
       await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceBtn.evaluate((e: HTMLElement) => e.click());
+      await commenceBtn.click();
 
       // Wait for HUD
       await page.waitForTimeout(2000);
@@ -272,7 +277,8 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       const mechBtn = page.locator('button:has-text("MECHA-SANTA")');
       await waitForOverlays(page);
-      await mechBtn.evaluate((e: HTMLElement) => e.click());
+      await mechBtn.waitFor({ state: 'visible', timeout: 30000 });
+      await mechBtn.click();
 
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
