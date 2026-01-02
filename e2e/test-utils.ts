@@ -81,6 +81,10 @@ export async function waitForLoadingScreen(page: Page, timeout = 20000) {
     throw new Error('Main UI elements not detected after loading screen');
   }
 
+  // Extra stabilization wait to ensure all event listeners are attached and page is fully interactive
+  await page.waitForTimeout(500);
+  console.log('[waitForLoadingScreen] Extra stabilization wait complete');
+
   console.log('[waitForLoadingScreen] Complete!');
 }
 

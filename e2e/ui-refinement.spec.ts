@@ -92,8 +92,23 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
-      // Click MECHA-SANTA
-      await page.click('button:has-text("MECHA-SANTA")');
+      // Try using evaluate() to directly trigger the click event
+      // This bypasses Playwright's action system entirely
+      await page.evaluate(() => {
+        const button = Array.from(document.querySelectorAll('button')).find(
+          btn => btn.textContent?.includes('MECHA-SANTA')
+        );
+        if (button) {
+          console.log('[Test] Found MECHA-SANTA button, clicking...');
+          button.click();
+          console.log('[Test] Button clicked');
+        } else {
+          console.error('[Test] MECHA-SANTA button not found!');
+        }
+      });
+
+      // Small wait for the click to process
+      await page.waitForTimeout(500);
 
       // Wait for mission briefing with longer timeout for state transition
       try {

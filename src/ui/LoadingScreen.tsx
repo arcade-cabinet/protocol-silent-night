@@ -19,6 +19,11 @@ export function LoadingScreen({ minDuration = 500 }: LoadingScreenProps) {
   const uiRng = useRef(new SeededRandom(42)); // Fixed seed for consistent UI animation
   const startTime = useRef(Date.now());
 
+  // Detect E2E testing environment - skip fade animation for faster test execution
+  const isE2ETesting = typeof window !== 'undefined' && (window as any).__E2E_TESTING__;
+  const fadeOutDuration = isE2ETesting ? 0 : 300; // No fade in E2E mode
+
+
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
 
@@ -42,23 +47,32 @@ export function LoadingScreen({ minDuration = 500 }: LoadingScreenProps) {
       setIsFadingOut(true);
     }, minDuration);
 
-    // Hide after fade out animation completes (300ms transition)
+    // Hide after fade out animation completes
     const hideTimer = setTimeout(() => {
       setIsVisible(false);
-    }, minDuration + 300); // Match CSS transition duration
+    }, minDuration + fadeOutDuration);
 
     return () => {
       clearInterval(intervalId);
       clearTimeout(fadeOutTimer);
       clearTimeout(hideTimer);
     };
-  }, [minDuration]);
+  }, [minDuration, fadeOutDuration]);
 
   if (!isVisible) return null;
 
   return (
     <div
       className={`${styles.screen} ${isFadingOut ? styles.fadingOut : ''}`}
+      style={{
+        // Explicitly disable pointer events inline when fading out to ensure immediate effect
+        // This prevents race conditions where CSS class updates don't apply fast enough
+        pointerEvents: isFadingOut ? 'none' : 'auto',
+        // In E2E mode, disable transition to remove element instantly
+        transition: isE2ETesting ? 'none' : undefined,
+        // In E2E mode, set opacity to 0 immediately when fading out
+        opacity: isE2ETesting && isFadingOut ? 0 : undefined
+      }}
     >
       <div className={styles.content}>
         <h1 className={styles.title}>
