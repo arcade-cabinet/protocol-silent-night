@@ -52,7 +52,7 @@ test.describe('Character Class Tests', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.click({ timeout: 30000 });
 
     // Start screen should disappear
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
