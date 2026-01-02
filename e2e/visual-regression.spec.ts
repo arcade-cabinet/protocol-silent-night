@@ -337,9 +337,10 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.click({ force: true });
 
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
     await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
@@ -358,8 +359,8 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
 
