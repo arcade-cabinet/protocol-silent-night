@@ -19,17 +19,17 @@ test.describe('Character Selection & Stats', () => {
   const characters = [
     {
       name: 'MECHA-SANTA',
-      role: 'TANK',
+      role: 'Heavy Siege / Tank',
       hp: '300',
-      speed: 'SLOW',
+      speed: '9',
       weapon: 'COAL CANNON',
       description: 'Heavy armor, slow movement. Fires massive coal projectiles.'
     },
     {
       name: 'CYBER-ELF',
-      role: 'SCOUT',
+      role: 'Recon / Scout',
       hp: '100',
-      speed: 'FAST',
+      speed: '18',
       weapon: 'PLASMA SMG',
       description: 'Low HP, high mobility. Rapid-fire plasma weapon.'
     },
@@ -37,7 +37,7 @@ test.describe('Character Selection & Stats', () => {
       name: 'THE BUMBLE',
       role: 'Crowd Control / Bruiser',
       hp: '200',
-      speed: 'MEDIUM',
+      speed: '12',
       weapon: 'STAR THROWER',
       description: 'Balanced stats. Fires spread pattern ninja stars.'
     }
