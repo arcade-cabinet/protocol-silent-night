@@ -332,6 +332,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
 
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     // Wait for game to initialize
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(10000);
@@ -341,6 +346,7 @@ test.describe('Visual Regression - Responsive Design', () => {
       threshold: 0.2, // Relaxed color threshold
       fullPage: true, // Ensure full rendering
       scale: 'css', // Use CSS pixel scaling
+      timeout: 30000, // Increased timeout for screenshot comparison
     });
   });
 
@@ -356,6 +362,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     await page.waitForTimeout(10000);
 
     // Touch controls should be visible
@@ -365,6 +377,7 @@ test.describe('Visual Regression - Responsive Design', () => {
       maxDiffPixelRatio: 0.5, // Increased threshold for mobile rendering variance
       threshold: 0.2, // Relaxed color threshold
       scale: 'css', // Use CSS pixel scaling
+      timeout: 30000, // Increased timeout for screenshot comparison
     });
   });
 });
