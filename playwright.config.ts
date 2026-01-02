@@ -51,8 +51,7 @@ export default defineConfig({
     toHaveScreenshot: {
       timeout: 120000,
       // Maximum number of pixels that can differ
-      // Increased to account for font rendering variations across environments
-      maxDiffPixels: 200,
+      maxDiffPixels: 100,
       // Animation handling
       animations: 'disabled',
       // CSS media features
