@@ -10,6 +10,7 @@
   justify-content: center;
   z-index: 1000;
   animation: fadeOut 0.5s ease-out 1.4s forwards;
+  /* Allow clicks to pass through immediately while fading */
   pointer-events: none;
 }
 
