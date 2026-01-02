@@ -16,13 +16,12 @@ export function LoadingScreen() {
     // Only show during initial load or explicit loading states
     if (state !== 'MENU' && state !== 'LOADING') {
       const animationDuration = 500; // CSS transition duration
-      const totalDuration = Math.max(minDuration, 2000); // Ensure at least 2s for animation to complete
 
       const timer = setTimeout(() => {
         setVisible(false);
         // Remove from DOM after fade out animation completes
         setTimeout(() => setMounted(false), animationDuration);
-      }, totalDuration);
+      }, animationDuration);
 
       return () => clearTimeout(timer);
     }
