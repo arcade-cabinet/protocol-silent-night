@@ -64,13 +64,21 @@
   clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
 }
 
-.classCard:hover,
-.classCard:focus {
+.classCard:hover {
   border-color: #00ffcc;
   background: rgba(0, 255, 200, 0.05);
   transform: translateY(-10px);
   box-shadow: 0 10px 30px rgba(0, 255, 200, 0.1);
   outline: none;
+}
+
+.classCard:focus-visible {
+  border-color: #00ffcc;
+  background: rgba(0, 255, 200, 0.05);
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(0, 255, 200, 0.1);
+  outline: 2px solid #00ffcc;
+  outline-offset: 4px;
 }
 
 .cardTitle {
