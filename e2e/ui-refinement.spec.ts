@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * UI Component Refinement Tests
@@ -11,6 +11,57 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
+
+/**
+ * Helper to disable animations for stable screenshots
+ */
+async function disableAnimations(page: Page) {
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        transition-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-delay: 0s !important;
+        animation-play-state: paused !important;
+        animation-iteration-count: 1 !important;
+      }
+      *:hover {
+        transform: none !important;
+        transition: none !important;
+      }
+    `
+  });
+
+  // Wait for rendering to settle (Three.js/WebGL)
+  await page.waitForTimeout(1000);
+
+  // Wait for any pending animations/transitions to complete
+  await page.evaluate(() => {
+    return new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
+  });
+}
+
+/**
+ * Helper to pause Three.js rendering loop for stable screenshots
+ */
+async function pauseThreeJsRendering(page: Page) {
+  await page.evaluate(() => {
+    // Pause any active Three.js render loops
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      // Force a final render frame
+      canvas.dispatchEvent(new Event('pause'));
+    }
+  });
+  await page.waitForTimeout(500);
+}
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
@@ -229,10 +280,15 @@ test.describe('UI Component Refinement', () => {
     test('should match menu screen snapshot', async ({ page }) => {
       await page.waitForSelector('h1', { timeout: 5000 });
 
+      await disableAnimations(page);
+      await pauseThreeJsRendering(page);
+
       // Take snapshot for visual regression
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
           maxDiffPixels: 100,
+          animations: 'disabled',
+          timeout: 30000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -244,9 +300,14 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("MECHA-SANTA")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
+      await disableAnimations(page);
+      await pauseThreeJsRendering(page);
+
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
           maxDiffPixels: 100,
+          animations: 'disabled',
+          timeout: 30000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });

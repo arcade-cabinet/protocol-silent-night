@@ -34,6 +34,35 @@ async function disableAnimations(page: Page) {
       }
     `
   });
+
+  // Wait for rendering to settle (Three.js/WebGL)
+  await page.waitForTimeout(1000);
+
+  // Wait for any pending animations/transitions to complete
+  await page.evaluate(() => {
+    return new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          resolve();
+        });
+      });
+    });
+  });
+}
+
+/**
+ * Helper to pause Three.js rendering loop for stable screenshots
+ */
+async function pauseThreeJsRendering(page: Page) {
+  await page.evaluate(() => {
+    // Pause any active Three.js render loops
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      // Force a final render frame
+      canvas.dispatchEvent(new Event('pause'));
+    }
+  });
+  await page.waitForTimeout(500);
 }
 
 /**
@@ -87,36 +116,60 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    await disableAnimations(page);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
+
+    // Wait for element to be fully stable
+    await page.waitForTimeout(500);
+
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    await disableAnimations(page);
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfCard.waitFor({ state: 'visible', timeout: 10000 });
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
+
+    // Wait for element to be fully stable
+    await page.waitForTimeout(500);
+
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    await disableAnimations(page);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
+
+    // Wait for element to be fully stable
+    await page.waitForTimeout(500);
+
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -327,8 +380,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Brief pause for rendering
+    await page.waitForTimeout(1000); // Longer pause for mobile rendering
+
     await disableAnimations(page);
+    await pauseThreeJsRendering(page);
+
+    // Additional wait for complete stability
+    await page.waitForTimeout(500);
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
