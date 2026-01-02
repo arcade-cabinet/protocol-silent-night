@@ -147,7 +147,7 @@ export function InputControls() {
     setFiring(false);
   }, [setFiring]);
 
-  if (state === 'MENU' || state === 'BRIEFING' || state === 'WIN' || state === 'GAME_OVER' || state === 'LEVEL_UP') {
+  if (state === 'MENU' || state === 'BRIEFING' || state === 'WIN' || state === 'GAME_OVER') {
     return null;
   }
 
