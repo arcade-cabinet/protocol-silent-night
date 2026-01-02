@@ -9,19 +9,42 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2;
 
+// Screenshot timeout to accommodate slow rendering in CI
+const SCREENSHOT_TIMEOUT = 30000;
+
+// Wait for WebGL canvas to be stable and ready for screenshots
+const waitForCanvasStable = async (page: any) => {
+  await page.waitForFunction(() => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return false;
+
+    // Check if canvas has rendered content
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    return gl !== null && canvas.width > 0 && canvas.height > 0;
+  }, { timeout: 15000 }).catch(() => {});
+
+  // Additional wait for rendering to stabilize
+  await page.waitForTimeout(1500);
+};
+
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle').catch(() => {});
     await page.waitForTimeout(3000);
 
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceBtn.click();
 
     await page.waitForTimeout(5000);
+    await waitForCanvasStable(page);
 
     // Focus on character by centering view
     await page.evaluate(() => {
@@ -34,40 +57,53 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should render Elf character model', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle').catch(() => {});
     await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceBtn.click();
 
     await page.waitForTimeout(5000);
+    await waitForCanvasStable(page);
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should render Bumble character model', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle').catch(() => {});
     await page.waitForTimeout(3000);
 
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceBtn.click();
 
     await page.waitForTimeout(5000);
+    await waitForCanvasStable(page);
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });

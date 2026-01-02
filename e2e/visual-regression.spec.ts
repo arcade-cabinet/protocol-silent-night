@@ -14,6 +14,9 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 // Global timeout for this file to accommodate slow CI rendering
 test.setTimeout(120000);
 
+// Screenshot timeout to accommodate slow rendering in CI
+const SCREENSHOT_TIMEOUT = 30000;
+
 const waitForOverlays = async (page: any) => {
   await page.waitForLoadState('networkidle').catch(() => {});
 
@@ -24,6 +27,21 @@ const waitForOverlays = async (page: any) => {
     const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
     return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
   }, { timeout: 10000 }).catch(() => {});
+};
+
+// Wait for WebGL canvas to be stable and ready for screenshots
+const waitForCanvasStable = async (page: any) => {
+  await page.waitForFunction(() => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return false;
+
+    // Check if canvas has rendered content
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    return gl !== null && canvas.width > 0 && canvas.height > 0;
+  }, { timeout: 15000 }).catch(() => {});
+
+  // Additional wait for rendering to stabilize
+  await page.waitForTimeout(1500);
 };
 
 test.describe('Visual Regression - Character Selection', () => {
