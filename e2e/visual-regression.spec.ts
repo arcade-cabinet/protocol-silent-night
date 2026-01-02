@@ -63,7 +63,8 @@ async function startGame(page: Page, characterName: RegExp | string) {
     page.getByRole('button', { name: /COMMENCE OPERATION/i })
   );
   await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-  await commenceBtn.click();
+  // Force click to bypass any potential overlays that might still be fading
+  await commenceBtn.click({ force: true, timeout: 30000 });
 
   // Wait for game to load (HUD score visible)
   await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });

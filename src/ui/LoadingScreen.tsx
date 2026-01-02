@@ -15,14 +15,18 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Simulate loading progress
+    // Simulate loading progress with deterministic linear progression
+    // This ensures predictable timing for CI tests
+    const steps = minDuration / 100; // Number of 100ms intervals
+    const increment = 100 / steps; // Progress per interval
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        return prev + Math.random() * 15;
+        return Math.min(prev + increment, 100);
       });
     }, 100);
 
