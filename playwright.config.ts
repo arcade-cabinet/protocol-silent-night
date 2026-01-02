@@ -53,8 +53,6 @@ export default defineConfig({
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
-      // Use maxDiffPixelRatio in tests instead of absolute pixel count
-      // to account for WebGL rendering variations across environments
     },
   },
   // Configure projects for major browsers
