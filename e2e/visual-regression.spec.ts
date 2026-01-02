@@ -259,14 +259,8 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
-
-    // Wait for rendering to stabilize (WebGL/CSS animations)
-    await page.waitForTimeout(500);
-
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 120000, // Increased timeout for screenshot comparison
     });
   });
 });
