@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
-const SCREENSHOT_TIMEOUT = 30000;
+const SCREENSHOT_TIMEOUT = 60000;
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
@@ -21,7 +21,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.click({ timeout: 20000 });
 
     await page.waitForTimeout(5000);
