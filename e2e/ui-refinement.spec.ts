@@ -120,6 +120,9 @@ test.describe('UI Component Refinement', () => {
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
+      // Wait for briefing animation to complete (7 lines × 600ms + 500ms delay = ~4700ms)
+      await page.waitForTimeout(5000);
+
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
       await expect(opButton).toBeVisible();
@@ -139,6 +142,9 @@ test.describe('UI Component Refinement', () => {
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+
+        // Wait for briefing content to fully appear
+        await page.waitForTimeout(2000);
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -165,6 +171,9 @@ test.describe('UI Component Refinement', () => {
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+
+      // Wait for briefing animation to complete (7 lines × 600ms + 500ms delay = ~4700ms)
+      await page.waitForTimeout(5000);
 
       // Click commence
       await page.click('button:has-text("COMMENCE OPERATION")');
