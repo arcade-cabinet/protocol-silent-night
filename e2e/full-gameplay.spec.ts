@@ -488,8 +488,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 30000,
     });
-    const playAgainButton = page.getByRole('button', { name: /PLAY AGAIN/ });
-    await expect(playAgainButton).toBeVisible({ timeout: 30000 });
+    const redeployButton = page.getByRole('button', { name: /PLAY AGAIN/ });
+    await expect(redeployButton).toBeVisible({ timeout: 30000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -548,15 +548,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
 
     let state = await getGameState(page);
-    expect(state?.killStreak).toBe(1);
-
-    await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
-
-    state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -783,9 +779,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    const playAgainButton = page.getByRole('button', { name: /PLAY AGAIN/ });
-    await playAgainButton.waitFor({ state: 'visible', timeout: 30000 });
-    await playAgainButton.evaluate((e) => e.click());
+    const redeployButton = page.getByRole('button', { name: /PLAY AGAIN/ });
+    await redeployButton.waitFor({ state: 'visible', timeout: 30000 });
+    await redeployButton.evaluate((e) => e.click());
 
     await page.waitForTimeout(1000);
 

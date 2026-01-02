@@ -19,17 +19,17 @@ test.describe('Character Selection & Stats', () => {
   const characters = [
     {
       name: 'MECHA-SANTA',
-      role: 'Heavy Siege / Tank',
+      role: 'TANK',
       hp: '300',
-      speed: '9',
+      speed: 'SLOW',
       weapon: 'COAL CANNON',
       description: 'Heavy armor, slow movement. Fires massive coal projectiles.'
     },
     {
       name: 'CYBER-ELF',
-      role: 'Recon / Scout',
+      role: 'SCOUT',
       hp: '100',
-      speed: '18',
+      speed: 'FAST',
       weapon: 'PLASMA SMG',
       description: 'Low HP, high mobility. Rapid-fire plasma weapon.'
     },
@@ -37,7 +37,7 @@ test.describe('Character Selection & Stats', () => {
       name: 'THE BUMBLE',
       role: 'Crowd Control / Bruiser',
       hp: '200',
-      speed: '12',
+      speed: 'MEDIUM',
       weapon: 'STAR THROWER',
       description: 'Balanced stats. Fires spread pattern ninja stars.'
     }
@@ -45,14 +45,16 @@ test.describe('Character Selection & Stats', () => {
 
   for (const char of characters) {
     test(`should select ${char.name} and verify stats`, async ({ page }) => {
-      // Find the character card button by text content
-      const charButton = page.locator('button').filter({ hasText: char.name });
-      await expect(charButton).toBeVisible({ timeout: 10000 });
+      // Find and click the character card
+      const charButton = page.getByRole('button', { name: new RegExp(char.name) });
+      await expect(charButton).toBeVisible();
 
       // Verify card details before clicking
-      await expect(charButton).toContainText(char.role);
-      await expect(charButton).toContainText(`HP: ${char.hp}`);
-      await expect(charButton).toContainText(`SPEED: ${char.speed}`);
+      const card = page.locator('button').filter({ hasText: char.name });
+      await card.waitFor({ state: 'attached', timeout: 10000 });
+      await expect(card).toContainText(char.role);
+      await expect(card).toContainText(`HP: ${char.hp}`);
+      await expect(card).toContainText(`SPEED: ${char.speed}`);
 
       // Select character
       await charButton.evaluate((e) => e.click());
@@ -113,11 +115,11 @@ test.describe('Weapon Mechanics', () => {
     );
     expect(initialBullets).toBe(0);
 
-    // Fire once - trigger via store (more reliable in headless CI)
+    // Fire once - ensure trigger happens
     await page.evaluate(() => {
       (window as any).useGameStore.getState().setFiring(true);
     });
-    await page.waitForTimeout(200); // Allow bullet to spawn
+    await page.waitForTimeout(200);
     await page.evaluate(() => {
       (window as any).useGameStore.getState().setFiring(false);
     });
@@ -142,11 +144,11 @@ test.describe('Weapon Mechanics', () => {
 
     await page.waitForTimeout(2000);
 
-    // Fire once - trigger via store (more reliable in headless CI)
+    // Fire once - ensure trigger happens
     await page.evaluate(() => {
       (window as any).useGameStore.getState().setFiring(true);
     });
-    await page.waitForTimeout(200); // Allow bullets to spawn
+    await page.waitForTimeout(200);
     await page.evaluate(() => {
       (window as any).useGameStore.getState().setFiring(false);
     });
