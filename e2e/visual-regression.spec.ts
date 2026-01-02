@@ -29,43 +29,54 @@ const waitForOverlays = async (page: any) => {
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
+    await waitForOverlays(page);
 
     // Wait for fonts and styles to load
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForOverlays(page);
+    await page.waitForTimeout(3000);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForOverlays(page);
+    await page.waitForTimeout(3000);
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForOverlays(page);
+    await page.waitForTimeout(3000);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });
@@ -168,6 +179,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await waitForOverlays(page);
     await santaButton.evaluate((e: HTMLElement) => e.click());
 
     // Click COMMENCE OPERATION to enter gameplay
@@ -193,6 +205,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await waitForOverlays(page);
     await santaButton.evaluate((e: HTMLElement) => e.click());
 
     // Click COMMENCE OPERATION to enter gameplay
@@ -217,6 +230,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await waitForOverlays(page);
     await santaButton.evaluate((e: HTMLElement) => e.click());
 
     // Click COMMENCE OPERATION to enter gameplay

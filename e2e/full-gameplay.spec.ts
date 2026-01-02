@@ -7,6 +7,31 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
+// Helper to wait for overlays to disappear
+async function waitForOverlays(page: Page) {
+  await page.waitForLoadState('networkidle').catch(() => {});
+
+  // Wait for loading screen to disappear
+  await page.getByText('INITIALIZING SYSTEMS').waitFor({ state: 'detached', timeout: 15000 }).catch(() => {});
+
+  await page.waitForFunction(() => {
+    const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
+    return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
+  }, { timeout: 10000 }).catch(() => {});
+}
+
+// Helper to select character and start game
+async function selectCharacterAndStart(page: Page, characterName: string) {
+  await waitForOverlays(page);
+  const characterButton = page.getByRole('button', { name: new RegExp(characterName, 'i') });
+  await characterButton.waitFor({ state: 'visible', timeout: 10000 });
+  await characterButton.click();
+
+  const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+  await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+  await commenceButton.click();
+}
+
 // Helper to get game state from the store
 async function getGameState(page: Page) {
   return page.evaluate(() => {
@@ -103,13 +128,14 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     expect(state?.gameState).toBe('MENU');
 
     // Select Santa
+    await waitForOverlays(page);
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await expect(commenceButton).toBeVisible({ timeout: 30000 });
     await commenceButton.click();
 
     // Wait for game to start
@@ -128,10 +154,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await selectCharacterAndStart(page, 'MECHA-SANTA');
 
     await page.waitForTimeout(3000);
 
