@@ -23,6 +23,7 @@ async function stabilizePage(page) {
   await page.waitForTimeout(500);
 
   // Ensure all animations are truly disabled via CSS injection
+  // Also disable focus-visible outlines for consistent screenshots
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -30,6 +31,9 @@ async function stabilizePage(page) {
         animation-delay: 0s !important;
         transition-duration: 0s !important;
         transition-delay: 0s !important;
+      }
+      *:focus-visible {
+        outline: none !important;
       }
     `
   });
@@ -49,6 +53,11 @@ test.describe('Visual Regression - Character Selection', () => {
     }
     // Additional wait for transition animation
     await page.waitForTimeout(2000);
+
+    // Disable focus-visible outlines for consistent screenshots
+    await page.addStyleTag({
+      content: `*:focus-visible { outline: none !important; }`
+    });
   });
 
   test('should match character selection screen', async ({ page }) => {
@@ -95,6 +104,11 @@ test.describe('Visual Regression - Game Start', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
+
+    // Disable focus-visible outlines for consistent screenshots
+    await page.addStyleTag({
+      content: `*:focus-visible { outline: none !important; }`
+    });
   });
 
   test('should render Santa gameplay correctly', async ({ page }) => {
@@ -166,6 +180,11 @@ test.describe('Visual Regression - HUD Elements', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
+
+    // Disable focus-visible outlines for consistent screenshots
+    await page.addStyleTag({
+      content: `*:focus-visible { outline: none !important; }`
+    });
   });
 
   test('should render HUD correctly during gameplay', async ({ page }) => {
@@ -203,6 +222,11 @@ test.describe('Visual Regression - Game Movement', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
+
+    // Disable focus-visible outlines for consistent screenshots
+    await page.addStyleTag({
+      content: `*:focus-visible { outline: none !important; }`
+    });
   });
 
   test('should render character movement correctly', async ({ page }) => {
@@ -244,6 +268,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
+
+    // Disable focus-visible outlines for consistent screenshots
+    await page.addStyleTag({
+      content: `*:focus-visible { outline: none !important; }`
+    });
   });
 
   test('should render combat with enemies', async ({ page }) => {
@@ -284,6 +313,11 @@ test.describe('Visual Regression - End Game States', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
+
+    // Disable focus-visible outlines for consistent screenshots
+    await page.addStyleTag({
+      content: `*:focus-visible { outline: none !important; }`
+    });
   });
 
   test('should render game over screen', async ({ page }) => {
@@ -324,6 +358,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
+
+    // Disable focus-visible outlines for consistent screenshots
+    await page.addStyleTag({
+      content: `*:focus-visible { outline: none !important; }`
+    });
   });
 
   test('should render correctly on mobile viewport', async ({ page }) => {
