@@ -180,7 +180,14 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    const now = Tone.now();
+    let now = Tone.now();
+
+    // Ensure each SFX has a unique start time to prevent Tone.js timing errors
+    // Add a minimum 1ms offset if called at the same time
+    if (now <= this.lastSfxTime) {
+      now = this.lastSfxTime + 0.001;
+    }
+    this.lastSfxTime = now;
 
     // Prevent timing collisions by ensuring each SFX has a unique timestamp
     // Reset if there's been a gap of more than 1 second (prevents indefinite accumulation)
