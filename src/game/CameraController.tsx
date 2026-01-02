@@ -7,6 +7,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
+import { SeededRandom } from '@/types';
 
 const DEFAULT_CAMERA_HEIGHT = 25;
 const DEFAULT_CAMERA_DISTANCE = 20;
@@ -18,6 +19,9 @@ const MAX_ZOOM = 2.0;
 
 const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
 const LOOK_TARGET = new THREE.Vector3();
+
+// Deterministic RNG for visual regression testing
+const rng = new SeededRandom(12463160577482274073);
 
 export function CameraController() {
   const { camera } = useThree();
@@ -165,9 +169,9 @@ export function CameraController() {
 
     // Apply screen shake
     if (screenShake > 0.01) {
-      targetRef.current.x += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.y += (Math.random() - 0.5) * screenShake * 2;
-      targetRef.current.z += (Math.random() - 0.5) * screenShake * 2;
+      targetRef.current.x += (rng.next() - 0.5) * screenShake * 2;
+      targetRef.current.y += (rng.next() - 0.5) * screenShake * 2;
+      targetRef.current.z += (rng.next() - 0.5) * screenShake * 2;
 
       // Decay shake using getState to avoid re-render cycles
       const currentShake = useGameStore.getState().screenShake;
