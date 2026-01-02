@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { selectCharacterAndStart } from './helpers';
 
 /**
  * UI Component Refinement Tests
@@ -89,6 +90,11 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
+      // Use helper but stop before clicking commence if needed,
+      // or reimplement parts of the flow for specific assertions.
+      // Since selectCharacterAndStart goes all the way to game start,
+      // we'll keep manual steps here to verify the briefing screen specifically.
+
       // Wait for page to stabilize
       await page.waitForTimeout(2000);
 
@@ -178,14 +184,7 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
-
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
-
-      // Click commence
-      await page.click('button:has-text("COMMENCE OPERATION")');
+      await selectCharacterAndStart(page, 'MECHA-SANTA');
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -202,10 +201,7 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      // Select CYBER-ELF (Plasma SMG)
-      await page.click('button:has-text("CYBER-ELF")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
-      await page.click('button:has-text("COMMENCE OPERATION")');
+      await selectCharacterAndStart(page, 'CYBER-ELF');
 
       // Wait for HUD
       await page.waitForTimeout(2000);
