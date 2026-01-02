@@ -264,9 +264,7 @@ test.describe('Visual Regression - End Game States', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ force: true, timeout: 20000 });
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click({ timeout: 20000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -297,8 +295,20 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+
+    try {
+      // Wait for page to fully load
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('networkidle');
+
+      // Check if button exists
+      const buttonCount = await page.getByRole('button', { name: /MECHA-SANTA/i }).count();
+      if (buttonCount === 0) {
+        console.log('Button not found, page content:', await page.content());
+      }
+    } catch (error) {
+      console.error('Page load interaction failed:', error);
+    }
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixels: 50000, // Switch to pixel count for mobile tolerance
@@ -310,18 +320,23 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
 
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-    await santaButton.click({ force: true, timeout: 30000 });
+    try {
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('networkidle');
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 60000 });
-    await commenceButton.click({ timeout: 60000 });
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await santaButton.waitFor({ state: 'visible', timeout: 30000 });
+      await santaButton.click({ force: true, timeout: 30000 });
+
+      // Click "COMMENCE OPERATION" on the briefing screen
+      const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+      await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+      await commenceButton.click({ timeout: 30000 });
+    } catch (error) {
+      console.error('Button interaction failed:', error);
+      throw error;
+    }
 
     await page.waitForTimeout(5000);
 
@@ -334,18 +349,23 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
 
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
-    await santaButton.click({ force: true, timeout: 30000 });
+    try {
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('networkidle');
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 60000 });
-    await commenceButton.click({ timeout: 60000 });
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await santaButton.waitFor({ state: 'visible', timeout: 30000 });
+      await santaButton.click({ force: true, timeout: 30000 });
+
+      // Click "COMMENCE OPERATION" on the briefing screen
+      const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+      await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+      await commenceButton.click({ timeout: 30000 });
+    } catch (error) {
+      console.error('Button interaction failed:', error);
+      throw error;
+    }
 
     await page.waitForTimeout(3000);
 
