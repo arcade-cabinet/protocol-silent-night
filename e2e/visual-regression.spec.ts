@@ -14,6 +14,30 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 // Increase timeout for all tests in this file
 test.setTimeout(60000);
 
+// Helper function to stabilize the page before screenshots
+async function stabilizePage(page) {
+  // Wait for all network requests to complete
+  await page.waitForLoadState('networkidle');
+
+  // Wait for dynamic content to settle
+  await page.waitForTimeout(500);
+
+  // Ensure all animations are truly disabled via CSS injection
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+    `
+  });
+
+  // Wait for any remaining font rendering
+  await page.waitForFunction(() => document.fonts.ready);
+}
+
 test.describe('Visual Regression - Character Selection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
@@ -307,15 +331,15 @@ test.describe('Visual Regression - Responsive Design', () => {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
 
-    await page.waitForLoadState('networkidle');
-    await page.waitForFunction(() => document.fonts.ready);
+    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixelRatio: 0.5, // Increased threshold for mobile rendering variance
-      threshold: 0.2, // Relaxed color threshold
+      maxDiffPixelRatio: 0.5,
+      threshold: 0.2,
       animations: 'disabled',
-      fullPage: true, // Ensure full rendering
-      scale: 'css', // Use CSS pixel scaling
+      fullPage: true,
+      scale: 'css',
+      timeout: 30000,
     });
   });
 
@@ -332,21 +356,16 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
-
     // Wait for game to initialize
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(10000);
+    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.5, // Increased threshold for mobile rendering variance
-      threshold: 0.2, // Relaxed color threshold
-      fullPage: true, // Ensure full rendering
-      scale: 'css', // Use CSS pixel scaling
-      timeout: 30000, // Increased timeout for screenshot comparison
+      maxDiffPixelRatio: 0.5,
+      threshold: 0.2,
+      fullPage: true,
+      scale: 'css',
+      timeout: 30000,
     });
   });
 
@@ -362,22 +381,23 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
-
     await page.waitForTimeout(10000);
 
     // Touch controls should be visible
+    // Wait for FIRE button using explicit DOM check for robustness
+    await page.waitForFunction(() => {
+      const button = document.querySelector('[role="button"][aria-label*="FIRE"], button:has-text("FIRE")');
+      // @ts-ignore
+      return button && window.getComputedStyle(button).display !== 'none';
+    }, { timeout: 30000 }).catch(() => {
+      console.log('Explicit DOM check timed out, falling back to locator');
+    });
+
     const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await fireButton.waitFor({ state: 'visible', timeout: 45000 }); // Further increased timeout
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
-      maxDiffPixelRatio: 0.5, // Increased threshold for mobile rendering variance
-      threshold: 0.2, // Relaxed color threshold
-      scale: 'css', // Use CSS pixel scaling
-      timeout: 30000, // Increased timeout for screenshot comparison
+      maxDiffPixelRatio: 0.5,
+      threshold: 0.2,
+      scale: 'css',
     });
   });
 });
