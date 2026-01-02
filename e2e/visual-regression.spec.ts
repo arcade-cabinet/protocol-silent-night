@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { stabilizePage } from './utils/stabilize-page';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -15,6 +14,34 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 // Increase timeout for all tests in this file to handle slow CI rendering
 test.setTimeout(120000);
 
+// Helper function to stabilize the page before screenshots
+async function stabilizePage(page) {
+  // Wait for all network requests to complete
+  await page.waitForLoadState('networkidle');
+
+  // Wait for dynamic content to settle
+  await page.waitForTimeout(500);
+
+  // Ensure all animations are truly disabled via CSS injection
+  // Also suppress focus outlines to prevent visual regression failures
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+      *:focus-visible {
+        outline: none !important;
+      }
+    `
+  });
+
+  // Wait for any remaining font rendering
+  await page.waitForFunction(() => document.fonts.ready);
+}
+
 test.describe('Visual Regression - Character Selection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
@@ -29,7 +56,9 @@ test.describe('Visual Regression - Character Selection', () => {
   });
 
   test('should match character selection screen', async ({ page }) => {
-    await stabilizePage(page);
+    // Wait for fonts and styles to load
+    await page.waitForLoadState('networkidle');
+    await page.waitForFunction(() => document.fonts.ready);
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
@@ -41,7 +70,6 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Santa character card correctly', async ({ page }) => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaCard.waitFor({ state: 'visible', timeout: 10000 });
-    await stabilizePage(page);
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -50,7 +78,6 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Elf character card correctly', async ({ page }) => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfCard.waitFor({ state: 'visible', timeout: 10000 });
-    await stabilizePage(page);
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -59,7 +86,6 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Bumble character card correctly', async ({ page }) => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
-    await stabilizePage(page);
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -89,7 +115,6 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Wait for game to load
     await page.waitForTimeout(10000);
-    await stabilizePage(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
@@ -110,7 +135,6 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Wait for game to load
     await page.waitForTimeout(10000);
-    await stabilizePage(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
@@ -131,7 +155,6 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Wait for game to load
     await page.waitForTimeout(10000);
-    await stabilizePage(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
@@ -154,7 +177,6 @@ test.describe('Visual Regression - HUD Elements', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
     await page.waitForTimeout(8000);
-    await stabilizePage(page);
 
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
@@ -171,7 +193,6 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Move and fire to generate some score
     await page.keyboard.press('Space');
     await page.waitForTimeout(2000);
-    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -198,7 +219,6 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.keyboard.down('w');
     await page.waitForTimeout(2000);
     await page.keyboard.up('w');
-    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -214,7 +234,6 @@ test.describe('Visual Regression - Game Movement', () => {
     // Fire weapon
     await page.keyboard.press('Space');
     await page.waitForTimeout(1000);
-    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -241,7 +260,6 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.keyboard.down('Space');
     await page.waitForTimeout(5000);
     await page.keyboard.up('Space');
-    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -256,7 +274,6 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     // Wait for potential damage from enemies
     await page.waitForTimeout(8000);
-    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -295,7 +312,6 @@ test.describe('Visual Regression - End Game States', () => {
     });
 
     await page.waitForTimeout(2000);
-    await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
