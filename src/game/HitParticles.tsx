@@ -7,6 +7,7 @@ import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
+import { SeededRandom } from '@/types';
 
 interface Particle {
   id: number;
@@ -23,6 +24,9 @@ const MAX_PARTICLES = 50;
 const dummy = new THREE.Object3D();
 
 let particleIdCounter = 0;
+
+// Seeded random for deterministic particle generation
+const particleRng = new SeededRandom(42);
 
 export function HitParticles() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -51,8 +55,8 @@ export function HitParticles() {
       lastKillsRef.current = stats.kills;
       // Spawn hit particles at a random position (since we don't track exact hit location)
       const playerPos = useGameStore.getState().playerPosition;
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 3 + Math.random() * 5;
+      const angle = particleRng.next() * Math.PI * 2;
+      const dist = 3 + particleRng.next() * 5;
       const hitPos = tempVecRef.current.set(
         playerPos.x + Math.cos(angle) * dist,
         1,
@@ -132,11 +136,11 @@ function spawnParticles(
       id: particleIdCounter++,
       position: position.clone(),
       velocity: new THREE.Vector3(
-        (Math.random() - 0.5) * 10,
-        Math.random() * 8 + 2,
-        (Math.random() - 0.5) * 10
+        (particleRng.next() - 0.5) * 10,
+        particleRng.next() * 8 + 2,
+        (particleRng.next() - 0.5) * 10
       ),
-      life: 0.5 + Math.random() * 0.5,
+      life: 0.5 + particleRng.next() * 0.5,
       color,
     });
   }

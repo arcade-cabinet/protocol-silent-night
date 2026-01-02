@@ -350,7 +350,8 @@ export class SeededRandom {
       window.crypto.getRandomValues(array);
       this.state = array[0] % 999999;
     } else {
-      this.state = Math.floor(Math.random() * 999999);
+      // Fallback to timestamp-based seed for SSR/Node environments
+      this.state = Date.now() % 999999;
     }
   }
 
