@@ -19,17 +19,17 @@ test.describe('Character Selection & Stats', () => {
   const characters = [
     {
       name: 'MECHA-SANTA',
-      role: 'TANK',
+      role: 'Heavy Siege / Tank',
       hp: '300',
-      speed: 'SLOW',
+      speed: '9',
       weapon: 'COAL CANNON',
       description: 'Heavy armor, slow movement. Fires massive coal projectiles.'
     },
     {
       name: 'CYBER-ELF',
-      role: 'SCOUT',
+      role: 'Recon / Scout',
       hp: '100',
-      speed: 'FAST',
+      speed: '18',
       weapon: 'PLASMA SMG',
       description: 'Low HP, high mobility. Rapid-fire plasma weapon.'
     },
@@ -37,7 +37,7 @@ test.describe('Character Selection & Stats', () => {
       name: 'THE BUMBLE',
       role: 'Crowd Control / Bruiser',
       hp: '200',
-      speed: 'MEDIUM',
+      speed: '12',
       weapon: 'STAR THROWER',
       description: 'Balanced stats. Fires spread pattern ninja stars.'
     }
@@ -45,16 +45,14 @@ test.describe('Character Selection & Stats', () => {
 
   for (const char of characters) {
     test(`should select ${char.name} and verify stats`, async ({ page }) => {
-      // Find and click the character card
-      const charButton = page.getByRole('button', { name: new RegExp(char.name) });
-      await expect(charButton).toBeVisible();
+      // Find the character card button by text content
+      const charButton = page.locator('button').filter({ hasText: char.name });
+      await expect(charButton).toBeVisible({ timeout: 10000 });
 
       // Verify card details before clicking
-      const card = page.locator('.classCard').filter({ hasText: char.name });
-      await card.waitFor({ state: 'attached', timeout: 10000 });
-      await expect(card).toContainText(char.role);
-      await expect(card).toContainText(`HP: ${char.hp}`);
-      await expect(card).toContainText(`SPEED: ${char.speed}`);
+      await expect(charButton).toContainText(char.role);
+      await expect(charButton).toContainText(`HP: ${char.hp}`);
+      await expect(charButton).toContainText(`SPEED: ${char.speed}`);
 
       // Select character
       await charButton.evaluate((e) => e.click());
