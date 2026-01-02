@@ -549,10 +549,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
+
+    let state = await getGameState(page);
+    expect(state?.killStreak).toBe(1);
+
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
 
-    let state = await getGameState(page);
+    state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
