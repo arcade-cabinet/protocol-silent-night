@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 import styles from './InputControls.module.css';
 
@@ -12,7 +13,15 @@ export function InputControls() {
   const joystickBaseRef = useRef<HTMLDivElement>(null);
   const joystickKnobRef = useRef<HTMLDivElement>(null);
 
-  const { state, setMovement, setFiring, setJoystick, input } = useGameStore();
+  const { state, setMovement, setFiring, setJoystick, input } = useGameStore(
+    useShallow((state) => ({
+      state: state.state,
+      setMovement: state.setMovement,
+      setFiring: state.setFiring,
+      setJoystick: state.setJoystick,
+      input: state.input,
+    }))
+  );
 
   // Keyboard input
   useEffect(() => {

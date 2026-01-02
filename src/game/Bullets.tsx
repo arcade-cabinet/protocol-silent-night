@@ -21,7 +21,9 @@ const dummy = new THREE.Object3D();
 const zeroScale = new THREE.Vector3(0, 0, 0);
 
 // Map weapon types to visual categories
-function getVisualType(weaponType: WeaponType | undefined): 'cannon' | 'smg' | 'star' | 'bell' | 'cane' | 'gingerbread' {
+function getVisualType(
+  weaponType: WeaponType | undefined
+): 'cannon' | 'smg' | 'star' | 'bell' | 'cane' | 'gingerbread' {
   switch (weaponType) {
     case 'cannon':
     case 'ornament':
@@ -197,7 +199,15 @@ export function Bullets() {
 
     const time = state.clock.elapsedTime;
 
-    if (!cannonRef.current || !smgRef.current || !starRef.current || !bellRef.current || !caneRef.current || !gingerbreadRef.current) return;
+    if (
+      !cannonRef.current ||
+      !smgRef.current ||
+      !starRef.current ||
+      !bellRef.current ||
+      !caneRef.current ||
+      !gingerbreadRef.current
+    )
+      return;
 
     // Optimization: Mutate bullets in place and only update store for removals
     const toRemove: string[] = [];
@@ -397,7 +407,6 @@ export function Bullets() {
         args={[gingerbreadGeometry, gingerbreadMaterial, MAX_STAR_BULLETS]}
         frustumCulled={false}
       />
-
     </group>
   );
 }

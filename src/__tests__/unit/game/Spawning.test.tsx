@@ -13,7 +13,7 @@ vi.mock('@jbcom/strata', () => ({
 // Mock Data
 vi.mock('@/data', async () => {
   // biome-ignore lint/suspicious/noExplicitAny: mocking
-  const actual = await vi.importActual('@/data') as any;
+  const actual = (await vi.importActual('@/data')) as any;
   return {
     ...actual,
     TERRAIN_CONFIG: {

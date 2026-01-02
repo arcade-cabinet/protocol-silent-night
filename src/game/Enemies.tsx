@@ -35,7 +35,12 @@ export function Enemies() {
   const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
-    const { state: currentState, enemies: currentEnemies, addEnemy, runProgress } = useGameStore.getState();
+    const {
+      state: currentState,
+      enemies: currentEnemies,
+      addEnemy,
+      runProgress,
+    } = useGameStore.getState();
     if (
       currentState === 'GAME_OVER' ||
       currentState === 'WIN' || // Although we removed WIN state trigger, keep it for safety
@@ -65,7 +70,9 @@ export function Enemies() {
       maxHp: MINION_CONFIG.hp * waveMult,
       isActive: true,
       type: 'minion',
-      speed: (MINION_CONFIG.speed + Math.random() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
+      speed:
+        (MINION_CONFIG.speed + Math.random() * 2) *
+        Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
       damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
     });

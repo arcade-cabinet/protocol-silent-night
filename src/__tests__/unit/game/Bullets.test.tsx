@@ -32,15 +32,25 @@ describe('Bullets Component', () => {
       (m: any) => m.instance.geometry.type === 'IcosahedronGeometry'
     );
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-    const smg = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry' && m.instance.material.type === 'MeshBasicMaterial');
+    const smg = instancedMeshes.find(
+      (m: any) =>
+        m.instance.geometry.type === 'CapsuleGeometry' &&
+        m.instance.material.type === 'MeshBasicMaterial'
+    );
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const stars = instancedMeshes.find((m: any) => m.instance.geometry.type === 'ExtrudeGeometry');
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const bell = instancedMeshes.find((m: any) => m.instance.geometry.type === 'SphereGeometry');
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-    const cane = instancedMeshes.find((m: any) => m.instance.geometry.type === 'CapsuleGeometry' && m.instance.material.type === 'MeshStandardMaterial');
+    const cane = instancedMeshes.find(
+      (m: any) =>
+        m.instance.geometry.type === 'CapsuleGeometry' &&
+        m.instance.material.type === 'MeshStandardMaterial'
+    );
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-    const gingerbread = instancedMeshes.find((m: any) => m.instance.geometry.type === 'BoxGeometry');
+    const gingerbread = instancedMeshes.find(
+      (m: any) => m.instance.geometry.type === 'BoxGeometry'
+    );
 
     if (cannon) expect(cannon.instance.count).toBe(30);
     if (smg) expect(smg.instance.count).toBe(60);

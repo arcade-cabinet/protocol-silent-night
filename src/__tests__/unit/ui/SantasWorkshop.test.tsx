@@ -1,9 +1,8 @@
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SantasWorkshop } from '@/ui/SantasWorkshop';
 import { useGameStore } from '@/store/gameStore';
+import { SantasWorkshop } from '@/ui/SantasWorkshop';
 
 // Mock AudioManager to avoid playing sounds during tests
 vi.mock('@/audio/AudioManager', () => ({

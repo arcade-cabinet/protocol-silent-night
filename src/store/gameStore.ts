@@ -23,9 +23,9 @@ import {
   type PlayerClassType,
   type RoguelikeUpgrade,
   type RunProgressData,
+  SeededRandom,
   type WeaponEvolutionType,
   type WeaponType,
-  SeededRandom,
 } from '@/types';
 import { HapticPatterns, triggerHaptic } from '@/utils/haptics';
 import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';

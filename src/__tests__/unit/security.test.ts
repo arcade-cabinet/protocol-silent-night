@@ -1,6 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { calculateChecksum, unwrapWithChecksum, verifyChecksum, wrapWithChecksum } from '@/utils/security';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
+import {
+  calculateChecksum,
+  unwrapWithChecksum,
+  verifyChecksum,
+  wrapWithChecksum,
+} from '@/utils/security';
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -86,16 +91,16 @@ describe('GameStore Persistence Security', () => {
   it('should load valid data with checksum', () => {
     // Manually set valid data
     const data = {
-        nicePoints: 500,
-        totalPointsEarned: 500,
-        runsCompleted: 1,
-        bossesDefeated: 0,
-        unlockedWeapons: ['cannon'],
-        unlockedSkins: [],
-        permanentUpgrades: {},
-        highScore: 0,
-        totalKills: 0,
-        totalDeaths: 0,
+      nicePoints: 500,
+      totalPointsEarned: 500,
+      runsCompleted: 1,
+      bossesDefeated: 0,
+      unlockedWeapons: ['cannon'],
+      unlockedSkins: [],
+      permanentUpgrades: {},
+      highScore: 0,
+      totalKills: 0,
+      totalDeaths: 0,
     };
     const wrapped = wrapWithChecksum(data);
     localStorage.setItem('protocol-silent-night-meta-progress', JSON.stringify(wrapped));
