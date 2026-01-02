@@ -91,8 +91,8 @@ export default defineConfig({
         timeout: 120000,
       }
     : {
-        // CI mode: Use production preview
-        command: 'pnpm build && pnpm preview',
+        // CI mode: Use production preview with E2E testing flag
+        command: 'VITE_E2E_TESTING=true pnpm build && pnpm preview',
         url: 'http://localhost:4173',
         reuseExistingServer: !isCI,
         timeout: 120000,
