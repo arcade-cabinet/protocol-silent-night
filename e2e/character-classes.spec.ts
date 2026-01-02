@@ -25,8 +25,14 @@ test.describe('Character Class Tests', () => {
         console.log(`Console error: ${msg.text()}`);
       }
     });
-    
+
     await page.goto('/');
+
+    // Wait for loading screen to disappear
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
   });
 
   // ============================================
@@ -35,24 +41,21 @@ test.describe('Character Class Tests', () => {
 
   test('MECHA-SANTA: should select character and start game', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    // Wait for loading screen
-    await page.waitForTimeout(3000);
-    
+
     // Find and click Santa button
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
-    await expect(santaButton).toBeVisible({ timeout: 15000 });
-    
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+
     // Verify character description is visible
     await expect(page.getByText(/Heavy Siege \/ Tank/i)).toBeVisible();
-    
+
     // Click to start
-    await santaButton.click();
+    await santaButton.click({ timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // Start screen should disappear
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
@@ -65,14 +68,17 @@ test.describe('Character Class Tests', () => {
 
   test('MECHA-SANTA: should display correct stats and move/fight', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Start game with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
-    await expect(santaButton).toBeVisible({ timeout: 15000 });
-    await santaButton.click();
-    
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click({ timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     // Wait for game to start
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -135,19 +141,22 @@ test.describe('Character Class Tests', () => {
 
   test('CYBER-ELF: should select character and start game', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Find and click Elf button
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
-    await expect(elfButton).toBeVisible({ timeout: 15000 });
-    
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+
     // Verify character description is visible
     await expect(page.getByText(/Recon \/ Scout/i)).toBeVisible();
-    
+
     // Click to start
-    await elfButton.click();
-    
+    await elfButton.click({ timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     // Start screen should disappear
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
     
@@ -159,14 +168,17 @@ test.describe('Character Class Tests', () => {
 
   test('CYBER-ELF: should display correct stats and move/fight', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Start game with Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
-    await expect(elfButton).toBeVisible({ timeout: 15000 });
-    await elfButton.click();
-    
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    await elfButton.click({ timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     // Wait for game to start
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -231,19 +243,22 @@ test.describe('Character Class Tests', () => {
 
   test('THE BUMBLE: should select character and start game', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Find and click Bumble button
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
-    await expect(bumbleButton).toBeVisible({ timeout: 15000 });
-    
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
+
     // Verify character description is visible
     await expect(page.getByText(/Crowd Control \/ Bruiser/i)).toBeVisible();
-    
+
     // Click to start
-    await bumbleButton.click();
-    
+    await bumbleButton.click({ timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     // Start screen should disappear
     await expect(bumbleButton).not.toBeVisible({ timeout: 5000 });
     
@@ -255,14 +270,17 @@ test.describe('Character Class Tests', () => {
 
   test('THE BUMBLE: should display correct stats and move/fight', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Start game with Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
-    await expect(bumbleButton).toBeVisible({ timeout: 15000 });
-    await bumbleButton.click();
-    
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
+    await bumbleButton.click({ timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     // Wait for game to start
     await expect(bumbleButton).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
@@ -321,14 +339,17 @@ test.describe('Character Class Tests', () => {
 
   test('Touch controls should work with all characters', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
-    await expect(santaButton).toBeVisible({ timeout: 15000 });
-    await santaButton.click();
-    
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click({ timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
     
@@ -352,14 +373,17 @@ test.describe('Character Class Tests', () => {
 
   test('Score should update when enemies are killed', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Start game with Elf (fast firing for quick kills)
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
-    await expect(elfButton).toBeVisible({ timeout: 15000 });
-    await elfButton.click();
-    
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    await elfButton.click({ timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(1000);
     
@@ -395,22 +419,30 @@ test.describe('Character Class Tests', () => {
 
   test('Character selection and game state should persist correctly', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     // Test with each character
     for (const character of ['MECHA-SANTA', 'CYBER-ELF', 'BUMBLE']) {
       console.log(`\nTesting ${character}...`);
-      
+
       // Reload page
       await page.reload();
-      await page.waitForTimeout(3000);
-      
+
+      // Wait for loading screen to disappear
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      if (await loadingScreen.isVisible()) {
+        await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+      }
+
       // Select character
       const button = page.getByRole('button', { name: new RegExp(character, 'i') });
-      await expect(button).toBeVisible({ timeout: 15000 });
-      await button.click();
-      
+      await button.waitFor({ state: 'visible', timeout: 15000 });
+      await button.click({ timeout: 15000 });
+
+      // Click "COMMENCE OPERATION" on the briefing screen
+      const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+      await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+      await commenceButton.click({ timeout: 15000 });
+
       // Verify game started
       await expect(button).not.toBeVisible({ timeout: 5000 });
       await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
@@ -431,29 +463,37 @@ test.describe('Character Class Tests', () => {
 
   test('All characters should survive basic gameplay loop', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
-    
-    await page.waitForTimeout(3000);
-    
+
     const characters = [
       { name: 'MECHA-SANTA', role: /Heavy Siege \/ Tank/i },
       { name: 'CYBER-ELF', role: /Recon \/ Scout/i },
       { name: 'THE BUMBLE', role: /Crowd Control \/ Bruiser/i },
     ];
-    
+
     for (const char of characters) {
       console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       console.log(`Testing ${char.name} gameplay loop...`);
       console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-      
+
       // Reload for fresh test
       await page.reload();
-      await page.waitForTimeout(3000);
-      
+
+      // Wait for loading screen to disappear
+      const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+      if (await loadingScreen.isVisible()) {
+        await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+      }
+
       // Select character
       const button = page.getByRole('button', { name: new RegExp(char.name, 'i') });
-      await expect(button).toBeVisible({ timeout: 15000 });
+      await button.waitFor({ state: 'visible', timeout: 15000 });
       await expect(page.getByText(char.role)).toBeVisible();
-      await button.click();
+      await button.click({ timeout: 15000 });
+
+      // Click "COMMENCE OPERATION" on the briefing screen
+      const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+      await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+      await commenceButton.click({ timeout: 15000 });
       
       console.log(`  ✓ ${char.name} selected`);
       
