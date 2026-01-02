@@ -264,7 +264,9 @@ test.describe('Visual Regression - End Game States', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ force: true, timeout: 20000 });
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 20000 });
 
     await page.waitForTimeout(3000);
 
@@ -312,8 +314,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.scrollIntoViewIfNeeded();
-    await santaButton.waitFor({ state: 'visible' });
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -337,8 +338,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.scrollIntoViewIfNeeded();
-    await santaButton.waitFor({ state: 'visible' });
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
