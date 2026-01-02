@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { startGame } from './helpers';
 
 /**
  * Component Snapshot Tests
@@ -10,48 +11,10 @@ import { test, expect, type Page } from '@playwright/test';
 const VISUAL_THRESHOLD = 0.2;
 const SCREENSHOT_TIMEOUT = 60000;
 
-/**
- * Helper function to wait for loading screen to disappear and ensure game is ready
- */
-async function waitForGameReady(page: Page) {
-  // Wait for loading screen to disappear (it has a minimum 2s duration)
-  await page.waitForTimeout(2500);
-
-  // Wait for networkidle to ensure all resources are loaded
-  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-    // Ignore timeout - some animations might keep network busy
-  });
-}
-
-/**
- * Helper function to start game by selecting character and clicking commence
- */
-async function startGame(page: Page, characterName: string) {
-  // Select character
-  const characterButton = page.getByRole('button', { name: new RegExp(characterName, 'i') });
-  await characterButton.waitFor({ state: 'visible', timeout: 10000 });
-  await characterButton.click({ force: true, timeout: 10000 });
-
-  // Wait for briefing animation to complete
-  // Briefing shows multiple lines at 600ms intervals + 500ms for button appearance
-  // Typical briefing has 5-6 lines, so ~4000ms total
-  await page.waitForTimeout(5000);
-
-  // Click "COMMENCE OPERATION" button
-  const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
-  await commenceButton.click({ timeout: 10000 });
-
-  // Wait for game to start
-  await page.waitForTimeout(1000);
-}
-
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
-
     await page.waitForTimeout(2000);
     
     // Focus on character by centering view
@@ -71,9 +34,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
   test('should render Elf character model', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'CYBER-ELF');
-
     await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
@@ -84,9 +45,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
   test('should render Bumble character model', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'BUMBLE');
-
     await page.waitForTimeout(2000);
     
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
@@ -99,8 +58,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 test.describe('Component Snapshots - Terrain and Environment', () => {
   test('should render terrain correctly', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(2000);
 
     // Move to see terrain better
     await page.keyboard.down('w');
@@ -119,8 +78,8 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
   test('should render lighting and atmosphere', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -132,10 +91,8 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 test.describe('Component Snapshots - Enemy Rendering', () => {
   test('should render enemies when spawned', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
-
-    await page.waitForTimeout(5000); // Wait for enemy spawns
+    await page.waitForTimeout(8000); // Wait for enemy spawns
 
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -145,10 +102,8 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
   test('should render enemy death effects', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
-
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(8000);
     
     // Fire at enemies
     await page.keyboard.down('Space');
@@ -165,8 +120,8 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 test.describe('Component Snapshots - Weapon Effects', () => {
   test('should render Santa cannon weapon', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(1000);
 
     // Fire weapon and capture projectiles
     await page.keyboard.press('Space');
@@ -180,8 +135,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
   test('should render Elf SMG weapon', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'CYBER-ELF');
+    await page.waitForTimeout(1000);
 
     // Fire SMG (rapid fire)
     await page.keyboard.down('Space');
@@ -196,8 +151,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
   test('should render Bumble star weapon', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'BUMBLE');
+    await page.waitForTimeout(1000);
     
     // Fire star weapon
     await page.keyboard.press('Space');
@@ -213,10 +168,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 test.describe('Component Snapshots - Particle Effects', () => {
   test('should render hit particles on impact', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
-
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(8000);
 
     // Fire and wait for hits
     await page.keyboard.down('Space');
@@ -233,8 +186,8 @@ test.describe('Component Snapshots - Particle Effects', () => {
 test.describe('Component Snapshots - Camera System', () => {
   test('should render correct camera perspective', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -244,8 +197,8 @@ test.describe('Component Snapshots - Camera System', () => {
 
   test('should render camera following player movement', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(1000);
 
     // Move in a pattern
     await page.keyboard.down('w');
@@ -264,10 +217,8 @@ test.describe('Component Snapshots - Camera System', () => {
 test.describe('Component Snapshots - UI Overlays', () => {
   test('should render damage flash effect', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'CYBER-ELF');
-
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(8000);
 
     // Trigger damage by getting close to enemies
     await page.waitForTimeout(5000);
@@ -280,8 +231,8 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
   test('should render kill streak notification', async ({ page }) => {
     await page.goto('/');
-    await waitForGameReady(page);
     await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(2000);
     
     // Trigger kill streak by rapid kills
     await page.evaluate(() => {
