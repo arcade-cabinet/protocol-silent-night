@@ -43,6 +43,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaCard.waitFor({ state: 'visible', timeout: 30000 });
+
+    // Wait for element to be stable before screenshot
+    await page.waitForTimeout(2000);
+    await santaCard.evaluate(el => el.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(500);
+
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
@@ -55,6 +61,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfCard.waitFor({ state: 'visible', timeout: 30000 });
+
+    // Wait for element to be stable before screenshot
+    await page.waitForTimeout(2000);
+    await elfCard.evaluate(el => el.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(500);
+
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
@@ -67,8 +79,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleCard.waitFor({ state: 'visible', timeout: 30000 });
-    // Wait for element to stabilize before screenshot
+
+    // Wait for element to be stable before screenshot
+    await page.waitForTimeout(2000);
+    await bumbleCard.evaluate(el => el.scrollIntoView({ block: 'center' }));
     await page.waitForTimeout(500);
+
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
@@ -171,11 +187,16 @@ test.describe('Visual Regression - HUD Elements', () => {
 
   test('should render score and objectives correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForOverlays(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+<<<<<<< HEAD
     await waitForOverlays(page);
     await santaButton.click();
+=======
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
+    await santaButton.evaluate((e: HTMLElement) => e.click());
+>>>>>>> 3242729 (fix(e2e): add proper visibility waits before all button clicks)
 
     // Click COMMENCE OPERATION to enter gameplay
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -197,11 +218,16 @@ test.describe('Visual Regression - HUD Elements', () => {
 test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForOverlays(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+<<<<<<< HEAD
     await waitForOverlays(page);
     await santaButton.click();
+=======
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
+    await santaButton.evaluate((e: HTMLElement) => e.click());
+>>>>>>> 3242729 (fix(e2e): add proper visibility waits before all button clicks)
 
     // Click COMMENCE OPERATION to enter gameplay
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -222,11 +248,16 @@ test.describe('Visual Regression - Game Movement', () => {
 
   test('should render firing animation correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await waitForOverlays(page);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+<<<<<<< HEAD
     await waitForOverlays(page);
     await santaButton.click();
+=======
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
+    await santaButton.evaluate((e: HTMLElement) => e.click());
+>>>>>>> 3242729 (fix(e2e): add proper visibility waits before all button clicks)
 
     // Click COMMENCE OPERATION to enter gameplay
     const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
