@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { setupE2EEnvironment } from './test-utils';
 
 /**
  * Comprehensive Character Class E2E Tests for Protocol: Silent Night
@@ -27,9 +26,6 @@ test.describe('Character Class Tests', () => {
       }
     });
 
-    // Setup E2E environment before navigation
-    await setupE2EEnvironment(page);
-
     await page.goto('/');
   });
 
@@ -54,10 +50,9 @@ test.describe('Character Class Tests', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
 
     // Start screen should disappear
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });

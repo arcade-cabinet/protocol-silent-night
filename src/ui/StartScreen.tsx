@@ -20,10 +20,6 @@ export function StartScreen() {
   useEffect(() => {
     if (state !== 'MENU') return;
 
-    // Skip audio setup in E2E testing to prevent hanging
-    const isE2E = typeof window !== 'undefined' && (window as any).__E2E_TESTING__;
-    if (isE2E) return;
-
     const initAudio = async () => {
       await AudioManager.initialize();
       audioInitializedRef.current = true;
@@ -49,8 +45,8 @@ export function StartScreen() {
 
   if (state !== 'MENU') return null;
 
-  const handleSelectClass = (type: PlayerClassType) => {
-    // Fire and forget audio initialization - don't block on it
+  const handleSelectClass = async (type: PlayerClassType) => {
+    // Ensure audio is initialized, but don't block on it
     AudioManager.initialize()
       .then(() => {
         audioInitializedRef.current = true;
@@ -59,7 +55,7 @@ export function StartScreen() {
         console.warn('Audio initialization failed:', error);
       });
 
-    // Always proceed with class selection immediately
+    // Always proceed with class selection
     selectClass(type);
   };
 

@@ -49,20 +49,10 @@ class AudioManagerClass {
   async initialize(): Promise<void> {
     if (this.initialized || this.initializing) return;
 
-    // Skip audio initialization in E2E test environment to prevent hanging
-    const isE2ETesting = typeof window !== 'undefined' && (window as any).__E2E_TESTING__;
-    if (isE2ETesting) {
-      this.initialized = true;
-      return;
-    }
-
     this.initializing = true;
     try {
-      // Start Tone.js audio context with timeout to prevent hanging in headless browsers
-      await Promise.race([
-        Tone.start(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Audio initialization timeout')), 2000))
-      ]);
+      // Start Tone.js audio context
+      await Tone.start();
       console.log('🎵 Audio system initialized');
 
       // Create synth instruments
@@ -74,8 +64,6 @@ class AudioManagerClass {
       this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize audio:', error);
-      // Mark as initialized anyway to prevent repeated attempts
-      this.initialized = true;
     } finally {
       this.initializing = false;
     }

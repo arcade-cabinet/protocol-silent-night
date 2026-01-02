@@ -1,5 +1,4 @@
 import { test, expect, type Page } from '@playwright/test';
-import { waitForLoadingScreen, setupE2EEnvironment } from './test-utils';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -14,23 +13,6 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 
 // Increase default timeout for this file due to heavy 3D loading and animations
 test.setTimeout(120000);
-
-/**
- * Disable all CSS animations and transitions for visual stability
- * This is more aggressive than Playwright's built-in animation disabling
- */
-async function disableAnimations(page: Page) {
-  await page.addStyleTag({
-    content: `
-      *, *::before, *::after {
-        animation-duration: 0s !important;
-        animation-delay: 0s !important;
-        transition-duration: 0s !important;
-        transition-delay: 0s !important;
-      }
-    `
-  });
-}
 
 /**
  * Helper to start the game with a specific character
@@ -53,15 +35,13 @@ async function startGame(page: Page, characterName: RegExp | string) {
   await charButton.click({ force: true, timeout: 15000 });
 
   // Click COMMENCE OPERATION on the briefing screen
-  // The button appears after briefing lines animate (7 lines * 600ms + 500ms = ~4.7s)
-  // Use Playwright's smart waiting instead of fixed timeout
-  const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+  // Wait specifically for the briefing screen to appear first
+  await page.waitForTimeout(1000); // Allow briefing transition
+  const commenceBtn = page.locator('[data-testid="mission-start-button"]').or(
+    page.getByRole('button', { name: /COMMENCE OPERATION/i })
+  );
   await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-  // Ensure button is ready for interaction
-  await commenceBtn.waitFor({ state: 'attached', timeout: 5000 });
-  await page.waitForTimeout(500); // Brief pause for any animations to settle
-  // Use noWaitAfter to prevent waiting for navigation events (this is a SPA state change)
-  await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+  await commenceBtn.click();
 
   // Wait for game to load (HUD score visible)
   await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });
@@ -69,9 +49,7 @@ async function startGame(page: Page, characterName: RegExp | string) {
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await disableAnimations(page);
 
     // Wait for fonts and styles to load
     await page.waitForTimeout(2000);
@@ -79,113 +57,84 @@ test.describe('Visual Regression - Character Selection', () => {
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should show Santa character card correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
-    await disableAnimations(page);
     await page.waitForTimeout(2000);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
-    await disableAnimations(page);
     await page.waitForTimeout(2000);
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should show Bumble character card correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await disableAnimations(page);
     await page.waitForTimeout(2000);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 });
 
 test.describe('Visual Regression - Game Start', () => {
   test('should render Santa gameplay correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
     
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should render Elf gameplay correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /CYBER-ELF/);
     
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should render Bumble gameplay correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /BUMBLE/);
     
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 });
 
 test.describe('Visual Regression - HUD Elements', () => {
   test('should render HUD correctly during gameplay', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
 
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should render score and objectives correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
 
@@ -195,15 +144,12 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 });
 
 test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
 
@@ -214,13 +160,10 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should render firing animation correctly', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
 
@@ -230,15 +173,12 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 });
 
 test.describe('Visual Regression - Combat Scenarios', () => {
   test('should render combat with enemies', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
 
@@ -249,13 +189,10 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 
   test('should render player taking damage', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /CYBER-ELF/);
 
@@ -264,15 +201,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 });
 
 test.describe('Visual Regression - End Game States', () => {
   test('should render game over screen', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
     await startGame(page, /MECHA-SANTA/);
 
@@ -290,13 +224,11 @@ test.describe('Visual Regression - End Game States', () => {
       gameWindow.useGameStore?.getState().damagePlayer(300);
     });
 
-    // Wait for Game Over screen (use role to be more specific)
-    await expect(page.getByRole('heading', { name: 'OPERATOR DOWN' })).toBeVisible({ timeout: 10000 });
+    // Wait for Game Over screen
+    await expect(page.getByText('OPERATOR DOWN')).toBeVisible({ timeout: 10000 });
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 });
@@ -304,7 +236,6 @@ test.describe('Visual Regression - End Game States', () => {
 test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await setupE2EEnvironment(page);
     await page.goto('/');
 
     // Wait for loading screen to disappear
@@ -312,14 +243,12 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Temporarily increased for high variance
-      timeout: 30000,
-      animations: "disabled",
+      timeout: 20000,
     });
   });
 
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await setupE2EEnvironment(page);
     await page.goto('/');
 
     await startGame(page, /MECHA-SANTA/);
@@ -329,16 +258,13 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
+      timeout: 10000
     });
   });
 
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await disableAnimations(page);
 
     await startGame(page, /MECHA-SANTA/);
 
@@ -346,13 +272,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 10000 });
 
-    // Additional wait to ensure button is fully stable
-    await page.waitForTimeout(500);
-
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
-      animations: "disabled",
     });
   });
 });

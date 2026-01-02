@@ -44,26 +44,12 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
-  // Check if running in E2E test environment (outside effect to avoid recreating on every render)
-  const isE2E = typeof window !== 'undefined' && (window as any).__E2E_TESTING__;
-
   useEffect(() => {
     if (state !== 'BRIEFING') return;
 
-    // Reset state when briefing starts
+    // Reset state immediately on entry to prevent race conditions
     setCurrentLine(0);
     setShowButton(false);
-
-    // In E2E mode, skip animations and show everything immediately
-    if (isE2E) {
-      // Use setTimeout to ensure state updates are batched and committed
-      const timeoutId = setTimeout(() => {
-        setCurrentLine(briefingLines.length - 1);
-        setShowButton(true);
-      }, 0);
-      AudioManager.playSFX('ui_click');
-      return () => clearTimeout(timeoutId);
-    }
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
@@ -86,7 +72,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines, isE2E]);
+  }, [state, briefingLines]);
 
   if (state !== 'BRIEFING') return null;
 
@@ -120,7 +106,12 @@ export function MissionBriefing() {
         </div>
 
         {showButton && (
-          <button type="button" className={styles.startButton} onClick={handleStart}>
+          <button
+            type="button"
+            className={styles.startButton}
+            onClick={handleStart}
+            data-testid="mission-start-button"
+          >
             <span className={styles.buttonText}>COMMENCE OPERATION</span>
             <div className={styles.buttonGlow} />
           </button>

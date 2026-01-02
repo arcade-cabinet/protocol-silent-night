@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { waitForLoadingScreen, setupE2EEnvironment } from './test-utils';
 
 /**
  * UI Component Refinement Tests
@@ -29,21 +28,17 @@ test.describe('UI Component Refinement', () => {
       }
     });
 
-    // Setup E2E environment before navigation
-    await setupE2EEnvironment(page);
-
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await waitForLoadingScreen(page);
   });
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render
-      const title = page.locator('h1');
-      await title.waitFor({ state: 'visible', timeout: 10000 });
+      await page.waitForSelector('h1', { timeout: 5000 });
 
       // Verify title is visible
+      const title = page.locator('h1');
       await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
@@ -92,23 +87,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
-      // Try using evaluate() to directly trigger the click event
-      // This bypasses Playwright's action system entirely
-      await page.evaluate(() => {
-        const button = Array.from(document.querySelectorAll('button')).find(
-          btn => btn.textContent?.includes('MECHA-SANTA')
-        );
-        if (button) {
-          console.log('[Test] Found MECHA-SANTA button, clicking...');
-          button.click();
-          console.log('[Test] Button clicked');
-        } else {
-          console.error('[Test] MECHA-SANTA button not found!');
-        }
-      });
-
-      // Small wait for the click to process
-      await page.waitForTimeout(500);
+      // Click MECHA-SANTA
+      await page.click('button:has-text("MECHA-SANTA")');
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -140,9 +120,9 @@ test.describe('UI Component Refinement', () => {
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
-      // Check for operation button (appears after briefing animation ~4.7s)
+      // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible({ timeout: 30000 });
+      await expect(opButton).toBeVisible();
       await expect(opButton).toBeEnabled();
     });
 
@@ -154,14 +134,11 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Wait for button to be ready before clicking
-        await page.waitForSelector(`button:has-text("${mech.name}")`, { state: 'visible', timeout: 5000 });
-
         // Click mech
         await page.click(`button:has-text("${mech.name}")`);
 
         // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -190,10 +167,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       // Click commence
-      // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-      const commenceBtn = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -213,11 +187,7 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
-
-      // Click commence - wait for button to appear after briefing animation
-      const commenceBtn2 = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceBtn2.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceBtn2.click({ timeout: 15000 });
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD
       await page.waitForTimeout(2000);
@@ -257,18 +227,12 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      // Wait for menu to be fully rendered
-      await page.waitForSelector('h1', { state: 'visible', timeout: 8000 });
-
-      // Extra wait to ensure all animations are complete
-      await page.waitForTimeout(300);
+      await page.waitForSelector('h1', { timeout: 5000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
           maxDiffPixels: 100,
-          timeout: 30000,
-          animations: "disabled",
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -276,21 +240,13 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
-      // Wait for button to be ready before clicking
-      await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 5000 });
-
       // Select mech
       await page.click('button:has-text("MECHA-SANTA")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
-
-      // Extra wait to ensure all animations are complete
-      await page.waitForTimeout(300);
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
           maxDiffPixels: 100,
-          timeout: 30000,
-          animations: "disabled",
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });

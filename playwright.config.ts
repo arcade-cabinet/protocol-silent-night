@@ -49,8 +49,8 @@ export default defineConfig({
     timeout: 10000,
     // Screenshot comparison settings
     toHaveScreenshot: {
-      // Use maxDiffPixelRatio per-test instead of a global maxDiffPixels limit
-      // This allows tests to specify appropriate thresholds for WebGL rendering variations
+      // Maximum number of pixels that can differ
+      maxDiffPixels: 100,
       // Animation handling
       animations: 'disabled',
       // CSS media features
@@ -91,8 +91,8 @@ export default defineConfig({
         timeout: 120000,
       }
     : {
-        // CI mode: Use production preview with E2E testing flag
-        command: 'VITE_E2E_TESTING=true pnpm build && pnpm preview',
+        // CI mode: Use production preview
+        command: 'pnpm build && pnpm preview',
         url: 'http://localhost:4173',
         reuseExistingServer: !isCI,
         timeout: 120000,

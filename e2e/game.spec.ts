@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { setupE2EEnvironment } from './test-utils';
 
 /**
  * E2E Tests for Protocol: Silent Night
@@ -23,9 +22,6 @@ test.describe('Protocol: Silent Night', () => {
         console.log(`Console error: ${msg.text()}`);
       }
     });
-
-    // Setup E2E environment before navigation
-    await setupE2EEnvironment(page);
 
     await page.goto('/');
   });
@@ -143,10 +139,9 @@ test.describe('Protocol: Silent Night', () => {
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
 
     // HUD should appear
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
@@ -164,10 +159,9 @@ test.describe('Protocol: Silent Night', () => {
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
 
     // Verify HUD elements
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
@@ -189,10 +183,9 @@ test.describe('Protocol: Silent Night', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
 
     // Wait for game to start
     await expect(commenceButton).not.toBeVisible({ timeout: 5000 });

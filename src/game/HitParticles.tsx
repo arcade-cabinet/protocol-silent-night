@@ -50,25 +50,24 @@ export function HitParticles() {
     if (stats.kills > lastKillsRef.current) {
       lastKillsRef.current = stats.kills;
       // Spawn hit particles at a random position (since we don't track exact hit location)
-      const { playerPosition: playerPos, rng } = useGameStore.getState();
-      const angle = rng.next() * Math.PI * 2;
-      const dist = 3 + rng.next() * 5;
+      const playerPos = useGameStore.getState().playerPosition;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 3 + Math.random() * 5;
       const hitPos = tempVecRef.current.set(
         playerPos.x + Math.cos(angle) * dist,
         1,
         playerPos.z + Math.sin(angle) * dist
       );
-      spawnParticles(particlesRef.current, hitPos, 0x00ff00, 6, rng);
+      spawnParticles(particlesRef.current, hitPos, 0x00ff00, 6);
     }
 
     // Check for boss damage
     if (bossHp < lastBossHpRef.current) {
-      const { enemies, rng } = useGameStore.getState();
-      const bossEnemy = enemies.find((e) => e.type === 'boss');
+      const bossEnemy = useGameStore.getState().enemies.find((e) => e.type === 'boss');
       if (bossEnemy) {
         const bossPos = tempVecRef.current.copy(bossEnemy.mesh.position);
         bossPos.y = 4;
-        spawnParticles(particlesRef.current, bossPos, 0xff0044, 8, rng);
+        spawnParticles(particlesRef.current, bossPos, 0xff0044, 8);
       }
       lastBossHpRef.current = bossHp;
     }
@@ -121,8 +120,7 @@ function spawnParticles(
   particles: Particle[],
   position: THREE.Vector3,
   color: number,
-  count: number,
-  rng: { next: () => number }
+  count: number
 ) {
   // Limit total particles
   while (particles.length + count > MAX_PARTICLES) {
@@ -134,11 +132,11 @@ function spawnParticles(
       id: particleIdCounter++,
       position: position.clone(),
       velocity: new THREE.Vector3(
-        (rng.next() - 0.5) * 10,
-        rng.next() * 8 + 2,
-        (rng.next() - 0.5) * 10
+        (Math.random() - 0.5) * 10,
+        Math.random() * 8 + 2,
+        (Math.random() - 0.5) * 10
       ),
-      life: 0.5 + rng.next() * 0.5,
+      life: 0.5 + Math.random() * 0.5,
       color,
     });
   }

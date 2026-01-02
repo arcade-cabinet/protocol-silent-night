@@ -9,16 +9,15 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 0.3s ease-out;
+  animation: fadeOut 0.5s ease-out 1.4s forwards;
 }
 
-.screen.fadingOut {
-  opacity: 0;
-  pointer-events: none;
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
-
 
 .content {
   text-align: center;

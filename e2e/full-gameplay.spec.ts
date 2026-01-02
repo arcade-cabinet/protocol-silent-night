@@ -1,5 +1,4 @@
 import { test, expect, Page } from '@playwright/test';
-import { waitForLoadingScreen, safeClick, setupE2EEnvironment } from './test-utils';
 
 /**
  * Full Gameplay E2E Tests
@@ -96,9 +95,7 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
     // Verify we're at menu
@@ -107,15 +104,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
     await expect(santaButton).toBeVisible();
-    await safeClick(santaButton);
+    await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
 
     // Wait for game to start
     await page.waitForTimeout(2000);
@@ -130,18 +125,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -161,18 +151,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should survive longer due to high HP', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -194,18 +179,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -225,18 +205,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should accumulate score and kills', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -261,19 +236,14 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
     // Select Elf
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
 
@@ -284,18 +254,13 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   });
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /CYBER-ELF/ }));
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -315,18 +280,13 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   });
 
   test('should die quickly with low HP', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /CYBER-ELF/ }));
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -342,19 +302,14 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
 test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should complete full game loop with Bumble', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
     // Select Bumble
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
 
@@ -365,18 +320,13 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   });
 
   test('should fire spread pattern weapon', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /BUMBLE/ }));
+    await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -396,18 +346,13 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   });
 
   test('should have balanced survivability', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /BUMBLE/ }));
+    await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -430,18 +375,13 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
 test.describe('Full Gameplay - Boss Battle', () => {
   test('should spawn boss after 10 kills', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -464,18 +404,13 @@ test.describe('Full Gameplay - Boss Battle', () => {
   });
 
   test('should defeat boss and win game', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -505,18 +440,13 @@ test.describe('Full Gameplay - Boss Battle', () => {
   });
 
   test('should show boss health decreasing', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -547,18 +477,13 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
 test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -586,18 +511,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   });
 
   test('should reset streak after timeout', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -622,18 +542,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   });
 
   test('should apply streak bonus to score', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -664,19 +579,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
 test.describe('Full Gameplay - Game Reset', () => {
   test('should reset game and return to menu', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
     // Play a game
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -701,19 +611,14 @@ test.describe('Full Gameplay - Game Reset', () => {
   });
 
   test('should preserve high score after reset', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
     // Play and get a score
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -736,10 +641,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn2.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn2.click({ timeout: 15000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
 
@@ -754,9 +656,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
 test.describe('Full Gameplay - Complete Playthrough', () => {
   test('should complete entire game as Santa', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
     // Step 1: Character Selection - verify start screen is showing
@@ -764,10 +664,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     // Step 2: Game starts
     await page.waitForTimeout(2000);
@@ -806,18 +703,13 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
   });
 
   test('should complete entire game as Elf', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /CYBER-ELF/ }));
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
 
@@ -843,18 +735,13 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
   });
 
   test('should complete entire game as Bumble', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /BUMBLE/ }));
+    await page.getByRole('button', { name: /BUMBLE/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(2000);
 
@@ -882,18 +769,13 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
 test.describe('Full Gameplay - Input Controls', () => {
   test('should respond to WASD movement', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -915,18 +797,13 @@ test.describe('Full Gameplay - Input Controls', () => {
   });
 
   test('should respond to arrow key movement', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -945,18 +822,13 @@ test.describe('Full Gameplay - Input Controls', () => {
   });
 
   test('should fire with spacebar', async ({ page }) => {
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -984,18 +856,13 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should show touch controls on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await setupE2EEnvironment(page);
     await page.goto('/');
-    await waitForLoadingScreen(page);
     await page.waitForTimeout(2000);
 
-    await safeClick(page.getByRole('button', { name: /MECHA-SANTA/ }));
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for button to appear after briefing animation (7 lines * 600ms + 500ms = ~4.7s)
-    const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-    await commenceBtn.click({ timeout: 15000, noWaitAfter: true });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
