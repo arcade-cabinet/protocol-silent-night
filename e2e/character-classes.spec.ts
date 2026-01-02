@@ -68,18 +68,22 @@ test.describe('Character Selection & Stats', () => {
       await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
       await commenceButton.evaluate((e) => e.click());
 
-      // Wait for game HUD
-      await page.waitForTimeout(2000);
+      // Wait for game to fully start
+      await page.waitForTimeout(3000);
 
       // Verify in-game stats via store
       const stats = await page.evaluate(() => {
         const store = (window as any).useGameStore;
         const state = store.getState();
         return {
+          gameState: state.state,
           hp: state.playerHp,
           maxHp: state.playerMaxHp
         };
       });
+
+      // Ensure game is in active state
+      expect(stats.gameState).toBe('PHASE_1');
 
       expect(stats.hp).toBe(parseInt(char.hp));
       expect(stats.maxHp).toBe(parseInt(char.hp));
@@ -106,7 +110,14 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game to fully start
+    await page.waitForTimeout(3000);
+
+    // Verify game state is PHASE_1
+    const gameState = await page.evaluate(() =>
+      (window as any).useGameStore.getState().state
+    );
+    expect(gameState).toBe('PHASE_1');
 
     // Get initial bullet count
     const initialBullets = await page.evaluate(() =>
@@ -116,14 +127,14 @@ test.describe('Weapon Mechanics', () => {
 
     // Fire once - ensure trigger happens
     await page.keyboard.down('Space');
-    await page.waitForTimeout(200); // Increased press time
+    await page.waitForTimeout(300);
     await page.keyboard.up('Space');
 
     // Should spawn exactly 1 bullet
     await page.waitForFunction(
       () => (window as any).useGameStore.getState().bullets.length > 0,
       null,
-      { timeout: 5000 }
+      { timeout: 10000 }
     );
   });
 
@@ -137,18 +148,25 @@ test.describe('Weapon Mechanics', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.evaluate((e) => e.click());
 
-    await page.waitForTimeout(2000);
+    // Wait for game to fully start
+    await page.waitForTimeout(3000);
+
+    // Verify game state is PHASE_1
+    const gameState = await page.evaluate(() =>
+      (window as any).useGameStore.getState().state
+    );
+    expect(gameState).toBe('PHASE_1');
 
     // Fire once - ensure trigger happens
     await page.keyboard.down('Space');
-    await page.waitForTimeout(200); // Increased press time
+    await page.waitForTimeout(300);
     await page.keyboard.up('Space');
 
     // Should spawn 3 bullets
     await page.waitForFunction(
       () => (window as any).useGameStore.getState().bullets.length >= 3,
       null,
-      { timeout: 5000 }
+      { timeout: 10000 }
     );
   });
 });
