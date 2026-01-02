@@ -296,7 +296,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(3000); // Increased wait time for mobile rendering stabilization
+
+    // Wait for character selection buttons to be visible
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Increased threshold for mobile specific rendering variances
@@ -318,7 +322,9 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 15000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 30000 });
 
     await page.waitForTimeout(5000);
 
@@ -341,7 +347,9 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 15000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 30000 });
 
     await page.waitForTimeout(3000);
 
