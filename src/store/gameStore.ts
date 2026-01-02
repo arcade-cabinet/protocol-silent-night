@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 import { AudioManager } from '@/audio/AudioManager';
 import {
   BRIEFING,
@@ -286,10 +287,11 @@ const initialState = {
   rng: new SeededRandom(12345),
 };
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  ...initialState,
+export const useGameStore = create<GameStore>()(
+  subscribeWithSelector((set, get) => ({
+    ...initialState,
 
-  setState: (state) => set((prev) => ({ state, previousState: prev.state })),
+    setState: (state) => set((prev) => ({ state, previousState: prev.state })),
 
   selectClass: (type) => {
     const config = PLAYER_CLASSES[
@@ -956,15 +958,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  reset: () =>
-    set({
-      ...initialState,
-      highScore: get().highScore,
-      metaProgress: get().metaProgress,
-      playerPosition: new THREE.Vector3(0, 0, 0),
-      rng: new SeededRandom(Date.now()),
-    }),
-}));
+    reset: () =>
+      set({
+        ...initialState,
+        highScore: get().highScore,
+        metaProgress: get().metaProgress,
+        playerPosition: new THREE.Vector3(0, 0, 0),
+        rng: new SeededRandom(Date.now()),
+      }),
+  }))
+);
 
 // Expose store on window for e2e testing
 if (typeof window !== 'undefined') {
