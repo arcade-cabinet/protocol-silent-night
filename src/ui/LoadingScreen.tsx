@@ -15,10 +15,9 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Simulate loading progress with deterministic linear progression
-    // This ensures predictable timing for CI tests
-    const steps = minDuration / 100; // Number of 100ms intervals
-    const increment = 100 / steps; // Progress per interval
+    // Simulate loading progress
+    const steps = 15; // Number of steps to complete (1.5s / 100ms)
+    const increment = 100 / steps;
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -26,7 +25,7 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
           clearInterval(interval);
           return 100;
         }
-        return Math.min(prev + increment, 100);
+        return prev + increment;
       });
     }, 100);
 
