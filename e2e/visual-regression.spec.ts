@@ -10,7 +10,7 @@ import { safeClick, selectCharacterAndStart, setupMobileViewport } from './helpe
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.35; // 35% diff tolerance for WebGL rendering variations with software rendering
+const VISUAL_THRESHOLD = 0.35; // 35% diff tolerance for WebGL rendering variations
 
 test.describe.configure({ timeout: 180000 });
 
@@ -193,7 +193,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixels: 20000,
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
       threshold: 0.3,
       timeout: 30000,
     });
@@ -223,7 +223,7 @@ test.describe('Visual Regression - End Game States', () => {
     
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixels: 50000,
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
       threshold: 0.3,
       timeout: 30000,
     });
@@ -255,7 +255,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixels: 30000,
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
       threshold: 0.3,
       timeout: 30000,
     });
