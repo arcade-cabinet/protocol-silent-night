@@ -10,17 +10,19 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
+const SCREENSHOT_TIMEOUT = 30000; // 30s timeout for screenshots due to continuous game loop rendering
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
-    
+
     // Wait for fonts and styles to load
     await page.waitForTimeout(2000);
-    
+
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -31,26 +33,29 @@ test.describe('Visual Regression - Character Selection', () => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    
+
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    
+
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -73,13 +78,14 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should render Elf gameplay correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     // Select Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click({ force: true, timeout: 20000 });
@@ -89,17 +95,18 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Wait for game to load
     await page.waitForTimeout(5000);
-    
+
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should render Bumble gameplay correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     // Select Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleButton.click({ force: true, timeout: 20000 });
@@ -109,10 +116,11 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Wait for game to load
     await page.waitForTimeout(5000);
-    
+
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -132,6 +140,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -152,6 +161,7 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -175,6 +185,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -195,6 +206,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -218,6 +230,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -237,6 +250,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -272,6 +286,7 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -281,11 +296,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000); // Increased wait for full render
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Increased threshold for mobile specific rendering variances
       animations: 'disabled',
+      timeout: 30000, // Increased timeout for screenshot
     });
   });
 
@@ -296,7 +312,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 }); // Increased timeout and force click
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -307,6 +323,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -317,7 +334,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -330,6 +347,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });

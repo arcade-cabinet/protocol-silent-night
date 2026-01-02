@@ -8,6 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
+const SCREENSHOT_TIMEOUT = 30000; // 30s timeout for screenshots due to continuous game loop rendering
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
@@ -34,6 +35,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -51,6 +53,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -68,6 +71,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -96,6 +100,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -113,6 +118,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -132,6 +138,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -154,6 +161,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -177,6 +185,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -199,6 +208,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -220,6 +230,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -244,6 +255,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -263,6 +275,7 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -287,6 +300,7 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
@@ -309,6 +323,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -339,6 +354,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 });
