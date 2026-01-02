@@ -30,11 +30,6 @@ test.describe('UI Component Refinement', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test.describe('Menu Screen', () => {

@@ -16,11 +16,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test('should render Santa character model', async ({ page }) => {
@@ -92,11 +87,6 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test('should render terrain correctly', async ({ page }) => {
@@ -150,11 +140,6 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test('should render enemies when spawned', async ({ page }) => {
@@ -198,11 +183,6 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test('should render Santa cannon weapon', async ({ page }) => {
@@ -277,11 +257,6 @@ test.describe('Component Snapshots - Particle Effects', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test('should render hit particles on impact', async ({ page }) => {
@@ -308,11 +283,6 @@ test.describe('Component Snapshots - Camera System', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test('should render correct camera perspective', async ({ page }) => {
@@ -364,11 +334,6 @@ test.describe('Component Snapshots - UI Overlays', () => {
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
-
-    // Disable focus-visible outlines for consistent screenshots
-    await page.addStyleTag({
-      content: `*:focus-visible { outline: none !important; }`
-    });
   });
 
   test('should render damage flash effect', async ({ page }) => {
