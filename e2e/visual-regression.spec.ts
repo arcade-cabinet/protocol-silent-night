@@ -15,12 +15,15 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
 
-    // Wait for fonts and styles to load
+    // Wait for fonts, styles, and character buttons to load
+    await page.waitForLoadState('networkidle').catch(() => {});
+    await page.waitForSelector('button:has-text("MECHA-SANTA")', { timeout: 5000 });
     await page.waitForTimeout(2000);
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -65,7 +68,7 @@ test.describe('Visual Regression - Game Start', () => {
     await santaButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -85,7 +88,7 @@ test.describe('Visual Regression - Game Start', () => {
     await elfButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -105,7 +108,7 @@ test.describe('Visual Regression - Game Start', () => {
     await bumbleButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -126,7 +129,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     await santaButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
     await page.waitForTimeout(3000);
 
     // Take HUD snapshot
@@ -143,7 +146,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     await santaButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
     await page.waitForTimeout(3000);
 
     // Move and fire to generate some score
@@ -165,7 +168,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await santaButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
     await page.waitForTimeout(3000);
 
     // Move character
@@ -186,7 +189,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await santaButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
     await page.waitForTimeout(3000);
 
     // Fire weapon
@@ -236,7 +239,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await elfButton.click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
     await page.waitForTimeout(5000);
 
     // Wait for potential damage from enemies
@@ -265,7 +268,7 @@ test.describe('Visual Regression - End Game States', () => {
     await santaButton.click({ force: true, noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
     await page.waitForTimeout(3000);
 
     // Trigger game over by evaluating state (for testing purposes)
