@@ -42,6 +42,7 @@ class AudioManagerClass {
     new Map();
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
+  private lastSfxTime = 0;
 
   /**
    * Initialize audio system. Must be called after user interaction.
@@ -179,8 +180,13 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    // Add small offset to prevent timing conflicts when multiple SFX are triggered rapidly
-    const now = Tone.now() + 0.001;
+    let now = Tone.now();
+
+    // Ensure monotonically increasing timestamps to prevent Tone.js errors in CI
+    if (now <= this.lastSfxTime) {
+      now = this.lastSfxTime + 0.001;
+    }
+    this.lastSfxTime = now;
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;

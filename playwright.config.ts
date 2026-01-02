@@ -50,8 +50,7 @@ export default defineConfig({
     // Screenshot comparison settings
     toHaveScreenshot: {
       // Maximum number of pixels that can differ
-      // Increased threshold to account for minor rendering variations in CI
-      maxDiffPixels: 50000,
+      maxDiffPixels: 100,
       // Animation handling
       animations: 'disabled',
       // CSS media features
