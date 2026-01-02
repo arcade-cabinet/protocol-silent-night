@@ -32,10 +32,27 @@ async function stabilizePage(page) {
         transition-duration: 0s !important;
         transition-delay: 0s !important;
       }
-      *:focus-visible {
+      *:focus, *:focus-visible, *:focus-within {
         outline: none !important;
+        box-shadow: none !important;
+        border-color: inherit !important;
+      }
+      button:focus, button:focus-visible,
+      a:focus, a:focus-visible,
+      [role="button"]:focus, [role="button"]:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+        border: inherit !important;
       }
     `
+  });
+
+  // Explicitly blur any focused elements to prevent focus outlines
+  await page.evaluate(() => {
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement && activeElement.blur) {
+      activeElement.blur();
+    }
   });
 
   // Wait for any remaining font rendering
