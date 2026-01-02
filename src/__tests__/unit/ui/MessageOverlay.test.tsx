@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MessageOverlay } from '@/ui/MessageOverlay';
-import { useGameStore } from '@/store/gameStore';
+import { useGameStore, type GameStore } from '@/store/gameStore';
 
 // Mock the game store
 vi.mock('@/store/gameStore', () => ({
   useGameStore: vi.fn(),
 }));
 
-type MockedUseGameStore = ReturnType<typeof vi.fn>;
+const mockedUseGameStore = vi.mocked(useGameStore);
 
 describe('MessageOverlay', () => {
   beforeEach(() => {
@@ -16,10 +16,10 @@ describe('MessageOverlay', () => {
   });
 
   it('renders boss warning when boss is active', () => {
-    (useGameStore as MockedUseGameStore).mockReturnValue({
+    mockedUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+    } as Partial<GameStore> as GameStore);
 
     render(<MessageOverlay />);
 
@@ -27,10 +27,10 @@ describe('MessageOverlay', () => {
   });
 
   it('renders mission complete when state is WIN', () => {
-    (useGameStore as MockedUseGameStore).mockReturnValue({
+    mockedUseGameStore.mockReturnValue({
       state: 'WIN',
       bossActive: false,
-    });
+    } as Partial<GameStore> as GameStore);
 
     render(<MessageOverlay />);
 
@@ -38,10 +38,10 @@ describe('MessageOverlay', () => {
   });
 
   it('renders operator down when state is GAME_OVER', () => {
-    (useGameStore as MockedUseGameStore).mockReturnValue({
+    mockedUseGameStore.mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
-    });
+    } as Partial<GameStore> as GameStore);
 
     render(<MessageOverlay />);
 
@@ -49,10 +49,10 @@ describe('MessageOverlay', () => {
   });
 
   it('is accessible with role="alert"', () => {
-    (useGameStore as MockedUseGameStore).mockReturnValue({
+    mockedUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+    } as Partial<GameStore> as GameStore);
 
     render(<MessageOverlay />);
 
