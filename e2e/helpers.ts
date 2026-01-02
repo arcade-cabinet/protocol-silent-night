@@ -29,8 +29,13 @@ export async function startGame(page: Page, characterName: string) {
     await commenceButton.waitFor({ state: 'visible', timeout: 60000 });
     await commenceButton.click({ timeout: 60000 });
   } catch (error) {
-    console.log('Available buttons:', await page.locator('button').allInnerTexts());
-    console.log('Page content:', await page.content());
+    // Try to get debug info if page is still available
+    try {
+      console.log('Available buttons:', await page.locator('button').allInnerTexts());
+      console.log('Page content:', await page.content());
+    } catch (debugError) {
+      console.log('Could not get debug info (page may be closed)');
+    }
     throw error;
   }
 
