@@ -26,10 +26,11 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
       });
     }, 100);
 
-    // Hide after minimum duration
+    // Hide after CSS animation completes (fadeOut starts at 1.4s, takes 0.5s = 1.9s total)
+    // Add buffer to ensure animation completes
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, minDuration);
+    }, Math.max(minDuration, 2000));
 
     return () => {
       clearInterval(interval);
