@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useGameStore } from '@/store/gameStore';
 import styles from './LoadingScreen.module.css';
 
 interface LoadingScreenProps {
@@ -13,19 +14,23 @@ interface LoadingScreenProps {
 export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
+  const { state } = useGameStore();
 
   useEffect(() => {
-    const animationDuration = 500; // CSS transition duration
+    // Only show during initial load or explicit loading states
+    if (state !== 'MENU' && state !== 'LOADING') {
+      const animationDuration = 500; // CSS transition duration
+      const totalDuration = Math.max(minDuration, 2000); // Ensure at least 2s for animation to complete
 
-    // Hide after minimum duration
-    const timer = setTimeout(() => {
-      setVisible(false);
-      // Remove from DOM after fade out animation completes
-      setTimeout(() => setMounted(false), animationDuration);
-    }, minDuration);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        // Remove from DOM after fade out animation completes
+        setTimeout(() => setMounted(false), animationDuration);
+      }, totalDuration);
 
-    return () => clearTimeout(timer);
-  }, [minDuration]);
+      return () => clearTimeout(timer);
+    }
+  }, [state, minDuration]);
 
   if (!mounted) return null;
 
