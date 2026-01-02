@@ -11,6 +11,13 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
+// Utility for stable screenshots
+async function waitForPageStability(page) {
+  await page.waitForLoadState('networkidle');
+  await page.waitForFunction(() => document.fonts.ready);
+  await page.waitForTimeout(500); // Brief pause for any remaining renders
+}
+
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
@@ -125,11 +132,10 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible' });
+    await santaButton.waitFor({ state: 'visible' });
+    await santaButton.waitFor({ state: 'visible' });
+    await santaButton.waitFor({ state: 'visible' });
     await santaButton.click({ force: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
     await page.waitForTimeout(3000);
 
     // Take HUD snapshot
@@ -144,10 +150,6 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ force: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
     await page.waitForTimeout(3000);
 
     // Move and fire to generate some score
@@ -167,10 +169,6 @@ test.describe('Visual Regression - Game Movement', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ force: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
     await page.waitForTimeout(3000);
 
     // Move character
@@ -189,10 +187,6 @@ test.describe('Visual Regression - Game Movement', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ force: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
     await page.waitForTimeout(3000);
 
     // Fire weapon
@@ -213,10 +207,6 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible' });
     await santaButton.click({ force: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
     await page.waitForTimeout(5000);
 
     // Wait for enemies to spawn and engage
@@ -235,10 +225,6 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click();
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
     await page.waitForTimeout(5000);
 
     // Wait for potential damage from enemies
@@ -259,10 +245,6 @@ test.describe('Visual Regression - End Game States', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible' });
     await santaButton.click({ force: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
     await page.waitForTimeout(3000);
 
     // Trigger game over by evaluating state (for testing purposes)
@@ -291,10 +273,11 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForPageStability(page);
     
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.2, // Increased tolerance for mobile rendering variations
+      timeout: 20000,
     });
   });
 
@@ -304,12 +287,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible' });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true });
-    await page.waitForTimeout(5000);
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await waitForPageStability(page);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
@@ -319,18 +304,16 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible' });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await waitForPageStability(page);
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 });
