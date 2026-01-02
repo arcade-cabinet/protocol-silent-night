@@ -9,9 +9,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation:
-    fadeOut 0.5s ease-out 1.4s forwards,
-    lowerZIndex 0.01s linear 1.4s forwards;
+  animation: fadeOut 0.5s ease-out 1.4s forwards;
   /* Allow clicks to pass through immediately while fading */
   pointer-events: none;
 }
@@ -19,12 +17,6 @@
 @keyframes fadeOut {
   to {
     opacity: 0;
-  }
-}
-
-@keyframes lowerZIndex {
-  to {
-    z-index: 50;
   }
 }
 
