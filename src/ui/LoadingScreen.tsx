@@ -17,8 +17,8 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const { state } = useGameStore();
 
   useEffect(() => {
-    // Only show during initial load or explicit loading states
-    if (state !== 'MENU' && state !== 'LOADING') {
+    // Only show during initial load (MENU state)
+    if (state !== 'MENU') {
       const animationDuration = 500; // CSS transition duration
       const totalDuration = Math.max(minDuration, 2000); // Ensure at least 2s for animation to complete
 
