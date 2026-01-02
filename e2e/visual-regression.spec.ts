@@ -25,12 +25,12 @@ async function disableAnimations(page: Page) {
         transition-duration: 0s !important;
         animation-delay: 0s !important;
         transition-delay: 0s !important;
-        animation-iteration-count: 1 !important;
         animation-play-state: paused !important;
+        animation-iteration-count: 1 !important;
       }
-      /* Prevent hover transforms from affecting stability */
       *:hover {
         transform: none !important;
+        transition: none !important;
       }
     `
   });
@@ -63,9 +63,7 @@ async function startGame(page: Page, characterName: RegExp | string) {
     page.getByRole('button', { name: /COMMENCE OPERATION/i })
   );
   await commenceBtn.waitFor({ state: 'visible', timeout: 30000 });
-  // Disable animations before clicking to prevent stability issues
-  await disableAnimations(page);
-  await commenceBtn.click({ timeout: 30000 });
+  await commenceBtn.click();
 
   // Wait for game to load (HUD score visible)
   await expect(page.getByText('SCORE')).toBeVisible({ timeout: 30000 });
@@ -92,11 +90,9 @@ test.describe('Visual Regression - Character Selection', () => {
     await disableAnimations(page);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(500); // Extra wait for stability
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
+      timeout: 20000,
     });
   });
 
