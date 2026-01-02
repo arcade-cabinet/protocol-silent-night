@@ -12,20 +12,8 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
-// Add type definition for global window property
-declare global {
-  interface Window {
-    __E2E_TEST__?: boolean;
-  }
-}
-
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
-    // Set deterministic RNG flag
-    await page.addInitScript(() => {
-      window.__E2E_TEST__ = true;
-    });
-
     // Listen for console errors
     page.on('console', msg => {
       if (msg.type() === 'error') {
