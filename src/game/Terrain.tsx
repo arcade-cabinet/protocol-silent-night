@@ -12,10 +12,6 @@ import { OBSTACLE_TYPES, TERRAIN_CONFIG } from '@/data';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
 import type { ChristmasObstacle } from '@/types';
-import { SeededRandom } from '@/types';
-
-// Deterministic RNG for visual regression testing
-const rng = new SeededRandom(124631605);
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -88,7 +84,7 @@ export function Terrain() {
           }
 
           const hRange = config.heightRange;
-          const obstacleHeight = hRange[0] + rng.next() * (hRange[1] - hRange[0]);
+          const obstacleHeight = hRange[0] + Math.random() * (hRange[1] - hRange[0]);
 
           dummy.position.y = h + (config.yOffset || obstacleHeight / 2);
 

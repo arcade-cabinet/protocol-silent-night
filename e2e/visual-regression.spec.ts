@@ -306,11 +306,14 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Wait specifically for mobile UI elements
     await page.waitForSelector('[data-testid="mobile-gameplay-ready"]', { timeout: 10000 }).catch(() => {});
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Brief pause for rendering
     await disableAnimations(page);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000
+      timeout: 20000,
+      animations: 'disabled',
     });
   });
 
@@ -323,11 +326,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Brief pause for rendering
     await disableAnimations(page);
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });

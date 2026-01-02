@@ -15,16 +15,8 @@ describe('CameraController Component', () => {
   });
 
   it('should follow player position', async () => {
-    interface R3FRenderer {
-      scene: {
-        instance: { children: Array<{ camera?: THREE.Camera }> };
-        allChildren: Array<{ instance?: { camera?: THREE.Camera } }>;
-      };
-      advanceFrames: (frames: number, delta: number) => Promise<void>;
-      unmount: () => Promise<void>;
-    }
-
-    const renderer = (await ReactTestRenderer.create(<CameraController />)) as unknown as R3FRenderer;
+    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+    const renderer = (await ReactTestRenderer.create(<CameraController />)) as any;
 
     useGameStore.setState({
       playerPosition: new THREE.Vector3(10, 0, 10),
@@ -36,7 +28,8 @@ describe('CameraController Component', () => {
     // Access camera from R3F state
     const camera =
       renderer.scene.instance.children[0]?.camera ||
-      renderer.scene.allChildren.find((c) => c.instance?.camera)?.instance?.camera;
+      (renderer.scene.allChildren.find((c: any) => (c as any).instance.camera) as any)?.instance
+        .camera;
     if (camera) {
       expect(camera.position.x).toBeCloseTo(10, 0);
       expect(camera.position.z).toBeGreaterThan(10);
