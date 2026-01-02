@@ -42,6 +42,11 @@ async function stabilizePage(page) {
   await page.waitForFunction(() => document.fonts.ready);
 }
 
+// Apply stabilization to all tests in this file to suppress focus outlines
+test.beforeEach(async ({ page }) => {
+  await stabilizePage(page);
+});
+
 test.describe('Visual Regression - Character Selection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
@@ -277,7 +282,6 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 50000, // Override for combat state variations
     });
   });
 });
@@ -298,14 +302,6 @@ test.describe('Visual Regression - End Game States', () => {
     await santaButton.click({ force: true, timeout: 15000 });
     await page.waitForTimeout(8000);
 
-    // Disable audio context to prevent Tone.js timing errors
-    await page.evaluate(() => {
-      const audioContext = (window as any).Tone?.context;
-      if (audioContext) {
-        audioContext.suspend();
-      }
-    });
-
     // Trigger game over by evaluating state (for testing purposes)
     await page.evaluate(() => {
       type GameWindow = Window & {
@@ -324,7 +320,6 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 50000, // Override for end game state variations
     });
   });
 });
