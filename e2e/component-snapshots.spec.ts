@@ -9,6 +9,21 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2;
 
+/**
+ * Helper function to wait for briefing animation and click COMMENCE OPERATION
+ * The briefing screen reveals lines one by one (600ms interval) + 500ms delay for button
+ * With 6-7 lines, this takes ~4-5 seconds total
+ */
+async function waitForAndClickCommenceOperation(page) {
+  // Wait for briefing animation to complete
+  await page.waitForTimeout(6000);
+
+  // Click "COMMENCE OPERATION" on the briefing screen
+  const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+  await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
+  await commenceButton.click({ timeout: 15000 });
+}
+
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -24,10 +39,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(8000);
 
@@ -50,10 +62,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(8000);
 
@@ -67,10 +76,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(8000);
 
@@ -94,10 +100,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(8000);
 
@@ -120,10 +123,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(8000);
 
@@ -147,10 +147,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
 
@@ -163,6 +160,9 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
+
+    await waitForAndClickCommenceOperation(page);
+
     await page.waitForTimeout(8000);
 
     // Fire at enemies
@@ -190,10 +190,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -211,10 +208,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -233,10 +227,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -263,6 +254,9 @@ test.describe('Component Snapshots - Particle Effects', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
+
+    await waitForAndClickCommenceOperation(page);
+
     await page.waitForTimeout(8000);
 
     // Fire and wait for hits
@@ -290,10 +284,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -307,10 +298,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -341,10 +329,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(8000);
 
@@ -361,10 +346,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await waitForAndClickCommenceOperation(page);
 
     await page.waitForTimeout(5000);
 
