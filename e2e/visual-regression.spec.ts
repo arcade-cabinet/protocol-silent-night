@@ -318,12 +318,17 @@ test.describe('Visual Regression - Responsive Design', () => {
   // Enable touch support for mobile emulation
   test.use({ hasTouch: true });
 
+  test.beforeEach(async ({ page }) => {
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
+  });
+
   test('should render correctly on mobile viewport', async ({ page }) => {
-    // Set viewport BEFORE navigation for consistent rendering
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/', { waitUntil: 'networkidle' });
 
-    // Wait for loading screen to disappear
     const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
@@ -342,11 +347,9 @@ test.describe('Visual Regression - Responsive Design', () => {
   });
 
   test('should render mobile gameplay correctly', async ({ page }) => {
-    // Set viewport BEFORE navigation for consistent rendering
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/', { waitUntil: 'networkidle' });
 
-    // Wait for loading screen to disappear
     const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
@@ -356,14 +359,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
 
-    // Wait for briefing screen to fully load and animate
-    // Lines are revealed one by one (600ms interval) + 500ms delay for button
-    // With 6-7 lines, this takes ~4-5 seconds
-    await page.waitForTimeout(6000);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
+    // Transition to gameplay
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
     await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to initialize
@@ -380,11 +378,9 @@ test.describe('Visual Regression - Responsive Design', () => {
   });
 
   test('should render touch controls on mobile', async ({ page }) => {
-    // Set viewport BEFORE navigation for consistent rendering
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/', { waitUntil: 'networkidle' });
 
-    // Wait for loading screen to disappear
     const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
@@ -394,17 +390,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
 
-    // Wait for briefing screen to fully load and animate
-    // Lines are revealed one by one (600ms interval) + 500ms delay for button
-    // With 6-7 lines, this takes ~4-5 seconds
-    await page.waitForTimeout(6000);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
+    // Transition to gameplay
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
     await commenceButton.click({ timeout: 15000 });
 
-    // Wait for game to initialize and touch controls to appear
     await page.waitForTimeout(10000);
 
     // Touch controls should be visible
