@@ -1,47 +1,12 @@
 import { test, expect, Page } from '@playwright/test';
+import { waitForGameReady, selectMech, commenceOperation, getGameState, triggerStoreAction } from './helpers';
 
 /**
  * Full Gameplay E2E Tests
- * 
+ *
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */
-
-// Helper to get game state from the store
-async function getGameState(page: Page) {
-  return page.evaluate(() => {
-    const store = (window as any).useGameStore;
-    if (!store) return null;
-    const state = store.getState();
-    return {
-      gameState: state.state,
-      playerHp: state.playerHp,
-      playerMaxHp: state.playerMaxHp,
-      score: state.stats.score,
-      kills: state.stats.kills,
-      bossDefeated: state.stats.bossDefeated,
-      bossActive: state.bossActive,
-      bossHp: state.bossHp,
-      killStreak: state.killStreak,
-      enemyCount: state.enemies.length,
-      bulletCount: state.bullets.length,
-    };
-  });
-}
-
-// Helper to trigger game actions via store
-async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  return page.evaluate(({ action, args }) => {
-    const store = (window as any).useGameStore;
-    if (!store) return false;
-    const state = store.getState();
-    if (typeof state[action] === 'function') {
-      state[action](...args);
-      return true;
-    }
-    return false;
-  }, { action, args });
-}
 
 // Helper to wait for game state
 async function waitForGameState(page: Page, expectedState: string, timeout = 10000) {
@@ -96,24 +61,15 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+    await waitForGameReady(page);
+
     // Verify we're at menu
     let state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
-    
-    // Select Santa
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible();
-    await santaButton.click();
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
-
-    // Wait for game to start
-    await page.waitForTimeout(2000);
+    // Select mech and start game
+    await selectMech(page, 'MECHA-SANTA');
+    await commenceOperation(page);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
@@ -126,14 +82,10 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForGameReady(page);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
-
-    await page.waitForTimeout(3000);
+    await selectMech(page, 'MECHA-SANTA');
+    await commenceOperation(page);
 
     // Verify Santa's stats are correct
     const state = await getGameState(page);

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForGameReady, waitForOverlays, waitForCanvasStable, selectMech, commenceOperation } from './helpers';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -17,43 +18,16 @@ test.setTimeout(120000);
 // Screenshot timeout to accommodate slow rendering in CI
 const SCREENSHOT_TIMEOUT = 30000;
 
-const waitForOverlays = async (page: any) => {
-  await page.waitForLoadState('networkidle').catch(() => {});
-
-  // Wait for loading screen to disappear
-  await page.getByText('INITIALIZING SYSTEMS').waitFor({ state: 'detached', timeout: 15000 }).catch(() => {});
-
-  await page.waitForFunction(() => {
-    const overlays = document.querySelectorAll('[role="dialog"], .modal, .overlay, .popup');
-    return Array.from(overlays).every(el => el === null || (el as HTMLElement).style.display === 'none' || !(el as HTMLElement).offsetParent);
-  }, { timeout: 10000 }).catch(() => {});
-};
-
-// Wait for WebGL canvas to be stable and ready for screenshots
-const waitForCanvasStable = async (page: any) => {
-  await page.waitForFunction(() => {
-    const canvas = document.querySelector('canvas');
-    if (!canvas) return false;
-
-    // Check if canvas has rendered content
-    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-    return gl !== null && canvas.width > 0 && canvas.height > 0;
-  }, { timeout: 15000 }).catch(() => {});
-
-  // Additional wait for rendering to stabilize
-  await page.waitForTimeout(1500);
-};
-
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await waitForGameReady(page);
 
     // Wait for character cards to be visible
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 15000 });
 
-    // Wait for fonts, styles, and WebGL to stabilize
-    await page.waitForTimeout(2000);
+    // Extra settling time
+    await page.waitForTimeout(1000);
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
@@ -63,11 +37,11 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await waitForGameReady(page);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaCard.waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000); // Allow WebGL to stabilize
+    await page.waitForTimeout(500); // Allow WebGL to stabilize
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
