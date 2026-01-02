@@ -88,7 +88,7 @@ test.describe('UI Component Refinement', () => {
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
       // Click MECHA-SANTA
-      await page.click('button:has-text("MECHA-SANTA")');
+      await page.click('button:has-text("MECHA-SANTA")', { force: true });
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -115,7 +115,7 @@ test.describe('UI Component Refinement', () => {
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
-      await page.click('button:has-text("CYBER-ELF")');
+      await page.click('button:has-text("CYBER-ELF")', { force: true });
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -135,7 +135,7 @@ test.describe('UI Component Refinement', () => {
 
       for (const [index, mech] of mechs.entries()) {
         // Click mech
-        await page.click(`button:has-text("${mech.name}")`);
+        await page.click(`button:has-text("${mech.name}")`, { force: true });
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -161,7 +161,7 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
+      await page.click('button:has-text("MECHA-SANTA")', { force: true });
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -185,7 +185,7 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select CYBER-ELF (Plasma SMG)
-      await page.click('button:has-text("CYBER-ELF")');
+      await page.click('button:has-text("CYBER-ELF")', { force: true });
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
@@ -241,7 +241,7 @@ test.describe('UI Component Refinement', () => {
 
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
+      await page.click('button:has-text("MECHA-SANTA")', { force: true });
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {

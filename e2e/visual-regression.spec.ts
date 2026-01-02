@@ -270,11 +270,19 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    // Wait for any loading overlay to disappear
+    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
+
     await page.waitForTimeout(5000);
-    
+
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -284,11 +292,19 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    // Wait for any loading overlay to disappear
+    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await commenceButton.click();
+
     await page.waitForTimeout(3000);
-    
+
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
