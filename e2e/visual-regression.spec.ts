@@ -65,8 +65,16 @@ async function pauseThreeJsRendering(page: Page) {
 declare global {
   interface Window {
     __pauseGameForScreenshot?: boolean;
+    __E2E_TEST__?: boolean;
   }
 }
+
+// Set deterministic RNG flag before each test
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__E2E_TEST__ = true;
+  });
+});
 
 /**
  * Helper to start the game with a specific character
