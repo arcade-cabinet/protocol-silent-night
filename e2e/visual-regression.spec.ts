@@ -315,7 +315,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Pause game for stable screenshot
     await page.evaluate(() => { window.__pauseGameForScreenshot = true; });
-    await page.waitForTimeout(500); // Wait for freeze
+    await page.waitForTimeout(1000); // Wait for all rendering to fully freeze
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,

@@ -49,12 +49,12 @@ export default defineConfig({
     timeout: 10000,
     // Screenshot comparison settings
     toHaveScreenshot: {
-      // Maximum number of pixels that can differ
-      maxDiffPixels: 100,
       // Animation handling
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
+      // Use maxDiffPixelRatio in tests instead of absolute pixel count
+      // to account for WebGL rendering variations across environments
     },
   },
   // Configure projects for major browsers
