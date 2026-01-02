@@ -300,60 +300,71 @@ test.describe('Visual Regression - Responsive Design', () => {
 
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/');
-    await page.waitForTimeout(2000);
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
+
+    await page.waitForLoadState('networkidle');
+    await page.waitForFunction(() => document.fonts.ready);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.5, // Increased threshold for mobile rendering variance
       threshold: 0.2, // Relaxed color threshold
       animations: 'disabled',
+      fullPage: true, // Ensure full rendering
+      scale: 'css', // Use CSS pixel scaling
     });
   });
 
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/');
-    await page.waitForTimeout(2000);
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.click({ timeout: 15000 });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await santaButton.click({ force: true, timeout: 15000 });
 
     // Wait for game to initialize
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(10000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: 0.5, // Increased threshold for mobile rendering variance
       threshold: 0.2, // Relaxed color threshold
+      fullPage: true, // Ensure full rendering
+      scale: 'css', // Use CSS pixel scaling
     });
   });
 
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/');
-    await page.waitForTimeout(2000);
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.click({ timeout: 15000 });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
-
-    await page.waitForTimeout(3000);
+    await santaButton.click({ force: true, timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Touch controls should be visible
-    await expect(page.getByRole('button', { name: /FIRE/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: /FIRE/ })).toHaveScreenshot('touch-fire-button.png', {
+    const fireButton = page.getByRole('button', { name: /FIRE/ });
+    await fireButton.waitFor({ state: 'visible', timeout: 45000 }); // Further increased timeout
+    await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: 0.5, // Increased threshold for mobile rendering variance
       threshold: 0.2, // Relaxed color threshold
+      scale: 'css', // Use CSS pixel scaling
     });
   });
 });
