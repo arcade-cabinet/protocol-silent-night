@@ -19,14 +19,13 @@ export async function startGame(page: Page, characterName: string) {
   await characterButton.waitFor({ state: 'visible', timeout: 60000 });
   await characterButton.click({ force: true, timeout: 60000 });
 
-  // Wait for briefing animation to complete (5-6 lines at 600ms + 500ms for button)
-  // We explicitly wait here to ensure the animation logic has time to run
-  await page.waitForTimeout(5000);
-
-  // Click COMMENCE OPERATION
+  // Wait for COMMENCE OPERATION button to appear
+  // The button appears after briefing animation completes (5-6 lines at 600ms + 500ms delay)
   const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
   try {
-    await commenceButton.waitFor({ state: 'visible', timeout: 60000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    // Ensure the button is stable and clickable
+    await page.waitForTimeout(500);
     await commenceButton.click({ timeout: 60000 });
   } catch (error) {
     if (!page.isClosed()) {

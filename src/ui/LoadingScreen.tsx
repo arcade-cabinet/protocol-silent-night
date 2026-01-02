@@ -17,16 +17,15 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const { state } = useGameStore();
 
   useEffect(() => {
-    // Only show during initial load or explicit loading states
+    // Only show during initial load (MENU) or explicit loading states
+    // Hide immediately when transitioning to any other state
     if (state !== 'MENU' && state !== 'LOADING') {
       const animationDuration = 500; // CSS transition duration
-      const totalDuration = Math.max(minDuration, 2000); // Ensure at least 2s for animation to complete
 
-      const timer = setTimeout(() => {
-        setVisible(false);
-        // Remove from DOM after fade out animation completes
-        setTimeout(() => setMounted(false), animationDuration);
-      }, totalDuration);
+      // Immediately start fade out
+      setVisible(false);
+      // Remove from DOM after fade out animation completes
+      const timer = setTimeout(() => setMounted(false), animationDuration);
 
       return () => clearTimeout(timer);
     }
