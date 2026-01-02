@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { setupE2EEnvironment } from './test-utils';
 
 /**
  * Comprehensive Character Class E2E Tests for Protocol: Silent Night
@@ -25,7 +26,10 @@ test.describe('Character Class Tests', () => {
         console.log(`Console error: ${msg.text()}`);
       }
     });
-    
+
+    // Setup E2E environment before navigation
+    await setupE2EEnvironment(page);
+
     await page.goto('/');
   });
 

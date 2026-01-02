@@ -5,6 +5,17 @@
 import { Page, Locator } from '@playwright/test';
 
 /**
+ * Setup E2E test environment for a page
+ * Call this before page.goto() to inject E2E markers
+ */
+export async function setupE2EEnvironment(page: Page) {
+  // Inject E2E marker before any page scripts run
+  await page.addInitScript(() => {
+    (window as any).__E2E_TESTING__ = true;
+  });
+}
+
+/**
  * Wait for the loading screen to disappear
  * The loading screen shows "INITIALIZING SYSTEMS" and blocks the main UI
  */

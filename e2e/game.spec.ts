@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { setupE2EEnvironment } from './test-utils';
 
 /**
  * E2E Tests for Protocol: Silent Night
@@ -22,7 +23,10 @@ test.describe('Protocol: Silent Night', () => {
         console.log(`Console error: ${msg.text()}`);
       }
     });
-    
+
+    // Setup E2E environment before navigation
+    await setupE2EEnvironment(page);
+
     await page.goto('/');
   });
 

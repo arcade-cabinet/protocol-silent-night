@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForLoadingScreen } from './test-utils';
+import { waitForLoadingScreen, setupE2EEnvironment } from './test-utils';
 
 /**
  * UI Component Refinement Tests
@@ -28,6 +28,9 @@ test.describe('UI Component Refinement', () => {
         console.log(`⚠️  WebGL warning: ${msg.text()}`);
       }
     });
+
+    // Setup E2E environment before navigation
+    await setupE2EEnvironment(page);
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
