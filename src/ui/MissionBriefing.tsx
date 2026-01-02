@@ -47,6 +47,17 @@ export function MissionBriefing() {
   useEffect(() => {
     if (state !== 'BRIEFING') return;
 
+    // Check if running in E2E test environment
+    const isE2E = typeof window !== 'undefined' && (window as any).__E2E_TESTING__;
+
+    // In E2E mode, skip animations and show everything immediately
+    if (isE2E) {
+      setCurrentLine(briefingLines.length - 1);
+      setShowButton(true);
+      AudioManager.playSFX('ui_click');
+      return;
+    }
+
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
