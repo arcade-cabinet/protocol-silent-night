@@ -10,10 +10,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { CONFIG, ENEMIES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
-import { SeededRandom } from '@/types';
 
 const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES;
-const rng = new SeededRandom(124631605);
 
 let enemyIdCounter = 0;
 
@@ -47,6 +45,8 @@ export function Enemies() {
       return;
 
     const id = `minion-${enemyIdCounter++}`;
+    // Use store RNG for consistency
+    const rng = useGameStore.getState().rng;
     const angle = rng.next() * Math.PI * 2;
     const radius =
       ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin +
@@ -67,7 +67,9 @@ export function Enemies() {
       maxHp: MINION_CONFIG.hp * waveMult,
       isActive: true,
       type: 'minion',
-      speed: (MINION_CONFIG.speed + rng.next() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
+      speed:
+        (MINION_CONFIG.speed + rng.next() * 2) *
+        Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
       damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
     });

@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Component Snapshot Tests
@@ -8,60 +8,6 @@ import { test, expect, type Page } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
-
-/**
- * Helper to disable animations for stable screenshots
- */
-async function disableAnimations(page: Page) {
-  await page.addStyleTag({
-    content: `
-      *, *::before, *::after {
-        animation-duration: 0s !important;
-        transition-duration: 0s !important;
-        animation-delay: 0s !important;
-        transition-delay: 0s !important;
-        animation-play-state: paused !important;
-        animation-iteration-count: 1 !important;
-      }
-      *:hover {
-        transform: none !important;
-        transition: none !important;
-      }
-    `
-  });
-
-  // Wait for rendering to settle (Three.js/WebGL)
-  await page.waitForTimeout(1000);
-
-  // Wait for any pending animations/transitions to complete
-  await page.evaluate(() => {
-    return new Promise<void>((resolve) => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          resolve();
-        });
-      });
-    });
-  });
-}
-
-/**
- * Helper to pause Three.js rendering loop for stable screenshots
- */
-async function pauseThreeJsRendering(page: Page) {
-  await page.evaluate(() => {
-    // Flag to stop useFrame loops
-    window.__pauseGameForScreenshot = true;
-  });
-  await page.waitForTimeout(500);
-}
-
-// Add type definition for global window property
-declare global {
-  interface Window {
-    __pauseGameForScreenshot?: boolean;
-  }
-}
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
@@ -86,13 +32,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
       }
     });
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -108,13 +49,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await page.waitForTimeout(5000);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -130,13 +66,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await page.waitForTimeout(5000);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 });
@@ -163,13 +94,8 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.waitForTimeout(1000);
     await page.keyboard.up('a');
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -185,13 +111,8 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await page.waitForTimeout(5000);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 });
@@ -209,13 +130,8 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -232,13 +148,8 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 });
@@ -260,13 +171,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.keyboard.press('Space');
     await page.waitForTimeout(300);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -287,13 +193,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(1000);
     await page.keyboard.up('Space');
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -313,13 +214,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.keyboard.press('Space');
     await page.waitForTimeout(300);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 });
@@ -338,13 +234,8 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 });
@@ -362,13 +253,8 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await page.waitForTimeout(3000);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -391,13 +277,8 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.keyboard.up('d');
     await page.keyboard.up('w');
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 });
@@ -418,13 +299,8 @@ test.describe('Component Snapshots - UI Overlays', () => {
     // Trigger damage by getting close to enemies
     await page.waitForTimeout(5000);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 
@@ -453,13 +329,8 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await page.waitForTimeout(1000);
 
-    await disableAnimations(page);
-    await pauseThreeJsRendering(page);
-
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      animations: 'disabled',
-      timeout: 30000,
     });
   });
 });

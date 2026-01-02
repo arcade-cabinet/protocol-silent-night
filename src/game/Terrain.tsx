@@ -11,10 +11,7 @@ import * as THREE from 'three';
 import { OBSTACLE_TYPES, TERRAIN_CONFIG } from '@/data';
 import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
 import { useGameStore } from '@/store/gameStore';
-import { SeededRandom } from '@/types';
 import type { ChristmasObstacle } from '@/types';
-
-const rng = new SeededRandom(124631605);
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -86,8 +83,14 @@ export function Terrain() {
             config = OBSTACLE_TYPES.candy_cane;
           }
 
+          // We need a stable random value based on position for terrain generation
+          // so it's deterministic but not dependent on game state RNG
+          // Use the noise value itself as a seed for height variation
+          const pseudoRandom = (Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1;
+          const normalizedRandom = Math.abs(pseudoRandom);
+
           const hRange = config.heightRange;
-          const obstacleHeight = hRange[0] + rng.next() * (hRange[1] - hRange[0]);
+          const obstacleHeight = hRange[0] + normalizedRandom * (hRange[1] - hRange[0]);
 
           dummy.position.y = h + (config.yOffset || obstacleHeight / 2);
 

@@ -34,6 +34,7 @@ import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
 declare global {
   interface Window {
     useGameStore?: unknown;
+    __E2E_TEST__?: boolean;
   }
 }
 
@@ -283,7 +284,11 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
-  rng: new SeededRandom(12345),
+  // Use a fixed seed in E2E environment for determinism, otherwise use secure random default
+  rng:
+    typeof window !== 'undefined' && window.__E2E_TEST__
+      ? new SeededRandom(124631605)
+      : new SeededRandom(),
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -968,7 +973,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       highScore: get().highScore,
       metaProgress: get().metaProgress,
       playerPosition: new THREE.Vector3(0, 0, 0),
-      rng: new SeededRandom(Date.now()),
+      // Preserve E2E determinism on reset
+      rng:
+        typeof window !== 'undefined' && window.__E2E_TEST__
+          ? new SeededRandom(124631605)
+          : new SeededRandom(),
     }),
 }));
 

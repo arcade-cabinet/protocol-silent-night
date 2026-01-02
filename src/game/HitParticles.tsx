@@ -7,9 +7,6 @@ import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { SeededRandom } from '@/types';
-
-const rng = new SeededRandom(124631605);
 
 interface Particle {
   id: number;
@@ -54,6 +51,7 @@ export function HitParticles() {
       lastKillsRef.current = stats.kills;
       // Spawn hit particles at a random position (since we don't track exact hit location)
       const playerPos = useGameStore.getState().playerPosition;
+      const rng = useGameStore.getState().rng;
       const angle = rng.next() * Math.PI * 2;
       const dist = 3 + rng.next() * 5;
       const hitPos = tempVecRef.current.set(
@@ -129,6 +127,8 @@ function spawnParticles(
   while (particles.length + count > MAX_PARTICLES) {
     particles.shift();
   }
+
+  const rng = useGameStore.getState().rng;
 
   for (let i = 0; i < count; i++) {
     particles.push({

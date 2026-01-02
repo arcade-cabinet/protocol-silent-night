@@ -7,9 +7,6 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useCallback, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
-import { SeededRandom } from '@/types';
-
-const rng = new SeededRandom(124631605);
 
 const DEFAULT_CAMERA_HEIGHT = 25;
 const DEFAULT_CAMERA_DISTANCE = 20;
@@ -168,6 +165,7 @@ export function CameraController() {
 
     // Apply screen shake
     if (screenShake > 0.01) {
+      const rng = useGameStore.getState().rng;
       targetRef.current.x += (rng.next() - 0.5) * screenShake * 2;
       targetRef.current.y += (rng.next() - 0.5) * screenShake * 2;
       targetRef.current.z += (rng.next() - 0.5) * screenShake * 2;
