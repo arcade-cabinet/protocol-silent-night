@@ -45,18 +45,23 @@ describe('SeededRandom Security', () => {
     Object.defineProperty(window, 'crypto', { value: originalCrypto, writable: true });
   });
 
-  it('should fall back to Math.random if crypto is not available', () => {
+  it('should fall back to Date.now() if crypto is not available', () => {
     const originalCrypto = window.crypto;
     Object.defineProperty(window, 'crypto', { value: undefined, writable: true });
 
-    const mathRandomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(123456789);
 
-    new SeededRandom();
+    const rng = new SeededRandom();
 
-    expect(mathRandomSpy).toHaveBeenCalled();
+    expect(dateNowSpy).toHaveBeenCalled();
+
+    // Should behave like seeded with the mocked timestamp % 999999
+    // 123456789 % 999999 = 456912 (verified with shell calculation)
+    const expectedRng = new SeededRandom(456912);
+    expect(rng.next()).toBe(expectedRng.next());
 
     // Restore
     Object.defineProperty(window, 'crypto', { value: originalCrypto, writable: true });
-    mathRandomSpy.mockRestore();
+    dateNowSpy.mockRestore();
   });
 });

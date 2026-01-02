@@ -9,6 +9,8 @@ import * as THREE from 'three';
 import { useGameStore } from '@/store/gameStore';
 import { SeededRandom } from '@/types';
 
+const rng = new SeededRandom(124631605);
+
 const DEFAULT_CAMERA_HEIGHT = 25;
 const DEFAULT_CAMERA_DISTANCE = 20;
 const LERP_SPEED = 5;
@@ -19,9 +21,6 @@ const MAX_ZOOM = 2.0;
 
 const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
 const LOOK_TARGET = new THREE.Vector3();
-
-// Seeded random for deterministic screen shake
-const shakeRng = new SeededRandom(789);
 
 export function CameraController() {
   const { camera } = useThree();
@@ -169,9 +168,9 @@ export function CameraController() {
 
     // Apply screen shake
     if (screenShake > 0.01) {
-      targetRef.current.x += (shakeRng.next() - 0.5) * screenShake * 2;
-      targetRef.current.y += (shakeRng.next() - 0.5) * screenShake * 2;
-      targetRef.current.z += (shakeRng.next() - 0.5) * screenShake * 2;
+      targetRef.current.x += (rng.next() - 0.5) * screenShake * 2;
+      targetRef.current.y += (rng.next() - 0.5) * screenShake * 2;
+      targetRef.current.z += (rng.next() - 0.5) * screenShake * 2;
 
       // Decay shake using getState to avoid re-render cycles
       const currentShake = useGameStore.getState().screenShake;

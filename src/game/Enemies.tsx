@@ -13,11 +13,9 @@ import { useGameStore } from '@/store/gameStore';
 import { SeededRandom } from '@/types';
 
 const { minion: MINION_CONFIG, boss: BOSS_CONFIG, spawnConfig: ENEMY_SPAWN_CONFIG } = ENEMIES;
+const rng = new SeededRandom(124631605);
 
 let enemyIdCounter = 0;
-
-// Seeded random for deterministic enemy spawning
-const enemyRng = new SeededRandom(123);
 
 // Pre-allocated objects for performance
 const dummy = new THREE.Object3D();
@@ -49,10 +47,10 @@ export function Enemies() {
       return;
 
     const id = `minion-${enemyIdCounter++}`;
-    const angle = enemyRng.next() * Math.PI * 2;
+    const angle = rng.next() * Math.PI * 2;
     const radius =
       ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin +
-      enemyRng.next() *
+      rng.next() *
         (ENEMY_SPAWN_CONFIG.minionSpawnRadiusMax - ENEMY_SPAWN_CONFIG.minionSpawnRadiusMin);
 
     const mesh = new THREE.Object3D();
@@ -69,7 +67,7 @@ export function Enemies() {
       maxHp: MINION_CONFIG.hp * waveMult,
       isActive: true,
       type: 'minion',
-      speed: (MINION_CONFIG.speed + enemyRng.next() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
+      speed: (MINION_CONFIG.speed + rng.next() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
       damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
     });
