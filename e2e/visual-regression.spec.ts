@@ -233,7 +233,9 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click({ force: true, timeout: 20000 });
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 30000 });
 
     await page.waitForTimeout(5000);
 
@@ -255,7 +257,9 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.click({ force: true, timeout: 20000 });
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ timeout: 30000 });
 
     await page.waitForTimeout(5000);
 
@@ -332,6 +336,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 }); // Increased timeout and force click
 
+    // Wait for briefing screen transition
+    await page.waitForTimeout(3000);
+
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 15000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -356,6 +363,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 });
+
+    // Wait for briefing screen transition
+    await page.waitForTimeout(3000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 15000 });
