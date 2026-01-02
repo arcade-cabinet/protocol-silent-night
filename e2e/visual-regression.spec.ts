@@ -23,7 +23,6 @@ async function stabilizePage(page) {
   await page.waitForTimeout(500);
 
   // Ensure all animations are truly disabled via CSS injection
-  // Also suppress focus outlines to prevent visual regression failures
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -32,10 +31,15 @@ async function stabilizePage(page) {
         transition-duration: 0s !important;
         transition-delay: 0s !important;
       }
-      *:focus-visible {
-        outline: none !important;
-      }
     `
+  });
+
+  // Remove focus from any focused element to prevent focus-visible outlines in screenshots
+  await page.evaluate(() => {
+    const activeElement = document.activeElement;
+    if (activeElement && activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
   });
 
   // Wait for any remaining font rendering
