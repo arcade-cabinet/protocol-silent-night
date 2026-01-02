@@ -88,7 +88,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        <div className={styles.tabs} role="tablist" aria-label="Workshop Categories">
+        <div className={styles.tabs} role="tablist">
           <button
             type="button"
             role="tab"

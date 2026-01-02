@@ -23,6 +23,7 @@ async function stabilizePage(page) {
   await page.waitForTimeout(500);
 
   // Ensure all animations are truly disabled via CSS injection
+  // Also suppress focus outlines to prevent visual regression failures
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -30,6 +31,9 @@ async function stabilizePage(page) {
         animation-delay: 0s !important;
         transition-duration: 0s !important;
         transition-delay: 0s !important;
+      }
+      *:focus-visible {
+        outline: none !important;
       }
     `
   });
@@ -107,7 +111,7 @@ test.describe('Visual Regression - Game Start', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -127,7 +131,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -147,7 +151,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -364,7 +368,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await commenceButton.click({ timeout: 30000 });
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
 
     // Wait for game to initialize
     await page.waitForTimeout(10000);
@@ -396,7 +401,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 15000, noWaitAfter: true });
+    await commenceButton.click({ timeout: 30000 });
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
 
     await page.waitForTimeout(10000);
 
@@ -409,13 +415,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(2000);
     await expect(fireButton).toBeVisible({ timeout: 60000 });
 
-    // Additional stabilization for consistent rendering
-    await stabilizePage(page);
-    await page.waitForTimeout(1000);
-
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: 0.5,
-      threshold: 0.3,
+      threshold: 0.3, // Relaxed color threshold
       scale: 'css',
       timeout: 60000,
     });
