@@ -403,7 +403,6 @@ test.describe('Visual Regression - Responsive Design', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
     await commenceButton.click({ timeout: 15000 });
 
-    // Wait for game to initialize
     await page.waitForTimeout(10000);
 
     // Touch controls should be visible
