@@ -356,6 +356,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
 
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     // Wait for game to initialize
     await page.waitForTimeout(10000);
     await stabilizePage(page);
@@ -381,6 +386,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
+
     await page.waitForTimeout(10000);
 
     // Touch controls should be visible
