@@ -41,8 +41,8 @@ export async function selectCharacterAndStart(
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
   // Check if page is open
-  if (page.isClosed()) {
-    throw new Error('Page is already closed');
+  if (!page || page.isClosed()) {
+    throw new Error('Page closed while waiting for game init');
   }
 
   // Initial animation wait - reduced
@@ -70,6 +70,10 @@ export async function selectCharacterAndStart(
   const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
   await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
   await safeClick(commenceButton);
+
+  if (!page || page.isClosed()) {
+    throw new Error('Page closed after click operation');
+  }
 
   // Wait for game to initialize - replaced with selector wait
   try {
