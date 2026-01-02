@@ -345,12 +345,20 @@ export class SeededRandom {
   constructor(seed?: number) {
     if (seed !== undefined) {
       this.state = seed;
-    } else if (typeof window !== 'undefined' && window.crypto) {
-      const array = new Uint32Array(1);
-      window.crypto.getRandomValues(array);
-      this.state = array[0] % 999999;
     } else {
-      this.state = Math.floor(Math.random() * 999999);
+      // Try to use crypto.getRandomValues for better entropy
+      try {
+        if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+          const array = new Uint32Array(1);
+          window.crypto.getRandomValues(array);
+          this.state = array[0] % 999999;
+        } else {
+          this.state = Math.floor(Math.random() * 999999);
+        }
+      } catch {
+        // Fallback to Math.random if crypto is not available or throws
+        this.state = Math.floor(Math.random() * 999999);
+      }
     }
   }
 
