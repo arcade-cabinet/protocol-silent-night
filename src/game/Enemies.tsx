@@ -21,7 +21,7 @@ const dummy = new THREE.Object3D();
 const tempColor = new THREE.Color();
 
 // Deterministic RNG for visual regression testing
-const rng = new SeededRandom(12463160577482274073);
+const rng = new SeededRandom(124631605);
 
 export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);

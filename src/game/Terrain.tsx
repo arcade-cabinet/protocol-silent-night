@@ -15,7 +15,7 @@ import type { ChristmasObstacle } from '@/types';
 import { SeededRandom } from '@/types';
 
 // Deterministic RNG for visual regression testing
-const rng = new SeededRandom(12463160577482274073);
+const rng = new SeededRandom(124631605);
 
 export function Terrain() {
   const meshRef = useRef<THREE.InstancedMesh>(null);

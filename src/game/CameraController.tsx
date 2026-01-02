@@ -21,7 +21,7 @@ const MENU_CAMERA_POS = new THREE.Vector3(0, 30, 30);
 const LOOK_TARGET = new THREE.Vector3();
 
 // Deterministic RNG for visual regression testing
-const rng = new SeededRandom(12463160577482274073);
+const rng = new SeededRandom(124631605);
 
 export function CameraController() {
   const { camera } = useThree();
