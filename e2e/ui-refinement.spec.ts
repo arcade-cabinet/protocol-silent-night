@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
-const WEBGL_MAX_DIFF_PIXELS = 55000; // Allow absolute pixel differences for large renders (increased for seeded RNG)
+const WEBGL_MAX_DIFF_PIXELS = 50000;
 
 // Set deterministic RNG flag before each test
 test.beforeEach(async ({ page }) => {
@@ -104,8 +104,6 @@ test.describe('UI Component Refinement', () => {
     await button.waitFor({ state: 'visible', timeout: 10000 });
     // Force click to bypass potential overlays
     await button.click({ force: true });
-    // Wait for state transition to complete
-    await page.waitForTimeout(500);
   }
 
   test.describe('Menu Screen', () => {
@@ -167,7 +165,7 @@ test.describe('UI Component Refinement', () => {
 
       // Wait for mission briefing with longer timeout for state transition
       try {
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000, state: 'visible' });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
 
         const briefingTitle = page.locator('text=MISSION BRIEFING');
         await expect(briefingTitle).toBeVisible({ timeout: 3000 });
@@ -239,7 +237,7 @@ test.describe('UI Component Refinement', () => {
       await clickMechButton(page, 'MECHA-SANTA');
 
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000, state: 'visible' });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       // Click commence
       await page.click('button:has-text("COMMENCE OPERATION")');
@@ -320,10 +318,7 @@ test.describe('UI Component Refinement', () => {
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
       await clickMechButton(page, 'MECHA-SANTA');
-      // Wait for mission briefing to appear with more generous timeout
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000, state: 'visible' });
-      // Wait for briefing animation to complete
-      await page.waitForTimeout(2000);
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await disableAnimations(page);
