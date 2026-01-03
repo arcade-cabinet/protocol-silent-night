@@ -65,9 +65,12 @@ test.describe('Visual Regression - Game Start', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     // Wait for game to load
@@ -88,9 +91,12 @@ test.describe('Visual Regression - Game Start', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await elfButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     // Wait for game to load
@@ -111,9 +117,12 @@ test.describe('Visual Regression - Game Start', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await bumbleButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     // Wait for game to load
@@ -135,9 +144,12 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -156,9 +168,12 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -182,9 +197,12 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -207,9 +225,12 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -233,9 +254,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(5000);
@@ -258,9 +282,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await elfButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(5000);
@@ -284,9 +311,12 @@ test.describe('Visual Regression - End Game States', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -337,9 +367,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForLoadState('networkidle', { timeout: 30000 });
@@ -359,9 +392,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.click({ force: true });
 
+    // Wait for briefing screen to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
