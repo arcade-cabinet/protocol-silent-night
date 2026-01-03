@@ -696,10 +696,10 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
-    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton2.waitFor({ state: 'visible', timeout: 45000 });
+    await commenceButton2.click({ timeout: 30000 });
 
     await page.waitForTimeout(2000);
 
