@@ -14,6 +14,9 @@ export async function waitForGameReady(page: Page) {
  * Selects a character and starts the game, handling the mission briefing sequence.
  */
 export async function startGame(page: Page, characterName: string) {
+  // Capture browser console logs to help diagnose issues
+  page.on('console', msg => console.log(`[Browser Console] ${msg.type()}: ${msg.text()}`));
+
   // Select character
   const characterButton = page.getByRole('button', { name: new RegExp(characterName, 'i') });
   await characterButton.waitFor({ state: 'visible', timeout: 60000 });
