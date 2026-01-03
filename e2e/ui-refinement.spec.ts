@@ -120,6 +120,9 @@ test.describe('UI Component Refinement', () => {
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
+      // Wait for briefing screen animation to complete (7 lines × 600ms + 500ms = ~4.7s)
+      await page.waitForTimeout(6000);
+
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
       await expect(opButton).toBeVisible();
@@ -166,6 +169,9 @@ test.describe('UI Component Refinement', () => {
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
+      // Wait for briefing screen animation to complete (7 lines × 600ms + 500ms = ~4.7s)
+      await page.waitForTimeout(6000);
+
       // Click commence
       await page.click('button:has-text("COMMENCE OPERATION")');
 
@@ -187,6 +193,10 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+
+      // Wait for briefing screen animation to complete (7 lines × 600ms + 500ms = ~4.7s)
+      await page.waitForTimeout(6000);
+
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD
@@ -243,6 +253,9 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       await page.click('button:has-text("MECHA-SANTA")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+
+      // Wait for briefing screen animation to complete (7 lines × 600ms + 500ms = ~4.7s)
+      await page.waitForTimeout(6000);
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
