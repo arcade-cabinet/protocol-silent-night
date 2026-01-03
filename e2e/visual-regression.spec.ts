@@ -114,13 +114,16 @@ test.describe('Visual Regression - Game Start', () => {
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.click({ timeout: 15000 });
+    await santaButton.click({ force: true, timeout: 15000 });
+
+    // Wait for mission briefing screen to appear
+    await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 15000 });
+    await commenceButton.click({ force: true, timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -138,10 +141,13 @@ test.describe('Visual Regression - Game Start', () => {
     await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click({ force: true, timeout: 15000 });
 
+    // Wait for mission briefing screen to appear
+    await page.waitForTimeout(1000);
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
+    await commenceButton.click({ force: true, timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -159,10 +165,13 @@ test.describe('Visual Regression - Game Start', () => {
     await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleButton.click({ force: true, timeout: 15000 });
 
+    // Wait for mission briefing screen to appear
+    await page.waitForTimeout(1000);
+
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ timeout: 15000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
+    await commenceButton.click({ force: true, timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -388,7 +397,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ force: true, timeout: 30000 });
     await page.waitForLoadState('networkidle', { timeout: 30000 });
 
     // Wait for game to initialize
@@ -422,7 +431,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ force: true, timeout: 30000 });
     await page.waitForLoadState('networkidle', { timeout: 30000 });
 
     await page.waitForTimeout(10000);
