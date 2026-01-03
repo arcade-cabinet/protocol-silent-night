@@ -69,7 +69,14 @@ test.describe('Visual Regression - Game Start', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      // Take a screenshot on failure to debug the page state
+      await page.screenshot({ path: 'commence-button-not-found.png' });
+      // Re-throw the error to fail the test
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     // Wait for game to load
@@ -94,7 +101,12 @@ test.describe('Visual Regression - Game Start', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-elf.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     // Wait for game to load
@@ -119,7 +131,12 @@ test.describe('Visual Regression - Game Start', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-bumble.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     // Wait for game to load
@@ -145,7 +162,12 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-hud.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -168,7 +190,12 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-score.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -196,7 +223,12 @@ test.describe('Visual Regression - Game Movement', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-move.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -223,7 +255,12 @@ test.describe('Visual Regression - Game Movement', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-fire.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -251,7 +288,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-combat.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(5000);
@@ -278,7 +320,12 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-damage.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(5000);
@@ -306,7 +353,12 @@ test.describe('Visual Regression - End Game States', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-gameover.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
@@ -362,7 +414,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     // Add explicit wait and retry logic for buttons
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-mobile.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForLoadState('networkidle', { timeout: 30000 });
@@ -386,7 +443,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-touch.png' });
+      throw e;
+    }
     await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
