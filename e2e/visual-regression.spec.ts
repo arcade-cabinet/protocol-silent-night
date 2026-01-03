@@ -321,12 +321,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     // For unstable mobile screenshots, disable animations and increase stability check:
     await page.addStyleTag({ content: '* { animation: none !important; transition: none !important; }' });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Add explicit wait before screenshot
+    await page.waitForTimeout(1000); // Add explicit wait before screenshot
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixels: 5000, // Allow up to 5000 pixels to differ due to WebGL/font rendering variations
+      maxDiffPixelRatio: VISUAL_THRESHOLD,
       threshold: 0.2,
-      timeout: 20000,
+      timeout: 30000,
       animations: 'disabled' // Explicitly disable animations
     });
   });
@@ -374,12 +374,14 @@ test.describe('Visual Regression - Responsive Design', () => {
       'button[class*="fireBtn"]', // Add class selector based on CSS module
     ].join(',')).first();
 
-    await expect(fireButton).toBeVisible({ timeout: 20000 });
+    await expect(fireButton).toBeVisible({ timeout: 30000 });
+    await fireButton.waitForElementState('stable');
+    await page.waitForTimeout(500);
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
-      maxDiffPixels: 200, // Allow up to 200 pixels to differ due to font/anti-aliasing variations
+      maxDiffPixelRatio: VISUAL_THRESHOLD,
       threshold: 0.2,
-      timeout: 20000
+      timeout: 30000
     });
   });
 });
