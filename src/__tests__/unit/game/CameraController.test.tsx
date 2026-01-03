@@ -28,6 +28,7 @@ describe('CameraController Component', () => {
     // Access camera from R3F state
     const camera =
       renderer.scene.instance.children[0]?.camera ||
+      // biome-ignore lint/suspicious/noExplicitAny: test renderer types are not fully typed
       (renderer.scene.allChildren.find((c: any) => (c as any).instance.camera) as any)?.instance
         .camera;
     if (camera) {
