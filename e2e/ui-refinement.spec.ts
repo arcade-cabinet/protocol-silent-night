@@ -232,9 +232,7 @@ test.describe('UI Component Refinement', () => {
       // Take snapshot for visual regression
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
-          maxDiffPixelRatio: 0.4,
-          maxDiffPixels: 200,
-          timeout: 30000,
+          maxDiffPixels: 100,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -248,9 +246,7 @@ test.describe('UI Component Refinement', () => {
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
-          maxDiffPixelRatio: 0.4,
-          maxDiffPixels: 200,
-          timeout: 30000,
+          maxDiffPixels: 100,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });

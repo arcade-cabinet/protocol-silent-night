@@ -34,8 +34,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -53,8 +51,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -72,8 +68,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 });
@@ -102,8 +96,6 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -121,8 +113,6 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 });
@@ -142,8 +132,6 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -162,8 +150,6 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 });
@@ -187,8 +173,6 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -211,8 +195,6 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -234,8 +216,6 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 });
@@ -256,8 +236,6 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 });
@@ -277,8 +255,6 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -303,8 +279,6 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 });
@@ -327,8 +301,6 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 
@@ -359,8 +331,6 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200,
-      timeout: 30000,
     });
   });
 });

@@ -398,7 +398,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200, // Allow up to 200 pixels difference for WebGL rendering
+      maxDiffPixels: 200, // Allow small absolute pixel differences
       timeout: 30000,
       animations: 'disabled',
     });
@@ -419,7 +419,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 200, // Allow up to 200 pixels difference for WebGL rendering
+      maxDiffPixels: 200, // Allow small absolute pixel differences
       timeout: 30000,
       animations: 'disabled',
     });
