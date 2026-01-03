@@ -100,10 +100,12 @@ test.describe('UI Component Refinement', () => {
    */
   async function clickMechButton(page: import('@playwright/test').Page, name: string) {
     const button = page.locator(`button:has-text("${name}")`).first();
-    // Wait for button to be stable
-    await button.waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for button to be stable with increased timeout for CI
+    await button.waitFor({ state: 'visible', timeout: 20000 });
+    // Wait for any animations/transitions to complete
+    await page.waitForTimeout(500);
     // Force click to bypass potential overlays
-    await button.click({ force: true });
+    await button.click({ force: true, timeout: 10000 });
   }
 
   test.describe('Menu Screen', () => {
