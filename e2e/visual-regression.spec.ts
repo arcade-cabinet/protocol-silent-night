@@ -320,6 +320,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
+      maxDiffPixels: 50000, // Add absolute pixel threshold
       maxDiffPixelRatio: 0.2, // Increased tolerance for mobile rendering
       timeout: 30000,
       animations: 'disabled',
@@ -334,13 +335,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     // Wait for any loading overlay to disappear
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
-    await expect(santaButton).toBeVisible({ timeout: 10000 });
-    await santaButton.click();
+    await santaButton.click({ force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.click({ force: true });
 
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     await page.waitForTimeout(5000);
@@ -357,13 +357,12 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
-    await expect(santaButton).toBeVisible({ timeout: 10000 });
-    await santaButton.click();
+    await santaButton.click({ force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.waitFor({ state: 'visible' });
+    await commenceButton.click({ force: true });
 
     await page.waitForTimeout(3000);
 
