@@ -20,7 +20,7 @@ describe('MessageOverlay Component', () => {
       state: 'PHASE_BOSS',
       bossActive: true,
       lastSfxTime: 0,
-    } as ReturnType<typeof useGameStore>);
+    } as any);
 
     render(<MessageOverlay />);
 
@@ -33,7 +33,7 @@ describe('MessageOverlay Component', () => {
       state: 'WIN',
       bossActive: false,
       lastSfxTime: 0,
-    } as ReturnType<typeof useGameStore>);
+    } as any);
 
     render(<MessageOverlay />);
 
@@ -46,7 +46,7 @@ describe('MessageOverlay Component', () => {
       state: 'GAME_OVER',
       bossActive: false,
       lastSfxTime: 0,
-    } as ReturnType<typeof useGameStore>);
+    } as any);
 
     render(<MessageOverlay />);
 
@@ -59,7 +59,7 @@ describe('MessageOverlay Component', () => {
       state: 'PHASE_BOSS',
       bossActive: true,
       lastSfxTime: 0,
-    } as ReturnType<typeof useGameStore>);
+    } as any);
 
     render(<MessageOverlay />);
 
