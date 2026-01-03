@@ -370,7 +370,7 @@ test.describe('Visual Regression - End Game States', () => {
       await page.screenshot({ path: 'commence-button-not-found-gameover.png' });
       throw e;
     }
-    await commenceButton.click({ force: true, noWaitAfter: true, timeout: 30000 });
+    await commenceButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
@@ -397,11 +397,9 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 50000, // Allow up to 50k pixels difference for accessibility changes
       threshold: 0.3, // Increase tolerance
       animations: 'disabled',
-      caret: 'hide',
-      timeout: 60000, // Increase timeout for font loading
+      caret: 'hide'
     });
   });
 });
