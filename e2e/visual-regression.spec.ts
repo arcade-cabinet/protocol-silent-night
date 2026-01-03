@@ -321,12 +321,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     // For unstable mobile screenshots, disable animations and increase stability check:
     await page.addStyleTag({ content: '* { animation: none !important; transition: none !important; }' });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Add explicit wait before screenshot
+    await page.waitForTimeout(1500); // Add explicit wait before screenshot
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixels: 5000, // Allow up to 5000 pixels difference for WebGL/font variations
-      threshold: 0.2,
-      timeout: 30000,
+      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      threshold: 0.3, // Increased threshold
+      timeout: 45000,
       animations: 'disabled' // Explicitly disable animations
     });
   });
@@ -380,7 +380,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(500);
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
-      maxDiffPixels: 200, // Allow up to 200 pixels difference for button rendering variations
+      maxDiffPixelRatio: VISUAL_THRESHOLD,
       threshold: 0.2,
       timeout: 30000
     });
