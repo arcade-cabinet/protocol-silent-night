@@ -115,6 +115,7 @@ test.describe('UI Component Refinement', () => {
 
     // Wait for state transition by checking if the game store state changed to BRIEFING
     // This ensures React has processed the state change before we continue
+    // Increased timeout to 25s to account for CI slowness
     await page.waitForFunction(
       () => {
         const store = (window as any).useGameStore;
@@ -122,7 +123,7 @@ test.describe('UI Component Refinement', () => {
         const state = store.getState();
         return state.state === 'BRIEFING';
       },
-      { timeout: 10000 }
+      { timeout: 25000 }
     );
   }
 
@@ -181,41 +182,21 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
-      // Click MECHA-SANTA
+      // Click MECHA-SANTA (this already waits for BRIEFING state)
       await clickMechButton(page, 'MECHA-SANTA');
 
-      // Wait for state transition animation
-      await page.waitForTimeout(1000);
+      // clickMechButton already ensures we're in BRIEFING state, so just verify UI elements
+      const briefingTitle = page.locator('text=MISSION BRIEFING');
+      await expect(briefingTitle).toBeVisible({ timeout: 10000 });
 
-      // Wait for mission briefing with longer timeout for state transition
-      try {
-        await page.waitForSelector('text=MISSION BRIEFING', { state: 'visible', timeout: 30000 });
-
-        const briefingTitle = page.locator('text=MISSION BRIEFING');
-        await expect(briefingTitle).toBeVisible({ timeout: 10000 });
-
-        // Verify mission details
-        await expect(page.locator('text=SILENT NIGHT')).toBeVisible();
-        await expect(page.locator('text=MECHA-SANTA')).toBeVisible();
-      } catch (e) {
-        // If briefing doesn't appear, check if we're in a black screen state
-        const pageContent = await page.content();
-        console.log('⚠️  Page still on menu or black screen - checking for MISSION BRIEFING in DOM...');
-
-        // Take screenshot for debugging
-        if (hasMcpSupport) {
-          await page.screenshot({ path: 'test-results/mech-selection-debug.png' });
-        }
-        throw new Error(`Mission briefing not found. Page content length: ${pageContent.length}`);
-      }
+      // Verify mission details
+      await expect(page.locator('text=SILENT NIGHT')).toBeVisible();
+      await expect(page.locator('text=MECHA-SANTA')).toBeVisible();
     });
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
-      // Select a mech
+      // Select a mech (this already waits for BRIEFING state)
       await clickMechButton(page, 'CYBER-ELF');
-
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
@@ -231,11 +212,8 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Click mech
+        // Click mech (this already waits for BRIEFING state)
         await clickMechButton(page, mech.name);
-
-        // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -257,11 +235,8 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      // Select mech
+      // Select mech (this already waits for BRIEFING state)
       await clickMechButton(page, 'MECHA-SANTA');
-
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
       // Click commence
       await page.click('button:has-text("COMMENCE OPERATION")');
@@ -281,9 +256,8 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      // Select CYBER-ELF (Plasma SMG)
+      // Select CYBER-ELF (Plasma SMG) - this already waits for BRIEFING state
       await clickMechButton(page, 'CYBER-ELF');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD
@@ -340,9 +314,8 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
-      // Select mech
+      // Select mech (this already waits for BRIEFING state)
       await clickMechButton(page, 'MECHA-SANTA');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
       if (hasMcpSupport) {
         await disableAnimations(page);

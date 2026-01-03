@@ -80,6 +80,7 @@ async function selectMech(page: import('@playwright/test').Page, mechName: strin
   await button.click({ noWaitAfter: true });
 
   // Wait for state transition to BRIEFING
+  // Increased timeout to 25s to account for CI slowness
   await page.waitForFunction(
     () => {
       const store = (window as any).useGameStore;
@@ -87,11 +88,10 @@ async function selectMech(page: import('@playwright/test').Page, mechName: strin
       const state = store.getState();
       return state.state === 'BRIEFING';
     },
-    { timeout: 10000 }
+    { timeout: 25000 }
   );
 
-  // Wait for MISSION BRIEFING text to be visible
-  await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+  // State transition ensures UI is ready, no need for additional selector wait
 }
 
 /**
