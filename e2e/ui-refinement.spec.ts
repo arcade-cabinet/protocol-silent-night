@@ -37,12 +37,12 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Wait for menu to fully render - use text-based selector which is more reliable
-      await page.waitForSelector('text=Protocol', { timeout: 10000 });
+      // Wait for menu to fully render
+      await page.waitForSelector('h1', { timeout: 5000 });
 
       // Verify title is visible
       const title = page.locator('h1');
-      await expect(title).toBeVisible({ timeout: 10000 });
+      await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
       // Verify subtitle
@@ -257,7 +257,7 @@ test.describe('UI Component Refinement', () => {
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
       await page.click('button:has-text("MECHA-SANTA")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {

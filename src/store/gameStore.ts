@@ -870,7 +870,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   spawnBoss: () => {
-    const { enemies, addEnemy, rng, state, runProgress } = get();
+    const { enemies, addEnemy, rng } = get();
     if (enemies.some((e) => e.type === 'boss')) return;
     const angle = rng.next() * Math.PI * 2;
     const radius = 30;
@@ -890,23 +890,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-
-    // Boss spawning overrides level-up screen - clear pending level-up
-    const wasLeveling = state === 'LEVEL_UP';
-    set((prevState) => ({
+    // Force transition to boss phase, overriding level up if active
+    const { runProgress } = get();
+    set((state) => ({
       state: 'PHASE_BOSS',
-      previousState: wasLeveling ? prevState.previousState : prevState.state,
+      // If we were leveling up, we'll return to PHASE_1 after boss, not back to LEVEL_UP
+      // unless we want to queue it. For now, boss takes priority.
+      previousState: 'PHASE_1',
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-      // Clear level-up state if we were leveling
-      runProgress: wasLeveling
-        ? {
-            ...runProgress,
-            pendingLevelUp: false,
-            upgradeChoices: [],
-          }
-        : runProgress,
+      // Cancel pending level up UI if it conflicts with boss entrance
+      runProgress: {
+        ...runProgress,
+        pendingLevelUp: false,
+      },
     }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
