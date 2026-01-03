@@ -1,5 +1,19 @@
 import { Page } from '@playwright/test';
 
+// Helper to navigate and wait for loading screen to disappear
+export async function navigateAndWaitForLoad(page: Page) {
+  await page.goto('/', { waitUntil: 'networkidle' });
+
+  // Wait for loading screen to disappear
+  const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+  if (await loadingScreen.isVisible()) {
+    await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+  }
+
+  // Additional wait for transition animation
+  await page.waitForTimeout(2000);
+}
+
 // Helper to get game state from the store
 export async function getGameState(page: Page) {
   return page.evaluate(() => {

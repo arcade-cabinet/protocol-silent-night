@@ -28,8 +28,16 @@ test.describe('UI Component Refinement', () => {
       }
     });
 
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/', { waitUntil: 'networkidle' });
+
+    // Wait for loading screen to disappear
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
+
+    // Additional wait for transition animation
+    await page.waitForTimeout(2000);
   });
 
   test.describe('Menu Screen', () => {

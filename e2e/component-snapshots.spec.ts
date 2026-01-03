@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacter, startMission } from './utils';
+import { selectCharacter, startMission, navigateAndWaitForLoad } from './utils';
 
 /**
  * Component Snapshot Tests
@@ -12,8 +12,7 @@ const VISUAL_THRESHOLD = 0.2;
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     // Start with Santa
     await selectCharacter(page, 'MECHA-SANTA');
@@ -36,8 +35,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
   });
 
   test('should render Elf character model', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
@@ -50,8 +48,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
   });
 
   test('should render Bumble character model', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
@@ -66,8 +63,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
 test.describe('Component Snapshots - Terrain and Environment', () => {
   test('should render terrain correctly', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
@@ -89,8 +85,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
   });
 
   test('should render lighting and atmosphere', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
@@ -105,8 +100,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
 test.describe('Component Snapshots - Enemy Rendering', () => {
   test('should render enemies when spawned', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
@@ -119,8 +113,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
   });
 
   test('should render enemy death effects', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await page.waitForTimeout(8000);
@@ -138,8 +131,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
 test.describe('Component Snapshots - Weapon Effects', () => {
   test('should render Santa cannon weapon', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
@@ -156,8 +148,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
   });
 
   test('should render Elf SMG weapon', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
@@ -175,8 +166,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
   });
 
   test('should render Bumble star weapon', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
@@ -195,8 +185,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
 test.describe('Component Snapshots - Particle Effects', () => {
   test('should render hit particles on impact', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await page.waitForTimeout(8000);
@@ -214,8 +203,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
 test.describe('Component Snapshots - Camera System', () => {
   test('should render correct camera perspective', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
@@ -228,8 +216,7 @@ test.describe('Component Snapshots - Camera System', () => {
   });
 
   test('should render camera following player movement', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
@@ -251,8 +238,7 @@ test.describe('Component Snapshots - Camera System', () => {
 
 test.describe('Component Snapshots - UI Overlays', () => {
   test('should render damage flash effect', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
@@ -268,8 +254,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
   });
 
   test('should render kill streak notification', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
+    await navigateAndWaitForLoad(page);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
