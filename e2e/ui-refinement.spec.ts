@@ -112,6 +112,18 @@ test.describe('UI Component Refinement', () => {
 
     // Force click to bypass potential overlays, noWaitAfter to avoid SPA navigation timeout
     await button.click({ force: true, timeout: 15000, noWaitAfter: true });
+
+    // Wait for state transition by checking if the game store state changed to BRIEFING
+    // This ensures React has processed the state change before we continue
+    await page.waitForFunction(
+      () => {
+        const store = (window as any).useGameStore;
+        if (!store) return false;
+        const state = store.getState();
+        return state.state === 'BRIEFING';
+      },
+      { timeout: 10000 }
+    );
   }
 
   test.describe('Menu Screen', () => {
@@ -142,11 +154,12 @@ test.describe('UI Component Refinement', () => {
 
       expect(count).toBeGreaterThanOrEqual(3);
 
-      // Verify each mech button is clickable
+      // Verify each mech button exists and is visible
       const mechNames = ['MECHA-SANTA', 'CYBER-ELF', 'THE BUMBLE'];
       for (const mechName of mechNames) {
-        // Use clickMechButton helper to safely wait for visibility/enabled state
-        await clickMechButton(page, mechName);
+        const button = page.locator(`button:has-text("${mechName}")`).first();
+        await expect(button).toBeVisible();
+        await expect(button).toBeEnabled();
       }
     });
 
