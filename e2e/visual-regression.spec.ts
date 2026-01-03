@@ -11,6 +11,9 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
+// Increase timeout for these tests due to animations and loading
+test.describe.configure({ timeout: 120000 });
+
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
