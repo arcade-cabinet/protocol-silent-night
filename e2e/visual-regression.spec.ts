@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variations and palette changes
+const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
 // Increase timeout for all tests in this file to handle slow CI rendering
 test.setTimeout(120000);
