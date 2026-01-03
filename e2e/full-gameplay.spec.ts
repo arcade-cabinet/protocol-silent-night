@@ -599,7 +599,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Click re-deploy
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ noWaitAfter: true });
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -634,7 +634,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Reset
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ noWaitAfter: true });
     await page.waitForTimeout(1000);
 
     // Start new game
@@ -695,7 +695,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ noWaitAfter: true });
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
