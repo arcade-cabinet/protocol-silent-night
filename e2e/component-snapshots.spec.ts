@@ -8,7 +8,69 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
-const WEBGL_MAX_DIFF_PIXELS = 50000; // Allow significant pixel differences for WebGL rendering (up to ~50k pixels)
+const WEBGL_MAX_DIFF_PIXELS = 50000;
+
+// Set deterministic RNG flag before each test
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__E2E_TEST__ = true;
+  });
+});
+
+/**
+ * Helper to disable animations for stable screenshots
+ * Also waits for Three.js render loop to stabilize
+ */
+async function disableAnimations(page: import('@playwright/test').Page) {
+  // Disable CSS animations
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        transition-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-delay: 0s !important;
+        animation-play-state: paused !important;
+        animation-iteration-count: 1 !important;
+      }
+      *:hover {
+        transform: none !important;
+        transition: none !important;
+      }
+    `
+  });
+
+  // Wait for a few frames to let any JS animations settle
+  await page.evaluate(() => {
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+
+  await page.waitForTimeout(1000);
+}
+
+/**
+ * Helper to pause Three.js rendering for stable snapshots
+ * This freezes the game loop to ensure pixel-perfect consistency
+ */
+async function pauseThreeJsRendering(page: import('@playwright/test').Page) {
+  await page.evaluate(() => {
+    // Flag to stop useFrame loops
+    window.__pauseGameForScreenshot = true;
+
+    // Force one final render if possible (depends on engine implementation)
+    // This is a best-effort attempt to settle the scene
+  });
+
+  await page.waitForTimeout(500); // Wait for pause to take effect
+}
+
+// Add type definition for global window property
+declare global {
+  interface Window {
+    __pauseGameForScreenshot?: boolean;
+    __E2E_TEST__?: boolean;
+  }
+}
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
@@ -33,9 +95,12 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
       }
     });
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -51,9 +116,12 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await page.waitForTimeout(5000);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -69,9 +137,12 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await page.waitForTimeout(5000);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -98,9 +169,12 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.waitForTimeout(1000);
     await page.keyboard.up('a');
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -116,9 +190,12 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await page.waitForTimeout(5000);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -136,9 +213,12 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -155,9 +235,12 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -179,9 +262,12 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.keyboard.press('Space');
     await page.waitForTimeout(300);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -202,9 +288,12 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(1000);
     await page.keyboard.up('Space');
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -224,9 +313,12 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.keyboard.press('Space');
     await page.waitForTimeout(300);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -245,9 +337,12 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -265,9 +360,12 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await page.waitForTimeout(3000);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -290,9 +388,12 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.keyboard.up('d');
     await page.keyboard.up('w');
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -313,9 +414,12 @@ test.describe('Component Snapshots - UI Overlays', () => {
     // Trigger damage by getting close to enemies
     await page.waitForTimeout(5000);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
@@ -344,9 +448,12 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await page.waitForTimeout(1000);
 
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });

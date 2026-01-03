@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.4; // 40% diff tolerance for WebGL rendering variations in CI
-const WEBGL_MAX_DIFF_PIXELS = 50000; // Allow significant pixel differences for WebGL rendering (up to ~50k pixels)
+const WEBGL_MAX_DIFF_PIXELS = 50000; // Allow absolute pixel differences for large renders
 
 // Increase default timeout for this file due to heavy 3D loading and animations
 test.setTimeout(120000);
@@ -399,7 +399,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS, // Allow small absolute pixel differences
       timeout: 30000,
       animations: 'disabled',
     });
@@ -420,7 +420,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS, // Allow small absolute pixel differences
       timeout: 30000,
       animations: 'disabled',
     });
