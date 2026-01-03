@@ -21,7 +21,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(5000);
 
@@ -49,7 +49,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(5000);
 
@@ -68,7 +68,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(5000);
 
@@ -89,7 +89,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(5000);
 
@@ -117,7 +117,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(5000);
 
@@ -138,7 +138,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
 
@@ -177,7 +177,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(3000);
 
@@ -200,7 +200,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(3000);
 
@@ -224,7 +224,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(3000);
 
@@ -269,7 +269,7 @@ test.describe('Component Snapshots - Camera System', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(3000);
 
@@ -288,7 +288,7 @@ test.describe('Component Snapshots - Camera System', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(3000);
 
@@ -316,7 +316,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(8000);
 
@@ -338,7 +338,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     await page.waitForTimeout(5000);
 

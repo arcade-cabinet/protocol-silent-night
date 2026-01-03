@@ -120,7 +120,7 @@ test.describe('Visual Regression - Game Start', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     // Mission briefing has a typing animation that takes ~4s, plus loading time
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -140,9 +140,8 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    // Mission briefing has a typing animation that takes ~4s, plus loading time
-    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
@@ -162,9 +161,8 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    // Mission briefing has a typing animation that takes ~4s, plus loading time
-    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-    await commenceButton.click({ timeout: 30000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
     await page.waitForTimeout(10000);
