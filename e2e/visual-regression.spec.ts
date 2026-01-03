@@ -118,7 +118,7 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Check if game started by waiting for HUD or game container
     try {
-        await page.waitForSelector('canvas', { timeout: 5000 });
+        await page.waitForSelector('canvas', { state: 'attached', timeout: 5000 });
     } catch {
         // Retry click if game didn't start
         if (await startButton.isVisible()) {
