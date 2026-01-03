@@ -1,4 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { getGameState, selectCharacter, startMission, triggerStoreAction } from './utils';
 
 /**
  * Full Gameplay E2E Tests
@@ -6,106 +7,6 @@ import { test, expect, Page } from '@playwright/test';
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */
-
-// Helper to get game state from the store
-async function getGameState(page: Page) {
-  return page.evaluate(() => {
-    const store = (window as any).useGameStore;
-    if (!store) return null;
-    const state = store.getState();
-    return {
-      gameState: state.state,
-      playerHp: state.playerHp,
-      playerMaxHp: state.playerMaxHp,
-      score: state.stats.score,
-      kills: state.stats.kills,
-      bossDefeated: state.stats.bossDefeated,
-      bossActive: state.bossActive,
-      bossHp: state.bossHp,
-      killStreak: state.killStreak,
-      enemyCount: state.enemies.length,
-      bulletCount: state.bullets.length,
-    };
-  });
-}
-
-// Helper to trigger game actions via store
-async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  return page.evaluate(({ action, args }) => {
-    const store = (window as any).useGameStore;
-    if (!store) return false;
-    const state = store.getState();
-    if (typeof state[action] === 'function') {
-      state[action](...args);
-      return true;
-    }
-    return false;
-  }, { action, args });
-}
-
-// Helper to wait for game state
-async function waitForGameState(page: Page, expectedState: string, timeout = 10000) {
-  const startTime = Date.now();
-  while (Date.now() - startTime < timeout) {
-    const state = await getGameState(page);
-    if (state?.gameState === expectedState) return true;
-    await page.waitForTimeout(100);
-  }
-  return false;
-}
-
-// Helper to select character robustly
-async function selectCharacter(page: Page, name: string) {
-  const button = page.locator('button', { hasText: name });
-  await button.waitFor({ state: 'visible', timeout: 10000 });
-  await button.click();
-}
-
-// Helper to start mission robustly
-async function startMission(page: Page) {
-  const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
-  await button.waitFor({ state: 'visible', timeout: 15000 });
-  await button.click();
-}
-
-// Helper to simulate combat until kills reach target
-async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
-  const startTime = Date.now();
-  
-  // Hold fire and move around
-  await page.keyboard.down('Space');
-  
-  while (Date.now() - startTime < maxTime) {
-    const state = await getGameState(page);
-    if (!state) break;
-    if (state.kills >= targetKills) break;
-    if (state.gameState === 'GAME_OVER') break;
-    
-    // Move in a pattern to find enemies
-    const direction = Math.floor((Date.now() / 1000) % 4);
-    await page.keyboard.up('w');
-    await page.keyboard.up('a');
-    await page.keyboard.up('s');
-    await page.keyboard.up('d');
-    
-    switch (direction) {
-      case 0: await page.keyboard.down('w'); break;
-      case 1: await page.keyboard.down('d'); break;
-      case 2: await page.keyboard.down('s'); break;
-      case 3: await page.keyboard.down('a'); break;
-    }
-    
-    await page.waitForTimeout(200);
-  }
-  
-  await page.keyboard.up('Space');
-  await page.keyboard.up('w');
-  await page.keyboard.up('a');
-  await page.keyboard.up('s');
-  await page.keyboard.up('d');
-  
-  return getGameState(page);
-}
 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
@@ -577,6 +478,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click re-deploy
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
+    // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
     await page.waitForTimeout(1000);
 
@@ -612,6 +514,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Reset
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
+    // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
     await page.waitForTimeout(1000);
 
@@ -673,6 +576,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Step 7: Can restart
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
+    // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
     await page.waitForTimeout(1000);
 

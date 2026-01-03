@@ -1,4 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { selectCharacter, startMission } from './utils';
 
 /**
  * Component Snapshot Tests
@@ -8,20 +9,6 @@ import { test, expect, Page } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
-
-// Helper to select character robustly
-async function selectCharacter(page: Page, name: string) {
-  const button = page.locator('button', { hasText: name });
-  await button.waitFor({ state: 'visible', timeout: 10000 });
-  await button.click();
-}
-
-// Helper to start mission robustly
-async function startMission(page: Page) {
-  const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
-  await button.waitFor({ state: 'visible', timeout: 45000 });
-  await button.click({ timeout: 15000 });
-}
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
