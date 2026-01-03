@@ -141,7 +141,7 @@ test.describe('Protocol: Silent Night', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click({ noWaitAfter: true });
+    await commenceButton.click();
 
     // HUD should appear
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
@@ -161,7 +161,7 @@ test.describe('Protocol: Silent Night', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click({ noWaitAfter: true });
+    await commenceButton.click();
 
     // Verify HUD elements
     await expect(page.getByText(/OPERATOR STATUS/i)).toBeVisible({ timeout: 5000 });
@@ -185,7 +185,7 @@ test.describe('Protocol: Silent Night', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click({ noWaitAfter: true });
+    await commenceButton.click();
 
     // Wait for game to start
     await expect(commenceButton).not.toBeVisible({ timeout: 5000 });
