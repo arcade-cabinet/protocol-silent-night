@@ -68,7 +68,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines.length]);
+  }, [state, briefingLines]);
 
   // Reset state when briefing starts
   useEffect(() => {
