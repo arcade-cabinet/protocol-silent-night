@@ -19,11 +19,6 @@ const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 test.describe('Character Class Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Set deterministic RNG flag
-    await page.addInitScript(() => {
-      window.__E2E_TEST__ = true;
-    });
-
     // Listen for console errors
     page.on('console', msg => {
       if (msg.type() === 'error') {

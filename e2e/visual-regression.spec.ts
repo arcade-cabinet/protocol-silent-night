@@ -14,6 +14,13 @@ const VISUAL_THRESHOLD = 0.4; // 40% diff tolerance for WebGL rendering variatio
 // Increase default timeout for this file due to heavy 3D loading and animations
 test.setTimeout(120000);
 
+// Set deterministic RNG flag before each test
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__E2E_TEST__ = true;
+  });
+});
+
 /**
  * Helper to disable animations for stable screenshots
  * Also waits for Three.js render loop to stabilize
@@ -65,16 +72,8 @@ async function pauseThreeJsRendering(page: Page) {
 declare global {
   interface Window {
     __pauseGameForScreenshot?: boolean;
-    __E2E_TEST__?: boolean;
   }
 }
-
-// Set deterministic RNG flag before each test
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__E2E_TEST__ = true;
-  });
-});
 
 /**
  * Helper to start the game with a specific character

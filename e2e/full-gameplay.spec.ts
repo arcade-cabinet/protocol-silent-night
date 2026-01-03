@@ -7,13 +7,6 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
-// Set deterministic RNG flag before each test
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__E2E_TEST__ = true;
-  });
-});
-
 // Helper to get game state from the store
 async function getGameState(page: Page) {
   return page.evaluate(() => {
