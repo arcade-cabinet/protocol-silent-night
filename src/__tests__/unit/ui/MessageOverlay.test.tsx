@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useGameStore } from '@/store/gameStore';
 import { MessageOverlay } from '@/ui/MessageOverlay';
-import type { GameState } from '@/types';
 
 // Mock the store
 vi.mock('@/store/gameStore', () => ({
@@ -10,12 +9,6 @@ vi.mock('@/store/gameStore', () => ({
 }));
 
 const mockUseGameStore = vi.mocked(useGameStore);
-
-// Helper type for mocking the minimal store state needed by MessageOverlay
-type MockGameStore = {
-  state: GameState;
-  bossActive: boolean;
-};
 
 describe('MessageOverlay Component', () => {
   beforeEach(() => {
@@ -26,7 +19,8 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    } as MockGameStore);
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 
@@ -38,7 +32,8 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'WIN',
       bossActive: false,
-    } as MockGameStore);
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 
@@ -50,7 +45,8 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
-    } as MockGameStore);
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 
@@ -62,7 +58,8 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    } as MockGameStore);
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 

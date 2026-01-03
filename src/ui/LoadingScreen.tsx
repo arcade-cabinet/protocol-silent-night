@@ -7,7 +7,11 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import styles from './LoadingScreen.module.css';
 
-export function LoadingScreen() {
+interface LoadingScreenProps {
+  minDuration?: number;
+}
+
+export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const { state } = useGameStore();
@@ -18,8 +22,7 @@ export function LoadingScreen() {
     if (state !== 'LOADING') {
       const animationDuration = 500; // CSS transition duration
 
-      // Hide immediately when leaving LOADING state
-      // This prevents blocking the mission briefing screen or other game states
+      // Hide immediately when loading is done
       setVisible(false);
 
       // Remove from DOM after fade out animation completes
