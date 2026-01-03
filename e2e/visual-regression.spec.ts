@@ -444,10 +444,17 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForURL(/\/game/, { timeout: 20000 }).catch(() => {}); // Wait for potential URL change or just proceed if SPA
     await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
     await page.waitForLoadState('networkidle', { timeout: 30000 });
-    await page.waitForTimeout(2000); // Allow UI to stabilize
+
+    // Extended wait for WebGL rendering and animations to stabilize
+    await page.waitForTimeout(5000);
+
+    // Wait for fonts to be ready
+    await page.waitForFunction(() => document.fonts.ready, { timeout: 30000 });
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
+      timeout: 30000,
     });
   });
 
@@ -473,14 +480,20 @@ test.describe('Visual Regression - Responsive Design', () => {
     await commenceButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(500);
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await fireButton.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Wait for element stability and animations to complete
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
+    await page.waitForTimeout(2000);
+
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       animations: 'disabled',
+      timeout: 30000,
     });
   });
 });
