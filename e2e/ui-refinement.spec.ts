@@ -38,7 +38,7 @@ test.describe('UI Component Refinement', () => {
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 15000 });
+      await page.waitForSelector('h1', { timeout: 5000 });
 
       // Verify title is visible
       const title = page.locator('h1');
@@ -173,7 +173,6 @@ test.describe('UI Component Refinement', () => {
           await page.reload();
           await page.waitForLoadState('networkidle');
           await page.waitForSelector('h1', { timeout: 15000 });
-          await page.waitForTimeout(2000); // Allow menu to fully stabilize
         }
       }
     });
@@ -243,7 +242,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 15000 });
+      await page.waitForSelector('h1', { timeout: 5000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
@@ -258,9 +257,7 @@ test.describe('UI Component Refinement', () => {
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
       await page.click('button:has-text("MECHA-SANTA")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
-      // Wait for briefing animation to complete (multiple lines with 600ms each + button reveal)
-      await page.waitForTimeout(5000);
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
