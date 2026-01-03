@@ -42,6 +42,14 @@ async function stabilizePage(page) {
   await page.waitForFunction(() => document.fonts.ready);
 }
 
+// Helper to wait for element stability before interaction
+async function waitForElementStability(page, locator) {
+  await locator.waitFor({ state: 'attached', timeout: 10000 });
+  await locator.waitFor({ state: 'visible', timeout: 10000 });
+  await page.waitForTimeout(200); // Extra buffer for animations
+  return locator;
+}
+
 // Apply stabilization to all tests in this file to suppress focus outlines
 test.beforeEach(async ({ page }) => {
   await stabilizePage(page);
@@ -75,8 +83,9 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Santa character card correctly', async ({ page }) => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
+    await waitForElementStability(page, santaCard);
     await page.waitForLoadState('networkidle');
+    await santaCard.scrollIntoViewIfNeeded({ timeout: 8000 });
     await page.waitForTimeout(500); // Allow animations to settle
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -87,8 +96,9 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Elf character card correctly', async ({ page }) => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfCard.waitFor({ state: 'visible', timeout: 10000 });
+    await waitForElementStability(page, elfCard);
     await page.waitForLoadState('networkidle');
+    await elfCard.scrollIntoViewIfNeeded({ timeout: 8000 });
     await page.waitForTimeout(500); // Allow animations to settle
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -99,8 +109,9 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Bumble character card correctly', async ({ page }) => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
+    await waitForElementStability(page, bumbleCard);
     await page.waitForLoadState('networkidle');
+    await bumbleCard.scrollIntoViewIfNeeded({ timeout: 8000 });
     await page.waitForTimeout(500); // Allow animations to settle
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
