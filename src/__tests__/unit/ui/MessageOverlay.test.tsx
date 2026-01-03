@@ -8,15 +8,13 @@ vi.mock('@/store/gameStore', () => ({
   useGameStore: vi.fn(),
 }));
 
-const mockUseGameStore = vi.mocked(useGameStore);
-
 describe('MessageOverlay', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders boss warning when boss is active', () => {
-    mockUseGameStore.mockReturnValue({
+    (useGameStore as any).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
     });
@@ -27,7 +25,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders mission complete when state is WIN', () => {
-    mockUseGameStore.mockReturnValue({
+    (useGameStore as any).mockReturnValue({
       state: 'WIN',
       bossActive: false,
     });
@@ -38,7 +36,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders operator down when state is GAME_OVER', () => {
-    mockUseGameStore.mockReturnValue({
+    (useGameStore as any).mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
     });
@@ -49,7 +47,7 @@ describe('MessageOverlay', () => {
   });
 
   it('is accessible with role="alert"', () => {
-    mockUseGameStore.mockReturnValue({
+    (useGameStore as any).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
     });

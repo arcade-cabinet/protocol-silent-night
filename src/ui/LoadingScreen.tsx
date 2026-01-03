@@ -7,26 +7,31 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import styles from './LoadingScreen.module.css';
 
-export function LoadingScreen() {
+interface LoadingScreenProps {
+  minDuration?: number;
+}
+
+export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const { state } = useGameStore();
 
   useEffect(() => {
     // Only show during initial load or explicit loading states
-    if (state !== 'MENU' && state !== 'LOADING') {
+    // Hide when state becomes MENU (initial load done) or any other non-loading state
+    if (state !== 'LOADING') {
       const animationDuration = 500; // CSS transition duration
+      const totalDuration = Math.max(minDuration, 2000); // Ensure at least 2s for animation to complete
 
-      // Hide immediately when leaving MENU state (e.g., entering BRIEFING)
-      // This prevents blocking the mission briefing screen
-      setVisible(false);
-
-      // Remove from DOM after fade out animation completes
-      const timer = setTimeout(() => setMounted(false), animationDuration);
+      const timer = setTimeout(() => {
+        setVisible(false);
+        // Remove from DOM after fade out animation completes
+        setTimeout(() => setMounted(false), animationDuration);
+      }, totalDuration);
 
       return () => clearTimeout(timer);
     }
-  }, [state]);
+  }, [state, minDuration]);
 
   if (!mounted) return null;
 
@@ -35,7 +40,7 @@ export function LoadingScreen() {
       <div className={styles.content}>
         <div className={styles.logo}>
           <div className={styles.icon}>🎄</div>
-          <div className={styles.title}>PROTOCOL: SILENT NIGHT</div>
+          <h1 className={styles.title}>PROTOCOL: SILENT NIGHT</h1>
         </div>
         <div className={styles.loader}>
           <div className={styles.bar} />

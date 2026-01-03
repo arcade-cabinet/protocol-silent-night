@@ -18,6 +18,7 @@ export async function startGame(page: Page, characterName: string) {
   page.on('console', msg => console.log(`[Browser Console] ${msg.type()}: ${msg.text()}`));
 
   // Select character
+  console.log(`Selecting character: ${characterName}`);
   const characterButton = page.getByRole('button', { name: new RegExp(characterName, 'i') });
   await characterButton.waitFor({ state: 'visible', timeout: 60000 });
   await characterButton.click({ force: true, timeout: 60000 });
@@ -34,7 +35,25 @@ export async function startGame(page: Page, characterName: string) {
 
     console.log('Waiting for commence button...');
     if (!page.isClosed()) {
-        console.log('Current page content preview:', (await page.content()).substring(0, 500));
+        try {
+            console.log('DEBUG PAGE INFO:');
+            console.log('URL:', page.url());
+            console.log('Title:', await page.title());
+
+            // Check for game container (root) presence
+            const root = page.locator('#root');
+            console.log('Root element exists:', await root.count() > 0);
+
+            // Log ALL buttons currently on page
+            const buttons = await page.locator('button').allInnerTexts();
+            console.log('Visible buttons:', buttons);
+
+            // Log body content preview (first 1000 chars)
+            // const content = await page.content();
+            // console.log('Page content preview:', content.substring(0, 1000));
+        } catch (e) {
+            console.log('Error logging debug info:', e);
+        }
     }
 
     // Try primary selector first
@@ -53,12 +72,16 @@ export async function startGame(page: Page, characterName: string) {
         rawSelectorWait
     ]);
 
-    await button.click({ timeout: 60000 });
+    // Final check before clicking
+    console.log('Button found. Clicking...');
+    await button.scrollIntoViewIfNeeded().catch(() => {}); // Try scroll if possible, ignore error if fails
+    await button.click({ force: true, timeout: 60000 });
   } catch (error) {
+    console.log('Start game failed. Final diagnostics:');
     if (!page.isClosed()) {
         try {
             console.log('Available buttons:', await page.locator('button').allInnerTexts());
-            console.log('Page content:', await page.content());
+            // console.log('Page content:', await page.content());
         } catch (e) {
             console.log('Failed to log debug info:', e);
         }
