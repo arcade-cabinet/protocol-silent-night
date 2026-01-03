@@ -6,18 +6,12 @@ import { test, expect } from '@playwright/test';
  * Uses Playwright's screenshot comparison to validate visual rendering
  * of 3D game components, characters, and gameplay scenarios.
  *
- * Note: Visual regression tests are skipped in CI due to WebGL rendering variations.
- * Run locally with: PLAYWRIGHT_MCP=true pnpm test:e2e:visual
+ * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.15; // 15% diff tolerance for WebGL rendering variations
-const MOBILE_THRESHOLD = 0.25; // 25% diff tolerance for mobile rendering (more variations)
-const isCI = !!process.env.CI;
+const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
 test.setTimeout(60000); // Increase global timeout for visual regression tests
-
-// Skip all visual regression tests in CI - WebGL rendering varies too much in headless environments
-test.skip(isCI, 'Visual regression tests are skipped in CI due to WebGL rendering variations');
 
 // Utility for stable screenshots
 async function waitForPageStability(page) {
@@ -119,11 +113,39 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await startButton.waitFor({ state: 'visible', timeout: 15000 });
-    await startButton.click({ force: true });
-    await page.waitForTimeout(1000);
-    if (await startButton.isVisible()) {
-        await startButton.click({ force: true });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true, noWaitAfter: true });
+
+    // Check if game started by waiting for HUD or game container
+    try {
+        await page.waitForSelector('canvas', { timeout: 5000 });
+    } catch {
+        // Retry click if game didn't start
+        if (await startButton.isVisible()) {
+            await startButton.click({ force: true, noWaitAfter: true });
+        }
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true, noWaitAfter: true });
+
+    // Check if game started
+    try {
+        await page.waitForSelector('canvas', { timeout: 5000 });
+    } catch {
+        // Retry click
+        if (await startButton.isVisible()) {
+            await startButton.click({ force: true, noWaitAfter: true });
+        }
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true, noWaitAfter: true });
+
+    // Check if game started
+    try {
+        await page.waitForSelector('canvas', { timeout: 5000 });
+    } catch {
+        // Retry click
+        if (await startButton.isVisible()) {
+            await startButton.click({ force: true, noWaitAfter: true });
+        }
     }
 
     // Wait for game to load
@@ -319,15 +341,10 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
     await waitForPageStability(page);
 
-    // Disable animations for more stable screenshots
-    await page.addStyleTag({ content: '* { animation: none !important; transition: none !important; }' });
-    await page.waitForTimeout(1000);
-
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixelRatio: MOBILE_THRESHOLD,
-      threshold: 0.3,
-      timeout: 30000,
-      animations: 'disabled'
+      maxDiffPixelRatio: 0.2, // Increased tolerance for mobile rendering variations
+      threshold: 0.2, // Add threshold option
+      timeout: 20000,
     });
   });
 
@@ -342,16 +359,16 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForLoadState('networkidle', { timeout: 15000 });
     await waitForPageStability(page);
 
-    // For unstable mobile screenshots, disable animations and increase stability check
+    // For unstable mobile screenshots, disable animations and increase stability check:
     await page.addStyleTag({ content: '* { animation: none !important; transition: none !important; }' });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500); // Add explicit wait before screenshot
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: MOBILE_THRESHOLD,
-      threshold: 0.4,
+      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      threshold: 0.3, // Increased threshold
       timeout: 45000,
-      animations: 'disabled'
+      animations: 'disabled' // Explicitly disable animations
     });
   });
 

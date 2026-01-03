@@ -22,7 +22,6 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:visual": "PLAYWRIGHT_MCP=true playwright test e2e/visual-regression.spec.ts e2e/component-snapshots.spec.ts",
     "test:e2e:update-snapshots": "PLAYWRIGHT_MCP=true playwright test --update-snapshots",
-    "test:e2e:update-snapshots:ci": "playwright test --update-snapshots",
     "test:all": "pnpm test:unit && pnpm test:e2e"
   },
   "keywords": [
