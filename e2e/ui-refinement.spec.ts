@@ -37,8 +37,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
+      // Wait for menu to fully render - wait for title to be visible
+      await page.waitForSelector('h1:has-text("Protocol")', { state: 'visible', timeout: 10000 });
 
       // Verify title is visible
       const title = page.locator('h1');
@@ -172,7 +172,7 @@ test.describe('UI Component Refinement', () => {
         if (index < mechs.length - 1) {
           await page.reload();
           await page.waitForLoadState('networkidle');
-          await page.waitForSelector('h1', { timeout: 15000 });
+          await page.waitForSelector('h1:has-text("Protocol")', { state: 'visible', timeout: 15000 });
         }
       }
     });
@@ -242,7 +242,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 5000 });
+      // Wait for menu to fully render
+      await page.waitForSelector('h1:has-text("Protocol")', { state: 'visible', timeout: 10000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
