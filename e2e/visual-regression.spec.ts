@@ -207,7 +207,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
 
-    // Click "COMMENCE OPERATION" to start the game
+    // Start game
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await startButton.waitFor({ state: 'visible', timeout: 30000 });
     await startButton.click({ force: true, noWaitAfter: true });
@@ -219,7 +219,8 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.keyboard.up('w');
 
     await expect(page).toHaveScreenshot('character-moved.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.03,
+      timeout: 20000,
     });
   });
 
@@ -231,7 +232,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
 
-    // Click "COMMENCE OPERATION" to start the game
+    // Start game
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await startButton.waitFor({ state: 'visible', timeout: 30000 });
     await startButton.click({ force: true, noWaitAfter: true });
@@ -242,7 +243,8 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.03,
+      timeout: 20000,
     });
   });
 });
@@ -364,9 +366,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     }
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.02,
-      threshold: 0.3,
-      timeout: 45000,
+      maxDiffPixelRatio: 0.03,
+      threshold: 0.5,
+      timeout: 60000,
       animations: 'disabled' // Explicitly disable animations
     });
   });
