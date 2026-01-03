@@ -42,12 +42,9 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
-
-      // Verify title is visible
+      // Verify title is visible (beforeEach already ensures page is loaded)
       const title = page.locator('h1');
-      await expect(title).toBeVisible();
+      await expect(title).toBeVisible({ timeout: 10000 });
       await expect(title).toContainText('Protocol');
 
       // Verify subtitle
