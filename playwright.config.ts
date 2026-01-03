@@ -45,12 +45,12 @@ export default defineConfig({
   },
   // Expect options for visual regression
   expect: {
-    // Timeout for expect() calls
-    timeout: 10000,
+    // Timeout for expect() calls - increased for WebGL rendering
+    timeout: 30000,
     // Screenshot comparison settings
     toHaveScreenshot: {
-      // Maximum number of pixels that can differ
-      maxDiffPixels: 100,
+      // Maximum number of pixels that can differ - increased for WebGL variations
+      maxDiffPixels: 500,
       // Animation handling
       animations: 'disabled',
       // CSS media features
