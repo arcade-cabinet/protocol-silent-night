@@ -304,6 +304,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForLoadState('networkidle', { timeout: 15000 });
     await waitForPageStability(page);
 
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await waitForPageStability(page);
+
     // For unstable mobile screenshots, disable animations and increase stability check:
     await page.addStyleTag({ content: '* { animation: none !important; transition: none !important; }' });
     await page.waitForLoadState('networkidle');
@@ -325,6 +330,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    await waitForPageStability(page);
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
     await page.waitForLoadState('networkidle', { timeout: 15000 });
     await waitForPageStability(page);
 
