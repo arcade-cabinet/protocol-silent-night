@@ -163,13 +163,11 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       await page.click('button:has-text("MECHA-SANTA")');
 
-      // Wait for briefing screen to appear
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+      // Wait for briefing
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       // Click commence
-      const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-      await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
-      await commenceButton.click();
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -188,13 +186,8 @@ test.describe('UI Component Refinement', () => {
 
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
-
-      // Wait for briefing screen to appear
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
-
-      const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-      await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
-      await commenceButton.click();
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD
       await page.waitForTimeout(2000);
