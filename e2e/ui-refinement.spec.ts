@@ -167,6 +167,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       // Click commence
+      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 15000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for game HUD to appear
@@ -187,6 +188,7 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 15000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD

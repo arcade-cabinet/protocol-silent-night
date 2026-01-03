@@ -334,12 +334,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     // Wait for any loading overlay to disappear
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
-    await santaButton.click({ force: true });
+    await expect(santaButton).toBeVisible({ timeout: 10000 });
+    await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
-    await commenceButton.click({ force: true });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click();
 
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     await page.waitForTimeout(5000);
@@ -356,12 +357,13 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
-    await santaButton.click({ force: true });
+    await expect(santaButton).toBeVisible({ timeout: 10000 });
+    await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible' });
-    await commenceButton.click({ force: true });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click();
 
     await page.waitForTimeout(3000);
 
