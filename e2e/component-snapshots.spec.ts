@@ -126,10 +126,12 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await startButton.waitFor({ state: 'visible', timeout: 15000 });
+    await startButton.click({ force: true });
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
-    
+
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -141,6 +143,12 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await startButton.waitFor({ state: 'visible', timeout: 15000 });
+    await startButton.click({ force: true });
+
     await page.waitForTimeout(8000);
 
     // Fire at enemies
@@ -227,6 +235,12 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await startButton.waitFor({ state: 'visible', timeout: 15000 });
+    await startButton.click({ force: true });
+
     await page.waitForTimeout(8000);
 
     // Fire and wait for hits
