@@ -58,16 +58,14 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
 async function selectCharacter(page: Page, name: string) {
   const button = page.locator('button', { hasText: name });
   await button.waitFor({ state: 'visible', timeout: 10000 });
-  await button.scrollIntoViewIfNeeded();
-  await button.click({ force: true });
+  await button.click();
 }
 
 // Helper to start mission robustly
 async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   await button.waitFor({ state: 'visible', timeout: 15000 });
-  await button.scrollIntoViewIfNeeded();
-  await button.click({ force: true });
+  await button.click();
 }
 
 // Helper to simulate combat until kills reach target
@@ -579,8 +577,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click re-deploy
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    await redeploy.scrollIntoViewIfNeeded();
-    await redeploy.click({ force: true });
+    await redeploy.click();
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -615,8 +612,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Reset
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    await redeploy.scrollIntoViewIfNeeded();
-    await redeploy.click({ force: true });
+    await redeploy.click();
     await page.waitForTimeout(1000);
 
     // Start new game
@@ -677,8 +673,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Step 7: Can restart
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    await redeploy.scrollIntoViewIfNeeded();
-    await redeploy.click({ force: true });
+    await redeploy.click();
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
