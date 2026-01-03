@@ -206,6 +206,11 @@ test.describe('Visual Regression - Game Movement', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
+
+    // Click "COMMENCE OPERATION" to start the game
+    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(3000);
 
     // Move character
@@ -225,6 +230,11 @@ test.describe('Visual Regression - Game Movement', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
+
+    // Click "COMMENCE OPERATION" to start the game
+    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(3000);
 
     // Fire weapon
