@@ -310,7 +310,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await startButton.waitFor({ state: 'visible', timeout: 15000 });
+    await startButton.click({ force: true });
+
+    // Wait for game to load
+    await page.waitForTimeout(5000);
     await waitForPageStability(page);
 
     // For unstable mobile screenshots, disable animations and increase stability check:
@@ -334,7 +341,14 @@ test.describe('Visual Regression - Responsive Design', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await startButton.waitFor({ state: 'visible', timeout: 15000 });
+    await startButton.click({ force: true });
+
+    // Wait for game to load
+    await page.waitForTimeout(5000);
     await waitForPageStability(page);
 
     // Touch controls should be visible
