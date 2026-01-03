@@ -116,10 +116,36 @@ test.describe('Visual Regression - Game Start', () => {
     await startButton.waitFor({ state: 'visible', timeout: 30000 });
     await startButton.click({ force: true, noWaitAfter: true });
 
-    // Check if game started by waiting for canvas
-    await page.waitForTimeout(1000);
-    if (await startButton.isVisible()) {
-      await startButton.click({ force: true, noWaitAfter: true });
+    // Check if game started by waiting for HUD or game container
+    try {
+        await page.waitForSelector('canvas', { timeout: 5000 });
+    } catch {
+        // Retry click if game didn't start
+        if (await startButton.isVisible()) {
+            await startButton.click({ force: true, noWaitAfter: true });
+        }
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true, noWaitAfter: true });
+
+    // Check if game started
+    try {
+        await page.waitForSelector('canvas', { timeout: 5000 });
+    } catch {
+        // Retry click
+        if (await startButton.isVisible()) {
+            await startButton.click({ force: true, noWaitAfter: true });
+        }
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true, noWaitAfter: true });
+
+    // Check if game started
+    try {
+        await page.waitForSelector('canvas', { timeout: 5000 });
+    } catch {
+        // Retry click
+        if (await startButton.isVisible()) {
+            await startButton.click({ force: true, noWaitAfter: true });
+        }
     }
 
     // Wait for game to load
