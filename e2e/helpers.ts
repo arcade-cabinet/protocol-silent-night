@@ -30,6 +30,7 @@ export async function startGame(page: Page, characterName: string) {
   try {
     // Ensure network is idle before waiting for button, as loading might be ongoing
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1000); // Allow for any late animations
 
     console.log('Waiting for commence button...');
     if (!page.isClosed()) {
@@ -42,10 +43,14 @@ export async function startGame(page: Page, characterName: string) {
     // Fallback selector in case of text content issues
     const fallbackButton = page.locator('button:has-text("COMMENCE")');
 
+    // Fallback using raw selector wait
+    const rawSelectorWait = page.waitForSelector('button:has-text("COMMENCE")', { timeout: 120000 }).then(() => page.locator('button:has-text("COMMENCE")'));
+
     // Wait for either to appear with extended 120s timeout
     const button = await Promise.race([
         commenceButton.waitFor({ state: 'visible', timeout: 120000 }).then(() => commenceButton),
-        fallbackButton.waitFor({ state: 'visible', timeout: 120000 }).then(() => fallbackButton)
+        fallbackButton.waitFor({ state: 'visible', timeout: 120000 }).then(() => fallbackButton),
+        rawSelectorWait
     ]);
 
     await button.click({ timeout: 60000 });
