@@ -58,7 +58,6 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
 async function selectCharacter(page: Page, name: string) {
   const button = page.locator('button', { hasText: name });
   await button.waitFor({ state: 'visible', timeout: 10000 });
-  await button.scrollIntoViewIfNeeded();
   await button.click({ force: true });
 }
 
@@ -66,7 +65,6 @@ async function selectCharacter(page: Page, name: string) {
 async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   await button.waitFor({ state: 'visible', timeout: 15000 });
-  await button.scrollIntoViewIfNeeded();
   await button.click({ force: true });
 }
 
@@ -579,7 +577,6 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click re-deploy
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    await redeploy.scrollIntoViewIfNeeded();
     await redeploy.click({ force: true });
     await page.waitForTimeout(1000);
 
@@ -615,7 +612,6 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Reset
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    await redeploy.scrollIntoViewIfNeeded();
     await redeploy.click({ force: true });
     await page.waitForTimeout(1000);
 
@@ -677,7 +673,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Step 7: Can restart
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    await redeploy.scrollIntoViewIfNeeded();
     await redeploy.click({ force: true });
     await page.waitForTimeout(1000);
 
