@@ -78,6 +78,7 @@ test.describe('Visual Regression - Game Start', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -108,6 +109,7 @@ test.describe('Visual Regression - Game Start', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -138,6 +140,7 @@ test.describe('Visual Regression - Game Start', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -169,6 +172,7 @@ test.describe('Visual Regression - HUD Elements', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
     await page.waitForURL(/\/game/, { timeout: 20000 }).catch(() => {}); // Wait for potential URL change or just proceed if SPA
     await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
 
@@ -199,6 +203,7 @@ test.describe('Visual Regression - HUD Elements', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
 
@@ -232,6 +237,7 @@ test.describe('Visual Regression - Game Movement', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
 
@@ -264,6 +270,7 @@ test.describe('Visual Regression - Game Movement', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
 
@@ -297,6 +304,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     await page.waitForTimeout(5000);
 
@@ -329,6 +337,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     await page.waitForTimeout(5000);
 
@@ -362,6 +371,7 @@ test.describe('Visual Regression - End Game States', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
 
@@ -430,6 +440,7 @@ test.describe('Visual Regression - Responsive Design', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
     await page.waitForURL(/\/game/, { timeout: 20000 }).catch(() => {}); // Wait for potential URL change or just proceed if SPA
     await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
     await page.waitForLoadState('networkidle', { timeout: 30000 });
@@ -460,6 +471,7 @@ test.describe('Visual Regression - Responsive Design', () => {
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
 
