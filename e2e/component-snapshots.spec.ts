@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
-const WEBGL_MAX_DIFF_PIXELS = 52000; // Allow absolute pixel differences for large renders (increased for seeded RNG variations)
+const WEBGL_MAX_DIFF_PIXELS = 50000;
 
 // Set deterministic RNG flag before each test
 test.beforeEach(async ({ page }) => {

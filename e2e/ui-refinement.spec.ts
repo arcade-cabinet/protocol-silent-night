@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
-const WEBGL_MAX_DIFF_PIXELS = 52000; // Allow absolute pixel differences for large renders (increased for seeded RNG variations)
+const WEBGL_MAX_DIFF_PIXELS = 50000;
 
 // Set deterministic RNG flag before each test
 test.beforeEach(async ({ page }) => {
@@ -110,8 +110,8 @@ test.describe('UI Component Refinement', () => {
     // Add a small delay before clicking to ensure UI is stable
     await page.waitForTimeout(500);
 
-    // Force click to bypass potential overlays, don't wait for navigation
-    await button.click({ force: true, timeout: 10000, noWaitAfter: true });
+    // Force click to bypass potential overlays
+    await button.click({ force: true, timeout: 10000 });
   }
 
   test.describe('Menu Screen', () => {

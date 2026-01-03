@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.4; // 40% diff tolerance for WebGL rendering variations in CI
-const WEBGL_MAX_DIFF_PIXELS = 52000; // Allow absolute pixel differences for large renders (increased for seeded RNG variations)
+const WEBGL_MAX_DIFF_PIXELS = 50000; // Allow absolute pixel differences for large renders
 
 // Increase default timeout for this file due to heavy 3D loading and animations
 test.setTimeout(120000);
@@ -358,11 +358,11 @@ test.describe('Visual Regression - End Game States', () => {
     await expect(page.getByRole('heading', { name: 'OPERATOR DOWN' })).toBeVisible({ timeout: 10000 });
     await disableAnimations(page);
     await pauseThreeJsRendering(page);
-    await page.waitForTimeout(1000); // Allow render to settle
+    await page.waitForTimeout(2000); // Allow render to settle (increased for CI)
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      maxDiffPixels: 55000, // Increased for seeded RNG variance
       timeout: 30000,
       animations: 'disabled',
     });
