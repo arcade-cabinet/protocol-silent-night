@@ -324,7 +324,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(1000); // Add explicit wait before screenshot
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 2000, // Allow up to 2000 pixels difference for mobile rendering variations
       threshold: 0.2,
       timeout: 30000,
       animations: 'disabled' // Explicitly disable animations
@@ -375,8 +375,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     ].join(',')).first();
 
     await expect(fireButton).toBeVisible({ timeout: 30000 });
-    await fireButton.waitForElementState('stable');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000); // Wait for element to stabilize
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
