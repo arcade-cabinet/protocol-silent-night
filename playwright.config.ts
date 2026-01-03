@@ -49,8 +49,8 @@ export default defineConfig({
     timeout: 10000,
     // Screenshot comparison settings
     toHaveScreenshot: {
-      // Maximum pixel diff ratio (30% tolerance for WebGL and palette variations)
-      maxDiffPixelRatio: 0.3,
+      // Maximum number of pixels that can differ
+      maxDiffPixels: 100,
       // Animation handling
       animations: 'disabled',
       // CSS media features
