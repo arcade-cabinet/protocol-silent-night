@@ -172,7 +172,7 @@ test.describe('UI Component Refinement', () => {
       // Click commence
       const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
       await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceButton.click();
+      await commenceButton.click({ timeout: 30000 });
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -194,7 +194,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
       const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
       await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceButton.click();
+      await commenceButton.click({ timeout: 30000 });
 
       // Wait for HUD
       await page.waitForTimeout(2000);
