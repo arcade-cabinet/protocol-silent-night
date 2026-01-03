@@ -241,8 +241,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await santaButton.click({ timeout: 10000 });
+      await page.getByText('MISSION BRIEFING').waitFor({ state: 'visible', timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
