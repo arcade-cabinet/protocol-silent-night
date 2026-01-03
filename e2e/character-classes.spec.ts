@@ -335,13 +335,16 @@ test.describe('Character Class Tests', () => {
     // Verify touch fire button is visible
     const fireButton = page.getByRole('button', { name: /FIRE/i });
     await expect(fireButton).toBeVisible();
-    
+
     // Click fire button multiple times
-    await fireButton.click();
+    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+    await fireButton.click({ timeout: 5000 });
     await page.waitForTimeout(200);
-    await fireButton.click();
+    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+    await fireButton.click({ timeout: 5000 });
     await page.waitForTimeout(200);
-    await fireButton.click();
+    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+    await fireButton.click({ timeout: 5000 });
     
     console.log('✓ Touch controls tested');
   });
