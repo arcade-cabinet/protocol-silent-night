@@ -354,7 +354,7 @@ test.describe('Visual Regression - End Game States', () => {
       gameWindow.useGameStore?.getState().damagePlayer(300);
     });
 
-    // Wait for Game Over screen - use getByRole to avoid strict mode violation
+    // Wait for Game Over screen
     await expect(page.getByRole('heading', { name: 'OPERATOR DOWN' })).toBeVisible({ timeout: 10000 });
     await disableAnimations(page);
 
