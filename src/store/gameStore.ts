@@ -892,7 +892,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
     // Force transition to boss phase, overriding level up if active
     const { runProgress } = get();
-    set((_state) => ({
+    set((state) => ({
       state: 'PHASE_BOSS',
       // If we were leveling up, we'll return to PHASE_1 after boss, not back to LEVEL_UP
       // unless we want to queue it. For now, boss takes priority.
@@ -934,9 +934,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Win the game after defeating the boss
+      // Endless mode: Increment wave and prepare for level up
       set({
-        state: 'WIN',
+        state: 'PHASE_1',
         bossActive: false,
         stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
@@ -945,6 +945,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
           wave: runProgress.wave + 1,
         },
       });
+
+      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
+      get().levelUp();
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
