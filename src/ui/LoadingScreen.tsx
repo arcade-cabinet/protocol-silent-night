@@ -20,13 +20,13 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
     // Only show during initial load or explicit loading states
     if (state !== 'MENU' && state !== 'LOADING') {
       const animationDuration = 500; // CSS transition duration
-      const totalDuration = Math.max(minDuration, 2000); // Ensure at least 2s for animation to complete
 
-      const timer = setTimeout(() => {
-        setVisible(false);
-        // Remove from DOM after fade out animation completes
-        setTimeout(() => setMounted(false), animationDuration);
-      }, totalDuration);
+      // Hide immediately when leaving MENU state (e.g., entering BRIEFING)
+      // This prevents blocking the mission briefing screen
+      setVisible(false);
+
+      // Remove from DOM after fade out animation completes
+      const timer = setTimeout(() => setMounted(false), animationDuration);
 
       return () => clearTimeout(timer);
     }
