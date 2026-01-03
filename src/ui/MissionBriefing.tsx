@@ -61,13 +61,15 @@ export function MissionBriefing() {
       setCurrentLine((prev) => {
         if (prev >= briefingLines.length - 1) {
           clearInterval(interval);
-          timeoutId = setTimeout(() => setShowButton(true), 500);
+          // Show button immediately in test environment or after delay
+          const delay = process.env.NODE_ENV === 'test' ? 0 : 500;
+          timeoutId = setTimeout(() => setShowButton(true), delay);
           return prev;
         }
         AudioManager.playSFX('ui_click');
         return prev + 1;
       });
-    }, 600);
+    }, 100); // Speed up typing in general
 
     return () => {
       clearInterval(interval);

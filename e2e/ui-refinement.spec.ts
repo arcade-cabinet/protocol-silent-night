@@ -12,9 +12,6 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
-// Increase timeout for these tests due to animations and loading
-test.describe.configure({ timeout: 120000 });
-
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
@@ -170,9 +167,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       // Click commence
-      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceButton.click({ timeout: 30000 });
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -192,9 +187,7 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
-      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
-      await commenceButton.click({ timeout: 30000 });
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD
       await page.waitForTimeout(2000);
