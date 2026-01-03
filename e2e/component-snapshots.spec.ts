@@ -231,18 +231,19 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await page.waitForTimeout(5000);
 
-    // Trigger kill streak by rapid kills
+    // Trigger kill streak by rapid kills with slight delays to avoid audio timing errors
     await page.evaluate(() => {
       // @ts-ignore
       const store = window.useGameStore?.getState();
       if (store) {
         store.addKill(50);
-        store.addKill(50);
-        store.addKill(50);
+        // Add small delay between kills to prevent Tone.js timing errors
+        setTimeout(() => store.addKill(50), 100);
+        setTimeout(() => store.addKill(50), 200);
       }
     });
 
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500);
 
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
