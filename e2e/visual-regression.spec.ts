@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variations and palette changes
+const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
 // Increase timeout for all tests in this file to handle slow CI rendering
 test.setTimeout(120000);
@@ -68,6 +68,7 @@ test.describe('Visual Regression - Character Selection', () => {
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
       animations: 'disabled',
     });
   });
@@ -77,6 +78,7 @@ test.describe('Visual Regression - Character Selection', () => {
     await santaCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 
@@ -85,6 +87,7 @@ test.describe('Visual Regression - Character Selection', () => {
     await elfCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 
@@ -93,6 +96,7 @@ test.describe('Visual Regression - Character Selection', () => {
     await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 });
@@ -124,6 +128,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 
@@ -144,6 +149,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 
@@ -164,6 +170,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 });
@@ -186,6 +193,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 
@@ -201,6 +209,7 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 });
@@ -227,6 +236,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 
@@ -242,6 +252,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 });
@@ -268,6 +279,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 
@@ -282,6 +294,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 });
@@ -320,6 +333,7 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200000,
     });
   });
 });
