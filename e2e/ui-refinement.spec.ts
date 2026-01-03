@@ -12,19 +12,8 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
-// Extend Window interface for E2E testing
-declare global {
-  interface Window {
-    __E2E_TEST__?: boolean;
-  }
-}
-
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
-    // Set deterministic RNG flag for E2E tests
-    await page.addInitScript(() => {
-      window.__E2E_TEST__ = true;
-    });
     // Listen for console errors
     page.on('console', msg => {
       if (msg.type() === 'error') {
