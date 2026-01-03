@@ -1,123 +1,159 @@
-# Contributing to Protocol: Silent Night
+---
+version: 1.0.1
+last_updated: 2026-01-03T02:21:30Z
+sync_type: always
+---
 
-Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
+# Contributing to Control Center
 
-## Getting Started
+Thank you for your interest in contributing! We are **stewards and servants of the open source community FIRST**.
 
-### Prerequisites
-- Node.js 20 or higher
-- pnpm 9 or higher
-- A modern browser with WebGL support
+## Our Standards
 
-### Setup
-```bash
-git clone https://github.com/arcade-cabinet/protocol-silent-night.git
-cd protocol-silent-night
-pnpm install
-pnpm dev
+We **mandate** these standards because we believe in leading by example:
+
+### Conventional Commits (REQUIRED)
+
+Every commit MUST follow [Conventional Commits](https://www.conventionalcommits.org/):
+
 ```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### Types
+
+| Type | Description | Triggers Release |
+|------|-------------|------------------|
+| `feat` | New feature | Minor bump |
+| `fix` | Bug fix | Patch bump |
+| `docs` | Documentation only | No |
+| `style` | Formatting, no code change | No |
+| `refactor` | Code change without feat/fix | No |
+| `perf` | Performance improvement | Patch bump |
+| `test` | Adding/fixing tests | No |
+| `build` | Build system or dependencies | No |
+| `ci` | CI/CD configuration | No |
+| `chore` | Maintenance tasks | No |
+| `deps` | Dependency updates | Patch bump |
+| `revert` | Revert previous commit | Patch bump |
+
+#### Breaking Changes
+
+Add `!` after type or include `BREAKING CHANGE:` in footer:
+
+```
+feat!: remove deprecated API
+
+BREAKING CHANGE: The old API has been removed. Use the new API instead.
+```
+
+#### Examples
+
+```bash
+# Good
+feat(reviewer): add support for multi-file review
+fix(curator): handle empty issue body gracefully
+docs: update installation instructions
+refactor(clients): simplify Ollama error handling
+deps: bump cobra to v1.10.2
+
+# Bad
+Fixed bug                    # No type
+feat: Add new feature        # Wrong case (use lowercase)
+fix: fixed the thing.        # No trailing period
+Update code                  # Not conventional
+```
+
+### Semantic Versioning (AUTOMATIC)
+
+We use [Release Please](https://github.com/googleapis/release-please) for automated versioning:
+
+- `feat:` → Minor version bump (0.1.0 → 0.2.0)
+- `fix:`, `perf:`, `deps:` → Patch version bump (0.1.0 → 0.1.1)
+- `feat!:` or `BREAKING CHANGE:` → Major version bump (0.1.0 → 1.0.0)
+
+### Pre-commit Hooks (REQUIRED)
+
+Install pre-commit hooks before contributing:
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install hooks
+pre-commit install
+pre-commit install --hook-type commit-msg
+
+# Run on all files
+pre-commit run --all-files
+```
+
+### Code Quality
+
+- **Go**: Run `make lint` before committing
+- **Tests**: Run `make test` and ensure all pass
+- **Format**: Run `make fmt` or let pre-commit handle it
 
 ## Development Workflow
 
-### Branch Naming
-- `feature/description` - New features
-- `fix/description` - Bug fixes
-- `docs/description` - Documentation updates
-- `refactor/description` - Code refactoring
+### 1. Fork and Clone
 
-### Code Style
-This project uses [Biome](https://biomejs.dev/) for linting and formatting:
 ```bash
-pnpm lint      # Check for issues
-pnpm format    # Auto-format code
-pnpm check     # Lint + format in one command
+git clone https://github.com/YOUR_USERNAME/control-center.git
+cd control-center
 ```
 
-### Type Checking
+### 2. Create Feature Branch
+
 ```bash
-pnpm typecheck
+git checkout -b feat/your-feature
 ```
 
-### Testing
+### 3. Make Changes
+
 ```bash
-# Run E2E tests (headless)
-pnpm test:e2e
+# Build
+make build
 
-# Run with full WebGL support (requires display)
-pnpm test:e2e:mcp
+# Test
+make test
 
-# Interactive test UI
-pnpm test:e2e:ui
+# Lint
+make lint
 ```
 
-## Project Structure
+### 4. Commit with Conventional Format
 
-```
-src/
-├── characters/     # Player character components
-│   ├── SantaCharacter.tsx
-│   ├── ElfCharacter.tsx
-│   ├── BumbleCharacter.tsx
-│   └── PlayerController.tsx
-├── game/           # Core game systems
-│   ├── GameScene.tsx    # Main 3D scene
-│   ├── Terrain.tsx      # Procedural terrain
-│   ├── Enemies.tsx      # Enemy AI
-│   ├── Bullets.tsx      # Projectile system
-│   └── HitParticles.tsx # Particle effects
-├── store/          # State management
-│   └── gameStore.ts     # Zustand store
-├── ui/             # UI components
-│   ├── StartScreen.tsx
-│   ├── HUD.tsx
-│   ├── BossHUD.tsx
-│   └── EndScreen.tsx
-├── shaders/        # Custom GLSL shaders
-└── types/          # TypeScript definitions
+```bash
+git add .
+git commit -m "feat(scope): add your feature"
 ```
 
-## Key Technologies
+### 5. Push and Create PR
 
-- **Three.js** - 3D rendering
-- **React Three Fiber** - React renderer for Three.js
-- **@jbcom/strata** - Procedural graphics library
-- **Zustand** - State management
-- **Vite** - Build tool
+```bash
+git push origin feat/your-feature
+```
 
-## Submitting Changes
+Then create a Pull Request on GitHub.
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `pnpm lint && pnpm typecheck && pnpm build`
-5. Run `pnpm test:e2e` to verify tests pass
-6. Submit a Pull Request
+## Pull Request Guidelines
 
-### PR Guidelines
-- Keep PRs focused on a single feature or fix
-- Include a clear description of changes
-- Reference any related issues
-- Ensure CI passes before requesting review
+1. **Title**: Use conventional commit format
+2. **Description**: Explain what and why, not how
+3. **Tests**: Add tests for new functionality
+4. **Docs**: Update documentation if needed
+5. **Review**: Address all AI and human feedback
 
-## Game Design Guidelines
+## Getting Help
 
-### Adding New Characters
-1. Create component in `src/characters/`
-2. Use `createCharacter()` from Strata for articulated models
-3. Add fur system with `createFurSystem()` if needed
-4. Add configuration to `PLAYER_CLASSES` in `src/types/`
+- **Issues**: [GitHub Issues](https://github.com/jbcom/control-center/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jbcom/control-center/discussions)
 
-### Adding New Enemies
-1. Add enemy type to `src/types/index.ts`
-2. Implement spawn logic in `src/game/Enemies.tsx`
-3. Create mesh component for rendering
-4. Balance HP/speed/damage appropriately
+## License
 
-### UI Components
-- Use CSS Modules for styling
-- Follow existing HUD panel patterns
-- Support both desktop and mobile layouts
-
-## Questions?
-
-Open an issue for questions or suggestions!
+By contributing, you agree that your contributions will be licensed under the MIT License.
