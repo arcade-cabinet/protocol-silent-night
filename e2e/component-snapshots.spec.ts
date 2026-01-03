@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * Component Snapshot Tests
@@ -8,6 +8,14 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.2;
+
+// Helper to wait for and click COMMENCE OPERATION button
+async function clickCommenceOperation(page: Page) {
+  const commenceBtn = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+  // Mission briefing has a typing animation that takes ~4s, plus loading time
+  await commenceBtn.waitFor({ state: 'visible', timeout: 45000 });
+  await commenceBtn.click();
+}
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
@@ -19,7 +27,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(5000);
 
@@ -45,7 +53,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(5000);
 
@@ -62,7 +70,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(5000);
 
@@ -81,7 +89,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(5000);
 
@@ -107,7 +115,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(5000);
 
@@ -126,7 +134,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
 
@@ -163,7 +171,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -184,7 +192,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -206,7 +214,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -249,7 +257,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -266,7 +274,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(3000);
 
@@ -292,7 +300,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(8000);
 
@@ -312,7 +320,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await clickCommenceOperation(page);
 
     await page.waitForTimeout(5000);
 

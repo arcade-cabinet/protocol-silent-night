@@ -120,9 +120,9 @@ test.describe('UI Component Refinement', () => {
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
-      // Check for operation button
+      // Check for operation button - briefing has a typing animation
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible();
+      await expect(opButton).toBeVisible({ timeout: 45000 });
       await expect(opButton).toBeEnabled();
     });
 
@@ -166,7 +166,8 @@ test.describe('UI Component Refinement', () => {
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
-      // Click commence
+      // Click commence - wait for briefing animation to complete
+      await page.locator('button:has-text("COMMENCE OPERATION")').waitFor({ state: 'visible', timeout: 45000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for game HUD to appear
@@ -187,6 +188,8 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      // Wait for briefing animation to complete
+      await page.locator('button:has-text("COMMENCE OPERATION")').waitFor({ state: 'visible', timeout: 45000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD

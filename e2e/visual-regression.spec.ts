@@ -76,27 +76,36 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Santa character card correctly', async ({ page }) => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaCard.waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for any hover/focus effects to settle
+    await page.waitForTimeout(1000);
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
+      timeout: 30000, // Increase timeout for screenshot stability
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfCard.waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for any hover/focus effects to settle
+    await page.waitForTimeout(1000);
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
+      timeout: 30000, // Increase timeout for screenshot stability
     });
   });
 
   test('should show Bumble character card correctly', async ({ page }) => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for any hover/focus effects to settle
+    await page.waitForTimeout(1000);
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
+      timeout: 30000, // Increase timeout for screenshot stability
     });
   });
 });
@@ -139,8 +148,9 @@ test.describe('Visual Regression - Game Start', () => {
     await elfButton.click({ force: true, timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    // Mission briefing has a typing animation that takes ~4s, plus loading time
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
@@ -160,8 +170,9 @@ test.describe('Visual Regression - Game Start', () => {
     await bumbleButton.click({ force: true, timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    // Mission briefing has a typing animation that takes ~4s, plus loading time
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 15000 });
 
     // Wait for game to load
