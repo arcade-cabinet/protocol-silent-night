@@ -337,14 +337,11 @@ test.describe('Character Class Tests', () => {
     await expect(fireButton).toBeVisible();
 
     // Click fire button multiple times
-    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
-    await fireButton.click({ timeout: 5000 });
+    await fireButton.click();
     await page.waitForTimeout(200);
-    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
-    await fireButton.click({ timeout: 5000 });
+    await fireButton.click();
     await page.waitForTimeout(200);
-    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
-    await fireButton.click({ timeout: 5000 });
+    await fireButton.click();
     
     console.log('✓ Touch controls tested');
   });
