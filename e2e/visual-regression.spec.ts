@@ -77,7 +77,8 @@ test.describe('Visual Regression - Character Selection', () => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaCard.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Allow animations to settle
+    await santaCard.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500); // Allow animations to settle
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
@@ -89,7 +90,8 @@ test.describe('Visual Regression - Character Selection', () => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfCard.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Allow animations to settle
+    await elfCard.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500); // Allow animations to settle
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
@@ -101,7 +103,8 @@ test.describe('Visual Regression - Character Selection', () => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Allow animations to settle
+    await bumbleCard.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500); // Allow animations to settle
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
