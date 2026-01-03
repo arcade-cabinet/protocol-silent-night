@@ -54,8 +54,6 @@ export default defineConfig({
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
-      // Use maxDiffPixelRatio per test instead of global maxDiffPixels
-      // to allow flexible thresholds for WebGL rendering variations
     },
   },
   // Configure projects for major browsers
