@@ -40,7 +40,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 3000, // Increased tolerance for dimension variations in CI rendering
+      maxDiffPixels: 3000,
     });
   });
 
@@ -55,7 +55,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 3000, // Increased tolerance for dimension variations in CI rendering
+      maxDiffPixels: 3000,
     });
   });
 
@@ -70,7 +70,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 3000, // Increased tolerance for dimension variations in CI rendering
+      maxDiffPixels: 3000,
     });
   });
 });
