@@ -28,23 +28,18 @@ test.describe('UI Component Refinement', () => {
       }
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
-
-    // Wait for loading screen to disappear
-    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-    if (await loadingScreen.isVisible()) {
-      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
-    }
-
-    // Additional wait for transition animation
-    await page.waitForTimeout(2000);
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
   });
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Verify title is visible (beforeEach already ensures page is loaded)
+      // Wait for menu to fully render
+      await page.waitForSelector('h1', { timeout: 5000 });
+
+      // Verify title is visible
       const title = page.locator('h1');
-      await expect(title).toBeVisible({ timeout: 10000 });
+      await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
       // Verify subtitle
