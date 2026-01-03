@@ -36,15 +36,13 @@ class AudioManagerClass {
   private masterVolume = 0.7;
   private musicVolume = 0.6;
   private sfxVolume = 0.8;
+  private lastSfxTime = 0;
 
   // Synth instruments
   private synths: Map<string, Tone.Synth | Tone.PolySynth | Tone.FMSynth | Tone.NoiseSynth> =
     new Map();
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
-
-  // Track last SFX time to prevent timing collisions
-  private lastSFXTime = 0;
 
   /**
    * Initialize audio system. Must be called after user interaction.
@@ -182,13 +180,12 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    const now = Tone.now();
 
-    // Ensure start time is strictly greater than previous start time
-    // Add small offset (10ms) if sounds are triggered too quickly
-    const minInterval = 0.01; // 10ms minimum between sounds
-    const startTime = Math.max(now, this.lastSFXTime + minInterval);
-    this.lastSFXTime = startTime;
+    // Ensure strictly monotonic start times to prevent Tone.js errors
+    // "Start time must be strictly greater than previous start time"
+    const now = Tone.now();
+    const startTime = Math.max(now, this.lastSfxTime + 0.001);
+    this.lastSfxTime = startTime;
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
