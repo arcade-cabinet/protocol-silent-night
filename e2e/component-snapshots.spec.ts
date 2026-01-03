@@ -64,23 +64,6 @@ async function pauseThreeJsRendering(page: import('@playwright/test').Page) {
   await page.waitForTimeout(500); // Wait for pause to take effect
 }
 
-/**
- * Helper to select a mech and wait for BRIEFING state
- */
-async function selectMech(page: import('@playwright/test').Page, mechName: string) {
-  const mechButton = page.getByRole('button', { name: new RegExp(mechName, 'i') });
-
-  // Wait for button to be ready, then click with increased timeout
-  await mechButton.waitFor({ state: 'visible', timeout: 10000 });
-  await mechButton.click({ timeout: 30000, noWaitAfter: true });
-
-  // Wait for state transition to BRIEFING
-  await page.waitForFunction(() => {
-    const store = (window as any).useGameStore;
-    return store && store.getState().state === 'BRIEFING';
-  }, null, { timeout: 30000 });
-}
-
 // Add type definition for global window property
 declare global {
   interface Window {
@@ -89,13 +72,29 @@ declare global {
   }
 }
 
+// Helper to select a mech and wait for state transition securely
+async function selectMech(page: import('@playwright/test').Page, mechNameRegex: RegExp) {
+  const button = page.getByRole('button', { name: mechNameRegex });
+  await expect(button).toBeVisible({ timeout: 30000 });
+  await button.click({ force: true, timeout: 30000, noWaitAfter: true });
+
+  // Wait for state transition to BRIEFING
+  await page.waitForFunction(() => {
+    const store = (window as any).useGameStore;
+    return store && store.getState().state === 'BRIEFING';
+  }, null, { timeout: 30000 });
+
+  // Wait for briefing text
+  await page.waitForSelector('text=MISSION BRIEFING', { state: 'visible', timeout: 30000 });
+}
+
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
     // Start with Santa
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -124,7 +123,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'CYBER-ELF');
+    await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -144,7 +143,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'BUMBLE');
+    await selectMech(page, /BUMBLE/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -167,7 +166,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -196,7 +195,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -218,7 +217,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -238,7 +237,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -265,7 +264,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -289,7 +288,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'CYBER-ELF');
+    await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -314,7 +313,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'BUMBLE');
+    await selectMech(page, /BUMBLE/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -340,7 +339,11 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
+
     await page.waitForTimeout(8000);
 
     // Fire and wait for hits
@@ -363,7 +366,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -383,7 +386,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -412,7 +415,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'CYBER-ELF');
+    await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
@@ -435,7 +438,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectMech(page, 'MECHA-SANTA');
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });

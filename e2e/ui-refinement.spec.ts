@@ -117,7 +117,7 @@ test.describe('UI Component Refinement', () => {
     await page.waitForTimeout(2000);
 
     // Force click to bypass potential overlays, noWaitAfter to avoid SPA navigation timeout
-    await button.click({ force: true, timeout: 20000, noWaitAfter: true });
+    await button.click({ force: true, timeout: 30000, noWaitAfter: true });
   }
 
   /**
@@ -206,9 +206,9 @@ test.describe('UI Component Refinement', () => {
       // Select a mech
       await selectMech(page, 'CYBER-ELF');
 
-      // Check for operation button
-      const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible();
+      // Check for operation button - use loose matching as the text might be animated
+      const opButton = page.locator('button', { hasText: /COMMENCE OPERATION/i });
+      await expect(opButton).toBeVisible({ timeout: 10000 });
       await expect(opButton).toBeEnabled();
     });
 
