@@ -22,10 +22,10 @@ export default defineConfig({
   forbidOnly: isCI,
   // Retry on CI only (not needed with MCP)
   retries: hasMcpSupport ? 0 : isCI ? 2 : 0,
-  // Parallel workers - more with MCP, fewer in CI
-  workers: hasMcpSupport ? undefined : isCI ? 2 : undefined,
-  // Longer timeout for WebGL rendering with MCP
-  timeout: hasMcpSupport ? 60000 : 30000,
+  // Parallel workers - single worker in CI to reduce memory pressure
+  workers: hasMcpSupport ? undefined : isCI ? 1 : undefined,
+  // Longer timeout for WebGL rendering
+  timeout: hasMcpSupport ? 60000 : isCI ? 60000 : 30000,
   // Reporter to use
   reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
   // Shared settings for all the projects below
@@ -45,8 +45,8 @@ export default defineConfig({
   },
   // Expect options for visual regression
   expect: {
-    // Timeout for expect() calls
-    timeout: 10000,
+    // Timeout for expect() calls - increased for CI
+    timeout: isCI ? 20000 : 10000,
     // Screenshot comparison settings
     toHaveScreenshot: {
       // Maximum number of pixels that can differ
@@ -55,6 +55,8 @@ export default defineConfig({
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
+      // Timeout for screenshots - increased for CI
+      timeout: isCI ? 30000 : 20000,
     },
   },
   // Configure projects for major browsers
@@ -70,12 +72,17 @@ export default defineConfig({
               args: ['--enable-webgl', '--ignore-gpu-blocklist'],
             }
           : {
-              // Headless mode - software rendering
+              // Headless mode - software rendering with stability improvements
               args: [
                 '--use-gl=swiftshader',
                 '--enable-webgl',
                 '--ignore-gpu-blocklist',
                 '--disable-gpu-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-software-rasterizer',
+                '--disable-setuid-sandbox',
+                '--no-sandbox',
+                '--single-process',
               ],
             },
       },
