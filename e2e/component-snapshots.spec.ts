@@ -69,7 +69,10 @@ async function pauseThreeJsRendering(page: import('@playwright/test').Page) {
  */
 async function selectMech(page: import('@playwright/test').Page, mechName: string) {
   const mechButton = page.getByRole('button', { name: new RegExp(mechName, 'i') });
-  await mechButton.click({ noWaitAfter: true });
+
+  // Wait for button to be ready, then click with increased timeout
+  await mechButton.waitFor({ state: 'visible', timeout: 10000 });
+  await mechButton.click({ timeout: 30000, noWaitAfter: true });
 
   // Wait for state transition to BRIEFING
   await page.waitForFunction(() => {
