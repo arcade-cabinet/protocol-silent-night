@@ -47,6 +47,10 @@ export function MissionBriefing() {
   useEffect(() => {
     if (state !== 'BRIEFING') return;
 
+    // Reset state when briefing starts
+    setCurrentLine(0);
+    setShowButton(false);
+
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
@@ -69,14 +73,6 @@ export function MissionBriefing() {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [state, briefingLines]);
-
-  // Reset state when briefing starts
-  useEffect(() => {
-    if (state === 'BRIEFING') {
-      setCurrentLine(0);
-      setShowButton(false);
-    }
-  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
@@ -110,7 +106,7 @@ export function MissionBriefing() {
         </div>
 
         {showButton && (
-          <button type="button" className={styles.startButton} onClick={handleStart}>
+          <button type="button" className={styles.startButton} onClick={handleStart} aria-label="Commence Operation">
             <span className={styles.buttonText}>COMMENCE OPERATION</span>
             <div className={styles.buttonGlow} />
           </button>
