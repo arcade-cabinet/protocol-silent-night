@@ -2,10 +2,22 @@ import { test, expect, Page } from '@playwright/test';
 
 /**
  * Full Gameplay E2E Tests
- * 
+ *
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */
+
+/**
+ * Helper: Wait for COMMENCE OPERATION button with proper timeout
+ * The button has a progressive reveal animation:
+ * - 7 briefing lines × 600ms = 4200ms
+ * - Plus 500ms button reveal delay = 4700ms total
+ */
+async function waitForCommenceButton(page: Page, timeout = 15000) {
+  const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+  await commenceButton.waitFor({ state: 'visible', timeout });
+  return commenceButton;
+}
 
 // Helper to get game state from the store
 async function getGameState(page: Page) {
@@ -108,8 +120,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    const commenceButton = await waitForCommenceButton(page);
     await commenceButton.click();
 
     // Wait for game to start
