@@ -13,6 +13,7 @@ const VISUAL_THRESHOLD = 0.2;
 async function selectCharacter(page: Page, name: string) {
   const button = page.locator('button', { hasText: name });
   await button.waitFor({ state: 'visible', timeout: 10000 });
+  await button.scrollIntoViewIfNeeded();
   await button.click({ force: true });
 }
 
@@ -20,6 +21,7 @@ async function selectCharacter(page: Page, name: string) {
 async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   await button.waitFor({ state: 'visible', timeout: 45000 });
+  await button.scrollIntoViewIfNeeded();
   await button.click({ force: true, timeout: 15000 });
 }
 
