@@ -397,23 +397,9 @@ describe('GameStore - Boss Management', () => {
       expect(killed).toBe(true);
     });
 
-    it('should set state to WIN when boss is killed on wave 1', () => {
+    it('should set state to LEVEL_UP when boss is killed (Endless Mode)', () => {
       const { damageBoss } = useGameStore.getState();
-
-      damageBoss(1000);
-
-      const state = useGameStore.getState();
-      expect(state.state).toBe('WIN');
-      expect(state.bossActive).toBe(false);
-    });
-
-    it('should set state to LEVEL_UP when boss is killed on wave 2+ (Endless Mode)', () => {
-      const store = useGameStore.getState();
-      // Manually set wave to 2 for endless mode testing
-      store.runProgress.wave = 2;
-
-      const { damageBoss } = store;
-      const initialWave = store.runProgress.wave;
+      const initialWave = useGameStore.getState().runProgress.wave;
 
       damageBoss(1000);
 

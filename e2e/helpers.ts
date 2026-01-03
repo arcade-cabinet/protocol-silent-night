@@ -45,11 +45,9 @@ export async function selectCharacterAndStart(
     throw new Error('Page closed while waiting for game init');
   }
 
-  // Wait for the menu to load first
+  // Initial animation wait - reduced
+  await page.waitForTimeout(1500);
   await page.waitForLoadState('networkidle');
-  // Wait for menu title to ensure React has rendered
-  await page.waitForSelector('h1:has-text("Protocol")', { state: 'visible', timeout: 15000 });
-  await page.waitForTimeout(500); // Small delay for animations
 
   // Select character
   const characterButton = page.getByRole('button', { name: new RegExp(characterName) });

@@ -49,9 +49,9 @@ describe('Game Flow Integration Tests', () => {
       const killed = store.damageBoss(1000);
 
       state = useGameStore.getState();
-      // 6. Boss Defeated - Game Won (first boss victory)
+      // 6. Boss Defeated (Endless Mode)
       expect(killed).toBe(true);
-      expect(state.state).toBe('WIN');
+      expect(state.state).toBe('LEVEL_UP');
       expect(state.stats.bossDefeated).toBe(true);
     });
 
@@ -304,7 +304,7 @@ describe('Game Flow Integration Tests', () => {
       });
 
       expect(killed).toBe(true);
-      expect(useGameStore.getState().state).toBe('WIN');
+      expect(useGameStore.getState().state).toBe('LEVEL_UP');
       expect(useGameStore.getState().stats.bossDefeated).toBe(true);
     });
 
@@ -446,11 +446,11 @@ describe('Game Flow Integration Tests', () => {
       }
       expect(useGameStore.getState().state).toBe('PHASE_BOSS');
 
-      // PHASE_BOSS -> WIN (first boss victory)
+      // PHASE_BOSS -> LEVEL_UP (Endless Cycle)
       store.damageBoss(1000);
-      expect(useGameStore.getState().state).toBe('WIN');
+      expect(useGameStore.getState().state).toBe('LEVEL_UP');
 
-      // Check reset from win state
+      // Loop continues... but for this test we check reset
       store.reset();
       expect(useGameStore.getState().state).toBe('MENU');
     });
