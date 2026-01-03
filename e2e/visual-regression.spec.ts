@@ -338,7 +338,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await waitForPageStability(page);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixelRatio: 0.40, // Increased tolerance for mobile rendering variations
+      maxDiffPixelRatio: 0.35, // Increased tolerance for mobile rendering variations
       threshold: 0.25, // Add threshold option
       timeout: 20000,
     });
@@ -349,22 +349,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.click({ force: true, noWaitAfter: true });
+    await santaButton.click({ timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await startButton.waitFor({ state: 'visible', timeout: 30000 });
-    await startButton.click({ force: true, noWaitAfter: true });
-    await page.waitForTimeout(1000);
-    if (await startButton.isVisible()) {
-        await startButton.click({ force: true, noWaitAfter: true });
-    }
-
-    // Wait for game to load
-    await page.waitForTimeout(5000);
+    // Wait for the game canvas to be visible instead of strict network idle
+    await page.locator('canvas').waitFor({ state: 'visible', timeout: 30000 });
     await waitForPageStability(page);
 
     // For unstable mobile screenshots, disable animations and increase stability check:
