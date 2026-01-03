@@ -446,10 +446,10 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     await page.waitForTimeout(3000); // Increase from 2000 to 3000
     await page.waitForLoadState('networkidle'); // Add this line
-    await page.waitForTimeout(2000); // Add extra wait after networkidle to ensure full stability
+    await page.waitForTimeout(1000); // Add extra wait after networkidle
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.10, // Increase to 10% for mobile viewport variations
+      maxDiffPixelRatio: 0.10, // Increase to 10%
       timeout: 30000, // Increase timeout
       animations: 'disabled', // Ensure animations are disabled
     });
@@ -476,26 +476,23 @@ test.describe('Visual Regression - Responsive Design', () => {
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(500);
-    await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
-    await page.waitForLoadState('networkidle', { timeout: 30000 });
+
     await page.waitForTimeout(3000);
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await fireButton.waitFor({ state: 'visible', timeout: 15000 });
-    await fireButton.scrollIntoViewIfNeeded({ timeout: 20000 }); // Increase timeout
-    await expect(fireButton).toBeInViewport(); // Verify it's in view
-    await page.waitForTimeout(2000); // Allow UI to fully settle with extra time
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000); // Allow UI to fully settle
 
-    // Use a bounding box screenshot instead of element screenshot for better stability
-    const boundingBox = await fireButton.boundingBox();
-    if (boundingBox) {
-      await expect(page).toHaveScreenshot('touch-fire-button.png', {
-        maxDiffPixelRatio: 0.06,
-        animations: 'disabled',
-        timeout: 30000,
-        clip: boundingBox,
-      });
-    }
+    // Use page screenshot with clip for stability instead of element screenshot
+    const box = await fireButton.boundingBox();
+    if (!box) throw new Error('Fire button not found');
+
+    await expect(page).toHaveScreenshot('touch-fire-button.png', {
+      clip: box,
+      maxDiffPixelRatio: 0.06,
+      animations: 'disabled',
+      timeout: 30000,
+    });
   });
 });
