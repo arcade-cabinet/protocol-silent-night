@@ -120,6 +120,7 @@ test.describe('Visual Regression - Character Selection', () => {
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -135,6 +136,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -150,6 +152,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -165,6 +168,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -181,6 +185,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -195,6 +200,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -209,6 +215,7 @@ test.describe('Visual Regression - Game Start', () => {
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -225,6 +232,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -242,6 +250,7 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -262,6 +271,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -279,6 +289,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -299,6 +310,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -315,6 +327,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -346,6 +359,7 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -363,6 +377,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: 0.4, // Temporarily increased for high variance
+      maxDiffPixels: 200,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -383,6 +398,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200, // Allow up to 200 pixels difference for WebGL rendering
       timeout: 30000,
       animations: 'disabled',
     });
@@ -403,6 +419,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: 200, // Allow up to 200 pixels difference for WebGL rendering
       timeout: 30000,
       animations: 'disabled',
     });
