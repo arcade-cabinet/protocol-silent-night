@@ -100,10 +100,16 @@ test.describe('UI Component Refinement', () => {
    */
   async function clickMechButton(page: import('@playwright/test').Page, name: string) {
     const button = page.locator(`button:has-text("${name}")`).first();
-    // Wait for button to be stable with increased timeout for CI
+
+    // Wait for button to be attached to DOM first
+    await button.waitFor({ state: 'attached', timeout: 30000 });
+
+    // Then wait for visibility with a longer timeout
     await button.waitFor({ state: 'visible', timeout: 20000 });
-    // Wait for any animations/transitions to complete
+
+    // Add a small delay before clicking to ensure UI is stable
     await page.waitForTimeout(500);
+
     // Force click to bypass potential overlays
     await button.click({ force: true, timeout: 10000 });
   }
@@ -165,9 +171,12 @@ test.describe('UI Component Refinement', () => {
       // Click MECHA-SANTA
       await clickMechButton(page, 'MECHA-SANTA');
 
+      // Wait for state transition animation
+      await page.waitForTimeout(500);
+
       // Wait for mission briefing with longer timeout for state transition
       try {
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { state: 'visible', timeout: 10000 });
 
         const briefingTitle = page.locator('text=MISSION BRIEFING');
         await expect(briefingTitle).toBeVisible({ timeout: 3000 });
