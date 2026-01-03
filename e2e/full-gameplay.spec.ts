@@ -696,9 +696,9 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animation to complete and button to appear (takes ~5 seconds)
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
-    await commenceButton.click();
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton2.waitFor({ state: 'visible', timeout: 10000 });
+    await commenceButton2.click();
 
     await page.waitForTimeout(2000);
 
