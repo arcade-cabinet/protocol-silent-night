@@ -7,7 +7,11 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import styles from './LoadingScreen.module.css';
 
-export function LoadingScreen() {
+interface LoadingScreenProps {
+  minDuration?: number;
+}
+
+export function LoadingScreen({}: LoadingScreenProps) {
   const [visible, setVisible] = useState(true);
   const [mounted, setMounted] = useState(true);
   const { state } = useGameStore();
