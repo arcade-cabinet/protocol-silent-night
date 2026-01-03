@@ -77,7 +77,7 @@ test.describe('Visual Regression - Game Start', () => {
       // Re-throw the error to fail the test
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -107,7 +107,7 @@ test.describe('Visual Regression - Game Start', () => {
       await page.screenshot({ path: 'commence-button-not-found-elf.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -137,7 +137,7 @@ test.describe('Visual Regression - Game Start', () => {
       await page.screenshot({ path: 'commence-button-not-found-bumble.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     // Wait for game to load
     await page.waitForTimeout(5000);
@@ -168,7 +168,7 @@ test.describe('Visual Regression - HUD Elements', () => {
       await page.screenshot({ path: 'commence-button-not-found-hud.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
 
@@ -196,7 +196,7 @@ test.describe('Visual Regression - HUD Elements', () => {
       await page.screenshot({ path: 'commence-button-not-found-score.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
 
@@ -229,7 +229,7 @@ test.describe('Visual Regression - Game Movement', () => {
       await page.screenshot({ path: 'commence-button-not-found-move.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
 
@@ -261,7 +261,7 @@ test.describe('Visual Regression - Game Movement', () => {
       await page.screenshot({ path: 'commence-button-not-found-fire.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
 
@@ -294,7 +294,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
       await page.screenshot({ path: 'commence-button-not-found-combat.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
 
@@ -326,7 +326,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
       await page.screenshot({ path: 'commence-button-not-found-damage.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
 
@@ -359,7 +359,7 @@ test.describe('Visual Regression - End Game States', () => {
       await page.screenshot({ path: 'commence-button-not-found-gameover.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
 
@@ -420,7 +420,7 @@ test.describe('Visual Regression - Responsive Design', () => {
       await page.screenshot({ path: 'commence-button-not-found-mobile.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     await page.waitForTimeout(5000);
@@ -449,7 +449,7 @@ test.describe('Visual Regression - Responsive Design', () => {
       await page.screenshot({ path: 'commence-button-not-found-touch.png' });
       throw e;
     }
-    await commenceButton.click({ force: true });
+    await commenceButton.click({ force: true, noWaitAfter: true });
 
     await page.waitForTimeout(3000);
 
