@@ -110,8 +110,8 @@ test.describe('UI Component Refinement', () => {
     // Add a small delay before clicking to ensure UI is stable
     await page.waitForTimeout(500);
 
-    // Force click to bypass potential overlays
-    await button.click({ force: true, timeout: 10000 });
+    // Force click to bypass potential overlays, don't wait for navigation
+    await button.click({ force: true, timeout: 10000, noWaitAfter: true });
   }
 
   test.describe('Menu Screen', () => {
