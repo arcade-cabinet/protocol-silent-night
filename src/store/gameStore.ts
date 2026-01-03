@@ -892,7 +892,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
     // Force transition to boss phase, overriding level up if active
     const { runProgress } = get();
-    set((_state) => ({
+    set((state) => ({
       state: 'PHASE_BOSS',
       // If we were leveling up, we'll return to PHASE_1 after boss, not back to LEVEL_UP
       // unless we want to queue it. For now, boss takes priority.
