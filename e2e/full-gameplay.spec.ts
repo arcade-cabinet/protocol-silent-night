@@ -106,7 +106,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
     await santaButton.click();
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
