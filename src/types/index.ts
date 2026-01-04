@@ -168,7 +168,6 @@ export interface EnemyData extends EntityData {
   pointValue: number;
   attackTimer?: number;
   phase?: 'chase' | 'barrage';
-  spawnTime?: number;
 }
 
 /**

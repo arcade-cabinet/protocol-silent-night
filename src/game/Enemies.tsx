@@ -68,7 +68,6 @@ export function Enemies() {
       speed: (MINION_CONFIG.speed + Math.random() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
       damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
-      spawnTime: Date.now(),
     });
   }, []);
 
@@ -161,12 +160,10 @@ export function Enemies() {
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
         if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-          // Only damage if enemy is properly initialized and has been alive for at least 1 second
+          // Only damage if enemy is properly initialized
           const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
-          const spawnGracePeriod = 1000; // 1 second grace period
-          const hasPassedGracePeriod = !enemy.spawnTime || (now - enemy.spawnTime) > spawnGracePeriod;
 
-          if (isInitialized && hasPassedGracePeriod) {
+          if (isInitialized) {
             shouldDamage = true;
             damageAmount = Math.max(damageAmount, enemy.damage);
           }
