@@ -36,6 +36,7 @@ class AudioManagerClass {
   private masterVolume = 0.7;
   private musicVolume = 0.6;
   private sfxVolume = 0.8;
+  private lastSfxTime = 0;
 
   // Synth instruments
   private synths: Map<string, Tone.Synth | Tone.PolySynth | Tone.FMSynth | Tone.NoiseSynth> =
@@ -179,7 +180,12 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
+
+    // Ensure strictly monotonic start times to prevent Tone.js errors
+    // "Start time must be strictly greater than previous start time"
     const now = Tone.now();
+    const startTime = Math.max(now, this.lastSfxTime + 0.001);
+    this.lastSfxTime = startTime;
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
@@ -189,18 +195,18 @@ class AudioManagerClass {
     if (effectData.sequence) {
       // @ts-expect-error
       for (const [note, duration, delay = 0] of effectData.sequence) {
-        sfxSynth.triggerAttackRelease(note, duration, now + delay);
+        sfxSynth.triggerAttackRelease(note, duration, startTime + delay);
       }
     } else {
       // @ts-expect-error
       if (effectData.note) {
         // @ts-expect-error
-        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
+        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, startTime);
       }
       // @ts-expect-error
       if (effectData.noise) {
         // @ts-expect-error
-        noiseSynth.triggerAttackRelease(effectData.duration, now);
+        noiseSynth.triggerAttackRelease(effectData.duration, startTime);
       }
     }
   }

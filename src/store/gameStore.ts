@@ -890,13 +890,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    const isLeveling = get().state === 'LEVEL_UP';
+    // Force transition to boss phase, overriding level up if active
+    const { runProgress } = get();
     set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+      state: 'PHASE_BOSS',
+      // If we were leveling up, we'll return to PHASE_1 after boss, not back to LEVEL_UP
+      // unless we want to queue it. For now, boss takes priority.
+      previousState: 'PHASE_1',
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
+      // Cancel pending level up UI if it conflicts with boss entrance
+      runProgress: {
+        ...runProgress,
+        pendingLevelUp: false,
+      },
     }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
