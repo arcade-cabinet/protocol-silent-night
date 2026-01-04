@@ -40,11 +40,6 @@ test.describe('UI Component Refinement', () => {
       `
     });
     await page.waitForLoadState('networkidle');
-
-    // Wait for loading screen to disappear
-    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
-    // Additional wait to ensure everything is stable
-    await page.waitForTimeout(1000);
   });
 
   test.describe('Menu Screen', () => {
