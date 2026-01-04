@@ -10,17 +10,20 @@
   justify-content: center;
   z-index: 1000;
   animation: fadeOut 0.5s ease-out 1.4s forwards;
+  /* Disable pointer events immediately so UI beneath is interactive */
+  pointer-events: none;
 }
 
 @keyframes fadeOut {
   to {
     opacity: 0;
-    pointer-events: none;
   }
 }
 
 .content {
   text-align: center;
+  /* Re-enable pointer events only for loading content */
+  pointer-events: auto;
 }
 
 .title {

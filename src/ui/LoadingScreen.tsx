@@ -26,10 +26,12 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
       });
     }, 100);
 
-    // Hide after minimum duration
+    // Hide after minimum duration + animation duration
+    // Animation is 1.4s delay + 0.5s fadeOut = 1.9s total
+    // But since we have pointer-events: none, we can hide earlier
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, minDuration);
+    }, minDuration + 1900); // Add animation time
 
     return () => {
       clearInterval(interval);
