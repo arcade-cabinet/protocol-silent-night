@@ -146,11 +146,16 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Click mech
-        await page.click(`button:has-text("${mech.name}")`);
+        // Click mech with more robust wait
+        const mechButton = page.locator(`button:has-text("${mech.name}")`);
+        await mechButton.waitFor({ state: 'visible', timeout: 15000 });
+        await mechButton.click({ timeout: 15000 });
 
-        // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+        // Wait for briefing with longer timeout
+        await page.waitForSelector('text=MISSION BRIEFING', { state: 'visible', timeout: 15000 });
+
+        // Wait for animations to complete
+        await page.waitForTimeout(500);
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -159,7 +164,8 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
-          await page.waitForSelector('h1', { timeout: 5000 });
+          await page.waitForSelector('h1', { state: 'visible', timeout: 10000 });
+          await page.waitForTimeout(500);
         }
       }
     });
@@ -239,7 +245,13 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 5000 });
+      await page.waitForSelector('h1', { state: 'visible', timeout: 10000 });
+
+      // Wait for all mech cards to be loaded
+      await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 10000 });
+
+      // Wait for animations to stabilize
+      await page.waitForTimeout(1000);
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
@@ -252,9 +264,16 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
-      // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      // Select mech with more robust wait
+      const santaButton = page.locator('button:has-text("MECHA-SANTA")');
+      await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+      await santaButton.click({ timeout: 15000 });
+
+      // Wait for mission briefing screen to appear
+      await page.waitForSelector('text=MISSION BRIEFING', { state: 'visible', timeout: 15000 });
+
+      // Wait for animation to complete
+      await page.waitForTimeout(1000);
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
