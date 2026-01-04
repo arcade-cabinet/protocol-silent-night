@@ -47,15 +47,15 @@ export function MissionBriefing() {
   useEffect(() => {
     if (state !== 'BRIEFING') return;
 
+    // Capture total lines to avoid dependency on the array reference
+    const totalLines = briefingLines.length;
+
     // Reset state when briefing starts
     setCurrentLine(0);
     setShowButton(false);
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
-
-    // Capture briefing lines length at effect start to avoid dependency issues
-    const totalLines = briefingLines.length;
 
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout>;
@@ -75,7 +75,8 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
