@@ -164,7 +164,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(300); // Increased delay to prevent Tone.js timing conflicts
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.playerHp).toBe(200); // 300 - 100 = 200
@@ -172,7 +172,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Take more damage
     await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(300); // Increased delay to prevent Tone.js timing conflicts
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.playerHp).toBe(100);
@@ -360,7 +360,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(300); // Increased delay to prevent Tone.js timing conflicts
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.playerHp).toBe(100);
