@@ -890,13 +890,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    const isLeveling = get().state === 'LEVEL_UP';
+    // Force transition to boss phase, clearing any pending level up state visually
+    // The pendingLevelUp flag in runProgress remains if we want to resume later,
+    // but for now we prioritize the boss fight.
     set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+      state: 'PHASE_BOSS',
+      // If we were in LEVEL_UP, we don't want to go back to it automatically via previousState logic
+      // because the boss fight overrides the pacing.
+      previousState: 'PHASE_1',
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
+      // Clear pending level up to prevent UI conflicts
+      runProgress: {
+        ...state.runProgress,
+        pendingLevelUp: false,
+      },
     }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
