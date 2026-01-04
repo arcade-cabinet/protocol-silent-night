@@ -3,7 +3,7 @@
  * Displays mission objectives before starting the game
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import styles from './MissionBriefing.module.css';
@@ -19,6 +19,7 @@ export function MissionBriefing() {
   const { state, setState, playerClass, missionBriefing } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
+  const animationRunning = useRef(false);
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -45,18 +46,42 @@ export function MissionBriefing() {
   }, [playerClass, missionBriefing]);
 
   useEffect(() => {
-    if (state !== 'BRIEFING') return;
+    // Reset animation flag and state when leaving BRIEFING state
+    if (state !== 'BRIEFING') {
+      animationRunning.current = false;
+      setCurrentLine(0);
+      setShowButton(false);
+      return;
+    }
+
+    // Skip if animation is already running to prevent re-renders
+    if (animationRunning.current) {
+      return;
+    }
+
+    // Mark animation as running
+    animationRunning.current = true;
+
+    // Reset state immediately on entry to prevent race conditions
+    setCurrentLine(0);
+    setShowButton(false);
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
+    // Capture lines length at start to avoid closure issues
+    const totalLines = briefingLines.length;
+
     // Reveal lines one by one
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
-        if (prev >= briefingLines.length - 1) {
+        if (prev >= totalLines - 1) {
           clearInterval(interval);
-          timeoutId = setTimeout(() => setShowButton(true), 500);
+          timeoutId = setTimeout(() => {
+            setShowButton(true);
+            animationRunning.current = false;
+          }, 500);
           return prev;
         }
         AudioManager.playSFX('ui_click');
@@ -67,16 +92,9 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      animationRunning.current = false;
     };
-  }, [state, briefingLines]);
-
-  // Reset state when briefing starts
-  useEffect(() => {
-    if (state === 'BRIEFING') {
-      setCurrentLine(0);
-      setShowButton(false);
-    }
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
@@ -110,7 +128,12 @@ export function MissionBriefing() {
         </div>
 
         {showButton && (
-          <button type="button" className={styles.startButton} onClick={handleStart}>
+          <button
+            type="button"
+            className={styles.startButton}
+            onClick={handleStart}
+            data-testid="mission-start-button"
+          >
             <span className={styles.buttonText}>COMMENCE OPERATION</span>
             <div className={styles.buttonGlow} />
           </button>
