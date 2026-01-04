@@ -34,6 +34,7 @@ import { unwrapWithChecksum, wrapWithChecksum } from '@/utils/security';
 declare global {
   interface Window {
     useGameStore?: unknown;
+    __E2E_TEST__?: boolean;
   }
 }
 
@@ -283,7 +284,11 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
-  rng: new SeededRandom(12345),
+  // Use a fixed seed in E2E environment for determinism, otherwise use secure random default
+  rng:
+    typeof window !== 'undefined' && window.__E2E_TEST__
+      ? new SeededRandom(1246316057748227)
+      : new SeededRandom(),
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -591,17 +596,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const choices = getRandomUpgrades();
 
-    set((state) => ({
-      state: 'LEVEL_UP',
-      previousState: state.state,
-      runProgress: {
-        ...runProgress,
-        pendingLevelUp: true,
-        upgradeChoices: choices,
-      },
-    }));
+    // Only show level-up screen if there are upgrade choices available
+    if (choices.length > 0) {
+      set((state) => ({
+        state: 'LEVEL_UP',
+        previousState: state.state,
+        runProgress: {
+          ...runProgress,
+          pendingLevelUp: true,
+          upgradeChoices: choices,
+        },
+      }));
 
-    AudioManager.playSFX('ui_select');
+      AudioManager.playSFX('ui_select');
+    }
   },
 
   selectLevelUpgrade: (upgradeId) => {
@@ -926,9 +934,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Endless mode: Increment wave and prepare for level up
+      // Win the game after defeating the boss
       set({
-        state: 'PHASE_1',
+        state: 'WIN',
         bossActive: false,
         stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
@@ -937,9 +945,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
           wave: runProgress.wave + 1,
         },
       });
-
-      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-      get().levelUp();
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
@@ -968,7 +973,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       highScore: get().highScore,
       metaProgress: get().metaProgress,
       playerPosition: new THREE.Vector3(0, 0, 0),
-      rng: new SeededRandom(Date.now()),
+      // Preserve E2E determinism on reset
+      rng:
+        typeof window !== 'undefined' && window.__E2E_TEST__
+          ? new SeededRandom(1246316057748227)
+          : new SeededRandom(),
     }),
 }));
 

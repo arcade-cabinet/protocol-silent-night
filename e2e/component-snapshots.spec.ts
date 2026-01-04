@@ -2,27 +2,105 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Component Snapshot Tests
- * 
+ *
  * Tests individual 3D game components and their rendering
  * using Playwright's visual comparison capabilities
  */
 
 const VISUAL_THRESHOLD = 0.2;
+const WEBGL_MAX_DIFF_PIXELS = 50000;
+
+// Set deterministic RNG flag before each test
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__E2E_TEST__ = true;
+  });
+});
+
+/**
+ * Helper to disable animations for stable screenshots
+ * Also waits for Three.js render loop to stabilize
+ */
+async function disableAnimations(page: import('@playwright/test').Page) {
+  // Disable CSS animations
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        transition-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-delay: 0s !important;
+        animation-play-state: paused !important;
+        animation-iteration-count: 1 !important;
+      }
+      *:hover {
+        transform: none !important;
+        transition: none !important;
+      }
+    `
+  });
+
+  // Wait for a few frames to let any JS animations settle
+  await page.evaluate(() => {
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+
+  await page.waitForTimeout(1000);
+}
+
+/**
+ * Helper to pause Three.js rendering for stable snapshots
+ * This freezes the game loop to ensure pixel-perfect consistency
+ */
+async function pauseThreeJsRendering(page: import('@playwright/test').Page) {
+  await page.evaluate(() => {
+    // Flag to stop useFrame loops
+    window.__pauseGameForScreenshot = true;
+
+    // Force one final render if possible (depends on engine implementation)
+    // This is a best-effort attempt to settle the scene
+  });
+
+  await page.waitForTimeout(500); // Wait for pause to take effect
+}
+
+// Add type definition for global window property
+declare global {
+  interface Window {
+    __pauseGameForScreenshot?: boolean;
+    __E2E_TEST__?: boolean;
+  }
+}
+
+// Helper to select a mech and wait for state transition securely
+async function selectMech(page: import('@playwright/test').Page, mechNameRegex: RegExp) {
+  const button = page.getByRole('button', { name: mechNameRegex });
+  await expect(button).toBeVisible({ timeout: 30000 });
+  await button.click({ force: true, timeout: 30000, noWaitAfter: true });
+
+  // Wait for state transition to BRIEFING
+  await page.waitForFunction(() => {
+    const store = (window as any).useGameStore;
+    return store && store.getState().state === 'BRIEFING';
+  }, null, { timeout: 30000 });
+
+  // Wait for briefing text
+  await page.waitForSelector('text=MISSION BRIEFING', { state: 'visible', timeout: 30000 });
+}
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     // Start with Santa
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(5000);
-    
+
     // Focus on character by centering view
     await page.evaluate(() => {
       // Center camera on player
@@ -31,43 +109,54 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
         canvas.style.filter = 'none';
       }
     });
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render Elf character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+
+    await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(5000);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render Bumble character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.click();
+
+    await selectMech(page, /BUMBLE/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(5000);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
+      noWaitAfter: true,
     });
   });
 });
@@ -76,43 +165,49 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
   test('should render terrain correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(5000);
-    
+
     // Move to see terrain better
     await page.keyboard.down('w');
     await page.waitForTimeout(2000);
     await page.keyboard.up('w');
-    
+
     await page.keyboard.down('a');
     await page.waitForTimeout(1000);
     await page.keyboard.up('a');
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render lighting and atmosphere', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(5000);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -121,35 +216,45 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
   test('should render enemies when spawned', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render enemy death effects', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
+
     await page.waitForTimeout(8000);
-    
+
     // Fire at enemies
     await page.keyboard.down('Space');
     await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -158,64 +263,73 @@ test.describe('Component Snapshots - Weapon Effects', () => {
   test('should render Santa cannon weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(3000);
-    
+
     // Fire weapon and capture projectiles
     await page.keyboard.press('Space');
     await page.waitForTimeout(300);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render Elf SMG weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+
+    await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(3000);
-    
+
     // Fire SMG (rapid fire)
     await page.keyboard.down('Space');
     await page.waitForTimeout(1000);
     await page.keyboard.up('Space');
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render Bumble star weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.click();
+
+    await selectMech(page, /BUMBLE/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(3000);
-    
+
     // Fire star weapon
     await page.keyboard.press('Space');
     await page.waitForTimeout(300);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -224,18 +338,25 @@ test.describe('Component Snapshots - Particle Effects', () => {
   test('should render hit particles on impact', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
+
     await page.waitForTimeout(8000);
-    
+
     // Fire and wait for hits
     await page.keyboard.down('Space');
     await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -244,41 +365,47 @@ test.describe('Component Snapshots - Camera System', () => {
   test('should render correct camera perspective', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(3000);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render camera following player movement', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
 
     await page.waitForTimeout(3000);
-    
+
     // Move in a pattern
     await page.keyboard.down('w');
     await page.keyboard.down('d');
     await page.waitForTimeout(2000);
     await page.keyboard.up('d');
     await page.keyboard.up('w');
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });
@@ -287,35 +414,41 @@ test.describe('Component Snapshots - UI Overlays', () => {
   test('should render damage flash effect', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
-    await elfButton.click();
+
+    await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ noWaitAfter: true, force: true });
 
     await page.waitForTimeout(8000);
-    
+
     // Trigger damage by getting close to enemies
     await page.waitForTimeout(5000);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 
   test('should render kill streak notification', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click();
+
+    await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ noWaitAfter: true, force: true });
 
     await page.waitForTimeout(5000);
-    
+
     // Trigger kill streak by rapid kills
     await page.evaluate(() => {
       // @ts-ignore
@@ -326,11 +459,15 @@ test.describe('Component Snapshots - UI Overlays', () => {
         store.addKill(50);
       }
     });
-    
+
     await page.waitForTimeout(1000);
-    
+
+    await disableAnimations(page);
+    await pauseThreeJsRendering(page);
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixels: WEBGL_MAX_DIFF_PIXELS,
+      animations: 'disabled',
     });
   });
 });

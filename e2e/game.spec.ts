@@ -22,7 +22,7 @@ test.describe('Protocol: Silent Night', () => {
         console.log(`Console error: ${msg.text()}`);
       }
     });
-    
+
     await page.goto('/');
   });
 

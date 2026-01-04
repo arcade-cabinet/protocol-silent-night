@@ -83,8 +83,14 @@ export function Terrain() {
             config = OBSTACLE_TYPES.candy_cane;
           }
 
+          // We need a stable random value based on position for terrain generation
+          // so it's deterministic but not dependent on game state RNG
+          // Use the noise value itself as a seed for height variation
+          const pseudoRandom = (Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1;
+          const normalizedRandom = Math.abs(pseudoRandom);
+
           const hRange = config.heightRange;
-          const obstacleHeight = hRange[0] + Math.random() * (hRange[1] - hRange[0]);
+          const obstacleHeight = hRange[0] + normalizedRandom * (hRange[1] - hRange[0]);
 
           dummy.position.y = h + (config.yOffset || obstacleHeight / 2);
 

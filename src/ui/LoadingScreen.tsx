@@ -16,13 +16,16 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
 
   useEffect(() => {
     // Simulate loading progress
+    const steps = 15; // Number of steps to complete (1.5s / 100ms)
+    const increment = 100 / steps;
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        return prev + Math.random() * 15;
+        return prev + increment;
       });
     }, 100);
 
