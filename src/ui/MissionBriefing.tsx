@@ -46,9 +46,11 @@ export function MissionBriefing() {
   }, [playerClass, missionBriefing]);
 
   useEffect(() => {
-    // Reset animation flag when leaving BRIEFING state
+    // Reset animation flag and state when leaving BRIEFING state
     if (state !== 'BRIEFING') {
       animationRunning.current = false;
+      setCurrentLine(0);
+      setShowButton(false);
       return;
     }
 
@@ -87,6 +89,7 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      animationRunning.current = false;
     };
   }, [state, briefingLines.length]);
 
