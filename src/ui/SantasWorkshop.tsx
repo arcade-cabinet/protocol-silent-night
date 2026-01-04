@@ -124,13 +124,14 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        <div
-          className={styles.content}
-          role="tabpanel"
-          id={`panel-${activeTab}`}
-          aria-labelledby={`tab-${activeTab}`}
-        >
-          {activeTab === 'weapons' && (
+        <div className={styles.content}>
+          {/* Weapons Panel */}
+          <div
+            role="tabpanel"
+            id="panel-weapons"
+            aria-labelledby="tab-weapons"
+            hidden={activeTab !== 'weapons'}
+          >
             <div className={styles.grid}>
               {WEAPON_UNLOCKS.map((weapon) => {
                 const isUnlocked = metaProgress.unlockedWeapons.includes(weapon.id);
@@ -180,9 +181,15 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
                 );
               })}
             </div>
-          )}
+          </div>
 
-          {activeTab === 'skins' && (
+          {/* Skins Panel */}
+          <div
+            role="tabpanel"
+            id="panel-skins"
+            aria-labelledby="tab-skins"
+            hidden={activeTab !== 'skins'}
+          >
             <div className={styles.grid}>
               {SKIN_UNLOCKS.map((skin) => {
                 const isUnlocked = metaProgress.unlockedSkins.includes(skin.id);
@@ -221,9 +228,15 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
                 );
               })}
             </div>
-          )}
+          </div>
 
-          {activeTab === 'upgrades' && (
+          {/* Upgrades Panel */}
+          <div
+            role="tabpanel"
+            id="panel-upgrades"
+            aria-labelledby="tab-upgrades"
+            hidden={activeTab !== 'upgrades'}
+          >
             <div className={styles.upgradesGrid}>
               {[1, 2, 3].map((tier) => {
                 const tierUpgrades = PERMANENT_UPGRADES.filter((u) => u.tier === tier);
@@ -275,7 +288,7 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
                 );
               })}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
