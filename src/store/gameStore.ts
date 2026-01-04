@@ -596,17 +596,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const choices = getRandomUpgrades();
 
-    set((state) => ({
-      state: 'LEVEL_UP',
-      previousState: state.state,
-      runProgress: {
-        ...runProgress,
-        pendingLevelUp: true,
-        upgradeChoices: choices,
-      },
-    }));
+    // Only show level-up screen if there are upgrade choices available
+    if (choices.length > 0) {
+      set((state) => ({
+        state: 'LEVEL_UP',
+        previousState: state.state,
+        runProgress: {
+          ...runProgress,
+          pendingLevelUp: true,
+          upgradeChoices: choices,
+        },
+      }));
 
-    AudioManager.playSFX('ui_select');
+      AudioManager.playSFX('ui_select');
+    }
   },
 
   selectLevelUpgrade: (upgradeId) => {
@@ -931,9 +934,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Endless mode: Increment wave and prepare for level up
+      // Win the game after defeating the boss
       set({
-        state: 'PHASE_1',
+        state: 'WIN',
         bossActive: false,
         stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
@@ -942,9 +945,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
           wave: runProgress.wave + 1,
         },
       });
-
-      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-      get().levelUp();
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);

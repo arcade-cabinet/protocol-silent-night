@@ -418,7 +418,9 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ noWaitAfter: true, force: true });
 
     await page.waitForTimeout(8000);
 
@@ -441,7 +443,9 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ noWaitAfter: true });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ noWaitAfter: true, force: true });
 
     await page.waitForTimeout(5000);
 

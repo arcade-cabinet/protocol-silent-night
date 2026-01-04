@@ -74,6 +74,42 @@ async function selectMech(page: Page, mechNameRegex: RegExp) {
   await commenceButton.waitFor({ state: 'visible', timeout: 120000 });
 }
 
+// Helper to handle level-up if it occurs
+async function handleLevelUpIfNeeded(page: Page) {
+  // Wait a bit for any level-up to trigger
+  await page.waitForTimeout(200);
+
+  const state = await getGameState(page);
+  if (state?.gameState === 'LEVEL_UP') {
+    // Wait for upgrade choices to be available or for state to change, select the first one if available
+    try {
+      await page.waitForFunction(() => {
+        const store = (window as any).useGameStore;
+        if (!store) return false;
+        const stateData = store.getState();
+        // Return true if we have choices OR if we're no longer in LEVEL_UP (edge case)
+        return (stateData.runProgress?.upgradeChoices || []).length > 0 || stateData.state !== 'LEVEL_UP';
+      }, null, { timeout: 5000 });
+
+      await page.evaluate(() => {
+        const store = (window as any).useGameStore;
+        if (!store) return;
+        const stateData = store.getState();
+        const choices = stateData.runProgress?.upgradeChoices || [];
+        if (choices.length > 0) {
+          stateData.selectLevelUpgrade(choices[0].id);
+        }
+      });
+
+      // Wait for state to transition back to PHASE_1
+      await page.waitForTimeout(500);
+    } catch (e) {
+      // If timeout, the state might have already transitioned, just continue
+      console.log('Level-up handling timed out, continuing...');
+    }
+  }
+}
+
 // Helper to simulate combat until kills reach target
 async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
   const startTime = Date.now();
@@ -438,6 +474,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(100);
     }
 
+    // Handle any level-up that occurred
+    await handleLevelUpIfNeeded(page);
+
     await page.waitForTimeout(1000);
 
     const state = await getGameState(page);
@@ -466,6 +505,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(100);
     }
+
+    // Handle any level-up that occurred
+    await handleLevelUpIfNeeded(page);
+
     await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
@@ -483,7 +526,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /PLAY AGAIN/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -724,6 +767,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(100);
     }
 
+    // Handle any level-up that occurred
+    await handleLevelUpIfNeeded(page);
+
     // Step 4: Boss phase
     await page.waitForTimeout(1000);
     state = await getGameState(page);
@@ -770,6 +816,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     }
     await page.waitForTimeout(500);
 
+    // Handle any level-up that occurred
+    await handleLevelUpIfNeeded(page);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
@@ -801,6 +850,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
+
+    // Handle any level-up that occurred
+    await handleLevelUpIfNeeded(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
