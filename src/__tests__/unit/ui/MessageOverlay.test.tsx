@@ -1,61 +1,70 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MessageOverlay } from '@/ui/MessageOverlay';
 import { useGameStore } from '@/store/gameStore';
+import { MessageOverlay } from '@/ui/MessageOverlay';
 
-// Mock the game store
+// Mock the store
 vi.mock('@/store/gameStore', () => ({
   useGameStore: vi.fn(),
 }));
 
-describe('MessageOverlay', () => {
+const mockUseGameStore = vi.mocked(useGameStore);
+
+describe('MessageOverlay Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders boss warning when boss is active', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 
-    expect(screen.getByText(/WARNING: BOSS DETECTED/)).toBeInTheDocument();
+    expect(screen.getByText(/WARNING: HIGH VALUE TARGET DETECTED/)).toBeInTheDocument();
+    expect(screen.getByText(/TARGET: MECHA-SANTA/)).toBeInTheDocument();
   });
 
   it('renders mission complete when state is WIN', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'WIN',
       bossActive: false,
-    });
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 
     expect(screen.getByText(/MISSION COMPLETE/)).toBeInTheDocument();
+    expect(screen.getByText(/TARGET NEUTRALIZED/)).toBeInTheDocument();
   });
 
   it('renders operator down when state is GAME_OVER', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
-    });
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 
     expect(screen.getByText(/OPERATOR DOWN/)).toBeInTheDocument();
+    expect(screen.getByText(/MISSION FAILED/)).toBeInTheDocument();
   });
 
   it('is accessible with role="alert"', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+      lastSfxTime: 0,
+    } as any);
 
     render(<MessageOverlay />);
 
     const alert = screen.getByRole('alert');
     expect(alert).toBeInTheDocument();
-    expect(alert).toHaveTextContent(/WARNING: BOSS DETECTED/);
+    expect(alert).toHaveAttribute('aria-live', 'assertive');
   });
 });

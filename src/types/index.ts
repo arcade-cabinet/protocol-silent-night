@@ -9,6 +9,7 @@ import type * as THREE from 'three';
  * Game state machine states
  */
 export type GameState =
+  | 'LOADING'
   | 'MENU'
   | 'BRIEFING'
   | 'PHASE_1'
