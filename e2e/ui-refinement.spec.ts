@@ -10,8 +10,6 @@ import { test, expect } from '@playwright/test';
  * Run headless: npm run test:e2e -- ui-refinement
  */
 
-test.setTimeout(120000); // Increase global timeout to 2 minutes
-
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 test.describe('UI Component Refinement', () => {
@@ -169,9 +167,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       // Click commence
-      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-      await commenceButton.click({ force: true });
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -191,9 +187,7 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.click('button:has-text("CYBER-ELF")');
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
-      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
-      await commenceButton.click({ force: true });
+      await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD
       await page.waitForTimeout(2000);

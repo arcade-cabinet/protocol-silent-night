@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
-test.setTimeout(120000); // Increase global timeout for visual regression tests to 2 minutes
+test.setTimeout(60000); // Increase global timeout for visual regression tests
 
 // Utility for stable screenshots
 async function waitForPageStability(page) {
@@ -35,12 +35,10 @@ test.describe('Visual Regression - Character Selection', () => {
 
     // Wait for fonts and styles to load
     await page.waitForTimeout(2000);
-    await waitForPageStability(page);
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000, // Increase screenshot timeout to 30s
     });
   });
 
@@ -87,7 +85,7 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await startButton.waitFor({ state: 'visible', timeout: 45000 });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
     // Handle potential double-click requirement or lag
     await startButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(1000); // Brief pause between clicks
@@ -115,7 +113,7 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await startButton.waitFor({ state: 'visible', timeout: 45000 });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
     await startButton.click({ force: true, noWaitAfter: true });
 
     // Check if game started by waiting for HUD or game container
@@ -148,11 +146,11 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await startButton.waitFor({ state: 'visible', timeout: 45000 });
-    await startButton.click({ force: true, noWaitAfter: true });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
+    await startButton.click({ force: true });
     await page.waitForTimeout(1000);
     if (await startButton.isVisible()) {
-        await startButton.click({ force: true, noWaitAfter: true });
+        await startButton.click({ force: true });
     }
 
     // Wait for game to load
@@ -202,8 +200,6 @@ test.describe('Visual Regression - HUD Elements', () => {
 
 test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
-    test.setTimeout(120000); // 2 minute timeout for this test
-
     await page.goto('/');
     await page.waitForTimeout(3000);
 
@@ -213,14 +209,9 @@ test.describe('Visual Regression - Game Movement', () => {
 
     // Start game
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await startButton.waitFor({ state: 'visible', timeout: 45000 });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
     await startButton.click({ force: true, noWaitAfter: true });
-    await page.waitForTimeout(1000);
-    // Retry click if needed
-    if (await startButton.isVisible()) {
-        await startButton.click({ force: true, noWaitAfter: true });
-    }
-    await page.waitForTimeout(5000); // Wait for game to fully load
+    await page.waitForTimeout(3000);
 
     // Move character
     await page.keyboard.down('w');
@@ -229,13 +220,11 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: 0.03,
-      timeout: 30000,
+      timeout: 20000,
     });
   });
 
   test('should render firing animation correctly', async ({ page }) => {
-    test.setTimeout(120000); // 2 minute timeout for this test
-
     await page.goto('/');
     await page.waitForTimeout(3000);
 
@@ -245,14 +234,9 @@ test.describe('Visual Regression - Game Movement', () => {
 
     // Start game
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await startButton.waitFor({ state: 'visible', timeout: 45000 });
+    await startButton.waitFor({ state: 'visible', timeout: 30000 });
     await startButton.click({ force: true, noWaitAfter: true });
-    await page.waitForTimeout(1000);
-    // Retry click if needed
-    if (await startButton.isVisible()) {
-        await startButton.click({ force: true, noWaitAfter: true });
-    }
-    await page.waitForTimeout(5000); // Wait for game to fully load
+    await page.waitForTimeout(3000);
 
     // Fire weapon
     await page.keyboard.press('Space');
@@ -260,7 +244,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: 0.03,
-      timeout: 30000,
+      timeout: 20000,
     });
   });
 });
