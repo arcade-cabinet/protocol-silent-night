@@ -44,16 +44,11 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const elfCard = page.locator('button[aria-label^="Select CYBER-ELF"]');
     await elfCard.waitFor({ state: 'visible', timeout: 15000 });
-
-    // Scroll using evaluate to avoid hover triggering
-    await elfCard.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await elfCard.evaluate(el => el.scrollIntoView());
+    // Move mouse to reset position to avoid hover states
+    await page.mouse.move(0, 0);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Increased wait for layout stability
-
-    // Move mouse away to prevent hover state
-    await page.mouse.move(0, 0);
-    await page.waitForTimeout(300); // Wait for hover transition
-
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500, // Tolerance for minor layout differences
@@ -68,16 +63,11 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const bumbleCard = page.locator('button[aria-label^="Select THE BUMBLE"]');
     await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
-
-    // Scroll using evaluate to avoid hover triggering
-    await bumbleCard.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    await bumbleCard.evaluate(el => el.scrollIntoView());
+    // Move mouse to reset position to avoid hover states
+    await page.mouse.move(0, 0);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000); // Increased wait for layout stability
-
-    // Move mouse away to prevent hover state
-    await page.mouse.move(0, 0);
-    await page.waitForTimeout(300); // Wait for hover transition
-
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500, // Tolerance for minor layout differences
