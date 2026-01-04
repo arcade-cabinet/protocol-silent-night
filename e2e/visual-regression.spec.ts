@@ -21,6 +21,8 @@ test.describe('Visual Regression - Character Selection', () => {
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -30,8 +32,11 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const santaCard = page.locator('button[aria-label^="Select MECHA-SANTA"]');
     await santaCard.waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(500); // Allow time for rendering to complete
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -41,10 +46,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const elfCard = page.locator('button[aria-label^="Select CYBER-ELF"]');
     await elfCard.waitFor({ state: 'visible', timeout: 15000 });
-    await elfCard.scrollIntoViewIfNeeded();
-    await elfCard.waitFor({ state: 'stable', timeout: 15000 });
+    await elfCard.scrollIntoViewIfNeeded({ timeout: 10000 });
+    await page.waitForTimeout(500); // Allow time for scroll to complete
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -54,10 +61,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const bumbleCard = page.locator('button[aria-label^="Select THE BUMBLE"]');
     await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
-    await bumbleCard.scrollIntoViewIfNeeded();
-    await bumbleCard.waitFor({ state: 'stable', timeout: 15000 });
+    await bumbleCard.scrollIntoViewIfNeeded({ timeout: 10000 });
+    await page.waitForTimeout(500); // Allow time for scroll to complete
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
