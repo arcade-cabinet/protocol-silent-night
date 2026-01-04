@@ -73,12 +73,15 @@ export function MissionBriefing() {
     const totalLines = briefingLines.length;
 
     // Reveal lines one by one
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
         if (prev >= totalLines - 1) {
           clearInterval(interval);
-          timeoutId = setTimeout(() => setShowButton(true), 500);
+          timeoutId = setTimeout(() => {
+            setShowButton(true);
+            animationRunning.current = false;
+          }, 500);
           return prev;
         }
         AudioManager.playSFX('ui_click');
@@ -91,7 +94,7 @@ export function MissionBriefing() {
       if (timeoutId) clearTimeout(timeoutId);
       animationRunning.current = false;
     };
-  }, [state, briefingLines.length]);
+  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
