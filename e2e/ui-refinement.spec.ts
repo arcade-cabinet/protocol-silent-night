@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * UI Component Refinement Tests
@@ -11,31 +11,6 @@ import { test, expect, Page } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
-
-// Helper to select a mech and start the game
-async function selectMechAndStart(page: Page, mechName: string) {
-  // Wait for the mech button to be visible and clickable
-  const mechButton = page.getByRole('button', { name: new RegExp(mechName, 'i') });
-  await expect(mechButton).toBeVisible({ timeout: 15000 });
-  await expect(mechButton).toBeEnabled({ timeout: 15000 });
-
-  // Wait a moment for any animations/transitions to complete
-  await page.waitForTimeout(500);
-
-  // Click the mech button
-  await mechButton.click();
-
-  // Wait for the briefing screen and COMMENCE OPERATION button
-  const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await expect(commenceButton).toBeVisible({ timeout: 15000 });
-  await expect(commenceButton).toBeEnabled({ timeout: 15000 });
-
-  // Wait a moment for briefing screen to be fully loaded
-  await page.waitForTimeout(500);
-
-  // Click COMMENCE OPERATION
-  await commenceButton.click();
-}
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
@@ -141,20 +116,15 @@ test.describe('UI Component Refinement', () => {
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
       const mechButton = page.getByRole('button', { name: /CYBER-ELF/i });
-      await expect(mechButton).toBeVisible({ timeout: 30000 });
-      await expect(mechButton).toBeEnabled({ timeout: 15000 });
-
-      // Wait for any animations
-      await page.waitForTimeout(500);
-
-      await mechButton.click();
+      await mechButton.waitFor({ state: 'visible', timeout: 30000 });
+      await mechButton.evaluate(el => el.click());
 
       // Wait for briefing
       await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
       // Check for operation button
-      const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible({ timeout: 15000 });
+      const opButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+      await expect(opButton).toBeVisible({ timeout: 30000 });
       await expect(opButton).toBeEnabled();
     });
 
@@ -168,13 +138,8 @@ test.describe('UI Component Refinement', () => {
       for (const [index, mech] of mechs.entries()) {
         // Click mech
         const mechButton = page.getByRole('button', { name: new RegExp(mech.name, 'i') });
-        await expect(mechButton).toBeVisible({ timeout: 30000 });
-        await expect(mechButton).toBeEnabled({ timeout: 15000 });
-
-        // Wait for any animations
-        await page.waitForTimeout(500);
-
-        await mechButton.click();
+        await mechButton.waitFor({ state: 'visible', timeout: 30000 });
+        await mechButton.click({ force: true, noWaitAfter: true, timeout: 30000 });
 
         // Wait for briefing
         await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
@@ -288,14 +253,8 @@ test.describe('UI Component Refinement', () => {
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
       const mechButton = page.getByRole('button', { name: /MECHA-SANTA/i });
-      await expect(mechButton).toBeVisible({ timeout: 30000 });
-      await expect(mechButton).toBeEnabled({ timeout: 15000 });
-
-      // Wait for any animations
-      await page.waitForTimeout(500);
-
-      await mechButton.click();
-
+      await mechButton.waitFor({ state: 'visible', timeout: 30000 });
+      await mechButton.click({ force: true, noWaitAfter: true });
       await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
       if (hasMcpSupport) {
