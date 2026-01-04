@@ -47,18 +47,30 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.waitForTimeout(2000);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await expect(santaCard).toBeVisible();
+
+    // Wait for any animations/transitions to complete
+    await page.waitForTimeout(1000);
+
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 60000, // Increase timeout for CI
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    
+
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+    await expect(elfCard).toBeVisible();
+
+    // Wait for any animations/transitions to complete
+    await page.waitForTimeout(1000);
+
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 60000, // Increase timeout for CI
     });
   });
 
@@ -67,8 +79,14 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.waitForTimeout(2000);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
+    await expect(bumbleCard).toBeVisible();
+
+    // Wait for any animations/transitions to complete
+    await page.waitForTimeout(1000);
+
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 60000, // Increase timeout for CI
     });
   });
 });
