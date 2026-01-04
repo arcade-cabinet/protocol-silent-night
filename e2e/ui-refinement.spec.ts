@@ -37,11 +37,12 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
+      // Wait for loading screen to disappear and menu to fully render
+      await page.waitForTimeout(2000); // Wait for loading screen (1500ms) + buffer
+      await page.waitForSelector('h1:has-text("Protocol")', { timeout: 5000 });
 
       // Verify title is visible
-      const title = page.locator('h1');
+      const title = page.locator('h1').filter({ hasText: 'Protocol' });
       await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
