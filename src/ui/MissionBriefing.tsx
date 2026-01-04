@@ -54,14 +54,11 @@ export function MissionBriefing() {
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
-    // Capture briefing lines length at effect start to avoid dependency issues
-    const totalLines = briefingLines.length;
-
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout>;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
-        if (prev >= totalLines - 1) {
+        if (prev >= briefingLines.length - 1) {
           clearInterval(interval);
           timeoutId = setTimeout(() => setShowButton(true), 500);
           return prev;
