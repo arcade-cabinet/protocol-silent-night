@@ -45,12 +45,7 @@ export function MissionBriefing() {
   }, [playerClass, missionBriefing]);
 
   useEffect(() => {
-    if (state !== 'BRIEFING') {
-      // Reset state when exiting BRIEFING
-      setCurrentLine(0);
-      setShowButton(false);
-      return;
-    }
+    if (state !== 'BRIEFING') return;
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
@@ -61,21 +56,27 @@ export function MissionBriefing() {
       setCurrentLine((prev) => {
         if (prev >= briefingLines.length - 1) {
           clearInterval(interval);
-          // Show button immediately in test environment or after delay
-          const delay = process.env.NODE_ENV === 'test' ? 0 : 500;
-          timeoutId = setTimeout(() => setShowButton(true), delay);
+          timeoutId = setTimeout(() => setShowButton(true), 500);
           return prev;
         }
         AudioManager.playSFX('ui_click');
         return prev + 1;
       });
-    }, 100); // Speed up typing in general
+    }, 600);
 
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [state, briefingLines]);
+
+  // Reset state when briefing starts
+  useEffect(() => {
+    if (state === 'BRIEFING') {
+      setCurrentLine(0);
+      setShowButton(false);
+    }
+  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
@@ -109,7 +110,7 @@ export function MissionBriefing() {
         </div>
 
         {showButton && (
-          <button type="button" className={styles.startButton} onClick={handleStart} aria-label="Commence Operation">
+          <button type="button" className={styles.startButton} onClick={handleStart}>
             <span className={styles.buttonText}>COMMENCE OPERATION</span>
             <div className={styles.buttonGlow} />
           </button>

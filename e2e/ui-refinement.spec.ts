@@ -240,13 +240,9 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
-      // Wait for button to be visible and clickable
-      const santaButton = page.locator('button:has-text("MECHA-SANTA")');
-      await santaButton.waitFor({ state: 'visible', timeout: 5000 });
-
       // Select mech
-      await santaButton.click();
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
+      await page.click('button:has-text("MECHA-SANTA")');
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {

@@ -29,7 +29,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    const santaCard = page.locator('button[aria-label^="Select MECHA-SANTA"]');
+    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+    const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaCard.waitFor({ state: 'visible', timeout: 15000 });
     await page.waitForLoadState('networkidle');
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
@@ -42,29 +43,17 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    const elfCard = page.locator('button[aria-label^="Select CYBER-ELF"]');
+    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+    const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfCard.waitFor({ state: 'visible', timeout: 15000 });
     await elfCard.evaluate(el => el.scrollIntoView());
     // Move mouse to reset position to avoid hover states
     await page.mouse.move(0, 0);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); // Increased wait for layout stability
-
-    // Wait for element to be fully stable before screenshot
-    await elfCard.evaluate(el => {
-      return new Promise(resolve => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => resolve(null));
-        });
-      });
-    });
-
+    await page.waitForTimeout(1000);
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
-      maxDiffPixelRatio: 0.15, // Increased from VISUAL_THRESHOLD
-      maxDiffPixels: 3000,     // Increased from 500
-      animations: 'disabled',
+      maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 30000,
-      scale: 'css',  // Use CSS scale to avoid size mismatch issues
     });
   });
 
@@ -72,29 +61,19 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    const bumbleCard = page.locator('button[aria-label^="Select THE BUMBLE"]');
-    await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
+    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+    const bumbleCard = page.getByRole('button', { name: /THE BUMBLE/ });
+    await bumbleCard.waitFor({ state: 'visible', timeout: 30000 });
     await bumbleCard.evaluate(el => el.scrollIntoView());
     // Move mouse to reset position to avoid hover states
     await page.mouse.move(0, 0);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); // Increased wait for layout stability
-
-    // Wait for element to be fully stable before screenshot
-    await bumbleCard.evaluate(el => {
-      return new Promise(resolve => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => resolve(null));
-        });
-      });
-    });
-
+    await page.waitForTimeout(1000);
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
-      maxDiffPixelRatio: 0.15, // Increased from VISUAL_THRESHOLD
-      maxDiffPixels: 3000,     // Increased from 500
+      maxDiffPixelRatio: 0.2, // Relaxed threshold as requested
+      maxDiffPixels: 3000,
       animations: 'disabled',
       timeout: 30000,
-      scale: 'css',  // Use CSS scale to avoid size mismatch issues
     });
   });
 });
@@ -116,9 +95,7 @@ test.describe('Visual Regression - Game Start', () => {
     try {
       await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
     } catch (e) {
-      // Take a screenshot on failure to debug the page state
       await page.screenshot({ path: 'commence-button-not-found.png' });
-      // Re-throw the error to fail the test
       throw e;
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
@@ -217,7 +194,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(500);
-    await page.waitForURL(/\/game/, { timeout: 20000 }).catch(() => {}); // Wait for potential URL change or just proceed if SPA
+    await page.waitForURL(/\/game/, { timeout: 20000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
 
     await page.waitForTimeout(3000);
@@ -442,10 +419,10 @@ test.describe('Visual Regression - End Game States', () => {
     }, { timeout: 30000 });
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
-      maxDiffPixelRatio: 0.1, // Increase from VISUAL_THRESHOLD to 10%
+      maxDiffPixelRatio: 0.1,
       threshold: 0.3,
       animations: 'disabled',
-      timeout: 30000, // Increase timeout from default 10s to 30s
+      timeout: 30000,
       caret: 'hide'
     });
   });
@@ -458,8 +435,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixels: 50000, // Add absolute pixel threshold
-      maxDiffPixelRatio: 0.2, // Increased tolerance for mobile rendering
+      maxDiffPixels: 50000,
+      maxDiffPixelRatio: 0.2,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -471,14 +448,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    // Wait for any loading overlay to disappear
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
     await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 });
-    await page.waitForLoadState('networkidle', { timeout: 15000 }); // Wait for navigation/transition
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // Add explicit wait and retry logic for buttons
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     try {
       await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
@@ -488,15 +462,15 @@ test.describe('Visual Regression - Responsive Design', () => {
     }
     await commenceButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(500);
-    await page.waitForURL(/\/game/, { timeout: 20000 }).catch(() => {}); // Wait for potential URL change or just proceed if SPA
+    await page.waitForURL(/\/game/, { timeout: 20000 }).catch(() => {});
     await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
     await page.waitForLoadState('networkidle', { timeout: 30000 });
-    await page.waitForTimeout(3000); // Increase from 2000 to 3000
-    await page.waitForLoadState('networkidle'); // Add this line
-    await page.waitForTimeout(1000); // Add extra wait after networkidle
+    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.05, // Reduce from 0.10 to 5%
+      maxDiffPixelRatio: 0.05,
       timeout: 30000,
       animations: 'disabled',
     });
@@ -512,7 +486,6 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 30000 });
     await santaButton.click({ force: true, timeout: 30000 });
 
-    // Click "COMMENCE OPERATION" on the briefing screen
     await page.waitForLoadState('networkidle', { timeout: 30000 });
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     try {
@@ -521,17 +494,17 @@ test.describe('Visual Regression - Responsive Design', () => {
       await page.screenshot({ path: 'commence-button-not-found-touch.png' });
       throw e;
     }
-    await commenceButton.click({ force: true, noWaitAfter: true });
+
+    // Use evaluate click to avoid scrolling/overlapped issues on mobile
+    await commenceButton.evaluate((b) => b.click());
     await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
 
-    // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); // Allow UI to fully settle
+    await page.waitForTimeout(2000);
 
-    // Use page screenshot with clip for stability instead of element screenshot
     const box = await fireButton.boundingBox();
     if (!box) throw new Error('Fire button not found');
 

@@ -72,7 +72,6 @@ export function StartScreen() {
           type="button"
           className={styles.classCard}
           onClick={() => handleSelectClass('santa')}
-          aria-label={`Select ${PLAYER_CLASSES.santa.name}: ${PLAYER_CLASSES.santa.role}, HP ${PLAYER_CLASSES.santa.hp}, Speed ${PLAYER_CLASSES.santa.speed}, Weapon Coal Cannon`}
         >
           <div className={styles.cardTitle} style={{ color: '#ff0044' }}>
             {PLAYER_CLASSES.santa.name}
@@ -92,12 +91,7 @@ export function StartScreen() {
         </button>
 
         {/* Elf Card */}
-        <button
-          type="button"
-          className={styles.classCard}
-          onClick={() => handleSelectClass('elf')}
-          aria-label={`Select ${PLAYER_CLASSES.elf.name}: ${PLAYER_CLASSES.elf.role}, HP ${PLAYER_CLASSES.elf.hp}, Speed ${PLAYER_CLASSES.elf.speed}, Weapon Plasma SMG`}
-        >
+        <button type="button" className={styles.classCard} onClick={() => handleSelectClass('elf')}>
           <div className={styles.cardTitle} style={{ color: '#00ffcc' }}>
             {PLAYER_CLASSES.elf.name}
           </div>
@@ -120,7 +114,6 @@ export function StartScreen() {
           type="button"
           className={styles.classCard}
           onClick={() => handleSelectClass('bumble')}
-          aria-label={`Select ${PLAYER_CLASSES.bumble.name}: ${PLAYER_CLASSES.bumble.role}, HP ${PLAYER_CLASSES.bumble.hp}, Speed ${PLAYER_CLASSES.bumble.speed}, Weapon Star Thrower`}
         >
           <div className={styles.cardTitle} style={{ color: '#eeeeee' }}>
             {PLAYER_CLASSES.bumble.name}
