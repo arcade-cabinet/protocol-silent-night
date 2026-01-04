@@ -47,10 +47,6 @@ export function MissionBriefing() {
   useEffect(() => {
     if (state !== 'BRIEFING') return;
 
-    // Reset state when briefing starts
-    setCurrentLine(0);
-    setShowButton(false);
-
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
@@ -73,6 +69,14 @@ export function MissionBriefing() {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [state, briefingLines.length]);
+
+  // Reset state when briefing starts
+  useEffect(() => {
+    if (state === 'BRIEFING') {
+      setCurrentLine(0);
+      setShowButton(false);
+    }
+  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
