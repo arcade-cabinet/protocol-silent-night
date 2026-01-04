@@ -46,7 +46,7 @@ export default defineConfig({
   // Expect options for visual regression
   expect: {
     // Timeout for expect() calls
-    timeout: 30000, // Increased from 10000 to allow elements to stabilize
+    timeout: 10000,
     // Screenshot comparison settings
     toHaveScreenshot: {
       // Maximum percentage of pixels that can differ
@@ -55,8 +55,6 @@ export default defineConfig({
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
-      // Timeout for screenshot comparisons
-      timeout: 30000, // Increased from default 5000 to allow for element stability
     },
   },
   // Configure projects for major browsers
