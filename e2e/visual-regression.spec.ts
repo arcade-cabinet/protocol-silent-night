@@ -45,13 +45,10 @@ test.describe('Visual Regression - Character Selection', () => {
     const elfCard = page.locator('button[aria-label^="Select CYBER-ELF"]');
     await elfCard.waitFor({ state: 'visible', timeout: 15000 });
     await elfCard.scrollIntoViewIfNeeded({ timeout: 15000 });
-    await page.waitForTimeout(1000); // Increased wait for scroll animation and layout stability
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Wait for scroll animation
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 500, // Allow for minor layout differences (2px height = ~400 pixels at 200px width)
       timeout: 30000,
-      animations: 'disabled',
     });
   });
 
@@ -62,13 +59,10 @@ test.describe('Visual Regression - Character Selection', () => {
     const bumbleCard = page.locator('button[aria-label^="Select THE BUMBLE"]');
     await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleCard.scrollIntoViewIfNeeded({ timeout: 15000 });
-    await page.waitForTimeout(1000); // Increased wait for scroll animation and layout stability
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Wait for scroll animation
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      maxDiffPixels: 500, // Allow for minor layout differences (2px height = ~400 pixels at 200px width)
       timeout: 30000,
-      animations: 'disabled',
     });
   });
 });
