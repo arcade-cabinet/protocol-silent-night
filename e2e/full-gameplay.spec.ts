@@ -106,7 +106,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
     await santaButton.click();
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -787,6 +787,7 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.keyboard.down('w');
     await page.waitForTimeout(500);
     await page.keyboard.up('w');
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
 
     // Player should have moved (position changed)
     // We can verify input state is being set
