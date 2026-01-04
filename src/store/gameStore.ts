@@ -287,7 +287,7 @@ const initialState = {
   // Use a fixed seed in E2E environment for determinism, otherwise use secure random default
   rng:
     typeof window !== 'undefined' && window.__E2E_TEST__
-      ? new SeededRandom(124631605)
+      ? new SeededRandom(12463160577482274073)
       : new SeededRandom(),
 };
 
