@@ -94,7 +94,7 @@ export function MissionBriefing() {
       if (timeoutId) clearTimeout(timeoutId);
       animationRunning.current = false;
     };
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
