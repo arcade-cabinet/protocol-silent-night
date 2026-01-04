@@ -10,14 +10,9 @@
   justify-content: center;
   z-index: 1000;
   animation: fadeOut 0.5s ease-out 1.4s forwards;
-  /* Ensure clicks pass through after component is hidden */
-  pointer-events: auto;
 }
 
 @keyframes fadeOut {
-  from {
-    pointer-events: auto;
-  }
   to {
     opacity: 0;
     pointer-events: none;

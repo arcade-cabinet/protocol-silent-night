@@ -40,7 +40,7 @@ export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
   if (!isVisible) return null;
 
   return (
-    <div className={styles.screen} data-testid="loading-overlay">
+    <div className={styles.screen}>
       <div className={styles.content}>
         <h1 className={styles.title}>
           PROTOCOL: <span className={styles.accent}>SILENT NIGHT</span>
