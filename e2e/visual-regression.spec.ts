@@ -324,6 +324,7 @@ test.describe('Visual Regression - End Game States', () => {
     });
 
     await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
