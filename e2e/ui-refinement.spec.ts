@@ -30,6 +30,11 @@ test.describe('UI Component Refinement', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+
+    // Wait for loading screen to disappear
+    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+    // Additional wait to ensure everything is stable
+    await page.waitForTimeout(1000);
   });
 
   test.describe('Menu Screen', () => {
@@ -89,7 +94,6 @@ test.describe('UI Component Refinement', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
       // Click MECHA-SANTA
       const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
-      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
       await santaButton.waitFor({ state: 'visible', timeout: 10000 });
       await santaButton.click();
 
@@ -119,7 +123,6 @@ test.describe('UI Component Refinement', () => {
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
       const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
-      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
       await elfButton.waitFor({ state: 'visible', timeout: 10000 });
       await elfButton.click();
 
@@ -142,7 +145,6 @@ test.describe('UI Component Refinement', () => {
       for (const [index, mech] of mechs.entries()) {
         // Click mech
         const mechButton = page.getByRole('button', { name: new RegExp(mech.name, 'i') });
-        await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
         await mechButton.waitFor({ state: 'visible', timeout: 10000 });
         await mechButton.click();
 
@@ -171,7 +173,6 @@ test.describe('UI Component Refinement', () => {
 
       // Select mech
       const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
-      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
       await santaButton.waitFor({ state: 'visible', timeout: 10000 });
       await santaButton.click();
 
@@ -254,7 +255,6 @@ test.describe('UI Component Refinement', () => {
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
       const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
-      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
       await santaButton.waitFor({ state: 'visible', timeout: 10000 });
       await santaButton.click();
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
