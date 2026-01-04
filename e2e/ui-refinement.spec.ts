@@ -88,7 +88,10 @@ test.describe('UI Component Refinement', () => {
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
       // Click MECHA-SANTA
-      await page.click('button:has-text("MECHA-SANTA")');
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
+      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+      await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+      await santaButton.click();
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -115,7 +118,10 @@ test.describe('UI Component Refinement', () => {
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
-      await page.click('button:has-text("CYBER-ELF")');
+      const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
+      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+      await elfButton.waitFor({ state: 'visible', timeout: 10000 });
+      await elfButton.click();
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -135,7 +141,10 @@ test.describe('UI Component Refinement', () => {
 
       for (const [index, mech] of mechs.entries()) {
         // Click mech
-        await page.click(`button:has-text("${mech.name}")`);
+        const mechButton = page.getByRole('button', { name: new RegExp(mech.name, 'i') });
+        await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+        await mechButton.waitFor({ state: 'visible', timeout: 10000 });
+        await mechButton.click();
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -161,7 +170,10 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
+      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+      await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+      await santaButton.click();
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -241,7 +253,10 @@ test.describe('UI Component Refinement', () => {
 
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
+      await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+      await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+      await santaButton.click();
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {

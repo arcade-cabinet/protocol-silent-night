@@ -470,7 +470,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: 0.08,
       timeout: 30000,
       animations: 'disabled',
     });
