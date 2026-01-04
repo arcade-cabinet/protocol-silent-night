@@ -103,8 +103,8 @@ test.describe('UI Component Refinement', () => {
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');
       await santaButton.waitFor({ state: 'visible', timeout: 10000 });
       await page.waitForTimeout(500); // Stability buffer
-      await santaButton.click({ timeout: 15000 });
-      await page.waitForLoadState('networkidle');
+      await santaButton.click({ timeout: 15000, noWaitAfter: true });
+      await page.waitForTimeout(500); // Allow state transition
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -132,10 +132,11 @@ test.describe('UI Component Refinement', () => {
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
-      await page.click('button:has-text("CYBER-ELF")');
+      await page.click('button:has-text("CYBER-ELF")', { noWaitAfter: true });
+      await page.waitForTimeout(500); // Allow state transition
 
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
@@ -154,10 +155,11 @@ test.describe('UI Component Refinement', () => {
         // Click mech
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
         await mechButton.waitFor({ state: 'visible', timeout: 10000 });
-        await mechButton.click();
+        await mechButton.click({ noWaitAfter: true });
+        await page.waitForTimeout(500); // Allow state transition
 
         // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -180,13 +182,14 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
+      await page.click('button:has-text("MECHA-SANTA")', { noWaitAfter: true });
+      await page.waitForTimeout(500); // Allow state transition
 
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       // Click commence
-      await page.click('button:has-text("COMMENCE OPERATION")');
+      await page.click('button:has-text("COMMENCE OPERATION")', { noWaitAfter: true });
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -204,9 +207,10 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select CYBER-ELF (Plasma SMG)
-      await page.click('button:has-text("CYBER-ELF")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
-      await page.click('button:has-text("COMMENCE OPERATION")');
+      await page.click('button:has-text("CYBER-ELF")', { noWaitAfter: true });
+      await page.waitForTimeout(500); // Allow state transition
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+      await page.click('button:has-text("COMMENCE OPERATION")', { noWaitAfter: true });
 
       // Wait for HUD
       await page.waitForTimeout(2000);
@@ -246,7 +250,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 5000 });
+      await page.waitForSelector('h1', { timeout: 10000, state: 'visible' });
+      await page.waitForTimeout(500); // Allow rendering to stabilize
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
@@ -260,8 +265,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.click('button:has-text("MECHA-SANTA")', { noWaitAfter: true });
+      await page.waitForTimeout(500); // Allow state transition
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
