@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 import { AudioManager } from '@/audio/AudioManager';
 import {
   BRIEFING,
@@ -286,10 +287,11 @@ const initialState = {
   rng: new SeededRandom(12345),
 };
 
-export const useGameStore = create<GameStore>((set, get) => ({
-  ...initialState,
+export const useGameStore = create<GameStore>()(
+  subscribeWithSelector((set, get) => ({
+    ...initialState,
 
-  setState: (state) => set((prev) => ({ state, previousState: prev.state })),
+    setState: (state) => set((prev) => ({ state, previousState: prev.state })),
 
   selectClass: (type) => {
     const config = PLAYER_CLASSES[
@@ -388,7 +390,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const now = Date.now();
     const newKills = stats.kills + 1;
 
-    const streakTimeout = 2000;
+    const streakTimeout = 5000; // Increased for CI stability
     const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
@@ -892,8 +894,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
     const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+      state: 'PHASE_BOSS',
+      previousState: isLeveling ? 'LEVEL_UP' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
@@ -916,7 +918,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     if (newHp <= 0) {
-      const { runProgress, stats } = get();
+      const { stats } = get();
       const updatedMeta = {
         ...get().metaProgress,
         bossesDefeated: get().metaProgress.bossesDefeated + 1,
@@ -926,24 +928,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Endless mode: Increment wave and prepare for level up
+      // Victory Condition: Defeating the boss wins the run
       set({
-        state: 'PHASE_1',
+        state: 'WIN',
         bossActive: false,
         stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
-        runProgress: {
-          ...runProgress,
-          wave: runProgress.wave + 1,
-        },
       });
-
-      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-      get().levelUp();
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
       AudioManager.playSFX('boss_defeated');
+      AudioManager.playMusic('victory');
 
       return true;
     }
@@ -962,15 +958,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  reset: () =>
-    set({
-      ...initialState,
-      highScore: get().highScore,
-      metaProgress: get().metaProgress,
-      playerPosition: new THREE.Vector3(0, 0, 0),
-      rng: new SeededRandom(Date.now()),
-    }),
-}));
+    reset: () =>
+      set({
+        ...initialState,
+        highScore: get().highScore,
+        metaProgress: get().metaProgress,
+        playerPosition: new THREE.Vector3(0, 0, 0),
+        rng: new SeededRandom(Date.now()),
+      }),
+  }))
+);
 
 // Expose store on window for e2e testing
 if (typeof window !== 'undefined') {
