@@ -113,38 +113,19 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
   return getGameState(page);
 }
 
-// Set deterministic RNG flag before each test - MUST be before page.goto()
+// Set deterministic RNG flag before each test
 test.beforeEach(async ({ page }) => {
-  // Add init script before any navigation
   await page.addInitScript(() => {
     window.__E2E_TEST__ = true;
   });
-
-  // Navigate to the app
-  await page.goto('/');
-  await page.waitForTimeout(2000);
-
-  // Verify we're at the menu before each test
-  const state = await page.evaluate(() => {
-    const store = (window as any).useGameStore;
-    return store?.getState()?.state;
-  });
-
-  // If not at menu, reset to menu
-  if (state !== 'MENU') {
-    await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      if (store?.getState()?.setState) {
-        store.getState().setState('MENU');
-      }
-    });
-    await page.waitForTimeout(500);
-  }
 });
 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
-    // Verify we're at menu (navigation done in beforeEach)
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
+    // Verify we're at menu
     let state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
 
@@ -169,6 +150,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -214,6 +198,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should survive longer due to high HP', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -239,6 +226,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -262,6 +252,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   });
 
   test('should accumulate score and kills', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -290,6 +283,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     // Select Elf
     await selectMech(page, /CYBER-ELF/);
 
@@ -305,6 +301,9 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   });
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -328,6 +327,9 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   });
 
   test('should die quickly with low HP', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -347,6 +349,9 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
 test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should complete full game loop with Bumble', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     // Select Bumble
     await selectMech(page, /BUMBLE/);
 
@@ -362,6 +367,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   });
 
   test('should fire spread pattern weapon', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /BUMBLE/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -385,6 +393,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   });
 
   test('should have balanced survivability', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /BUMBLE/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -411,6 +422,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
 test.describe('Full Gameplay - Boss Battle', () => {
   test('should spawn boss after 10 kills', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -437,6 +451,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
   });
 
   test('should defeat boss and win game', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -470,6 +487,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
   });
 
   test('should show boss health decreasing', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -504,6 +524,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
 test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -535,6 +558,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   });
 
   test('should reset streak after timeout', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -563,6 +589,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   });
 
   test('should apply streak bonus to score', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -597,6 +626,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
 test.describe('Full Gameplay - Game Reset', () => {
   test('should reset game and return to menu', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     // Play a game
     await selectMech(page, /MECHA-SANTA/);
 
@@ -626,6 +658,9 @@ test.describe('Full Gameplay - Game Reset', () => {
   });
 
   test('should preserve high score after reset', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     // Play and get a score
     await selectMech(page, /MECHA-SANTA/);
 
@@ -668,6 +703,9 @@ test.describe('Full Gameplay - Game Reset', () => {
 
 test.describe('Full Gameplay - Complete Playthrough', () => {
   test('should complete entire game as Santa', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     // Step 1: Character Selection - verify start screen is showing
     await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
     await selectMech(page, /MECHA-SANTA/);
@@ -712,6 +750,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
   });
 
   test('should complete entire game as Elf', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /CYBER-ELF/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -741,6 +782,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
   });
 
   test('should complete entire game as Bumble', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /BUMBLE/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -772,6 +816,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
 test.describe('Full Gameplay - Input Controls', () => {
   test('should respond to WASD movement', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -797,6 +844,9 @@ test.describe('Full Gameplay - Input Controls', () => {
   });
 
   test('should respond to arrow key movement', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -819,6 +869,9 @@ test.describe('Full Gameplay - Input Controls', () => {
   });
 
   test('should fire with spacebar', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(2000);
+
     await selectMech(page, /MECHA-SANTA/);
 
     // Click "COMMENCE OPERATION" on the briefing screen

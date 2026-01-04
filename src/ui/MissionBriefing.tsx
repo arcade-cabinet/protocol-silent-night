@@ -3,7 +3,7 @@
  * Displays mission objectives before starting the game
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import styles from './MissionBriefing.module.css';
@@ -19,8 +19,6 @@ export function MissionBriefing() {
   const { state, setState, playerClass, missionBriefing } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
-  const hasInitialized = useRef(false);
-  const prevState = useRef<string>('');
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -47,20 +45,7 @@ export function MissionBriefing() {
   }, [playerClass, missionBriefing]);
 
   useEffect(() => {
-    // Only run when transitioning INTO briefing state
-    if (state !== 'BRIEFING') {
-      hasInitialized.current = false;
-      prevState.current = state;
-      return;
-    }
-
-    // Skip if we've already initialized for this briefing session
-    if (hasInitialized.current && prevState.current === 'BRIEFING') {
-      return;
-    }
-
-    hasInitialized.current = true;
-    prevState.current = state;
+    if (state !== 'BRIEFING') return;
 
     // Reset state immediately on entry to prevent race conditions
     setCurrentLine(0);
@@ -69,14 +54,11 @@ export function MissionBriefing() {
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
-    // Capture lines length at the start to prevent re-renders
-    const totalLines = briefingLines.length;
-
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout>;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
-        if (prev >= totalLines - 1) {
+        if (prev >= briefingLines.length - 1) {
           clearInterval(interval);
           timeoutId = setTimeout(() => setShowButton(true), 500);
           return prev;
@@ -90,7 +72,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines.length]);
+  }, [state, briefingLines]);
 
   if (state !== 'BRIEFING') return null;
 
