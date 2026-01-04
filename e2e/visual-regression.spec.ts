@@ -48,12 +48,23 @@ test.describe('Visual Regression - Character Selection', () => {
     // Move mouse to reset position to avoid hover states
     await page.mouse.move(0, 0);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Increased wait for layout stability
+    await page.waitForTimeout(2000); // Increased wait for layout stability
+
+    // Wait for element to be fully stable before screenshot
+    await elfCard.evaluate(el => {
+      return new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve(null));
+        });
+      });
+    });
+
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: 0.15, // Increased from VISUAL_THRESHOLD
       maxDiffPixels: 3000,     // Increased from 500
       animations: 'disabled',
       timeout: 30000,
+      scale: 'css',  // Use CSS scale to avoid size mismatch issues
     });
   });
 
@@ -67,12 +78,23 @@ test.describe('Visual Regression - Character Selection', () => {
     // Move mouse to reset position to avoid hover states
     await page.mouse.move(0, 0);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Increased wait for layout stability
+    await page.waitForTimeout(2000); // Increased wait for layout stability
+
+    // Wait for element to be fully stable before screenshot
+    await bumbleCard.evaluate(el => {
+      return new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve(null));
+        });
+      });
+    });
+
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: 0.15, // Increased from VISUAL_THRESHOLD
       maxDiffPixels: 3000,     // Increased from 500
       animations: 'disabled',
       timeout: 30000,
+      scale: 'css',  // Use CSS scale to avoid size mismatch issues
     });
   });
 });
