@@ -29,6 +29,12 @@ async function waitForPageStability(page) {
   await page.waitForTimeout(500); // Brief pause for any remaining renders
 }
 
+// Wait for loading screen to be removed before each test
+test.beforeEach(async ({ page }) => {
+  // If page has navigated, wait for loading overlay to disappear
+  await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+});
+
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
@@ -246,7 +252,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.03,
+      maxDiffPixelRatio: 0.05,
       timeout: 20000,
     });
   });

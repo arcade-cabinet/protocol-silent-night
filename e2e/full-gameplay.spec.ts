@@ -93,6 +93,12 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
   return getGameState(page);
 }
 
+// Wait for loading screen to be removed before each test
+test.beforeEach(async ({ page }) => {
+  // If page has navigated, wait for loading overlay to disappear
+  await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+});
+
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');

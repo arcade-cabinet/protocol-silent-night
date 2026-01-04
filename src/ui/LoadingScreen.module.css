@@ -13,6 +13,10 @@
 }
 
 @keyframes fadeOut {
+  from {
+    opacity: 1;
+    pointer-events: auto;
+  }
   to {
     opacity: 0;
     pointer-events: none;
