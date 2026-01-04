@@ -13,29 +13,9 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 
 test.setTimeout(120000); // Increase global timeout for visual regression tests
 
-/**
- * Wait for loading screen to complete and be fully removed
- */
-async function waitForLoadingComplete(page: any) {
-  // Wait for loading screen to either not exist or be invisible
-  await page.waitForFunction(
-    () => {
-      const loadingScreen = document.querySelector('[class*="LoadingScreen"]');
-      return !loadingScreen || window.getComputedStyle(loadingScreen).opacity === '0';
-    },
-    { timeout: 5000 }
-  ).catch(() => {
-    // Loading screen may already be gone
-  });
-
-  // Additional small buffer for any remaining transitions
-  await page.waitForTimeout(100);
-}
-
 // Utility for stable screenshots
 async function waitForPageStability(page) {
   await page.waitForLoadState('networkidle');
-  await waitForLoadingComplete(page);
   // Wait for fonts to be ready with a polling mechanism
   try {
     await page.waitForFunction(
@@ -266,7 +246,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.05, // Increased threshold for animation variations
+      maxDiffPixelRatio: 0.03,
       timeout: 20000,
     });
   });
