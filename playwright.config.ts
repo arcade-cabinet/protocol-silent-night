@@ -56,8 +56,6 @@ export default defineConfig({
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
-      // Increased timeout for WebGL screenshot generation
-      timeout: 30000,
     },
   },
   // Configure projects for major browsers

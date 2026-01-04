@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
-test.setTimeout(120000); // 2 minutes timeout for visual regression tests with WebGL rendering
+test.setTimeout(120000); // Increase global timeout for visual regression tests
 
 // Utility for stable screenshots
 async function waitForPageStability(page) {
@@ -94,7 +94,8 @@ test.describe('Visual Regression - Game Start', () => {
     }
 
     // Wait for game to load
-    await page.waitForTimeout(5000);
+    await page.locator('canvas').waitFor({ state: 'visible', timeout: 30000 });
+    await waitForPageStability(page);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
