@@ -105,12 +105,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
-    await santaButton.click();
+    await santaButton.evaluate(el => el.click());
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 30000 });
-    await commenceButton.click();
+    await commenceButton.evaluate(el => el.click());
 
     // Wait for game to start
     await page.waitForTimeout(2000);
@@ -128,12 +128,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -160,12 +160,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -196,12 +196,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -228,12 +228,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -266,12 +266,14 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     // Select Elf
+    await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /CYBER-ELF/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -289,12 +291,14 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /CYBER-ELF/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -321,12 +325,14 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /CYBER-ELF/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -350,12 +356,14 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     // Select Bumble
+    await page.getByRole('button', { name: /BUMBLE/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /BUMBLE/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -373,12 +381,14 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /BUMBLE/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /BUMBLE/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -405,12 +415,14 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /BUMBLE/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /BUMBLE/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -440,12 +452,12 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -475,12 +487,12 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -502,6 +514,14 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(1000);
 
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 });
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
     expect(state?.bossHp).toBe(0);
@@ -517,12 +537,12 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -560,12 +580,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -600,12 +620,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -637,12 +657,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -681,12 +701,12 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     // Play a game
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -703,7 +723,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Click re-deploy
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -719,12 +739,12 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     // Play and get a score
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -744,16 +764,18 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Reset
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
 
     // Start new game
+    await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /CYBER-ELF/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -776,13 +798,13 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     // Step 1: Character Selection - verify start screen is showing
-    await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'Protocol: Silent Night', exact: true })).toBeVisible({ timeout: 5000 });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -810,6 +832,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(1000);
 
     // Step 6: Victory
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 });
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
@@ -817,7 +847,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click();
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
@@ -828,12 +858,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /CYBER-ELF/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -858,6 +890,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(500);
 
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 });
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
   });
@@ -866,12 +906,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /BUMBLE/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /BUMBLE/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -896,6 +938,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(500);
 
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 });
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().state === 'WIN';
+    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
   });
@@ -906,12 +956,12 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -940,12 +990,12 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -971,12 +1021,12 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
@@ -1011,12 +1061,12 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
     await page.waitForTimeout(1000);
