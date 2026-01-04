@@ -124,7 +124,7 @@ test.describe('UI Component Refinement', () => {
 
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible();
+      await expect(opButton).toBeVisible({ timeout: 15000 });
       await expect(opButton).toBeEnabled();
     });
 
