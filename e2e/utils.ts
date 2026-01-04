@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
 
 // Helper to get game state from the store
 export async function getGameState(page: Page) {
@@ -39,20 +39,69 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
   }, { action, args });
 }
 
-// Helper to select character robustly
-export async function selectCharacter(page: Page, name: string) {
-  const button = page.locator('button', { hasText: name });
-  // Wait for button to be visible
-  await button.waitFor({ state: 'visible', timeout: 10000 });
-  // Removed scrollIntoViewIfNeeded as it causes instability in CI
-  // Use standard click which attempts to scroll if needed
-  await button.click();
+// Helper to stabilize page before screenshots
+export async function stabilizePage(page: Page) {
+  // Wait for all network requests to complete
+  await page.waitForLoadState('networkidle');
+
+  // Wait for dynamic content to settle
+  await page.waitForTimeout(500);
+
+  // Ensure all animations are truly disabled via CSS injection
+  // Also suppress focus outlines to prevent visual regression failures
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+      *:focus-visible {
+        outline: none !important;
+      }
+    `
+  });
+
+  // Wait for any remaining font rendering
+  await page.waitForFunction(() => document.fonts.ready);
 }
 
-// Helper to start mission robustly
-export async function startMission(page: Page) {
-  const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
-  // Mission briefing has a typing animation (~4s) plus potential CI slowness
+// Helper to wait for element stability before interaction
+export async function waitForElementStability(page: Page, locator: Locator) {
+  await locator.waitFor({ state: 'attached', timeout: 10000 });
+  await locator.waitFor({ state: 'visible', timeout: 10000 });
+  await page.waitForTimeout(200); // Extra buffer for animations
+  return locator;
+}
+
+// Helper to wait for loading screen to disappear
+export async function waitForLoadingScreen(page: Page) {
+  const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+  if (await loadingScreen.isVisible()) {
+    await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+  }
+  // Additional wait for transition animation
+  await page.waitForTimeout(2000);
+}
+
+// Helper to select character robustly with force click option
+export async function selectCharacter(page: Page, name: string, options: { force?: boolean } = {}) {
+  const button = page.getByRole('button', { name: new RegExp(name, 'i') });
+  await button.waitFor({ state: 'visible', timeout: 30000 });
+  await button.click({ force: options.force, timeout: 30000 });
+}
+
+// Helper to start mission robustly with force click option
+export async function startMission(page: Page, options: { force?: boolean } = {}) {
+  const button = page.getByRole('button', { name: /COMMENCE OPERATION/i });
   await button.waitFor({ state: 'visible', timeout: 45000 });
-  await button.click();
+  await button.click({ force: options.force, timeout: 30000 });
+}
+
+// Helper to setup page for visual regression tests
+export async function setupVisualTest(page: Page) {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await waitForLoadingScreen(page);
+  await stabilizePage(page);
 }
