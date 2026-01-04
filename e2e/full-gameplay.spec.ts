@@ -158,9 +158,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
-    const mechButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await mechButton.waitFor({ state: 'visible', timeout: 10000 });
-    await mechButton.evaluate(el => el.click());
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
@@ -338,9 +336,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     // Select Bumble
-    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleButton.waitFor({ state: 'visible', timeout: 10000 });
-    await bumbleButton.evaluate(el => el.click());
+    await page.getByRole('button', { name: /BUMBLE/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 

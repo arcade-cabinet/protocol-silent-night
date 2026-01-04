@@ -36,15 +36,13 @@ class AudioManagerClass {
   private masterVolume = 0.7;
   private musicVolume = 0.6;
   private sfxVolume = 0.8;
+  private lastSFXTime = 0;
 
   // Synth instruments
   private synths: Map<string, Tone.Synth | Tone.PolySynth | Tone.FMSynth | Tone.NoiseSynth> =
     new Map();
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
-
-  // Track last scheduled time to prevent timing collisions
-  private lastScheduledTime = 0;
 
   /**
    * Initialize audio system. Must be called after user interaction.
@@ -177,45 +175,50 @@ class AudioManagerClass {
   /**
    * Play sound effect
    */
-  playSFX(effect: SoundEffect): void {
+  async playSFX(effect: SoundEffect): Promise<void> {
     if (!this.initialized || !this.sfxEnabled) return;
+
+    // Ensure context is running (resume if suspended)
+    if (Tone.context.state !== 'running') {
+      await Tone.start();
+    }
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    let now = Tone.now();
 
-    // Ensure this time is strictly after the last scheduled time
-    // Add a small offset (1ms) to prevent timing collisions
-    if (now <= this.lastScheduledTime) {
-      now = this.lastScheduledTime + 0.001;
-    }
-    this.lastScheduledTime = now;
+    try {
+      // Ensure monotonic timing to prevent Tone.js errors
+      // Increase gap to 0.05s to be safe
+      let now = Tone.now();
+      if (now <= this.lastSFXTime) {
+        now = this.lastSFXTime + 0.05;
+      }
+      this.lastSFXTime = now;
 
-    const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
-    if (!effectData) return;
+      const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
+      if (!effectData) return;
 
-    // Handle sequence
-    // @ts-expect-error
-    if (effectData.sequence) {
+      // Handle sequence
       // @ts-expect-error
-      for (const [note, duration, delay = 0] of effectData.sequence) {
-        const scheduleTime = now + delay;
-        if (scheduleTime > this.lastScheduledTime) {
-          this.lastScheduledTime = scheduleTime;
+      if (effectData.sequence) {
+        // @ts-expect-error
+        for (const [note, duration, delay = 0] of effectData.sequence) {
+          sfxSynth.triggerAttackRelease(note, duration, now + delay);
         }
-        sfxSynth.triggerAttackRelease(note, duration, scheduleTime);
-      }
-    } else {
-      // @ts-expect-error
-      if (effectData.note) {
+      } else {
         // @ts-expect-error
-        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
-      }
-      // @ts-expect-error
-      if (effectData.noise) {
+        if (effectData.note) {
+          // @ts-expect-error
+          sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
+        }
         // @ts-expect-error
-        noiseSynth.triggerAttackRelease(effectData.duration, now);
+        if (effectData.noise) {
+          // @ts-expect-error
+          noiseSynth.triggerAttackRelease(effectData.duration, now);
+        }
       }
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
     }
   }
 
