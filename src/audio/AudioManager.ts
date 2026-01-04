@@ -43,6 +43,9 @@ class AudioManagerClass {
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
 
+  // Track last scheduled time to prevent timing collisions
+  private lastScheduledTime = 0;
+
   /**
    * Initialize audio system. Must be called after user interaction.
    */
@@ -179,7 +182,14 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    const now = Tone.now();
+    let now = Tone.now();
+
+    // Ensure this time is strictly after the last scheduled time
+    // Add a small offset (1ms) to prevent timing collisions
+    if (now <= this.lastScheduledTime) {
+      now = this.lastScheduledTime + 0.001;
+    }
+    this.lastScheduledTime = now;
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
@@ -189,7 +199,11 @@ class AudioManagerClass {
     if (effectData.sequence) {
       // @ts-expect-error
       for (const [note, duration, delay = 0] of effectData.sequence) {
-        sfxSynth.triggerAttackRelease(note, duration, now + delay);
+        const scheduleTime = now + delay;
+        if (scheduleTime > this.lastScheduledTime) {
+          this.lastScheduledTime = scheduleTime;
+        }
+        sfxSynth.triggerAttackRelease(note, duration, scheduleTime);
       }
     } else {
       // @ts-expect-error
