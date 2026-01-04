@@ -11,6 +11,7 @@
   justify-content: center;
   z-index: 100;
   animation: fadeIn 0.5s ease-out;
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {
@@ -58,19 +59,28 @@
   border: 1px solid #333;
   padding: 20px;
   width: 200px;
+  min-height: 180px; /* Enforce consistent height */
+  box-sizing: border-box; /* Include padding/border in height */
   cursor: pointer;
   transition: 0.3s;
   text-align: center;
   clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
 }
 
-.classCard:hover,
-.classCard:focus {
+.classCard:hover {
   border-color: #00ffcc;
   background: rgba(0, 255, 200, 0.05);
   transform: translateY(-10px);
   box-shadow: 0 10px 30px rgba(0, 255, 200, 0.1);
   outline: none;
+}
+
+.classCard:focus-visible {
+  outline: 2px solid #00ffcc;
+  outline-offset: 4px;
+  border-color: #00ffcc;
+  transform: translateY(-5px);
+  z-index: 10;
 }
 
 .cardTitle {
