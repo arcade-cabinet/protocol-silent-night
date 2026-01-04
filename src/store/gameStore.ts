@@ -889,6 +889,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       speed: bossConfig.speed,
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
+      spawnTime: Date.now(),
     });
     const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
