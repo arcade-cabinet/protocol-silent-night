@@ -65,14 +65,10 @@ test.describe('Visual Regression - Character Selection', () => {
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    await waitForPageStability(page);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(500); // Extra stability for animations
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
