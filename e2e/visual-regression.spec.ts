@@ -14,43 +14,59 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
-    
+
     // Wait for fonts and styles to load
-    await page.waitForTimeout(2000);
-    
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    // Ensure all character cards are visible before taking screenshot
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 20000 });
+    await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 20000 });
+    await page.getByRole('button', { name: /BUMBLE/ }).waitFor({ state: 'visible', timeout: 20000 });
+
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaCard.waitFor({ state: 'visible', timeout: 20000 });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfCard.waitFor({ state: 'visible', timeout: 20000 });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
-    
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleCard.waitFor({ state: 'visible', timeout: 20000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 });
