@@ -17,10 +17,15 @@ test.describe('Visual Regression - Character Selection', () => {
 
     // Wait for fonts and styles to load
     await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+
+    // Wait for fonts to be fully loaded
+    await page.waitForFunction(() => document.fonts.ready, { timeout: 15000 }).catch(() => {});
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000, // Explicit timeout for this screenshot
     });
   });
 
@@ -42,10 +47,11 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const elfCard = page.locator('button[aria-label^="Select CYBER-ELF"]');
     await elfCard.waitFor({ state: 'visible', timeout: 15000 });
-    await elfCard.scrollIntoViewIfNeeded({ timeout: 15000 });
-    await page.waitForTimeout(500); // Wait for scroll animation
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1000); // Wait for any animations to settle
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000, // Explicit timeout for this screenshot
     });
   });
 
@@ -55,10 +61,11 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const bumbleCard = page.locator('button[aria-label^="Select THE BUMBLE"]');
     await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
-    await bumbleCard.scrollIntoViewIfNeeded({ timeout: 15000 });
-    await page.waitForTimeout(500); // Wait for scroll animation
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(1000); // Wait for any animations to settle
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000, // Explicit timeout for this screenshot
     });
   });
 });
