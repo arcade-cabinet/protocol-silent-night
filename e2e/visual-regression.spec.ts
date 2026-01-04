@@ -47,11 +47,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.waitForTimeout(2000);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaCard.waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000); // Wait for element to stabilize
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
     });
   });
 
@@ -209,25 +206,22 @@ test.describe('Visual Regression - Game Movement', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(500); // Wait for animations
-    await santaButton.click({ force: true, noWaitAfter: true, timeout: 15000 });
+    await santaButton.click({ force: true, noWaitAfter: true });
 
     // Start game
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await startButton.waitFor({ state: 'visible', timeout: 30000 });
-    await page.waitForTimeout(500); // Wait for button readiness
-    await startButton.click({ force: true, noWaitAfter: true, timeout: 15000 });
-    await page.waitForTimeout(5000); // Longer wait for game to fully load
+    await startButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(3000);
 
     // Move character
     await page.keyboard.down('w');
     await page.waitForTimeout(2000);
     await page.keyboard.up('w');
-    await page.waitForTimeout(1000); // Wait for movement to settle
 
     await expect(page).toHaveScreenshot('character-moved.png', {
-      maxDiffPixelRatio: 0.05, // Increased tolerance
-      timeout: 30000,
+      maxDiffPixelRatio: 0.03,
+      timeout: 20000,
     });
   });
 
@@ -237,23 +231,21 @@ test.describe('Visual Regression - Game Movement', () => {
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(500); // Wait for animations
-    await santaButton.click({ force: true, noWaitAfter: true, timeout: 15000 });
+    await santaButton.click({ force: true, noWaitAfter: true });
 
     // Start game
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await startButton.waitFor({ state: 'visible', timeout: 30000 });
-    await page.waitForTimeout(500); // Wait for button readiness
-    await startButton.click({ force: true, noWaitAfter: true, timeout: 15000 });
-    await page.waitForTimeout(5000); // Longer wait for game to fully load
+    await startButton.click({ force: true, noWaitAfter: true });
+    await page.waitForTimeout(3000);
 
     // Fire weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(1000); // Longer wait for animation
+    await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.05, // Increased tolerance
-      timeout: 30000,
+      maxDiffPixelRatio: 0.03,
+      timeout: 20000,
     });
   });
 });
