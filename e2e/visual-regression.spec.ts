@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
 
 const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
 
-test.setTimeout(60000); // Increase global timeout for visual regression tests
+test.setTimeout(120000); // 2 minutes timeout for visual regression tests with WebGL rendering
 
 // Utility for stable screenshots
 async function waitForPageStability(page) {

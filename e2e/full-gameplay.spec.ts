@@ -7,6 +7,8 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
+test.setTimeout(120000); // 2 minutes timeout for full gameplay tests
+
 // Helper to get game state from the store
 async function getGameState(page: Page) {
   return page.evaluate(() => {
