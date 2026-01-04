@@ -94,8 +94,7 @@ export function MissionBriefing() {
       if (timeoutId) clearTimeout(timeoutId);
       animationRunning.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
