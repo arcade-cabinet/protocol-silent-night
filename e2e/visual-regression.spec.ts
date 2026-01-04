@@ -310,9 +310,14 @@ test.describe('Visual Regression - End Game States', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, noWaitAfter: true });
+
+    // Wait for commence operation button and click it
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ force: true });
     await page.waitForTimeout(3000);
 
-    // Trigger game over by evaluating state (for testing purposes)
+    // Trigger game over by evaluating state with delay to prevent Tone.js timing conflicts
     await page.evaluate(() => {
       type GameWindow = Window & {
         useGameStore?: {
@@ -323,7 +328,12 @@ test.describe('Visual Regression - End Game States', () => {
       };
 
       const gameWindow = window as GameWindow;
-      gameWindow.useGameStore?.getState().damagePlayer(300);
+      // Deal damage in chunks with delays to avoid Tone.js scheduling conflicts
+      const store = gameWindow.useGameStore?.getState();
+      if (store) {
+        store.damagePlayer(150);
+        setTimeout(() => store.damagePlayer(150), 200);
+      }
     });
 
     await page.waitForTimeout(2000);
