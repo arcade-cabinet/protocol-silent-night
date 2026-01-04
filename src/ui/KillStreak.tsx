@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useGameStore } from '@/store/gameStore';
 import styles from './KillStreak.module.css';
 
@@ -19,7 +20,12 @@ const STREAK_NAMES = [
 ];
 
 export function KillStreak() {
-  const { killStreak, state } = useGameStore();
+  const { killStreak, state } = useGameStore(
+    useShallow((state) => ({
+      killStreak: state.killStreak,
+      state: state.state,
+    }))
+  );
   const [showStreak, setShowStreak] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
 

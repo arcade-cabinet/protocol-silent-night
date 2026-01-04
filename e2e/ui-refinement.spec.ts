@@ -28,14 +28,26 @@ test.describe('UI Component Refinement', () => {
       }
     });
 
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.addStyleTag({
+      content: `
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-delay: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+          transition-delay: 0.01ms !important;
+        }
+      `
+    });
     await page.waitForLoadState('networkidle');
   });
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
+      await page.waitForSelector('h1', { timeout: 10000, state: 'attached' });
+      await page.waitForSelector('h1', { timeout: 10000, state: 'visible' });
+      await page.waitForTimeout(500); // Stability buffer
 
       // Verify title is visible
       const title = page.locator('h1');
@@ -88,11 +100,14 @@ test.describe('UI Component Refinement', () => {
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
       // Click MECHA-SANTA
-      await page.click('button:has-text("MECHA-SANTA")');
+      const santaButton = page.locator('button:has-text("MECHA-SANTA")');
+      await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+      await page.waitForTimeout(500); // Stability buffer
+      await santaButton.click({ timeout: 15000 });
 
       // Wait for mission briefing with longer timeout for state transition
       try {
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000, state: 'visible' });
 
         const briefingTitle = page.locator('text=MISSION BRIEFING');
         await expect(briefingTitle).toBeVisible({ timeout: 3000 });

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { WORKSHOP } from '@/data';
 import { useGameStore } from '@/store/gameStore';
-import type { WeaponUnlock, SkinConfig, PermanentUpgradeConfig } from '@/types';
+import type { PermanentUpgradeConfig, SkinConfig, WeaponUnlock } from '@/types';
 import styles from './SantasWorkshop.module.css';
 
 const WEAPON_UNLOCKS = WORKSHOP.weapons as WeaponUnlock[];
@@ -83,12 +83,17 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
             <span className={styles.npLabel}>Nice Points:</span>
             <span className={styles.npValue}>{metaProgress.nicePoints}</span>
           </div>
-          <button type="button" className={styles.closeBtn} onClick={handleClose} aria-label="Close Workshop">
+          <button
+            type="button"
+            className={styles.closeBtn}
+            onClick={handleClose}
+            aria-label="Close Workshop"
+          >
             ✕
           </button>
         </div>
 
-        <div className={styles.tabs} role="tablist">
+        <div className={styles.tabs} role="tablist" aria-label="Workshop Categories">
           <button
             type="button"
             role="tab"

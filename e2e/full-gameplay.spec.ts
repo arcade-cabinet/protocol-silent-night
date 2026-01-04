@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 
 /**
  * Full Gameplay E2E Tests
- * 
+ *
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */
@@ -97,20 +97,21 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
-    
+
     // Verify we're at menu
     let state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
-    
+
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaButton).toBeVisible();
     await santaButton.click();
+    await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
-    await commenceButton.click();
+    await commenceButton.click({ timeout: 30000 });
 
     // Wait for game to start
     await page.waitForTimeout(2000);
@@ -243,7 +244,8 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton2.click();
 
     await page.waitForTimeout(2000);
 
