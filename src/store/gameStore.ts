@@ -287,7 +287,7 @@ const initialState = {
   // Use a fixed seed in E2E environment for determinism, otherwise use secure random default
   rng:
     typeof window !== 'undefined' && window.__E2E_TEST__
-      ? new SeededRandom(12463160577482274073)
+      ? new SeededRandom(1246316057748227)
       : new SeededRandom(),
 };
 
@@ -976,7 +976,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Preserve E2E determinism on reset
       rng:
         typeof window !== 'undefined' && window.__E2E_TEST__
-          ? new SeededRandom(124631605)
+          ? new SeededRandom(1246316057748227)
           : new SeededRandom(),
     }),
 }));
