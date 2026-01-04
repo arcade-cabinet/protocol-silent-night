@@ -72,6 +72,11 @@ export function MissionBriefing() {
     // Capture lines length at start to avoid closure issues
     const totalLines = briefingLines.length;
 
+    // Speed up animation in E2E tests to prevent timeouts
+    const isE2ETest = typeof window !== 'undefined' && (window as any).__E2E_TEST__;
+    const lineInterval = isE2ETest ? 50 : 600;
+    const buttonDelay = isE2ETest ? 50 : 500;
+
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const interval = setInterval(() => {
@@ -81,13 +86,13 @@ export function MissionBriefing() {
           timeoutId = setTimeout(() => {
             setShowButton(true);
             animationRunning.current = false;
-          }, 500);
+          }, buttonDelay);
           return prev;
         }
         AudioManager.playSFX('ui_click');
         return prev + 1;
       });
-    }, 600);
+    }, lineInterval);
 
     return () => {
       clearInterval(interval);
