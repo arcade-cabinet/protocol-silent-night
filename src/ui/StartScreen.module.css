@@ -59,7 +59,7 @@
   padding: 20px;
   width: 200px;
   cursor: pointer;
-  transition: transform 0.3s, border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  transition: 0.3s;
   text-align: center;
   clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
 }
