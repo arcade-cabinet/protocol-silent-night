@@ -17,10 +17,16 @@ test.describe('Visual Regression - Character Selection', () => {
 
     // Wait for fonts and styles to load
     await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
+
+    // Wait for fonts to be ready
+    await page.waitForFunction(() => document.fonts.ready, { timeout: 10000 });
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -42,7 +48,8 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const elfCard = page.locator('button[aria-label^="Select CYBER-ELF"]');
     await elfCard.waitFor({ state: 'visible', timeout: 15000 });
-    await elfCard.scrollIntoViewIfNeeded();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Extra stability wait
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -54,7 +61,8 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const bumbleCard = page.locator('button[aria-label^="Select THE BUMBLE"]');
     await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
-    await bumbleCard.scrollIntoViewIfNeeded();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Extra stability wait
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
     });
@@ -485,10 +493,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await page.waitForLoadState('networkidle');
+    await fireButton.waitFor({ state: 'visible', timeout: 15000 });
     await page.waitForTimeout(2000); // Allow UI to fully settle
 
     // Use page screenshot with clip for stability instead of element screenshot
