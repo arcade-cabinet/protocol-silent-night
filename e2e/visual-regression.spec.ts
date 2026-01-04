@@ -219,12 +219,11 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(2000);
     await page.keyboard.up('w');
 
-    // Wait for movement animation to stabilize
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: 0.05,
-      timeout: 30000,
+      timeout: 20000,
     });
   });
 
@@ -244,14 +243,11 @@ test.describe('Visual Regression - Game Movement', () => {
 
     // Fire weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(800);
-
-    // Wait for projectile animation to stabilize
     await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.05,
-      timeout: 30000,
+      maxDiffPixelRatio: 0.03,
+      timeout: 20000,
     });
   });
 });
