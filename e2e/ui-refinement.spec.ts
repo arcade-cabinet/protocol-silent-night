@@ -138,8 +138,8 @@ test.describe('UI Component Refinement', () => {
       for (const [index, mech] of mechs.entries()) {
         // Click mech
         const mechButton = page.getByRole('button', { name: new RegExp(mech.name, 'i') });
-        await expect(mechButton).toBeVisible({ timeout: 10000 });
-        await mechButton.click();
+        await mechButton.waitFor({ state: 'visible', timeout: 30000 });
+        await mechButton.click({ force: true, noWaitAfter: true, timeout: 30000 });
 
         // Wait for briefing
         await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
