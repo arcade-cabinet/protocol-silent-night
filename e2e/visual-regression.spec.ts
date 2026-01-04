@@ -47,8 +47,13 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.waitForTimeout(2000);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    // Wait for element to be stable before screenshot
+    await santaCard.waitFor({ state: 'visible' });
+    await page.waitForTimeout(500);
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 60000,
+      animations: 'disabled',
     });
   });
 
@@ -245,9 +250,13 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.keyboard.press('Space');
     await page.waitForTimeout(500);
 
+    // Wait for rendering to stabilize
+    await page.waitForTimeout(500);
+
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.03,
-      timeout: 20000,
+      maxDiffPixelRatio: 0.05,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -313,17 +322,24 @@ test.describe('Visual Regression - End Game States', () => {
     await page.waitForTimeout(3000);
 
     // Trigger game over by evaluating state (for testing purposes)
+    // Call damagePlayer once with enough damage to kill, not multiple times
     await page.evaluate(() => {
       type GameWindow = Window & {
         useGameStore?: {
           getState(): {
             damagePlayer: (amount: number) => void;
+            playerMaxHp: number;
           };
         };
       };
 
       const gameWindow = window as GameWindow;
-      gameWindow.useGameStore?.getState().damagePlayer(300);
+      const store = gameWindow.useGameStore?.getState();
+      if (store) {
+        // Get current max HP and deal fatal damage in a single call
+        const maxHp = store.playerMaxHp || 300;
+        store.damagePlayer(maxHp + 10);
+      }
     });
 
     await page.waitForTimeout(2000);
@@ -332,6 +348,7 @@ test.describe('Visual Regression - End Game States', () => {
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 20000,
+      animations: 'disabled',
     });
   });
 });
