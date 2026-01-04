@@ -49,8 +49,9 @@ export default defineConfig({
     timeout: 10000,
     // Screenshot comparison settings
     toHaveScreenshot: {
-      // Maximum number of pixels that can differ
-      maxDiffPixels: 100,
+      // Don't set maxDiffPixels globally - let tests use maxDiffPixelRatio instead
+      // This allows for percentage-based thresholds that scale with image size
+      // maxDiffPixels: 100,
       // Animation handling
       animations: 'disabled',
       // CSS media features
