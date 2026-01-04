@@ -12,6 +12,25 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
+/**
+ * Wait for loading screen to complete and be fully removed
+ */
+async function waitForLoadingComplete(page: any) {
+  // Wait for loading screen to either not exist or be invisible
+  await page.waitForFunction(
+    () => {
+      const loadingScreen = document.querySelector('[class*="LoadingScreen"]');
+      return !loadingScreen || window.getComputedStyle(loadingScreen).opacity === '0';
+    },
+    { timeout: 5000 }
+  ).catch(() => {
+    // Loading screen may already be gone
+  });
+
+  // Additional small buffer for any remaining transitions
+  await page.waitForTimeout(100);
+}
+
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
@@ -40,6 +59,9 @@ test.describe('UI Component Refinement', () => {
       `
     });
     await page.waitForLoadState('networkidle');
+
+    // Wait for loading screen to complete
+    await waitForLoadingComplete(page);
   });
 
   test.describe('Menu Screen', () => {

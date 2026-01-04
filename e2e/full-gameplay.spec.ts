@@ -7,6 +7,25 @@ import { test, expect, Page } from '@playwright/test';
  * for each character class, testing all game mechanics and state transitions.
  */
 
+/**
+ * Wait for loading screen to complete and be fully removed
+ */
+async function waitForLoadingComplete(page: Page) {
+  // Wait for loading screen to either not exist or be invisible
+  await page.waitForFunction(
+    () => {
+      const loadingScreen = document.querySelector('[class*="LoadingScreen"]');
+      return !loadingScreen || window.getComputedStyle(loadingScreen).opacity === '0';
+    },
+    { timeout: 5000 }
+  ).catch(() => {
+    // Loading screen may already be gone
+  });
+
+  // Additional small buffer for any remaining transitions
+  await page.waitForTimeout(100);
+}
+
 // Helper to get game state from the store
 async function getGameState(page: Page) {
   return page.evaluate(() => {
@@ -96,7 +115,7 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     // Verify we're at menu
     let state = await getGameState(page);
@@ -127,7 +146,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -158,7 +177,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should survive longer due to high HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -186,7 +205,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -212,7 +231,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should accumulate score and kills', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -243,7 +262,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     // Select Elf
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
@@ -262,7 +281,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
@@ -288,7 +307,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should die quickly with low HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
@@ -310,7 +329,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should complete full game loop with Bumble', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     // Select Bumble
     await page.getByRole('button', { name: /BUMBLE/ }).click();
@@ -328,7 +347,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should fire spread pattern weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
@@ -354,7 +373,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should have balanced survivability', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
@@ -383,7 +402,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 test.describe('Full Gameplay - Boss Battle', () => {
   test('should spawn boss after 10 kills', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -412,7 +431,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should defeat boss and win game', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -448,7 +467,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should show boss health decreasing', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -485,7 +504,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
 test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -519,7 +538,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
   test('should reset streak after timeout', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -550,7 +569,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
   test('should apply streak bonus to score', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -587,7 +606,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 test.describe('Full Gameplay - Game Reset', () => {
   test('should reset game and return to menu', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     // Play a game
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
@@ -619,7 +638,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
   test('should preserve high score after reset', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     // Play and get a score
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
@@ -664,7 +683,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 test.describe('Full Gameplay - Complete Playthrough', () => {
   test('should complete entire game as Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     // Step 1: Character Selection - verify start screen is showing
     await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
@@ -711,7 +730,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /CYBER-ELF/ }).click();
 
@@ -743,7 +762,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Bumble', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /BUMBLE/ }).click();
 
@@ -777,7 +796,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 test.describe('Full Gameplay - Input Controls', () => {
   test('should respond to WASD movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -806,7 +825,7 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should respond to arrow key movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -831,7 +850,7 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should fire with spacebar', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
@@ -865,7 +884,7 @@ test.describe('Full Gameplay - Input Controls', () => {
   test('should show touch controls on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await waitForLoadingComplete(page);
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
 
