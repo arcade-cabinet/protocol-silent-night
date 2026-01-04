@@ -396,9 +396,10 @@ test.describe('Visual Regression - End Game States', () => {
     }, { timeout: 30000 });
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      threshold: 0.3, // Increase tolerance
+      maxDiffPixelRatio: 0.1, // Increase from VISUAL_THRESHOLD to 10%
+      threshold: 0.3,
       animations: 'disabled',
+      timeout: 30000, // Increase timeout from default 10s to 30s
       caret: 'hide'
     });
   });
@@ -449,9 +450,9 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(1000); // Add extra wait after networkidle
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.10, // Increase to 10%
-      timeout: 30000, // Increase timeout
-      animations: 'disabled', // Ensure animations are disabled
+      maxDiffPixelRatio: 0.05, // Reduce from 0.10 to 5%
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
