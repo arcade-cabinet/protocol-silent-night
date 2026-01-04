@@ -64,14 +64,11 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleCard.waitFor({ state: 'visible', timeout: 10000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 45000,
     });
   });
 });
@@ -249,7 +246,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: 0.03,
       timeout: 20000,
     });
   });

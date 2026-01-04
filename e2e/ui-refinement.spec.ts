@@ -143,9 +143,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should display correct operator for each mech', async ({ page }) => {
       const mechs = [
-        { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
-        { name: 'CYBER-ELF', role: 'Recon / Scout' },
-        { name: 'THE BUMBLE', role: 'Crowd Control / Bruiser' },
+        { name: 'MECHA-SANTA', role: 'Heavy Stage' },
+        { name: 'CYBER-ELF', role: 'Recon' },
+        { name: 'THE BUMBLE', role: 'Crowd Control' },
       ];
 
       for (const [index, mech] of mechs.entries()) {
@@ -153,10 +153,9 @@ test.describe('UI Component Refinement', () => {
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
         await mechButton.waitFor({ state: 'visible', timeout: 10000 });
         await mechButton.click();
-        await page.waitForLoadState('networkidle');
 
         // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -245,9 +244,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 10000, state: 'attached' });
-      await page.waitForSelector('h1', { timeout: 10000, state: 'visible' });
-      await page.waitForTimeout(1000); // Additional stability buffer
+      await page.waitForSelector('h1', { timeout: 5000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
@@ -261,13 +258,8 @@ test.describe('UI Component Refinement', () => {
 
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
-      const santaButton = page.locator('button:has-text("MECHA-SANTA")');
-      await santaButton.waitFor({ state: 'visible', timeout: 10000 });
-      await page.waitForTimeout(500); // Stability buffer
-      await santaButton.click({ timeout: 15000 });
-
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000, state: 'visible' });
-      await page.waitForTimeout(1000); // Additional stability buffer
+      await page.click('button:has-text("MECHA-SANTA")');
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
