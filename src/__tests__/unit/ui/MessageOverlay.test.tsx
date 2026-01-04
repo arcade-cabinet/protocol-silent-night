@@ -19,8 +19,7 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-      lastSfxTime: 0,
-    } as any);
+    });
 
     render(<MessageOverlay />);
 
@@ -32,8 +31,7 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'WIN',
       bossActive: false,
-      lastSfxTime: 0,
-    } as any);
+    });
 
     render(<MessageOverlay />);
 
@@ -45,8 +43,7 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
-      lastSfxTime: 0,
-    } as any);
+    });
 
     render(<MessageOverlay />);
 
@@ -58,8 +55,7 @@ describe('MessageOverlay Component', () => {
     mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-      lastSfxTime: 0,
-    } as any);
+    });
 
     render(<MessageOverlay />);
 
