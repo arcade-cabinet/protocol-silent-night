@@ -43,21 +43,6 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
   }, { action, args });
 }
 
-// Helper to select a mech and start the game
-async function selectMechAndStart(page: Page, mechName: string) {
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(500);
-
-  const mechButton = page.getByRole('button', { name: new RegExp(mechName) });
-  await expect(mechButton).toBeVisible({ timeout: 15000 });
-  await mechButton.click({ timeout: 20000 });
-  await page.waitForLoadState('networkidle');
-
-  const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await expect(commenceButton).toBeVisible({ timeout: 20000 });
-  await commenceButton.click({ timeout: 30000 });
-}
-
 // Helper to wait for game state
 async function waitForGameState(page: Page, expectedState: string, timeout = 10000) {
   const startTime = Date.now();
@@ -111,7 +96,6 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
     // Verify we're at menu
@@ -120,13 +104,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Select Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible({ timeout: 15000 });
-    await santaButton.click({ timeout: 20000 });
+    await expect(santaButton).toBeVisible();
+    await santaButton.click();
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 20000 });
+    await expect(commenceButton).toBeVisible({ timeout: 15000 });
     await commenceButton.click({ timeout: 30000 });
 
     // Wait for game to start
@@ -143,10 +127,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await selectMechAndStart(page, 'MECHA-SANTA');
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -167,10 +153,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should survive longer due to high HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await selectMechAndStart(page, 'MECHA-SANTA');
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -193,10 +181,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await selectMechAndStart(page, 'MECHA-SANTA');
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -217,10 +207,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should accumulate score and kills', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await selectMechAndStart(page, 'MECHA-SANTA');
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -246,11 +238,14 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    // Select Elf and start
-    await selectMechAndStart(page, 'CYBER-ELF');
+    // Select Elf
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton2.click();
 
     await page.waitForTimeout(2000);
 
@@ -262,10 +257,12 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await selectMechAndStart(page, 'CYBER-ELF');
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 
@@ -286,10 +283,12 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should die quickly with low HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
-    await selectMechAndStart(page, 'CYBER-ELF');
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
 
     await page.waitForTimeout(3000);
 

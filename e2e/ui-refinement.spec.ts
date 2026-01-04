@@ -108,6 +108,7 @@ test.describe('UI Component Refinement', () => {
 
       // Wait for mission briefing with longer timeout for state transition
       try {
+        await page.waitForLoadState('networkidle');
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000, state: 'visible' });
 
         const briefingTitle = page.locator('text=MISSION BRIEFING');
@@ -144,37 +145,28 @@ test.describe('UI Component Refinement', () => {
 
     test('should display correct operator for each mech', async ({ page }) => {
       const mechs = [
-        { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
-        { name: 'CYBER-ELF', role: 'Recon / Scout' },
-        { name: 'THE BUMBLE', role: 'Crowd Control / Bruiser' },
+        { name: 'MECHA-SANTA', role: 'Heavy Stage' },
+        { name: 'CYBER-ELF', role: 'Recon' },
+        { name: 'THE BUMBLE', role: 'Crowd Control' },
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Ensure page is stable and ready
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
-
         // Click mech
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
-        await mechButton.waitFor({ state: 'visible', timeout: 15000 });
-        await mechButton.click({ timeout: 20000 });
+        await mechButton.waitFor({ state: 'visible', timeout: 10000 });
+        await mechButton.click();
 
-        // Wait for navigation to complete
-        await page.waitForLoadState('networkidle');
-
-        // Wait for briefing with extended timeout
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000, state: 'visible' });
+        // Wait for briefing
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
         // Verify operator and role
-        await expect(page.locator(`text=${mech.name}`)).toBeVisible({ timeout: 5000 });
-        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 15000 });
+        await expect(page.locator(`text=${mech.name}`)).toBeVisible();
+        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 10000 });
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
-          await page.waitForLoadState('networkidle');
-          await page.waitForSelector('h1', { timeout: 15000, state: 'visible' });
-          await page.waitForTimeout(500); // Stability buffer
+          await page.waitForSelector('h1', { timeout: 5000 });
         }
       }
     });
@@ -254,10 +246,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      // Ensure page is fully stable before screenshot
-      await page.waitForLoadState('networkidle');
-      await page.waitForSelector('h1', { timeout: 15000, state: 'visible' });
-      await page.waitForTimeout(1000); // Extra stability buffer
+      await page.waitForSelector('h1', { timeout: 5000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
@@ -270,19 +259,9 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
-      // Ensure page is stable before interaction
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(500);
-
       // Select mech
-      const mechButton = page.locator('button:has-text("MECHA-SANTA")');
-      await mechButton.waitFor({ state: 'visible', timeout: 15000 });
-      await mechButton.click({ timeout: 20000 });
-
-      // Wait for navigation and briefing
-      await page.waitForLoadState('networkidle');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000, state: 'visible' });
-      await page.waitForTimeout(1000); // Extra stability buffer
+      await page.click('button:has-text("MECHA-SANTA")');
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
