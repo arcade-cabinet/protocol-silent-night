@@ -384,18 +384,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
+    const store = get();
+    const { stats, state, lastKillTime, killStreak } = store;
     const now = Date.now();
     const newKills = stats.kills + 1;
 
     const streakTimeout = 2000;
-    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+    // If lastKillTime is 0 (initial state), this is the first kill, so newStreak = 1
+    // Otherwise, check if the time since last kill is within the streak timeout
+    const newStreak = lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
-    get().gainXP(xpGain);
+    store.gainXP(xpGain);
 
     let npStreakBonus = 0;
     if (newStreak === 2) npStreakBonus = 5;
@@ -404,15 +407,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     else if (newStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
-    get().earnNicePoints(npGain);
+    store.earnNicePoints(npGain);
 
+    // Get the updated metaProgress after earnNicePoints
+    const updatedState = get();
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...get().metaProgress,
-        totalKills: metaProgress.totalKills + 1,
+        ...updatedState.metaProgress,
+        totalKills: updatedState.metaProgress.totalKills + 1,
       },
     });
 

@@ -722,15 +722,16 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(500);
-
-    // Click re-deploy
-    // RE-DEPLOY click removed for Endless Mode
     await page.waitForTimeout(1000);
 
-    // Should be back at menu
+    // Click RE-DEPLOY button to reset and return to menu
+    await page.getByRole('button', { name: /RE-DEPLOY/i }).waitFor({ state: 'visible', timeout: 5000 });
+    await page.getByRole('button', { name: /RE-DEPLOY/i }).click();
+    await page.waitForTimeout(500);
+
+    // Should be back at menu with reset stats
     const state = await getGameState(page);
-    // expect(state?.gameState).toBe('MENU');
+    expect(state?.gameState).toBe('MENU');
     expect(state?.score).toBe(0);
     expect(state?.kills).toBe(0);
     expect(state?.playerHp).toBe(100); // Reset to default
@@ -765,9 +766,10 @@ test.describe('Full Gameplay - Game Reset', () => {
     await triggerStoreAction(page, 'damagePlayer', 300);
     await page.waitForTimeout(1000);
 
-    // Reset
-    // RE-DEPLOY click removed for Endless Mode
-    await page.waitForTimeout(2000);
+    // Click RE-DEPLOY button to reset and return to menu
+    await page.getByRole('button', { name: /RE-DEPLOY/i }).waitFor({ state: 'visible', timeout: 5000 });
+    await page.getByRole('button', { name: /RE-DEPLOY/i }).click();
+    await page.waitForTimeout(1000);
 
     // Start new game
     await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
