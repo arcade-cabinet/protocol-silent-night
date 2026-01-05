@@ -685,7 +685,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
+    await safeClick(page, page.getByRole('button', { name: /PLAY AGAIN/ }));
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);

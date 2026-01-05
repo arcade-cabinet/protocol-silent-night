@@ -307,6 +307,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       selectedSkin: null,
       killStreak: 0,
       lastKillTime: 0,
+      stats: { score: 0, kills: 0, bossDefeated: false },
       runProgress: {
         xp: 0,
         level: 1,
