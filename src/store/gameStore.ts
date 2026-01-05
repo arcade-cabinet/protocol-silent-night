@@ -393,7 +393,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const streakTimeout = 2000;
     // Handle initial case where lastKillTime is 0 (first kill)
-    const timeSinceLastKill = lastKillTime === 0 ? 0 : now - lastKillTime;
+    const timeSinceLastKill = lastKillTime === 0 ? Infinity : now - lastKillTime;
     const newStreak = timeSinceLastKill < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
