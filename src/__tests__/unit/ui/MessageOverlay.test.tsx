@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameStore } from '@/store/gameStore';
 import { useGameStore } from '@/store/gameStore';
 import { MessageOverlay } from '@/ui/MessageOverlay';
 
@@ -21,7 +20,8 @@ describe('MessageOverlay Component', () => {
       state: 'PHASE_BOSS',
       bossActive: true,
       lastSfxTime: 0,
-    } as Partial<GameStore> as GameStore);
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
@@ -34,7 +34,8 @@ describe('MessageOverlay Component', () => {
       state: 'WIN',
       bossActive: false,
       lastSfxTime: 0,
-    } as Partial<GameStore> as GameStore);
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
@@ -47,7 +48,8 @@ describe('MessageOverlay Component', () => {
       state: 'GAME_OVER',
       bossActive: false,
       lastSfxTime: 0,
-    } as Partial<GameStore> as GameStore);
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
@@ -60,7 +62,8 @@ describe('MessageOverlay Component', () => {
       state: 'PHASE_BOSS',
       bossActive: true,
       lastSfxTime: 0,
-    } as Partial<GameStore> as GameStore);
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
