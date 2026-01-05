@@ -48,10 +48,14 @@ export function MissionBriefing() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length causes infinite restarts
   useEffect(() => {
     if (state !== 'BRIEFING') {
+      // Reset animation ref when leaving briefing state
       animationStartedRef.current = false;
+      setCurrentLine(0);
+      setShowButton(false);
       return;
     }
 
+    // Prevent re-running animation if already started for this briefing session
     if (animationStartedRef.current) return;
     animationStartedRef.current = true;
 

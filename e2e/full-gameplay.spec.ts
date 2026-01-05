@@ -421,11 +421,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGame(page, 'MECHA-SANTA');
     await page.waitForTimeout(3000);
 
-    // Build a streak
+    // Build a streak - ensure kills happen within the 2000ms window
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
