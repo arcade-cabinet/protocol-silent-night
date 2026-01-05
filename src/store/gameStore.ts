@@ -290,13 +290,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   setState: (state) => {
+    const currentState = get().state;
     const updates: Partial<GameStore> = {
       state,
-      previousState: get().state,
+      previousState: currentState,
     };
 
-    // Reset kill streak when starting a new game (transitioning to PHASE_1)
-    if (state === 'PHASE_1') {
+    // Reset kill streak only when starting a new game from BRIEFING
+    // Don't reset when returning to PHASE_1 from LEVEL_UP
+    if (state === 'PHASE_1' && currentState === 'BRIEFING') {
       updates.killStreak = 0;
       updates.lastKillTime = 0;
     }
