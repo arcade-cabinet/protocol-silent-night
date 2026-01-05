@@ -639,7 +639,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Wait for streak to timeout (5+ seconds - streak timeout is 5000ms)
+    // Wait for streak to timeout (5+ seconds)
     await page.waitForTimeout(5500);
 
     // Next kill should start new streak
