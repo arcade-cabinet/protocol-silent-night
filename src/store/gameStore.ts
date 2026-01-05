@@ -384,26 +384,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    // Get fresh state at the very beginning
-    const currentState = get();
-    const { stats, state, lastKillTime, killStreak } = currentState;
     const now = Date.now();
-    const newKills = stats.kills + 1;
-
     const streakTimeout = 2000;
-    // If lastKillTime is 0 (initial state), this is the first kill, so newStreak = 1
-    // Otherwise, check if the time since last kill is within the streak timeout
-    const newStreak = lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
-    const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
-    const newScore = stats.score + points + streakBonus;
+    // Use functional set to ensure atomicity - prevents race conditions
+    let newStreak = 0;
+    let newKills = 0;
+    let state = '';
 
-    // Update killStreak and lastKillTime IMMEDIATELY to prevent race conditions
-    // This ensures subsequent rapid calls to addKill see the updated values
-    set({
-      stats: { ...stats, kills: newKills, score: newScore },
-      killStreak: newStreak,
-      lastKillTime: now,
+    set((currentState) => {
+      const { stats, state: gameState, lastKillTime, killStreak } = currentState;
+      newKills = stats.kills + 1;
+
+      // If lastKillTime is 0 (initial state), this is the first kill, so newStreak = 1
+      // Otherwise, check if the time since last kill is within the streak timeout
+      newStreak = lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+
+      const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
+      const newScore = stats.score + points + streakBonus;
+
+      state = gameState;
+
+      return {
+        stats: { ...stats, kills: newKills, score: newScore },
+        killStreak: newStreak,
+        lastKillTime: now,
+      };
     });
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
