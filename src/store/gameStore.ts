@@ -41,7 +41,7 @@ declare global {
 const HIGH_SCORE_KEY = 'protocol-silent-night-highscore';
 const META_PROGRESS_KEY = 'protocol-silent-night-meta-progress';
 
-interface GameStore {
+export interface GameStore {
   // Game State
   state: GameState;
   previousState: GameState;
