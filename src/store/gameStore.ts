@@ -390,10 +390,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const newKills = state.stats.kills + 1;
 
       const streakTimeout = 5000;
-      const timeSinceLastKill = now - state.lastKillTime;
-      const newStreak = state.lastKillTime > 0 && timeSinceLastKill < streakTimeout
-        ? state.killStreak + 1
-        : 1;
+      const newStreak = now - state.lastKillTime < streakTimeout ? state.killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = state.stats.score + points + streakBonus;
