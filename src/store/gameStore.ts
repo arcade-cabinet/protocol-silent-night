@@ -305,6 +305,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentWeapon: config.weaponType,
       currentEvolution: null,
       selectedSkin: null,
+      killStreak: 0,
+      lastKillTime: 0,
       runProgress: {
         xp: 0,
         level: 1,
@@ -434,7 +436,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  resetStats: () => set({ stats: { score: 0, kills: 0, bossDefeated: false } }),
+  resetStats: () =>
+    set({
+      stats: { score: 0, kills: 0, bossDefeated: false },
+      killStreak: 0,
+      lastKillTime: 0,
+    }),
 
   earnNicePoints: (amount) => {
     const { metaProgress } = get();
