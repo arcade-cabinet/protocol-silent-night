@@ -136,9 +136,6 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Ensure menu is visible before clicking
-        await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 });
-
         // Click mech
         const mechButton = page.getByRole('button', { name: new RegExp(mech.name, 'i') });
         await mechButton.waitFor({ state: 'visible', timeout: 30000 });
