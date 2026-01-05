@@ -241,7 +241,9 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 5000 });
+      // Additional stability wait for visual regression
+      await page.waitForSelector('h1', { timeout: 30000, state: 'visible' });
+      await page.waitForTimeout(1000);
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
@@ -257,7 +259,8 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       const mechButton = page.locator('button:has-text("MECHA-SANTA")');
       await safeClick(page, mechButton, { timeout: 30000 });
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000, state: 'visible' });
+      await page.waitForTimeout(1000);
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {

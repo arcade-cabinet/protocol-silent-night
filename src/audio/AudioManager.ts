@@ -179,7 +179,8 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    const now = Tone.now();
+    // Add small offset to prevent timing conflicts when rapidly triggering sounds
+    const now = Tone.now() + 0.001;
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
