@@ -117,7 +117,7 @@ test.describe('UI Component Refinement', () => {
       // Select a mech
       const mechButton = page.getByRole('button', { name: /CYBER-ELF/i });
       await mechButton.waitFor({ state: 'visible', timeout: 30000 });
-      await mechButton.evaluate(el => el.click());
+      await mechButton.click();
 
       // Wait for briefing
       await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
@@ -139,7 +139,7 @@ test.describe('UI Component Refinement', () => {
         // Click mech
         const mechButton = page.getByRole('button', { name: new RegExp(mech.name, 'i') });
         await mechButton.waitFor({ state: 'visible', timeout: 30000 });
-        await mechButton.evaluate(el => el.click());
+        await mechButton.click();
         await page.waitForLoadState('networkidle');
 
         // Wait for briefing
