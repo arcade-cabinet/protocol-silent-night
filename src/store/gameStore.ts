@@ -890,19 +890,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    // Boss appearance interrupts level-up screen and transitions to boss phase immediately
+    const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
-      state: 'PHASE_BOSS',
-      previousState: state.previousState,
+      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
+      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-      // Clear level-up state if it was active
-      runProgress: {
-        ...get().runProgress,
-        pendingLevelUp: false,
-        upgradeChoices: [],
-      },
     }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
@@ -932,9 +926,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Endless mode: Increment wave and prepare for level up
+      // Victory state
       set({
-        state: 'PHASE_1',
+        state: 'WIN',
         bossActive: false,
         stats: { ...stats, bossDefeated: true },
         metaProgress: updatedMeta,
@@ -943,9 +937,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
           wave: runProgress.wave + 1,
         },
       });
-
-      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-      get().levelUp();
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
