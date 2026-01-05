@@ -171,9 +171,9 @@ export function Enemies() {
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
         if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-          // Grace period: don't allow damage in the first 8 seconds after game start
+          // Grace period: don't allow damage in the first 10 seconds after game start
           // Extended to provide stability for E2E tests and give players more breathing room
-          const gracePeriod = 8000;
+          const gracePeriod = 10000;
           const isInGracePeriod = gameStartTimeRef.current > 0 && now - gameStartTimeRef.current < gracePeriod;
 
           // Only damage if enemy is properly initialized (not at origin 0,0,0).

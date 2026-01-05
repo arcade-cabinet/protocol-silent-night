@@ -323,7 +323,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentEvolution: null,
       selectedSkin: null,
       killStreak: 0,
-      lastKillTime: Date.now(), // Use current time instead of 0
+      lastKillTime: 0, // Start at 0 so first kill always starts a streak
       runProgress: {
         xp: 0,
         level: 1,
@@ -408,8 +408,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newKills = stats.kills + 1;
 
     const streakTimeout = 5000;  // Increased from 2000ms for E2E test stability and more forgiving gameplay
-    const timeSinceLastKill = now - lastKillTime;
-    const newStreak = timeSinceLastKill < streakTimeout ? killStreak + 1 : 1;
+    const timeSinceLastKill = lastKillTime === 0 ? 0 : now - lastKillTime;
+    const newStreak = (lastKillTime === 0 || timeSinceLastKill < streakTimeout) ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;

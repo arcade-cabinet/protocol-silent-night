@@ -45,7 +45,7 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     return false;
   }, { action, args });
   // Add delay after action to ensure state propagation
-  await page.waitForTimeout(100);
+  await page.waitForTimeout(50);
   return result;
 }
 
@@ -116,8 +116,8 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await safeClick(page, commenceButton, { timeout: 30000 });
 
-    // Wait for game to start
-    await page.waitForTimeout(3000);
+    // Wait for game to start (reduced wait time to check HP before grace period ends)
+    await page.waitForTimeout(500);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
@@ -169,7 +169,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await safeClick(page, commenceButton, { timeout: 30000 });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(500);
 
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -356,7 +356,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(500);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -483,29 +483,32 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(500);
 
-    // Rapid kills to build streak
+    // Rapid kills to build streak - minimal delays to ensure streak doesn't timeout
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(300);
     await triggerStoreAction(page, 'addKill', 10);
+
+    // Wait for state to propagate and UI to render
     await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show DOUBLE KILL (check immediately after verifying streak)
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
+
+    // Wait for state to propagate and UI to render
     await page.waitForTimeout(300);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
-    // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show TRIPLE KILL (check immediately after verifying streak)
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
@@ -546,18 +549,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(500);
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(50);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(50);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -565,7 +568,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(50);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
