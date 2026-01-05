@@ -90,7 +90,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
