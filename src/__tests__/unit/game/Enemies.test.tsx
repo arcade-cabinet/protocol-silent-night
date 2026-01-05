@@ -46,34 +46,42 @@ describe('Enemies Component', () => {
     await renderer.unmount();
   });
 
-  it('should damage player on collision', async () => {
-    const enemy = {
-      id: 'test-enemy',
-      mesh: new THREE.Object3D(),
-      velocity: new THREE.Vector3(),
-      hp: 30,
-      maxHp: 30,
-      isActive: true,
-      type: 'minion' as const,
-      speed: 10,
-      damage: 10,
-      pointValue: 10,
-    };
-    enemy.mesh.position.set(0.5, 0, 0); // Colliding
+  it(
+    'should damage player on collision',
+    async () => {
+      const enemy = {
+        id: 'test-enemy',
+        mesh: new THREE.Object3D(),
+        velocity: new THREE.Vector3(),
+        hp: 30,
+        maxHp: 30,
+        isActive: true,
+        type: 'minion' as const,
+        speed: 10,
+        damage: 10,
+        pointValue: 10,
+      };
+      enemy.mesh.position.set(0.5, 0, 0); // Colliding
 
-    useGameStore.setState({
-      enemies: [enemy],
-      playerHp: 100,
-    });
+      useGameStore.setState({
+        enemies: [enemy],
+        playerHp: 100,
+      });
 
-    // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
-    const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
+      // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+      const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
-    await renderer.advanceFrames(1, 0.1);
+      // Wait for grace period to expire using real time
+      await new Promise((resolve) => setTimeout(resolve, 5100));
 
-    const state = useGameStore.getState();
-    expect(state.playerHp).toBeLessThan(100);
+      // Now advance frame to trigger collision
+      await renderer.advanceFrames(1, 0.1);
 
-    await renderer.unmount();
-  });
+      const state = useGameStore.getState();
+      expect(state.playerHp).toBeLessThan(100);
+
+      await renderer.unmount();
+    },
+    10000
+  );
 });

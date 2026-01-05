@@ -391,7 +391,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newKills = stats.kills + 1;
 
     const streakTimeout = 2000;
-    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+    // Handle initial case where lastKillTime is 0 (first kill)
+    const timeSinceLastKill = lastKillTime === 0 ? 0 : now - lastKillTime;
+    const newStreak = timeSinceLastKill < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
@@ -897,10 +899,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    const isLeveling = get().state === 'LEVEL_UP';
+    // Boss phase takes priority - transition immediately
     set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+      state: 'PHASE_BOSS',
+      previousState: state.state,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
