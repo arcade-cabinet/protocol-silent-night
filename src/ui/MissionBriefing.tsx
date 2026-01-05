@@ -20,7 +20,6 @@ export function MissionBriefing() {
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
   const animationStartedRef = useRef(false);
-  const briefingLinesLengthRef = useRef(0);
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -46,9 +45,6 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
-  // Update the ref when briefingLines changes without causing re-renders
-  briefingLinesLengthRef.current = briefingLines.length;
-
   useEffect(() => {
     if (state !== 'BRIEFING') {
       animationStartedRef.current = false;
@@ -62,8 +58,8 @@ export function MissionBriefing() {
     setCurrentLine(0);
     setShowButton(false);
 
-    // Use the ref to avoid dependency on briefingLines
-    const totalLines = briefingLinesLengthRef.current;
+    // Capture total lines to avoid dependency on the array reference
+    const totalLines = briefingLines.length;
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
@@ -86,7 +82,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
