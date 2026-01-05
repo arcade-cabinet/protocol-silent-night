@@ -390,8 +390,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const newKills = state.stats.kills + 1;
 
       const streakTimeout = 5000;
-      // Calculate streak: if this is the first kill OR outside timeout window, reset to 1
-      // Otherwise increment the current streak
       const timeSinceLastKill = now - state.lastKillTime;
       const newStreak = state.lastKillTime > 0 && timeSinceLastKill < streakTimeout
         ? state.killStreak + 1
