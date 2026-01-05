@@ -289,24 +289,7 @@ const initialState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  setState: (state) => {
-    const currentState = get().state;
-    const { playerMaxHp } = get();
-    const updates: Partial<GameStore> = {
-      state,
-      previousState: currentState,
-    };
-
-    // Reset kill streak and restore full HP when starting a new game from BRIEFING
-    // Don't reset when returning to PHASE_1 from LEVEL_UP
-    if (state === 'PHASE_1' && currentState === 'BRIEFING') {
-      updates.killStreak = 0;
-      updates.lastKillTime = Date.now(); // Use current time instead of 0 to prevent streak logic issues
-      updates.playerHp = playerMaxHp; // Ensure HP is at max when starting game
-    }
-
-    set(updates);
-  },
+  setState: (state) => set((prev) => ({ state, previousState: prev.state })),
 
   selectClass: (type) => {
     const config = PLAYER_CLASSES[
@@ -323,7 +306,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentEvolution: null,
       selectedSkin: null,
       killStreak: 0,
-      lastKillTime: 0, // Start at 0 so first kill always starts a streak
+      lastKillTime: 0,
       runProgress: {
         xp: 0,
         level: 1,
@@ -403,13 +386,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const now = Date.now();
     const { stats, state, lastKillTime, killStreak, metaProgress } = get();
+    const now = Date.now();
     const newKills = stats.kills + 1;
 
-    const streakTimeout = 5000;  // Increased from 2000ms for E2E test stability and more forgiving gameplay
-    const timeSinceLastKill = lastKillTime === 0 ? 0 : now - lastKillTime;
-    const newStreak = (lastKillTime === 0 || timeSinceLastKill < streakTimeout) ? killStreak + 1 : 1;
+    const streakTimeout = 2000;
+    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
@@ -426,15 +408,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
 
-    // Get fresh metaProgress after other updates
-    const currentMetaProgress = get().metaProgress;
-
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...currentMetaProgress,
+        ...get().metaProgress,
         totalKills: metaProgress.totalKills + 1,
       },
     });
@@ -461,7 +440,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       stats: { score: 0, kills: 0, bossDefeated: false },
       killStreak: 0,
-      lastKillTime: Date.now(), // Use current time instead of 0
+      lastKillTime: 0,
     }),
 
   earnNicePoints: (amount) => {
@@ -898,7 +877,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   spawnBoss: () => {
-    const { enemies, addEnemy, rng, runProgress } = get();
+    const { enemies, addEnemy, rng } = get();
     if (enemies.some((e) => e.type === 'boss')) return;
     const angle = rng.next() * Math.PI * 2;
     const radius = 30;
@@ -918,18 +897,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    // Boss phase takes priority - clear any pending level-ups
+    const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
-      state: 'PHASE_BOSS',
-      previousState: state.previousState,
+      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
+      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-      runProgress: {
-        ...runProgress,
-        pendingLevelUp: false,
-        upgradeChoices: [],
-      },
     }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');

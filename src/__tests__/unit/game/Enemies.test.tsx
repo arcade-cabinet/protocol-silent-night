@@ -61,25 +61,15 @@ describe('Enemies Component', () => {
     };
     enemy.mesh.position.set(0.5, 0, 0); // Colliding
 
-    // Start from MENU state, then transition to PHASE_1 to trigger game start timer
     useGameStore.setState({
       enemies: [enemy],
       playerHp: 100,
-      state: 'MENU',
     });
 
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
-    // Transition to PHASE_1 to start the grace period timer
-    useGameStore.setState({ state: 'PHASE_1' });
-
-    // Allow component to react to state change
     await renderer.advanceFrames(1, 0.1);
-
-    // Advance frames to exceed the 8-second grace period (8000ms)
-    // Each frame advances by 100ms, so 100 frames = 10 seconds
-    await renderer.advanceFrames(100, 0.1);
 
     const state = useGameStore.getState();
     expect(state.playerHp).toBeLessThan(100);
