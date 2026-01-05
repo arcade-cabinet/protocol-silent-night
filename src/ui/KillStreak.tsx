@@ -25,14 +25,22 @@ export function KillStreak() {
 
   useEffect(() => {
     if (killStreak >= 2 && state !== 'MENU') {
+      // Always update the streak display immediately
       setCurrentStreak(killStreak);
       setShowStreak(true);
 
+      // Set a new timeout that will hide the notification
       const timer = setTimeout(() => {
         setShowStreak(false);
       }, 1500);
 
-      return () => clearTimeout(timer);
+      // Cleanup function clears the timeout if killStreak changes again
+      return () => {
+        clearTimeout(timer);
+      };
+    } else if (killStreak < 2) {
+      // Reset display when streak is broken
+      setShowStreak(false);
     }
   }, [killStreak, state]);
 
