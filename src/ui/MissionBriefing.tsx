@@ -3,7 +3,7 @@
  * Displays mission objectives before starting the game
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import styles from './MissionBriefing.module.css';
@@ -19,6 +19,7 @@ export function MissionBriefing() {
   const { state, setState, playerClass, missionBriefing } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
+  const animationStartedRef = useRef<boolean>(false);
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -46,7 +47,15 @@ export function MissionBriefing() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length causes infinite restarts
   useEffect(() => {
-    if (state !== 'BRIEFING') return;
+    if (state !== 'BRIEFING') {
+      // Reset animation flag when leaving briefing state
+      animationStartedRef.current = false;
+      return;
+    }
+
+    // Only run animation once per briefing session
+    if (animationStartedRef.current) return;
+    animationStartedRef.current = true;
 
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
