@@ -47,8 +47,13 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.waitForTimeout(2000);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for element to be stable before screenshot
+    await page.waitForTimeout(1000);
+
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 10000,
     });
   });
 
@@ -57,8 +62,13 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.waitForTimeout(2000);
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfCard.waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for element to be stable before screenshot
+    await page.waitForTimeout(1000);
+
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 10000,
     });
   });
 

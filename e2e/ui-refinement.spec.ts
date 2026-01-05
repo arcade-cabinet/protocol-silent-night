@@ -151,13 +151,14 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Click mech
+        // Click mech with noWaitAfter to prevent navigation timeout
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
         await mechButton.waitFor({ state: 'visible', timeout: 10000 });
-        await mechButton.click();
+        await mechButton.click({ noWaitAfter: true });
 
         // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000, state: 'visible' });
+        await page.waitForLoadState('networkidle');
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -166,7 +167,8 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
-          await page.waitForSelector('h1', { timeout: 5000 });
+          await page.waitForSelector('h1', { timeout: 10000, state: 'visible' });
+          await page.waitForLoadState('networkidle');
         }
       }
     });
@@ -246,12 +248,16 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 5000 });
+      await page.waitForSelector('h1', { timeout: 10000, state: 'visible' });
+      // Wait for page to be stable
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(1000);
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
           maxDiffPixels: 100,
+          timeout: 10000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -259,13 +265,17 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
-      // Select mech
-      await page.click('button:has-text("MECHA-SANTA")');
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      // Select mech with noWaitAfter to prevent navigation timeout
+      await page.click('button:has-text("MECHA-SANTA")', { noWaitAfter: true });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000, state: 'visible' });
+      // Wait for page to be stable
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(1000);
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
           maxDiffPixels: 100,
+          timeout: 10000,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
