@@ -41,12 +41,12 @@ export default defineConfig({
     // Video recording with MCP for debugging
     video: hasMcpSupport ? 'on-first-retry' : 'off',
     // Increased action timeout for WebGL rendering
-    actionTimeout: 10000,
+    actionTimeout: 30000,
   },
   // Expect options for visual regression
   expect: {
     // Timeout for expect() calls
-    timeout: 10000,
+    timeout: 30000,
     // Screenshot comparison settings
     toHaveScreenshot: {
       // Maximum percentage of pixels that can differ

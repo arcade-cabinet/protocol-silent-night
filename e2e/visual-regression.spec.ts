@@ -243,15 +243,23 @@ test.describe('Visual Regression - HUD Elements', () => {
 test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
     await page.goto('/');
-    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+    await page.waitForTimeout(3000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
-    await page.waitForLoadState('networkidle');
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+    await santaButton.waitFor({ state: 'visible', timeout: 30000 });
+    await santaButton.click({ force: true, timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.waitForLoadState('networkidle', { timeout: 30000 });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    try {
+      await commenceButton.waitFor({ state: 'visible', timeout: 90000 });
+    } catch (e) {
+      await page.screenshot({ path: 'commence-button-not-found-move.png' });
+      throw e;
+    }
+    await commenceButton.click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(500);
 
     await page.waitForTimeout(3000);

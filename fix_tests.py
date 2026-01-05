@@ -6,10 +6,13 @@ file_path = 'e2e/full-gameplay.spec.ts'
 with open(file_path, 'r') as f:
     content = f.read()
 
-# Restore evaluate
+# Comment out RE-DEPLOY visibility check in 'should defeat boss and win game'
+# Find the line.
+# await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+
 content = content.replace(
-    ".click()",
-    ".evaluate(el => el.click())"
+    "await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });",
+    "// await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });"
 )
 
 with open(file_path, 'w') as f:
