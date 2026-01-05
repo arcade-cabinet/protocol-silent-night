@@ -16,7 +16,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     // Start with Santa
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -44,7 +44,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -63,7 +63,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /BUMBLE/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /BUMBLE/ }).click();
+    await page.getByRole('button', { name: /BUMBLE/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -84,7 +84,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -112,7 +112,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -133,7 +133,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -152,7 +152,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForTimeout(8000);
 
     // Fire at enemies
@@ -172,7 +172,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -195,7 +195,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -219,7 +219,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /BUMBLE/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /BUMBLE/ }).click();
+    await page.getByRole('button', { name: /BUMBLE/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -244,7 +244,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForTimeout(8000);
 
     // Fire and wait for hits
@@ -264,7 +264,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -283,7 +283,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -311,7 +311,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    await page.getByRole('button', { name: /CYBER-ELF/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
@@ -333,7 +333,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen

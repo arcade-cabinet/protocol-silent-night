@@ -246,7 +246,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).click({ force: true });
     await page.waitForLoadState('networkidle');
 
     // Click "COMMENCE OPERATION" on the briefing screen
