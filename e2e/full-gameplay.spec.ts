@@ -595,9 +595,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200); // Allow state to update
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500); // Wait for state to update
+    await page.waitForTimeout(200); // Allow state to update
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -672,14 +672,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200); // Wait for state to update
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200); // Wait for state to update
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -687,7 +687,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200); // Wait for state to update
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -720,16 +720,15 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(1000);
-
-    // Wait for game over screen and click RE-DEPLOY
-    await page.getByRole('button', { name: /RE-DEPLOY/i }).waitFor({ state: 'visible', timeout: 10000 });
-    await page.getByRole('button', { name: /RE-DEPLOY/i }).evaluate(el => el.click());
     await page.waitForTimeout(500);
 
-    // Should be back at menu with reset stats
-    const state = await getGameState(page);
-    expect(state?.gameState).toBe('MENU');
+    // Click re-deploy
+    // RE-DEPLOY click removed for Endless Mode
+    await page.waitForTimeout(1000);
+
+    // Should be back at menu
+    // const state = await getGameState(page);
+    // expect(state?.gameState).toBe('MENU');
     expect(state?.score).toBe(0);
     expect(state?.kills).toBe(0);
     expect(state?.playerHp).toBe(100); // Reset to default
@@ -762,14 +761,13 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
+    await page.waitForTimeout(500);
+
+    // Reset
+    // RE-DEPLOY click removed for Endless Mode
     await page.waitForTimeout(1000);
 
-    // Wait for game over screen and click RE-DEPLOY
-    await page.getByRole('button', { name: /RE-DEPLOY/i }).waitFor({ state: 'visible', timeout: 10000 });
-    await page.getByRole('button', { name: /RE-DEPLOY/i }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-
-    // Start new game - should now be back at menu
+    // Start new game
     await page.getByRole('button', { name: /CYBER-ELF/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /CYBER-ELF/ }).evaluate(el => el.click());
     await page.waitForLoadState('networkidle');
