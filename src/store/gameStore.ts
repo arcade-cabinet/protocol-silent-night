@@ -877,7 +877,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   spawnBoss: () => {
-    const { enemies, addEnemy, rng, state } = get();
+    const { enemies, addEnemy, rng } = get();
     if (enemies.some((e) => e.type === 'boss')) return;
     const angle = rng.next() * Math.PI * 2;
     const radius = 30;
@@ -897,18 +897,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-
-    // If we're in LEVEL_UP state, set previousState to PHASE_BOSS so when
-    // the level-up completes, we transition to PHASE_BOSS instead of PHASE_1
-    const isLeveling = state === 'LEVEL_UP';
-
-    set({
+    const isLeveling = get().state === 'LEVEL_UP';
+    set((state) => ({
       state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: 'PHASE_BOSS',
+      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
-    });
+    }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');
   },
