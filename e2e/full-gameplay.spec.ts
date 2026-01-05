@@ -687,9 +687,9 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.getByRole('button', { name: /CYBER-ELF/ }).click({ noWaitAfter: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
-    await commenceButton.click({ noWaitAfter: true });
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton2.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton2.click({ noWaitAfter: true });
 
     await page.waitForTimeout(2000);
 
