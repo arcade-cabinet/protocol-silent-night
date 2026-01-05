@@ -289,22 +289,7 @@ const initialState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  setState: (state) => {
-    const currentState = get().state;
-    const updates: Partial<GameStore> = {
-      state,
-      previousState: currentState,
-    };
-
-    // Reset kill streak only when starting a new game from BRIEFING
-    // Don't reset when returning to PHASE_1 from LEVEL_UP
-    if (state === 'PHASE_1' && currentState === 'BRIEFING') {
-      updates.killStreak = 0;
-      updates.lastKillTime = 0;
-    }
-
-    set(updates);
-  },
+  setState: (state) => set((prev) => ({ state, previousState: prev.state })),
 
   selectClass: (type) => {
     const config = PLAYER_CLASSES[
@@ -322,7 +307,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       selectedSkin: null,
       killStreak: 0,
       lastKillTime: 0,
-      stats: { score: 0, kills: 0, bossDefeated: false },
       runProgress: {
         xp: 0,
         level: 1,
@@ -407,9 +391,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newKills = stats.kills + 1;
 
     const streakTimeout = 2000;
-    // Handle initial case where lastKillTime is 0 (first kill)
-    const timeSinceLastKill = lastKillTime === 0 ? Infinity : now - lastKillTime;
-    const newStreak = timeSinceLastKill < streakTimeout ? killStreak + 1 : 1;
+    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
@@ -915,10 +897,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    // Boss phase takes priority - transition immediately
+    const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
-      state: 'PHASE_BOSS',
-      previousState: state.state,
+      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
+      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
