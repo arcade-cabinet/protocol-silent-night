@@ -291,16 +291,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setState: (state) => {
     const currentState = get().state;
+    const { playerMaxHp } = get();
     const updates: Partial<GameStore> = {
       state,
       previousState: currentState,
     };
 
-    // Reset kill streak only when starting a new game from BRIEFING
+    // Reset kill streak and restore full HP when starting a new game from BRIEFING
     // Don't reset when returning to PHASE_1 from LEVEL_UP
     if (state === 'PHASE_1' && currentState === 'BRIEFING') {
       updates.killStreak = 0;
-      updates.lastKillTime = 0;
+      updates.lastKillTime = Date.now(); // Use current time instead of 0 to prevent streak logic issues
+      updates.playerHp = playerMaxHp; // Ensure HP is at max when starting game
     }
 
     set(updates);
@@ -321,7 +323,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentEvolution: null,
       selectedSkin: null,
       killStreak: 0,
-      lastKillTime: 0,
+      lastKillTime: Date.now(), // Use current time instead of 0
       runProgress: {
         xp: 0,
         level: 1,
@@ -459,7 +461,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       stats: { score: 0, kills: 0, bossDefeated: false },
       killStreak: 0,
-      lastKillTime: 0,
+      lastKillTime: Date.now(), // Use current time instead of 0
     }),
 
   earnNicePoints: (amount) => {

@@ -436,7 +436,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /PLAY AGAIN/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -687,8 +687,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       timeout: 5000,
     });
 
-    // Step 7: Can restart
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
+    // Step 7: Can restart (button says "PLAY AGAIN" on win, "RE-DEPLOY" on loss)
+    await safeClick(page, page.getByRole('button', { name: /PLAY AGAIN/ }));
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
