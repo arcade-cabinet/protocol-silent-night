@@ -32,6 +32,8 @@ async function getGameState(page: Page) {
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
+  // Add small delay between actions to ensure proper audio timing and preventing scheduling race conditions
+  await page.waitForTimeout(50);
   return page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
     if (!store) return false;
@@ -706,7 +708,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
 
@@ -737,7 +739,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
 
