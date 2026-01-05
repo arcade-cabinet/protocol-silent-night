@@ -31,7 +31,7 @@ async function getGameState(page: Page) {
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  return page.evaluate(({ action, args }) => {
+  const result = await page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
     if (!store) return false;
     const state = store.getState();
@@ -41,6 +41,10 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     }
     return false;
   }, { action, args });
+
+  // Add a small delay to allow Zustand state updates to propagate
+  await page.waitForTimeout(50);
+  return result;
 }
 
 // Helper to wait for game state
@@ -500,12 +504,14 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
+    // Wait for briefing animation to complete
+    await page.waitForTimeout(2000);
+
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForTimeout(1000);
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click();
+    await page.waitForTimeout(2000);
 
     await page.waitForTimeout(3000);
 
@@ -602,9 +608,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200); // Allow state to update
+    await page.waitForTimeout(100); // Brief wait between kills to maintain streak timing
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(1000); // Increased wait for state consistency
+    await page.waitForTimeout(100); // Allow state to fully propagate
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -614,7 +620,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -679,14 +685,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -694,7 +700,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -712,12 +718,14 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
+    // Wait for briefing animation to complete
+    await page.waitForTimeout(2000);
+
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForTimeout(1000);
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click();
+    await page.waitForTimeout(2000);
 
     await page.waitForTimeout(3000);
 

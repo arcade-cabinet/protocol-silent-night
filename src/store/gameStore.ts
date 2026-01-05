@@ -384,8 +384,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const store = get();
-    const { stats, state, lastKillTime, killStreak } = store;
+    // Get fresh state at the very beginning
+    const currentState = get();
+    const { stats, state, lastKillTime, killStreak } = currentState;
     const now = Date.now();
     const newKills = stats.kills + 1;
 
@@ -406,7 +407,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
-    store.gainXP(xpGain);
+    // Call gainXP using get() to ensure we get the fresh store reference
+    get().gainXP(xpGain);
 
     let npStreakBonus = 0;
     if (newStreak === 2) npStreakBonus = 5;
@@ -415,7 +417,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     else if (newStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
-    store.earnNicePoints(npGain);
+    // Call earnNicePoints using get() to ensure we get the fresh store reference
+    get().earnNicePoints(npGain);
 
     // Update metaProgress after earnNicePoints
     const updatedState = get();
@@ -433,7 +436,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    // Scale requirement by wave
+    // Scale requirement by wave - get fresh state
     const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
 
     if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
