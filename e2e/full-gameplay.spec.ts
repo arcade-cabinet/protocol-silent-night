@@ -114,7 +114,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await safeClick(page, commenceButton, { timeout: 30000 });
 
     // Wait for game to start
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
@@ -414,7 +414,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(200);
     }
     await page.waitForTimeout(1000);
 
@@ -449,7 +449,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(20);
+      await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
 
@@ -484,9 +484,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -496,7 +496,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -517,9 +517,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -529,7 +529,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
@@ -547,14 +547,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -562,7 +562,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -657,14 +657,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
     // Step 2: Game starts
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
     // Step 3: Combat phase - kill enemies
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(200);
     }
 
     // Step 4: Boss phase
