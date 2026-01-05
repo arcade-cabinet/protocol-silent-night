@@ -397,6 +397,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
 
+    // Update killStreak and lastKillTime IMMEDIATELY to prevent race conditions
+    // This ensures subsequent rapid calls to addKill see the updated values
+    set({
+      stats: { ...stats, kills: newKills, score: newScore },
+      killStreak: newStreak,
+      lastKillTime: now,
+    });
+
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     store.gainXP(xpGain);
 
@@ -409,12 +417,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const npGain = Math.floor(points / 10) + npStreakBonus;
     store.earnNicePoints(npGain);
 
-    // Get the updated metaProgress after earnNicePoints
+    // Update metaProgress after earnNicePoints
     const updatedState = get();
     set({
-      stats: { ...stats, kills: newKills, score: newScore },
-      killStreak: newStreak,
-      lastKillTime: now,
       metaProgress: {
         ...updatedState.metaProgress,
         totalKills: updatedState.metaProgress.totalKills + 1,
