@@ -139,18 +139,10 @@ test.describe('UI Component Refinement', () => {
         // Click mech
         const mechButton = page.getByRole('button', { name: new RegExp(mech.name, 'i') });
         await mechButton.waitFor({ state: 'visible', timeout: 30000 });
-        await mechButton.evaluate(el => el.click());
-        await page.waitForTimeout(2000);
+        await mechButton.click({ force: true, noWaitAfter: true, timeout: 30000 });
 
-        // Wait for briefing - use a more lenient check with multiple attempts
-        try {
-          await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
-        } catch (e) {
-          // If briefing didn't appear, try clicking again
-          await mechButton.evaluate(el => el.click());
-          await page.waitForTimeout(2000);
-          await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
-        }
+        // Wait for briefing
+        await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();

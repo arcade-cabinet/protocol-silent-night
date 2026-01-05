@@ -384,69 +384,56 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const now = Date.now();
-    const streakTimeout = 2000;
+    // Use functional update to ensure we always work with fresh state
+    set((state) => {
+      const now = Date.now();
+      const newKills = state.stats.kills + 1;
 
-    // Use functional set to ensure atomicity - prevents race conditions
-    let newStreak = 0;
-    let newKills = 0;
-    let state = '';
-
-    set((currentState) => {
-      const { stats, state: gameState, lastKillTime, killStreak } = currentState;
-      newKills = stats.kills + 1;
-
-      // If lastKillTime is 0 (initial state), this is the first kill, so newStreak = 1
-      // Otherwise, check if the time since last kill is within the streak timeout
-      newStreak = lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+      const streakTimeout = 5000;
+      const newStreak = now - state.lastKillTime < streakTimeout ? state.killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
-      const newScore = stats.score + points + streakBonus;
-
-      state = gameState;
+      const newScore = state.stats.score + points + streakBonus;
 
       return {
-        stats: { ...stats, kills: newKills, score: newScore },
+        stats: { ...state.stats, kills: newKills, score: newScore },
         killStreak: newStreak,
         lastKillTime: now,
+        metaProgress: {
+          ...state.metaProgress,
+          totalKills: state.metaProgress.totalKills + 1,
+        },
       };
     });
 
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
-    // Call gainXP using get() to ensure we get the fresh store reference
+    // Run side effects using updated state
+    const state = get();
+    const { killStreak } = state;
+
+    const xpGain = 10 + (killStreak > 1 ? (killStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
     let npStreakBonus = 0;
-    if (newStreak === 2) npStreakBonus = 5;
-    else if (newStreak === 3) npStreakBonus = 10;
-    else if (newStreak === 4) npStreakBonus = 25;
-    else if (newStreak >= 5) npStreakBonus = 50;
+    if (killStreak === 2) npStreakBonus = 5;
+    else if (killStreak === 3) npStreakBonus = 10;
+    else if (killStreak === 4) npStreakBonus = 25;
+    else if (killStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
-    // Call earnNicePoints using get() to ensure we get the fresh store reference
     get().earnNicePoints(npGain);
-
-    // Update metaProgress after earnNicePoints
-    const updatedState = get();
-    set({
-      metaProgress: {
-        ...updatedState.metaProgress,
-        totalKills: updatedState.metaProgress.totalKills + 1,
-      },
-    });
 
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
-    if (newStreak > 1 && newStreak % 3 === 0) {
+    if (killStreak > 1 && killStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
     }
 
-    // Scale requirement by wave - get fresh state
-    const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
+    // Scale requirement by wave
+    const waveReq = CONFIG.WAVE_REQ * state.runProgress.wave;
 
-    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
-      const hasBoss = get().enemies.some((e) => e.type === 'boss');
+    if (state.stats.kills >= waveReq && (state.state === 'PHASE_1' || state.state === 'LEVEL_UP')) {
+      const hasBoss = state.enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
       }
