@@ -706,7 +706,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(100);
     }
     await page.waitForTimeout(500);
 
@@ -737,7 +737,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(100);
     }
     await page.waitForTimeout(500);
 
