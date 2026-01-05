@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { setupPage, safeClick, selectMechAndCommence, waitForBriefingButton } from './helpers';
+import { setupPage, safeClick } from './helpers';
 
 /**
  * Full Gameplay E2E Tests
@@ -155,10 +155,16 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should survive longer due to high HP', async ({ page }) => {
     await setupPage(page);
 
-    // Select Santa and start game
-    await selectMechAndCommence(page, 'MECHA-SANTA');
+    // Select Santa
+    const mechButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await safeClick(page, mechButton);
+    await page.waitForLoadState('networkidle');
 
-    await page.waitForTimeout(1000);
+    // Click "COMMENCE OPERATION" on the briefing screen
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await safeClick(page, commenceButton, { timeout: 30000 });
+
+    await page.waitForTimeout(3000);
 
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -205,9 +211,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should accumulate score and kills', async ({ page }) => {
     await setupPage(page);
 
-    await selectMechAndCommence(page, 'MECHA-SANTA');
+    await safeClick(page, page.getByRole('button', { name: /MECHA-SANTA/ }), { timeout: 30000 });
 
-    await page.waitForTimeout(1000);
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }), { timeout: 30000 });
+
+    await page.waitForTimeout(3000);
 
     // Simulate kills
     await triggerStoreAction(page, 'addKill', 10);
