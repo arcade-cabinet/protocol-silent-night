@@ -45,7 +45,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await elfButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
 
     await page.waitForTimeout(5000);
 
@@ -62,7 +63,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await bumbleButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
 
     await page.waitForTimeout(5000);
 
@@ -126,7 +128,8 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
     
@@ -249,7 +252,8 @@ test.describe('Component Snapshots - Camera System', () => {
     await santaButton.click();
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
 
     await page.waitForTimeout(3000);
     

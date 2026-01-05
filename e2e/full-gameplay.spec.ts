@@ -114,7 +114,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Wait for game to start
     await page.waitForTimeout(2000);
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
     expect(state?.playerHp).toBe(300);
@@ -725,7 +725,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(1000);
 
     // Should be back at menu
-    // const state = await getGameState(page);
+    const state = await getGameState(page);
     // expect(state?.gameState).toBe('MENU');
     expect(state?.score).toBe(0);
     expect(state?.kills).toBe(0);
