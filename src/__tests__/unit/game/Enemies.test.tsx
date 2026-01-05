@@ -69,11 +69,18 @@ describe('Enemies Component', () => {
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
+    // Advance past initial damage cooldown (500ms)
+    // The component sets lastDamageTimeRef to Date.now() on mount when state is PHASE_1
+    // So we need to advance time by 600ms to ensure the cooldown has passed
+    vi.useFakeTimers();
+    vi.advanceTimersByTime(600);
+
     await renderer.advanceFrames(1, 0.1);
 
     const state = useGameStore.getState();
     expect(state.playerHp).toBeLessThan(100);
 
+    vi.useRealTimers();
     await renderer.unmount();
   });
 });
