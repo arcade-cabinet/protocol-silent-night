@@ -514,23 +514,18 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(1000);
 
+    // Boss defeated triggers level up in endless mode
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
+      return store?.getState().state === 'LEVEL_UP';
     }, { timeout: 10000 });
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
-    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
+    expect(state?.gameState).toBe('LEVEL_UP');
     expect(state?.bossHp).toBe(0);
+    expect(state?.bossActive).toBe(false);
 
-    // Verify victory screen - use heading role for specificity
-    await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
-      timeout: 5000,
-    });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+    // Verify level up screen appears with upgrade choices
+    await expect(page.getByText(/Choose an Upgrade/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -831,27 +826,24 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(1000);
 
-    // Step 6: Victory
+    // Step 6: Victory - boss defeated triggers level up in endless mode
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
+      return store?.getState().state === 'LEVEL_UP';
     }, { timeout: 10000 });
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
-    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
-    await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
-      timeout: 5000,
-    });
+    expect(state?.gameState).toBe('LEVEL_UP');
 
-    // Step 7: Can restart
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).evaluate(el => el.click());
+    // Verify boss is defeated
+    expect(state?.bossActive).toBe(false);
+
+    // Select an upgrade to continue
+    await page.getByRole('button').first().click();
     await page.waitForTimeout(1000);
 
+    // Game should return to playing state
     state = await getGameState(page);
-    expect(state?.gameState).toBe('MENU');
+    expect(['PHASE_1', 'PHASE_2', 'PHASE_3', 'PHASE_BOSS']).toContain(state?.gameState);
   });
 
   test('should complete entire game as Elf', async ({ page }) => {
@@ -890,16 +882,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(500);
 
+    // Boss defeated triggers level up in endless mode
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
+      return store?.getState().state === 'LEVEL_UP';
     }, { timeout: 10000 });
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
-    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
+    expect(state?.gameState).toBe('LEVEL_UP');
+    expect(state?.bossActive).toBe(false);
   });
 
   test('should complete entire game as Bumble', async ({ page }) => {
@@ -938,16 +928,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await triggerStoreAction(page, 'damageBoss', 1000);
     await page.waitForTimeout(500);
 
+    // Boss defeated triggers level up in endless mode
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
+      return store?.getState().state === 'LEVEL_UP';
     }, { timeout: 10000 });
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().state === 'WIN';
-    }, { timeout: 10000 }).catch(() => {});
     state = await getGameState(page);
-    expect(state?.gameState).toBe('WIN');
+    expect(state?.gameState).toBe('LEVEL_UP');
+    expect(state?.bossActive).toBe(false);
   });
 });
 
@@ -1023,6 +1011,7 @@ test.describe('Full Gameplay - Input Controls', () => {
 
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /MECHA-SANTA/ }).evaluate(el => el.click());
+    await page.waitForLoadState('networkidle');
     await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
