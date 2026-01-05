@@ -57,6 +57,21 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
   return false;
 }
 
+// Helper to handle any pending level-ups
+async function handlePendingLevelUps(page: Page) {
+  await page.evaluate(() => {
+    const store = (window as any).useGameStore;
+    if (!store) return;
+    const state = store.getState();
+
+    // If there's a pending level-up, auto-select the first available upgrade
+    while (state.runProgress?.pendingLevelUp && state.runProgress?.upgradeChoices?.length > 0) {
+      const firstUpgrade = state.runProgress.upgradeChoices[0];
+      state.selectLevelUpgrade(firstUpgrade.id);
+    }
+  });
+}
+
 // Helper to simulate combat until kills reach target
 async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
   const startTime = Date.now();
@@ -389,6 +404,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(100);
     }
 
+    // Handle any pending level-ups before checking boss phase
+    await handlePendingLevelUps(page);
     await page.waitForTimeout(1000);
 
     const state = await getGameState(page);
@@ -416,6 +433,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(100);
     }
+
+    // Handle any pending level-ups before checking boss phase
+    await handlePendingLevelUps(page);
     await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
@@ -488,6 +508,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
 
+    // Handle any pending level-ups that may have occurred
+    await handlePendingLevelUps(page);
+
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
@@ -497,6 +520,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(500);
+
+    // Handle any pending level-ups that may have occurred
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -520,6 +546,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
+
+    // Handle any pending level-ups that may have occurred
+    await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -549,12 +578,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
 
+    // Handle any pending level-ups that may have occurred
+    await handlePendingLevelUps(page);
+
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
+
+    // Handle any pending level-ups that may have occurred
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -563,6 +598,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
+
+    // Handle any pending level-ups that may have occurred
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -667,6 +705,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
 
+    // Handle any pending level-ups before checking boss phase
+    await handlePendingLevelUps(page);
+
     // Step 4: Boss phase
     await page.waitForTimeout(1000);
     state = await getGameState(page);
@@ -710,6 +751,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(200);
     }
+
+    // Handle any pending level-ups before checking boss phase
+    await handlePendingLevelUps(page);
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
@@ -741,6 +785,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(200);
     }
+
+    // Handle any pending level-ups before checking boss phase
+    await handlePendingLevelUps(page);
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
