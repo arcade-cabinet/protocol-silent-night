@@ -19,7 +19,7 @@ export function MissionBriefing() {
   const { state, setState, playerClass, missionBriefing } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
-  const animationStartedRef = useRef<boolean>(false);
+  const animationStartedRef = useRef(false);
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -45,24 +45,21 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length causes infinite restarts
   useEffect(() => {
     if (state !== 'BRIEFING') {
-      // Reset animation flag when leaving briefing state
       animationStartedRef.current = false;
       return;
     }
 
-    // Only run animation once per briefing session
     if (animationStartedRef.current) return;
     animationStartedRef.current = true;
-
-    // Capture total lines to avoid dependency on the array reference
-    const totalLines = briefingLines.length;
 
     // Reset state when briefing starts
     setCurrentLine(0);
     setShowButton(false);
+
+    // Capture total lines to avoid dependency on the array reference
+    const totalLines = briefingLines.length;
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
@@ -85,7 +82,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state]);
+  }, [state, briefingLines]);
 
   if (state !== 'BRIEFING') return null;
 
