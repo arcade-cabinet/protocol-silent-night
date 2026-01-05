@@ -141,7 +141,8 @@ test.describe('UI Component Refinement', () => {
         await mechButton.waitFor({ state: 'visible', timeout: 30000 });
         await mechButton.click({ force: true, noWaitAfter: true, timeout: 30000 });
 
-        // Wait for briefing
+        // Wait for briefing with extra buffer
+        await page.waitForTimeout(500);
         await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
         // Verify operator and role
@@ -151,9 +152,12 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.evaluate(() => window.localStorage.clear());
-          await page.reload();
-          await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached' }).catch(() => {});
+          await page.reload({ waitUntil: 'networkidle' });
+          await page.locator('[data-testid="loading-overlay"]').waitFor({ state: 'detached', timeout: 30000 }).catch(() => {});
+          await page.waitForTimeout(1000);
           await expect(page.locator('h1').first()).toBeVisible({ timeout: 15000 });
+          // Ensure menu buttons are ready
+          await page.getByRole('button', { name: new RegExp(mechs[index + 1].name, 'i') }).waitFor({ state: 'visible', timeout: 30000 });
         }
       }
     });

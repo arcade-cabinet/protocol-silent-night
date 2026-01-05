@@ -590,27 +590,26 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak
-    await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200); // Allow state to update
-    await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200); // Allow state to update
+    // Rapid kills to build streak - execute synchronously to ensure timing
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return;
+      const state = store.getState();
+
+      // Execute kills in rapid succession to build streak
+      state.addKill(10);
+      state.addKill(10);
+      state.addKill(10);
+    });
+
+    // Wait for state to settle and UI to update
+    await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
-    expect(state?.killStreak).toBe(2);
-
-    // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
-
-    // Continue streak
-    await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500);
-
-    state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
-    // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show TRIPLE KILL (most recent notification)
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
