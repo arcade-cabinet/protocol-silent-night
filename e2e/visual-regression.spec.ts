@@ -56,8 +56,10 @@ test.describe('Visual Regression - Character Selection', () => {
     await setupPage(page);
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfCard.waitFor({ state: 'visible', timeout: 30000 });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -65,8 +67,10 @@ test.describe('Visual Regression - Character Selection', () => {
     await setupPage(page);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleCard.waitFor({ state: 'visible', timeout: 30000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
