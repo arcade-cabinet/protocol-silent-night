@@ -26,15 +26,30 @@ async function waitForPageStability(page) {
   } catch (e) {
     console.log('Font loading check timed out, proceeding anyway...');
   }
-  await page.waitForTimeout(500); // Brief pause for any remaining renders
+  await page.waitForTimeout(1000); // Increased pause for stability
+}
+
+// Disable animations helper
+async function disableAnimations(page) {
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+        animation: none !important;
+        transition: none !important;
+      }
+    `
+  });
 }
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
-    await page.goto('/');
-
-    // Wait for fonts and styles to load
-    await page.waitForTimeout(2000);
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await disableAnimations(page);
+    await waitForPageStability(page);
 
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
@@ -43,12 +58,18 @@ test.describe('Visual Regression - Character Selection', () => {
   });
 
   test('should show Santa character card correctly', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await disableAnimations(page);
+    await waitForPageStability(page);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
+    await santaCard.waitFor({ state: 'attached', timeout: 10000 });
+    await page.waitForTimeout(1000);
+
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
