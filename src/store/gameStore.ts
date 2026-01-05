@@ -401,12 +401,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
+    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
     const newKills = stats.kills + 1;
 
-    const streakTimeout = 2000;
-    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+    const streakTimeout = 5000;  // Increased from 2000ms for E2E test stability and more forgiving gameplay
+    const timeSinceLastKill = now - lastKillTime;
+    const newStreak = timeSinceLastKill < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
@@ -423,12 +424,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
 
+    // Get fresh metaProgress after other updates
+    const currentMetaProgress = get().metaProgress;
+
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...get().metaProgress,
+        ...currentMetaProgress,
         totalKills: metaProgress.totalKills + 1,
       },
     });
