@@ -289,7 +289,22 @@ const initialState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  setState: (state) => set((prev) => ({ state, previousState: prev.state })),
+  setState: (state) => {
+    const currentState = get().state;
+    const updates: Partial<GameStore> = {
+      state,
+      previousState: currentState,
+    };
+
+    // Reset kill streak only when starting a new game from BRIEFING
+    // Don't reset when returning to PHASE_1 from LEVEL_UP
+    if (state === 'PHASE_1' && currentState === 'BRIEFING') {
+      updates.killStreak = 0;
+      updates.lastKillTime = 0;
+    }
+
+    set(updates);
+  },
 
   selectClass: (type) => {
     const config = PLAYER_CLASSES[
