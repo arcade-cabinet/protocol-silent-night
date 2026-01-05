@@ -639,8 +639,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Wait for streak to timeout (2+ seconds)
-    await page.waitForTimeout(2500);
+    // Wait for streak to timeout (5+ seconds - streak timeout is 5000ms)
+    await page.waitForTimeout(5500);
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);

@@ -384,17 +384,40 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    // Use functional update to ensure we always work with fresh state
+    // Capture timestamp outside of set() to ensure consistency across updates
+    const now = Date.now();
+
     set((state) => {
-      const now = Date.now();
       const newKills = state.stats.kills + 1;
 
       const streakTimeout = 5000;
-      const newStreak = now - state.lastKillTime < streakTimeout ? state.killStreak + 1 : 1;
+      // Calculate time since last kill
+      const timeSinceLastKill = now - state.lastKillTime;
+
+      // Determine if we're within the streak window
+      // Special case: If lastKillTime is 0 (initial state), start a new streak at 1
+      // Special case: If time difference is 0 or negative (same millisecond or clock skew), continue streak
+      // Normal case: If within timeout window, continue streak
+      // Otherwise: Streak timed out - reset to 1
+      let newStreak: number;
+      if (state.lastKillTime === 0) {
+        newStreak = 1; // First kill ever
+      } else if (timeSinceLastKill <= 0) {
+        // Same millisecond or clock went backwards - continue streak
+        newStreak = state.killStreak + 1;
+      } else if (timeSinceLastKill < streakTimeout) {
+        // Within streak window - continue streak
+        newStreak = state.killStreak + 1;
+      } else {
+        // Streak timed out - reset to 1
+        newStreak = 1;
+      }
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = state.stats.score + points + streakBonus;
 
+      // Always use the real timestamp - don't artificially advance time
+      // This ensures timeout calculations work correctly
       return {
         stats: { ...state.stats, kills: newKills, score: newScore },
         killStreak: newStreak,
