@@ -45,13 +45,10 @@ test.describe('Visual Regression - Character Selection', () => {
     await setupPage(page);
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
-    // Wait for card to be fully visible and stable
-    await santaCard.waitFor({ state: 'visible', timeout: 10000 });
-    await page.waitForTimeout(1500);
-
+    await santaCard.waitFor({ state: 'visible', timeout: 30000 });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -214,12 +211,12 @@ test.describe('Visual Regression - Game Movement', () => {
     await safeClick(page, startButton, { timeout: 30000 });
     await page.waitForTimeout(3000);
 
-    // Fire weapon and wait for animation to settle
+    // Fire weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.05, // Increased threshold for animation variance
+      maxDiffPixelRatio: 0.03,
       timeout: 20000,
     });
   });

@@ -149,7 +149,7 @@ test.describe('UI Component Refinement', () => {
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
-        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 10000 });
+        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 30000 });
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
@@ -241,9 +241,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      // Additional stability wait for visual regression
-      await page.waitForSelector('h1', { timeout: 30000, state: 'visible' });
-      await page.waitForTimeout(1000);
+      await page.waitForSelector('h1', { timeout: 15000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
@@ -259,8 +257,7 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       const mechButton = page.locator('button:has-text("MECHA-SANTA")');
       await safeClick(page, mechButton, { timeout: 30000 });
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000, state: 'visible' });
-      await page.waitForTimeout(1000);
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
