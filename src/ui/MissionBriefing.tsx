@@ -45,7 +45,6 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines causes infinite restarts - we capture length instead
   useEffect(() => {
     if (state !== 'BRIEFING') {
       animationStartedRef.current = false;
@@ -83,6 +82,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
+    // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines causes infinite restarts/stops
   }, [state]);
 
   if (state !== 'BRIEFING') return null;
