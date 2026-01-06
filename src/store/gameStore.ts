@@ -897,8 +897,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    // Boss phase always takes priority, even during level-up
-    // Store the current state to potentially restore after boss defeat
     const currentState = get().state;
     set((state) => ({
       state: 'PHASE_BOSS',
