@@ -57,6 +57,35 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
   return false;
 }
 
+// Helper to handle level-up state by selecting the first available upgrade
+async function handleLevelUp(page: Page) {
+  const state = await getGameState(page);
+  if (state?.gameState !== 'LEVEL_UP') return;
+
+  // Get the first available upgrade choice
+  const upgradeId = await page.evaluate(() => {
+    const store = (window as any).useGameStore;
+    if (!store) return null;
+    const state = store.getState();
+    return state.runProgress?.upgradeChoices?.[0]?.id || null;
+  });
+
+  if (upgradeId) {
+    await triggerStoreAction(page, 'selectLevelUpgrade', upgradeId);
+    await page.waitForTimeout(100);
+  }
+}
+
+// Helper to handle multiple level-ups that may occur
+async function handleAllLevelUps(page: Page, maxAttempts = 10) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const state = await getGameState(page);
+    if (state?.gameState !== 'LEVEL_UP') break;
+    await handleLevelUp(page);
+    await page.waitForTimeout(100);
+  }
+}
+
 // Helper to simulate combat until kills reach target
 async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
   const startTime = Date.now();
@@ -387,9 +416,13 @@ test.describe('Full Gameplay - Boss Battle', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(100);
+      // Handle any level-ups that occur
+      await handleAllLevelUps(page);
     }
 
     await page.waitForTimeout(1000);
+    // Handle any remaining level-ups before checking for boss
+    await handleAllLevelUps(page);
 
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
@@ -415,8 +448,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(100);
+      await handleAllLevelUps(page);
     }
     await page.waitForTimeout(1000);
+    await handleAllLevelUps(page);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -450,8 +485,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(200);
+      await handleAllLevelUps(page);
     }
     await page.waitForTimeout(500);
+    await handleAllLevelUps(page);
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
@@ -616,6 +653,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
       await page.waitForTimeout(200);
+      await handleAllLevelUps(page);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
@@ -665,10 +703,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(200);
+      await handleAllLevelUps(page);
     }
 
     // Step 4: Boss phase
     await page.waitForTimeout(1000);
+    await handleAllLevelUps(page);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
@@ -709,8 +749,10 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(200);
+      await handleAllLevelUps(page);
     }
     await page.waitForTimeout(500);
+    await handleAllLevelUps(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -740,8 +782,10 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(200);
+      await handleAllLevelUps(page);
     }
     await page.waitForTimeout(500);
+    await handleAllLevelUps(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
