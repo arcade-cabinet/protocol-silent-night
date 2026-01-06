@@ -590,42 +590,67 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
-    await page.waitForTimeout(1000);
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000); // Wait for game to fully start
 
-    await page.waitForTimeout(3000);
+    // Wait for game to be in active state
+    await waitForGameState(page, 'PHASE_1', 10000);
 
     // First kill to initialize streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500); // Allow state to update
+    await page.waitForTimeout(100); // Brief wait for store update
+
+    // Wait for kill streak state to update
+    let attempts = 0;
+    while (attempts < 20) {
+      const state = await getGameState(page);
+      if (state?.killStreak === 1) break;
+      await page.waitForTimeout(100);
+      attempts++;
+    }
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(1);
 
-    // Second kill for DOUBLE KILL
+    // Second kill for DOUBLE KILL - must be within 5 seconds
+    await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(300); // Allow state to update
+
+    // Wait for kill streak state to update to 2
+    attempts = 0;
+    while (attempts < 20) {
+      state = await getGameState(page);
+      if (state?.killStreak === 2) break;
+      await page.waitForTimeout(100);
+      attempts++;
+    }
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
 
     // Wait for DOUBLE KILL notification to disappear before triggering next kill
     await page.waitForTimeout(1600); // Notification shows for 1500ms
 
-    // Third kill for TRIPLE KILL
+    // Third kill for TRIPLE KILL - must be within 5 seconds of second kill
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(300); // Allow state to update
+
+    // Wait for kill streak state to update to 3
+    attempts = 0;
+    while (attempts < 20) {
+      state = await getGameState(page);
+      if (state?.killStreak === 3) break;
+      await page.waitForTimeout(100);
+      attempts++;
+    }
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
     // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {

@@ -258,7 +258,9 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       const mechButton = page.getByRole('button', { name: /MECHA-SANTA/i });
       await mechButton.waitFor({ state: 'visible', timeout: 30000 });
-      await mechButton.click({ force: true, noWaitAfter: true });
+      await mechButton.click({ force: true });
+      // Wait for state transition and briefing screen to render
+      await page.waitForTimeout(500);
       await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
       if (hasMcpSupport) {
