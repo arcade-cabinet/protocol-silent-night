@@ -258,18 +258,14 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       const mechButton = page.getByRole('button', { name: /MECHA-SANTA/i });
       await mechButton.waitFor({ state: 'visible', timeout: 30000 });
-
-      // Use evaluate to ensure click is processed
       await mechButton.evaluate(el => el.click());
 
-      // Wait for state transition with retry logic
+      // Wait for state transition to BRIEFING
       await page.waitForFunction(() => {
         const store = (window as any).useGameStore;
-        if (!store) return false;
-        return store.getState().state === 'BRIEFING';
-      }, { timeout: 30000 });
+        return store?.getState().state === 'BRIEFING';
+      }, { timeout: 10000 });
 
-      // Now wait for the UI element
       await expect(page.getByText('MISSION BRIEFING')).toBeVisible({ timeout: 30000 });
 
       if (hasMcpSupport) {
