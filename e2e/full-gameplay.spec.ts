@@ -712,13 +712,16 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
 
-    // Step 4: Boss phase - handle potential LEVEL_UP transition
+    // Step 4: Boss phase - handle potential LEVEL_UP transitions
     await page.waitForTimeout(1000);
     state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
+    // Handle multiple LEVEL_UP transitions that may occur from accumulated XP
+    let levelUpAttempts = 0;
+    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 5) {
       await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
       await page.waitForTimeout(500);
       state = await getGameState(page);
+      levelUpAttempts++;
     }
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
@@ -763,11 +766,13 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Handle potential LEVEL_UP state transition before PHASE_BOSS
-    if (state?.gameState === 'LEVEL_UP') {
+    // Handle potential LEVEL_UP state transitions before PHASE_BOSS
+    let levelUpAttempts = 0;
+    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 5) {
       await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
       await page.waitForTimeout(500);
       state = await getGameState(page);
+      levelUpAttempts++;
     }
     expect(state?.gameState).toBe('PHASE_BOSS');
 
@@ -800,11 +805,13 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Handle potential LEVEL_UP state transition before PHASE_BOSS
-    if (state?.gameState === 'LEVEL_UP') {
+    // Handle potential LEVEL_UP state transitions before PHASE_BOSS
+    let levelUpAttempts = 0;
+    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 5) {
       await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
       await page.waitForTimeout(500);
       state = await getGameState(page);
+      levelUpAttempts++;
     }
     expect(state?.gameState).toBe('PHASE_BOSS');
 
