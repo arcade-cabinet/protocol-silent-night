@@ -241,6 +241,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
+      await setupPage(page);
       await page.waitForLoadState('networkidle', { timeout: 15000 });
       await page.waitForSelector('h1', { state: 'visible', timeout: 5000 });
       await page.waitForTimeout(500); // Allow any animations to settle
@@ -256,6 +257,7 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
+      await setupPage(page);
       // Select mech
       const mechButton = page.locator('button:has-text("MECHA-SANTA")');
       await safeClick(page, mechButton, { timeout: 30000 });
