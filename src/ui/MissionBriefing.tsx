@@ -55,13 +55,13 @@ export function MissionBriefing() {
       return;
     }
 
+    if (animationStartedRef.current) return;
+
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
 
-    // Wait for briefingLines to be populated before starting animation
     if (totalLines === 0) return;
 
-    if (animationStartedRef.current) return;
     animationStartedRef.current = true;
 
     // Reset state when briefing starts
