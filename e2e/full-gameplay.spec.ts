@@ -57,6 +57,28 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
   return false;
 }
 
+// Helper to auto-complete level-ups by selecting first available upgrade
+async function completeLevelUpIfNeeded(page: Page) {
+  const state = await getGameState(page);
+  if (state?.gameState === 'LEVEL_UP') {
+    // Get available upgrades and select the first one
+    const upgraded = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return false;
+      const state = store.getState();
+      const choices = state.runProgress?.upgradeChoices;
+      if (choices && choices.length > 0) {
+        state.selectLevelUpgrade(choices[0].id);
+        return true;
+      }
+      return false;
+    });
+    if (upgraded) {
+      await page.waitForTimeout(200); // Wait for state transition
+    }
+  }
+}
+
 // Helper to simulate combat until kills reach target
 async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
   const startTime = Date.now();
@@ -391,6 +413,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
+    // Complete level-up if it triggered
+    await completeLevelUpIfNeeded(page);
+
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -417,6 +442,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(100);
     }
     await page.waitForTimeout(1000);
+
+    // Complete level-up if it triggered
+    await completeLevelUpIfNeeded(page);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -452,6 +480,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
+
+    // Complete level-up if it triggered
+    await completeLevelUpIfNeeded(page);
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
@@ -667,8 +698,10 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
 
-    // Step 4: Boss phase
+    // Step 4: Boss phase - complete level-up if needed
     await page.waitForTimeout(1000);
+    await completeLevelUpIfNeeded(page);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
@@ -712,6 +745,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     }
     await page.waitForTimeout(500);
 
+    // Complete level-up if it triggered
+    await completeLevelUpIfNeeded(page);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
@@ -742,6 +778,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
+
+    // Complete level-up if it triggered
+    await completeLevelUpIfNeeded(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
