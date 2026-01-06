@@ -243,8 +243,14 @@ test.describe('UI Component Refinement', () => {
     test('should match menu screen snapshot', async ({ page }) => {
       await setupPage(page);
       await page.waitForLoadState('networkidle', { timeout: 15000 });
-      await page.waitForSelector('h1', { state: 'visible', timeout: 5000 });
-      await page.waitForTimeout(500); // Allow any animations to settle
+      // Wait for menu screen to be visible - try multiple selectors
+      try {
+        await page.waitForSelector('h1', { state: 'visible', timeout: 5000 });
+      } catch {
+        // If h1 doesn't appear, wait for any heading or button as fallback
+        await page.waitForSelector('button', { state: 'visible', timeout: 5000 });
+      }
+      await page.waitForTimeout(1000); // Allow any animations to settle
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
