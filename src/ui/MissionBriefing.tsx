@@ -65,6 +65,8 @@ export function MissionBriefing() {
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
 
+    if (totalLines === 0) return;
+
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
@@ -86,7 +88,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
