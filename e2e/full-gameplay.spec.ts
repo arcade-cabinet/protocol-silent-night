@@ -605,8 +605,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Should show DOUBLE KILL
     await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
 
-    // Wait for notification to complete before next level
-    await page.waitForTimeout(2000);
+    // Wait briefly for notification, but stay within 5s streak timeout
+    await page.waitForTimeout(500);
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
