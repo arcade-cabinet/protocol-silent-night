@@ -85,7 +85,7 @@ test.describe('Visual Regression - Character Selection', () => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await waitForElementStability(page, santaCard);
     await page.waitForLoadState('networkidle');
-    await santaCard.scrollIntoViewIfNeeded({ timeout: 8000 });
+    // Removed scrollIntoViewIfNeeded as it causes timeouts in CI
     await page.waitForTimeout(500); // Allow animations to settle
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -98,7 +98,7 @@ test.describe('Visual Regression - Character Selection', () => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await waitForElementStability(page, elfCard);
     await page.waitForLoadState('networkidle');
-    await elfCard.scrollIntoViewIfNeeded({ timeout: 8000 });
+    // Removed scrollIntoViewIfNeeded as it causes timeouts in CI
     await page.waitForTimeout(500); // Allow animations to settle
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -111,7 +111,7 @@ test.describe('Visual Regression - Character Selection', () => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await waitForElementStability(page, bumbleCard);
     await page.waitForLoadState('networkidle');
-    await bumbleCard.scrollIntoViewIfNeeded({ timeout: 8000 });
+    // Removed scrollIntoViewIfNeeded as it causes timeouts in CI
     await page.waitForTimeout(500); // Allow animations to settle
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
