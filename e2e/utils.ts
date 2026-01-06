@@ -56,12 +56,3 @@ export async function startMission(page: Page) {
   await button.waitFor({ state: 'visible', timeout: 45000 });
   await button.click();
 }
-
-// Helper to wait for loading screen to disappear
-export async function waitForLoadingScreen(page: Page) {
-  const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-  if (await loadingScreen.isVisible()) {
-    // Using a very long timeout as SwiftShader compilation can be slow
-    await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
-  }
-}
