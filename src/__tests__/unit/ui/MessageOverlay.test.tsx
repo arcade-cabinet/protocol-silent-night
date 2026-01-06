@@ -14,6 +14,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders boss warning when boss is active', () => {
+    // biome-ignore lint/suspicious/noExplicitAny: mocking vitest function
     (useGameStore as any).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
@@ -25,6 +26,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders mission complete when state is WIN', () => {
+    // biome-ignore lint/suspicious/noExplicitAny: mocking vitest function
     (useGameStore as any).mockReturnValue({
       state: 'WIN',
       bossActive: false,
@@ -36,6 +38,7 @@ describe('MessageOverlay', () => {
   });
 
   it('renders operator down when state is GAME_OVER', () => {
+    // biome-ignore lint/suspicious/noExplicitAny: mocking vitest function
     (useGameStore as any).mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
@@ -47,6 +50,7 @@ describe('MessageOverlay', () => {
   });
 
   it('is accessible with role="alert"', () => {
+    // biome-ignore lint/suspicious/noExplicitAny: mocking vitest function
     (useGameStore as any).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,

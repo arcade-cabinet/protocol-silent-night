@@ -28,8 +28,13 @@ describe('CameraController Component', () => {
     // Access camera from R3F state
     const camera =
       renderer.scene.instance.children[0]?.camera ||
-      (renderer.scene.allChildren.find((c: any) => (c as any).instance.camera) as any)?.instance
-        .camera;
+      (renderer.scene.allChildren.find(
+        // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+        (c: any) =>
+          // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+          (c as any).instance.camera,
+        // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
+      ) as any)?.instance.camera;
     if (camera) {
       expect(camera.position.x).toBeCloseTo(10, 0);
       expect(camera.position.z).toBeGreaterThan(10);
