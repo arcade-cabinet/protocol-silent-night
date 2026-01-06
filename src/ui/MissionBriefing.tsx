@@ -55,12 +55,16 @@ export function MissionBriefing() {
       return;
     }
 
-    if (animationStartedRef.current) return;
-
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
 
-    if (totalLines === 0) return;
+    if (totalLines === 0) {
+      // Reset guard if briefing lines aren't ready yet
+      animationStartedRef.current = false;
+      return;
+    }
+
+    if (animationStartedRef.current) return;
 
     animationStartedRef.current = true;
 
