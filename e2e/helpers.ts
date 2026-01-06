@@ -23,13 +23,8 @@ export async function startGame(page: Page, characterName: string) {
   await characterButton.waitFor({ state: 'visible', timeout: 60000 });
   await characterButton.click({ force: true, timeout: 60000 });
 
-  // Wait for character selection screen to disappear (briefing should appear)
-  await characterButton.waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {
-    console.log('Warning: Character button did not disappear as expected');
-  });
-
-  // Wait for briefing animation to complete (6 lines at 600ms + 500ms for button = 4.1s)
-  // Add buffer to ensure animation has time to complete
+  // Wait for briefing animation to complete (5-6 lines at 600ms + 500ms for button)
+  // We explicitly wait here to ensure the animation logic has time to run
   await page.waitForTimeout(5000);
 
   // Click COMMENCE OPERATION
