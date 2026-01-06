@@ -118,12 +118,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
-    // Allow small variance in HP due to timing/rounding
-    expect(state?.playerHp).toBeGreaterThanOrEqual(295);
-    expect(state?.playerHp).toBeLessThanOrEqual(300);
+    expect(state?.playerHp).toBe(300);
 
     // Verify HUD is visible
     await expect(page.locator('text=OPERATOR STATUS')).toBeVisible();
+    await expect(page.locator('text=300 / 300')).toBeVisible();
   });
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
@@ -174,20 +173,16 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // Allow for some variance due to potential enemy damage during gameplay
-    expect(state?.playerHp).toBeGreaterThanOrEqual(190); // 300 - 100 = 200, allow ~10 HP variance
-    expect(state?.playerHp).toBeLessThanOrEqual(200);
-    expect(['PHASE_1', 'LEVEL_UP']).toContain(state?.gameState); // Still alive
+    expect(state?.playerHp).toBe(200); // 300 - 100 = 200
+    expect(state?.gameState).toBe('PHASE_1'); // Still alive
 
     // Take more damage
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
 
     state = await getGameState(page);
-    // Allow for some variance due to potential enemy damage
-    expect(state?.playerHp).toBeGreaterThanOrEqual(90);
-    expect(state?.playerHp).toBeLessThanOrEqual(100);
-    expect(['PHASE_1', 'LEVEL_UP']).toContain(state?.gameState); // Still alive
+    expect(state?.playerHp).toBe(100);
+    expect(state?.gameState).toBe('PHASE_1'); // Still alive with 100 HP
   });
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
@@ -365,10 +360,8 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // Allow small variance in HP due to timing/rounding/enemy damage
-    expect(state?.playerHp).toBeGreaterThanOrEqual(94);
-    expect(state?.playerHp).toBeLessThanOrEqual(100);
-    expect(['PHASE_1', 'LEVEL_UP']).toContain(state?.gameState);
+    expect(state?.playerHp).toBe(100);
+    expect(state?.gameState).toBe('PHASE_1');
 
     // One more hit at 100 damage kills
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -398,18 +391,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
-    let state = await getGameState(page);
+    const state = await getGameState(page);
     expect(state?.kills).toBe(10);
-
-    // Handle potential LEVEL_UP state transitions before PHASE_BOSS
-    let levelUpAttempts = 0;
-    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 10) {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-      levelUpAttempts++;
-    }
-
     expect(state?.gameState).toBe('PHASE_BOSS');
     expect(state?.bossActive).toBe(true);
     expect(state?.bossHp).toBe(1000);
@@ -436,16 +419,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
-
-    // Handle potential LEVEL_UP state transitions before PHASE_BOSS
-    let levelUpAttempts = 0;
-    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 10) {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-      levelUpAttempts++;
-    }
-
     expect(state?.bossActive).toBe(true);
 
     // Damage boss until defeated
@@ -509,20 +482,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-    }
-
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -549,20 +515,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-    }
-
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
@@ -586,18 +545,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-    }
-
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
@@ -661,13 +613,6 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-    }
-
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
       await page.waitForTimeout(200);
@@ -722,17 +667,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
 
-    // Step 4: Boss phase - handle potential LEVEL_UP transitions
+    // Step 4: Boss phase
     await page.waitForTimeout(1000);
     state = await getGameState(page);
-    // Handle multiple LEVEL_UP transitions that may occur from accumulated XP
-    let levelUpAttempts = 0;
-    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 10) {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-      levelUpAttempts++;
-    }
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
 
@@ -776,14 +713,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Handle potential LEVEL_UP state transitions before PHASE_BOSS
-    let levelUpAttempts = 0;
-    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 10) {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-      levelUpAttempts++;
-    }
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
@@ -815,14 +744,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Handle potential LEVEL_UP state transitions before PHASE_BOSS
-    let levelUpAttempts = 0;
-    while (state?.gameState === 'LEVEL_UP' && levelUpAttempts < 10) {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'coal_fury');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-      levelUpAttempts++;
-    }
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
