@@ -444,16 +444,15 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(3000);
 
-    // Trigger boss spawn - use smaller delays to avoid timeout
+    // Trigger boss spawn - minimize delays between kills
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(100);
     }
-    await page.waitForTimeout(1000);
 
     // Handle any pending level-ups before asserting boss state
     await handlePendingLevelUps(page);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -483,10 +482,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(3000);
 
-    // Trigger boss spawn
+    // Trigger boss spawn - minimize delays between kills
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(100);
     }
     await page.waitForTimeout(500);
 
@@ -519,13 +518,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak - reduce delays to avoid timeout
+    // Rapid kills to build streak - minimize delays between kills
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
-    await handlePendingLevelUps(page);
+    await page.waitForTimeout(100);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
+
+    // Handle level-ups AFTER building streak
     await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
@@ -536,7 +536,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
+
+    // Handle level-ups after checking streak
     await handlePendingLevelUps(page);
 
     state = await getGameState(page);
@@ -556,13 +558,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Build a streak - reduce delays to avoid timeout
+    // Build a streak - minimize delays between kills
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
-    await handlePendingLevelUps(page);
+    await page.waitForTimeout(100);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
+
+    // Handle level-ups after building streak
     await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
@@ -573,7 +576,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
+
+    // Handle level-ups after kill
     await handlePendingLevelUps(page);
 
     state = await getGameState(page);
@@ -592,7 +597,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
     await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
@@ -600,7 +605,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
+
+    // Handle level-ups after building streak
     await handlePendingLevelUps(page);
 
     state = await getGameState(page);
@@ -609,7 +616,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
+
+    // Handle level-ups after kill
     await handlePendingLevelUps(page);
 
     state = await getGameState(page);
@@ -711,16 +720,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Step 3: Combat phase - kill enemies with reduced delays to avoid timeout
+    // Step 3: Combat phase - minimize delays between kills
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(100);
     }
 
     // Step 4: Boss phase - handle any level-ups first
-    await page.waitForTimeout(1000);
     await handlePendingLevelUps(page);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
