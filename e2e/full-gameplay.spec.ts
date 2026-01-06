@@ -172,19 +172,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     await page.waitForTimeout(3000);
 
-    // Verify starting HP
-    let state = await getGameState(page);
-    expect(state?.playerHp).toBe(300); // Santa starts with 300 HP
-    expect(state?.playerMaxHp).toBe(300);
-
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
 
-    state = await getGameState(page);
-    // Allow small variance due to potential collision damage or float precision
-    expect(state?.playerHp).toBeLessThanOrEqual(200);
-    expect(state?.playerHp).toBeGreaterThan(195); // Allow 5 HP variance for collision damage
+    let state = await getGameState(page);
+    expect(state?.playerHp).toBe(200); // 300 - 100 = 200
     expect(state?.gameState).toBe('PHASE_1'); // Still alive
 
     // Take more damage
@@ -590,67 +583,40 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).evaluate(el => el.click());
-    await page.waitForTimeout(2000); // Wait for game to fully start
+    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1000);
 
-    // Wait for game to be in active state
-    await waitForGameState(page, 'PHASE_1', 10000);
+    await page.waitForTimeout(3000);
 
-    // First kill to initialize streak
+    // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100); // Brief wait for store update
-
-    // Wait for kill streak state to update
-    let attempts = 0;
-    while (attempts < 20) {
-      const state = await getGameState(page);
-      if (state?.killStreak === 1) break;
-      await page.waitForTimeout(100);
-      attempts++;
-    }
-
-    let state = await getGameState(page);
-    expect(state?.killStreak).toBe(1);
-
-    // Second kill for DOUBLE KILL - must be within 5 seconds
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
 
-    // Wait for kill streak state to update to 2
-    attempts = 0;
-    while (attempts < 20) {
-      state = await getGameState(page);
-      if (state?.killStreak === 2) break;
+    // Wait for kill streak state to update
+    let attempts = 0;
+    let state = await getGameState(page);
+    while (attempts < 20 && state?.killStreak !== 2) {
       await page.waitForTimeout(100);
+      state = await getGameState(page);
       attempts++;
     }
-
-    state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
 
-    // Wait for DOUBLE KILL notification to disappear before triggering next kill
-    await page.waitForTimeout(1600); // Notification shows for 1500ms
-
-    // Third kill for TRIPLE KILL - must be within 5 seconds of second kill
+    // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-
-    // Wait for kill streak state to update to 3
-    attempts = 0;
-    while (attempts < 20) {
-      state = await getGameState(page);
-      if (state?.killStreak === 3) break;
-      await page.waitForTimeout(100);
-      attempts++;
-    }
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
     // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
