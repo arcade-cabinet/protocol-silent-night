@@ -57,6 +57,31 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
   return false;
 }
 
+// Helper to handle any pending level-ups by selecting the first available upgrade
+async function handlePendingLevelUps(page: Page, maxAttempts = 5) {
+  for (let i = 0; i < maxAttempts; i++) {
+    const state = await getGameState(page);
+    if (state?.gameState !== 'LEVEL_UP') {
+      break;
+    }
+
+    // Get available upgrade choices and select the first one
+    const upgradeChoices = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return [];
+      const state = store.getState();
+      return state.runProgress?.upgradeChoices || [];
+    });
+
+    if (upgradeChoices.length > 0) {
+      await triggerStoreAction(page, 'selectLevelUpgrade', upgradeChoices[0].id);
+      await page.waitForTimeout(200);
+    } else {
+      break;
+    }
+  }
+}
+
 // Helper to simulate combat until kills reach target
 async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
   const startTime = Date.now();
@@ -391,6 +416,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
+    // Handle any pending level-ups that may have occurred from XP gains
+    await handlePendingLevelUps(page);
+
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -417,6 +445,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(100);
     }
     await page.waitForTimeout(1000);
+
+    // Handle any pending level-ups before asserting boss state
+    await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -485,8 +516,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
+    await handlePendingLevelUps(page);
+
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
+    await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -497,6 +531,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(500);
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -518,8 +553,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
+    await handlePendingLevelUps(page);
+
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
+    await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -530,6 +568,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(100);
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
@@ -548,6 +587,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
+    await handlePendingLevelUps(page);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
@@ -555,6 +595,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -563,6 +604,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -667,8 +709,10 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
 
-    // Step 4: Boss phase
+    // Step 4: Boss phase - handle any level-ups first
     await page.waitForTimeout(1000);
+    await handlePendingLevelUps(page);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
@@ -712,6 +756,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     }
     await page.waitForTimeout(500);
 
+    // Handle any level-ups before asserting boss phase
+    await handlePendingLevelUps(page);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
@@ -742,6 +789,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
+
+    // Handle any level-ups before asserting boss phase
+    await handlePendingLevelUps(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
