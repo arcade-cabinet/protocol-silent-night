@@ -52,12 +52,13 @@ export function MissionBriefing() {
       return;
     }
 
-    if (animationStartedRef.current) return;
-    animationStartedRef.current = true;
-
-    // Reset state when briefing starts
+    // Reset state when briefing starts (before checking animationStartedRef)
+    // This ensures fresh state on each entry to BRIEFING
     setCurrentLine(0);
     setShowButton(false);
+
+    if (animationStartedRef.current) return;
+    animationStartedRef.current = true;
 
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
