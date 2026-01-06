@@ -57,28 +57,6 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
   return false;
 }
 
-// Helper to auto-complete level-ups by selecting first available upgrade
-async function completeLevelUpIfNeeded(page: Page) {
-  const state = await getGameState(page);
-  if (state?.gameState === 'LEVEL_UP') {
-    // Get available upgrades and select the first one
-    const upgraded = await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      const state = store.getState();
-      const choices = state.runProgress?.upgradeChoices;
-      if (choices && choices.length > 0) {
-        state.selectLevelUpgrade(choices[0].id);
-        return true;
-      }
-      return false;
-    });
-    if (upgraded) {
-      await page.waitForTimeout(200); // Wait for state transition
-    }
-  }
-}
-
 // Helper to simulate combat until kills reach target
 async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
   const startTime = Date.now();
@@ -195,9 +173,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // Allow small variance due to potential collision damage
-    expect(state?.playerHp).toBeGreaterThanOrEqual(195);
-    expect(state?.playerHp).toBeLessThanOrEqual(200);
+    expect(state?.playerHp).toBe(200); // 300 - 100 = 200
     expect(state?.gameState).toBe('PHASE_1'); // Still alive
 
     // Take more damage
@@ -205,10 +181,8 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForTimeout(200);
 
     state = await getGameState(page);
-    // Allow small variance due to potential collision damage
-    expect(state?.playerHp).toBeGreaterThanOrEqual(95);
-    expect(state?.playerHp).toBeLessThanOrEqual(100);
-    expect(state?.gameState).toBe('PHASE_1'); // Still alive with ~100 HP
+    expect(state?.playerHp).toBe(100);
+    expect(state?.gameState).toBe('PHASE_1'); // Still alive with 100 HP
   });
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
@@ -386,12 +360,10 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // Allow small variance due to potential collision damage (93-100 HP)
-    expect(state?.playerHp).toBeGreaterThanOrEqual(90);
-    expect(state?.playerHp).toBeLessThanOrEqual(100);
+    expect(state?.playerHp).toBe(100);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // One more hit at 100 damage should kill (even with collision damage)
+    // One more hit at 100 damage kills
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(500);
 
@@ -414,13 +386,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Simulate 10 kills to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(100);
     }
 
     await page.waitForTimeout(1000);
-
-    // Complete level-up if it triggered
-    await completeLevelUpIfNeeded(page);
 
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
@@ -445,12 +414,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(100);
     }
     await page.waitForTimeout(1000);
-
-    // Complete level-up if it triggered
-    await completeLevelUpIfNeeded(page);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -465,9 +431,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     // Verify victory screen - use heading role for specificity
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
-      timeout: 10000,
+      timeout: 5000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -486,9 +452,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
-
-    // Complete level-up if it triggered
-    await completeLevelUpIfNeeded(page);
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
@@ -519,7 +482,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak (minimize waits to stay within 2s timeout)
+    // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
@@ -533,7 +496,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -562,11 +525,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
-    await page.waitForTimeout(2200);
+    await page.waitForTimeout(2500);
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
@@ -650,21 +613,20 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
-    // Reduce iterations and waits to avoid timeout
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(200);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     // Reset
     await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // Start new game
     await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
@@ -699,16 +661,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Step 3: Combat phase - kill enemies (reduced wait time)
+    // Step 3: Combat phase - kill enemies
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(200);
     }
 
-    // Step 4: Boss phase - complete level-up if needed
+    // Step 4: Boss phase
     await page.waitForTimeout(1000);
-    await completeLevelUpIfNeeded(page);
-
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
@@ -721,11 +681,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
-      timeout: 10000,
+      timeout: 5000,
     });
 
     // Step 7: Can restart
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }), { timeout: 30000 });
+    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
@@ -751,9 +711,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
-
-    // Complete level-up if it triggered
-    await completeLevelUpIfNeeded(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -785,9 +742,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
-
-    // Complete level-up if it triggered
-    await completeLevelUpIfNeeded(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
