@@ -610,9 +610,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
+    // Wait for kill streak state to update to 3
+    attempts = 0;
     state = await getGameState(page);
+    while (attempts < 20 && state?.killStreak !== 3) {
+      await page.waitForTimeout(100);
+      state = await getGameState(page);
+      attempts++;
+    }
     expect(state?.killStreak).toBe(3);
 
     // Should show TRIPLE KILL
