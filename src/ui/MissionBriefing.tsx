@@ -49,16 +49,18 @@ export function MissionBriefing() {
   useEffect(() => {
     if (state !== 'BRIEFING') {
       animationStartedRef.current = false;
+      // Reset state when leaving briefing to ensure fresh start on next entry
+      setCurrentLine(0);
+      setShowButton(false);
       return;
     }
 
-    // Reset state when briefing starts (before checking animationStartedRef)
-    // This ensures fresh state on each entry to BRIEFING
-    setCurrentLine(0);
-    setShowButton(false);
-
     if (animationStartedRef.current) return;
     animationStartedRef.current = true;
+
+    // Reset state when briefing starts
+    setCurrentLine(0);
+    setShowButton(false);
 
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;

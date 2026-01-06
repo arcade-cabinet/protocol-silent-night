@@ -23,6 +23,7 @@ export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
+  const phaseStartTimeRef = useRef(0); // Add phase start time tracking
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
@@ -79,6 +80,7 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
+      phaseStartTimeRef.current = Date.now(); // Set start time when phase begins
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
@@ -159,7 +161,10 @@ export function Enemies() {
           ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
-        if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
+        // Add 1s grace period after phase start to prevent instant damage
+        const isGracePeriod = now - phaseStartTimeRef.current < 1000;
+
+        if (!isGracePeriod && now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
           // Only damage if enemy is properly initialized
           const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
