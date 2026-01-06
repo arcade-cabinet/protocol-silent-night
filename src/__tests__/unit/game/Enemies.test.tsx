@@ -47,10 +47,6 @@ describe('Enemies Component', () => {
   });
 
   it('should damage player on collision', async () => {
-    // Mock Date.now to control grace period timing
-    const startTime = Date.now();
-    const mockNow = vi.spyOn(Date, 'now');
-
     const enemy = {
       id: 'test-enemy',
       mesh: new THREE.Object3D(),
@@ -68,25 +64,16 @@ describe('Enemies Component', () => {
     useGameStore.setState({
       enemies: [enemy],
       playerHp: 100,
-      state: 'PHASE_1', // Set to phase state to start the game
     });
-
-    // Set initial time for component mount
-    mockNow.mockReturnValue(startTime);
 
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
-    // Advance time past grace period (1000ms)
-    mockNow.mockReturnValue(startTime + 1100);
-
-    // Advance frames to trigger collision check
-    await renderer.advanceFrames(2, 0.1);
+    await renderer.advanceFrames(1, 0.1);
 
     const state = useGameStore.getState();
     expect(state.playerHp).toBeLessThan(100);
 
-    mockNow.mockRestore();
     await renderer.unmount();
   });
 });
