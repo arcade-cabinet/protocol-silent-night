@@ -384,50 +384,59 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
-    const now = Date.now();
-    const newKills = stats.kills + 1;
+    // Use functional update to ensure we always work with fresh state
+    set((state) => {
+      const now = Date.now();
+      const newKills = state.stats.kills + 1;
 
-    const streakTimeout = 2000;
-    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+      const streakTimeout = 5000;
+      const timeSinceLastKill = now - state.lastKillTime;
+      const newStreak = state.lastKillTime > 0 && timeSinceLastKill < streakTimeout
+        ? state.killStreak + 1
+        : 1;
 
-    const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
-    const newScore = stats.score + points + streakBonus;
+      const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
+      const newScore = state.stats.score + points + streakBonus;
 
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+      return {
+        stats: { ...state.stats, kills: newKills, score: newScore },
+        killStreak: newStreak,
+        lastKillTime: now,
+        metaProgress: {
+          ...state.metaProgress,
+          totalKills: state.metaProgress.totalKills + 1,
+        },
+      };
+    });
+
+    // Run side effects using updated state
+    const state = get();
+    const { killStreak } = state;
+
+    const xpGain = 10 + (killStreak > 1 ? (killStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
     let npStreakBonus = 0;
-    if (newStreak === 2) npStreakBonus = 5;
-    else if (newStreak === 3) npStreakBonus = 10;
-    else if (newStreak === 4) npStreakBonus = 25;
-    else if (newStreak >= 5) npStreakBonus = 50;
+    if (killStreak === 2) npStreakBonus = 5;
+    else if (killStreak === 3) npStreakBonus = 10;
+    else if (killStreak === 4) npStreakBonus = 25;
+    else if (killStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
 
-    set({
-      stats: { ...stats, kills: newKills, score: newScore },
-      killStreak: newStreak,
-      lastKillTime: now,
-      metaProgress: {
-        ...get().metaProgress,
-        totalKills: metaProgress.totalKills + 1,
-      },
-    });
-
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
-    if (newStreak > 1 && newStreak % 3 === 0) {
+    if (killStreak > 1 && killStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
     }
 
     // Scale requirement by wave
-    const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
+    const waveReq = CONFIG.WAVE_REQ * state.runProgress.wave;
 
-    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
-      const hasBoss = get().enemies.some((e) => e.type === 'boss');
+    if (state.stats.kills >= waveReq && (state.state === 'PHASE_1' || state.state === 'LEVEL_UP')) {
+      const hasBoss = state.enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
       }
@@ -890,13 +899,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    const isLeveling = get().state === 'LEVEL_UP';
+    // Force transition to boss phase, clearing any pending level up state visually
+    // The pendingLevelUp flag in runProgress remains if we want to resume later,
+    // but for now we prioritize the boss fight.
     set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+      state: 'PHASE_BOSS',
+      // If we were in LEVEL_UP, we don't want to go back to it automatically via previousState logic
+      // because the boss fight overrides the pacing.
+      previousState: 'PHASE_1',
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
+      // Clear pending level up to prevent UI conflicts
+      runProgress: {
+        ...state.runProgress,
+        pendingLevelUp: false,
+      },
     }));
     AudioManager.playSFX('boss_appear');
     AudioManager.playMusic('boss');

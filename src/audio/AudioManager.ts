@@ -36,6 +36,7 @@ class AudioManagerClass {
   private masterVolume = 0.7;
   private musicVolume = 0.6;
   private sfxVolume = 0.8;
+  private lastSFXTime = 0;
 
   // Synth instruments
   private synths: Map<string, Tone.Synth | Tone.PolySynth | Tone.FMSynth | Tone.NoiseSynth> =
@@ -174,34 +175,50 @@ class AudioManagerClass {
   /**
    * Play sound effect
    */
-  playSFX(effect: SoundEffect): void {
+  async playSFX(effect: SoundEffect): Promise<void> {
     if (!this.initialized || !this.sfxEnabled) return;
+
+    // Ensure context is running (resume if suspended)
+    if (Tone.context.state !== 'running') {
+      await Tone.start();
+    }
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    const now = Tone.now();
 
-    const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
-    if (!effectData) return;
+    try {
+      // Ensure monotonic timing to prevent Tone.js errors
+      // Increase gap to 0.05s to be safe
+      let now = Tone.now();
+      if (now <= this.lastSFXTime) {
+        now = this.lastSFXTime + 0.05;
+      }
+      this.lastSFXTime = now;
 
-    // Handle sequence
-    // @ts-expect-error
-    if (effectData.sequence) {
+      const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
+      if (!effectData) return;
+
+      // Handle sequence
       // @ts-expect-error
-      for (const [note, duration, delay = 0] of effectData.sequence) {
-        sfxSynth.triggerAttackRelease(note, duration, now + delay);
-      }
-    } else {
-      // @ts-expect-error
-      if (effectData.note) {
+      if (effectData.sequence) {
         // @ts-expect-error
-        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
-      }
-      // @ts-expect-error
-      if (effectData.noise) {
+        for (const [note, duration, delay = 0] of effectData.sequence) {
+          sfxSynth.triggerAttackRelease(note, duration, now + delay);
+        }
+      } else {
         // @ts-expect-error
-        noiseSynth.triggerAttackRelease(effectData.duration, now);
+        if (effectData.note) {
+          // @ts-expect-error
+          sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
+        }
+        // @ts-expect-error
+        if (effectData.noise) {
+          // @ts-expect-error
+          noiseSynth.triggerAttackRelease(effectData.duration, now);
+        }
       }
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
     }
   }
 
