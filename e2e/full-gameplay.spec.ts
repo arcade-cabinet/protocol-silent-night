@@ -174,7 +174,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     let state = await getGameState(page);
     expect(state?.playerHp).toBe(200); // 300 - 100 = 200
-    expect(['PHASE_1', 'LEVEL_UP']).toContain(state?.gameState); // Still alive
+    expect(state?.gameState).toBe('PHASE_1'); // Still alive
 
     // Take more damage
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -182,7 +182,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     state = await getGameState(page);
     expect(state?.playerHp).toBe(100);
-    expect(['PHASE_1', 'LEVEL_UP']).toContain(state?.gameState); // Still alive with 100 HP
+    expect(state?.gameState).toBe('PHASE_1'); // Still alive with 100 HP
   });
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
@@ -361,7 +361,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     let state = await getGameState(page);
     expect(state?.playerHp).toBe(100);
-    expect(['PHASE_1', 'LEVEL_UP']).toContain(state?.gameState);
+    expect(state?.gameState).toBe('PHASE_1');
 
     // One more hit at 100 damage kills
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -391,17 +391,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
-    let state = await getGameState(page);
+    const state = await getGameState(page);
     expect(state?.kills).toBe(10);
-
-    // Handle potential LEVEL_UP state transition before PHASE_BOSS
-    if (state?.gameState === 'LEVEL_UP') {
-      // Select an upgrade to continue
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-    }
-
     expect(state?.gameState).toBe('PHASE_BOSS');
     expect(state?.bossActive).toBe(true);
     expect(state?.bossHp).toBe(1000);
@@ -428,14 +419,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
-
-    // Handle potential LEVEL_UP state transition before PHASE_BOSS
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-    }
-
     expect(state?.bossActive).toBe(true);
 
     // Damage boss until defeated
@@ -499,20 +482,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-    }
-
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -539,20 +515,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-    }
-
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
@@ -576,18 +545,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-    }
-
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
     await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
@@ -651,13 +613,6 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
-    // Dismiss any LEVEL_UP screens if present
-    let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-    }
-
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
       await page.waitForTimeout(200);
@@ -712,14 +667,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(200);
     }
 
-    // Step 4: Boss phase - handle potential LEVEL_UP transition
+    // Step 4: Boss phase
     await page.waitForTimeout(1000);
     state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-    }
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
 
@@ -763,12 +713,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Handle potential LEVEL_UP state transition before PHASE_BOSS
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-    }
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
@@ -800,12 +744,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
-    // Handle potential LEVEL_UP state transition before PHASE_BOSS
-    if (state?.gameState === 'LEVEL_UP') {
-      await triggerStoreAction(page, 'selectLevelUpgrade', 'faster_movement');
-      await page.waitForTimeout(500);
-      state = await getGameState(page);
-    }
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
