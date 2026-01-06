@@ -55,9 +55,6 @@ export function MissionBriefing() {
       return;
     }
 
-    // Wait for briefingLines to be populated before starting animation
-    if (briefingLines.length === 0) return;
-
     if (animationStartedRef.current) return;
     animationStartedRef.current = true;
 
