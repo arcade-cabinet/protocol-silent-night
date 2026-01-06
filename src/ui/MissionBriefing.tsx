@@ -55,9 +55,6 @@ export function MissionBriefing() {
       return;
     }
 
-    // Wait for briefingLines to be populated before starting animation
-    if (briefingLines.length === 0) return;
-
     if (animationStartedRef.current) return;
     animationStartedRef.current = true;
 
@@ -67,6 +64,8 @@ export function MissionBriefing() {
 
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
+
+    if (totalLines === 0) return;
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
