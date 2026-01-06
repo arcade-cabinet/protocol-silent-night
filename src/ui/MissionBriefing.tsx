@@ -55,17 +55,18 @@ export function MissionBriefing() {
       return;
     }
 
+    // Capture total lines to avoid dependency on the array reference
+    const totalLines = briefingLines.length;
+
+    // Wait for briefingLines to be populated before starting animation
+    if (totalLines === 0) return;
+
     if (animationStartedRef.current) return;
     animationStartedRef.current = true;
 
     // Reset state when briefing starts
     setCurrentLine(0);
     setShowButton(false);
-
-    // Capture total lines to avoid dependency on the array reference
-    const totalLines = briefingLines.length;
-
-    if (totalLines === 0) return;
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
