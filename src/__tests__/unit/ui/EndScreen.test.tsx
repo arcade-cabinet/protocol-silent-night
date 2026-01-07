@@ -169,7 +169,7 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    const button = screen.getByRole('button', { name: /RE-DEPLOY/ });
+    const button = screen.getByRole('button', { name: /PLAY AGAIN/ });
     expect(button).toBeInTheDocument();
   });
 
@@ -194,7 +194,7 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    const button = screen.getByRole('button', { name: /RE-DEPLOY/ });
+    const button = screen.getByRole('button', { name: /PLAY AGAIN/ });
     await act(async () => {
       await user.click(button);
     });
