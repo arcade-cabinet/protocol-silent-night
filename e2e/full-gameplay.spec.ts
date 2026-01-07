@@ -622,10 +622,13 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
+
+    // Wait for game over state
+    await waitForGameState(page, 'GAME_OVER', 10000);
 
     // Reset
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
+    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }), { timeout: 30000 });
     await page.waitForTimeout(1000);
 
     // Start new game

@@ -386,19 +386,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
+    const { stats, state, lastKillTime, killStreak, metaProgress, runProgress } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
     const streakTimeout = 2000;
-    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+    // Handle streak logic: if lastKillTime is 0 (first kill) or timeout expired, reset to 1
+    // Otherwise, increment the existing streak
+    const newStreak =
+      lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
 
+    // Calculate XP gain
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
-    get().gainXP(xpGain);
+    const xpBonus = runProgress.activeUpgrades.christmas_spirit
+      ? 1 + runProgress.activeUpgrades.christmas_spirit * 0.3
+      : 1;
+    const adjustedXP = Math.floor(xpGain * xpBonus);
+    const newXP = runProgress.xp + adjustedXP;
 
+    // Calculate Nice Points gain
     let npStreakBonus = 0;
     if (newStreak === 2) npStreakBonus = 5;
     else if (newStreak === 3) npStreakBonus = 10;
@@ -406,17 +415,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
     else if (newStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
-    get().earnNicePoints(npGain);
 
+    // Update all state in a single set() call to avoid race conditions
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
+      runProgress: { ...runProgress, xp: newXP },
       metaProgress: {
-        ...get().metaProgress,
+        ...metaProgress,
         totalKills: metaProgress.totalKills + 1,
+        nicePoints: metaProgress.nicePoints + npGain,
+        totalPointsEarned: metaProgress.totalPointsEarned + npGain,
       },
     });
+
+    // Save metaProgress to localStorage
+    saveMetaProgress(get().metaProgress);
+
+    // Check for level up after state is updated
+    const xpToNextLevel = runProgress.level * 100;
+    if (state !== 'LEVEL_UP' && newXP >= xpToNextLevel) {
+      // Call levelUp through the store to handle level up logic
+      set({
+        runProgress: {
+          ...get().runProgress,
+          xp: newXP - xpToNextLevel,
+          level: get().runProgress.level + 1,
+        },
+      });
+      get().levelUp();
+    }
 
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
