@@ -59,7 +59,6 @@ export function MissionBriefing() {
     const totalLines = briefingLines.length;
 
     if (totalLines === 0) {
-      // Reset guard if briefing lines aren't ready yet
       animationStartedRef.current = false;
       return;
     }
