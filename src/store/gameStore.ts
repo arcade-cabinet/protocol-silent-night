@@ -387,6 +387,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   addKill: (points) => {
     const now = Date.now();
+    let newStreak = 0;
 
     // Use set with updater function to ensure we read the latest state
     set((currentState) => {
@@ -394,7 +395,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const newKills = stats.kills + 1;
 
       const streakTimeout = 2000;
-      const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+      newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = stats.score + points + streakBonus;
@@ -410,8 +411,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    // Get updated state for subsequent operations
-    const { killStreak: newStreak, state } = get();
+    // Use the calculated newStreak value
+    const { state } = get();
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);

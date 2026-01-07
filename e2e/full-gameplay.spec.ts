@@ -30,12 +30,30 @@ async function getGameState(page: Page) {
   });
 }
 
+// Helper to auto-handle level-ups during tests
+async function autoHandleLevelUp(page: Page) {
+  const state = await getGameState(page);
+  if (state?.gameState === 'LEVEL_UP') {
+    // Auto-select the first available upgrade
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return;
+      const state = store.getState();
+      const choices = state.runProgress.upgradeChoices;
+      if (choices && choices.length > 0) {
+        state.selectLevelUpgrade(choices[0].id);
+      }
+    });
+    await page.waitForTimeout(200);
+  }
+}
+
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
   // Add small delay between actions to ensure proper audio timing and preventing scheduling race conditions
   await page.waitForTimeout(50);
   try {
-    return await page.evaluate(({ action, args }) => {
+    const result = await page.evaluate(({ action, args }) => {
       const store = (window as any).useGameStore;
       if (!store) return false;
       const state = store.getState();
@@ -45,6 +63,11 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
       }
       return false;
     }, { action, args });
+
+    // Auto-handle any level-ups that occur
+    await autoHandleLevelUp(page);
+
+    return result;
   } catch (error) {
     console.error(`Failed to trigger action ${action}:`, error);
     return false;
