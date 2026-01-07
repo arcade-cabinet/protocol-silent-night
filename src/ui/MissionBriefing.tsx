@@ -94,8 +94,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-    // biome-ignore lint/correctness/useExhaustiveDependencies: Only run when entering BRIEFING state
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
