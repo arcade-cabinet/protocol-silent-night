@@ -386,8 +386,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
+    const currentState = get();
+    const { stats, state, lastKillTime, killStreak, metaProgress } = currentState;
+
     const newKills = stats.kills + 1;
 
     const streakTimeout = 2000;
