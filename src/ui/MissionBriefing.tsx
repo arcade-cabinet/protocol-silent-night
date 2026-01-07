@@ -45,7 +45,6 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length causes infinite restarts
   useEffect(() => {
     if (state !== 'BRIEFING') {
       animationStartedRef.current = false;
@@ -58,11 +57,14 @@ export function MissionBriefing() {
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
 
+    // If briefing lines aren't ready yet, this shouldn't happen since
+    // playerClass is set atomically with state in selectClass()
     if (totalLines === 0) {
-      animationStartedRef.current = false;
+      console.warn('MissionBriefing: briefingLines is empty in BRIEFING state');
       return;
     }
 
+    // Only run animation once per briefing session
     if (animationStartedRef.current) return;
 
     animationStartedRef.current = true;
@@ -92,7 +94,8 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines.length]);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: Only run when entering BRIEFING state
+  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
