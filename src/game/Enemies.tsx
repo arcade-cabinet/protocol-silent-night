@@ -88,8 +88,9 @@ export function Enemies() {
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
 
+      // Add initial delay before first spawn to prevent immediate damage
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
-        const id = setTimeout(() => spawnMinion(), i * 200);
+        const id = setTimeout(() => spawnMinion(), 500 + i * 200);
         timeoutIds.push(id);
       }
     }
