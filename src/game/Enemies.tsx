@@ -87,8 +87,6 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
-      // Reset start time when gameplay actually begins
-      startTimeRef.current = Date.now();
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
@@ -171,9 +169,8 @@ export function Enemies() {
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
         if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
-          // Extended grace period check: Don't damage player in first 10 seconds
-          // This prevents damage during E2E test setup and manual testing
-          const isGracePeriod = now - startTimeRef.current < 10000;
+          // Grace period check: Don't damage player in first 5 seconds
+          const isGracePeriod = now - startTimeRef.current < 5000;
 
           // Only damage if enemy is properly initialized (not at origin 0,0,0).
           // Enemies spawn at radius 20-30 units, so lengthSq > 0.1 ensures proper initialization.
