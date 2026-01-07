@@ -40,7 +40,7 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('h1', { timeout: 30000 });
 
       // Verify title is visible
-      const title = page.locator('h1').first();
+      const title = page.locator('h1');
       await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
