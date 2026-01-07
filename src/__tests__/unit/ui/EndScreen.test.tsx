@@ -161,7 +161,7 @@ describe('EndScreen Component', () => {
     expect(screen.queryByText(/NEW HIGH SCORE/i)).not.toBeInTheDocument();
   });
 
-  it('should have play again button on win', () => {
+  it('should have re-deploy button on win', () => {
     act(() => {
       useGameStore.getState().selectClass('santa');
       useGameStore.getState().setState('WIN');
@@ -169,7 +169,7 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    const button = screen.getByRole('button', { name: /PLAY AGAIN/ });
+    const button = screen.getByRole('button', { name: /RE-DEPLOY/ });
     expect(button).toBeInTheDocument();
   });
 
@@ -185,7 +185,7 @@ describe('EndScreen Component', () => {
     expect(button).toBeInTheDocument();
   });
 
-  it('should reset game when play again clicked', async () => {
+  it('should reset game when re-deploy clicked', async () => {
     const user = userEvent.setup();
     act(() => {
       useGameStore.getState().selectClass('santa');
@@ -194,7 +194,7 @@ describe('EndScreen Component', () => {
 
     render(<EndScreen />);
 
-    const button = screen.getByRole('button', { name: /PLAY AGAIN/ });
+    const button = screen.getByRole('button', { name: /RE-DEPLOY/ });
     await act(async () => {
       await user.click(button);
     });
