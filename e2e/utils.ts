@@ -46,7 +46,8 @@ export async function selectCharacter(page: Page, name: string) {
   await button.waitFor({ state: 'visible', timeout: 10000 });
   // Removed scrollIntoViewIfNeeded as it causes instability in CI
   // Use standard click which attempts to scroll if needed
-  await button.click();
+  // Increase timeout for mobile viewports where click can be slower
+  await button.click({ timeout: 30000 });
 }
 
 // Helper to start mission robustly
@@ -54,5 +55,6 @@ export async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
-  await button.click();
+  // Increase timeout for mobile viewports where click can be slower
+  await button.click({ timeout: 30000 });
 }
