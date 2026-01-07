@@ -47,6 +47,10 @@ describe('Enemies Component', () => {
   });
 
   it('should damage player on collision', async () => {
+    vi.useFakeTimers();
+    // Advance time past the grace period (2000ms)
+    vi.setSystemTime(Date.now() + 2500);
+
     const enemy = {
       id: 'test-enemy',
       mesh: new THREE.Object3D(),
@@ -75,5 +79,6 @@ describe('Enemies Component', () => {
     expect(state.playerHp).toBeLessThan(100);
 
     await renderer.unmount();
+    vi.useRealTimers();
   });
 });
