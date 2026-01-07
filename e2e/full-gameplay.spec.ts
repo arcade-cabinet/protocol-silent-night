@@ -433,7 +433,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /PLAY AGAIN/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -613,20 +613,30 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
+    // Add kills sequentially with adequate delays to prevent race conditions
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(300); // Increased from 200ms for CI stability
     }
 
+    // Wait for state to settle before reading score
+    await page.waitForTimeout(500);
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
+    expect(scoreBeforeDeath).toBeGreaterThan(0); // Verify we actually scored
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000); // Increased wait for game over transition
+
+    // Wait for game over screen to be visible
+    await expect(page.getByRole('heading', { name: /OPERATOR DOWN/i })).toBeVisible({ timeout: 10000 });
 
     // Reset
     await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500); // Increased wait for reset transition
+
+    // Verify we're back at menu
+    await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 10000 });
 
     // Start new game
     await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
@@ -634,14 +644,14 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000); // Increased wait for game start
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000); // Increased wait for game over transition
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -684,8 +694,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       timeout: 5000,
     });
 
-    // Step 7: Can restart
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
+    // Step 7: Can restart (button says "PLAY AGAIN" on win, "RE-DEPLOY" on loss)
+    await safeClick(page, page.getByRole('button', { name: /PLAY AGAIN/ }));
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
