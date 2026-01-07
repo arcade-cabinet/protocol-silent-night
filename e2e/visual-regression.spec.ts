@@ -217,10 +217,10 @@ test.describe('Visual Regression - Game Movement', () => {
 
     // Fire weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(800); // Wait longer for consistent animation frame
+    await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.05, // Increased tolerance for animation variations
+      maxDiffPixelRatio: 0.03,
       timeout: 20000,
     });
   });
