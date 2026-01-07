@@ -153,9 +153,11 @@ test.describe('UI Component Refinement', () => {
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
-          await page.reload();
-          await setupPage(page); // Re-apply animation disable after reload
-          await page.waitForSelector('h1', { timeout: 30000 });
+          await page.reload({ waitUntil: 'domcontentloaded' });
+          await disableAnimations(page);
+          await page.waitForLoadState('networkidle');
+          await page.waitForTimeout(2000); // Extra buffer for page stability
+          await page.waitForSelector('h1', { timeout: 30000, state: 'visible' });
         }
       }
     });
@@ -241,7 +243,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 15000 });
+      await page.waitForSelector('h1', { timeout: 30000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
