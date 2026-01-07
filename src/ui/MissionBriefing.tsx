@@ -91,8 +91,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 
