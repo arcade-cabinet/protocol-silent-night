@@ -64,6 +64,9 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
       return false;
     }, { action, args });
 
+    // Wait for state to fully propagate (increased for CI stability)
+    await page.waitForTimeout(200);
+
     // Auto-handle any level-ups that occur
     await autoHandleLevelUp(page);
 
