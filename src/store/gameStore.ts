@@ -411,17 +411,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    // Use the calculated newStreak value
-    const { state } = get();
+    // Get the actual streak value from state after the update
+    const { state, killStreak: currentStreak } = get();
+    const actualStreak = currentStreak;
 
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+    const xpGain = 10 + (actualStreak > 1 ? (actualStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
     let npStreakBonus = 0;
-    if (newStreak === 2) npStreakBonus = 5;
-    else if (newStreak === 3) npStreakBonus = 10;
-    else if (newStreak === 4) npStreakBonus = 25;
-    else if (newStreak >= 5) npStreakBonus = 50;
+    if (actualStreak === 2) npStreakBonus = 5;
+    else if (actualStreak === 3) npStreakBonus = 10;
+    else if (actualStreak === 4) npStreakBonus = 25;
+    else if (actualStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
@@ -429,7 +430,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
-    if (newStreak > 1 && newStreak % 3 === 0) {
+    if (actualStreak > 1 && actualStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
     }
 
