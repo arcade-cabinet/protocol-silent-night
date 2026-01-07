@@ -389,15 +389,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const now = Date.now();
     const streakTimeout = 2000;
 
+    // Capture the updated values from the atomic state update
+    let newStreak = 0;
+    let newKills = 0;
+    let newScore = 0;
+
     // Use set's updater function to ensure atomic state updates for kill streaks
     set((state) => {
       const { stats, lastKillTime, killStreak, metaProgress } = state;
-      const newKills = stats.kills + 1;
+      newKills = stats.kills + 1;
 
-      const newStreak = (lastKillTime > 0 && now - lastKillTime < streakTimeout) ? killStreak + 1 : 1;
+      // Check if we should continue the streak or start a new one
+      // First kill (lastKillTime === 0) starts streak at 1
+      // Subsequent kills within timeout increment the streak
+      newStreak = (lastKillTime > 0 && now - lastKillTime < streakTimeout) ? killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
-      const newScore = stats.score + points + streakBonus;
+      newScore = stats.score + points + streakBonus;
 
       return {
         stats: { ...stats, kills: newKills, score: newScore },
@@ -410,8 +418,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    // Call these after the atomic update - read fresh state
-    const { killStreak: newStreak, stats, state } = get();
+    // Use the captured values from the atomic update instead of calling get()
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
@@ -431,7 +438,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    // Scale requirement by wave
+    // Read current state for wave/boss logic
+    const { stats, state } = get();
     const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
 
     if (stats.kills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
