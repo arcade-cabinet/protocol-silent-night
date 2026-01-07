@@ -386,51 +386,38 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    // Get fresh state - read once at the start
-    const currentState = get();
-    const { stats, state: gameState, lastKillTime, killStreak, metaProgress } = currentState;
+    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
-    // Calculate new streak
     const streakTimeout = 2000;
-    const timeSinceLastKill = (typeof lastKillTime === 'number' && lastKillTime > 0) ? now - lastKillTime : Infinity;
-    const newStreak = timeSinceLastKill < streakTimeout ? killStreak + 1 : 1;
+    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
-    // Calculate score with streak bonus
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
 
-    // Calculate Nice Points bonus
+    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+    get().gainXP(xpGain);
+
     let npStreakBonus = 0;
     if (newStreak === 2) npStreakBonus = 5;
     else if (newStreak === 3) npStreakBonus = 10;
     else if (newStreak === 4) npStreakBonus = 25;
     else if (newStreak >= 5) npStreakBonus = 50;
-    const npGain = Math.floor(points / 10) + npStreakBonus;
 
-    // Update all kill-related state in one atomic operation
-    // This MUST happen before calling other functions to ensure state is consistent
+    const npGain = Math.floor(points / 10) + npStreakBonus;
+    get().earnNicePoints(npGain);
+
     set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...metaProgress,
-        nicePoints: metaProgress.nicePoints + npGain,
-        totalPointsEarned: metaProgress.totalPointsEarned + npGain,
+        ...get().metaProgress,
         totalKills: metaProgress.totalKills + 1,
       },
     });
 
-    // Save meta progress (after state update)
-    saveMetaProgress(get().metaProgress);
-
-    // Grant XP (which may trigger level up) - happens after kill streak is already set
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
-    get().gainXP(xpGain);
-
-    // Audio/haptic feedback
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
@@ -438,9 +425,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       AudioManager.playSFX('streak_start');
     }
 
-    // Check if boss should spawn
+    // Scale requirement by wave
     const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
-    if (newKills >= waveReq && (gameState === 'PHASE_1' || gameState === 'LEVEL_UP')) {
+
+    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();

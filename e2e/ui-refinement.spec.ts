@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupPage, safeClick, disableAnimations } from './helpers';
+import { setupPage, safeClick } from './helpers';
 
 /**
  * UI Component Refinement Tests
@@ -153,10 +153,8 @@ test.describe('UI Component Refinement', () => {
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
-          await page.reload({ waitUntil: 'domcontentloaded' });
-          await page.waitForLoadState('networkidle');
-          await disableAnimations(page); // Re-apply animation disable after reload
-          await page.waitForTimeout(1000); // Stability buffer
+          await page.reload();
+          await setupPage(page); // Re-apply animation disable after reload
           await page.waitForSelector('h1', { timeout: 30000 });
         }
       }

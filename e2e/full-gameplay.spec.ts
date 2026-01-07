@@ -34,35 +34,16 @@ async function getGameState(page: Page) {
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
   // Add small delay between actions to ensure proper audio timing and preventing scheduling race conditions
   await page.waitForTimeout(50);
-  const result = await page.evaluate(({ action, args }) => {
+  return page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
-    if (!store) return { success: false, stateBefore: null, stateAfter: null };
-    const stateBefore = {
-      killStreak: store.getState().killStreak,
-      lastKillTime: store.getState().lastKillTime,
-      score: store.getState().stats.score,
-    };
+    if (!store) return false;
     const state = store.getState();
     if (typeof state[action] === 'function') {
       state[action](...args);
-      const stateAfter = {
-        killStreak: store.getState().killStreak,
-        lastKillTime: store.getState().lastKillTime,
-        score: store.getState().stats.score,
-      };
-      return { success: true, stateBefore, stateAfter };
+      return true;
     }
-    return { success: false, stateBefore, stateAfter: null };
+    return false;
   }, { action, args });
-
-  // Debug logging
-  if (action === 'addKill' && result.success) {
-    console.log(`[triggerStoreAction] ${action}(${args.join(', ')})`);
-    console.log('  Before:', result.stateBefore);
-    console.log('  After:', result.stateAfter);
-  }
-
-  return result.success;
 }
 
 // Helper to wait for game state
