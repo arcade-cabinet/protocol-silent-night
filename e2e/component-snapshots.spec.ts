@@ -123,7 +123,6 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacter(page, 'MECHA-SANTA');
-    await startMission(page);
     await page.waitForTimeout(8000);
 
     // Fire at enemies
@@ -200,7 +199,6 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacter(page, 'MECHA-SANTA');
-    await startMission(page);
     await page.waitForTimeout(8000);
 
     // Fire and wait for hits
