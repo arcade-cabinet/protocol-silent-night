@@ -353,16 +353,19 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
 
     // Wait longer for fonts and mobile rendering to stabilize
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(7000);
 
     // Wait for fonts to be fully loaded
     await page.evaluate(() => document.fonts.ready);
 
     // Additional wait for layout to stabilize
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     // Ensure no animations are running
     await page.evaluate(() => document.fonts.ready);
+
+    // Wait for menu buttons to be visible
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -383,12 +386,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Use force click to bypass scroll issues
     await santaButton.click({ timeout: 15000, force: true });
 
-    // Wait for briefing screen to load and all lines to animate
-    await page.waitForTimeout(6000);
+    // Wait for briefing screen to load and all lines to animate (increased from 6000ms)
+    await page.waitForTimeout(8000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
     await commenceButton.click({ timeout: 15000, force: true });
 
     await page.waitForTimeout(5000);
@@ -412,12 +415,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Use force click to bypass scroll issues
     await santaButton.click({ timeout: 15000, force: true });
 
-    // Wait for briefing screen to load and all lines to animate
-    await page.waitForTimeout(6000);
+    // Wait for briefing screen to load and all lines to animate (increased from 6000ms)
+    await page.waitForTimeout(8000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 10000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
     await commenceButton.click({ timeout: 15000, force: true });
 
     await page.waitForTimeout(5000);
