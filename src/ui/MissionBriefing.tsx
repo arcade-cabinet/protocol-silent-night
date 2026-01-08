@@ -52,7 +52,7 @@ export function MissionBriefing() {
 
     // Use faster animations in test/CI environments for better test reliability
     // Check if running in playwright test context via window.navigator.webdriver
-    const isPlaywrightTest = typeof window !== 'undefined' && (window.navigator as any).webdriver === true;
+    const isPlaywrightTest = typeof window !== 'undefined' && (window.navigator as any).webdriver !== undefined;
     const isTestEnv = import.meta.env.MODE === 'test' || isPlaywrightTest;
     const lineDelay = isTestEnv ? 100 : 600;
     const buttonDelay = isTestEnv ? 50 : 500;
