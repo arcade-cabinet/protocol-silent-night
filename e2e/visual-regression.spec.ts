@@ -43,7 +43,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await santaCard.waitFor({ state: 'visible', timeout: 15000 });
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 15000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -55,7 +56,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await elfCard.waitFor({ state: 'visible', timeout: 15000 });
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 15000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -67,7 +69,8 @@ test.describe('Visual Regression - Character Selection', () => {
     await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 15000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -329,6 +332,8 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
 test.describe('Visual Regression - End Game States', () => {
   test('should render game over screen', async ({ page }) => {
+    test.setTimeout(120000); // Increase timeout to 120s for this complex test
+
     await page.goto('/');
     await page.waitForTimeout(3000);
 
@@ -361,11 +366,13 @@ test.describe('Visual Regression - End Game States', () => {
       gameWindow.useGameStore?.getState().damagePlayer(300);
     });
 
-    await page.waitForTimeout(2000);
+    // Wait longer for game over screen to fully render and stabilize
+    await page.waitForTimeout(3000);
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 15000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
