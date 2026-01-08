@@ -96,6 +96,9 @@ test.describe('Visual Regression - Game Start', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -122,6 +125,9 @@ test.describe('Visual Regression - Game Start', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -147,6 +153,9 @@ test.describe('Visual Regression - Game Start', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -175,6 +184,9 @@ test.describe('Visual Regression - HUD Elements', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -198,6 +210,9 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -228,6 +243,9 @@ test.describe('Visual Regression - Game Movement', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -255,6 +273,9 @@ test.describe('Visual Regression - Game Movement', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -285,6 +306,9 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -312,6 +336,9 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -341,6 +368,9 @@ test.describe('Visual Regression - End Game States', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });

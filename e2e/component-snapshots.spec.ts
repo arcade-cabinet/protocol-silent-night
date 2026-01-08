@@ -22,6 +22,9 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -54,6 +57,9 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -76,6 +82,9 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -101,6 +110,9 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -134,6 +146,9 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -159,6 +174,9 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     // Wait longer for briefing screen transition and animation to complete
     await page.waitForTimeout(3000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen with increased timeout
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 20000 });
@@ -181,6 +199,9 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -212,6 +233,9 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -238,6 +262,9 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -271,6 +298,9 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     // Wait longer for briefing screen transition and animation
     await page.waitForTimeout(3000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 20000 });
@@ -299,6 +329,9 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -330,6 +363,9 @@ test.describe('Component Snapshots - Camera System', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -352,6 +388,9 @@ test.describe('Component Snapshots - Camera System', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -385,6 +424,9 @@ test.describe('Component Snapshots - UI Overlays', () => {
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await expect(commenceButton).toBeVisible({ timeout: 15000 });
@@ -410,6 +452,9 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     // Wait for briefing screen transition
     await page.waitForTimeout(2000);
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
