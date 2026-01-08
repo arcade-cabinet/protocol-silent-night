@@ -91,9 +91,12 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 15000 });
       await page.click('button:has-text("MECHA-SANTA")', { timeout: 20000 });
 
+      // Wait for briefing screen transition
+      await page.waitForTimeout(2000);
+
       // Wait for mission briefing with longer timeout for state transition
       try {
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 8000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
         const briefingTitle = page.locator('text=MISSION BRIEFING');
         await expect(briefingTitle).toBeVisible({ timeout: 3000 });
@@ -119,8 +122,11 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('button:has-text("CYBER-ELF")', { state: 'visible', timeout: 15000 });
       await page.click('button:has-text("CYBER-ELF")', { timeout: 20000 });
 
+      // Wait for briefing screen transition
+      await page.waitForTimeout(2000);
+
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       // Check for operation button (wait for it to appear after animations)
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
@@ -140,8 +146,11 @@ test.describe('UI Component Refinement', () => {
         await page.waitForSelector(`button:has-text("${mech.name}")`, { state: 'visible', timeout: 15000 });
         await page.click(`button:has-text("${mech.name}")`, { timeout: 20000 });
 
+        // Wait for briefing screen transition
+        await page.waitForTimeout(2000);
+
         // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -167,8 +176,11 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 15000 });
       await page.click('button:has-text("MECHA-SANTA")', { timeout: 20000 });
 
+      // Wait for briefing screen transition
+      await page.waitForTimeout(2000);
+
       // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       // Wait for and click commence button after animations complete
       await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 10000 });
@@ -192,7 +204,11 @@ test.describe('UI Component Refinement', () => {
       // Select CYBER-ELF (Plasma SMG)
       await page.waitForSelector('button:has-text("CYBER-ELF")', { state: 'visible', timeout: 15000 });
       await page.click('button:has-text("CYBER-ELF")', { timeout: 20000 });
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+
+      // Wait for briefing screen transition
+      await page.waitForTimeout(2000);
+
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       // Wait for and click commence button after animations complete
       await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { state: 'visible', timeout: 10000 });
@@ -252,7 +268,11 @@ test.describe('UI Component Refinement', () => {
       // Select mech
       await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 15000 });
       await page.click('button:has-text("MECHA-SANTA")', { timeout: 20000 });
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+
+      // Wait for briefing screen transition
+      await page.waitForTimeout(2000);
+
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
