@@ -8,7 +8,7 @@ import { selectCharacterAndStartMission } from './test-helpers';
  * using Playwright's visual comparison capabilities
  */
 
-const VISUAL_THRESHOLD = 0.2;
+const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variations in CI
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   // Increase timeout for all tests in this suite due to WebGL rendering

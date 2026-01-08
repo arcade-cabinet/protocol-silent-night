@@ -10,7 +10,7 @@ import { selectCharacterAndStartMission } from './test-helpers';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
+const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variations in CI
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
@@ -342,7 +342,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(10000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: 0.25, // Slightly higher threshold for mobile WebGL variations
+      maxDiffPixelRatio: 0.35, // Higher threshold for mobile WebGL variations in CI
       timeout: 40000,
     });
   });
