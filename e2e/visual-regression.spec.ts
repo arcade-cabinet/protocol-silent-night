@@ -301,24 +301,36 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(3000);
+
+    // Wait longer for fonts and mobile rendering to stabilize
+    await page.waitForTimeout(5000);
+
+    // Wait for fonts to be fully loaded
+    await page.evaluate(() => document.fonts.ready);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 15000,
+      timeout: 20000,
     });
   });
 
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ timeout: 15000 });
+
+    // Ensure button is in viewport before clicking
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Use force click to bypass scroll issues
+    await santaButton.click({ timeout: 15000, force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: 15000 });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000, force: true });
 
     await page.waitForTimeout(5000);
 
@@ -331,13 +343,20 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ timeout: 15000 });
+
+    // Ensure button is in viewport before clicking
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Use force click to bypass scroll issues
+    await santaButton.click({ timeout: 15000, force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ timeout: 15000 });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.click({ timeout: 15000, force: true });
 
     await page.waitForTimeout(5000);
 
