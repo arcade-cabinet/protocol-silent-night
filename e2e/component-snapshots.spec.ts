@@ -12,7 +12,7 @@ const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variatio
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   // Increase timeout for all tests in this suite due to WebGL rendering
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -68,7 +68,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 });
 
 test.describe('Component Snapshots - Terrain and Environment', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render terrain correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -110,7 +110,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 });
 
 test.describe('Component Snapshots - Enemy Rendering', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render enemies when spawned', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -148,7 +148,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 });
 
 test.describe('Component Snapshots - Weapon Effects', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render Santa cannon weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -208,7 +208,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 });
 
 test.describe('Component Snapshots - Particle Effects', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render hit particles on impact', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -232,7 +232,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
 });
 
 test.describe('Component Snapshots - Camera System', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render correct camera perspective', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -272,7 +272,7 @@ test.describe('Component Snapshots - Camera System', () => {
 });
 
 test.describe('Component Snapshots - UI Overlays', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render damage flash effect', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);

@@ -95,7 +95,7 @@ async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime
 }
 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
@@ -229,7 +229,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 });
 
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should complete full game loop with Elf', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
@@ -296,7 +296,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 });
 
 test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should complete full game loop with Bumble', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
@@ -370,7 +370,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 });
 
 test.describe('Full Gameplay - Boss Battle', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should spawn boss after 10 kills', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
@@ -473,7 +473,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
 });
 
 test.describe('Full Gameplay - Kill Streaks', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should trigger kill streak notifications', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
@@ -576,7 +576,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 });
 
 test.describe('Full Gameplay - Game Reset', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should reset game and return to menu', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
@@ -654,7 +654,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 });
 
 test.describe('Full Gameplay - Complete Playthrough', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should complete entire game as Santa', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);
@@ -768,7 +768,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 });
 
 test.describe('Full Gameplay - Input Controls', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should respond to WASD movement', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);

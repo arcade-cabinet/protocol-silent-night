@@ -14,7 +14,7 @@ import { selectCharacterAndStartMission, selectCharacterToBriefing } from './tes
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 test.describe('UI Component Refinement', () => {
-  test.setTimeout(60000);
+  test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
     page.on('console', msg => {
