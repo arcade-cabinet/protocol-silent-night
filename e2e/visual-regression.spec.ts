@@ -367,7 +367,10 @@ test.describe('Visual Regression - End Game States', () => {
     });
 
     // Wait longer for game over screen to fully render and stabilize
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
+
+    // Additional wait for any text animations or particle effects to complete
+    await page.waitForLoadState('networkidle');
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,

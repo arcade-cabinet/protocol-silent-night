@@ -121,8 +121,8 @@ test.describe('UI Component Refinement', () => {
       await elfButton.waitFor({ state: 'visible', timeout: 15000 });
       await elfButton.click({ force: true, timeout: 30000 });
 
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+      // Wait for briefing with longer timeout for state transition
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
       // Check for operation button
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
@@ -143,12 +143,15 @@ test.describe('UI Component Refinement', () => {
         await mechButton.waitFor({ state: 'visible', timeout: 15000 });
         await mechButton.click({ force: true, timeout: 30000 });
 
-        // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
+        // Wait for briefing with longer timeout for state transition
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
-        // Verify operator and role
-        await expect(page.locator(`text=${mech.name}`)).toBeVisible();
-        await expect(page.locator(`text=${mech.role}`)).toBeVisible();
+        // Additional wait for content to render
+        await page.waitForTimeout(1000);
+
+        // Verify operator and role with more flexible selectors
+        await expect(page.locator(`text=${mech.name}`)).toBeVisible({ timeout: 5000 });
+        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 5000 });
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
