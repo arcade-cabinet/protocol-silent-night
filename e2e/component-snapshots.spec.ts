@@ -16,6 +16,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -48,6 +49,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click();
 
     // Wait for briefing screen animation to complete
@@ -71,6 +73,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await page.waitForTimeout(3000);
 
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleButton.click();
 
     // Wait for briefing screen animation to complete
@@ -96,6 +99,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -128,6 +132,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -153,6 +158,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -176,6 +182,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -206,6 +213,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -233,6 +241,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(3000);
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click();
 
     // Wait for briefing screen animation to complete
@@ -261,6 +270,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.waitForTimeout(3000);
 
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleButton.click();
 
     // Wait for briefing screen animation to complete
@@ -290,6 +300,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -320,6 +331,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.waitForTimeout(3000);
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -343,6 +355,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete
@@ -375,6 +388,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.waitForTimeout(3000);
     
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
     await elfButton.click();
 
     // Wait for briefing screen animation to complete
@@ -401,6 +415,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click();
 
     // Wait for briefing screen animation to complete

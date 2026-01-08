@@ -128,7 +128,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -159,7 +161,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -192,7 +196,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -223,7 +229,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -260,7 +268,9 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.waitForTimeout(2000);
 
     // Select Elf
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    await elfButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -282,7 +292,9 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    await elfButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -313,7 +325,9 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    await elfButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -341,7 +355,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.waitForTimeout(2000);
 
     // Select Bumble
-    await page.getByRole('button', { name: /BUMBLE/ }).click();
+    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
+    await bumbleButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -363,7 +379,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /BUMBLE/ }).click();
+    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
+    await bumbleButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -394,7 +412,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /BUMBLE/ }).click();
+    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
+    await bumbleButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -428,7 +448,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -462,7 +484,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -503,7 +527,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -545,7 +571,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -584,7 +612,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -620,7 +650,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -663,7 +695,9 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(2000);
 
     // Play a game
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -700,7 +734,9 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(2000);
 
     // Play and get a score
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -728,7 +764,9 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(1000);
 
     // Start new game
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    await elfButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -756,7 +794,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 1: Character Selection - verify start screen is showing
     await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -806,7 +846,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /CYBER-ELF/ }).click();
+    const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+    await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    await elfButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -843,7 +885,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /BUMBLE/ }).click();
+    const bumbleButton = page.getByRole('button', { name: /BUMBLE/ });
+    await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
+    await bumbleButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -882,7 +926,9 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -915,7 +961,9 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -945,7 +993,9 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
@@ -984,7 +1034,9 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+    await santaButton.click();
 
     // Wait for briefing screen animation to complete
     await page.waitForTimeout(6000);
