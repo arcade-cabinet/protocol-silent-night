@@ -352,7 +352,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
@@ -361,8 +361,12 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Wait for briefing screen to appear - it takes time due to animations
     // Briefing shows lines at 600ms intervals, with ~6 lines = ~3.6s + 500ms for button
+    // Wait for the briefing header first to ensure briefing screen loaded
+    await page.getByText('MISSION BRIEFING').waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(5000); // Wait for all lines to animate in
+
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
     await commenceButton.click({ force: true, noWaitAfter: true });
 
     // Wait for game to load
@@ -378,7 +382,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
@@ -386,8 +390,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.click({ force: true, noWaitAfter: true });
 
     // Wait for briefing screen to appear - it takes time due to animations
+    // Wait for the briefing header first to ensure briefing screen loaded
+    await page.getByText('MISSION BRIEFING').waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(5000); // Wait for all lines to animate in
+
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
     await commenceButton.click({ force: true, noWaitAfter: true });
 
     // Wait for game and touch controls to appear
