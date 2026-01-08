@@ -241,9 +241,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      // Wait for menu to be fully loaded and stable
-      await page.waitForSelector('h1', { timeout: 30000, state: 'visible' });
-      await page.waitForTimeout(1000); // Allow animations to complete
+      await page.waitForSelector('h1', { timeout: 15000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
