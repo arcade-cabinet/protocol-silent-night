@@ -120,6 +120,9 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
+      // Wait for page to be fully ready
+      await page.waitForTimeout(2000);
+
       // Select a mech
       const elfButton = page.locator('button:has-text("CYBER-ELF")');
       await elfButton.waitFor({ state: 'visible', timeout: 15000 });
@@ -135,6 +138,9 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should display correct operator for each mech', async ({ page }) => {
+      // Wait for page to be fully ready
+      await page.waitForTimeout(2000);
+
       const mechs = [
         { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
         { name: 'CYBER-ELF', role: 'Recon / Scout' },
@@ -157,6 +163,8 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
+          await page.waitForLoadState('networkidle');
+          await page.waitForTimeout(2000);
           await page.waitForSelector('h1', { timeout: 15000 });
         }
       }
@@ -265,6 +273,9 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
+      // Wait for page to be fully ready
+      await page.waitForTimeout(2000);
+
       // Select mech
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');
       await santaButton.waitFor({ state: 'visible', timeout: 15000 });

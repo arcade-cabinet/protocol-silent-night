@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { resolveLevelUp } from './test-utils';
 
 /**
  * Full Gameplay E2E Tests
@@ -474,6 +475,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
+    // Resolve any level-up that may have occurred
+    await resolveLevelUp(page);
+
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -508,6 +512,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(100);
     }
     await page.waitForTimeout(1000);
+
+    // Resolve any level-up that may have occurred
+    await resolveLevelUp(page);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -551,6 +558,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await page.waitForTimeout(20);
     }
     await page.waitForTimeout(500);
+
+    // Resolve any level-up that may have occurred
+    await resolveLevelUp(page);
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
@@ -822,6 +832,10 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 4: Boss phase
     await page.waitForTimeout(1000);
+
+    // Resolve any level-up that may have occurred
+    await resolveLevelUp(page);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
@@ -873,6 +887,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     }
     await page.waitForTimeout(500);
 
+    // Resolve any level-up that may have occurred
+    await resolveLevelUp(page);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
@@ -911,6 +928,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
+
+    // Resolve any level-up that may have occurred
+    await resolveLevelUp(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');

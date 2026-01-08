@@ -40,6 +40,9 @@ export async function selectCharacter(
   const button = page.getByRole('button', { name: new RegExp(characterName) });
   await button.waitFor({ state: 'visible', timeout: 15000 });
 
+  // Small wait to ensure button is fully interactive
+  await page.waitForTimeout(500);
+
   // Click the character button
   await button.click({ force: true });
 
@@ -75,4 +78,32 @@ export async function startGame(
 ): Promise<void> {
   await selectCharacter(page, characterName);
   await commenceOperation(page);
+}
+
+/**
+ * Resolves any pending level-up state by selecting the first available upgrade
+ */
+export async function resolveLevelUp(page: Page): Promise<void> {
+  const state = await page.evaluate(() => {
+    const store = (window as any).useGameStore;
+    return store?.getState?.()?.state;
+  });
+
+  if (state === 'LEVEL_UP') {
+    // Get available upgrades and select the first one
+    const upgradeId = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      const choices = store?.getState?.()?.runProgress?.upgradeChoices || [];
+      return choices[0]?.id;
+    });
+
+    if (upgradeId) {
+      await page.evaluate((id) => {
+        const store = (window as any).useGameStore;
+        store?.getState?.()?.selectLevelUpgrade?.(id);
+      }, upgradeId);
+      // Wait for state transition
+      await page.waitForTimeout(500);
+    }
+  }
 }
