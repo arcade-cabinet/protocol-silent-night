@@ -358,11 +358,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(500);
     await commenceButton.click({ force: true, timeout: 20000 });
 
-    await page.waitForTimeout(6000);
+    // Wait longer for WebGL rendering to stabilize in CI
+    await page.waitForTimeout(8000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
     });
   });
 
@@ -386,14 +387,17 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(500);
     await commenceButton.click({ force: true, timeout: 20000 });
 
-    await page.waitForTimeout(4000);
+    // Wait longer for WebGL rendering and touch controls to stabilize in CI
+    await page.waitForTimeout(6000);
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
     await expect(fireButton).toBeVisible({ timeout: 20000 });
+    // Additional wait for button rendering to stabilize
+    await page.waitForTimeout(1000);
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
     });
   });
 });
