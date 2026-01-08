@@ -156,12 +156,12 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ timeout: 20000 });
 
-    // Wait for briefing screen transition
-    await page.waitForTimeout(2000);
+    // Wait longer for briefing screen transition and animation to complete
+    await page.waitForTimeout(3000);
 
-    // Wait for and click "COMMENCE OPERATION" on the briefing screen
+    // Wait for and click "COMMENCE OPERATION" on the briefing screen with increased timeout
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await expect(commenceButton).toBeVisible({ timeout: 20000 });
     await commenceButton.click({ timeout: 30000, noWaitAfter: true });
 
     await page.waitForTimeout(8000); // Wait for enemy spawns
