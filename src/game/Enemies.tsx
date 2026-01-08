@@ -23,7 +23,7 @@ export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
-  const startTimeRef = useRef<number | null>(null);
+  const startTimeRef = useRef(Date.now());
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
@@ -87,8 +87,6 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
-      // Start grace period timer when PHASE_1 begins
-      startTimeRef.current = Date.now();
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
@@ -172,7 +170,7 @@ export function Enemies() {
       if (distance < hitRadius) {
         if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
           // Grace period check: Don't damage player in first 5 seconds
-          const isGracePeriod = startTimeRef.current === null || now - startTimeRef.current < 5000;
+          const isGracePeriod = now - startTimeRef.current < 5000;
 
           // Only damage if enemy is properly initialized (not at origin 0,0,0).
           // Enemies spawn at radius 20-30 units, so lengthSq > 0.1 ensures proper initialization.
