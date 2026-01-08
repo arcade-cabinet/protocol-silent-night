@@ -139,6 +139,14 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     await page.waitForTimeout(3000);
 
+    // Clear all enemies to prevent background damage
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        store.getState().updateEnemies(() => []);
+      }
+    });
+
     // Verify Santa's stats are correct
     const state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(300);
@@ -167,6 +175,14 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await safeClick(page, commenceButton, { timeout: 30000 });
 
     await page.waitForTimeout(3000);
+
+    // Clear all enemies to prevent background damage
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        store.getState().updateEnemies(() => []);
+      }
+    });
 
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -484,11 +500,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
-    await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
 
+    // Verify first kill registered
     let state = await getGameState(page);
+    expect(state?.killStreak).toBe(1);
+    expect(state?.kills).toBe(1);
+
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
+
+    state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -496,7 +518,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -547,24 +569,27 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
+    expect(state?.killStreak).toBe(1);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
+    expect(state?.killStreak).toBe(2);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
     expect(state?.score).toBe(225);
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
+    expect(state?.killStreak).toBe(3);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
     expect(state?.score).toBe(375);
   });
