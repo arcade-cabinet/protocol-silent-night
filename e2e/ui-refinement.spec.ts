@@ -39,8 +39,8 @@ test.describe('UI Component Refinement', () => {
       // Wait for menu to fully render
       await page.waitForSelector('h1', { timeout: 30000 });
 
-      // Verify title is visible
-      const title = page.locator('h1');
+      // Verify title is visible (use first() to handle multiple h1 elements)
+      const title = page.locator('h1').first();
       await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
