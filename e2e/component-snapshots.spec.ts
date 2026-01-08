@@ -426,7 +426,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
         store.addKill(50);
       }
     });
-    await page.waitForTimeout(100); // Small delay to prevent Tone.js timing errors
+    await page.waitForTimeout(200); // Increased delay to prevent Tone.js timing errors
     await page.evaluate(() => {
       // @ts-ignore
       const store = window.useGameStore?.getState();
@@ -434,7 +434,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
         store.addKill(50);
       }
     });
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
     await page.evaluate(() => {
       // @ts-ignore
       const store = window.useGameStore?.getState();
@@ -442,7 +442,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
         store.addKill(50);
       }
     });
-    
+
     await page.waitForTimeout(1000);
     
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {

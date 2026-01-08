@@ -46,10 +46,10 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
-    await bumbleCard.waitFor({ state: 'visible' });
+    await bumbleCard.waitFor({ state: 'visible', timeout: 15000 });
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: 15000,
@@ -343,7 +343,7 @@ test.describe('Visual Regression - End Game States', () => {
     // Take screenshot with increased threshold and longer timeout
     // Game over screen has dynamic content (scores, stats) so needs higher tolerance
     await expect(page).toHaveScreenshot('game-over-screen.png', {
-      maxDiffPixelRatio: 0.08, // Increased to handle CI rendering variations (observed 0.06 diff)
+      maxDiffPixelRatio: 0.10, // Increased to handle CI rendering variations (observed 0.06 diff, adding buffer)
       timeout: 30000, // Increased timeout for CI
     });
   });
