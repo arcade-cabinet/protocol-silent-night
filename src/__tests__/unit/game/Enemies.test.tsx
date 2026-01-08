@@ -48,6 +48,8 @@ describe('Enemies Component', () => {
 
   it('should damage player on collision', async () => {
     vi.useFakeTimers();
+    // Advance time past the grace period (2000ms)
+    vi.setSystemTime(Date.now() + 2500);
 
     const enemy = {
       id: 'test-enemy',
@@ -71,8 +73,6 @@ describe('Enemies Component', () => {
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
-    // Advance time past the grace period (2000ms) and run a frame
-    vi.advanceTimersByTime(2500);
     await renderer.advanceFrames(1, 0.1);
 
     const state = useGameStore.getState();
