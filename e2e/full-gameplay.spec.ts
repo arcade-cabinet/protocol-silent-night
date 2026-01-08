@@ -907,13 +907,25 @@ test.describe('Full Gameplay - Input Controls', () => {
   test('should show touch controls on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).click();
+    // Wait for page load and elements to be ready
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+
+    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+    await santaButton.click();
+
+    // Wait for briefing screen to be visible
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
+    // Wait for briefing animation to complete (7 lines × 600ms + 500ms = ~4700ms)
+    // Add extra buffer for mobile performance
+    await page.waitForTimeout(6000);
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
     await commenceButton.click();
 
     await page.waitForTimeout(3000);
