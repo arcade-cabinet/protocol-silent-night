@@ -386,73 +386,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const currentState = get();
-    const { stats, lastKillTime, killStreak, metaProgress, runProgress, state: gameState } = currentState;
+    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
     const streakTimeout = 2000;
-    // Fix: Ensure first kill starts streak at 1, and handle timing correctly
-    const newStreak = lastKillTime === 0 ? 1 : (now - lastKillTime < streakTimeout ? killStreak + 1 : 1);
+    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
 
-    // Calculate XP
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
-    const xpBonus = runProgress.activeUpgrades.christmas_spirit
-      ? 1 + runProgress.activeUpgrades.christmas_spirit * 0.3
-      : 1;
-    const adjustedXP = Math.floor(xpGain * xpBonus);
-    const newXP = runProgress.xp + adjustedXP;
-    const xpToNextLevel = runProgress.level * 100;
+    get().gainXP(xpGain);
 
-    // Calculate Nice Points
     let npStreakBonus = 0;
     if (newStreak === 2) npStreakBonus = 5;
     else if (newStreak === 3) npStreakBonus = 10;
     else if (newStreak === 4) npStreakBonus = 25;
     else if (newStreak >= 5) npStreakBonus = 50;
-    const npGain = Math.floor(points / 10) + npStreakBonus;
 
-    // Update all state atomically
-    const updates: Partial<GameStore> = {
+    const npGain = Math.floor(points / 10) + npStreakBonus;
+    get().earnNicePoints(npGain);
+
+    set({
       stats: { ...stats, kills: newKills, score: newScore },
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...metaProgress,
+        ...get().metaProgress,
         totalKills: metaProgress.totalKills + 1,
-        nicePoints: metaProgress.nicePoints + npGain,
-        totalPointsEarned: metaProgress.totalPointsEarned + npGain,
       },
-    };
-
-    // Handle XP and leveling
-    if (gameState !== 'LEVEL_UP') {
-      if (newXP >= xpToNextLevel) {
-        updates.runProgress = {
-          ...runProgress,
-          xp: newXP - xpToNextLevel,
-          level: runProgress.level + 1,
-        };
-      } else {
-        updates.runProgress = {
-          ...runProgress,
-          xp: newXP,
-        };
-      }
-    }
-
-    set(updates);
-
-    // Save meta progress
-    saveMetaProgress(updates.metaProgress!);
-
-    // Handle level up after state update
-    if (gameState !== 'LEVEL_UP' && newXP >= xpToNextLevel) {
-      get().levelUp();
-    }
+    });
 
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
@@ -463,9 +427,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Scale requirement by wave
     const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
-    const stateAfterUpdate = get().state;
 
-    if (newKills >= waveReq && (stateAfterUpdate === 'PHASE_1' || stateAfterUpdate === 'LEVEL_UP')) {
+    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
