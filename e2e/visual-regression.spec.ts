@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
 
-const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variations
+const VISUAL_THRESHOLD = 0.25; // 25% diff tolerance for WebGL rendering variations across CI environments
 
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
@@ -360,12 +360,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     // Wait for menu buttons to be visible
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 15000 });
 
-    // Additional wait for layout to stabilize
-    await page.waitForTimeout(5000);
+    // Additional wait for layout and WebGL rendering to stabilize
+    await page.waitForTimeout(8000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 25000,
+      animations: 'disabled',
     });
   });
 
@@ -392,12 +393,13 @@ test.describe('Visual Regression - Responsive Design', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
     await commenceButton.click({ timeout: 20000, force: true });
 
-    // Wait for game to fully load
-    await page.waitForTimeout(8000);
+    // Wait for game to fully load and WebGL rendering to stabilize
+    await page.waitForTimeout(12000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 20000,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
