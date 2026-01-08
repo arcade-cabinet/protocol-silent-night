@@ -484,9 +484,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -517,9 +517,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -547,14 +547,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -622,7 +622,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(500);
+    await waitForGameState(page, 'GAME_OVER', 5000);
 
     // Reset
     await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
@@ -638,7 +638,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(500);
+    await waitForGameState(page, 'GAME_OVER', 5000);
 
     // High score should still be preserved
     await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
