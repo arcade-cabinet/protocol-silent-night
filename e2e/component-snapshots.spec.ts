@@ -100,6 +100,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -137,22 +138,27 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
   test('should render enemy death effects', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-    
+
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.click();
+
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click();
+
     await page.waitForTimeout(8000);
-    
+
     // Fire at enemies
     await page.keyboard.down('Space');
     await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
-    
+
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: SCREENSHOT_TIMEOUT,
@@ -179,6 +185,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -201,6 +208,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -263,6 +271,7 @@ test.describe('Component Snapshots - Camera System', () => {
     
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
@@ -310,6 +319,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: SCREENSHOT_TIMEOUT,
     });
   });
 
