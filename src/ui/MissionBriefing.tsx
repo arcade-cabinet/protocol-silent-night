@@ -45,7 +45,7 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines is stable via useMemo, but we need briefingLines.length to trigger animation
+  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length must be excluded to prevent infinite animation loops
   useEffect(() => {
     if (state !== 'BRIEFING') {
       animationStartedRef.current = false;
@@ -92,7 +92,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines.length]);
+  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
