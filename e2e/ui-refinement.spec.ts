@@ -154,8 +154,9 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
+          await page.waitForLoadState('domcontentloaded');
           await setupPage(page); // Re-apply animation disable after reload
-          await page.waitForSelector('h1', { timeout: 30000 });
+          await page.waitForSelector('h1', { state: 'visible', timeout: 30000 });
         }
       }
     });
