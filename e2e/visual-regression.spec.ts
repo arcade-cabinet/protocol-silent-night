@@ -78,8 +78,8 @@ test.describe('Visual Regression - Game Start', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0, // Uses default click (no timeout specified)
     });
 
@@ -98,8 +98,8 @@ test.describe('Visual Regression - Game Start', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /CYBER-ELF/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -118,8 +118,8 @@ test.describe('Visual Regression - Game Start', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /BUMBLE/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -140,8 +140,8 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -159,8 +159,8 @@ test.describe('Visual Regression - HUD Elements', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -183,8 +183,8 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -208,8 +208,8 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -232,8 +232,8 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -257,8 +257,8 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /CYBER-ELF/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 
@@ -280,8 +280,8 @@ test.describe('Visual Regression - End Game States', () => {
     await page.waitForTimeout(3000);
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 0,
-      commenceVisibilityTimeout: 15000,
+      briefingTransitionWait: 2000,
+      commenceVisibilityTimeout: 30000,
       commenceClickTimeout: 0,
     });
 

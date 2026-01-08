@@ -63,7 +63,7 @@ export async function selectCharacterToBriefing(
     characterVisibilityTimeout = 20000,
     characterClickTimeout = 20000,
     briefingTransitionWait = 2000,
-    briefingTimeout = 15000,
+    briefingTimeout = 30000,
   } = options;
 
   await page.waitForTimeout(preClickWait);
@@ -97,8 +97,8 @@ export async function selectCharacterAndStartMission(
     characterVisibilityTimeout,
     preClickWait = 500,
     characterClickTimeout = 15000,
-    briefingTransitionWait = 1000,
-    commenceVisibilityTimeout = 20000,
+    briefingTransitionWait = 2000,
+    commenceVisibilityTimeout = 30000,
     preCommenceClickWait = 0,
     commenceClickTimeout = 15000,
   } = options;
