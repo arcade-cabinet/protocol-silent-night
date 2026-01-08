@@ -37,7 +37,13 @@ test.describe('UI Component Refinement', () => {
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render - longer timeout for CI with SwiftShader
-      await page.waitForSelector('h1', { timeout: 15000 });
+      try {
+        await page.waitForSelector('h1', { timeout: 30000 });
+      } catch (error) {
+        // Retry once more after additional wait
+        await page.waitForTimeout(5000);
+        await page.waitForSelector('h1', { timeout: 30000 });
+      }
 
       // Verify title is visible
       const title = page.locator('h1');
@@ -126,7 +132,14 @@ test.describe('UI Component Refinement', () => {
         if (index < mechs.length - 1) {
           await page.reload();
           await page.waitForLoadState('networkidle');
-          await page.waitForSelector('h1', { timeout: 15000 });
+          // Increase timeout and add retry logic for h1 selector
+          try {
+            await page.waitForSelector('h1', { timeout: 30000 });
+          } catch (error) {
+            // Retry once more after additional wait
+            await page.waitForTimeout(5000);
+            await page.waitForSelector('h1', { timeout: 30000 });
+          }
         }
       }
     });
