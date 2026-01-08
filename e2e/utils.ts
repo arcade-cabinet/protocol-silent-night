@@ -56,3 +56,11 @@ export async function startMission(page: Page) {
   await button.waitFor({ state: 'visible', timeout: 45000 });
   await button.click();
 }
+
+// Helper to wait for loading screen to complete
+export async function waitForLoadingScreen(page: Page) {
+  const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+  if (await loadingScreen.isVisible()) {
+    await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+  }
+}
