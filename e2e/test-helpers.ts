@@ -21,6 +21,45 @@ export interface SelectCharacterOptions {
 }
 
 /**
+ * Selects a character and waits for the mission briefing screen to appear.
+ * Does NOT click the COMMENCE OPERATION button.
+ *
+ * Use this when you want to test the briefing UI itself without starting gameplay.
+ *
+ * @param page - The Playwright page object
+ * @param characterName - A string matching the character button name (e.g., "MECHA-SANTA")
+ * @param options - Optional configuration for timeouts and waits
+ */
+export async function selectCharacterToBriefing(
+  page: Page,
+  characterName: string,
+  options: {
+    preClickWait?: number;
+    characterVisibilityTimeout?: number;
+    characterClickTimeout?: number;
+    briefingTransitionWait?: number;
+    briefingTimeout?: number;
+  } = {}
+): Promise<void> {
+  const {
+    preClickWait = 1000,
+    characterVisibilityTimeout = 20000,
+    characterClickTimeout = 20000,
+    briefingTransitionWait = 2000,
+    briefingTimeout = 15000,
+  } = options;
+
+  await page.waitForTimeout(preClickWait);
+  const characterButton = page.locator(`button:has-text("${characterName}")`);
+  await expect(characterButton).toBeVisible({ timeout: characterVisibilityTimeout });
+  await characterButton.click({ force: true, timeout: characterClickTimeout });
+
+  // Wait for briefing screen transition
+  await page.waitForTimeout(briefingTransitionWait);
+  await page.waitForSelector('text=MISSION BRIEFING', { timeout: briefingTimeout });
+}
+
+/**
  * Selects a character and starts the mission by clicking through the briefing screen.
  *
  * This helper consolidates the common pattern of:
