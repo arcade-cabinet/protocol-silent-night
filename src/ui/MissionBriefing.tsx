@@ -50,19 +50,26 @@ export function MissionBriefing() {
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
+    // Use faster animations in test/CI environments for better test reliability
+    // Check if running in playwright test context via window.navigator.webdriver
+    const isPlaywrightTest = typeof window !== 'undefined' && (window.navigator as any).webdriver === true;
+    const isTestEnv = import.meta.env.MODE === 'test' || isPlaywrightTest;
+    const lineDelay = isTestEnv ? 100 : 600;
+    const buttonDelay = isTestEnv ? 50 : 500;
+
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout>;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
         if (prev >= briefingLines.length - 1) {
           clearInterval(interval);
-          timeoutId = setTimeout(() => setShowButton(true), 500);
+          timeoutId = setTimeout(() => setShowButton(true), buttonDelay);
           return prev;
         }
         AudioManager.playSFX('ui_click');
         return prev + 1;
       });
-    }, 600);
+    }, lineDelay);
 
     return () => {
       clearInterval(interval);

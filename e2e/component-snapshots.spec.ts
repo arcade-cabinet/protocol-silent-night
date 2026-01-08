@@ -43,11 +43,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, noWaitAfter: true });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
     
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -65,11 +65,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, noWaitAfter: true });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
     
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -89,11 +89,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, noWaitAfter: true });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
     
     // Move to see terrain better
     await page.keyboard.down('w');
@@ -120,11 +120,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, noWaitAfter: true });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
     
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -144,7 +144,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
@@ -166,7 +166,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
@@ -195,7 +195,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
@@ -221,7 +221,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
@@ -248,7 +248,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
@@ -270,7 +270,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await page.goto('/');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     
     // Fire and wait for hits
     await page.keyboard.down('Space');
@@ -295,7 +295,7 @@ test.describe('Component Snapshots - Camera System', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
@@ -317,7 +317,7 @@ test.describe('Component Snapshots - Camera System', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
@@ -348,14 +348,14 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
     await page.waitForTimeout(8000);
-    
+
     // Trigger damage by getting close to enemies
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -373,11 +373,11 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(2000);
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
     
     // Trigger kill streak by rapid kills
     await page.evaluate(() => {

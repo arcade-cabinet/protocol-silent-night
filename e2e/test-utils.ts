@@ -51,8 +51,9 @@ export async function selectCharacter(
  * Clicks the commence operation button and waits for game to start
  */
 export async function commenceOperation(page: Page): Promise<void> {
-  // Wait for briefing animations (600ms per line * ~6 lines + 500ms for button)
-  await page.waitForTimeout(5000);
+  // Wait for briefing animations (100ms per line in test mode * ~6 lines + 50ms for button = ~650ms)
+  // Adding buffer for rendering and stability
+  await page.waitForTimeout(2000);
 
   // Wait for button to be visible
   const button = page.getByRole('button', { name: /COMMENCE OPERATION/i });
