@@ -38,7 +38,8 @@ test.describe('UI Component Refinement', () => {
       // Wait for loading screen to disappear by waiting for the specific menu title (title case)
       // LoadingScreen has "PROTOCOL: SILENT NIGHT", StartScreen has "Protocol: Silent Night"
       await page.waitForTimeout(1000); // Give time for loading screen to show
-      await page.waitForSelector('text="Protocol: Silent Night"', { state: 'visible', timeout: 15000 });
+      // Wait for the h1 heading to be visible, which indicates StartScreen is ready
+      await page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 }).waitFor({ state: 'visible', timeout: 15000 });
 
       // Verify title is visible
       const title = page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 });
@@ -135,9 +136,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should display correct operator for each mech', async ({ page }) => {
       const mechs = [
-        { name: 'MECHA-SANTA', role: 'Heavy Stage' },
-        { name: 'CYBER-ELF', role: 'Recon' },
-        { name: 'THE BUMBLE', role: 'Crowd Control' },
+        { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
+        { name: 'CYBER-ELF', role: 'Recon / Scout' },
+        { name: 'THE BUMBLE', role: 'Crowd Control / Bruiser' },
       ];
 
       for (const [index, mech] of mechs.entries()) {
@@ -249,7 +250,8 @@ test.describe('UI Component Refinement', () => {
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
       await page.waitForTimeout(1000); // Give time for loading screen to show
-      await page.waitForSelector('text="Protocol: Silent Night"', { state: 'visible', timeout: 15000 });
+      // Wait for the h1 heading to be visible, which indicates StartScreen is ready
+      await page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 }).waitFor({ state: 'visible', timeout: 15000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
