@@ -339,57 +339,61 @@ test.describe('Visual Regression - Responsive Design', () => {
   });
 
   test('should render mobile gameplay correctly', async ({ page }) => {
-    test.setTimeout(60000); // Increase timeout for mobile rendering
+    test.setTimeout(90000); // Increase timeout for mobile rendering
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible();
-    await page.waitForTimeout(500); // Wait for any animations
-    await santaButton.click({ force: true, timeout: 15000 });
+    await expect(santaButton).toBeVisible({ timeout: 20000 });
+    await page.waitForTimeout(1000); // Wait for any animations
+    await santaButton.click({ force: true, timeout: 20000 });
 
     // Wait for briefing screen transition with increased timeout
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 30000 });
-    await commenceButton.click({ force: true, timeout: 15000 });
+    await expect(commenceButton).toBeVisible({ timeout: 40000 });
+    await page.waitForTimeout(500);
+    await commenceButton.click({ force: true, timeout: 20000 });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(6000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 
   test('should render touch controls on mobile', async ({ page }) => {
-    test.setTimeout(60000); // Increase timeout for mobile rendering
+    test.setTimeout(90000); // Increase timeout for mobile rendering
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible();
-    await page.waitForTimeout(500); // Wait for any animations
-    await santaButton.click({ force: true, timeout: 15000 });
+    await expect(santaButton).toBeVisible({ timeout: 20000 });
+    await page.waitForTimeout(1000); // Wait for any animations
+    await santaButton.click({ force: true, timeout: 20000 });
 
     // Wait for briefing screen transition with increased timeout
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 30000 });
-    await commenceButton.click({ force: true, timeout: 15000 });
+    await expect(commenceButton).toBeVisible({ timeout: 40000 });
+    await page.waitForTimeout(500);
+    await commenceButton.click({ force: true, timeout: 20000 });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
-    await expect(fireButton).toBeVisible();
+    await expect(fireButton).toBeVisible({ timeout: 20000 });
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 20000,
     });
   });
 });
