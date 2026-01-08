@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { selectCharacterAndStartMission } from './test-helpers';
 
 /**
  * UI Component Refinement Tests
@@ -176,22 +177,14 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      // Select mech with longer wait and timeout
-      await page.waitForTimeout(1000); // Wait for any animations
-      const mechButton = page.locator('button:has-text("MECHA-SANTA")');
-      await expect(mechButton).toBeVisible({ timeout: 20000 });
-      await mechButton.click({ force: true, timeout: 20000 });
-
-      // Wait for briefing screen transition
-      await page.waitForTimeout(2000);
-
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
-
-      // Wait for COMMENCE OPERATION button to be visible and click
-      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { timeout: 30000 });
-      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceButton.click({ force: true, timeout: 20000 });
+      await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
+        characterVisibilityTimeout: 20000,
+        preClickWait: 1000,
+        characterClickTimeout: 20000,
+        briefingTransitionWait: 2000,
+        commenceVisibilityTimeout: 30000,
+        commenceClickTimeout: 20000,
+      });
 
       // Wait for game HUD to appear
       await page.waitForTimeout(3000);
@@ -208,21 +201,14 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      // Select CYBER-ELF (Plasma SMG) with longer wait and timeout
-      await page.waitForTimeout(1000); // Wait for any animations
-      const mechButton = page.locator('button:has-text("CYBER-ELF")');
-      await expect(mechButton).toBeVisible({ timeout: 20000 });
-      await mechButton.click({ force: true, timeout: 20000 });
-
-      // Wait for briefing screen transition
-      await page.waitForTimeout(2000);
-
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
-
-      // Wait for COMMENCE OPERATION button to be visible and click
-      await page.waitForSelector('button:has-text("COMMENCE OPERATION")', { timeout: 30000 });
-      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await commenceButton.click({ force: true, timeout: 20000 });
+      await selectCharacterAndStartMission(page, /CYBER-ELF/, {
+        characterVisibilityTimeout: 20000,
+        preClickWait: 1000,
+        characterClickTimeout: 20000,
+        briefingTransitionWait: 2000,
+        commenceVisibilityTimeout: 30000,
+        commenceClickTimeout: 20000,
+      });
 
       // Wait for HUD
       await page.waitForTimeout(3000);

@@ -1,8 +1,9 @@
 import { test, expect, Page } from '@playwright/test';
+import { selectCharacterAndStartMission } from './test-helpers';
 
 /**
  * Full Gameplay E2E Tests
- * 
+ *
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */
@@ -103,19 +104,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     let state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
     
-    // Select Santa
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await expect(santaButton).toBeVisible();
-    await page.waitForTimeout(500); // Wait for any animations
-    await santaButton.click({ force: true, timeout: 15000 });
-
-    // Wait for briefing screen transition
-    await page.waitForTimeout(1000);
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 20000 });
-    await commenceButton.click({ force: true, timeout: 15000 });
+    await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
     // Wait for game to start
     await page.waitForTimeout(2000);
