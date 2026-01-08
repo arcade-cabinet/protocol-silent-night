@@ -413,7 +413,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       killStreak: newStreak,
       lastKillTime: now,
       metaProgress: {
-        ...get().metaProgress,
+        ...metaProgress,
         totalKills: metaProgress.totalKills + 1,
       },
     });
