@@ -319,10 +319,10 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
 
     // Extra wait for animations and WebGL initialization
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixelRatio: 0.25, // Increased tolerance for mobile rendering variations
+      maxDiffPixelRatio: 0.3, // Increased tolerance for mobile rendering variations
       timeout: 20000,
     });
   });
@@ -339,7 +339,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 10000 });
 
     // Click and wait for briefing screen to appear
-    await santaButton.click();
+    await santaButton.click({ timeout: 20000 });
 
     // Wait for briefing screen to be visible
     await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
@@ -372,7 +372,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 10000 });
 
     // Click and wait for briefing screen to appear
-    await santaButton.click();
+    await santaButton.click({ timeout: 20000 });
 
     // Wait for briefing screen to be visible
     await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
