@@ -316,11 +316,11 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.scrollIntoViewIfNeeded();
     await santaButton.click({ timeout: 15000 });
 
     // Wait for briefing to appear and click COMMENCE OPERATION
@@ -339,11 +339,11 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-    await santaButton.scrollIntoViewIfNeeded();
     await santaButton.click({ timeout: 15000 });
 
     // Wait for briefing to appear and click COMMENCE OPERATION
