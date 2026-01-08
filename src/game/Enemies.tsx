@@ -23,7 +23,7 @@ export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
-  const startTimeRef = useRef(0);
+  const startTimeRef = useRef(Date.now());
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
@@ -87,8 +87,6 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
-      // Reset start time for grace period when entering gameplay phase
-      startTimeRef.current = Date.now();
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
