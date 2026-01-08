@@ -10,6 +10,41 @@ import { selectCharacter, startMission } from './utils';
 
 const VISUAL_THRESHOLD = 0.2;
 
+// Helper function to stabilize the page before screenshots
+async function stabilizePage(page) {
+  // Wait for all network requests to complete
+  await page.waitForLoadState('networkidle');
+
+  // Wait for dynamic content to settle
+  await page.waitForTimeout(500);
+
+  // Ensure all animations are truly disabled via CSS injection
+  // Force remove transforms to prevent instability during screenshots
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+        transition-property: none !important;
+        transform: none !important;
+      }
+      *:focus-visible {
+        outline: none !important;
+      }
+    `
+  });
+
+  // Wait for any remaining font rendering
+  await page.waitForFunction(() => document.fonts.ready);
+}
+
+// Apply stabilization to all tests in this file
+test.beforeEach(async ({ page }) => {
+  await stabilizePage(page);
+});
+
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
@@ -32,6 +67,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -46,6 +82,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -60,6 +97,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
@@ -85,6 +123,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -99,6 +138,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
@@ -115,6 +155,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -132,6 +173,7 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
@@ -152,6 +194,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -171,6 +214,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -189,6 +233,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
@@ -208,6 +253,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
@@ -224,6 +270,7 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -245,6 +292,7 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
@@ -264,6 +312,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 
@@ -291,6 +340,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      animations: 'disabled',
     });
   });
 });
