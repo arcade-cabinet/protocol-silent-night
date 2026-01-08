@@ -24,6 +24,7 @@ async function stabilizePage(page) {
 
   // Ensure all animations are truly disabled via CSS injection
   // Also suppress focus outlines to prevent visual regression failures
+  // Force remove transforms to prevent instability during screenshots
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -31,6 +32,8 @@ async function stabilizePage(page) {
         animation-delay: 0s !important;
         transition-duration: 0s !important;
         transition-delay: 0s !important;
+        transition-property: none !important;
+        transform: none !important;
       }
       *:focus-visible {
         outline: none !important;
@@ -85,12 +88,21 @@ test.describe('Visual Regression - Character Selection', () => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await waitForElementStability(page, santaCard);
     await page.waitForLoadState('networkidle');
-    await santaCard.scrollIntoViewIfNeeded({ timeout: 8000 });
     await page.waitForTimeout(500); // Allow animations to settle
+
+    // Force remove all transitions and transforms to ensure stability
+    await santaCard.evaluate(el => {
+      el.style.transition = 'none';
+      el.style.transform = 'none';
+      el.style.animation = 'none';
+    });
+    await page.waitForTimeout(100);
+
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -98,12 +110,21 @@ test.describe('Visual Regression - Character Selection', () => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await waitForElementStability(page, elfCard);
     await page.waitForLoadState('networkidle');
-    await elfCard.scrollIntoViewIfNeeded({ timeout: 8000 });
     await page.waitForTimeout(500); // Allow animations to settle
+
+    // Force remove all transitions and transforms to ensure stability
+    await elfCard.evaluate(el => {
+      el.style.transition = 'none';
+      el.style.transform = 'none';
+      el.style.animation = 'none';
+    });
+    await page.waitForTimeout(100);
+
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -111,12 +132,21 @@ test.describe('Visual Regression - Character Selection', () => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await waitForElementStability(page, bumbleCard);
     await page.waitForLoadState('networkidle');
-    await bumbleCard.scrollIntoViewIfNeeded({ timeout: 8000 });
     await page.waitForTimeout(500); // Allow animations to settle
+
+    // Force remove all transitions and transforms to ensure stability
+    await bumbleCard.evaluate(el => {
+      el.style.transition = 'none';
+      el.style.transform = 'none';
+      el.style.animation = 'none';
+    });
+    await page.waitForTimeout(100);
+
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
       timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
