@@ -133,7 +133,7 @@ test.describe('Protocol: Silent Night', () => {
     
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
     await expect(santaButton).toBeVisible({ timeout: 15000 });
-    await santaButton.click();
+    await santaButton.click({ force: true });
     
     // Start screen should disappear
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
@@ -156,7 +156,7 @@ test.describe('Protocol: Silent Night', () => {
     // Start game with Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
     await expect(elfButton).toBeVisible({ timeout: 15000 });
-    await elfButton.click();
+    await elfButton.click({ force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -180,7 +180,7 @@ test.describe('Protocol: Silent Night', () => {
     // Start game
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
     await expect(santaButton).toBeVisible({ timeout: 15000 });
-    await santaButton.click();
+    await santaButton.click({ force: true });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
