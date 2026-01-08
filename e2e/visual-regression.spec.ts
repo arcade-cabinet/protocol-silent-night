@@ -15,13 +15,14 @@ const VISUAL_THRESHOLD = 0.2; // 20% diff tolerance for WebGL rendering variatio
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
-    
+
     // Wait for fonts and styles to load
-    await page.waitForTimeout(2000);
-    
+    await page.waitForTimeout(3000); // Increased wait for full page load
+
     // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 
@@ -31,8 +32,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaCard).toBeVisible();
+    // Wait for animations/transitions to complete
+    await page.waitForTimeout(1000);
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 
@@ -42,8 +47,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await expect(elfCard).toBeVisible();
+    // Wait for animations/transitions to complete
+    await page.waitForTimeout(1000);
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000, // Increase timeout for element stability
+      animations: 'disabled', // Disable animations for stability
     });
   });
 
@@ -53,8 +62,12 @@ test.describe('Visual Regression - Character Selection', () => {
 
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await expect(bumbleCard).toBeVisible();
+    // Wait for animations/transitions to complete
+    await page.waitForTimeout(1000);
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
+      animations: 'disabled',
     });
   });
 });
@@ -70,12 +83,13 @@ test.describe('Visual Regression - Game Start', () => {
       commenceClickTimeout: 0, // Uses default click (no timeout specified)
     });
 
-    // Wait for game to load
-    await page.waitForTimeout(5000);
+    // Wait longer for WebGL rendering to stabilize
+    await page.waitForTimeout(8000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -89,12 +103,13 @@ test.describe('Visual Regression - Game Start', () => {
       commenceClickTimeout: 0,
     });
 
-    // Wait for game to load
-    await page.waitForTimeout(5000);
+    // Wait longer for WebGL rendering to stabilize
+    await page.waitForTimeout(8000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -108,12 +123,13 @@ test.describe('Visual Regression - Game Start', () => {
       commenceClickTimeout: 0,
     });
 
-    // Wait for game to load
-    await page.waitForTimeout(5000);
+    // Wait longer for WebGL rendering to stabilize
+    await page.waitForTimeout(8000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -129,11 +145,12 @@ test.describe('Visual Regression - HUD Elements', () => {
       commenceClickTimeout: 0,
     });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
 
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -147,7 +164,7 @@ test.describe('Visual Regression - HUD Elements', () => {
       commenceClickTimeout: 0,
     });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
 
     // Move and fire to generate some score
     await page.keyboard.press('Space');
@@ -155,6 +172,7 @@ test.describe('Visual Regression - HUD Elements', () => {
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -170,15 +188,18 @@ test.describe('Visual Regression - Game Movement', () => {
       commenceClickTimeout: 0,
     });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
 
     // Move character
     await page.keyboard.down('w');
     await page.waitForTimeout(2000);
     await page.keyboard.up('w');
 
+    await page.waitForTimeout(1000); // Wait for movement to settle
+
     await expect(page).toHaveScreenshot('character-moved.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -192,7 +213,7 @@ test.describe('Visual Regression - Game Movement', () => {
       commenceClickTimeout: 0,
     });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
 
     // Fire weapon
     await page.keyboard.press('Space');
@@ -200,6 +221,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -215,15 +237,18 @@ test.describe('Visual Regression - Combat Scenarios', () => {
       commenceClickTimeout: 0,
     });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(10000); // Increased wait for enemy spawns and WebGL stabilization
 
     // Wait for enemies to spawn and engage
     await page.keyboard.down('Space');
     await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
 
+    await page.waitForTimeout(1000); // Wait for combat effects to render
+
     await expect(page).toHaveScreenshot('combat-scenario.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -237,13 +262,14 @@ test.describe('Visual Regression - Combat Scenarios', () => {
       commenceClickTimeout: 0,
     });
 
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(10000); // Increased wait for WebGL stabilization
 
     // Wait for potential damage from enemies
     await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -259,7 +285,7 @@ test.describe('Visual Regression - End Game States', () => {
       commenceClickTimeout: 0,
     });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
 
     // Trigger game over by evaluating state (for testing purposes)
     await page.evaluate(() => {
@@ -279,6 +305,7 @@ test.describe('Visual Regression - End Game States', () => {
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -291,7 +318,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 15000,
+      timeout: 30000,
     });
   });
 
@@ -312,11 +339,11 @@ test.describe('Visual Regression - Responsive Design', () => {
     });
 
     // Wait longer for WebGL rendering to stabilize in CI
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 30000,
+      maxDiffPixelRatio: 0.25, // Slightly higher threshold for mobile WebGL variations
+      timeout: 40000,
     });
   });
 

@@ -19,8 +19,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(5000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     // Focus on character by centering view
     await page.evaluate(() => {
       // Center camera on player
@@ -29,9 +29,12 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
         canvas.style.filter = 'none';
       }
     });
-    
+
+    await page.waitForTimeout(1000); // Additional wait after DOM manipulation
+
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -41,10 +44,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await selectCharacterAndStartMission(page, /CYBER-ELF/);
 
-    await page.waitForTimeout(5000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -54,10 +58,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await selectCharacterAndStartMission(page, /BUMBLE/);
 
-    await page.waitForTimeout(5000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -70,19 +75,22 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(5000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     // Move to see terrain better
     await page.keyboard.down('w');
     await page.waitForTimeout(2000);
     await page.keyboard.up('w');
-    
+
     await page.keyboard.down('a');
     await page.waitForTimeout(1000);
     await page.keyboard.up('a');
-    
+
+    await page.waitForTimeout(1000); // Wait for movement to settle
+
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -92,10 +100,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(5000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -108,10 +117,11 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(8000); // Wait for enemy spawns
-    
+    await page.waitForTimeout(10000); // Increased wait for enemy spawns and WebGL stabilization
+
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -121,15 +131,18 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(8000);
-    
+    await page.waitForTimeout(10000); // Increased wait for WebGL stabilization
+
     // Fire at enemies
     await page.keyboard.down('Space');
     await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
-    
+
+    await page.waitForTimeout(1000); // Wait for effects to render
+
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -142,14 +155,15 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(3000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     // Fire weapon and capture projectiles
     await page.keyboard.press('Space');
-    await page.waitForTimeout(300);
-    
+    await page.waitForTimeout(500);
+
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -159,15 +173,18 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await selectCharacterAndStartMission(page, /CYBER-ELF/);
 
-    await page.waitForTimeout(3000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     // Fire SMG (rapid fire)
     await page.keyboard.down('Space');
     await page.waitForTimeout(1000);
     await page.keyboard.up('Space');
-    
+
+    await page.waitForTimeout(500); // Wait for projectiles to render
+
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -177,14 +194,15 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await selectCharacterAndStartMission(page, /BUMBLE/);
 
-    await page.waitForTimeout(3000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     // Fire star weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(300);
-    
+    await page.waitForTimeout(500);
+
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -197,15 +215,18 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(8000);
-    
+    await page.waitForTimeout(10000); // Increased wait for WebGL stabilization
+
     // Fire and wait for hits
     await page.keyboard.down('Space');
     await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
-    
+
+    await page.waitForTimeout(500); // Wait for particles to render
+
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -218,10 +239,11 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(3000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -231,17 +253,20 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(3000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     // Move in a pattern
     await page.keyboard.down('w');
     await page.keyboard.down('d');
     await page.waitForTimeout(2000);
     await page.keyboard.up('d');
     await page.keyboard.up('w');
-    
+
+    await page.waitForTimeout(1000); // Wait for camera to settle
+
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
@@ -254,13 +279,14 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await selectCharacterAndStartMission(page, /CYBER-ELF/);
 
-    await page.waitForTimeout(8000);
-    
+    await page.waitForTimeout(10000); // Increased wait for WebGL stabilization
+
     // Trigger damage by getting close to enemies
     await page.waitForTimeout(5000);
-    
+
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 
@@ -270,8 +296,8 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
 
-    await page.waitForTimeout(5000);
-    
+    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+
     // Trigger kill streak by rapid kills
     await page.evaluate(() => {
       // @ts-ignore
@@ -282,11 +308,12 @@ test.describe('Component Snapshots - UI Overlays', () => {
         store.addKill(50);
       }
     });
-    
-    await page.waitForTimeout(1000);
-    
+
+    await page.waitForTimeout(1500); // Increased wait for notification animation
+
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 40000,
     });
   });
 });
