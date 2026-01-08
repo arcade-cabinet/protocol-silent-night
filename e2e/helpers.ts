@@ -28,7 +28,7 @@ export async function setupPage(page: Page) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await disableAnimations(page);
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(500); // Initial stability buffer
+  await page.waitForTimeout(1000); // Initial stability buffer
 }
 
 /**
