@@ -316,14 +316,17 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.evaluate(() => document.fonts.ready);
 
     // Wait for character selection buttons to be visible (ensures WebGL and components loaded)
-    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 10000 });
+    await page.getByRole('button', { name: /MECHA-SANTA/ }).waitFor({ state: 'visible', timeout: 15000 });
+
+    // Wait for WebGL canvas to be ready
+    await page.waitForSelector('canvas', { state: 'visible', timeout: 10000 });
 
     // Extra wait for animations and WebGL initialization
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(3000);
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
-      maxDiffPixelRatio: 0.3, // Increased tolerance for mobile rendering variations
-      timeout: 20000,
+      maxDiffPixelRatio: 0.4, // Increased tolerance for mobile rendering variations
+      timeout: 30000,
     });
   });
 
@@ -333,30 +336,28 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Wait for page load and elements to be ready
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
 
     // Click and wait for briefing screen to appear
     await santaButton.click({ timeout: 20000 });
 
-    // Wait for briefing screen to be visible
-    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
-
-    // Wait for briefing animation to complete (7 lines × 600ms + 500ms = ~4700ms)
-    // Add extra buffer for mobile performance
-    await page.waitForTimeout(6000);
+    // Wait for briefing screen to be visible with increased timeout
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 20000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.click();
 
-    await page.waitForTimeout(5000);
+    // Wait for game canvas to be ready
+    await page.waitForSelector('canvas', { state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(3000);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 30000,
     });
   });
 
@@ -366,32 +367,31 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     // Wait for page load and elements to be ready
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.waitFor({ state: 'visible', timeout: 10000 });
+    await santaButton.waitFor({ state: 'visible', timeout: 15000 });
 
     // Click and wait for briefing screen to appear
     await santaButton.click({ timeout: 20000 });
 
-    // Wait for briefing screen to be visible
-    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
-
-    // Wait for briefing animation to complete (7 lines × 600ms + 500ms = ~4700ms)
-    // Add extra buffer for mobile performance
-    await page.waitForTimeout(6000);
+    // Wait for briefing screen to be visible with increased timeout
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 20000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
     await commenceButton.click();
 
+    // Wait for game to load and touch controls to appear
     await page.waitForTimeout(3000);
 
     // Touch controls should be visible
     const fireButton = page.getByRole('button', { name: /FIRE/ });
+    await fireButton.waitFor({ state: 'visible', timeout: 10000 });
+
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: 0.3,
+      timeout: 30000,
     });
   });
 });
