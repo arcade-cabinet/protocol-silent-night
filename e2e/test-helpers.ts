@@ -21,6 +21,23 @@ export interface SelectCharacterOptions {
 }
 
 /**
+ * Preset configuration for mobile viewport tests in CI environments.
+ * Mobile tests require longer timeouts due to:
+ * - SwiftShader software rendering (slower than GPU)
+ * - Additional viewport scaling overhead
+ * - Touch control initialization delays
+ */
+export const MOBILE_TEST_CONFIG: SelectCharacterOptions = {
+  characterVisibilityTimeout: 20000,
+  preClickWait: 1000,
+  characterClickTimeout: 20000,
+  briefingTransitionWait: 3000,
+  commenceVisibilityTimeout: 40000,
+  preCommenceClickWait: 500,
+  commenceClickTimeout: 20000,
+};
+
+/**
  * Selects a character and waits for the mission briefing screen to appear.
  * Does NOT click the COMMENCE OPERATION button.
  *

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacterAndStartMission, selectCharacterToBriefing } from './test-helpers';
+import { selectCharacterAndStartMission, selectCharacterToBriefing, MOBILE_TEST_CONFIG } from './test-helpers';
 
 /**
  * UI Component Refinement Tests
@@ -138,14 +138,7 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-        characterVisibilityTimeout: 20000,
-        preClickWait: 1000,
-        characterClickTimeout: 20000,
-        briefingTransitionWait: 2000,
-        commenceVisibilityTimeout: 30000,
-        commenceClickTimeout: 20000,
-      });
+      await selectCharacterAndStartMission(page, /MECHA-SANTA/, MOBILE_TEST_CONFIG);
 
       // Wait for game HUD to appear
       await page.waitForTimeout(3000);
@@ -162,14 +155,7 @@ test.describe('UI Component Refinement', () => {
         test.skip();
       }
 
-      await selectCharacterAndStartMission(page, /CYBER-ELF/, {
-        characterVisibilityTimeout: 20000,
-        preClickWait: 1000,
-        characterClickTimeout: 20000,
-        briefingTransitionWait: 2000,
-        commenceVisibilityTimeout: 30000,
-        commenceClickTimeout: 20000,
-      });
+      await selectCharacterAndStartMission(page, /CYBER-ELF/, MOBILE_TEST_CONFIG);
 
       // Wait for HUD
       await page.waitForTimeout(3000);

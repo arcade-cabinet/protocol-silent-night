@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacterAndStartMission } from './test-helpers';
+import { selectCharacterAndStartMission, MOBILE_TEST_CONFIG } from './test-helpers';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -328,15 +328,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      characterVisibilityTimeout: 20000,
-      preClickWait: 1000,
-      characterClickTimeout: 20000,
-      briefingTransitionWait: 3000,
-      commenceVisibilityTimeout: 40000,
-      preCommenceClickWait: 500,
-      commenceClickTimeout: 20000,
-    });
+    await selectCharacterAndStartMission(page, /MECHA-SANTA/, MOBILE_TEST_CONFIG);
 
     // Wait longer for WebGL rendering to stabilize in CI
     await page.waitForTimeout(10000);
@@ -353,15 +345,7 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.goto('/');
     await page.waitForTimeout(3000);
 
-    await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      characterVisibilityTimeout: 20000,
-      preClickWait: 1000,
-      characterClickTimeout: 20000,
-      briefingTransitionWait: 3000,
-      commenceVisibilityTimeout: 40000,
-      preCommenceClickWait: 500,
-      commenceClickTimeout: 20000,
-    });
+    await selectCharacterAndStartMission(page, /MECHA-SANTA/, MOBILE_TEST_CONFIG);
 
     // Wait longer for WebGL rendering and touch controls to stabilize in CI
     await page.waitForTimeout(6000);
