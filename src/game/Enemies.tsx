@@ -87,6 +87,8 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
+      // Reset grace period when entering game phase
+      startTimeRef.current = Date.now();
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
