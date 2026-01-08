@@ -8,41 +8,6 @@ import { getGameState, selectCharacter, startMission, triggerStoreAction } from 
  * for each character class, testing all game mechanics and state transitions.
  */
 
-// Helper function to stabilize the page before interactions
-async function stabilizePage(page) {
-  // Wait for all network requests to complete
-  await page.waitForLoadState('networkidle');
-
-  // Wait for dynamic content to settle
-  await page.waitForTimeout(500);
-
-  // Ensure all animations are truly disabled via CSS injection
-  // Force remove transforms to prevent instability during interactions
-  await page.addStyleTag({
-    content: `
-      *, *::before, *::after {
-        animation-duration: 0s !important;
-        animation-delay: 0s !important;
-        transition-duration: 0s !important;
-        transition-delay: 0s !important;
-        transition-property: none !important;
-        transform: none !important;
-      }
-      *:focus-visible {
-        outline: none !important;
-      }
-    `
-  });
-
-  // Wait for any remaining font rendering
-  await page.waitForFunction(() => document.fonts.ready);
-}
-
-// Apply stabilization to all tests in this file
-test.beforeEach(async ({ page }) => {
-  await stabilizePage(page);
-});
-
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
