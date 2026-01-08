@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-// Test utils available but not currently used in this file
 
 /**
  * UI Component Refinement Tests

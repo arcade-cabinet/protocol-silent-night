@@ -1,5 +1,4 @@
 import { test, expect, Page } from '@playwright/test';
-// Test utils available but not currently used in this file
 
 /**
  * Full Gameplay E2E Tests
