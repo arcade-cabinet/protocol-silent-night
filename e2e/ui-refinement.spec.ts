@@ -35,11 +35,13 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 15000 });
+      // Wait for loading screen to disappear by waiting for the specific menu title (title case)
+      // LoadingScreen has "PROTOCOL: SILENT NIGHT", StartScreen has "Protocol: Silent Night"
+      await page.waitForTimeout(1000); // Give time for loading screen to show
+      await page.waitForSelector('text="Protocol: Silent Night"', { state: 'visible', timeout: 15000 });
 
       // Verify title is visible
-      const title = page.locator('h1');
+      const title = page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 });
       await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
@@ -246,7 +248,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 15000 });
+      await page.waitForTimeout(1000); // Give time for loading screen to show
+      await page.waitForSelector('text="Protocol: Silent Night"', { state: 'visible', timeout: 15000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {

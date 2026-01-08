@@ -51,11 +51,20 @@ export function MissionBriefing() {
     AudioManager.playSFX('ui_click');
 
     // Use faster animations in test/CI environments for better test reliability
-    // Check if running in playwright test context via window.navigator.webdriver
-    const isPlaywrightTest = typeof window !== 'undefined' && (window.navigator as any).webdriver !== undefined;
+    // Check if running in playwright test context via multiple indicators
+    const isPlaywrightTest = typeof window !== 'undefined' && (
+      (window.navigator as any).webdriver === true ||
+      window.navigator.userAgent.includes('Playwright') ||
+      window.navigator.userAgent.includes('HeadlessChrome') ||
+      // Check if running in CI environment (GitHub Actions sets CI=true)
+      (typeof process !== 'undefined' && process.env && process.env.CI === 'true') ||
+      // Additional Playwright detection
+      (window as any).__playwright !== undefined
+    );
     const isTestEnv = import.meta.env.MODE === 'test' || isPlaywrightTest;
-    const lineDelay = isTestEnv ? 100 : 600;
-    const buttonDelay = isTestEnv ? 50 : 500;
+    // Use very fast timings in test mode to prevent timeouts
+    const lineDelay = isTestEnv ? 50 : 600;
+    const buttonDelay = isTestEnv ? 25 : 500;
 
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout>;
@@ -117,7 +126,12 @@ export function MissionBriefing() {
         </div>
 
         {showButton && (
-          <button type="button" className={styles.startButton} onClick={handleStart}>
+          <button
+            type="button"
+            className={styles.startButton}
+            onClick={handleStart}
+            data-testid="commence-operation-button"
+          >
             <span className={styles.buttonText}>COMMENCE OPERATION</span>
             <div className={styles.buttonGlow} />
           </button>
