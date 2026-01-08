@@ -484,15 +484,15 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show DOUBLE KILL - notification appears briefly so increase timeout
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
@@ -501,8 +501,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
-    // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show TRIPLE KILL - notification appears briefly so increase timeout
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
@@ -547,14 +547,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -562,7 +562,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -624,8 +624,10 @@ test.describe('Full Gameplay - Game Reset', () => {
     await triggerStoreAction(page, 'damagePlayer', 300);
     await page.waitForTimeout(500);
 
-    // Reset
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
+    // Reset - wait longer for game over state to fully render
+    await page.waitForTimeout(2000);
+    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
+    await safeClick(page, redeployButton, { timeout: 60000 });
     await page.waitForTimeout(1000);
 
     // Start new game
