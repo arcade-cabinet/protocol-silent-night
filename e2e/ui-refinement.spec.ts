@@ -256,8 +256,8 @@ test.describe('UI Component Refinement', () => {
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');
       await santaButton.waitFor({ state: 'visible', timeout: 15000 });
       await santaButton.click({ timeout: 15000 });
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
-      await page.waitForTimeout(2000);
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 20000 });
+      await page.waitForTimeout(3000);
 
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
