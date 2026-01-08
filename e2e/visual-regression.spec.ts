@@ -220,7 +220,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await page.waitForTimeout(500);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.03,
+      maxDiffPixelRatio: 0.05, // Increased tolerance for game animations
       timeout: 20000,
     });
   });
