@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { waitForStablePage, startGame } from './test-utils';
+// Test utils available but not currently used in this file
 
 /**
  * Full Gameplay E2E Tests

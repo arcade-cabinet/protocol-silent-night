@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { disableAnimations, waitForStablePage, selectCharacter, commenceOperation, startGame } from './test-utils';
+import { disableAnimations, waitForStablePage, startGame } from './test-utils';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
