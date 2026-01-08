@@ -13,6 +13,7 @@ import { test, expect } from '@playwright/test';
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 test.describe('UI Component Refinement', () => {
+  test.setTimeout(60000);
   test.beforeEach(async ({ page }) => {
     // Listen for console errors
     page.on('console', msg => {

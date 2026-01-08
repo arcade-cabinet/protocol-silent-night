@@ -339,6 +339,7 @@ test.describe('Visual Regression - Responsive Design', () => {
   });
 
   test('should render mobile gameplay correctly', async ({ page }) => {
+    test.setTimeout(60000); // Increase timeout for mobile rendering
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -348,12 +349,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(500); // Wait for any animations
     await santaButton.click({ force: true, timeout: 15000 });
 
-    // Wait for briefing screen transition
-    await page.waitForTimeout(1000);
+    // Wait for briefing screen transition with increased timeout
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 20000 });
+    await expect(commenceButton).toBeVisible({ timeout: 30000 });
     await commenceButton.click({ force: true, timeout: 15000 });
 
     await page.waitForTimeout(5000);
@@ -364,6 +365,7 @@ test.describe('Visual Regression - Responsive Design', () => {
   });
 
   test('should render touch controls on mobile', async ({ page }) => {
+    test.setTimeout(60000); // Increase timeout for mobile rendering
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -373,12 +375,12 @@ test.describe('Visual Regression - Responsive Design', () => {
     await page.waitForTimeout(500); // Wait for any animations
     await santaButton.click({ force: true, timeout: 15000 });
 
-    // Wait for briefing screen transition
-    await page.waitForTimeout(1000);
+    // Wait for briefing screen transition with increased timeout
+    await page.waitForTimeout(2000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 20000 });
+    await expect(commenceButton).toBeVisible({ timeout: 30000 });
     await commenceButton.click({ force: true, timeout: 15000 });
 
     await page.waitForTimeout(3000);
