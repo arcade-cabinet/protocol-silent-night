@@ -1,8 +1,9 @@
 import { test, expect, Page } from '@playwright/test';
+import { waitForStablePage, startGame } from './test-utils';
 
 /**
  * Full Gameplay E2E Tests
- * 
+ *
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
  */

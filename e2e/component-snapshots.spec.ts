@@ -1,31 +1,22 @@
 import { test, expect } from '@playwright/test';
+import { waitForStablePage, startGame } from './test-utils';
 
 /**
  * Component Snapshot Tests
- * 
+ *
  * Tests individual 3D game components and their rendering
  * using Playwright's visual comparison capabilities
  */
 
 const VISUAL_THRESHOLD = 0.2;
-const SCREENSHOT_TIMEOUT = 30000; // 30 second timeout for WebGL screenshot operations
+const SCREENSHOT_TIMEOUT = 45000; // 45 second timeout for WebGL screenshot operations
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
-    
-    // Start with Santa
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true, noWaitAfter: true });
-
-    // Click "COMMENCE OPERATION" on the briefing screen
-    // Wait for briefing animations to complete before clicking
-    await page.waitForTimeout(5000);
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 10000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, noWaitAfter: true });
-
-    await page.waitForTimeout(5000);
+    await waitForStablePage(page);
+    await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(2000);
     
     // Focus on character by centering view
     await page.evaluate(() => {
@@ -268,11 +259,9 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 test.describe('Component Snapshots - Particle Effects', () => {
   test('should render hit particles on impact', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
-    
-    const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
-    await santaButton.click({ force: true, noWaitAfter: true });
-    await page.waitForTimeout(8000);
+    await waitForStablePage(page);
+    await startGame(page, 'MECHA-SANTA');
+    await page.waitForTimeout(5000);
     
     // Fire and wait for hits
     await page.keyboard.down('Space');

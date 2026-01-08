@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForStablePage, disableAnimations, selectCharacter, commenceOperation } from './test-utils';
 
 /**
  * UI Component Refinement Tests
@@ -11,7 +12,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
-const SCREENSHOT_TIMEOUT = 30000; // 30 second timeout for WebGL screenshot operations
+const SCREENSHOT_TIMEOUT = 45000; // 45 second timeout for WebGL screenshot operations
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
