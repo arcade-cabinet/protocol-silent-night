@@ -314,6 +314,7 @@ test.describe('Visual Regression - Responsive Design', () => {
 
     await expect(page).toHaveScreenshot('mobile-menu.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 15000, // Increased timeout for mobile rendering
     });
   });
 
@@ -332,7 +333,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'attached', timeout: 5000 });
     await page.waitForTimeout(500); // Let animations settle
 
-    await santaButton.click({ force: true });
+    // Use noWaitAfter to prevent hanging on navigation wait
+    await santaButton.click({ force: true, noWaitAfter: true });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -361,7 +363,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     await santaButton.waitFor({ state: 'attached', timeout: 5000 });
     await page.waitForTimeout(500); // Let animations settle
 
-    await santaButton.click({ force: true });
+    // Use noWaitAfter to prevent hanging on navigation wait
+    await santaButton.click({ force: true, noWaitAfter: true });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
