@@ -80,11 +80,18 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
-      phaseStartTimeRef.current = Date.now(); // Set start time when phase begins
+      // Always reset phase start time when entering a new phase to ensure grace period works correctly
+      phaseStartTimeRef.current = Date.now();
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
         timeoutIds.push(id);
+      }
+    } else if (state === 'PHASE_1' || state === 'PHASE_BOSS') {
+      // Also update phase start time if we're in an active phase but spawning was already initialized
+      // This ensures the grace period applies even on continued play
+      if (phaseStartTimeRef.current === 0) {
+        phaseStartTimeRef.current = Date.now();
       }
     }
 
@@ -101,6 +108,7 @@ export function Enemies() {
 
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
+      phaseStartTimeRef.current = 0; // Reset phase start time when leaving phase
     }
 
     return () => {
