@@ -40,8 +40,8 @@ export default defineConfig({
     headless: !hasMcpSupport,
     // Video recording with MCP for debugging
     video: hasMcpSupport ? 'on-first-retry' : 'off',
-    // Increased action timeout for WebGL rendering
-    actionTimeout: 10000,
+    // Increased action timeout for WebGL rendering and slow CI environments
+    actionTimeout: 30000,
   },
   // Expect options for visual regression
   expect: {

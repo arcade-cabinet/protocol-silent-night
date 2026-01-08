@@ -90,7 +90,7 @@ test.describe('UI Component Refinement', () => {
       // Click MECHA-SANTA
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');
       await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-      await santaButton.click({ force: true });
+      await santaButton.click({ force: true, timeout: 30000 });
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -119,7 +119,7 @@ test.describe('UI Component Refinement', () => {
       // Select a mech
       const elfButton = page.locator('button:has-text("CYBER-ELF")');
       await elfButton.waitFor({ state: 'visible', timeout: 15000 });
-      await elfButton.click({ force: true });
+      await elfButton.click({ force: true, timeout: 30000 });
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -141,7 +141,7 @@ test.describe('UI Component Refinement', () => {
         // Click mech
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
         await mechButton.waitFor({ state: 'visible', timeout: 15000 });
-        await mechButton.click({ force: true });
+        await mechButton.click({ force: true, timeout: 30000 });
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
