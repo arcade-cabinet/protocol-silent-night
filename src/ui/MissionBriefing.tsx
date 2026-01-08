@@ -45,6 +45,7 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length must be excluded to prevent infinite animation loops
   useEffect(() => {
     if (state !== 'BRIEFING') {
       animationStartedRef.current = false;
@@ -54,6 +55,7 @@ export function MissionBriefing() {
       return;
     }
 
+    // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
 
     if (totalLines === 0) {
@@ -90,7 +92,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [state, briefingLines]);
+  }, [state]);
 
   if (state !== 'BRIEFING') return null;
 
