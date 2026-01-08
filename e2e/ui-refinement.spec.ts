@@ -90,7 +90,9 @@ test.describe('UI Component Refinement', () => {
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
       // Click MECHA-SANTA
-      await page.click('button:has-text("MECHA-SANTA")', { force: true });
+      const santaButton = page.locator('button:has-text("MECHA-SANTA")');
+      await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+      await santaButton.click({ force: true });
 
       // Wait for mission briefing with longer timeout for state transition
       try {
@@ -117,7 +119,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
       // Select a mech
-      await page.click('button:has-text("CYBER-ELF")', { force: true });
+      const elfButton = page.locator('button:has-text("CYBER-ELF")');
+      await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+      await elfButton.click({ force: true });
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -137,7 +141,9 @@ test.describe('UI Component Refinement', () => {
 
       for (const [index, mech] of mechs.entries()) {
         // Click mech
-        await page.click(`button:has-text("${mech.name}")`, { force: true });
+        const mechButton = page.locator(`button:has-text("${mech.name}")`);
+        await mechButton.waitFor({ state: 'visible', timeout: 15000 });
+        await mechButton.click({ force: true });
 
         // Wait for briefing
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -163,7 +169,9 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")', { force: true });
+      const santaButton = page.locator('button:has-text("MECHA-SANTA")');
+      await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+      await santaButton.click({ force: true });
 
       // Wait for briefing
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
@@ -171,7 +179,9 @@ test.describe('UI Component Refinement', () => {
       // Click commence
       // Wait for briefing animations to complete
       await page.waitForTimeout(5000);
-      await page.click('button:has-text("COMMENCE OPERATION")', { force: true });
+      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
+      await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+      await commenceButton.click({ force: true });
 
       // Wait for game HUD to appear
       await page.waitForTimeout(2000);
@@ -189,11 +199,15 @@ test.describe('UI Component Refinement', () => {
       }
 
       // Select CYBER-ELF (Plasma SMG)
-      await page.click('button:has-text("CYBER-ELF")', { force: true });
+      const elfButton = page.locator('button:has-text("CYBER-ELF")');
+      await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+      await elfButton.click({ force: true });
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
       // Wait for briefing animations to complete
       await page.waitForTimeout(5000);
-      await page.click('button:has-text("COMMENCE OPERATION")', { force: true });
+      const commenceButton = page.locator('button:has-text("COMMENCE OPERATION")');
+      await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
+      await commenceButton.click({ force: true });
 
       // Wait for HUD
       await page.waitForTimeout(2000);
@@ -248,7 +262,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should match mission briefing snapshot', async ({ page }) => {
       // Select mech
-      await page.click('button:has-text("MECHA-SANTA")', { force: true });
+      const santaButton = page.locator('button:has-text("MECHA-SANTA")');
+      await santaButton.waitFor({ state: 'visible', timeout: 15000 });
+      await santaButton.click({ force: true });
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
 
       if (hasMcpSupport) {
