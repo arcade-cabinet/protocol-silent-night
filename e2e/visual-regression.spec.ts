@@ -16,6 +16,7 @@ const SCREENSHOT_TIMEOUT = 45000; // 45 second timeout for WebGL screenshot oper
 test.describe('Visual Regression - Character Selection', () => {
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await disableAnimations(page);
 
@@ -28,6 +29,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Santa character card correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await disableAnimations(page);
 
@@ -42,6 +44,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Elf character card correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await disableAnimations(page);
 
@@ -56,6 +59,7 @@ test.describe('Visual Regression - Character Selection', () => {
 
   test('should show Bumble character card correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await disableAnimations(page);
 
@@ -72,6 +76,7 @@ test.describe('Visual Regression - Character Selection', () => {
 test.describe('Visual Regression - Game Start', () => {
   test('should render Santa gameplay correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -84,6 +89,7 @@ test.describe('Visual Regression - Game Start', () => {
 
   test('should render Elf gameplay correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'CYBER-ELF');
 
@@ -96,6 +102,7 @@ test.describe('Visual Regression - Game Start', () => {
 
   test('should render Bumble gameplay correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'BUMBLE');
 
@@ -110,6 +117,7 @@ test.describe('Visual Regression - Game Start', () => {
 test.describe('Visual Regression - HUD Elements', () => {
   test('should render HUD correctly during gameplay', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -122,6 +130,7 @@ test.describe('Visual Regression - HUD Elements', () => {
 
   test('should render score and objectives correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -139,6 +148,7 @@ test.describe('Visual Regression - HUD Elements', () => {
 test.describe('Visual Regression - Game Movement', () => {
   test('should render character movement correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -155,6 +165,7 @@ test.describe('Visual Regression - Game Movement', () => {
 
   test('should render firing animation correctly', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -172,6 +183,7 @@ test.describe('Visual Regression - Game Movement', () => {
 test.describe('Visual Regression - Combat Scenarios', () => {
   test('should render combat with enemies', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -191,6 +203,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 
   test('should render player taking damage', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'CYBER-ELF');
 
@@ -207,6 +220,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 test.describe('Visual Regression - End Game States', () => {
   test('should render game over screen', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -237,6 +251,7 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await disableAnimations(page);
 
@@ -252,6 +267,7 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
@@ -264,6 +280,7 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await waitForStablePage(page);
     await startGame(page, 'MECHA-SANTA');
 
