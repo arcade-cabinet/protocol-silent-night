@@ -11,6 +11,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
+const SCREENSHOT_TIMEOUT = 30000; // 30 second timeout for WebGL screenshot operations
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
@@ -233,6 +234,7 @@ test.describe('UI Component Refinement', () => {
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('menu-screen.png', {
           maxDiffPixels: 100,
+          timeout: SCREENSHOT_TIMEOUT,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
@@ -247,6 +249,7 @@ test.describe('UI Component Refinement', () => {
       if (hasMcpSupport) {
         await expect(page).toHaveScreenshot('mission-briefing.png', {
           maxDiffPixels: 100,
+          timeout: SCREENSHOT_TIMEOUT,
         }).catch(() => {
           console.log('ℹ️  Snapshot mismatch - this may be expected for visual refinements');
         });
