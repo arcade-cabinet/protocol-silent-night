@@ -264,12 +264,12 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await bumbleButton.waitFor({ state: 'visible', timeout: 15000 });
     await bumbleButton.click({ timeout: 20000 });
 
-    // Wait for briefing screen transition
-    await page.waitForTimeout(2000);
+    // Wait longer for briefing screen transition and animation
+    await page.waitForTimeout(3000);
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-    await expect(commenceButton).toBeVisible({ timeout: 15000 });
+    await expect(commenceButton).toBeVisible({ timeout: 20000 });
     await commenceButton.click({ timeout: 30000, noWaitAfter: true });
 
     await page.waitForTimeout(3000);

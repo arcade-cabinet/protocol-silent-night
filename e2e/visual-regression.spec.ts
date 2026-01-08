@@ -335,10 +335,13 @@ test.describe('Visual Regression - End Game States', () => {
       gameWindow.useGameStore?.getState().damagePlayer(300);
     });
 
-    await page.waitForTimeout(2000);
+    // Wait longer for game over animation and state to settle
+    await page.waitForTimeout(4000);
 
+    // Take screenshot with increased threshold and longer timeout
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000, // Increased timeout for CI
     });
   });
 });

@@ -87,9 +87,10 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
-      // Click MECHA-SANTA
-      await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 15000 });
-      await page.click('button:has-text("MECHA-SANTA")', { timeout: 20000 });
+      // Click MECHA-SANTA using getByRole for better reliability
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await expect(santaButton).toBeVisible({ timeout: 15000 });
+      await santaButton.click({ timeout: 20000 });
 
       // Wait for briefing screen transition
       await page.waitForTimeout(2000);
@@ -118,9 +119,10 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
-      // Select a mech
-      await page.waitForSelector('button:has-text("CYBER-ELF")', { state: 'visible', timeout: 15000 });
-      await page.click('button:has-text("CYBER-ELF")', { timeout: 20000 });
+      // Select a mech using getByRole for better reliability
+      const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
+      await expect(elfButton).toBeVisible({ timeout: 15000 });
+      await elfButton.click({ timeout: 20000 });
 
       // Wait for briefing screen transition
       await page.waitForTimeout(2000);
@@ -142,9 +144,10 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Click mech
-        await page.waitForSelector(`button:has-text("${mech.name}")`, { state: 'visible', timeout: 15000 });
-        await page.click(`button:has-text("${mech.name}")`, { timeout: 20000 });
+        // Click mech using getByRole for better reliability
+        const mechButton = page.getByRole('button', { name: new RegExp(mech.name) });
+        await expect(mechButton).toBeVisible({ timeout: 15000 });
+        await mechButton.click({ timeout: 20000 });
 
         // Wait for briefing screen transition
         await page.waitForTimeout(2000);
@@ -265,9 +268,10 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
-      // Select mech
-      await page.waitForSelector('button:has-text("MECHA-SANTA")', { state: 'visible', timeout: 15000 });
-      await page.click('button:has-text("MECHA-SANTA")', { timeout: 20000 });
+      // Select mech using getByRole for better reliability
+      const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
+      await expect(santaButton).toBeVisible({ timeout: 15000 });
+      await santaButton.click({ timeout: 20000 });
 
       // Wait for briefing screen transition
       await page.waitForTimeout(2000);
