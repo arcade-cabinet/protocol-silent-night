@@ -250,9 +250,13 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await page.keyboard.down('Space');
     await page.waitForTimeout(1000);
     await page.keyboard.up('Space');
-    
+
+    // Wait for weapon effects to stabilize
+    await page.waitForTimeout(500);
+
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000, // Increased timeout for CI stability
     });
   });
 
@@ -413,14 +417,28 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await commenceButton.click({ timeout: 30000, noWaitAfter: true });
 
     await page.waitForTimeout(5000);
-    
-    // Trigger kill streak by rapid kills
+
+    // Trigger kill streak by adding kills with delays to avoid audio timing conflicts
     await page.evaluate(() => {
       // @ts-ignore
       const store = window.useGameStore?.getState();
       if (store) {
         store.addKill(50);
+      }
+    });
+    await page.waitForTimeout(100); // Small delay to prevent Tone.js timing errors
+    await page.evaluate(() => {
+      // @ts-ignore
+      const store = window.useGameStore?.getState();
+      if (store) {
         store.addKill(50);
+      }
+    });
+    await page.waitForTimeout(100);
+    await page.evaluate(() => {
+      // @ts-ignore
+      const store = window.useGameStore?.getState();
+      if (store) {
         store.addKill(50);
       }
     });

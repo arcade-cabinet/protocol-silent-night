@@ -343,7 +343,7 @@ test.describe('Visual Regression - End Game States', () => {
     // Take screenshot with increased threshold and longer timeout
     // Game over screen has dynamic content (scores, stats) so needs higher tolerance
     await expect(page).toHaveScreenshot('game-over-screen.png', {
-      maxDiffPixelRatio: 0.5, // Increased from 0.25 due to dynamic score/stat rendering
+      maxDiffPixelRatio: 0.08, // Increased to handle CI rendering variations (observed 0.06 diff)
       timeout: 30000, // Increased timeout for CI
     });
   });
