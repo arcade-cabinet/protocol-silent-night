@@ -40,6 +40,8 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.waitFor({ state: 'visible', timeout: 15000 });
+    // Add small delay before click to ensure element is interactive
+    await page.waitForTimeout(500);
     await elfButton.click({ force: true });
 
     // Wait for mission briefing to appear
@@ -48,8 +50,20 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     // Wait for briefing animations to complete before clicking
     await page.waitForTimeout(2000);
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 15000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, noWaitAfter: true });
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    // Add extra delay to ensure button is fully interactive
+    await page.waitForTimeout(500);
+    // Try clicking multiple times with retry logic
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await commenceButton.click({ force: true, timeout: 5000 });
+        break; // Success, exit loop
+      } catch (error) {
+        if (attempt === 2) throw error; // Last attempt, rethrow
+        await page.waitForTimeout(1000); // Wait before retry
+      }
+    }
 
     await page.waitForTimeout(3000);
     

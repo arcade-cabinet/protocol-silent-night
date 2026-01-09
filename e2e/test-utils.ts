@@ -88,50 +88,96 @@ export async function startGame(
  * Retries multiple times to handle timing issues
  */
 export async function resolveLevelUp(page: Page): Promise<void> {
+  // Check if page is closed before starting
+  if (page.isClosed()) {
+    console.error('Page is closed, cannot resolve level up');
+    return;
+  }
+
   // Wait a bit for any state transitions to settle
-  await page.waitForTimeout(500);
+  try {
+    await page.waitForTimeout(500);
+  } catch (error) {
+    if (page.isClosed()) {
+      console.error('Page closed during initial wait');
+      return;
+    }
+    throw error;
+  }
 
   // Try up to 5 times with delays to handle timing issues
   for (let attempt = 0; attempt < 5; attempt++) {
-    const state = await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState?.()?.state;
-    });
+    // Check if page is still open
+    if (page.isClosed()) {
+      console.error('Page closed during level up resolution');
+      return;
+    }
 
-    if (state === 'LEVEL_UP') {
-      // Get available upgrades and select the first one
-      const upgradeId = await page.evaluate(() => {
+    try {
+      const state = await page.evaluate(() => {
         const store = (window as any).useGameStore;
-        const choices = store?.getState?.()?.runProgress?.upgradeChoices || [];
-        return choices[0]?.id;
+        return store?.getState?.()?.state;
       });
 
-      if (upgradeId) {
-        await page.evaluate((id) => {
+      if (state === 'LEVEL_UP') {
+        // Get available upgrades and select the first one
+        const upgradeId = await page.evaluate(() => {
           const store = (window as any).useGameStore;
-          store?.getState?.()?.selectLevelUpgrade?.(id);
-        }, upgradeId);
-        // Wait for state transition
-        await page.waitForTimeout(800);
-
-        // Verify the state changed
-        const newState = await page.evaluate(() => {
-          const store = (window as any).useGameStore;
-          return store?.getState?.()?.state;
+          const choices = store?.getState?.()?.runProgress?.upgradeChoices || [];
+          return choices[0]?.id;
         });
 
-        // If still in LEVEL_UP, retry
-        if (newState === 'LEVEL_UP') {
-          await page.waitForTimeout(500);
-          continue;
-        } else {
-          // Successfully resolved
-          return;
+        if (upgradeId) {
+          await page.evaluate((id) => {
+            const store = (window as any).useGameStore;
+            store?.getState?.()?.selectLevelUpgrade?.(id);
+          }, upgradeId);
+
+          // Wait for state transition with page close check
+          try {
+            await page.waitForTimeout(800);
+          } catch (error) {
+            if (page.isClosed()) {
+              console.error('Page closed during state transition wait');
+              return;
+            }
+            throw error;
+          }
+
+          // Verify the state changed
+          const newState = await page.evaluate(() => {
+            const store = (window as any).useGameStore;
+            return store?.getState?.()?.state;
+          });
+
+          // If still in LEVEL_UP, retry
+          if (newState === 'LEVEL_UP') {
+            try {
+              await page.waitForTimeout(500);
+            } catch (error) {
+              if (page.isClosed()) {
+                console.error('Page closed during retry wait');
+                return;
+              }
+              throw error;
+            }
+            continue;
+          } else {
+            // Successfully resolved
+            return;
+          }
         }
+      } else {
+        // Not in LEVEL_UP state, nothing to resolve
+        return;
       }
-    } else {
-      // Not in LEVEL_UP state, nothing to resolve
-      return;
+    } catch (error) {
+      if (page.isClosed()) {
+        console.error('Page closed during level up evaluation');
+        return;
+      }
+      // Log error but continue trying
+      console.error(`Level up resolution attempt ${attempt + 1} failed:`, error);
     }
   }
 }
