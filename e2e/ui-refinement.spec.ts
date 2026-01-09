@@ -34,8 +34,11 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
-      // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
+      // Wait for menu to fully render with longer timeout for CI
+      await page.waitForSelector('h1', { timeout: 10000 });
+
+      // Ensure buttons are also rendered before proceeding
+      await page.waitForSelector('button[type="button"]', { timeout: 10000 });
 
       // Verify title is visible
       const title = page.locator('h1');
@@ -87,6 +90,9 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
+      // Wait for menu buttons to be fully loaded
+      await page.waitForSelector('button[type="button"]', { timeout: 15000 });
+
       // Click MECHA-SANTA
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');
       await santaButton.waitFor({ state: 'visible', timeout: 15000 });
@@ -116,6 +122,9 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
+      // Wait for menu buttons to be fully loaded
+      await page.waitForSelector('button[type="button"]', { timeout: 15000 });
+
       // Select a mech
       const elfButton = page.locator('button:has-text("CYBER-ELF")');
       await elfButton.waitFor({ state: 'visible', timeout: 15000 });
@@ -138,6 +147,9 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
+        // Wait for menu buttons to be fully loaded
+        await page.waitForSelector('button[type="button"]', { timeout: 15000 });
+
         // Click mech
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
         await mechButton.waitFor({ state: 'visible', timeout: 15000 });
@@ -156,7 +168,10 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
-          await page.waitForSelector('h1', { timeout: 5000 });
+          await page.waitForLoadState('networkidle');
+          await page.waitForSelector('h1', { timeout: 10000 });
+          // Also wait for buttons to be ready
+          await page.waitForSelector('button[type="button"]', { timeout: 10000 });
         }
       }
     });

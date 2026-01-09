@@ -10,6 +10,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.30; // 30% diff tolerance for WebGL rendering variations across CI environments
+const GAME_OVER_THRESHOLD = 0.08; // Higher tolerance for game-over screen due to particle effects and animations
 
 // Helper function to ensure page is interactive and ready for clicks
 async function waitForPageReady(page: any) {
@@ -373,7 +374,7 @@ test.describe('Visual Regression - End Game States', () => {
     await page.waitForLoadState('networkidle');
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
+      maxDiffPixelRatio: GAME_OVER_THRESHOLD,
       timeout: 30000,
       animations: 'disabled',
     });
