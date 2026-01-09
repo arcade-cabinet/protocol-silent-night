@@ -365,6 +365,17 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     await page.waitForTimeout(3000);
 
+    // Clear all enemies to prevent damage during test
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        state.enemies = [];
+      }
+    });
+
+    await page.waitForTimeout(100);
+
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
@@ -540,8 +551,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Wait for streak to timeout (2+ seconds)
-    await page.waitForTimeout(2500);
+    // Wait for streak to timeout (5+ seconds based on streakTimeout in gameStore.ts:394)
+    await page.waitForTimeout(5500);
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
@@ -638,6 +649,9 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
+
+    // Wait for game over state
+    await waitForGameState(page, 'GAME_OVER', 5000);
     await page.waitForTimeout(500);
 
     // Reset
@@ -654,6 +668,9 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
+
+    // Wait for game over state
+    await waitForGameState(page, 'GAME_OVER', 5000);
     await page.waitForTimeout(500);
 
     // High score should still be preserved
