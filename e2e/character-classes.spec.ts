@@ -25,8 +25,11 @@ test.describe('Character Class Tests', () => {
         console.log(`Console error: ${msg.text()}`);
       }
     });
-    
+
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    // Wait for LoadingScreen to disappear (1500ms + buffer)
+    await page.waitForTimeout(2000);
   });
 
   // ============================================

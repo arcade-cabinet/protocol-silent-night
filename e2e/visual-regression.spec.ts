@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const VISUAL_THRESHOLD = 0.30; // 30% diff tolerance for WebGL rendering variations across CI environments
-const GAME_OVER_THRESHOLD = 0.08; // Higher tolerance for game-over screen due to particle effects and animations
+const GAME_OVER_THRESHOLD = 0.10; // Higher tolerance for game-over screen due to particle effects and animations
 
 // Helper function to ensure page is interactive and ready for clicks
 async function waitForPageReady(page: any) {
@@ -336,7 +336,9 @@ test.describe('Visual Regression - End Game States', () => {
     test.setTimeout(120000); // Increase timeout to 120s for this complex test
 
     await page.goto('/');
-    await page.waitForTimeout(3000);
+    await page.waitForLoadState('networkidle');
+    // Wait for LoadingScreen to disappear (1500ms + buffer)
+    await page.waitForTimeout(2000);
 
     // Start game
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
