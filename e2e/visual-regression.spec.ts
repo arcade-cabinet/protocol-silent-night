@@ -213,16 +213,15 @@ test.describe('Visual Regression - Game Movement', () => {
     // Start game
     const startButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await safeClick(page, startButton, { timeout: 30000 });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
-    // Fire weapon and wait for animation to stabilize
+    // Fire weapon
     await page.keyboard.press('Space');
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
 
-    // Increase tolerance for CI environment rendering differences
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.05,
-      timeout: 25000,
+      maxDiffPixelRatio: 0.03,
+      timeout: 20000,
     });
   });
 });
