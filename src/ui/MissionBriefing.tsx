@@ -56,8 +56,6 @@ export function MissionBriefing() {
       (window.navigator as any).webdriver === true ||
       window.navigator.userAgent.includes('Playwright') ||
       window.navigator.userAgent.includes('HeadlessChrome') ||
-      // Check if running in CI environment (GitHub Actions sets CI=true)
-      (typeof process !== 'undefined' && process.env && process.env.CI === 'true') ||
       // Additional Playwright detection
       (window as any).__playwright !== undefined
     );
