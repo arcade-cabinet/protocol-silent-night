@@ -132,9 +132,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should display correct operator for each mech', async ({ page }) => {
       const mechs = [
-        { name: 'MECHA-SANTA', role: 'Heavy Stage' },
-        { name: 'CYBER-ELF', role: 'Recon' },
-        { name: 'THE BUMBLE', role: 'Crowd Control' },
+        { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
+        { name: 'CYBER-ELF', role: 'Recon / Scout' },
+        { name: 'THE BUMBLE', role: 'Crowd Control / Bruiser' },
       ];
 
       for (const [index, mech] of mechs.entries()) {

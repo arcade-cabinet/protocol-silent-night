@@ -86,7 +86,7 @@ test.describe('Visual Regression - Game Start', () => {
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -113,7 +113,7 @@ test.describe('Visual Regression - Game Start', () => {
     await elfButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -140,7 +140,7 @@ test.describe('Visual Regression - Game Start', () => {
     await bumbleButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -168,7 +168,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -193,7 +193,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -223,7 +223,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -252,7 +252,7 @@ test.describe('Visual Regression - Game Movement', () => {
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -282,7 +282,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -311,7 +311,7 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await elfButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -343,7 +343,7 @@ test.describe('Visual Regression - End Game States', () => {
     await santaButton.click({ force: true, timeout: 30000 });
 
     // Wait for briefing screen animation to complete
-    await page.waitForTimeout(8000);
+    await page.waitForTimeout(10000);
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
