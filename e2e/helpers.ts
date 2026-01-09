@@ -27,8 +27,8 @@ export async function disableAnimations(page: Page) {
 export async function setupPage(page: Page) {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await disableAnimations(page);
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(1000); // Initial stability buffer
+  await page.waitForLoadState('networkidle', { timeout: 15000 });
+  await page.waitForTimeout(500); // Initial stability buffer - reduced for faster tests
 }
 
 /**
@@ -36,10 +36,10 @@ export async function setupPage(page: Page) {
  * Follows the pattern: Wait for visibility -> Stability buffer -> Force Click -> State buffer
  */
 export async function safeClick(page: Page, locator: Locator, options: { timeout?: number } = {}) {
-  const timeout = options.timeout || 30000;
+  const timeout = options.timeout || 15000;
 
   await locator.waitFor({ state: 'visible', timeout });
-  await page.waitForTimeout(500); // Stability buffer
+  await page.waitForTimeout(300); // Stability buffer - reduced for faster tests
   await locator.click({ force: true, timeout });
-  await page.waitForTimeout(1000); // State transition buffer
+  await page.waitForTimeout(500); // State transition buffer - reduced for faster tests
 }
