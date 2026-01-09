@@ -25,11 +25,9 @@ export async function disableAnimations(page: Page) {
  * - Waits for network stability
  */
 export async function setupPage(page: Page) {
-  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await disableAnimations(page);
-  await page.waitForLoadState('networkidle', { timeout: 60000 }).catch(() => {
-    console.log('Network idle timeout - proceeding anyway');
-  });
+  await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1000); // Initial stability buffer
 }
 
