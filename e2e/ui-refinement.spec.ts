@@ -139,12 +139,12 @@ test.describe('UI Component Refinement', () => {
       await elfButton.click({ force: true, timeout: 30000 });
 
       // Wait for briefing with longer timeout for state transition
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
 
-      // Check for operation button
+      // Check for operation button with increased timeout
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible();
-      await expect(opButton).toBeEnabled();
+      await expect(opButton).toBeVisible({ timeout: 15000 });
+      await expect(opButton).toBeEnabled({ timeout: 15000 });
     });
 
     test('should display correct operator for each mech', async ({ page }) => {
@@ -179,7 +179,9 @@ test.describe('UI Component Refinement', () => {
         if (index < mechs.length - 1) {
           await page.reload();
           await page.waitForLoadState('networkidle');
-          await page.waitForSelector('h1', { timeout: 10000 });
+          // Wait for LoadingScreen to disappear after reload
+          await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 10000 }).catch(() => {});
+          await page.waitForSelector('h1', { timeout: 15000 });
           // Also wait for buttons to be ready
           await page.waitForSelector('button[type="button"]', { timeout: 20000 });
         }

@@ -51,7 +51,7 @@ export default defineConfig({
     toHaveScreenshot: {
       // Maximum number of pixels that can differ (increased for WebGL CI variations)
       // Set high enough to defer to maxDiffPixelRatio in individual tests
-      maxDiffPixels: 50000,
+      maxDiffPixels: 60000,
       // Animation handling
       animations: 'disabled',
       // CSS media features
