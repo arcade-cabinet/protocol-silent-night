@@ -387,19 +387,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    let newStreak = 1;
-    let newKills = 0;
+    const now = Date.now();
+    const streakTimeout = 2000;
+
+    let capturedStreak = 0;
+    let capturedKills = 0;
 
     set((state) => {
-      const now = Date.now();
-      newKills = state.stats.kills + 1;
-
-      const streakTimeout = 2000;
       const timeSinceLastKill = now - state.lastKillTime;
-      newStreak = timeSinceLastKill < streakTimeout ? state.killStreak + 1 : 1;
+      const newStreak = timeSinceLastKill < streakTimeout ? state.killStreak + 1 : 1;
+      const newKills = state.stats.kills + 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = state.stats.score + points + streakBonus;
+
+      // Capture values for use after state update
+      capturedStreak = newStreak;
+      capturedKills = newKills;
 
       return {
         stats: { ...state.stats, kills: newKills, score: newScore },
@@ -412,15 +416,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    // Use captured values from the state update closure
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+    // Use captured values from the state update
+    const xpGain = 10 + (capturedStreak > 1 ? (capturedStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
     let npStreakBonus = 0;
-    if (newStreak === 2) npStreakBonus = 5;
-    else if (newStreak === 3) npStreakBonus = 10;
-    else if (newStreak === 4) npStreakBonus = 25;
-    else if (newStreak >= 5) npStreakBonus = 50;
+    if (capturedStreak === 2) npStreakBonus = 5;
+    else if (capturedStreak === 3) npStreakBonus = 10;
+    else if (capturedStreak === 4) npStreakBonus = 25;
+    else if (capturedStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
@@ -428,7 +432,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
-    if (newStreak > 1 && newStreak % 3 === 0) {
+    if (capturedStreak > 1 && capturedStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
     }
 
@@ -436,7 +440,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
     const gameState = get().state;
 
-    if (newKills >= waveReq && (gameState === 'PHASE_1' || gameState === 'LEVEL_UP')) {
+    if (capturedKills >= waveReq && (gameState === 'PHASE_1' || gameState === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
