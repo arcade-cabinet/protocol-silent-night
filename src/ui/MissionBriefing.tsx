@@ -91,6 +91,9 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      // Reset animation guard on cleanup to allow animation to restart on next briefing
+      // This handles cases where component unmounts/remounts or React StrictMode triggers cleanup
+      animationStartedRef.current = false;
     };
   }, [state]);
 
