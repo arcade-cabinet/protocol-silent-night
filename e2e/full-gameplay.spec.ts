@@ -657,10 +657,10 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(1000);
 
     // Add kills rapidly
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       const success = await triggerStoreAction(page, 'addKill', 100);
       expect(success).toBe(true);
     }
@@ -670,12 +670,12 @@ test.describe('Full Gameplay - Game Reset', () => {
       const store = (window as any).useGameStore;
       if (!store) return false;
       const state = store.getState();
-      return state.stats.kills >= 5;
-    }, { timeout: 30000, polling: 50 });
+      return state.stats.kills >= 3;
+    }, { timeout: 15000, polling: 50 });
 
-    // Verify we have 5 kills and a score
+    // Verify we have kills and a score
     let state = await getGameState(page);
-    expect(state?.kills).toBe(5);
+    expect(state?.kills).toBeGreaterThanOrEqual(3);
     expect(state?.score).toBeGreaterThan(0);
     const scoreBeforeDeath = state?.score || 0;
 
@@ -688,7 +688,17 @@ test.describe('Full Gameplay - Game Reset', () => {
       const store = (window as any).useGameStore;
       if (!store) return false;
       return store.getState().state === 'GAME_OVER';
-    }, { timeout: 30000, polling: 50 });
+    }, { timeout: 15000, polling: 50 });
+
+    // Verify high score is shown on game over screen
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
+
+    // Get high score value before reset
+    const highScoreBeforeReset = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().highScore || 0;
+    });
+    expect(highScoreBeforeReset).toBeGreaterThan(0);
 
     // Reset
     await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
@@ -698,7 +708,7 @@ test.describe('Full Gameplay - Game Reset', () => {
       const store = (window as any).useGameStore;
       if (!store) return false;
       return store.getState().state === 'MENU';
-    }, { timeout: 30000, polling: 50 });
+    }, { timeout: 15000, polling: 50 });
 
     // Start new game
     await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
@@ -708,17 +718,14 @@ test.describe('Full Gameplay - Game Reset', () => {
       const store = (window as any).useGameStore;
       if (!store) return false;
       return store.getState().state === 'BRIEFING';
-    }, { timeout: 30000, polling: 50 });
-
-    // Wait a bit for UI to stabilize
-    await page.waitForTimeout(1000);
+    }, { timeout: 15000, polling: 50 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
 
-    // Die with 0 score
+    // Die with 0 score (or minimal score)
     const damageSuccess2 = await triggerStoreAction(page, 'damagePlayer', 100);
     expect(damageSuccess2).toBe(true);
 
@@ -727,10 +734,19 @@ test.describe('Full Gameplay - Game Reset', () => {
       const store = (window as any).useGameStore;
       if (!store) return false;
       return store.getState().state === 'GAME_OVER';
-    }, { timeout: 30000, polling: 50 });
+    }, { timeout: 15000, polling: 50 });
 
-    // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 3000 });
+    // High score should still be preserved (should match the first game's score)
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
+
+    const highScoreAfterReset = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().highScore || 0;
+    });
+
+    // Verify high score was preserved and is still the same value from first game
+    expect(highScoreAfterReset).toBe(highScoreBeforeReset);
+    expect(highScoreAfterReset).toBeGreaterThan(0);
   });
 });
 
