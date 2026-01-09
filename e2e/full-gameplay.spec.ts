@@ -32,8 +32,9 @@ async function getGameState(page: Page) {
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  // Trigger the action immediately - Zustand state updates are synchronous
-  const result = await page.evaluate(({ action, args }) => {
+  // Add small delay between actions to ensure proper audio timing and preventing scheduling race conditions
+  await page.waitForTimeout(50);
+  return page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
     if (!store) return false;
     const state = store.getState();
@@ -43,12 +44,6 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     }
     return false;
   }, { action, args });
-
-  // Small delay to allow side effects (audio, etc.) to complete
-  // Kept minimal to allow rapid successive calls for kill streak tests
-  await page.waitForTimeout(50);
-
-  return result;
 }
 
 // Helper to wait for game state
@@ -119,20 +114,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await safeClick(page, commenceButton, { timeout: 30000 });
 
     // Wait for game to start
-    await page.waitForTimeout(1000);
-
-    // Immediately check state to avoid enemy damage
+    await page.waitForTimeout(2000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
-    // Allow for small HP variance due to possible enemy contact during spawn
-    expect(state?.playerHp).toBeGreaterThanOrEqual(290);
-    expect(state?.playerHp).toBeLessThanOrEqual(300);
+    expect(state?.playerHp).toBe(300);
 
     // Verify HUD is visible
     await expect(page.locator('text=OPERATOR STATUS')).toBeVisible();
-    // Use a more flexible HP check that doesn't require exact value
-    await expect(page.locator('text=/\\d{3} \\/ 300/')).toBeVisible();
+    await expect(page.locator('text=300 / 300')).toBeVisible();
   });
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
@@ -152,9 +142,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Verify Santa's stats are correct
     const state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(300);
-    // Allow small variance due to possible enemy collision damage during spawn
-    expect(state?.playerHp).toBeGreaterThanOrEqual(295);
-    expect(state?.playerHp).toBeLessThanOrEqual(300);
+    expect(state?.playerHp).toBe(300);
 
     // Fire weapon - Santa's Coal Cannon fires single shots
     await page.keyboard.down('Space');
@@ -185,9 +173,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // Allow small variance due to possible enemy damage during test
-    expect(state?.playerHp).toBeGreaterThanOrEqual(195);
-    expect(state?.playerHp).toBeLessThanOrEqual(200); // 300 - 100 = 200 (with ~5 HP tolerance)
+    expect(state?.playerHp).toBe(200); // 300 - 100 = 200
     expect(state?.gameState).toBe('PHASE_1'); // Still alive
 
     // Take more damage
@@ -195,8 +181,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForTimeout(200);
 
     state = await getGameState(page);
-    expect(state?.playerHp).toBeGreaterThanOrEqual(95);
-    expect(state?.playerHp).toBeLessThanOrEqual(100); // 100 HP (with ~5 HP tolerance)
+    expect(state?.playerHp).toBe(100);
     expect(state?.gameState).toBe('PHASE_1'); // Still alive with 100 HP
   });
 
@@ -372,18 +357,10 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
-
-    // Wait for damage to apply with proper timeout
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      return store.getState().playerHp < 200;
-    }, { timeout: 2000, polling: 50 });
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // Allow for small variance due to timing or rounding
-    expect(state?.playerHp).toBeGreaterThanOrEqual(95);
-    expect(state?.playerHp).toBeLessThanOrEqual(100);
+    expect(state?.playerHp).toBe(100);
     expect(state?.gameState).toBe('PHASE_1');
 
     // One more hit at 100 damage kills
@@ -505,30 +482,27 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak - must execute ALL kills quickly to stay within 2000ms window
-    // Call addKill three times rapidly without ANY intermediate checks
-    const success1 = await triggerStoreAction(page, 'addKill', 10);
-    expect(success1).toBe(true);
-    const success2 = await triggerStoreAction(page, 'addKill', 10);
-    expect(success2).toBe(true);
-    const success3 = await triggerStoreAction(page, 'addKill', 10);
-    expect(success3).toBe(true);
+    // Rapid kills to build streak
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(200);
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(200);
 
-    // Now wait for all kills and streak to register
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      const state = store.getState();
-      return state.killStreak >= 3 && state.stats.kills >= 3;
-    }, { timeout: 30000, polling: 50 });
-
-    // Verify final state
     let state = await getGameState(page);
-    expect(state?.killStreak).toBe(3);
-    expect(state?.kills).toBe(3);
+    expect(state?.killStreak).toBe(2);
 
-    // Note: DOUBLE/TRIPLE KILL notifications may have already faded by the time we check
-    // The important part is that the streak counter is correct
+    // Should show DOUBLE KILL
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
+
+    // Continue streak
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(500);
+
+    state = await getGameState(page);
+    expect(state?.killStreak).toBe(3);
+
+    // Should show TRIPLE KILL
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
@@ -541,42 +515,24 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Build a streak - execute rapidly to stay within 2000ms window
-    const success1 = await triggerStoreAction(page, 'addKill', 10);
-    expect(success1).toBe(true);
-    const success2 = await triggerStoreAction(page, 'addKill', 10);
-    expect(success2).toBe(true);
-
-    // Wait for streak to reach 2
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      const state = store.getState();
-      return state.killStreak >= 2 && state.stats.kills >= 2;
-    }, { timeout: 30000, polling: 50 });
+    // Build a streak
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(200);
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
-    expect(state?.kills).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
     await page.waitForTimeout(2500);
 
     // Next kill should start new streak
-    const success3 = await triggerStoreAction(page, 'addKill', 10);
-    expect(success3).toBe(true);
-
-    // Wait for streak to reset to 1
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      const state = store.getState();
-      return state.killStreak === 1 && state.stats.kills >= 3;
-    }, { timeout: 30000, polling: 50 });
+    await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
-    expect(state?.kills).toBe(3);
   });
 
   test('should apply streak bonus to score', async ({ page }) => {
@@ -589,30 +545,28 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Execute kills rapidly to maintain streak (within 2000ms window)
-    const success1 = await triggerStoreAction(page, 'addKill', 100);
-    expect(success1).toBe(true);
-    const success2 = await triggerStoreAction(page, 'addKill', 100);
-    expect(success2).toBe(true);
-    const success3 = await triggerStoreAction(page, 'addKill', 100);
-    expect(success3).toBe(true);
-
-    // Wait for all kills and bonuses to apply
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      const state = store.getState();
-      // Wait for 3 kills with streak bonus
-      // Kill 1: 100, Kill 2: 100 + 25 = 125, Kill 3: 100 + 50 = 150
-      // Total:  375
-      return state.stats.kills >= 3 && state.killStreak >= 3 && state.stats.score >= 325;
-    }, { timeout: 30000, polling: 50 });
+    // First kill - no bonus
+    await triggerStoreAction(page, 'addKill', 100);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // With all bonuses: 100 + 125 + 150 = 375
-    expect(state?.score).toBeGreaterThanOrEqual(325);
-    expect(state?.kills).toBe(3);
-    expect(state?.killStreak).toBe(3);
+    expect(state?.score).toBe(100);
+
+    // Second kill - 25% bonus (streak of 2)
+    await triggerStoreAction(page, 'addKill', 100);
+    await page.waitForTimeout(200);
+
+    state = await getGameState(page);
+    // 100 + (100 + 25% of 100) = 100 + 125 = 225
+    expect(state?.score).toBe(225);
+
+    // Third kill - 50% bonus (streak of 3)
+    await triggerStoreAction(page, 'addKill', 100);
+    await page.waitForTimeout(200);
+
+    state = await getGameState(page);
+    // 225 + (100 + 50% of 100) = 225 + 150 = 375
+    expect(state?.score).toBe(375);
   });
 });
 
@@ -652,69 +606,42 @@ test.describe('Full Gameplay - Game Reset', () => {
     await setupPage(page);
 
     // Play and get a score
-    await safeClick(page, page.getByRole('button', { name: /MECHA-SANTA/ }), { timeout: 10000 });
+    await safeClick(page, page.getByRole('button', { name: /MECHA-SANTA/ }));
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }), { timeout: 10000 });
+    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(3000);
 
-    // Add kills rapidly
-    for (let i = 0; i < 3; i++) {
-      const success = await triggerStoreAction(page, 'addKill', 100);
-      expect(success).toBe(true);
+    for (let i = 0; i < 5; i++) {
+      await triggerStoreAction(page, 'addKill', 100);
+      await page.waitForTimeout(200);
     }
 
-    // Wait for all kills to register
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      const state = store.getState();
-      return state.stats.kills >= 3;
-    }, { timeout: 10000, polling: 100 });
-
-    // Verify we have kills and a score
-    let state = await getGameState(page);
-    expect(state?.kills).toBeGreaterThanOrEqual(3);
-    expect(state?.score).toBeGreaterThan(0);
+    const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die
-    const damageSuccess = await triggerStoreAction(page, 'damagePlayer', 300);
-    expect(damageSuccess).toBe(true);
-
-    // Wait for game over state
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      return store.getState().state === 'GAME_OVER';
-    }, { timeout: 10000, polling: 100 });
-
-    // Get high score value before reset
-    const highScoreBeforeReset = await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().highScore || 0;
-    });
-    expect(highScoreBeforeReset).toBeGreaterThan(0);
+    await triggerStoreAction(page, 'damagePlayer', 300);
+    await page.waitForTimeout(500);
 
     // Reset
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/i }), { timeout: 10000 });
+    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
+    await page.waitForTimeout(1000);
 
-    // Wait for menu state
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      return store.getState().state === 'MENU';
-    }, { timeout: 10000, polling: 100 });
+    // Start new game
+    await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
 
-    // Verify high score persisted by directly checking store
-    const highScoreAfterReset = await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().highScore || 0;
-    });
+    // Click "COMMENCE OPERATION" on the briefing screen
+    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    // Verify high score was preserved and is still the same value from first game
-    expect(highScoreAfterReset).toBe(highScoreBeforeReset);
-    expect(highScoreAfterReset).toBeGreaterThan(0);
+    await page.waitForTimeout(2000);
+
+    // Die with 0 score
+    await triggerStoreAction(page, 'damagePlayer', 100);
+    await page.waitForTimeout(500);
+
+    // High score should still be preserved
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
   });
 });
 

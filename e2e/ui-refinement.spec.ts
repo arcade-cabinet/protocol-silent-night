@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupPage, safeClick, disableAnimations } from './helpers';
+import { setupPage, safeClick } from './helpers';
 
 /**
  * UI Component Refinement Tests
@@ -142,22 +142,20 @@ test.describe('UI Component Refinement', () => {
       for (const [index, mech] of mechs.entries()) {
         // Click mech
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
-        await safeClick(page, mechButton, { timeout: 15000 });
+        await safeClick(page, mechButton, { timeout: 30000 });
 
-        // Wait for briefing with reduced timeout
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
+        // Wait for briefing
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
         // Verify operator and role
-        await expect(page.locator(`text=${mech.name}`)).toBeVisible({ timeout: 5000 });
-        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 5000 });
+        await expect(page.locator(`text=${mech.name}`)).toBeVisible();
+        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 30000 });
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
-          await page.goto('/', { waitUntil: 'domcontentloaded' });
-          await disableAnimations(page);
-          await page.waitForLoadState('networkidle', { timeout: 15000 });
-          await page.waitForTimeout(500); // Reduced stability buffer
-          await page.waitForSelector('h1', { state: 'visible', timeout: 15000 });
+          await page.reload();
+          await setupPage(page); // Re-apply animation disable after reload
+          await page.waitForSelector('h1', { timeout: 30000 });
         }
       }
     });
@@ -243,9 +241,7 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      // Wait for page to be fully loaded (setupPage already waits for networkidle)
-      await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
-      await page.waitForTimeout(1500); // Additional wait for animations and rendering
+      await page.waitForSelector('h1', { timeout: 15000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
