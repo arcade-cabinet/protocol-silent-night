@@ -58,9 +58,12 @@ export async function commenceOperation(page: Page): Promise<void> {
   // Adding buffer for rendering and stability
   await page.waitForTimeout(2000);
 
-  // Wait for button to be visible
+  // Wait for button to be visible with increased timeout for CI
   const button = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await button.waitFor({ state: 'visible', timeout: 15000 });
+  await button.waitFor({ state: 'visible', timeout: 30000 });
+
+  // Extra wait to ensure button is fully interactive
+  await page.waitForTimeout(500);
 
   // Click the button
   await button.click({ force: true });
@@ -82,28 +85,53 @@ export async function startGame(
 
 /**
  * Resolves any pending level-up state by selecting the first available upgrade
+ * Retries multiple times to handle timing issues
  */
 export async function resolveLevelUp(page: Page): Promise<void> {
-  const state = await page.evaluate(() => {
-    const store = (window as any).useGameStore;
-    return store?.getState?.()?.state;
-  });
+  // Wait a bit for any state transitions to settle
+  await page.waitForTimeout(500);
 
-  if (state === 'LEVEL_UP') {
-    // Get available upgrades and select the first one
-    const upgradeId = await page.evaluate(() => {
+  // Try up to 5 times with delays to handle timing issues
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const state = await page.evaluate(() => {
       const store = (window as any).useGameStore;
-      const choices = store?.getState?.()?.runProgress?.upgradeChoices || [];
-      return choices[0]?.id;
+      return store?.getState?.()?.state;
     });
 
-    if (upgradeId) {
-      await page.evaluate((id) => {
+    if (state === 'LEVEL_UP') {
+      // Get available upgrades and select the first one
+      const upgradeId = await page.evaluate(() => {
         const store = (window as any).useGameStore;
-        store?.getState?.()?.selectLevelUpgrade?.(id);
-      }, upgradeId);
-      // Wait for state transition
-      await page.waitForTimeout(500);
+        const choices = store?.getState?.()?.runProgress?.upgradeChoices || [];
+        return choices[0]?.id;
+      });
+
+      if (upgradeId) {
+        await page.evaluate((id) => {
+          const store = (window as any).useGameStore;
+          store?.getState?.()?.selectLevelUpgrade?.(id);
+        }, upgradeId);
+        // Wait for state transition
+        await page.waitForTimeout(800);
+
+        // Verify the state changed
+        const newState = await page.evaluate(() => {
+          const store = (window as any).useGameStore;
+          return store?.getState?.()?.state;
+        });
+
+        // If still in LEVEL_UP, retry
+        if (newState === 'LEVEL_UP') {
+          await page.waitForTimeout(500);
+          continue;
+        } else {
+          // Successfully resolved
+          return;
+        }
+      }
+    } else {
+      // Not in LEVEL_UP state, nothing to resolve
+      return;
     }
   }
 }

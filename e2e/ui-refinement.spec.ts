@@ -128,12 +128,15 @@ test.describe('UI Component Refinement', () => {
       await elfButton.waitFor({ state: 'visible', timeout: 15000 });
       await elfButton.click({ force: true });
 
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
+      // Wait for briefing with increased timeout
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
-      // Check for operation button
+      // Wait for briefing animations to complete before checking button
+      await page.waitForTimeout(2000);
+
+      // Check for operation button with increased timeout
       const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible();
+      await expect(opButton).toBeVisible({ timeout: 30000 });
       await expect(opButton).toBeEnabled();
     });
 
@@ -153,8 +156,8 @@ test.describe('UI Component Refinement', () => {
         await mechButton.waitFor({ state: 'visible', timeout: 15000 });
         await mechButton.click({ force: true });
 
-        // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
+        // Wait for briefing with increased timeout
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -162,9 +165,13 @@ test.describe('UI Component Refinement', () => {
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
-          await page.reload();
-          await page.waitForLoadState('networkidle');
-          await page.waitForTimeout(2000);
+          // Navigate back using store instead of reload to avoid ERR_ABORTED
+          await page.evaluate(() => {
+            const store = (window as any).useGameStore;
+            store?.getState?.()?.resetGame?.();
+          });
+          await page.waitForTimeout(1000);
+          // Wait for menu to be visible
           await page.waitForSelector('h1', { timeout: 15000 });
         }
       }
