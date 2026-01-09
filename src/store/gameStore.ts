@@ -890,10 +890,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       damage: bossConfig.damage,
       pointValue: bossConfig.pointValue,
     });
-    const isLeveling = get().state === 'LEVEL_UP';
     set((state) => ({
-      state: isLeveling ? 'LEVEL_UP' : 'PHASE_BOSS',
-      previousState: isLeveling ? 'PHASE_BOSS' : state.previousState,
+      state: 'PHASE_BOSS',
+      previousState: state.state,
       bossActive: true,
       bossHp: bossConfig.hp,
       bossMaxHp: bossConfig.hp,
@@ -926,20 +925,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Endless mode: Increment wave and prepare for level up
-      set({
-        state: 'PHASE_1',
-        bossActive: false,
-        stats: { ...stats, bossDefeated: true },
-        metaProgress: updatedMeta,
-        runProgress: {
-          ...runProgress,
-          wave: runProgress.wave + 1,
-        },
-      });
+      // Check if this is wave 1 (first boss) - if so, WIN state
+      // Otherwise, endless mode: Increment wave and prepare for level up
+      if (runProgress.wave === 1) {
+        set({
+          state: 'WIN',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+        });
+      } else {
+        // Endless mode: Increment wave and prepare for level up
+        set({
+          state: 'PHASE_1',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+          runProgress: {
+            ...runProgress,
+            wave: runProgress.wave + 1,
+          },
+        });
 
-      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-      get().levelUp();
+        // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
+        get().levelUp();
+      }
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
