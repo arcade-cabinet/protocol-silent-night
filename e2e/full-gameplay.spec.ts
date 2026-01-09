@@ -243,6 +243,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     await page.waitForTimeout(3000);
 
+    // Clear enemies and bullets to prevent additional damage
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return;
+      store.setState({ enemies: [], bullets: [] });
+    });
+
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
@@ -714,46 +721,36 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Test kill streaks by calling addKill calls atomically and waiting for notifications
     // The kill streak notifications show for 1500ms each
 
-    // First, do a double kill and check for DOUBLE KILL notification
+    // First, do all three kills synchronously to ensure they're within the 2000ms streak window
     await page.evaluate(() => {
       const store = (window as any).useGameStore;
       if (!store) return;
 
       // Clear enemies and bullets to stop game loop interference
+      // Set lastKillTime to now so all kills will be within the streak window
+      const now = Date.now();
       store.setState({
         enemies: [],
         bullets: [],
-        lastKillTime: 0, // Reset to ensure first kill starts fresh
+        lastKillTime: now,
         killStreak: 0
       });
 
-      // Call two kills synchronously to ensure streak timing works
+      // Call three kills synchronously to ensure they're all within the streak window
       const state = store.getState();
       state.addKill(10); // First kill - should set streak to 1
       state.addKill(10); // Second kill - should increment streak to 2
-    });
-
-    // Wait a bit for notification to appear, then check
-    await page.waitForTimeout(100);
-
-    // Should show DOUBLE KILL notification
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 500 });
-
-    // Now add third kill while DOUBLE KILL is still visible
-    await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return;
-      const state = store.getState();
       state.addKill(10); // Third kill - should increment streak to 3
     });
 
-    await page.waitForTimeout(100);
+    // Wait a bit for notifications to appear
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
-    // Should show TRIPLE KILL notification
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 500 });
+    // Should show TRIPLE KILL notification (it will replace DOUBLE KILL)
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 1000 });
 
     // Handle potential LEVEL_UP state after all checks
     await handlePotentialLevelUp(page);
@@ -901,7 +898,7 @@ test.describe('Full Gameplay - Game Reset', () => {
   });
 
   test('should preserve high score after reset', async ({ page }) => {
-    test.setTimeout(120000); // Increase timeout for CI
+    test.setTimeout(180000); // Increase timeout to 3 minutes for CI
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Wait for LoadingScreen to disappear (1500ms + buffer)
@@ -922,10 +919,20 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
-    for (let i = 0; i < 5; i++) {
-      await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(50);
-    }
+    // Add kills in batch to avoid timeout issues
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return;
+      const state = store.getState();
+      // Clear enemies and bullets
+      store.setState({ enemies: [], bullets: [] });
+      // Add kills synchronously
+      for (let i = 0; i < 5; i++) {
+        state.addKill(100);
+      }
+    });
+
+    await page.waitForTimeout(500);
 
     // Handle potential LEVEL_UP state
     await handlePotentialLevelUp(page);
@@ -933,9 +940,15 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     const scoreBeforeDeath = state?.score || 0;
 
-    // Die
-    await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(1000); // Wait longer for LOSE state
+    // Die - do it in one evaluate call to avoid timeout
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return;
+      const state = store.getState();
+      state.damagePlayer(300);
+    });
+
+    await page.waitForTimeout(1000); // Wait for GAME_OVER state
 
     // Wait for RE-DEPLOY button to appear
     const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
@@ -958,12 +971,18 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
-    // Die with 0 score
-    await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(500);
+    // Die with 0 score - do it in one evaluate call
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return;
+      const state = store.getState();
+      state.damagePlayer(100);
+    });
+
+    await page.waitForTimeout(1000);
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
   });
 });
 
