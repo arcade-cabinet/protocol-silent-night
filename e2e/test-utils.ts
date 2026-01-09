@@ -25,8 +25,11 @@ export async function disableAnimations(page: Page): Promise<void> {
  * Waits for page to be fully loaded and stable
  */
 export async function waitForStablePage(page: Page): Promise<void> {
+  await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
+
+  // Wait for loading screen to complete (100ms in test mode + buffer for React re-renders and CI slowness)
+  await page.waitForTimeout(3000);
 }
 
 /**
@@ -52,6 +55,15 @@ export async function selectCharacter(
       break;
     } catch (error) {
       console.error(`Click attempt ${attempt + 1} failed:`, error);
+
+      // Check if we actually navigated to briefing screen despite the error
+      const briefingVisible = await page.getByText('MISSION BRIEFING').isVisible().catch(() => false);
+      if (briefingVisible) {
+        console.log('Briefing screen visible - click succeeded despite error');
+        clicked = true;
+        break;
+      }
+
       if (attempt < 2) {
         await page.waitForTimeout(500);
       } else {
@@ -64,7 +76,7 @@ export async function selectCharacter(
     throw new Error(`Failed to click character button ${characterName}`);
   }
 
-  // Wait for briefing screen to appear
+  // Wait for briefing screen to appear if not already visible
   await page.getByText('MISSION BRIEFING').waitFor({ state: 'visible', timeout: 20000 });
 }
 
@@ -92,6 +104,15 @@ export async function commenceOperation(page: Page): Promise<void> {
       break;
     } catch (error) {
       console.error(`Commence click attempt ${attempt + 1} failed:`, error);
+
+      // Check if game has started despite the error (canvas/game elements visible)
+      const canvasExists = await page.locator('canvas').count() > 0;
+      if (canvasExists) {
+        console.log('Game canvas detected - click succeeded despite error');
+        clicked = true;
+        break;
+      }
+
       if (attempt < 2) {
         await page.waitForTimeout(500);
       } else {

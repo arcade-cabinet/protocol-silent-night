@@ -107,8 +107,8 @@ async function getGameState(page: Page) {
 
 // Helper to start a game properly with proper loading screen wait
 async function startGameplay(page: Page, character: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE' = 'MECHA-SANTA'): Promise<void> {
-  await page.goto('/');
-  await waitForStablePage(page); // Waits for network idle + 2s for loading screen
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await waitForStablePage(page); // Waits for network idle + character buttons visible
   await selectCharacter(page, character); // Handles character selection with proper waits
   await commenceOperation(page); // Handles commence button with proper waits
 
