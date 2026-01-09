@@ -395,11 +395,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     set((state) => {
       const timeSinceLastKill = now - state.lastKillTime;
-      // Check if this kill is part of a streak (within timeout window and not the first kill)
-      const isStreakContinuation = state.lastKillTime > 0 && timeSinceLastKill < streakTimeout;
-      const newStreak = isStreakContinuation ? state.killStreak + 1 : 1;
+      // Streak continues if the kill happens within the timeout window
+      // If lastKillTime is 0 (first kill), timeSinceLastKill will be huge, so newStreak = 1
+      const newStreak = timeSinceLastKill < streakTimeout ? state.killStreak + 1 : 1;
       const newKills = state.stats.kills + 1;
 
+      // Streak bonus: (streak - 1) * 0.25 * points
+      // Streak 1: no bonus (0%)
+      // Streak 2: 25% bonus (0.25 * points)
+      // Streak 3: 50% bonus (0.50 * points)
+      // etc.
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = state.stats.score + points + streakBonus;
 
