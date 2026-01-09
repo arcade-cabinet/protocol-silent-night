@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * UI Component Refinement Tests
@@ -12,6 +12,19 @@ import { test, expect } from '@playwright/test';
 
 const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 const SCREENSHOT_TIMEOUT = 45000; // 45 second timeout for WebGL screenshot operations
+
+// Helper to wait for store to be available
+async function waitForStore(page: Page, timeout = 15000) {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    const storeAvailable = await page.evaluate(() => {
+      return typeof (window as any).useGameStore !== 'undefined';
+    });
+    if (storeAvailable) return true;
+    await page.waitForTimeout(100);
+  }
+  return false;
+}
 
 test.describe('UI Component Refinement', () => {
   test.beforeEach(async ({ page }) => {
@@ -166,9 +179,10 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           // Navigate back using store instead of reload to avoid ERR_ABORTED
+          await waitForStore(page);
           await page.evaluate(() => {
             const store = (window as any).useGameStore;
-            store?.getState?.()?.resetGame?.();
+            store?.getState?.()?.reset?.();
           });
           await page.waitForTimeout(1000);
           // Wait for menu to be visible

@@ -8,8 +8,24 @@ import { resolveLevelUp } from './test-utils';
  * for each character class, testing all game mechanics and state transitions.
  */
 
+// Helper to wait for store to be available
+async function waitForStore(page: Page, timeout = 15000) {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    const storeAvailable = await page.evaluate(() => {
+      return typeof (window as any).useGameStore !== 'undefined';
+    });
+    if (storeAvailable) return true;
+    await page.waitForTimeout(100);
+  }
+  return false;
+}
+
 // Helper to get game state from the store
 async function getGameState(page: Page) {
+  // Ensure store is loaded first
+  await waitForStore(page);
+
   return page.evaluate(() => {
     const store = (window as any).useGameStore;
     if (!store) return null;
@@ -32,6 +48,9 @@ async function getGameState(page: Page) {
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
+  // Ensure store is loaded first
+  await waitForStore(page);
+
   return page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
     if (!store) return false;
@@ -1020,6 +1039,7 @@ test.describe('Full Gameplay - Input Controls', () => {
 
     // Player should have moved (position changed)
     // We can verify input state is being set
+    await waitForStore(page);
     const inputState = await page.evaluate(() => {
       const store = (window as any).useGameStore;
       return store?.getState().input;
@@ -1086,6 +1106,7 @@ test.describe('Full Gameplay - Input Controls', () => {
     await page.keyboard.down('Space');
     await page.waitForTimeout(100);
 
+    await waitForStore(page);
     const firingState = await page.evaluate(() => {
       const store = (window as any).useGameStore;
       return store?.getState().input.isFiring;
