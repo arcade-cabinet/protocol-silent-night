@@ -635,15 +635,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await page.waitForTimeout(500);
 
     // Handle potential LEVEL_UP state from XP gains
+    await handlePotentialLevelUp(page);
     let state = await getGameState(page);
-    if (state?.gameState === 'LEVEL_UP') {
-      // Select first upgrade to continue
-      const upgradeButtons = page.locator('button:has-text("SELECT")');
-      const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
-      await firstButton.click();
-      await page.waitForTimeout(500);
-    }
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
@@ -941,17 +934,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 4: Boss phase
     await page.waitForTimeout(1000);
-    state = await getGameState(page);
     // Handle potential LEVEL_UP state from XP gains
-    if (state?.gameState === 'LEVEL_UP') {
-      // Select first upgrade to continue
-      const upgradeButtons = page.locator('button:has-text("SELECT")');
-      const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
-      await firstButton.click();
-      await page.waitForTimeout(1000);
-      state = await getGameState(page);
-    }
+    await handlePotentialLevelUp(page);
+    state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
 
@@ -1006,17 +991,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     }
     await page.waitForTimeout(500);
 
-    state = await getGameState(page);
     // Handle potential LEVEL_UP state from XP gains
-    if (state?.gameState === 'LEVEL_UP') {
-      // Select first upgrade to continue
-      const upgradeButtons = page.locator('button:has-text("SELECT")');
-      const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
-      await firstButton.click();
-      await page.waitForTimeout(1000);
-      state = await getGameState(page);
-    }
+    await handlePotentialLevelUp(page);
+    state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
@@ -1059,17 +1036,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     }
     await page.waitForTimeout(500);
 
-    state = await getGameState(page);
     // Handle potential LEVEL_UP state from XP gains
-    if (state?.gameState === 'LEVEL_UP') {
-      // Select first upgrade to continue
-      const upgradeButtons = page.locator('button:has-text("SELECT")');
-      const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
-      await firstButton.click();
-      await page.waitForTimeout(1000);
-      state = await getGameState(page);
-    }
+    await handlePotentialLevelUp(page);
+    state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
