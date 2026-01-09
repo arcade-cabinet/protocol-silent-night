@@ -8,7 +8,7 @@ import { selectCharacter, startMission } from './utils';
  * using Playwright's visual comparison capabilities
  */
 
-const VISUAL_THRESHOLD = 0.5; // Increased to tolerate dimension changes in palette UX improvements
+const VISUAL_THRESHOLD = 0.2;
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
