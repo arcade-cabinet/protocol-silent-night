@@ -8,10 +8,7 @@ import { selectCharacter, startMission } from './utils';
  * using Playwright's visual comparison capabilities
  */
 
-const VISUAL_THRESHOLD = 0.3; // 30% tolerance for WebGL rendering variations in CI
-
-// Increase timeout for all tests in this file to handle slow CI rendering and game initialization
-test.setTimeout(120000);
+const VISUAL_THRESHOLD = 0.2;
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
@@ -35,7 +32,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('santa-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -50,7 +46,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -65,7 +60,6 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
@@ -91,7 +85,6 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('terrain-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -106,7 +99,6 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
@@ -123,7 +115,6 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -141,7 +132,6 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
     await expect(page).toHaveScreenshot('enemy-death-effects.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
@@ -162,7 +152,6 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('santa-cannon-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -182,7 +171,6 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('elf-smg-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -201,7 +189,6 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
@@ -221,7 +208,6 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
     await expect(page).toHaveScreenshot('hit-particles.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
@@ -238,7 +224,6 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -260,7 +245,6 @@ test.describe('Component Snapshots - Camera System', () => {
 
     await expect(page).toHaveScreenshot('camera-following.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
@@ -280,7 +264,6 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 
@@ -308,7 +291,6 @@ test.describe('Component Snapshots - UI Overlays', () => {
 
     await expect(page).toHaveScreenshot('kill-streak-notification.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 60000,
     });
   });
 });
