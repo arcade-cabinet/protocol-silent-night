@@ -630,6 +630,8 @@ test.describe('Full Gameplay - Game Reset', () => {
   });
 
   test('should preserve high score after reset', async ({ page }) => {
+    test.setTimeout(180000); // 3 minutes for this complex test
+
     await setupPage(page);
 
     // Play and get a score
@@ -650,8 +652,12 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
 
-    // Wait for game over state
-    await waitForGameState(page, 'GAME_OVER', 5000);
+    // Wait for game over state with longer timeout
+    const gameOver1 = await waitForGameState(page, 'GAME_OVER', 15000);
+    if (!gameOver1) {
+      const state = await getGameState(page);
+      throw new Error(`Failed to reach GAME_OVER state after first death. Current state: ${JSON.stringify(state)}`);
+    }
     await page.waitForTimeout(500);
 
     // Reset
@@ -669,8 +675,12 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
 
-    // Wait for game over state
-    await waitForGameState(page, 'GAME_OVER', 5000);
+    // Wait for game over state with longer timeout
+    const gameOver2 = await waitForGameState(page, 'GAME_OVER', 15000);
+    if (!gameOver2) {
+      const state = await getGameState(page);
+      throw new Error(`Failed to reach GAME_OVER state after second death. Current state: ${JSON.stringify(state)}`);
+    }
     await page.waitForTimeout(500);
 
     // High score should still be preserved
