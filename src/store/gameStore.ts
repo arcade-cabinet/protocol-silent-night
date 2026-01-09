@@ -926,20 +926,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
-      // Endless mode: Increment wave and prepare for level up
-      set({
-        state: 'PHASE_1',
-        bossActive: false,
-        stats: { ...stats, bossDefeated: true },
-        metaProgress: updatedMeta,
-        runProgress: {
-          ...runProgress,
-          wave: runProgress.wave + 1,
-        },
-      });
+      // Check if this is wave 1 (first boss defeat) - trigger WIN
+      if (runProgress.wave === 1) {
+        set({
+          state: 'WIN',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+        });
+      } else {
+        // Endless mode: Increment wave and prepare for level up
+        set({
+          state: 'PHASE_1',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+          runProgress: {
+            ...runProgress,
+            wave: runProgress.wave + 1,
+          },
+        });
 
-      // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
-      get().levelUp();
+        // Trigger level up to show upgrade choices (sets pendingLevelUp and upgradeChoices)
+        get().levelUp();
+      }
 
       get().updateHighScore();
       saveMetaProgress(updatedMeta);
