@@ -45,8 +45,8 @@ test.describe('UI Component Refinement', () => {
         await page.waitForSelector('h1', { timeout: 30000 });
       }
 
-      // Verify title is visible
-      const title = page.locator('h1');
+      // Verify title is visible - use first() to avoid strict mode violation when multiple h1s exist
+      const title = page.locator('h1').first();
       await expect(title).toBeVisible();
       await expect(title).toContainText('Protocol');
 
