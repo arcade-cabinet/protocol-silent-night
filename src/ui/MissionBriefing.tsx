@@ -63,17 +63,20 @@ export function MissionBriefing() {
       return;
     }
 
-    // CRITICAL: Reset the guard when entering BRIEFING state to ensure animation runs
-    if (!animationStartedRef.current) {
-      animationStartedRef.current = true;
-    } else {
-      // Animation already running, don't start again
+    // CRITICAL: Guard to prevent duplicate animations during the same BRIEFING session
+    // Only allow animation to start once per BRIEFING state entry
+    if (animationStartedRef.current) {
+      // Animation already running or completed for this BRIEFING session
       return;
     }
 
     // Reset state when briefing starts
     setCurrentLine(0);
     setShowButton(false);
+
+    // Mark animation as started AFTER resetting state, but BEFORE starting timers
+    // This ensures the animation can start while preventing duplicate animations
+    animationStartedRef.current = true;
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
@@ -95,6 +98,9 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      // Reset animation guard if effect cleanup runs (e.g., StrictMode double-invocation)
+      // This allows the animation to restart if the effect runs again
+      animationStartedRef.current = false;
     };
   }, [state]);
 
