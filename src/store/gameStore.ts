@@ -391,21 +391,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newKills = stats.kills + 1;
 
     const streakTimeout = 2000;
-    const newStreak = lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
-
-    // Update kill streak and score FIRST before calling other functions
-    set({
-      stats: { ...stats, kills: newKills, score: newScore },
-      killStreak: newStreak,
-      lastKillTime: now,
-      metaProgress: {
-        ...get().metaProgress,
-        totalKills: metaProgress.totalKills + 1,
-      },
-    });
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
@@ -418,6 +407,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
+
+    set({
+      stats: { ...stats, kills: newKills, score: newScore },
+      killStreak: newStreak,
+      lastKillTime: now,
+      metaProgress: {
+        ...get().metaProgress,
+        totalKills: metaProgress.totalKills + 1,
+      },
+    });
 
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);

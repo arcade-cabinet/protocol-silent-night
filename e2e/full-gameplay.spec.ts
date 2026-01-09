@@ -168,16 +168,6 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     await page.waitForTimeout(3000);
 
-    // Clear all enemies to prevent passive damage during HP tests
-    await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      if (store) {
-        const state = store.getState();
-        state.updateEnemies(() => []);
-      }
-    });
-    await page.waitForTimeout(100);
-
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
@@ -340,16 +330,6 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     await page.waitForTimeout(3000);
 
-    // Clear all enemies to prevent passive damage during HP tests
-    await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      if (store) {
-        const state = store.getState();
-        state.updateEnemies(() => []);
-      }
-    });
-    await page.waitForTimeout(100);
-
     // Verify Bumble's stats - 200 HP, medium speed
     const state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
@@ -374,16 +354,6 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
     await page.waitForTimeout(3000);
-
-    // Clear all enemies to prevent passive damage during HP tests
-    await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      if (store) {
-        const state = store.getState();
-        state.updateEnemies(() => []);
-      }
-    });
-    await page.waitForTimeout(100);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -516,7 +486,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -549,7 +519,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -584,7 +554,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -641,24 +611,22 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(200);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-
-    // Wait for game over state
-    await waitForGameState(page, 'GAME_OVER', 5000);
+    await page.waitForTimeout(500);
 
     // Reset
     await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // Start new game
     await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
@@ -666,16 +634,14 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
-
-    // Wait for game over state
-    await waitForGameState(page, 'GAME_OVER', 5000);
+    await page.waitForTimeout(500);
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
   });
 });
 
