@@ -636,8 +636,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
+    // Restore to previous state, with safety check for invalid states
+    const nextState = previousState === 'LEVEL_UP' || previousState === 'MENU' || previousState === 'BRIEFING'
+      ? 'PHASE_1'
+      : previousState;
+
     set({
-      state: previousState === 'LEVEL_UP' ? 'PHASE_1' : previousState,
+      state: nextState,
       runProgress: {
         ...runProgress,
         selectedUpgrades: [...runProgress.selectedUpgrades, upgradeId],

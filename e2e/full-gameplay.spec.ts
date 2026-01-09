@@ -76,9 +76,19 @@ async function handlePotentialLevelUp(page: Page, maxWaitMs = 5000): Promise<voi
       await page.evaluate(() => {
         const store = (window as any).useGameStore;
         if (store && store.getState().state === 'LEVEL_UP') {
-          // Force back to PHASE_1 or PHASE_BOSS
-          const currentKills = store.getState().stats.kills;
-          store.setState({ state: currentKills >= 100 ? 'PHASE_BOSS' : 'PHASE_1' });
+          // Force back to PHASE_1 or PHASE_BOSS depending on kill count
+          const state = store.getState();
+          const currentKills = state.stats.kills;
+          const currentWave = state.runProgress.wave;
+          const killsRequired = 10 * currentWave; // WAVE_REQ is 10
+
+          // If we have enough kills for boss, check if boss should spawn
+          if (currentKills >= killsRequired) {
+            const hasBoss = state.bossActive || state.enemies.some((e: any) => e.type === 'boss');
+            store.setState({ state: hasBoss || state.previousState === 'PHASE_BOSS' ? 'PHASE_BOSS' : 'PHASE_1' });
+          } else {
+            store.setState({ state: 'PHASE_1' });
+          }
         }
       });
       await page.waitForTimeout(500);
