@@ -42,6 +42,7 @@ class AudioManagerClass {
     new Map();
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
+  private lastSfxTime = 0;
 
   /**
    * Initialize audio system. Must be called after user interaction.
@@ -179,7 +180,10 @@ class AudioManagerClass {
 
     const sfxSynth = this.synths.get('sfx') as Tone.Synth;
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
-    const now = Tone.now();
+
+    // Ensure strict monotonicity for audio scheduling
+    const now = Math.max(Tone.now(), this.lastSfxTime + 0.05);
+    this.lastSfxTime = now;
 
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;

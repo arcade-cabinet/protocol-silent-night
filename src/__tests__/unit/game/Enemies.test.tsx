@@ -1,6 +1,6 @@
 import ReactTestRenderer from '@react-three/test-renderer';
 import * as THREE from 'three';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import { Enemies } from '@/game/Enemies';
 import { useGameStore } from '@/store/gameStore';
 
@@ -12,6 +12,12 @@ describe('Enemies Component', () => {
       state: 'PHASE_1',
       playerPosition: new THREE.Vector3(0, 0, 0),
     });
+    // Mock Date.now to allow controlling time for grace period
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should render enemies and handle movement', async () => {
@@ -64,12 +70,22 @@ describe('Enemies Component', () => {
     useGameStore.setState({
       enemies: [enemy],
       playerHp: 100,
+      // Ensure state allows damage
+      state: 'PHASE_1'
     });
+
+    // Start at specific time
+    const startTime = Date.now();
+    vi.setSystemTime(startTime);
 
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
-    await renderer.advanceFrames(1, 0.1);
+    // Advance time past grace period
+    vi.setSystemTime(startTime + 6000);
+
+    // Advance frames
+    await renderer.advanceFrames(5, 0.1);
 
     const state = useGameStore.getState();
     expect(state.playerHp).toBeLessThan(100);

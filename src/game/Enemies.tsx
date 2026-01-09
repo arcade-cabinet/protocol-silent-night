@@ -23,6 +23,7 @@ export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
+  const startTimeRef = useRef(Date.now());
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
@@ -35,7 +36,12 @@ export function Enemies() {
   const damagePlayer = useGameStore((state) => state.damagePlayer);
 
   const spawnMinion = useCallback(() => {
-    const { state: currentState, enemies: currentEnemies, addEnemy, runProgress } = useGameStore.getState();
+    const {
+      state: currentState,
+      enemies: currentEnemies,
+      addEnemy,
+      runProgress,
+    } = useGameStore.getState();
     if (
       currentState === 'GAME_OVER' ||
       currentState === 'WIN' || // Although we removed WIN state trigger, keep it for safety
@@ -65,7 +71,9 @@ export function Enemies() {
       maxHp: MINION_CONFIG.hp * waveMult,
       isActive: true,
       type: 'minion',
-      speed: (MINION_CONFIG.speed + Math.random() * 2) * Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
+      speed:
+        (MINION_CONFIG.speed + Math.random() * 2) *
+        Math.min(1.5, 1 + (runProgress.wave - 1) * 0.05),
       damage: MINION_CONFIG.damage * waveMult,
       pointValue: MINION_CONFIG.pointValue,
     });
@@ -161,12 +169,15 @@ export function Enemies() {
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
         if (now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
+          // Grace period check: Don't damage player in first 5 seconds
+          const isGracePeriod = now - startTimeRef.current < 5000;
+
           // Only damage if enemy is properly initialized (not at origin 0,0,0).
           // Enemies spawn at radius 20-30 units, so lengthSq > 0.1 ensures proper initialization.
           // This prevents "ghost damage" from corrupted or uninitialized enemy meshes.
           const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
-          if (isInitialized) {
+          if (isInitialized && !isGracePeriod) {
             shouldDamage = true;
             damageAmount = Math.max(damageAmount, enemy.damage);
           }

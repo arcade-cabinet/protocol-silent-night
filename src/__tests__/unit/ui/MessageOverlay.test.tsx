@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MessageOverlay } from '@/ui/MessageOverlay';
 import { useGameStore } from '@/store/gameStore';
+import { MessageOverlay } from '@/ui/MessageOverlay';
 
 // Mock the game store
 vi.mock('@/store/gameStore', () => ({
