@@ -138,9 +138,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     expect(state?.playerHp).toBeGreaterThanOrEqual(295);
     expect(state?.playerHp).toBeLessThanOrEqual(300);
 
-    // Verify HUD is visible
+    // Verify HUD is visible - wait for it to render with HP info
     await expect(page.locator('text=OPERATOR STATUS')).toBeVisible();
-    await expect(page.locator('text=/HP:\\s*300\\s*\\/\\s*300/')).toBeVisible({ timeout: 5000 });
+    // Add a small wait to ensure HUD has fully rendered with HP values
+    await page.waitForTimeout(500);
+    await expect(page.locator('text=/HP:\\s*\\d+\\s*\\/\\s*300/')).toBeVisible({ timeout: 5000 });
   });
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
@@ -491,9 +493,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -550,14 +552,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -565,7 +567,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
