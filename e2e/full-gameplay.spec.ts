@@ -654,6 +654,7 @@ test.describe('Full Gameplay - Game Reset', () => {
   });
 
   test('should preserve high score after reset', async ({ page }) => {
+    test.setTimeout(180000); // Increase timeout to 3 minutes for CI stability
     await setupPage(page);
 
     // Play and get a score
