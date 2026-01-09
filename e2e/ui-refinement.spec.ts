@@ -282,9 +282,11 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForTimeout(1000); // Give time for loading screen to show
+      // Wait for store to be ready first
+      await waitForStore(page, 20000);
+
       // Wait for the h1 heading to be visible, which indicates StartScreen is ready
-      await page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 }).waitFor({ state: 'visible', timeout: 15000 });
+      await page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 }).waitFor({ state: 'visible', timeout: 30000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {

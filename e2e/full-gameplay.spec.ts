@@ -178,25 +178,26 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
 // Helper to wait for game state
 async function waitForGameState(page: Page, expectedState: string, timeout = 10000) {
   const startTime = Date.now();
+  let lastState: string | undefined = undefined;
+
   while (Date.now() - startTime < timeout) {
     if (page.isClosed()) {
-      console.error('Page closed while waiting for game state');
-      return false;
+      throw new Error(`Page closed while waiting for game state: ${expectedState}`);
     }
     const state = await getGameState(page);
-    if (state?.gameState === expectedState) return true;
+    lastState = state?.gameState;
+    if (lastState === expectedState) return;
 
     try {
       await page.waitForTimeout(100);
     } catch (error) {
       if (page.isClosed()) {
-        console.error('Page closed during state wait');
-        return false;
+        throw new Error(`Page closed during state wait for: ${expectedState}`);
       }
       throw error;
     }
   }
-  return false;
+  throw new Error(`Timeout waiting for game state: expected "${expectedState}", last state was "${lastState}"`);
 }
 
 // Helper to simulate combat until kills reach target
@@ -337,6 +338,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Add more kills
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(50);
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(100);
 
@@ -452,10 +454,11 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Simulate 10 kills to trigger boss efficiently
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      // No artificial delays - let store operations complete naturally
+      // Small delay to allow store state to stabilize between operations
+      await page.waitForTimeout(50);
     }
 
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200);
 
     // Resolve any level-up that may have occurred
     await resolveLevelUp(page);
@@ -476,7 +479,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn efficiently
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      // No artificial delays - let store operations complete naturally
+      // Small delay to allow store state to stabilize between operations
+      await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
 
@@ -507,7 +511,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn efficiently
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      // No artificial delays - let store operations complete naturally
+      // Small delay to allow store state to stabilize between operations
+      await page.waitForTimeout(50);
     }
     await page.waitForTimeout(500);
 
@@ -681,11 +686,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       if (!success) {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
-      // No artificial delays - let store operations complete naturally
+      // Small delay to allow store state to stabilize between operations
+      await page.waitForTimeout(50);
     }
 
-    // Step 4: Boss phase - wait for transition
-    await waitForGameState(page, 'PHASE_BOSS', 5000);
+    // Step 4: Boss phase - wait for transition (increased timeout for CI)
+    await waitForGameState(page, 'PHASE_BOSS', 15000);
 
     // Resolve any level-up that may have occurred
     await resolveLevelUp(page);
@@ -732,11 +738,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       if (!success) {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
-      // No artificial delays - let store operations complete naturally
+      // Small delay to allow store state to stabilize between operations
+      await page.waitForTimeout(50);
     }
 
-    // Wait for boss phase transition
-    await waitForGameState(page, 'PHASE_BOSS', 5000);
+    // Wait for boss phase transition (increased timeout for CI)
+    await waitForGameState(page, 'PHASE_BOSS', 15000);
 
     // Resolve any level-up that may have occurred
     await resolveLevelUp(page);
@@ -771,11 +778,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       if (!success) {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
-      // No artificial delays - let store operations complete naturally
+      // Small delay to allow store state to stabilize between operations
+      await page.waitForTimeout(50);
     }
 
-    // Wait for boss phase transition
-    await waitForGameState(page, 'PHASE_BOSS', 5000);
+    // Wait for boss phase transition (increased timeout for CI)
+    await waitForGameState(page, 'PHASE_BOSS', 15000);
 
     // Resolve any level-up that may have occurred
     await resolveLevelUp(page);
