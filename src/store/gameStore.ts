@@ -387,13 +387,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const now = Date.now();
     const streakTimeout = 2000;
 
     let capturedStreak = 0;
     let capturedKills = 0;
 
     set((state) => {
+      const now = Date.now();
       const timeSinceLastKill = now - state.lastKillTime;
       // Streak continues if the kill happens within the timeout window
       // If lastKillTime is 0 (first kill), timeSinceLastKill will be huge, so newStreak = 1
