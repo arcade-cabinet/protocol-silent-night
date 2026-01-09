@@ -253,7 +253,8 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should complete full game loop with Bumble', async ({ page }) => {
     await page.goto('/');
     await startGame(page, 'BUMBLE');
-    // Check HP immediately after game starts, well within the 2s grace period
+    await page.waitForTimeout(2000);
+
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(200); // Bumble has 200 HP
