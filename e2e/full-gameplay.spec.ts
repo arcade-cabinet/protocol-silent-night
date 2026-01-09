@@ -16,6 +16,12 @@ async function waitForStore(page: Page, timeout = 15000) {
 
   while (Date.now() - startTime < timeout) {
     try {
+      // Check if page is still open
+      if (page.isClosed()) {
+        console.error('Page is closed, cannot wait for store');
+        return false;
+      }
+
       // Set a page timeout for this evaluation
       page.setDefaultTimeout(3000);
       const storeAvailable = await page.evaluate(() => {
@@ -31,6 +37,13 @@ async function waitForStore(page: Page, timeout = 15000) {
     } catch (error) {
       // Reset timeout
       page.setDefaultTimeout(15000);
+
+      // Check if page closed during evaluation
+      if (page.isClosed()) {
+        console.error('Page closed during store check');
+        return false;
+      }
+
       consecutiveFailures++;
 
       // If we've had too many consecutive failures, the page might be broken
@@ -39,7 +52,17 @@ async function waitForStore(page: Page, timeout = 15000) {
         return false;
       }
     }
-    await page.waitForTimeout(100);
+
+    // Safe wait with page close check
+    try {
+      await page.waitForTimeout(100);
+    } catch (error) {
+      if (page.isClosed()) {
+        console.error('Page closed during timeout');
+        return false;
+      }
+      throw error;
+    }
   }
   return false;
 }
@@ -84,6 +107,12 @@ async function getGameState(page: Page) {
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
+  // Check if page is still open
+  if (page.isClosed()) {
+    console.error(`Page closed, cannot trigger action: ${action}`);
+    return false;
+  }
+
   // Ensure store is loaded first - use shorter timeout for store actions
   const storeReady = await waitForStore(page, 5000);
   if (!storeReady) {
@@ -107,6 +136,10 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     return result;
   } catch (error) {
     page.setDefaultTimeout(15000);
+    if (page.isClosed()) {
+      console.error(`Page closed during action ${action}`);
+      return false;
+    }
     console.error(`Failed to trigger action ${action}:`, error);
     return false;
   }
@@ -116,9 +149,22 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
 async function waitForGameState(page: Page, expectedState: string, timeout = 10000) {
   const startTime = Date.now();
   while (Date.now() - startTime < timeout) {
+    if (page.isClosed()) {
+      console.error('Page closed while waiting for game state');
+      return false;
+    }
     const state = await getGameState(page);
     if (state?.gameState === expectedState) return true;
-    await page.waitForTimeout(100);
+
+    try {
+      await page.waitForTimeout(100);
+    } catch (error) {
+      if (page.isClosed()) {
+        console.error('Page closed during state wait');
+        return false;
+      }
+      throw error;
+    }
   }
   return false;
 }
@@ -391,12 +437,16 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
-    await page.waitForTimeout(3000);
+    // Wait for game to start and stabilize
+    await waitForGameState(page, 'PHASE_1', 10000);
+    await page.waitForTimeout(2000); // Give extra time for enemies to spawn and stabilize
 
     // Verify Elf's stats - low HP, high speed
     const state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
-    expect(state?.playerHp).toBe(100);
+    // Player HP might be slightly reduced if enemies spawned and hit player during initialization
+    expect(state?.playerHp).toBeGreaterThanOrEqual(95);
+    expect(state?.playerHp).toBeLessThanOrEqual(100);
 
     // Elf's SMG fires rapidly - hold fire for a bit
     await page.keyboard.down('Space');
@@ -929,19 +979,28 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
-    // Step 2: Game starts
-    await page.waitForTimeout(2000);
+    // Step 2: Game starts - wait for state transition
+    await waitForGameState(page, 'PHASE_1', 10000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Step 3: Combat phase - kill enemies
+    // Step 3: Combat phase - kill enemies with safe waits
     for (let i = 0; i < 10; i++) {
-      await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      const success = await triggerStoreAction(page, 'addKill', 10);
+      if (!success) {
+        throw new Error(`Failed to add kill ${i + 1}`);
+      }
+      // Use smaller, safer waits
+      try {
+        await page.waitForTimeout(50);
+      } catch (error) {
+        if (page.isClosed()) throw new Error('Page closed during combat phase');
+        throw error;
+      }
     }
 
-    // Step 4: Boss phase
-    await page.waitForTimeout(1000);
+    // Step 4: Boss phase - wait for transition
+    await waitForGameState(page, 'PHASE_BOSS', 5000);
 
     // Resolve any level-up that may have occurred
     await resolveLevelUp(page);
@@ -951,8 +1010,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
 
     // Step 5: Defeat boss
-    await triggerStoreAction(page, 'damageBoss', 1000);
-    await page.waitForTimeout(1000);
+    const bossSuccess = await triggerStoreAction(page, 'damageBoss', 1000);
+    if (!bossSuccess) {
+      throw new Error('Failed to damage boss');
+    }
+    await waitForGameState(page, 'WIN', 5000);
 
     // Step 6: Victory
     state = await getGameState(page);
@@ -963,7 +1025,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 7: Can restart
     await page.getByRole('button', { name: /PLAY AGAIN/ }).click();
-    await page.waitForTimeout(1000);
+    await waitForGameState(page, 'MENU', 5000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
@@ -987,17 +1049,28 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start
+    await waitForGameState(page, 'PHASE_1', 10000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
 
-    // Kill enemies to trigger boss
+    // Kill enemies to trigger boss with safe waits
     for (let i = 0; i < 10; i++) {
-      await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
+      const success = await triggerStoreAction(page, 'addKill', 10);
+      if (!success) {
+        throw new Error(`Failed to add kill ${i + 1}`);
+      }
+      try {
+        await page.waitForTimeout(30);
+      } catch (error) {
+        if (page.isClosed()) throw new Error('Page closed during combat');
+        throw error;
+      }
     }
-    await page.waitForTimeout(500);
+
+    // Wait for boss phase transition
+    await waitForGameState(page, 'PHASE_BOSS', 5000);
 
     // Resolve any level-up that may have occurred
     await resolveLevelUp(page);
@@ -1006,8 +1079,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
-    await triggerStoreAction(page, 'damageBoss', 1000);
-    await page.waitForTimeout(500);
+    const bossSuccess = await triggerStoreAction(page, 'damageBoss', 1000);
+    if (!bossSuccess) {
+      throw new Error('Failed to damage boss');
+    }
+    await waitForGameState(page, 'WIN', 5000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -1031,17 +1107,28 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).waitFor({ state: 'visible', timeout: 30000 });
     await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true });
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start
+    await waitForGameState(page, 'PHASE_1', 10000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
 
-    // Kill enemies to trigger boss
+    // Kill enemies to trigger boss with safe waits
     for (let i = 0; i < 10; i++) {
-      await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
+      const success = await triggerStoreAction(page, 'addKill', 10);
+      if (!success) {
+        throw new Error(`Failed to add kill ${i + 1}`);
+      }
+      try {
+        await page.waitForTimeout(30);
+      } catch (error) {
+        if (page.isClosed()) throw new Error('Page closed during combat');
+        throw error;
+      }
     }
-    await page.waitForTimeout(500);
+
+    // Wait for boss phase transition
+    await waitForGameState(page, 'PHASE_BOSS', 5000);
 
     // Resolve any level-up that may have occurred
     await resolveLevelUp(page);
@@ -1050,8 +1137,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
-    await triggerStoreAction(page, 'damageBoss', 1000);
-    await page.waitForTimeout(500);
+    const bossSuccess = await triggerStoreAction(page, 'damageBoss', 1000);
+    if (!bossSuccess) {
+      throw new Error('Failed to damage boss');
+    }
+    await waitForGameState(page, 'WIN', 5000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');

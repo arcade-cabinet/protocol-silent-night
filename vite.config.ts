@@ -19,6 +19,10 @@ export default defineConfig({
     port: 3000,
     open: true,
   },
+  preview: {
+    port: 4173,
+    strictPort: true,
+  },
   build: {
     target: 'esnext',
     sourcemap: true,
