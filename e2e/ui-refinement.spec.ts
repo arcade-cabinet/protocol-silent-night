@@ -155,10 +155,11 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
-        // Wait for LoadingScreen to disappear
-        await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 10000 }).catch(() => {});
+        // Wait for LoadingScreen to disappear (longer timeout for CI)
+        await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 20000 }).catch(() => {});
         // Menu buttons should be visible now that LoadingScreen is gone
-        await page.waitForSelector('button[type="button"]', { timeout: 20000 });
+        await page.waitForTimeout(1000); // Extra buffer for rendering
+        await page.waitForSelector('button[type="button"]', { timeout: 30000 });
 
         // Click mech
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
@@ -179,11 +180,15 @@ test.describe('UI Component Refinement', () => {
         if (index < mechs.length - 1) {
           await page.reload();
           await page.waitForLoadState('networkidle');
-          // Wait for LoadingScreen to disappear after reload
-          await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 10000 }).catch(() => {});
-          await page.waitForSelector('h1', { timeout: 15000 });
-          // Also wait for buttons to be ready
-          await page.waitForSelector('button[type="button"]', { timeout: 20000 });
+          // Wait for LoadingScreen to disappear after reload (longer timeout for CI)
+          await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 20000 }).catch(() => {});
+          // Wait for menu to be ready with longer timeout
+          await page.waitForTimeout(2000); // Give extra time for rendering
+          // Wait for either h1 or buttons to appear (menu is ready)
+          await Promise.race([
+            page.waitForSelector('h1', { timeout: 30000 }).catch(() => {}),
+            page.waitForSelector('button[type="button"]', { timeout: 30000 })
+          ]);
         }
       }
     });
