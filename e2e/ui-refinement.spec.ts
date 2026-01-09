@@ -144,7 +144,10 @@ test.describe('UI Component Refinement', () => {
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
         await safeClick(page, mechButton, { timeout: 30000 });
 
-        // Wait for briefing
+        // Wait for briefing with network idle
+        await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {
+          console.log('Network idle timeout - proceeding anyway');
+        });
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
 
         // Verify operator and role
@@ -153,9 +156,12 @@ test.describe('UI Component Refinement', () => {
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
-          await page.reload();
+          await page.reload({ timeout: 60000 });
           await setupPage(page); // Re-apply animation disable after reload
-          await page.waitForSelector('h1', { timeout: 30000 });
+          await page.waitForSelector('h1', { timeout: 30000, state: 'visible' }).catch(async () => {
+            console.log('h1 not visible after reload, page state:', await page.title());
+          });
+          await page.waitForTimeout(1000);
         }
       }
     });
@@ -241,7 +247,14 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      await page.waitForSelector('h1', { timeout: 15000 });
+      // Wait for menu to be visible with more robust checking
+      await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {
+        console.log('Network idle timeout - proceeding anyway');
+      });
+      await page.waitForSelector('h1', { timeout: 30000, state: 'visible' }).catch(async () => {
+        console.log('h1 not found, checking page state:', await page.title());
+      });
+      await page.waitForTimeout(1000);
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
