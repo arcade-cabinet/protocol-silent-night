@@ -41,17 +41,16 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
 
 // Helper to select character robustly
 export async function selectCharacter(page: Page, name: string) {
-  const button = page.locator('button', { hasText: name });
-  // Wait for button to be visible
-  await button.waitFor({ state: 'visible', timeout: 10000 });
-  // Removed scrollIntoViewIfNeeded as it causes instability in CI
+  const button = page.locator('button').filter({ hasText: name });
+  // Wait for button to be visible with increased timeout for CI
+  await button.waitFor({ state: 'visible', timeout: 30000 });
   // Use force click to bypass potential overlays and increased timeout
   await button.click({ timeout: 15000, force: true });
 }
 
 // Helper to start mission robustly
 export async function startMission(page: Page) {
-  const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
+  const button = page.locator('button').filter({ hasText: 'COMMENCE OPERATION' });
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
   await button.click();
