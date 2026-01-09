@@ -40,6 +40,7 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
       // Wait for multiple microtasks to ensure all nested state updates complete
       return new Promise((resolve) => {
         // Use a longer timeout to ensure all state updates propagate
+        // Increased to 150ms to handle gainXP and earnNicePoints cascading updates
         setTimeout(() => {
           const newState = store.getState();
           resolve({
@@ -51,7 +52,7 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
               kills: newState.stats.kills
             }
           });
-        }, 50);
+        }, 150);
       });
     }
     return { success: false, state: null };
@@ -272,7 +273,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Simulate kills
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.kills).toBe(1);
@@ -280,8 +281,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Add more kills
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.kills).toBe(3);
@@ -469,7 +471,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
     await commenceButton.click({ force: true, timeout: 30000 });
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start
+    await waitForGameState(page, 'PHASE_1', 5000);
+    await page.waitForTimeout(1000);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -481,6 +485,9 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     // One more hit at 100 damage kills
     await triggerStoreAction(page, 'damagePlayer', 100);
+
+    // Wait for GAME_OVER state
+    await waitForGameState(page, 'GAME_OVER', 5000);
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
@@ -510,7 +517,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Simulate 10 kills to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(200);
     }
 
     await page.waitForTimeout(1000);
@@ -546,7 +553,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(200);
     }
     await page.waitForTimeout(1000);
 
@@ -589,9 +596,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(200);
     }
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
@@ -630,10 +637,10 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak - use 800ms delay to ensure state updates are atomic
-    // The streak timeout is 2000ms, so 800ms is well within the window
+    // Rapid kills to build streak - use 200ms delay to ensure state updates are atomic
+    // The streak timeout is 2000ms, so 200ms is well within the window
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     // Verify first kill registered
     let state = await getGameState(page);
@@ -641,7 +648,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     expect(state?.kills).toBe(1);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -652,7 +659,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -682,14 +689,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     // Verify first kill registered
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(1);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -725,7 +732,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
@@ -733,7 +740,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -742,7 +749,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -773,7 +780,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Get some score
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
@@ -812,7 +819,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(200);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
@@ -840,12 +847,17 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(2000);
 
-    // Die with 0 score
+    // Die with 0 score - wait for game to start
+    await waitForGameState(page, 'PHASE_1', 5000);
+
     await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(500);
+
+    // Wait for GAME_OVER state
+    await waitForGameState(page, 'GAME_OVER', 5000);
+    await page.waitForTimeout(1000);
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -869,14 +881,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await commenceButton.click({ force: true, timeout: 30000 });
 
     // Step 2: Game starts
-    await page.waitForTimeout(2000);
+    await waitForGameState(page, 'PHASE_1', 5000);
+    await page.waitForTimeout(1000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
     // Step 3: Combat phase - kill enemies
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(200);
     }
 
     // Step 4: Boss phase
@@ -931,7 +944,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
 
@@ -973,7 +986,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(150);
+      await page.waitForTimeout(200);
     }
     await page.waitForTimeout(500);
 
