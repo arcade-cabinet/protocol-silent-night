@@ -645,10 +645,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
-    // Simulate 10 kills to trigger boss with minimal waits
+    // Simulate 10 kills to trigger boss efficiently
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(20);
+      // No artificial delays - let store operations complete naturally
     }
 
     await page.waitForTimeout(500);
@@ -686,10 +686,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
-    // Trigger boss spawn with minimal waits
+    // Trigger boss spawn efficiently
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(20);
+      // No artificial delays - let store operations complete naturally
     }
     await page.waitForTimeout(500);
 
@@ -734,10 +734,10 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
     await page.waitForTimeout(1000);
 
-    // Trigger boss spawn
+    // Trigger boss spawn efficiently
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(20);
+      // No artificial delays - let store operations complete naturally
     }
     await page.waitForTimeout(500);
 
@@ -1020,15 +1020,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Step 3: Combat phase - kill enemies with minimal waits to prevent timeout
+    // Step 3: Combat phase - kill enemies efficiently
     for (let i = 0; i < 10; i++) {
+      if (page.isClosed()) throw new Error('Page closed during combat phase');
       const success = await triggerStoreAction(page, 'addKill', 10);
       if (!success) {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
-      // Minimal wait - just enough for state updates
-      if (page.isClosed()) throw new Error('Page closed during combat phase');
-      await page.waitForTimeout(20);
+      // No artificial delays - let store operations complete naturally
     }
 
     // Step 4: Boss phase - wait for transition
@@ -1087,14 +1086,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
 
-    // Kill enemies to trigger boss with minimal waits
+    // Kill enemies to trigger boss efficiently
     for (let i = 0; i < 10; i++) {
+      if (page.isClosed()) throw new Error('Page closed during combat');
       const success = await triggerStoreAction(page, 'addKill', 10);
       if (!success) {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
-      if (page.isClosed()) throw new Error('Page closed during combat');
-      await page.waitForTimeout(20);
+      // No artificial delays - let store operations complete naturally
     }
 
     // Wait for boss phase transition
@@ -1141,14 +1140,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
 
-    // Kill enemies to trigger boss with minimal waits
+    // Kill enemies to trigger boss efficiently
     for (let i = 0; i < 10; i++) {
+      if (page.isClosed()) throw new Error('Page closed during combat');
       const success = await triggerStoreAction(page, 'addKill', 10);
       if (!success) {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
-      if (page.isClosed()) throw new Error('Page closed during combat');
-      await page.waitForTimeout(20);
+      // No artificial delays - let store operations complete naturally
     }
 
     // Wait for boss phase transition

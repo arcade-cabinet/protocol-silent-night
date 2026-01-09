@@ -36,7 +36,10 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Elf character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(3000);
+
+    // Wait for loading screen to disappear and menu to be ready
+    await page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 }).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(2000); // Allow time for menu and 3D models to render
 
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/ });
     await elfButton.waitFor({ state: 'visible', timeout: 15000 });
