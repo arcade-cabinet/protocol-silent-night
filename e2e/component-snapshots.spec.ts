@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacterAndStartMission } from './test-helpers';
+import { selectCharacterAndStartMission, captureGameplaySnapshot } from './test-helpers';
 
 /**
  * Component Snapshot Tests
@@ -39,31 +39,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
   });
 
   test('should render Elf character model', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /CYBER-ELF/);
-
-    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
-
-    await expect(page).toHaveScreenshot('elf-character-render.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
-    });
+    await captureGameplaySnapshot(page, /CYBER-ELF/, 'elf-character-render.png');
   });
 
   test('should render Bumble character model', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /BUMBLE/);
-
-    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
-
-    await expect(page).toHaveScreenshot('bumble-character-render.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
-    });
+    await captureGameplaySnapshot(page, /BUMBLE/, 'bumble-character-render.png');
   });
 });
 
@@ -95,33 +75,15 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
   });
 
   test('should render lighting and atmosphere', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /MECHA-SANTA/);
-
-    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
-
-    await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
-    });
+    await captureGameplaySnapshot(page, /MECHA-SANTA/, 'lighting-atmosphere.png');
   });
 });
 
 test.describe('Component Snapshots - Enemy Rendering', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render enemies when spawned', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /MECHA-SANTA/);
-
-    await page.waitForTimeout(10000); // Increased wait for enemy spawns and WebGL stabilization
-
-    await expect(page).toHaveScreenshot('enemies-spawned.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
+    await captureGameplaySnapshot(page, /MECHA-SANTA/, 'enemies-spawned.png', {
+      preSnapshotWait: 10000, // Extra wait for enemy spawns
     });
   });
 
@@ -152,10 +114,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
   test('should render Santa cannon weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-
     await selectCharacterAndStartMission(page, /MECHA-SANTA/);
-
-    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+    await page.waitForTimeout(8000);
 
     // Fire weapon and capture projectiles
     await page.keyboard.press('Space');
@@ -170,10 +130,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
   test('should render Elf SMG weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-
     await selectCharacterAndStartMission(page, /CYBER-ELF/);
-
-    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+    await page.waitForTimeout(8000);
 
     // Fire SMG (rapid fire)
     await page.keyboard.down('Space');
@@ -191,10 +149,8 @@ test.describe('Component Snapshots - Weapon Effects', () => {
   test('should render Bumble star weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
-
     await selectCharacterAndStartMission(page, /BUMBLE/);
-
-    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
+    await page.waitForTimeout(8000);
 
     // Fire star weapon
     await page.keyboard.press('Space');
@@ -234,17 +190,7 @@ test.describe('Component Snapshots - Particle Effects', () => {
 test.describe('Component Snapshots - Camera System', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
   test('should render correct camera perspective', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /MECHA-SANTA/);
-
-    await page.waitForTimeout(8000); // Increased wait for WebGL stabilization
-
-    await expect(page).toHaveScreenshot('camera-perspective.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
-    });
+    await captureGameplaySnapshot(page, /MECHA-SANTA/, 'camera-perspective.png');
   });
 
   test('should render camera following player movement', async ({ page }) => {

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacterAndStartMission, MOBILE_TEST_CONFIG } from './test-helpers';
+import { selectCharacterAndStartMission, captureGameplaySnapshot, MOBILE_TEST_CONFIG } from './test-helpers';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -74,62 +74,32 @@ test.describe('Visual Regression - Character Selection', () => {
 
 test.describe('Visual Regression - Game Start', () => {
   test('should render Santa gameplay correctly', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /MECHA-SANTA/, {
-      briefingTransitionWait: 2000,
-      commenceVisibilityTimeout: 30000,
-      commenceClickTimeout: 0, // Uses default click (no timeout specified)
-    });
-
-    // Wait longer for WebGL rendering to stabilize
-    await page.waitForTimeout(8000);
-
-    // Take gameplay snapshot
-    await expect(page).toHaveScreenshot('santa-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
+    await captureGameplaySnapshot(page, /MECHA-SANTA/, 'santa-gameplay.png', {
+      characterOptions: {
+        briefingTransitionWait: 2000,
+        commenceVisibilityTimeout: 30000,
+        commenceClickTimeout: 0,
+      },
     });
   });
 
   test('should render Elf gameplay correctly', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /CYBER-ELF/, {
-      briefingTransitionWait: 2000,
-      commenceVisibilityTimeout: 30000,
-      commenceClickTimeout: 0,
-    });
-
-    // Wait longer for WebGL rendering to stabilize
-    await page.waitForTimeout(8000);
-
-    // Take gameplay snapshot
-    await expect(page).toHaveScreenshot('elf-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
+    await captureGameplaySnapshot(page, /CYBER-ELF/, 'elf-gameplay.png', {
+      characterOptions: {
+        briefingTransitionWait: 2000,
+        commenceVisibilityTimeout: 30000,
+        commenceClickTimeout: 0,
+      },
     });
   });
 
   test('should render Bumble gameplay correctly', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(3000);
-
-    await selectCharacterAndStartMission(page, /BUMBLE/, {
-      briefingTransitionWait: 2000,
-      commenceVisibilityTimeout: 30000,
-      commenceClickTimeout: 0,
-    });
-
-    // Wait longer for WebGL rendering to stabilize
-    await page.waitForTimeout(8000);
-
-    // Take gameplay snapshot
-    await expect(page).toHaveScreenshot('bumble-gameplay.png', {
-      maxDiffPixelRatio: VISUAL_THRESHOLD,
-      timeout: 40000,
+    await captureGameplaySnapshot(page, /BUMBLE/, 'bumble-gameplay.png', {
+      characterOptions: {
+        briefingTransitionWait: 2000,
+        commenceVisibilityTimeout: 30000,
+        commenceClickTimeout: 0,
+      },
     });
   });
 });

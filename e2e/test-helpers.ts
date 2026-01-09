@@ -130,3 +130,49 @@ export async function selectCharacterAndStartMission(
     await commenceButton.click({ force: true, timeout: commenceClickTimeout });
   }
 }
+
+/**
+ * Captures a visual snapshot of gameplay after character selection.
+ *
+ * This helper consolidates the common pattern for visual regression tests:
+ * 1. Navigate to home page
+ * 2. Wait for initial page load
+ * 3. Select character and start mission
+ * 4. Wait for WebGL rendering to stabilize
+ * 5. Capture screenshot
+ *
+ * @param page - The Playwright page object
+ * @param characterName - A RegExp matching the character button name (e.g., /MECHA-SANTA/)
+ * @param snapshotName - Filename for the snapshot (e.g., 'santa-gameplay.png')
+ * @param options - Optional configuration for waits and screenshot settings
+ */
+export async function captureGameplaySnapshot(
+  page: Page,
+  characterName: RegExp,
+  snapshotName: string,
+  options: {
+    characterOptions?: SelectCharacterOptions;
+    initialPageWait?: number;
+    preSnapshotWait?: number;
+    maxDiffPixelRatio?: number;
+    snapshotTimeout?: number;
+  } = {}
+): Promise<void> {
+  const {
+    characterOptions = {},
+    initialPageWait = 3000,
+    preSnapshotWait = 8000,
+    maxDiffPixelRatio = 0.3,
+    snapshotTimeout = 40000,
+  } = options;
+
+  await page.goto('/');
+  await page.waitForTimeout(initialPageWait);
+  await selectCharacterAndStartMission(page, characterName, characterOptions);
+  await page.waitForTimeout(preSnapshotWait);
+
+  await expect(page).toHaveScreenshot(snapshotName, {
+    maxDiffPixelRatio,
+    timeout: snapshotTimeout,
+  });
+}
