@@ -25,7 +25,8 @@ export default defineConfig({
   // Parallel workers - more with MCP, fewer in CI
   workers: hasMcpSupport ? undefined : isCI ? 2 : undefined,
   // Longer timeout for WebGL rendering - increased for CI due to slower resources and WebGL setup
-  timeout: hasMcpSupport ? 60000 : isCI ? 90000 : 30000,
+  // Bumped to 120s for CI to accommodate full gameplay tests with boss battles
+  timeout: hasMcpSupport ? 60000 : isCI ? 120000 : 30000,
   // Reporter to use
   reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
   // Shared settings for all the projects below
