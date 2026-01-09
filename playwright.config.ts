@@ -45,8 +45,8 @@ export default defineConfig({
   },
   // Expect options for visual regression
   expect: {
-    // Timeout for expect() calls
-    timeout: 10000,
+    // Timeout for expect() calls - increased for CI WebGL rendering
+    timeout: isCI ? 30000 : 10000,
     // Screenshot comparison settings
     toHaveScreenshot: {
       // Allow per-test maxDiffPixelRatio to take precedence
@@ -57,6 +57,8 @@ export default defineConfig({
       animations: 'disabled',
       // CSS media features
       caret: 'hide',
+      // Increase timeout for screenshot capture in CI (WebGL rendering is slow)
+      timeout: isCI ? 30000 : 10000,
     },
   },
   // Configure projects for major browsers
