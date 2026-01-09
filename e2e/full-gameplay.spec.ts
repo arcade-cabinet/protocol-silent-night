@@ -329,7 +329,8 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Simulate kills
-    await triggerStoreAction(page, 'addKill', 10);
+    const success1 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(50);
 
     let state = await getGameState(page);
@@ -337,9 +338,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     expect(state?.score).toBe(10);
 
     // Add more kills
-    await triggerStoreAction(page, 'addKill', 10);
+    const success2 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success2) throw new Error('Failed to add second kill');
     await page.waitForTimeout(25);
-    await triggerStoreAction(page, 'addKill', 10);
+    const success3 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success3) throw new Error('Failed to add third kill');
     await page.waitForTimeout(50);
 
     state = await getGameState(page);
@@ -545,9 +548,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Rapid kills to build streak
-    await triggerStoreAction(page, 'addKill', 10);
+    const success1 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(50);
-    await triggerStoreAction(page, 'addKill', 10);
+    const success2 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success2) throw new Error('Failed to add second kill');
     await page.waitForTimeout(50);
 
     let state = await getGameState(page);
@@ -557,7 +562,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
 
     // Continue streak
-    await triggerStoreAction(page, 'addKill', 10);
+    const success3 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success3) throw new Error('Failed to add third kill');
     await page.waitForTimeout(200);
 
     state = await getGameState(page);
@@ -571,9 +577,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Build a streak
-    await triggerStoreAction(page, 'addKill', 10);
+    const success1 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(50);
-    await triggerStoreAction(page, 'addKill', 10);
+    const success2 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success2) throw new Error('Failed to add second kill');
     await page.waitForTimeout(50);
 
     let state = await getGameState(page);
@@ -583,7 +591,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(2100);
 
     // Next kill should start new streak
-    await triggerStoreAction(page, 'addKill', 10);
+    const success3 = await triggerStoreAction(page, 'addKill', 10);
+    if (!success3) throw new Error('Failed to add third kill');
     await page.waitForTimeout(50);
 
     state = await getGameState(page);
@@ -594,14 +603,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // First kill - no bonus
-    await triggerStoreAction(page, 'addKill', 100);
+    const success1 = await triggerStoreAction(page, 'addKill', 100);
+    if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(50);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
-    await triggerStoreAction(page, 'addKill', 100);
+    const success2 = await triggerStoreAction(page, 'addKill', 100);
+    if (!success2) throw new Error('Failed to add second kill');
     await page.waitForTimeout(50);
 
     state = await getGameState(page);
@@ -609,7 +620,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     expect(state?.score).toBe(225);
 
     // Third kill - 50% bonus (streak of 3)
-    await triggerStoreAction(page, 'addKill', 100);
+    const success3 = await triggerStoreAction(page, 'addKill', 100);
+    if (!success3) throw new Error('Failed to add third kill');
     await page.waitForTimeout(50);
 
     state = await getGameState(page);
@@ -647,14 +659,16 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     for (let i = 0; i < 5; i++) {
       if (page.isClosed()) throw new Error('Page closed during kill loop');
-      await triggerStoreAction(page, 'addKill', 100);
+      const success = await triggerStoreAction(page, 'addKill', 100);
+      if (!success) throw new Error(`Failed to add kill ${i + 1}`);
       await page.waitForTimeout(25);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die
-    await triggerStoreAction(page, 'damagePlayer', 300);
+    const damageSuccess = await triggerStoreAction(page, 'damagePlayer', 300);
+    if (!damageSuccess) throw new Error('Failed to damage player');
     await page.waitForTimeout(300);
 
     // Reset
@@ -666,7 +680,8 @@ test.describe('Full Gameplay - Game Reset', () => {
     await commenceOperation(page);
 
     // Die with 0 score
-    await triggerStoreAction(page, 'damagePlayer', 100);
+    const damageSuccess2 = await triggerStoreAction(page, 'damagePlayer', 100);
+    if (!damageSuccess2) throw new Error('Failed to damage player second time');
     await page.waitForTimeout(300);
 
     // High score should still be preserved
@@ -694,11 +709,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(20);
     }
 
+    // Resolve any level-up that may have occurred BEFORE waiting for boss phase
+    await page.waitForTimeout(200);
+    await resolveLevelUp(page);
+
     // Step 4: Boss phase - wait for transition
     await waitForGameState(page, 'PHASE_BOSS', 10000);
-
-    // Resolve any level-up that may have occurred
-    await resolveLevelUp(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -746,11 +762,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(20);
     }
 
+    // Resolve any level-up that may have occurred BEFORE waiting for boss phase
+    await page.waitForTimeout(200);
+    await resolveLevelUp(page);
+
     // Wait for boss phase transition
     await waitForGameState(page, 'PHASE_BOSS', 10000);
-
-    // Resolve any level-up that may have occurred
-    await resolveLevelUp(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -786,11 +803,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       await page.waitForTimeout(20);
     }
 
+    // Resolve any level-up that may have occurred BEFORE waiting for boss phase
+    await page.waitForTimeout(200);
+    await resolveLevelUp(page);
+
     // Wait for boss phase transition
     await waitForGameState(page, 'PHASE_BOSS', 10000);
-
-    // Resolve any level-up that may have occurred
-    await resolveLevelUp(page);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
