@@ -104,9 +104,9 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
-      // Wait for loading screen to disappear and menu to be ready
+      // Wait for loading screen to disappear (2s default) and menu to be ready
+      await page.waitForTimeout(2500); // Wait for loading screen minimum duration + buffer
       await page.getByRole('heading', { name: /Protocol.*Silent Night/i, level: 1 }).waitFor({ state: 'visible', timeout: 15000 });
-      await page.waitForTimeout(500); // Brief wait for menu animations
 
       // Click MECHA-SANTA
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');

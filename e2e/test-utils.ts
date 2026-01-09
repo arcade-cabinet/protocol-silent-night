@@ -55,8 +55,8 @@ export async function selectCharacter(
  */
 export async function commenceOperation(page: Page): Promise<void> {
   // Wait for briefing animations (100ms per line in test mode * ~6 lines + 50ms for button = ~650ms)
-  // Adding buffer for rendering and stability
-  await page.waitForTimeout(2000);
+  // Adding buffer for rendering and stability - increased for slow CI
+  await page.waitForTimeout(3000);
 
   // Wait for button to be visible with increased timeout for CI
   const button = page.getByRole('button', { name: /COMMENCE OPERATION/i });
@@ -68,8 +68,8 @@ export async function commenceOperation(page: Page): Promise<void> {
   // Click the button
   await button.click({ force: true });
 
-  // Wait for game to initialize
-  await page.waitForTimeout(3000);
+  // Wait for game to initialize - increased for WebGL setup on CI
+  await page.waitForTimeout(4000);
 }
 
 /**
