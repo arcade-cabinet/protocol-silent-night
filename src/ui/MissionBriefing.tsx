@@ -48,7 +48,6 @@ export function MissionBriefing() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length must be excluded to prevent infinite animation loops
   useEffect(() => {
     if (state !== 'BRIEFING') {
-      animationStartedRef.current = false;
       // Reset state when leaving briefing to ensure fresh start on next entry
       setCurrentLine(0);
       setShowButton(false);
@@ -59,7 +58,6 @@ export function MissionBriefing() {
     const totalLines = briefingLines.length;
 
     if (totalLines === 0) {
-      animationStartedRef.current = false;
       return;
     }
 
@@ -91,6 +89,8 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      // Reset animation guard in cleanup to allow re-animation on next BRIEFING state
+      animationStartedRef.current = false;
     };
   }, [state]);
 
