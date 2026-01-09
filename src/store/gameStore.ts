@@ -392,7 +392,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     let capturedStreak = 0;
     let capturedKills = 0;
-    let capturedScore = 0;
 
     set((state) => {
       const timeSinceLastKill = now - state.lastKillTime;
@@ -405,7 +404,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Capture values for use after state update
       capturedStreak = newStreak;
       capturedKills = newKills;
-      capturedScore = newScore;
 
       return {
         stats: { ...state.stats, kills: newKills, score: newScore },
