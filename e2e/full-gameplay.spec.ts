@@ -8,14 +8,37 @@ import { resolveLevelUp } from './test-utils';
  * for each character class, testing all game mechanics and state transitions.
  */
 
-// Helper to wait for store to be available
+// Helper to wait for store to be available with circuit breaker
 async function waitForStore(page: Page, timeout = 15000) {
   const startTime = Date.now();
+  let consecutiveFailures = 0;
+  const maxConsecutiveFailures = 5;
+
   while (Date.now() - startTime < timeout) {
-    const storeAvailable = await page.evaluate(() => {
-      return typeof (window as any).useGameStore !== 'undefined';
-    });
-    if (storeAvailable) return true;
+    try {
+      // Set a page timeout for this evaluation
+      page.setDefaultTimeout(3000);
+      const storeAvailable = await page.evaluate(() => {
+        return typeof (window as any).useGameStore !== 'undefined';
+      });
+      // Reset timeout
+      page.setDefaultTimeout(15000);
+
+      if (storeAvailable) {
+        return true;
+      }
+      consecutiveFailures = 0; // Reset counter on success
+    } catch (error) {
+      // Reset timeout
+      page.setDefaultTimeout(15000);
+      consecutiveFailures++;
+
+      // If we've had too many consecutive failures, the page might be broken
+      if (consecutiveFailures >= maxConsecutiveFailures) {
+        console.error('Too many consecutive failures waiting for store, page may be broken');
+        return false;
+      }
+    }
     await page.waitForTimeout(100);
   }
   return false;
@@ -24,43 +47,69 @@ async function waitForStore(page: Page, timeout = 15000) {
 // Helper to get game state from the store
 async function getGameState(page: Page) {
   // Ensure store is loaded first
-  await waitForStore(page);
+  const storeReady = await waitForStore(page);
+  if (!storeReady) {
+    console.error('Store not available for getGameState');
+    return null;
+  }
 
-  return page.evaluate(() => {
-    const store = (window as any).useGameStore;
-    if (!store) return null;
-    const state = store.getState();
-    return {
-      gameState: state.state,
-      playerHp: state.playerHp,
-      playerMaxHp: state.playerMaxHp,
-      score: state.stats.score,
-      kills: state.stats.kills,
-      bossDefeated: state.stats.bossDefeated,
-      bossActive: state.bossActive,
-      bossHp: state.bossHp,
-      killStreak: state.killStreak,
-      enemyCount: state.enemies.length,
-      bulletCount: state.bullets.length,
-    };
-  });
+  try {
+    page.setDefaultTimeout(5000);
+    const result = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return null;
+      const state = store.getState();
+      return {
+        gameState: state.state,
+        playerHp: state.playerHp,
+        playerMaxHp: state.playerMaxHp,
+        score: state.stats.score,
+        kills: state.stats.kills,
+        bossDefeated: state.stats.bossDefeated,
+        bossActive: state.bossActive,
+        bossHp: state.bossHp,
+        killStreak: state.killStreak,
+        enemyCount: state.enemies.length,
+        bulletCount: state.bullets.length,
+      };
+    });
+    page.setDefaultTimeout(15000);
+    return result;
+  } catch (error) {
+    page.setDefaultTimeout(15000);
+    console.error('Failed to get game state:', error);
+    return null;
+  }
 }
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  // Ensure store is loaded first
-  await waitForStore(page);
-
-  return page.evaluate(({ action, args }) => {
-    const store = (window as any).useGameStore;
-    if (!store) return false;
-    const state = store.getState();
-    if (typeof state[action] === 'function') {
-      state[action](...args);
-      return true;
-    }
+  // Ensure store is loaded first - use shorter timeout for store actions
+  const storeReady = await waitForStore(page, 5000);
+  if (!storeReady) {
+    console.error(`Store not available for action: ${action}`);
     return false;
-  }, { action, args });
+  }
+
+  try {
+    page.setDefaultTimeout(3000);
+    const result = await page.evaluate(({ action, args }) => {
+      const store = (window as any).useGameStore;
+      if (!store) return false;
+      const state = store.getState();
+      if (typeof state[action] === 'function') {
+        state[action](...args);
+        return true;
+      }
+      return false;
+    }, { action, args });
+    page.setDefaultTimeout(15000);
+    return result;
+  } catch (error) {
+    page.setDefaultTimeout(15000);
+    console.error(`Failed to trigger action ${action}:`, error);
+    return false;
+  }
 }
 
 // Helper to wait for game state
