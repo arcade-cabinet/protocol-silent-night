@@ -568,7 +568,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(20);
+      await page.waitForTimeout(150);
     }
     await page.waitForTimeout(500);
 
@@ -690,14 +690,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(150);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(150);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -705,7 +705,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(150);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -774,7 +774,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(150);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
@@ -893,7 +893,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(150);
     }
     await page.waitForTimeout(500);
 
@@ -935,7 +935,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(150);
     }
     await page.waitForTimeout(500);
 
@@ -995,6 +995,9 @@ test.describe('Full Gameplay - Input Controls', () => {
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 30000 });
 
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
     await commenceButton.waitFor({ state: 'visible', timeout: 15000 });
@@ -1023,6 +1026,9 @@ test.describe('Full Gameplay - Input Controls', () => {
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/ });
     await santaButton.waitFor({ state: 'visible', timeout: 15000 });
     await santaButton.click({ force: true, timeout: 30000 });
+
+    // Wait for briefing screen to fully render
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
