@@ -388,12 +388,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   addKill: (points) => {
     const streakTimeout = 2000;
-    const now = Date.now(); // Capture timestamp BEFORE set() to avoid race conditions
 
     let capturedStreak = 0;
     let capturedKills = 0;
+    let now = 0;
 
     set((state) => {
+      // Capture timestamp INSIDE set() to ensure atomic operation with state read
+      now = Date.now();
       const timeSinceLastKill = now - state.lastKillTime;
       // Streak continues if the kill happens within the timeout window
       // If lastKillTime is 0 (first kill), timeSinceLastKill will be huge, so newStreak = 1
