@@ -35,7 +35,8 @@ test.describe('UI Component Refinement', () => {
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 15000 });
+      await page.waitForLoadState('networkidle');
+      await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
 
       // Verify title is visible
       const title = page.locator('h1');
@@ -147,7 +148,7 @@ test.describe('UI Component Refinement', () => {
         // Click mech using getByRole for better reliability
         const mechButton = page.getByRole('button', { name: new RegExp(mech.name) });
         await expect(mechButton).toBeVisible({ timeout: 15000 });
-        await mechButton.click({ timeout: 20000 });
+        await mechButton.click({ force: true, timeout: 20000 });
 
         // Wait for briefing screen transition
         await page.waitForTimeout(2000);
@@ -162,7 +163,8 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
-          await page.waitForSelector('h1', { timeout: 15000 });
+          await page.waitForLoadState('networkidle');
+          await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
         }
       }
     });

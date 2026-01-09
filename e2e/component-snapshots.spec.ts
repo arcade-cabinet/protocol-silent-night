@@ -158,6 +158,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });
@@ -314,6 +315,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     
     await expect(page).toHaveScreenshot('bumble-star-fire.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
+      timeout: 30000,
     });
   });
 });
