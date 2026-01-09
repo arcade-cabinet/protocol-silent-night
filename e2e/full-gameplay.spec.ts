@@ -500,51 +500,66 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak
-    await triggerStoreAction(page, 'addKill', 10);
+    // Rapid kills to build streak - call addKill with proper timing
+    const success1 = await triggerStoreAction(page, 'addKill', 10);
+    expect(success1).toBe(true);
 
     // Wait for state to update with polling
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
       if (!store) return false;
-      return store.getState().killStreak >= 1;
-    }, { timeout: 5000, polling: 100 });
+      const state = store.getState();
+      return state.killStreak >= 1 && state.stats.kills >= 1;
+    }, { timeout: 10000, polling: 100 });
 
     // Verify first kill registered
     let state = await getGameState(page);
     expect(state?.killStreak).toBeGreaterThanOrEqual(1);
+    expect(state?.kills).toBeGreaterThanOrEqual(1);
+
+    // Wait a bit to ensure state is fully settled
+    await page.waitForTimeout(100);
 
     // Second kill within streak window
-    await triggerStoreAction(page, 'addKill', 10);
+    const success2 = await triggerStoreAction(page, 'addKill', 10);
+    expect(success2).toBe(true);
 
     // Wait for streak to update with longer timeout for CI
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
       if (!store) return false;
-      return store.getState().killStreak >= 2;
-    }, { timeout: 10000, polling: 100 });
+      const state = store.getState();
+      return state.killStreak >= 2 && state.stats.kills >= 2;
+    }, { timeout: 15000, polling: 100 });
 
     state = await getGameState(page);
     expect(state?.killStreak).toBeGreaterThanOrEqual(2);
+    expect(state?.kills).toBeGreaterThanOrEqual(2);
 
     // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
+
+    // Wait a bit to ensure state is fully settled
+    await page.waitForTimeout(100);
 
     // Continue streak
-    await triggerStoreAction(page, 'addKill', 10);
+    const success3 = await triggerStoreAction(page, 'addKill', 10);
+    expect(success3).toBe(true);
 
     // Wait for streak to update
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
       if (!store) return false;
-      return store.getState().killStreak >= 3;
-    }, { timeout: 5000, polling: 100 });
+      const state = store.getState();
+      return state.killStreak >= 3 && state.stats.kills >= 3;
+    }, { timeout: 10000, polling: 100 });
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
+    expect(state?.kills).toBe(3);
 
     // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
@@ -558,42 +573,53 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(3000);
 
     // Build a streak
-    await triggerStoreAction(page, 'addKill', 10);
+    const success1 = await triggerStoreAction(page, 'addKill', 10);
+    expect(success1).toBe(true);
 
     // Wait for first kill to register
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
       if (!store) return false;
-      return store.getState().killStreak >= 1;
-    }, { timeout: 5000, polling: 100 });
+      const state = store.getState();
+      return state.killStreak >= 1 && state.stats.kills >= 1;
+    }, { timeout: 10000, polling: 100 });
 
-    await triggerStoreAction(page, 'addKill', 10);
+    // Wait a bit to ensure state is fully settled
+    await page.waitForTimeout(100);
+
+    const success2 = await triggerStoreAction(page, 'addKill', 10);
+    expect(success2).toBe(true);
 
     // Wait for streak to reach 2 with longer timeout for CI
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
       if (!store) return false;
-      return store.getState().killStreak >= 2;
-    }, { timeout: 10000, polling: 100 });
+      const state = store.getState();
+      return state.killStreak >= 2 && state.stats.kills >= 2;
+    }, { timeout: 15000, polling: 100 });
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
+    expect(state?.kills).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
     await page.waitForTimeout(2500);
 
     // Next kill should start new streak
-    await triggerStoreAction(page, 'addKill', 10);
+    const success3 = await triggerStoreAction(page, 'addKill', 10);
+    expect(success3).toBe(true);
 
     // Wait for streak to update
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
       if (!store) return false;
-      return store.getState().killStreak === 1;
-    }, { timeout: 5000, polling: 100 });
+      const state = store.getState();
+      return state.killStreak === 1 && state.stats.kills >= 3;
+    }, { timeout: 10000, polling: 100 });
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
+    expect(state?.kills).toBe(3);
   });
 
   test('should apply streak bonus to score', async ({ page }) => {
@@ -607,7 +633,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(3000);
 
     // First kill - no bonus
-    await triggerStoreAction(page, 'addKill', 100);
+    const success1 = await triggerStoreAction(page, 'addKill', 100);
+    expect(success1).toBe(true);
 
     // Wait for kill to register
     await page.waitForFunction(() => {
@@ -615,14 +642,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
       if (!store) return false;
       const state = store.getState();
       return state.stats.kills >= 1 && state.stats.score >= 100;
-    }, { timeout: 5000, polling: 100 });
+    }, { timeout: 10000, polling: 100 });
 
     let state = await getGameState(page);
     expect(state?.score).toBeGreaterThanOrEqual(100);
     expect(state?.kills).toBe(1);
 
+    // Wait a bit to ensure state is fully settled
+    await page.waitForTimeout(100);
+
     // Second kill - 25% bonus (streak of 2)
-    await triggerStoreAction(page, 'addKill', 100);
+    const success2 = await triggerStoreAction(page, 'addKill', 100);
+    expect(success2).toBe(true);
 
     // Wait for kill and streak bonus to apply with longer timeout for CI
     await page.waitForFunction(() => {
@@ -630,7 +661,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
       if (!store) return false;
       const state = store.getState();
       return state.stats.kills >= 2 && state.killStreak >= 2 && state.stats.score >= 200;
-    }, { timeout: 10000, polling: 100 });
+    }, { timeout: 15000, polling: 100 });
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -638,8 +669,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     expect(state?.score).toBeGreaterThanOrEqual(200);
     expect(state?.kills).toBe(2);
 
+    // Wait a bit to ensure state is fully settled
+    await page.waitForTimeout(100);
+
     // Third kill - 50% bonus (streak of 3)
-    await triggerStoreAction(page, 'addKill', 100);
+    const success3 = await triggerStoreAction(page, 'addKill', 100);
+    expect(success3).toBe(true);
 
     // Wait for kill and streak bonus to apply
     await page.waitForFunction(() => {
@@ -647,7 +682,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
       if (!store) return false;
       const state = store.getState();
       return state.stats.kills >= 3 && state.killStreak >= 3 && state.stats.score >= 325;
-    }, { timeout: 5000, polling: 100 });
+    }, { timeout: 10000, polling: 100 });
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -700,20 +735,48 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
+    // Add kills one at a time with proper waiting
     for (let i = 0; i < 5; i++) {
-      await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(200);
+      const success = await triggerStoreAction(page, 'addKill', 100);
+      expect(success).toBe(true);
+
+      // Wait for kill to register
+      await page.waitForFunction((expectedKills) => {
+        const store = (window as any).useGameStore;
+        if (!store) return false;
+        const state = store.getState();
+        return state.stats.kills >= expectedKills;
+      }, i + 1, { timeout: 5000, polling: 100 });
+
+      await page.waitForTimeout(100);
     }
 
-    const scoreBeforeDeath = (await getGameState(page))?.score || 0;
+    // Verify we have 5 kills and a score
+    let state = await getGameState(page);
+    expect(state?.kills).toBe(5);
+    expect(state?.score).toBeGreaterThan(0);
+    const scoreBeforeDeath = state?.score || 0;
 
     // Die
-    await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(500);
+    const damageSuccess = await triggerStoreAction(page, 'damagePlayer', 300);
+    expect(damageSuccess).toBe(true);
+
+    // Wait for game over state
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return false;
+      return store.getState().state === 'GAME_OVER';
+    }, { timeout: 3000, polling: 100 });
 
     // Reset
     await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
-    await page.waitForTimeout(1000);
+
+    // Wait for menu state
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return false;
+      return store.getState().state === 'MENU';
+    }, { timeout: 3000, polling: 100 });
 
     // Start new game
     await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
@@ -724,11 +787,18 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(2000);
 
     // Die with 0 score
-    await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(500);
+    const damageSuccess2 = await triggerStoreAction(page, 'damagePlayer', 100);
+    expect(damageSuccess2).toBe(true);
+
+    // Wait for game over state
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return false;
+      return store.getState().state === 'GAME_OVER';
+    }, { timeout: 3000, polling: 100 });
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 3000 });
   });
 });
 
