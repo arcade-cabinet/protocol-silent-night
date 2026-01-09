@@ -497,23 +497,20 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(3000);
 
     // Rapid kills to build streak - must happen within 2000ms of each other
-    // To avoid race conditions, trigger both kills in the same browser context with minimal delay
-    const result = await page.evaluate(async () => {
+    // Execute both kills synchronously in the same evaluation context
+    const result = await page.evaluate(() => {
       const store = (window as any).useGameStore;
       if (!store) return null;
       const state = store.getState();
 
       // First kill
       state.addKill(10);
-      const t1 = Date.now();
       const streak1 = store.getState().killStreak;
       const lastTime1 = store.getState().lastKillTime;
 
-      // Second kill after a minimal delay to ensure different timestamps
-      // but well within the 2000ms streak timeout
-      // Using 50ms to ensure Date.now() reliably advances in CI environments
-      await new Promise(resolve => setTimeout(resolve, 50));
-      const t2 = Date.now();
+      // Second kill immediately after (same tick)
+      // The store's functional update will use Date.now() for both calls
+      // which should be within the streak timeout in the same JS execution context
       state.addKill(10);
 
       // Return state immediately to avoid game loop resetting streak
@@ -522,8 +519,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
         killStreak: finalState.killStreak,
         lastKillTime: finalState.lastKillTime,
         kills: finalState.stats.kills,
-        t1, t2, streak1, lastTime1,
-        timeDiff: t2 - lastTime1,
+        streak1,
+        lastTime1,
+        timeDiff: finalState.lastKillTime - lastTime1,
       };
     });
 
@@ -534,13 +532,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
 
     // Continue streak - third kill
-    const result3 = await page.evaluate(async () => {
+    const result3 = await page.evaluate(() => {
       const store = (window as any).useGameStore;
       if (!store) return null;
       const state = store.getState();
 
-      // Third kill after minimal delay
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Third kill immediately
       state.addKill(10);
 
       // Return state immediately
@@ -593,22 +590,21 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Execute all three kills in the browser context with minimal delays
+    // Execute all three kills synchronously in the same evaluation context
     // to ensure they happen within the 2000ms streak timeout
-    const scoreResult = await page.evaluate(async () => {
+    const scoreResult = await page.evaluate(() => {
       const store = (window as any).useGameStore;
       if (!store) return null;
       const state = store.getState();
 
+      // All kills happen synchronously in rapid succession
       // First kill - no bonus
       state.addKill(100);
 
       // Second kill - 25% bonus (streak of 2)
-      await new Promise(resolve => setTimeout(resolve, 50));
       state.addKill(100);
 
       // Third kill - 50% bonus (streak of 3)
-      await new Promise(resolve => setTimeout(resolve, 50));
       state.addKill(100);
 
       // Return state immediately to avoid game loop interference
