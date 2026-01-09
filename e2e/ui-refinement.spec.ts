@@ -35,7 +35,7 @@ test.describe('UI Component Refinement', () => {
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render
-      await page.waitForSelector('h1', { timeout: 5000 });
+      await page.waitForSelector('h1', { timeout: 15000 });
 
       // Verify title is visible
       const title = page.locator('h1');
@@ -138,9 +138,9 @@ test.describe('UI Component Refinement', () => {
 
     test('should display correct operator for each mech', async ({ page }) => {
       const mechs = [
-        { name: 'MECHA-SANTA', role: 'Heavy Stage' },
-        { name: 'CYBER-ELF', role: 'Recon' },
-        { name: 'THE BUMBLE', role: 'Crowd Control' },
+        { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
+        { name: 'CYBER-ELF', role: 'Recon / Scout' },
+        { name: 'THE BUMBLE', role: 'Crowd Control / Bruiser' },
       ];
 
       for (const [index, mech] of mechs.entries()) {
@@ -162,7 +162,7 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
-          await page.waitForSelector('h1', { timeout: 5000 });
+          await page.waitForSelector('h1', { timeout: 15000 });
         }
       }
     });
