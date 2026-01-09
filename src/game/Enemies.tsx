@@ -22,9 +22,8 @@ const tempColor = new THREE.Color();
 export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
-  const lastDamageTimeRef = useRef(-999); // Start with large negative to allow first damage after grace period
-  const phaseStartTimeRef = useRef(-999); // Phase start time in frame clock seconds
-  const lastStateRef = useRef<string>(''); // Track state changes
+  const lastDamageTimeRef = useRef(0);
+  const phaseStartTimeRef = useRef(0); // Add phase start time tracking
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
@@ -81,6 +80,7 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
+      phaseStartTimeRef.current = Date.now(); // Set start time when phase begins
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
@@ -101,8 +101,6 @@ export function Enemies() {
 
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
-      // Reset last state when not in active phase
-      lastStateRef.current = '';
     }
 
     return () => {
@@ -119,21 +117,11 @@ export function Enemies() {
   const directionRef = useRef(new THREE.Vector3());
   const tempVecRef = useRef(new THREE.Vector3());
 
-  useFrame((frameState, delta) => {
+  useFrame((_, delta) => {
     // Optimization: Access transient state
     const { state: gameState, playerPosition, enemies: currentEnemies } = useGameStore.getState();
 
-    if (gameState !== 'PHASE_1' && gameState !== 'PHASE_BOSS') {
-      // Reset last state when not in active phase
-      lastStateRef.current = '';
-      return;
-    }
-
-    // Reset grace period timer when entering a new phase using frame clock
-    if (lastStateRef.current !== gameState) {
-      lastStateRef.current = gameState;
-      phaseStartTimeRef.current = frameState.clock.elapsedTime;
-    }
+    if (gameState !== 'PHASE_1' && gameState !== 'PHASE_BOSS') return;
 
     if (gameState === 'PHASE_1' || gameState === 'PHASE_BOSS') {
       spawnTimerRef.current += delta * 1000;
@@ -146,7 +134,7 @@ export function Enemies() {
     const toPlayer = toPlayerRef.current;
     const direction = directionRef.current;
     const tempVec = tempVecRef.current;
-    const currentTime = frameState.clock.elapsedTime;
+    const now = Date.now();
 
     let shouldDamage = false;
     let damageAmount = 0;
@@ -174,9 +162,9 @@ export function Enemies() {
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
         // Add 2s grace period after phase start to prevent instant damage
-        const isGracePeriod = currentTime - phaseStartTimeRef.current < 2;
+        const isGracePeriod = now - phaseStartTimeRef.current < 2000;
 
-        if (!isGracePeriod && currentTime - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown / 1000) {
+        if (!isGracePeriod && now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
           // Only damage if enemy is properly initialized
           const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
 
@@ -191,7 +179,7 @@ export function Enemies() {
     }
 
     if (shouldDamage) {
-      lastDamageTimeRef.current = currentTime;
+      lastDamageTimeRef.current = now;
       damagePlayer(damageAmount);
     }
   });
