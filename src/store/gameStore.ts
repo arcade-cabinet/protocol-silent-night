@@ -386,7 +386,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
+    const { stats, state, lastKillTime, killStreak } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
@@ -395,6 +395,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
+
+    // Update kill stats first, before calling other functions that might read state
+    set({
+      stats: { ...stats, kills: newKills, score: newScore },
+      killStreak: newStreak,
+      lastKillTime: now,
+    });
+
+    // Now update meta progress with fresh state
+    const freshMeta = get().metaProgress;
+    set({
+      metaProgress: {
+        ...freshMeta,
+        totalKills: freshMeta.totalKills + 1,
+      },
+    });
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
@@ -407,16 +423,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
-
-    set({
-      stats: { ...stats, kills: newKills, score: newScore },
-      killStreak: newStreak,
-      lastKillTime: now,
-      metaProgress: {
-        ...get().metaProgress,
-        totalKills: metaProgress.totalKills + 1,
-      },
-    });
 
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
@@ -837,7 +843,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Mistletoe Lifesteal
     if (stats && stats.lifesteal > 0) {
-      const healAmount = finalDamage * stats.lifesteal;
+      const healAmount = Math.round(finalDamage * stats.lifesteal);
       set({ playerHp: Math.min(playerMaxHp, playerHp + healAmount) });
     }
 
@@ -918,7 +924,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const stats = getEffectiveStats();
     // Mistletoe Lifesteal
     if (stats && stats.lifesteal > 0) {
-      const healAmount = amount * stats.lifesteal;
+      const healAmount = Math.round(amount * stats.lifesteal);
       set({ playerHp: Math.min(playerMaxHp, playerHp + healAmount) });
     }
 
