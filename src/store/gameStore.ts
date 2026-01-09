@@ -305,6 +305,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentWeapon: config.weaponType,
       currentEvolution: null,
       selectedSkin: null,
+      stats: { score: 0, kills: 0, bossDefeated: false },
+      killStreak: 0,
+      lastKillTime: 0,
       runProgress: {
         xp: 0,
         level: 1,
