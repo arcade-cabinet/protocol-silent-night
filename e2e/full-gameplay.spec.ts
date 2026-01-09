@@ -691,7 +691,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     }, { timeout: 15000, polling: 50 });
 
     // Verify high score is shown on game over screen
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('HIGH SCORE', { exact: true })).toBeVisible({ timeout: 5000 });
 
     // Get high score value before reset
     const highScoreBeforeReset = await page.evaluate(() => {
@@ -737,7 +737,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     }, { timeout: 15000, polling: 50 });
 
     // High score should still be preserved (should match the first game's score)
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('HIGH SCORE', { exact: true })).toBeVisible({ timeout: 5000 });
 
     const highScoreAfterReset = await page.evaluate(() => {
       const store = (window as any).useGameStore;
