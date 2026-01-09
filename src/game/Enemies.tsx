@@ -23,6 +23,7 @@ export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
+  const gameStartTimeRef = useRef<number | null>(null);
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
@@ -79,6 +80,7 @@ export function Enemies() {
 
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
+      gameStartTimeRef.current = Date.now();
 
       for (let i = 0; i < ENEMY_SPAWN_CONFIG.initialMinions; i++) {
         const id = setTimeout(() => spawnMinion(), i * 200);
@@ -100,6 +102,7 @@ export function Enemies() {
 
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
+      gameStartTimeRef.current = null;
     }
 
     return () => {
@@ -164,9 +167,11 @@ export function Enemies() {
           // Only damage if enemy is properly initialized (not at origin 0,0,0).
           // Enemies spawn at radius 20-30 units, so lengthSq > 0.1 ensures proper initialization.
           // This prevents "ghost damage" from corrupted or uninitialized enemy meshes.
+          // Also add grace period at game start to prevent instant damage
           const isInitialized = enemy.mesh.position.lengthSq() > 0.1;
+          const gracePeriod = gameStartTimeRef.current ? now - gameStartTimeRef.current > 500 : true;
 
-          if (isInitialized) {
+          if (isInitialized && gracePeriod) {
             shouldDamage = true;
             damageAmount = Math.max(damageAmount, enemy.damage);
           }
