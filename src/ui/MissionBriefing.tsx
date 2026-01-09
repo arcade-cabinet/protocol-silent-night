@@ -51,6 +51,7 @@ export function MissionBriefing() {
       // Reset state when leaving briefing to ensure fresh start on next entry
       setCurrentLine(0);
       setShowButton(false);
+      animationStartedRef.current = false;
       return;
     }
 
@@ -89,8 +90,6 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
-      // Reset animation guard in cleanup to allow re-animation on next BRIEFING state
-      animationStartedRef.current = false;
     };
   }, [state]);
 
