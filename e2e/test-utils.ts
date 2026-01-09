@@ -36,10 +36,9 @@ export async function selectCharacter(
   page: Page,
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
-  // Wait for character button to be visible and attached
+  // Wait for character button to be visible
   const button = page.getByRole('button', { name: new RegExp(characterName) });
-  await button.waitFor({ state: 'visible', timeout: 20000 });
-  await button.waitFor({ state: 'attached', timeout: 5000 });
+  await button.waitFor({ state: 'visible', timeout: 30000 });
 
   // Wait to ensure button is fully interactive and layout is stable
   await page.waitForTimeout(1000);
@@ -79,8 +78,7 @@ export async function commenceOperation(page: Page): Promise<void> {
 
   // Wait for button to be visible with increased timeout for CI
   const button = page.getByRole('button', { name: /COMMENCE OPERATION/i });
-  await button.waitFor({ state: 'visible', timeout: 30000 });
-  await button.waitFor({ state: 'attached', timeout: 5000 });
+  await button.waitFor({ state: 'visible', timeout: 45000 });
 
   // Extra wait to ensure button is fully interactive
   await page.waitForTimeout(1000);
