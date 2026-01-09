@@ -926,6 +926,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
 
+      // Check if this is wave 1 (first boss) - transition to WIN
+      if (runProgress.wave === 1) {
+        set({
+          state: 'WIN',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+        });
+
+        get().updateHighScore();
+        saveMetaProgress(updatedMeta);
+        AudioManager.playSFX('boss_defeated');
+
+        return true;
+      }
+
       // Endless mode: Increment wave and prepare for level up
       set({
         state: 'PHASE_1',
