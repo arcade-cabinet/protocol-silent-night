@@ -168,6 +168,16 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     await page.waitForTimeout(3000);
 
+    // Clear all enemies to prevent passive damage during HP tests
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        state.updateEnemies(() => []);
+      }
+    });
+    await page.waitForTimeout(100);
+
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
@@ -330,6 +340,16 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     await page.waitForTimeout(3000);
 
+    // Clear all enemies to prevent passive damage during HP tests
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        state.updateEnemies(() => []);
+      }
+    });
+    await page.waitForTimeout(100);
+
     // Verify Bumble's stats - 200 HP, medium speed
     const state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
@@ -354,6 +374,16 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
     await page.waitForTimeout(3000);
+
+    // Clear all enemies to prevent passive damage during HP tests
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        state.updateEnemies(() => []);
+      }
+    });
+    await page.waitForTimeout(100);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
