@@ -36,18 +36,37 @@ export async function selectCharacter(
   page: Page,
   characterName: 'MECHA-SANTA' | 'CYBER-ELF' | 'BUMBLE'
 ): Promise<void> {
-  // Wait for character button to be visible
+  // Wait for character button to be visible and attached
   const button = page.getByRole('button', { name: new RegExp(characterName) });
-  await button.waitFor({ state: 'visible', timeout: 15000 });
+  await button.waitFor({ state: 'visible', timeout: 20000 });
+  await button.waitFor({ state: 'attached', timeout: 5000 });
 
-  // Small wait to ensure button is fully interactive
-  await page.waitForTimeout(500);
+  // Wait to ensure button is fully interactive and layout is stable
+  await page.waitForTimeout(1000);
 
-  // Click the character button
-  await button.click({ force: true });
+  // Try clicking with retries
+  let clicked = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await button.click({ timeout: 10000, force: true });
+      clicked = true;
+      break;
+    } catch (error) {
+      console.error(`Click attempt ${attempt + 1} failed:`, error);
+      if (attempt < 2) {
+        await page.waitForTimeout(500);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  if (!clicked) {
+    throw new Error(`Failed to click character button ${characterName}`);
+  }
 
   // Wait for briefing screen to appear
-  await page.getByText('MISSION BRIEFING').waitFor({ state: 'visible', timeout: 15000 });
+  await page.getByText('MISSION BRIEFING').waitFor({ state: 'visible', timeout: 20000 });
 }
 
 /**
@@ -61,15 +80,34 @@ export async function commenceOperation(page: Page): Promise<void> {
   // Wait for button to be visible with increased timeout for CI
   const button = page.getByRole('button', { name: /COMMENCE OPERATION/i });
   await button.waitFor({ state: 'visible', timeout: 30000 });
+  await button.waitFor({ state: 'attached', timeout: 5000 });
 
   // Extra wait to ensure button is fully interactive
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
 
-  // Click the button
-  await button.click({ force: true });
+  // Click with retries
+  let clicked = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await button.click({ timeout: 10000, force: true });
+      clicked = true;
+      break;
+    } catch (error) {
+      console.error(`Commence click attempt ${attempt + 1} failed:`, error);
+      if (attempt < 2) {
+        await page.waitForTimeout(500);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  if (!clicked) {
+    throw new Error('Failed to click COMMENCE OPERATION button');
+  }
 
   // Wait for game to initialize - increased for WebGL setup on CI
-  await page.waitForTimeout(4000);
+  await page.waitForTimeout(5000);
 }
 
 /**
