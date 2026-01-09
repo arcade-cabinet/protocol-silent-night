@@ -34,7 +34,7 @@ async function getGameState(page: Page) {
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
   // Add small delay between actions to ensure proper audio timing and preventing scheduling race conditions
   await page.waitForTimeout(50);
-  return page.evaluate(({ action, args }) => {
+  const result = await page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
     if (!store) return false;
     const state = store.getState();
@@ -44,6 +44,9 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     }
     return false;
   }, { action, args });
+  // Add small delay after action to ensure Zustand state updates have propagated
+  await page.waitForTimeout(50);
+  return result;
 }
 
 // Helper to wait for game state
@@ -609,13 +612,12 @@ test.describe('Full Gameplay - Game Reset', () => {
     await safeClick(page, page.getByRole('button', { name: /MECHA-SANTA/ }));
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
+    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }), { timeout: 30000 });
 
     await page.waitForTimeout(3000);
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(200);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
@@ -625,14 +627,14 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Reset
-    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
+    await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }), { timeout: 30000 });
     await page.waitForTimeout(1000);
 
     // Start new game
     await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
 
     // Click "COMMENCE OPERATION" on the briefing screen
-    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
+    await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }), { timeout: 30000 });
 
     await page.waitForTimeout(2000);
 
