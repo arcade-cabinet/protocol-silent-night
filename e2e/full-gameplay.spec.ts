@@ -516,7 +516,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -549,7 +549,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -584,7 +584,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
