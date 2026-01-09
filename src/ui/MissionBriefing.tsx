@@ -48,10 +48,10 @@ export function MissionBriefing() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length must be excluded to prevent infinite animation loops
   useEffect(() => {
     if (state !== 'BRIEFING') {
+      animationStartedRef.current = false;
       // Reset state when leaving briefing to ensure fresh start on next entry
       setCurrentLine(0);
       setShowButton(false);
-      animationStartedRef.current = false;
       return;
     }
 
@@ -63,20 +63,13 @@ export function MissionBriefing() {
       return;
     }
 
-    // CRITICAL: Guard to prevent duplicate animations during the same BRIEFING session
-    // Only allow animation to start once per BRIEFING state entry
-    if (animationStartedRef.current) {
-      // Animation already running or completed for this BRIEFING session
-      return;
-    }
+    if (animationStartedRef.current) return;
+
+    animationStartedRef.current = true;
 
     // Reset state when briefing starts
     setCurrentLine(0);
     setShowButton(false);
-
-    // Mark animation as started AFTER resetting state, but BEFORE starting timers
-    // This ensures the animation can start while preventing duplicate animations
-    animationStartedRef.current = true;
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
@@ -98,9 +91,6 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
-      // Reset animation guard if effect cleanup runs (e.g., StrictMode double-invocation)
-      // This allows the animation to restart if the effect runs again
-      animationStartedRef.current = false;
     };
   }, [state]);
 
