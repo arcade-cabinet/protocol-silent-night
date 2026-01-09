@@ -25,6 +25,8 @@ test.describe('Protocol: Silent Night', () => {
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+    // Wait for loading screen to finish (1.5s minimum duration)
+    await page.waitForTimeout(2000);
   });
 
   // ============================================
