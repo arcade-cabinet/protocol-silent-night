@@ -387,15 +387,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
     const now = Date.now();
-    const newKills = stats.kills + 1;
-
     const streakTimeout = 2000;
-    const newStreak = lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
-    const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
-    const newScore = stats.score + points + streakBonus;
+    // Use functional update to prevent race conditions when multiple kills happen rapidly
+    set((state) => {
+      const { stats, lastKillTime, killStreak, metaProgress } = state;
+      const newKills = stats.kills + 1;
+
+      // Check if this is a streak continuation (within timeout window)
+      const newStreak = lastKillTime > 0 && now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+
+      const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
+      const newScore = stats.score + points + streakBonus;
+
+      return {
+        stats: { ...stats, kills: newKills, score: newScore },
+        killStreak: newStreak,
+        lastKillTime: now,
+        metaProgress: {
+          ...metaProgress,
+          totalKills: metaProgress.totalKills + 1,
+        },
+      };
+    });
+
+    // Get updated state for XP and NP calculations
+    const { killStreak: newStreak } = get();
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
@@ -409,16 +427,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
 
-    set({
-      stats: { ...stats, kills: newKills, score: newScore },
-      killStreak: newStreak,
-      lastKillTime: now,
-      metaProgress: {
-        ...get().metaProgress,
-        totalKills: metaProgress.totalKills + 1,
-      },
-    });
-
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
@@ -427,10 +435,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Scale requirement by wave
-    const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
+    const { stats, state: gameState, runProgress, enemies } = get();
+    const waveReq = CONFIG.WAVE_REQ * runProgress.wave;
 
-    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
-      const hasBoss = get().enemies.some((e) => e.type === 'boss');
+    if (stats.kills >= waveReq && (gameState === 'PHASE_1' || gameState === 'LEVEL_UP')) {
+      const hasBoss = enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
       }
