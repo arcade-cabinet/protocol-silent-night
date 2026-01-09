@@ -519,7 +519,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -611,22 +611,24 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(100);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(500);
+
+    // Wait for game over state
+    await waitForGameState(page, 'GAME_OVER', 5000);
 
     // Reset
     await safeClick(page, page.getByRole('button', { name: /RE-DEPLOY/ }));
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
 
     // Start new game
     await safeClick(page, page.getByRole('button', { name: /CYBER-ELF/ }));
@@ -634,14 +636,16 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await safeClick(page, page.getByRole('button', { name: /COMMENCE OPERATION/i }));
 
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
-    await page.waitForTimeout(500);
+
+    // Wait for game over state
+    await waitForGameState(page, 'GAME_OVER', 5000);
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
   });
 });
 

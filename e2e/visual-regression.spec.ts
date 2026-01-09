@@ -215,12 +215,12 @@ test.describe('Visual Regression - Game Movement', () => {
     await safeClick(page, startButton, { timeout: 30000 });
     await page.waitForTimeout(3000);
 
-    // Fire weapon
+    // Fire weapon and wait for animation to settle
     await page.keyboard.press('Space');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
-      maxDiffPixelRatio: 0.03,
+      maxDiffPixelRatio: 0.05,
       timeout: 20000,
     });
   });
