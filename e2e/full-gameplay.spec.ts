@@ -39,9 +39,8 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
       state[action](...args);
       // Wait for multiple microtasks to ensure all nested state updates complete
       return new Promise((resolve) => {
-        // Use a longer timeout to ensure all state updates propagate
-        // Increased to 300ms to handle gainXP and earnNicePoints cascading updates
-        // and ensure atomic state changes are fully committed
+        // Use a shorter timeout since we'll add delays between actions in the tests
+        // This reduces the total time between kills to prevent streak timeout
         setTimeout(() => {
           const newState = store.getState();
           resolve({
@@ -53,7 +52,7 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
               kills: newState.stats.kills
             }
           });
-        }, 300);
+        }, 100);
       });
     }
     return { success: false, state: null };
@@ -272,19 +271,19 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     await page.waitForTimeout(3000);
 
-    // Simulate kills with longer delays to prevent browser overload
+    // Simulate kills with balanced delays to prevent browser overload while maintaining streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     let state = await getGameState(page);
     expect(state?.kills).toBe(1);
     expect(state?.score).toBe(10);
 
-    // Add more kills
+    // Add more kills with shorter delays to maintain streak (total < 2000ms)
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     state = await getGameState(page);
     expect(state?.kills).toBe(3);
@@ -640,10 +639,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak - use 800ms delay to prevent browser overload
-    // The streak timeout is 2000ms, so 800ms is well within the window
+    // Rapid kills to build streak - use balanced delays to maintain streak (< 2000ms)
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     // Verify first kill registered
     let state = await getGameState(page);
@@ -651,7 +649,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     expect(state?.kills).toBe(1);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -662,7 +660,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -690,16 +688,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Build a streak with longer delays to prevent browser overload
+    // Build a streak with balanced delays to maintain streak (< 2000ms)
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     // Verify first kill registered
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(1);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -733,17 +731,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // First kill - no bonus, with longer delays to prevent browser overload
+    // First kill - no bonus, with balanced delays to maintain streak
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
     expect(state?.killStreak).toBe(1);
 
-    // Second kill - 25% bonus (streak of 2)
+    // Second kill - 25% bonus (streak of 2), within timeout (< 2000ms total)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -752,7 +750,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -781,13 +779,13 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
-    // Get some score with longer delays to prevent browser overload
+    // Get some score with balanced delays
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     // Click re-deploy
     await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: 30000 });
@@ -820,17 +818,17 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
-    // Use longer delays to prevent browser overload
+    // Use balanced delays to maintain performance
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(400);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
-    // Die with longer delay to prevent browser overload
+    // Die with balanced delay
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(400);
 
     // Reset
     await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: 30000 });
@@ -890,10 +888,10 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Step 3: Combat phase - kill enemies with longer delays to prevent browser overload
+    // Step 3: Combat phase - kill enemies with balanced delays
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(800);
+      await page.waitForTimeout(400);
     }
 
     // Step 4: Boss phase
