@@ -46,7 +46,21 @@ async function stabilizePage(page) {
 async function waitForElementStability(page, locator) {
   await locator.waitFor({ state: 'attached', timeout: 10000 });
   await locator.waitFor({ state: 'visible', timeout: 10000 });
-  await page.waitForTimeout(200); // Extra buffer for animations
+
+  // Wait for layout to be fully stable by checking bounding box stability
+  let previousBox = null;
+  for (let i = 0; i < 5; i++) {
+    await page.waitForTimeout(100);
+    const currentBox = await locator.boundingBox();
+    if (previousBox && currentBox &&
+        previousBox.height === currentBox.height &&
+        previousBox.width === currentBox.width) {
+      break; // Dimensions are stable
+    }
+    previousBox = currentBox;
+  }
+
+  await page.waitForTimeout(300); // Extra buffer for any remaining animations
   return locator;
 }
 
@@ -85,11 +99,12 @@ test.describe('Visual Regression - Character Selection', () => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await waitForElementStability(page, santaCard);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Allow animations to settle
+    await page.waitForTimeout(1000); // Allow animations to settle
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500000,
-      timeout: 30000,
+      timeout: 60000,
+      animations: 'disabled',
     });
   });
 
@@ -97,11 +112,12 @@ test.describe('Visual Regression - Character Selection', () => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await waitForElementStability(page, elfCard);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Allow animations to settle
+    await page.waitForTimeout(1000); // Allow animations to settle
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500000,
-      timeout: 30000,
+      timeout: 60000,
+      animations: 'disabled',
     });
   });
 
@@ -109,11 +125,12 @@ test.describe('Visual Regression - Character Selection', () => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await waitForElementStability(page, bumbleCard);
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(500); // Allow animations to settle
+    await page.waitForTimeout(1000); // Allow animations to settle
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500000,
-      timeout: 30000,
+      timeout: 60000,
+      animations: 'disabled',
     });
   });
 });
