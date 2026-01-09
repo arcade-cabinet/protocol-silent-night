@@ -32,7 +32,7 @@ async function getGameState(page: Page) {
 
 // Helper to trigger game actions via store
 async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  return page.evaluate(({ action, args }) => {
+  const result = await page.evaluate(({ action, args }) => {
     const store = (window as any).useGameStore;
     if (!store) return false;
     const state = store.getState();
@@ -42,6 +42,10 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
     }
     return false;
   }, { action, args });
+
+  // Small delay to ensure state has propagated
+  await page.waitForTimeout(50);
+  return result;
 }
 
 // Helper to wait for game state
@@ -493,9 +497,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak - ensure state propagates between calls
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500); // Increased to ensure state propagates
+    await page.waitForTimeout(600); // Wait to ensure time difference but stay within streak timeout
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500); // Increased to ensure state propagates
+    await page.waitForTimeout(200); // Wait for state to stabilize
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -505,7 +509,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500); // Wait for state propagation
+    await page.waitForTimeout(200); // Wait for state to stabilize
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -552,14 +556,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(500); // Increased to ensure state propagates
+    await page.waitForTimeout(100); // Wait for state to stabilize
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(500); // Increased to ensure state propagates
+    await page.waitForTimeout(200); // Wait for state to stabilize
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -567,7 +571,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(500); // Increased to ensure state propagates
+    await page.waitForTimeout(200); // Wait for state to stabilize
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
