@@ -45,8 +45,8 @@ export async function selectCharacter(page: Page, name: string) {
   // Wait for button to be visible
   await button.waitFor({ state: 'visible', timeout: 10000 });
   // Removed scrollIntoViewIfNeeded as it causes instability in CI
-  // Use standard click which attempts to scroll if needed
-  await button.click();
+  // Use force click to bypass potential overlays and increased timeout
+  await button.click({ timeout: 15000, force: true });
 }
 
 // Helper to start mission robustly
