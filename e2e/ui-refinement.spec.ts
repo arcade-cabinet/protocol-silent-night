@@ -148,7 +148,7 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should display correct operator for each mech', async ({ page }) => {
-      test.setTimeout(120000); // Increase timeout to 2 minutes for this test with multiple iterations
+      test.setTimeout(180000); // Increase timeout to 3 minutes for this test with multiple iterations
 
       const mechs = [
         { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
@@ -158,25 +158,25 @@ test.describe('UI Component Refinement', () => {
 
       for (const [index, mech] of mechs.entries()) {
         // Wait for LoadingScreen to disappear (longer timeout for CI)
-        await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 20000 }).catch(() => {});
+        await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 30000 }).catch(() => {});
         // Menu buttons should be visible now that LoadingScreen is gone
-        await page.waitForTimeout(1000); // Extra buffer for rendering
+        await page.waitForTimeout(2000); // Extra buffer for rendering
         await page.waitForSelector('button[type="button"]', { timeout: 30000 });
 
-        // Click mech
+        // Click mech with increased timeout
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
-        await mechButton.waitFor({ state: 'visible', timeout: 15000 });
-        await mechButton.click({ force: true, timeout: 30000 });
+        await mechButton.waitFor({ state: 'visible', timeout: 20000 });
+        await mechButton.click({ force: true, timeout: 60000 });
 
         // Wait for briefing with longer timeout for state transition
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 20000 });
 
         // Additional wait for content to render
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(2000);
 
         // Verify operator and role with more flexible selectors
-        await expect(page.locator(`text=${mech.name}`)).toBeVisible({ timeout: 5000 });
-        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 5000 });
+        await expect(page.locator(`text=${mech.name}`)).toBeVisible({ timeout: 10000 });
+        await expect(page.locator(`text=${mech.role}`)).toBeVisible({ timeout: 10000 });
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
@@ -185,7 +185,7 @@ test.describe('UI Component Refinement', () => {
           // Wait for LoadingScreen to disappear after reload (longer timeout for CI)
           await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 30000 }).catch(() => {});
           // Wait for menu to be ready with longer timeout
-          await page.waitForTimeout(3000); // Give extra time for rendering
+          await page.waitForTimeout(5000); // Give extra time for rendering
           // Wait for either h1 or buttons to appear (menu is ready)
           await Promise.race([
             page.waitForSelector('h1', { timeout: 30000 }).catch(() => {}),

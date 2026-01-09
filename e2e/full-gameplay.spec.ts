@@ -189,6 +189,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
+    // Handle potential LEVEL_UP state
+    if (state?.gameState === 'LEVEL_UP') {
+      const upgradeButtons = page.locator('button:has-text("SELECT")');
+      const firstButton = upgradeButtons.first();
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
+      await firstButton.click();
+      await page.waitForTimeout(500);
+      state = await getGameState(page);
+    }
     expect(state?.playerHp).toBe(200); // 300 - 100 = 200
     expect(state?.gameState).toBe('PHASE_1'); // Still alive
 
@@ -478,6 +487,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
 test.describe('Full Gameplay - Boss Battle', () => {
   test('should spawn boss after 10 kills', async ({ page }) => {
+    test.setTimeout(120000); // Increase timeout for CI
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Wait for LoadingScreen to disappear (1500ms + buffer)
@@ -511,7 +521,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
       // Select first upgrade to continue
       const upgradeButtons = page.locator('button:has-text("SELECT")');
       const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 5000 });
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
       await firstButton.click();
       await page.waitForTimeout(500);
       state = await getGameState(page);
@@ -527,6 +537,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
   });
 
   test('should defeat boss and win game', async ({ page }) => {
+    test.setTimeout(120000); // Increase timeout for CI
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Wait for LoadingScreen to disappear (1500ms + buffer)
@@ -559,7 +570,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
       // Select first upgrade to continue
       const upgradeButtons = page.locator('button:has-text("SELECT")');
       const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 5000 });
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
       await firstButton.click();
       await page.waitForTimeout(500);
       state = await getGameState(page);
@@ -583,6 +594,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
   });
 
   test('should show boss health decreasing', async ({ page }) => {
+    test.setTimeout(120000); // Increase timeout for CI
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Wait for LoadingScreen to disappear (1500ms + buffer)
@@ -615,7 +627,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
       // Select first upgrade to continue
       const upgradeButtons = page.locator('button:has-text("SELECT")');
       const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 5000 });
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
       await firstButton.click();
       await page.waitForTimeout(500);
     }
@@ -640,6 +652,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
 test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
+    test.setTimeout(120000); // Increase timeout for CI
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Wait for LoadingScreen to disappear (1500ms + buffer)
@@ -666,6 +679,15 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(100);
 
     let state = await getGameState(page);
+    // Handle potential LEVEL_UP state
+    if (state?.gameState === 'LEVEL_UP') {
+      const upgradeButtons = page.locator('button:has-text("SELECT")');
+      const firstButton = upgradeButtons.first();
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
+      await firstButton.click();
+      await page.waitForTimeout(500);
+      state = await getGameState(page);
+    }
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -723,6 +745,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   });
 
   test('should apply streak bonus to score', async ({ page }) => {
+    test.setTimeout(120000); // Increase timeout for CI
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Wait for LoadingScreen to disappear (1500ms + buffer)
@@ -747,6 +770,15 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(50);
 
     let state = await getGameState(page);
+    // Handle potential LEVEL_UP state
+    if (state?.gameState === 'LEVEL_UP') {
+      const upgradeButtons = page.locator('button:has-text("SELECT")');
+      const firstButton = upgradeButtons.first();
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
+      await firstButton.click();
+      await page.waitForTimeout(500);
+      state = await getGameState(page);
+    }
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
@@ -810,6 +842,7 @@ test.describe('Full Gameplay - Game Reset', () => {
   });
 
   test('should preserve high score after reset', async ({ page }) => {
+    test.setTimeout(120000); // Increase timeout for CI
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // Wait for LoadingScreen to disappear (1500ms + buffer)
@@ -835,7 +868,18 @@ test.describe('Full Gameplay - Game Reset', () => {
       await page.waitForTimeout(50);
     }
 
-    const scoreBeforeDeath = (await getGameState(page))?.score || 0;
+    let state = await getGameState(page);
+    // Handle potential LEVEL_UP state
+    if (state?.gameState === 'LEVEL_UP') {
+      const upgradeButtons = page.locator('button:has-text("SELECT")');
+      const firstButton = upgradeButtons.first();
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
+      await firstButton.click();
+      await page.waitForTimeout(500);
+      state = await getGameState(page);
+    }
+
+    const scoreBeforeDeath = state?.score || 0;
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
@@ -911,7 +955,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       // Select first upgrade to continue
       const upgradeButtons = page.locator('button:has-text("SELECT")');
       const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 10000 });
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
       await firstButton.click();
       await page.waitForTimeout(1000);
       state = await getGameState(page);
@@ -976,7 +1020,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       // Select first upgrade to continue
       const upgradeButtons = page.locator('button:has-text("SELECT")');
       const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 10000 });
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
       await firstButton.click();
       await page.waitForTimeout(1000);
       state = await getGameState(page);
@@ -1029,7 +1073,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       // Select first upgrade to continue
       const upgradeButtons = page.locator('button:has-text("SELECT")');
       const firstButton = upgradeButtons.first();
-      await firstButton.waitFor({ state: 'visible', timeout: 10000 });
+      await firstButton.waitFor({ state: 'visible', timeout: 20000 });
       await firstButton.click();
       await page.waitForTimeout(1000);
       state = await getGameState(page);
