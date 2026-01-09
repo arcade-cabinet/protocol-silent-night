@@ -511,8 +511,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
       // Second kill after a minimal delay to ensure different timestamps
       // but well within the 2000ms streak timeout
-      // Using 10ms to minimize delay while ensuring Date.now() advances
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Using 50ms to ensure Date.now() reliably advances in CI environments
+      await new Promise(resolve => setTimeout(resolve, 50));
       const t2 = Date.now();
       state.addKill(10);
 
@@ -540,7 +540,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
       const state = store.getState();
 
       // Third kill after minimal delay
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 50));
       state.addKill(10);
 
       // Return state immediately
@@ -604,11 +604,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
       state.addKill(100);
 
       // Second kill - 25% bonus (streak of 2)
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 50));
       state.addKill(100);
 
       // Third kill - 50% bonus (streak of 3)
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 50));
       state.addKill(100);
 
       // Return state immediately to avoid game loop interference
