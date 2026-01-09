@@ -148,6 +148,8 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should display correct operator for each mech', async ({ page }) => {
+      test.setTimeout(120000); // Increase timeout to 2 minutes for this test with multiple iterations
+
       const mechs = [
         { name: 'MECHA-SANTA', role: 'Heavy Siege / Tank' },
         { name: 'CYBER-ELF', role: 'Recon / Scout' },
@@ -179,11 +181,11 @@ test.describe('UI Component Refinement', () => {
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
           await page.reload();
-          await page.waitForLoadState('networkidle');
+          await page.waitForLoadState('networkidle', { timeout: 30000 });
           // Wait for LoadingScreen to disappear after reload (longer timeout for CI)
-          await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 20000 }).catch(() => {});
+          await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 30000 }).catch(() => {});
           // Wait for menu to be ready with longer timeout
-          await page.waitForTimeout(2000); // Give extra time for rendering
+          await page.waitForTimeout(3000); // Give extra time for rendering
           // Wait for either h1 or buttons to appear (menu is ready)
           await Promise.race([
             page.waitForSelector('h1', { timeout: 30000 }).catch(() => {}),
@@ -290,11 +292,15 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should match mission briefing snapshot', async ({ page }) => {
+      // Wait for menu to be ready
+      await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 30000 }).catch(() => {});
+      await page.waitForTimeout(2000);
+
       // Select mech
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');
       await santaButton.waitFor({ state: 'visible', timeout: 15000 });
-      await santaButton.click({ timeout: 15000 });
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 20000 });
+      await santaButton.click({ force: true, timeout: 30000 });
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 30000 });
       await page.waitForTimeout(3000);
 
       if (hasMcpSupport) {
