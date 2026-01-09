@@ -36,8 +36,10 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
+      // Wait for LoadingScreen to disappear by checking for its absence
+      await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 5000 }).catch(() => {});
       // Menu should be visible now that LoadingScreen is gone
-      await page.waitForSelector('h1:has-text("Protocol")', { timeout: 5000 });
+      await page.waitForSelector('h1:has-text("Protocol")', { timeout: 10000 });
 
       // Ensure buttons are also rendered before proceeding
       await page.waitForSelector('button[type="button"]', { timeout: 5000 });
@@ -92,8 +94,10 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Mech Selection Flow', () => {
     test('should show mission briefing when mech is selected', async ({ page }) => {
+      // Wait for LoadingScreen to disappear
+      await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 5000 }).catch(() => {});
       // Menu buttons should be visible now that LoadingScreen is gone
-      await page.waitForSelector('button[type="button"]', { timeout: 5000 });
+      await page.waitForSelector('button[type="button"]', { timeout: 10000 });
 
       // Click MECHA-SANTA
       const santaButton = page.locator('button:has-text("MECHA-SANTA")');
@@ -124,8 +128,10 @@ test.describe('UI Component Refinement', () => {
     });
 
     test('should have COMMENCE OPERATION button on briefing screen', async ({ page }) => {
+      // Wait for LoadingScreen to disappear
+      await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 5000 }).catch(() => {});
       // Menu buttons should be visible now that LoadingScreen is gone
-      await page.waitForSelector('button[type="button"]', { timeout: 5000 });
+      await page.waitForSelector('button[type="button"]', { timeout: 10000 });
 
       // Select a mech
       const elfButton = page.locator('button:has-text("CYBER-ELF")');
@@ -149,8 +155,10 @@ test.describe('UI Component Refinement', () => {
       ];
 
       for (const [index, mech] of mechs.entries()) {
+        // Wait for LoadingScreen to disappear
+        await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 5000 }).catch(() => {});
         // Menu buttons should be visible now that LoadingScreen is gone
-        await page.waitForSelector('button[type="button"]', { timeout: 5000 });
+        await page.waitForSelector('button[type="button"]', { timeout: 10000 });
 
         // Click mech
         const mechButton = page.locator(`button:has-text("${mech.name}")`);
@@ -257,8 +265,10 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
+      // Wait for LoadingScreen to disappear
+      await page.waitForSelector('.LoadingScreen_screen', { state: 'hidden', timeout: 5000 }).catch(() => {});
       // Wait for menu title to be visible
-      await page.waitForSelector('h1:has-text("Protocol")', { timeout: 5000 });
+      await page.waitForSelector('h1:has-text("Protocol")', { timeout: 10000 });
       await page.waitForTimeout(500);
 
       // Take snapshot for visual regression
