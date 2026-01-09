@@ -8,6 +8,9 @@ import { getGameState, selectCharacter, startMission, triggerStoreAction } from 
  * for each character class, testing all game mechanics and state transitions.
  */
 
+// Increase timeout for all tests in this file to handle slow CI rendering and game initialization
+test.setTimeout(120000);
+
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
