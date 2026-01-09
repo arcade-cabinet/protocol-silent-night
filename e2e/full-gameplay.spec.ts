@@ -9,25 +9,30 @@ import { test, expect, Page } from '@playwright/test';
 
 // Helper to get game state from the store
 async function getGameState(page: Page) {
-  return page.evaluate(() => {
-    const store = (window as any).useGameStore;
-    if (!store) return null;
-    const state = store.getState();
-    return {
-      gameState: state.state,
-      playerHp: state.playerHp,
-      playerMaxHp: state.playerMaxHp,
-      score: state.stats.score,
-      kills: state.stats.kills,
-      bossDefeated: state.stats.bossDefeated,
-      bossActive: state.bossActive,
-      bossHp: state.bossHp,
-      killStreak: state.killStreak,
-      lastKillTime: state.lastKillTime,
-      enemyCount: state.enemies.length,
-      bulletCount: state.bullets.length,
-    };
-  });
+  try {
+    return await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return null;
+      const state = store.getState();
+      return {
+        gameState: state.state,
+        playerHp: state.playerHp,
+        playerMaxHp: state.playerMaxHp,
+        score: state.stats.score,
+        kills: state.stats.kills,
+        bossDefeated: state.stats.bossDefeated,
+        bossActive: state.bossActive,
+        bossHp: state.bossHp,
+        killStreak: state.killStreak,
+        lastKillTime: state.lastKillTime,
+        enemyCount: state.enemies.length,
+        bulletCount: state.bullets.length,
+      };
+    });
+  } catch (e) {
+    console.error('getGameState error:', e);
+    return null;
+  }
 }
 
 // Helper to trigger game actions via store
@@ -74,25 +79,30 @@ async function handlePotentialLevelUp(page: Page, maxWaitMs = 5000): Promise<voi
     } catch (e) {
       // If SELECT button doesn't appear, force exit LEVEL_UP by setting state
       console.log('SELECT button not visible within ' + maxWaitMs + 'ms, forcing continue');
-      await page.evaluate(() => {
-        const store = (window as any).useGameStore;
-        if (store && store.getState().state === 'LEVEL_UP') {
-          // Force back to PHASE_1 or PHASE_BOSS depending on kill count
-          const state = store.getState();
-          const currentKills = state.stats.kills;
-          const currentWave = state.runProgress.wave;
-          const killsRequired = 10 * currentWave; // WAVE_REQ is 10
+      try {
+        await page.evaluate(() => {
+          const store = (window as any).useGameStore;
+          if (store && store.getState().state === 'LEVEL_UP') {
+            // Force back to PHASE_1 or PHASE_BOSS depending on kill count
+            const state = store.getState();
+            const currentKills = state.stats.kills;
+            const currentWave = state.runProgress.wave;
+            const killsRequired = 10 * currentWave; // WAVE_REQ is 10
 
-          // If we have enough kills for boss, check if boss should spawn
-          if (currentKills >= killsRequired) {
-            const hasBoss = state.bossActive || state.enemies.some((e: any) => e.type === 'boss');
-            store.setState({ state: hasBoss || state.previousState === 'PHASE_BOSS' ? 'PHASE_BOSS' : 'PHASE_1' });
-          } else {
-            store.setState({ state: 'PHASE_1' });
+            // If we have enough kills for boss, check if boss should spawn
+            if (currentKills >= killsRequired) {
+              const hasBoss = state.bossActive || state.enemies.some((e: any) => e.type === 'boss');
+              store.setState({ state: hasBoss || state.previousState === 'PHASE_BOSS' ? 'PHASE_BOSS' : 'PHASE_1' });
+            } else {
+              store.setState({ state: 'PHASE_1' });
+            }
           }
-        }
-      });
-      await page.waitForTimeout(500);
+        });
+        await page.waitForTimeout(500);
+      } catch (evalError) {
+        console.error('Error forcing LEVEL_UP exit:', evalError);
+        // Continue anyway - page might be closed
+      }
     }
   } else {
     // If not in LEVEL_UP state, just wait a bit for any animations
@@ -622,7 +632,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /PLAY AGAIN/ })).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -701,8 +711,10 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Test kill streaks by calling both addKill calls atomically in one evaluate
-    // This prevents game loop interference between calls
+    // Test kill streaks by calling addKill calls atomically and waiting for notifications
+    // The kill streak notifications show for 1500ms each
+
+    // First, do a double kill and check for DOUBLE KILL notification
     await page.evaluate(() => {
       const store = (window as any).useGameStore;
       if (!store) return;
@@ -715,20 +727,33 @@ test.describe('Full Gameplay - Kill Streaks', () => {
         killStreak: 0
       });
 
-      // Call all three kills synchronously to ensure streak timing works
+      // Call two kills synchronously to ensure streak timing works
       const state = store.getState();
       state.addKill(10); // First kill - should set streak to 1
       state.addKill(10); // Second kill - should increment streak to 2
+    });
+
+    // Wait a bit for notification to appear, then check
+    await page.waitForTimeout(100);
+
+    // Should show DOUBLE KILL notification
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 500 });
+
+    // Now add third kill while DOUBLE KILL is still visible
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return;
+      const state = store.getState();
       state.addKill(10); // Third kill - should increment streak to 3
     });
+
     await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
-    // Should show kill streak notifications
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show TRIPLE KILL notification
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 500 });
 
     // Handle potential LEVEL_UP state after all checks
     await handlePotentialLevelUp(page);
@@ -999,9 +1024,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart
-    const redeployButton = page.getByRole('button', { name: /RE-DEPLOY/ });
-    await redeployButton.waitFor({ state: 'visible', timeout: 10000 });
-    await redeployButton.click();
+    const playAgainButton = page.getByRole('button', { name: /PLAY AGAIN/ });
+    await playAgainButton.waitFor({ state: 'visible', timeout: 10000 });
+    await playAgainButton.click();
     await page.waitForTimeout(2000);
 
     state = await getGameState(page);
