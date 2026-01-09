@@ -505,33 +505,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak - must execute quickly to stay within 2000ms window
-    // Call addKill twice rapidly without intermediate checks
+    // Rapid kills to build streak - must execute ALL kills quickly to stay within 2000ms window
+    // Call addKill three times rapidly without ANY intermediate checks
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     expect(success1).toBe(true);
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     expect(success2).toBe(true);
-
-    // Now wait for both kills and streak to register
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return false;
-      const state = store.getState();
-      return state.killStreak >= 2 && state.stats.kills >= 2;
-    }, { timeout: 30000, polling: 50 });
-
-    let state = await getGameState(page);
-    expect(state?.killStreak).toBeGreaterThanOrEqual(2);
-    expect(state?.kills).toBeGreaterThanOrEqual(2);
-
-    // Note: DOUBLE KILL notification may have already faded by the time we check
-    // The important part is that the streak counter is correct
-
-    // Continue streak - must be within 2000ms of last kill
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     expect(success3).toBe(true);
 
-    // Wait for streak to update
+    // Now wait for all kills and streak to register
     await page.waitForFunction(() => {
       const store = (window as any).useGameStore;
       if (!store) return false;
@@ -539,11 +522,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
       return state.killStreak >= 3 && state.stats.kills >= 3;
     }, { timeout: 30000, polling: 50 });
 
-    state = await getGameState(page);
+    // Verify final state
+    let state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
     expect(state?.kills).toBe(3);
 
-    // Note: TRIPLE KILL notification may have already faded by the time we check
+    // Note: DOUBLE/TRIPLE KILL notifications may have already faded by the time we check
     // The important part is that the streak counter is correct
   });
 
