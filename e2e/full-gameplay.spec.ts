@@ -448,7 +448,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 20000 });
     await commenceButton.click({ force: true, timeout: 30000 });
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);

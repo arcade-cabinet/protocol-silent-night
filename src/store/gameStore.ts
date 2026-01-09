@@ -387,13 +387,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
+    let newStreak = 1;
+    let newKills = 0;
+
     set((state) => {
       const now = Date.now();
-      const newKills = state.stats.kills + 1;
+      newKills = state.stats.kills + 1;
 
       const streakTimeout = 2000;
       const timeSinceLastKill = now - state.lastKillTime;
-      const newStreak = timeSinceLastKill < streakTimeout ? state.killStreak + 1 : 1;
+      newStreak = timeSinceLastKill < streakTimeout ? state.killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = state.stats.score + points + streakBonus;
@@ -409,9 +412,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    // Get updated state after the set operation
-    const { killStreak: newStreak, state: gameState } = get();
-
+    // Use captured values from the state update closure
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
@@ -433,7 +434,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Scale requirement by wave
     const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
-    const newKills = get().stats.kills;
+    const gameState = get().state;
 
     if (newKills >= waveReq && (gameState === 'PHASE_1' || gameState === 'LEVEL_UP')) {
       const hasBoss = get().enemies.some((e) => e.type === 'boss');
