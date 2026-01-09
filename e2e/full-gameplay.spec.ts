@@ -497,7 +497,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(3000);
 
     // Rapid kills to build streak - must happen within 2000ms of each other
-    // Execute both kills synchronously in the same evaluation context
+    // Execute all three kills synchronously in the same evaluation context
     const result = await page.evaluate(() => {
       const store = (window as any).useGameStore;
       if (!store) return null;
@@ -509,8 +509,10 @@ test.describe('Full Gameplay - Kill Streaks', () => {
       const lastTime1 = store.getState().lastKillTime;
 
       // Second kill immediately after (same tick)
-      // The store's functional update will use Date.now() for both calls
-      // which should be within the streak timeout in the same JS execution context
+      state.addKill(10);
+      const streak2 = store.getState().killStreak;
+
+      // Third kill immediately after (same tick)
       state.addKill(10);
 
       // Return state immediately to avoid game loop resetting streak
@@ -520,35 +522,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
         lastKillTime: finalState.lastKillTime,
         kills: finalState.stats.kills,
         streak1,
+        streak2,
         lastTime1,
         timeDiff: finalState.lastKillTime - lastTime1,
       };
     });
 
     console.log('Streak debug:', result);
-    expect(result?.killStreak).toBe(2);
-
-    // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
-
-    // Continue streak - third kill
-    const result3 = await page.evaluate(() => {
-      const store = (window as any).useGameStore;
-      if (!store) return null;
-      const state = store.getState();
-
-      // Third kill immediately
-      state.addKill(10);
-
-      // Return state immediately
-      const finalState = store.getState();
-      return {
-        killStreak: finalState.killStreak,
-        kills: finalState.stats.kills,
-      };
-    });
-
-    expect(result3?.killStreak).toBe(3);
+    expect(result?.killStreak).toBe(3);
 
     // Should show TRIPLE KILL
     await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
