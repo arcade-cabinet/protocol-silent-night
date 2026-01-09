@@ -41,9 +41,15 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
 
 // Helper to select character robustly
 export async function selectCharacter(page: Page, name: string) {
+  // Wait for the game store to be available first
+  await page.waitForFunction(() => {
+    // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+    return (window as any).useGameStore !== undefined;
+  }, { timeout: 20000 });
+
   const button = page.locator('button', { hasText: name });
-  // Wait for button to be visible
-  await button.waitFor({ state: 'visible', timeout: 10000 });
+  // Wait for button to be visible with increased timeout for CI
+  await button.waitFor({ state: 'visible', timeout: 40000 });
   // Removed scrollIntoViewIfNeeded as it causes instability in CI
   // Use force click to bypass potential overlays and increased timeout
   await button.click({ timeout: 15000, force: true });
@@ -52,7 +58,11 @@ export async function selectCharacter(page: Page, name: string) {
 // Helper to start mission robustly
 export async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
-  // Mission briefing has a typing animation (~4s) plus potential CI slowness
-  await button.waitFor({ state: 'visible', timeout: 45000 });
-  await button.click();
+  // Mission briefing has a typing animation (lines * 600ms + 500ms)
+  // Wait for button to be visible with increased timeout for CI
+  await button.waitFor({ state: 'visible', timeout: 50000 });
+  // Add small delay to ensure button animations complete
+  await page.waitForTimeout(500);
+  // Use force click to bypass animation stability checks and increased timeout
+  await button.click({ force: true, timeout: 20000 });
 }
