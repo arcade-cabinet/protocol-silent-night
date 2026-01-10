@@ -14,10 +14,10 @@ describe('MessageOverlay', () => {
   });
 
   it('renders boss warning when boss is active', () => {
-    (useGameStore as any).mockReturnValue({
+    vi.mocked(useGameStore).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+    } as ReturnType<typeof useGameStore>);
 
     render(<MessageOverlay />);
 
@@ -25,10 +25,10 @@ describe('MessageOverlay', () => {
   });
 
   it('renders mission complete when state is WIN', () => {
-    (useGameStore as any).mockReturnValue({
+    vi.mocked(useGameStore).mockReturnValue({
       state: 'WIN',
       bossActive: false,
-    });
+    } as ReturnType<typeof useGameStore>);
 
     render(<MessageOverlay />);
 
@@ -36,10 +36,10 @@ describe('MessageOverlay', () => {
   });
 
   it('renders operator down when state is GAME_OVER', () => {
-    (useGameStore as any).mockReturnValue({
+    vi.mocked(useGameStore).mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
-    });
+    } as ReturnType<typeof useGameStore>);
 
     render(<MessageOverlay />);
 
@@ -47,10 +47,10 @@ describe('MessageOverlay', () => {
   });
 
   it('is accessible with role="alert"', () => {
-    (useGameStore as any).mockReturnValue({
+    vi.mocked(useGameStore).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+    } as ReturnType<typeof useGameStore>);
 
     render(<MessageOverlay />);
 

@@ -68,8 +68,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-    // biome-ignore lint/correctness/useExhaustiveDependencies: Only run animation when state changes to BRIEFING, not when lines update
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   // Reset state when briefing starts
   useEffect(() => {
