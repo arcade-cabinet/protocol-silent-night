@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 
 // Helper to get game state from the store
 export async function getGameState(page: Page) {
@@ -23,6 +23,19 @@ export async function getGameState(page: Page) {
   });
 }
 
+// Helper to wait for specific game state
+export async function waitForGameState(page: Page, targetState: string, timeout = 10000) {
+  await page.waitForFunction(
+    (state) => {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
+      const store = (window as any).useGameStore;
+      return store?.getState().state === state;
+    },
+    targetState,
+    { timeout }
+  );
+}
+
 // Helper to trigger game actions via store
 // biome-ignore lint/suspicious/noExplicitAny: Generic args for store actions
 export async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
@@ -39,25 +52,46 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
   }, { action, args });
 }
 
-// Helper to wait for loading screen to disappear
-export async function waitForLoadingScreen(page: Page) {
-  // Wait for loading screen to disappear - critical for slow CI environments
-  // Using a very long timeout as SwiftShader compilation can be slow
-  const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-  try {
-    if (await loadingScreen.isVisible()) {
-      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+// Helper to simulate combat and verify kills
+export async function simulateCombatUntilKills(page: Page, targetKills: number) {
+  // Use evaluate to directly manipulate game state for stability
+  // instead of trying to aim and shoot in WebGL via playwright actions
+  await page.evaluate(async (target) => {
+    // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
+    const store = (window as any).useGameStore;
+    if (!store) return;
+
+    // Reset stats first
+    store.getState().resetStats();
+
+    // Add kills directly
+    for (let i = 0; i < target; i++) {
+      store.getState().addKill(100); // 100 points per kill
+      // Small delay to allow store updates to propagate if needed
+      await new Promise(resolve => setTimeout(resolve, 10));
     }
-  } catch {
-    // Loading screen might already be gone
+  }, targetKills);
+
+  // Verify the state updated
+  await expect.poll(async () => {
+    const state = await getGameState(page);
+    return state?.kills;
+  }, { timeout: 5000 }).toBeGreaterThanOrEqual(targetKills);
+}
+
+// Helper to wait for loading screen to complete
+export async function waitForLoadingScreen(page: Page) {
+  const loadingScreen = page.locator('[data-testid="loading-screen"]');
+  // Initial check if loading screen is present
+  if (await loadingScreen.isVisible()) {
+    // Wait for it to disappear with generous timeout for CI
+    await loadingScreen.waitFor({ state: 'detached', timeout: 45000 });
   }
-  // Additional wait for transition animation
-  await page.waitForTimeout(1000);
 }
 
 // Helper to select character robustly
 export async function selectCharacter(page: Page, name: string) {
-  // First ensure loading screen is gone
+  // Ensure loading is complete before attempting interaction
   await waitForLoadingScreen(page);
 
   const button = page.locator('button', { hasText: name });

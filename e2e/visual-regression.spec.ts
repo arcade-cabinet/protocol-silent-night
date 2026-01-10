@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { waitForLoadingScreen } from './utils';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -59,9 +58,14 @@ test.beforeEach(async ({ page }) => {
 test.describe('Visual Regression - Character Selection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
+    // Wait for loading screen to disappear - critical for slow CI environments
+    // Using a very long timeout as SwiftShader compilation can be slow
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
     // Additional wait for transition animation
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
   });
 
   test('should match character selection screen', async ({ page }) => {
@@ -69,12 +73,11 @@ test.describe('Visual Regression - Character Selection', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForFunction(() => document.fonts.ready);
 
-    // Take snapshot of character selection with increased timeout for CI
+    // Take snapshot of character selection
     await expect(page).toHaveScreenshot('character-selection.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 200000,
       animations: 'disabled',
-      timeout: 30000, // Increased timeout for CI environment
     });
   });
 
