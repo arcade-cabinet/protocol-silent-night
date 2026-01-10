@@ -384,13 +384,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const now = Date.now();
     const streakTimeout = 2000;
 
     // Use functional update to ensure we always work with the latest state
     // This prevents race conditions when multiple kills happen in rapid succession
     set((currentState) => {
       const { stats, lastKillTime, killStreak, metaProgress } = currentState;
+      const now = Date.now(); // Capture timestamp inside functional update to avoid race conditions
       const newKills = stats.kills + 1;
 
       const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
