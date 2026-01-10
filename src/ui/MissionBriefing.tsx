@@ -91,6 +91,7 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      animationStartedRef.current = false;
     };
   }, [state]);
 
