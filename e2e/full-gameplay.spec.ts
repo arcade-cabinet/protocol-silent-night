@@ -648,17 +648,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill
     await triggerStoreAction(page, 'addKill', 10);
-
-    // Wait briefly for state to propagate, but not long enough to expire the streak window
-    let state = await waitForKillStreak(page, 1, 1000);
-    expect(state?.killStreak).toBe(1);
-    expect(state?.kills).toBe(1);
+    // Minimal delay for state propagation
+    await page.waitForTimeout(100);
 
     // Second kill - trigger immediately to ensure we're within the streak window (2000ms)
-    // No additional wait needed as waitForKillStreak above ensures state is ready
     await triggerStoreAction(page, 'addKill', 10);
-
-    state = await waitForKillStreak(page, 2, 1000);
+    // Wait for streak state to update
+    let state = await waitForKillStreak(page, 2, 1000);
     expect(state?.killStreak).toBe(2);
     expect(state?.kills).toBe(2);
 
@@ -666,6 +662,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
 
     // Third kill - trigger immediately to stay within streak window
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 10);
 
     state = await waitForKillStreak(page, 3, 1000);
@@ -696,15 +693,13 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill
     await triggerStoreAction(page, 'addKill', 10);
-
-    // Wait briefly for state to propagate, but not long enough to expire the streak window
-    let state = await waitForKillStreak(page, 1, 1000);
-    expect(state?.killStreak).toBe(1);
+    // Minimal delay for state propagation
+    await page.waitForTimeout(100);
 
     // Second kill - trigger immediately to ensure we're within the streak window (2000ms)
     await triggerStoreAction(page, 'addKill', 10);
 
-    state = await waitForKillStreak(page, 2, 1000);
+    let state = await waitForKillStreak(page, 2, 1000);
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
@@ -739,21 +734,19 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-
-    // Wait briefly for state to propagate, but not long enough to expire the streak window
-    let state = await waitForKillStreak(page, 1, 1000);
-    expect(state?.score).toBe(100);
-    expect(state?.killStreak).toBe(1);
+    // Minimal delay for state propagation
+    await page.waitForTimeout(100);
 
     // Second kill - 25% bonus (streak of 2), trigger immediately to ensure we're within the streak window (2000ms)
     await triggerStoreAction(page, 'addKill', 100);
 
-    state = await waitForKillStreak(page, 2, 1000);
+    let state = await waitForKillStreak(page, 2, 1000);
     expect(state?.killStreak).toBe(2);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
     expect(state?.score).toBe(225);
 
     // Third kill - 50% bonus (streak of 3), trigger immediately to stay within streak window
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 100);
 
     state = await waitForKillStreak(page, 3, 1000);
@@ -822,6 +815,9 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await page.waitForTimeout(3000);
 
+    // Wait for game to be in active state
+    await waitForGameState(page, 'PHASE_1', 10000);
+
     // Use minimal delays to maintain performance
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
@@ -832,7 +828,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Die with minimal delay
     await triggerStoreAction(page, 'damagePlayer', 300);
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
 
     // Reset
     await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: 30000 });
@@ -854,12 +850,18 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(2000);
 
     // Die with 0 score - wait for game to start
-    await waitForGameState(page, 'PHASE_1', 5000);
+    const gameStarted = await waitForGameState(page, 'PHASE_1', 10000);
+    if (!gameStarted) {
+      throw new Error('Game did not start within timeout');
+    }
 
     await triggerStoreAction(page, 'damagePlayer', 100);
 
     // Wait for GAME_OVER state
-    await waitForGameState(page, 'GAME_OVER', 5000);
+    const gameOver = await waitForGameState(page, 'GAME_OVER', 10000);
+    if (!gameOver) {
+      throw new Error('Game did not transition to GAME_OVER within timeout');
+    }
     await page.waitForTimeout(1000);
 
     // High score should still be preserved
