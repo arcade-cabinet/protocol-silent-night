@@ -20,6 +20,7 @@ export function MissionBriefing() {
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
   const animationStartedRef = useRef(false);
+  const previousStateRef = useRef<string | null>(null);
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -47,11 +48,15 @@ export function MissionBriefing() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length must be excluded to prevent infinite animation loops
   useEffect(() => {
+    // Detect state transition INTO BRIEFING
+    const isEnteringBriefing = state === 'BRIEFING' && previousStateRef.current !== 'BRIEFING';
+    previousStateRef.current = state;
+
     if (state !== 'BRIEFING') {
-      animationStartedRef.current = false;
       // Reset state when leaving briefing to ensure fresh start on next entry
       setCurrentLine(0);
       setShowButton(false);
+      animationStartedRef.current = false;
       return;
     }
 
@@ -59,11 +64,13 @@ export function MissionBriefing() {
     const totalLines = briefingLines.length;
 
     if (totalLines === 0) {
-      animationStartedRef.current = false;
       return;
     }
 
-    if (animationStartedRef.current) return;
+    // Only start animation if we just entered BRIEFING state OR if animation never started
+    if (!isEnteringBriefing && animationStartedRef.current) {
+      return;
+    }
 
     animationStartedRef.current = true;
 
