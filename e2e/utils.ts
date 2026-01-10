@@ -81,7 +81,8 @@ export async function simulateCombatUntilKills(page: Page, targetKills: number) 
 
 // Helper to wait for loading screen to complete
 export async function waitForLoadingScreen(page: Page) {
-  const loadingScreen = page.locator('[data-testid="loading-screen"]');
+  // Use text-based detection to match the actual LoadingScreen component
+  const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
   // Initial check if loading screen is present
   if (await loadingScreen.isVisible()) {
     // Wait for it to disappear with generous timeout for CI
