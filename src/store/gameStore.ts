@@ -386,8 +386,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
   addKill: (points) => {
     const streakTimeout = 2000;
 
-    let newStreak = 1;
-
     // Use functional update to ensure we always work with the latest state
     // This prevents race conditions when multiple kills happen in rapid succession
     set((currentState) => {
@@ -400,7 +398,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // This correctly sets streak to 1 for the first kill
       const timeSinceLastKill = now - lastKillTime;
       const isWithinStreakWindow = lastKillTime > 0 && timeSinceLastKill < streakTimeout;
-      newStreak = isWithinStreakWindow ? killStreak + 1 : 1;
+      const newStreak = isWithinStreakWindow ? killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = stats.score + points + streakBonus;
@@ -416,17 +414,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    // Use the streak value calculated in the set callback for side effects
-    const { stats, state } = get();
+    // Get the actual current state after the update for side effects
+    const { stats, state, killStreak: currentStreak } = get();
 
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+    const xpGain = 10 + (currentStreak > 1 ? (currentStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
     let npStreakBonus = 0;
-    if (newStreak === 2) npStreakBonus = 5;
-    else if (newStreak === 3) npStreakBonus = 10;
-    else if (newStreak === 4) npStreakBonus = 25;
-    else if (newStreak >= 5) npStreakBonus = 50;
+    if (currentStreak === 2) npStreakBonus = 5;
+    else if (currentStreak === 3) npStreakBonus = 10;
+    else if (currentStreak === 4) npStreakBonus = 25;
+    else if (currentStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
@@ -434,7 +432,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
-    if (newStreak > 1 && newStreak % 3 === 0) {
+    if (currentStreak > 1 && currentStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
     }
 
