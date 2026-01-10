@@ -47,7 +47,7 @@ describe('Security Utils', () => {
     });
 
     it('should return null for data missing security fields', () => {
-      const result = unwrapWithChecksum({ data: testData } as { data: unknown });
+      const result = unwrapWithChecksum({ data: testData } as { data: unknown; checksum: string });
       expect(result).toBeNull();
     });
   });
