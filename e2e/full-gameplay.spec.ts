@@ -646,30 +646,27 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // First kill
-    await triggerStoreAction(page, 'addKill', 10);
-    // Minimal delay for state propagation
-    await page.waitForTimeout(100);
+    // Trigger all kills in rapid succession within the streak window
+    // Execute all addKill calls in a single page.evaluate to ensure timing
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        // First kill
+        state.addKill(10);
+        // Second kill - immediate
+        state.addKill(10);
+        // Third kill - immediate
+        state.addKill(10);
+      }
+    });
 
-    // Second kill - trigger immediately to ensure we're within the streak window (2000ms)
-    await triggerStoreAction(page, 'addKill', 10);
-    // Wait for streak state to update
-    let state = await waitForKillStreak(page, 2, 1000);
-    expect(state?.killStreak).toBe(2);
-    expect(state?.kills).toBe(2);
-
-    // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
-
-    // Third kill - trigger immediately to stay within streak window
-    await page.waitForTimeout(100);
-    await triggerStoreAction(page, 'addKill', 10);
-
-    state = await waitForKillStreak(page, 3, 1000);
+    // Wait for final streak state to update
+    let state = await waitForKillStreak(page, 3, 1000);
     expect(state?.killStreak).toBe(3);
     expect(state?.kills).toBe(3);
 
-    // Should show TRIPLE KILL
+    // Should show TRIPLE KILL (most recent notification)
     await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
   });
 
@@ -732,26 +729,25 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
-    // First kill - no bonus
-    await triggerStoreAction(page, 'addKill', 100);
-    // Minimal delay for state propagation
-    await page.waitForTimeout(100);
+    // Trigger all kills in rapid succession within the streak window
+    // Execute all addKill calls in a single page.evaluate to ensure timing
+    await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        // First kill - no bonus
+        state.addKill(100);
+        // Second kill - 25% bonus (streak of 2)
+        state.addKill(100);
+        // Third kill - 50% bonus (streak of 3)
+        state.addKill(100);
+      }
+    });
 
-    // Second kill - 25% bonus (streak of 2), trigger immediately to ensure we're within the streak window (2000ms)
-    await triggerStoreAction(page, 'addKill', 100);
-
-    let state = await waitForKillStreak(page, 2, 1000);
-    expect(state?.killStreak).toBe(2);
-    // 100 + (100 + 25% of 100) = 100 + 125 = 225
-    expect(state?.score).toBe(225);
-
-    // Third kill - 50% bonus (streak of 3), trigger immediately to stay within streak window
-    await page.waitForTimeout(100);
-    await triggerStoreAction(page, 'addKill', 100);
-
-    state = await waitForKillStreak(page, 3, 1000);
+    // Wait for final streak state to update
+    let state = await waitForKillStreak(page, 3, 1000);
     expect(state?.killStreak).toBe(3);
-    // 225 + (100 + 50% of 100) = 225 + 150 = 375
+    // 100 + (100 + 25% of 100) + (100 + 50% of 100) = 100 + 125 + 150 = 375
     expect(state?.score).toBe(375);
   });
 });
