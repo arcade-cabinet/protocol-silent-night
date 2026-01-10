@@ -150,6 +150,9 @@ test.describe('UI Component Refinement', () => {
         await expect(mechButton).toBeVisible({ timeout: 15000 });
         await mechButton.click({ force: true, timeout: 20000 });
 
+        // Wait longer for briefing screen transition to complete
+        await page.waitForTimeout(2000);
+
         // Wait for briefing screen to appear
         await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
 
@@ -256,6 +259,8 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
+      // Wait for page load and animations to settle
+      await page.waitForTimeout(2000);
       await page.waitForSelector('h1', { state: 'visible', timeout: 15000 });
 
       // Take snapshot for visual regression
