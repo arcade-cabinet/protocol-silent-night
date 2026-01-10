@@ -92,6 +92,7 @@ async function getGameState(page: Page) {
         bossActive: state.bossActive,
         bossHp: state.bossHp,
         killStreak: state.killStreak,
+        lastKillTime: state.lastKillTime,
         enemyCount: state.enemies.length,
         bulletCount: state.bullets.length,
       };
@@ -103,6 +104,24 @@ async function getGameState(page: Page) {
     console.error('Failed to get game state:', error);
     return null;
   }
+}
+
+// Helper to wait for state condition with polling
+async function waitForStateCondition(
+  page: Page,
+  condition: (state: any) => boolean,
+  timeout = 2000
+): Promise<any> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    const state = await getGameState(page);
+    if (state && condition(state)) {
+      return state;
+    }
+    await page.waitForTimeout(50);
+  }
+  const finalState = await getGameState(page);
+  throw new Error(`Timeout waiting for state condition. Final state: ${JSON.stringify(finalState)}`);
 }
 
 // Helper to start a game properly with proper loading screen wait
@@ -331,21 +350,24 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Simulate kills
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(50);
 
-    let state = await getGameState(page);
+    // Wait for first kill to register
+    let state = await waitForStateCondition(page, s => s.kills === 1 && s.score === 10);
     expect(state?.kills).toBe(1);
     expect(state?.score).toBe(10);
 
     // Add more kills
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(25);
+
+    // Wait for second kill to register
+    await waitForStateCondition(page, s => s.kills === 2);
+
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
-    await page.waitForTimeout(50);
 
-    state = await getGameState(page);
+    // Wait for third kill to register with streak bonuses
+    state = await waitForStateCondition(page, s => s.kills === 3 && s.score > 30);
     expect(state?.kills).toBe(3);
     expect(state?.score).toBeGreaterThan(30); // Should have streak bonus
   });
@@ -555,18 +577,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Rapid kills to build streak
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(50);
 
-    // Verify first kill registered with streak = 1
-    let state = await getGameState(page);
+    // Wait for first kill to register
+    let state = await waitForStateCondition(page, s => s.killStreak === 1 && s.kills === 1);
     expect(state?.killStreak).toBe(1);
     expect(state?.kills).toBe(1);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(50);
 
-    state = await getGameState(page);
+    // Wait for second kill to register with streak = 2
+    state = await waitForStateCondition(page, s => s.killStreak === 2 && s.kills === 2);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -575,9 +596,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Continue streak
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
-    await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    // Wait for third kill to register with streak = 3
+    state = await waitForStateCondition(page, s => s.killStreak === 3 && s.kills === 3);
     expect(state?.killStreak).toBe(3);
 
     // Should show TRIPLE KILL
@@ -590,16 +611,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Build a streak
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(50);
 
-    let state = await getGameState(page);
+    // Wait for first kill to register
+    let state = await waitForStateCondition(page, s => s.killStreak === 1 && s.kills === 1);
     expect(state?.killStreak).toBe(1);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(50);
 
-    state = await getGameState(page);
+    // Wait for second kill to register with streak = 2
+    state = await waitForStateCondition(page, s => s.killStreak === 2 && s.kills === 2);
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
@@ -620,29 +641,29 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // First kill - no bonus
     const success1 = await triggerStoreAction(page, 'addKill', 100);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(50);
 
-    let state = await getGameState(page);
+    // Wait for first kill to register
+    let state = await waitForStateCondition(page, s => s.killStreak === 1 && s.kills === 1 && s.score === 100);
     expect(state?.score).toBe(100);
     expect(state?.killStreak).toBe(1);
 
     // Second kill - 25% bonus (streak of 2)
     const success2 = await triggerStoreAction(page, 'addKill', 100);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(50);
 
-    state = await getGameState(page);
-    expect(state?.killStreak).toBe(2);
+    // Wait for second kill to register with streak = 2 and correct score
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
+    state = await waitForStateCondition(page, s => s.killStreak === 2 && s.kills === 2 && s.score === 225);
+    expect(state?.killStreak).toBe(2);
     expect(state?.score).toBe(225);
 
     // Third kill - 50% bonus (streak of 3)
     const success3 = await triggerStoreAction(page, 'addKill', 100);
     if (!success3) throw new Error('Failed to add third kill');
-    await page.waitForTimeout(50);
 
-    state = await getGameState(page);
+    // Wait for third kill to register with streak = 3 and correct score
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
+    state = await waitForStateCondition(page, s => s.killStreak === 3 && s.kills === 3 && s.score === 375);
     expect(state?.score).toBe(375);
   });
 });
