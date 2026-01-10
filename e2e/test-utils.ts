@@ -90,7 +90,8 @@ export async function commenceOperation(page: Page): Promise<void> {
   await button.waitFor({ state: 'visible', timeout: 45000 });
 
   // Wait for button to be fully attached and interactive
-  await button.waitFor({ state: 'attached', timeout: 5000 });
+  // Increase timeout to match visibility timeout for consistency in CI
+  await button.waitFor({ state: 'attached', timeout: 45000 });
 
   // Click with retries
   let clicked = false;

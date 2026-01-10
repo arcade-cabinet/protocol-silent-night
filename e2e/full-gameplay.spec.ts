@@ -165,7 +165,13 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
         const state = store.getState();
         if (typeof state[action] === 'function') {
           state[action](...args);
-          return true;
+          // Force a microtask to ensure Zustand's state update completes
+          // before we return control to Playwright
+          return new Promise((resolve) => {
+            // Use setTimeout(0) to ensure we're in the next event loop tick
+            // after Zustand's set() has completed
+            setTimeout(() => resolve(true), 0);
+          });
         }
         return false;
       }, { action, args });
