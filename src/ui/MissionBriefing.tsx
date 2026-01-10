@@ -19,7 +19,7 @@ export function MissionBriefing() {
   const { state, setState, playerClass, missionBriefing } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
-  const lastStateRef = useRef<string | null>(null);
+  const animationStartedRef = useRef(false);
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -45,30 +45,27 @@ export function MissionBriefing() {
     return lines;
   }, [playerClass, missionBriefing]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length captured in closure to prevent infinite animation loops
+  // biome-ignore lint/correctness/useExhaustiveDependencies: briefingLines.length must be excluded to prevent infinite animation loops
   useEffect(() => {
     if (state !== 'BRIEFING') {
+      animationStartedRef.current = false;
       // Reset state when leaving briefing to ensure fresh start on next entry
-      lastStateRef.current = state;
       setCurrentLine(0);
       setShowButton(false);
       return;
     }
 
-    // Only run animation if this is a NEW transition to BRIEFING
-    // This handles React StrictMode double-mounting and component remounts
-    if (lastStateRef.current === 'BRIEFING') {
-      return;
-    }
-
-    lastStateRef.current = 'BRIEFING';
-
     // Capture total lines to avoid dependency on the array reference
     const totalLines = briefingLines.length;
 
     if (totalLines === 0) {
+      animationStartedRef.current = false;
       return;
     }
+
+    if (animationStartedRef.current) return;
+
+    animationStartedRef.current = true;
 
     // Reset state when briefing starts
     setCurrentLine(0);
