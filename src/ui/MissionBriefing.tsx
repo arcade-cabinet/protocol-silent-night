@@ -68,9 +68,7 @@ export function MissionBriefing() {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // Only run when entering BRIEFING state, not when briefingLines changes
-  }, [state, briefingLines.length]);
+  }, [state, briefingLines]);
 
   // Reset state when briefing starts
   useEffect(() => {

@@ -104,8 +104,7 @@ export async function selectCharacter(page: Page, name: string) {
 
 // Helper to start mission robustly
 export async function startMission(page: Page) {
-  // Use getByRole for better accessibility and reliability
-  const button = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+  const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
   await button.click();
