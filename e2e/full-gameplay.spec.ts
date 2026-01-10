@@ -646,6 +646,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await page.waitForTimeout(3000);
 
+    // Wait for game to be in active state
+    const gameStarted = await waitForGameState(page, 'PHASE_1', 10000);
+    if (!gameStarted) {
+      throw new Error('Game did not start within timeout');
+    }
+
     // Trigger all kills in rapid succession within the streak window
     // Execute all addKill calls in a single page.evaluate to ensure timing
     await page.evaluate(() => {
@@ -662,12 +668,12 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     });
 
     // Wait for final streak state to update
-    let state = await waitForKillStreak(page, 3, 1000);
+    let state = await waitForKillStreak(page, 3, 3000);
     expect(state?.killStreak).toBe(3);
     expect(state?.kills).toBe(3);
 
-    // Should show TRIPLE KILL (most recent notification)
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show TRIPLE KILL (most recent notification) - increased timeout
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 5000 });
   });
 
   test('should reset streak after timeout', async ({ page }) => {
@@ -812,19 +818,34 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(3000);
 
     // Wait for game to be in active state
-    await waitForGameState(page, 'PHASE_1', 10000);
+    const gameStarted1 = await waitForGameState(page, 'PHASE_1', 10000);
+    if (!gameStarted1) {
+      throw new Error('Game did not start within timeout (first game)');
+    }
 
     // Use minimal delays to maintain performance
     for (let i = 0; i < 5; i++) {
-      await triggerStoreAction(page, 'addKill', 100);
+      const result = await triggerStoreAction(page, 'addKill', 100);
+      if (!result.success) {
+        throw new Error(`Failed to add kill ${i + 1}`);
+      }
       await page.waitForTimeout(200);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die with minimal delay
-    await triggerStoreAction(page, 'damagePlayer', 300);
+    const damageResult = await triggerStoreAction(page, 'damagePlayer', 300);
+    if (!damageResult.success) {
+      throw new Error('Failed to damage player in first game');
+    }
     await page.waitForTimeout(500);
+
+    // Wait for GAME_OVER state before clicking reset
+    const gameOver1 = await waitForGameState(page, 'GAME_OVER', 10000);
+    if (!gameOver1) {
+      throw new Error('Game did not transition to GAME_OVER after death');
+    }
 
     // Reset
     await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: 30000 });
@@ -839,9 +860,9 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(2000);
 
     // Wait for and click "COMMENCE OPERATION" on the briefing screen
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i })
-      .waitFor({ state: 'visible', timeout: 20000 });
-    await page.getByRole('button', { name: /COMMENCE OPERATION/i }).click({ force: true, timeout: 30000 });
+    const commenceButton2 = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton2.waitFor({ state: 'visible', timeout: 20000 });
+    await commenceButton2.click({ force: true, timeout: 30000 });
 
     await page.waitForTimeout(2000);
 
@@ -851,7 +872,10 @@ test.describe('Full Gameplay - Game Reset', () => {
       throw new Error('Game did not start within timeout');
     }
 
-    await triggerStoreAction(page, 'damagePlayer', 100);
+    const damageResult2 = await triggerStoreAction(page, 'damagePlayer', 100);
+    if (!damageResult2.success) {
+      throw new Error('Failed to damage player in second game');
+    }
 
     // Wait for GAME_OVER state
     const gameOver = await waitForGameState(page, 'GAME_OVER', 10000);

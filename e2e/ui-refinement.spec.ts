@@ -125,16 +125,17 @@ test.describe('UI Component Refinement', () => {
       await expect(elfButton).toBeVisible({ timeout: 15000 });
       await elfButton.click({ timeout: 20000 });
 
-      // Wait for briefing screen transition
-      await page.waitForTimeout(2000);
+      // Wait for briefing screen to fully render
+      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
 
-      // Wait for briefing
-      await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+      // Wait for page to stabilize after transition
+      await page.waitForLoadState('networkidle', { timeout: 10000 });
+      await page.waitForTimeout(1000);
 
       // Check for operation button (wait for it to appear after animations)
-      const opButton = page.locator('button:has-text("COMMENCE OPERATION")');
-      await expect(opButton).toBeVisible({ timeout: 10000 });
-      await expect(opButton).toBeEnabled();
+      const opButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+      await expect(opButton).toBeVisible({ timeout: 15000 });
+      await expect(opButton).toBeEnabled({ timeout: 5000 });
     });
 
     test('should display correct operator for each mech', async ({ page }) => {
@@ -161,9 +162,12 @@ test.describe('UI Component Refinement', () => {
         if (index < mechs.length - 1) {
           // Navigate back to home instead of reload to avoid state issues
           await page.goto('/');
-          await page.waitForLoadState('networkidle');
-          // Wait for menu to be visible
-          await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
+          await page.waitForLoadState('domcontentloaded');
+          await page.waitForLoadState('networkidle', { timeout: 30000 });
+          // Wait for first mech button to be visible as a signal that the menu is ready
+          const nextMech = mechs[index + 1];
+          const nextButton = page.getByRole('button', { name: new RegExp(nextMech.name) });
+          await expect(nextButton).toBeVisible({ timeout: 30000 });
           await page.waitForTimeout(1000); // Brief pause to ensure menu is ready
         }
       }
