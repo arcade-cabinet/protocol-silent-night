@@ -150,11 +150,8 @@ test.describe('UI Component Refinement', () => {
         await expect(mechButton).toBeVisible({ timeout: 15000 });
         await mechButton.click({ force: true, timeout: 20000 });
 
-        // Wait longer for briefing screen transition to complete
-        await page.waitForTimeout(2000);
-
-        // Wait for briefing screen to appear
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
+        // Wait for briefing screen to appear (reduced wait time before check)
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 20000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -164,9 +161,10 @@ test.describe('UI Component Refinement', () => {
         if (index < mechs.length - 1) {
           // Navigate back to home instead of reload to avoid state issues
           await page.goto('/');
-          await page.waitForLoadState('domcontentloaded');
+          await page.waitForLoadState('networkidle');
           // Wait for menu to be visible
           await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
+          await page.waitForTimeout(1000); // Brief pause to ensure menu is ready
         }
       }
     });
@@ -259,9 +257,12 @@ test.describe('UI Component Refinement', () => {
 
   test.describe('Visual Regression', () => {
     test('should match menu screen snapshot', async ({ page }) => {
-      // Wait for page load and animations to settle
-      await page.waitForTimeout(2000);
-      await page.waitForSelector('h1', { state: 'visible', timeout: 15000 });
+      // Wait for page to be fully loaded
+      await page.waitForLoadState('networkidle');
+      // Wait for animations to settle
+      await page.waitForTimeout(1000);
+      // Verify h1 is visible
+      await expect(page.locator('h1').first()).toBeVisible({ timeout: 10000 });
 
       // Take snapshot for visual regression
       if (hasMcpSupport) {
