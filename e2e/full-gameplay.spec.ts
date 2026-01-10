@@ -347,15 +347,18 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should accumulate score and kills', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Trigger kills rapidly to maintain streak timing
+    // Trigger kills with small delays to ensure state updates propagate
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
+    await page.waitForTimeout(100);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
+    await page.waitForTimeout(100);
 
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
+    await page.waitForTimeout(100);
 
     // Wait for all kills to register with streak bonuses
     const state = await waitForStateCondition(page, s => s.kills === 3 && s.score > 30, 500);
@@ -565,15 +568,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Trigger kills rapidly to maintain streak (< 2000ms between kills)
+    // Trigger kills with small delays to ensure state updates propagate (< 2000ms between kills)
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
+    await page.waitForTimeout(100);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
+    await page.waitForTimeout(100);
 
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
+    await page.waitForTimeout(100);
 
     // Wait for all kills to register with correct streak
     const state = await waitForStateCondition(page, s => s.killStreak === 3 && s.kills === 3, 500);
@@ -590,9 +596,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Build a streak with rapid kills
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
+    await page.waitForTimeout(100);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
+    await page.waitForTimeout(100);
 
     // Wait for streak to register
     let state = await waitForStateCondition(page, s => s.killStreak === 2 && s.kills === 2, 500);
@@ -604,7 +612,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Next kill should start new streak
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
@@ -613,15 +621,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   test('should apply streak bonus to score', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Trigger kills rapidly to maintain streak timing
+    // Trigger kills with small delays to ensure state updates propagate
     const success1 = await triggerStoreAction(page, 'addKill', 100);
     if (!success1) throw new Error('Failed to add first kill');
+    await page.waitForTimeout(100);
 
     const success2 = await triggerStoreAction(page, 'addKill', 100);
     if (!success2) throw new Error('Failed to add second kill');
+    await page.waitForTimeout(100);
 
     const success3 = await triggerStoreAction(page, 'addKill', 100);
     if (!success3) throw new Error('Failed to add third kill');
+    await page.waitForTimeout(100);
 
     // Wait for all kills to register with correct streak and scores
     // Kill 1: 100 (streak 1, no bonus)
