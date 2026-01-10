@@ -39,11 +39,30 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
   }, { action, args });
 }
 
+// Helper to wait for loading screen to disappear
+export async function waitForLoadingScreen(page: Page) {
+  // Wait for loading screen to disappear - critical for slow CI environments
+  // Using a very long timeout as SwiftShader compilation can be slow
+  const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+  try {
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
+  } catch {
+    // Loading screen might already be gone
+  }
+  // Additional wait for transition animation
+  await page.waitForTimeout(1000);
+}
+
 // Helper to select character robustly
 export async function selectCharacter(page: Page, name: string) {
+  // First ensure loading screen is gone
+  await waitForLoadingScreen(page);
+
   const button = page.locator('button', { hasText: name });
-  // Wait for button to be visible
-  await button.waitFor({ state: 'visible', timeout: 10000 });
+  // Wait for button to be visible with increased timeout for CI
+  await button.waitFor({ state: 'visible', timeout: 30000 });
   // Removed scrollIntoViewIfNeeded as it causes instability in CI
   // Use force click to bypass potential overlays and increased timeout
   await button.click({ timeout: 15000, force: true });
