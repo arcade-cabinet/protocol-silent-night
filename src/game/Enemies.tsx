@@ -161,8 +161,8 @@ export function Enemies() {
           ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
-        // Add 4s grace period after phase start to prevent instant damage
-        const isGracePeriod = now - phaseStartTimeRef.current < 4000;
+        // Add 2s grace period after phase start to prevent instant damage
+        const isGracePeriod = now - phaseStartTimeRef.current < 2000;
 
         if (!isGracePeriod && now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
           // Only damage if enemy is properly initialized

@@ -23,9 +23,9 @@ export async function startGame(page: Page, characterName: string) {
   await characterButton.waitFor({ state: 'visible', timeout: 60000 });
   await characterButton.click({ force: true, timeout: 60000 });
 
-  // Wait for briefing animation to complete (7 lines at 600ms + 500ms for button = 4700ms minimum)
-  // Adding 2000ms buffer for rendering delays and network latency
-  await page.waitForTimeout(7000);
+  // Wait for briefing animation to complete (5-6 lines at 600ms + 500ms for button)
+  // We explicitly wait here to ensure the animation logic has time to run
+  await page.waitForTimeout(5000);
 
   // Click COMMENCE OPERATION
   try {
