@@ -649,7 +649,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     let state = await waitForKillStreak(page, 1);
     expect(state?.killStreak).toBe(1);
@@ -657,7 +657,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Second kill - trigger immediately to stay within 2000ms streak window
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     state = await waitForKillStreak(page, 2);
     expect(state?.killStreak).toBe(2);
@@ -668,7 +668,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - trigger immediately to stay within streak window
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     state = await waitForKillStreak(page, 3);
     expect(state?.killStreak).toBe(3);
@@ -698,14 +698,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     let state = await waitForKillStreak(page, 1);
     expect(state?.killStreak).toBe(1);
 
     // Second kill - trigger immediately to stay within streak window
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     state = await waitForKillStreak(page, 2);
     expect(state?.killStreak).toBe(2);
@@ -715,7 +715,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     // Wait for streak to reset
     state = await waitForKillStreak(page, 1);
@@ -742,7 +742,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     let state = await waitForKillStreak(page, 1);
     expect(state?.score).toBe(100);
@@ -750,7 +750,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Second kill - 25% bonus (streak of 2), trigger immediately to stay within streak window
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     state = await waitForKillStreak(page, 2);
     expect(state?.killStreak).toBe(2);
@@ -759,7 +759,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3), trigger immediately to stay within streak window
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(100); // Small delay for state propagation
+    await page.waitForTimeout(200); // Delay for state propagation
 
     state = await waitForKillStreak(page, 3);
     expect(state?.killStreak).toBe(3);
