@@ -17,7 +17,7 @@ describe('MessageOverlay', () => {
     vi.mocked(useGameStore).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    } as ReturnType<typeof useGameStore>);
+    });
 
     render(<MessageOverlay />);
 
@@ -28,7 +28,7 @@ describe('MessageOverlay', () => {
     vi.mocked(useGameStore).mockReturnValue({
       state: 'WIN',
       bossActive: false,
-    } as ReturnType<typeof useGameStore>);
+    });
 
     render(<MessageOverlay />);
 
@@ -39,7 +39,7 @@ describe('MessageOverlay', () => {
     vi.mocked(useGameStore).mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
-    } as ReturnType<typeof useGameStore>);
+    });
 
     render(<MessageOverlay />);
 
@@ -50,7 +50,7 @@ describe('MessageOverlay', () => {
     vi.mocked(useGameStore).mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    } as ReturnType<typeof useGameStore>);
+    });
 
     render(<MessageOverlay />);
 
