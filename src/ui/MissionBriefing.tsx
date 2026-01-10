@@ -91,8 +91,6 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
-      // Reset animation guard in cleanup to handle React StrictMode and component remounting
-      animationStartedRef.current = false;
     };
   }, [state]);
 
