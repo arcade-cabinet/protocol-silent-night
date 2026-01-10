@@ -107,6 +107,5 @@ export async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
-  // Force click to bypass potential overlays and use increased timeout
   await button.click({ timeout: 15000, force: true });
 }
