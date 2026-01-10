@@ -66,6 +66,18 @@ async function waitForGameState(page: Page, expectedState: string, timeout = 100
   return false;
 }
 
+// Helper to wait for kill streak to reach expected value
+async function waitForKillStreak(page: Page, expectedStreak: number, timeout = 3000) {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    const state = await getGameState(page);
+    if (state?.killStreak === expectedStreak) return state;
+    await page.waitForTimeout(50);
+  }
+  // Return current state even if timeout
+  return getGameState(page);
+}
+
 // Helper to simulate combat until kills reach target
 async function simulateCombatUntilKills(page: Page, targetKills: number, maxTime = 30000) {
   const startTime = Date.now();
@@ -637,17 +649,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Rapid kills to build streak - use minimal delays to maintain streak (< 2000ms)
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
 
-    // Verify first kill registered
-    let state = await getGameState(page);
+    // Wait for first kill to register
+    let state = await waitForKillStreak(page, 1);
     expect(state?.killStreak).toBe(1);
     expect(state?.kills).toBe(1);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    // Wait for second kill to register
+    state = await waitForKillStreak(page, 2);
     expect(state?.killStreak).toBe(2);
     expect(state?.kills).toBe(2);
 
@@ -656,9 +667,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    // Wait for third kill to register
+    state = await waitForKillStreak(page, 3);
     expect(state?.killStreak).toBe(3);
     expect(state?.kills).toBe(3);
 
@@ -686,16 +697,15 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Build a streak with minimal delays to maintain streak (< 2000ms)
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
 
-    // Verify first kill registered
-    let state = await getGameState(page);
+    // Wait for first kill to register
+    let state = await waitForKillStreak(page, 1);
     expect(state?.killStreak).toBe(1);
 
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    // Wait for second kill to register
+    state = await waitForKillStreak(page, 2);
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
@@ -703,9 +713,9 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(500);
 
-    state = await getGameState(page);
+    // Wait for streak to reset
+    state = await waitForKillStreak(page, 1);
     expect(state?.killStreak).toBe(1); // Reset to 1
   });
 
@@ -729,26 +739,26 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // First kill - no bonus, with minimal delays to maintain streak
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
 
-    let state = await getGameState(page);
+    // Wait for first kill to register
+    let state = await waitForKillStreak(page, 1);
     expect(state?.score).toBe(100);
     expect(state?.killStreak).toBe(1);
 
     // Second kill - 25% bonus (streak of 2), within timeout (< 2000ms total)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    // Wait for second kill to register
+    state = await waitForKillStreak(page, 2);
     expect(state?.killStreak).toBe(2);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
     expect(state?.score).toBe(225);
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    await page.waitForTimeout(200);
 
-    state = await getGameState(page);
+    // Wait for third kill to register
+    state = await waitForKillStreak(page, 3);
     expect(state?.killStreak).toBe(3);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
     expect(state?.score).toBe(375);

@@ -150,11 +150,8 @@ test.describe('UI Component Refinement', () => {
         await expect(mechButton).toBeVisible({ timeout: 15000 });
         await mechButton.click({ force: true, timeout: 20000 });
 
-        // Wait for briefing screen transition
-        await page.waitForTimeout(2000);
-
-        // Wait for briefing
-        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 10000 });
+        // Wait for briefing screen to appear
+        await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
 
         // Verify operator and role
         await expect(page.locator(`text=${mech.name}`)).toBeVisible();
@@ -162,8 +159,10 @@ test.describe('UI Component Refinement', () => {
 
         // Go back to menu for next iteration, unless it's the last one
         if (index < mechs.length - 1) {
-          await page.reload();
-          await page.waitForLoadState('networkidle');
+          // Navigate back to home instead of reload to avoid state issues
+          await page.goto('/');
+          await page.waitForLoadState('domcontentloaded');
+          // Wait for menu to be visible
           await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
         }
       }
