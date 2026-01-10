@@ -386,6 +386,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   addKill: (points) => {
     const streakTimeout = 2000;
 
+    let newStreak = 1;
+
     // Use functional update to ensure we always work with the latest state
     // This prevents race conditions when multiple kills happen in rapid succession
     set((currentState) => {
@@ -398,7 +400,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // This correctly sets streak to 1 for the first kill
       const timeSinceLastKill = now - lastKillTime;
       const isWithinStreakWindow = lastKillTime > 0 && timeSinceLastKill < streakTimeout;
-      const newStreak = isWithinStreakWindow ? killStreak + 1 : 1;
+      newStreak = isWithinStreakWindow ? killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = stats.score + points + streakBonus;
@@ -414,8 +416,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     });
 
-    // Now get the updated state for side effects
-    const { killStreak: newStreak, stats, state } = get();
+    // Use the streak value calculated in the set callback for side effects
+    const { stats, state } = get();
 
     const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
