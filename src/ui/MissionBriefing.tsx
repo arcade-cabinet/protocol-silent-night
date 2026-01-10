@@ -76,17 +76,16 @@ export function MissionBriefing() {
 
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout>;
-    let lineIndex = 0;
     const interval = setInterval(() => {
-      lineIndex++;
-      if (lineIndex >= totalLines) {
-        clearInterval(interval);
-        setCurrentLine(totalLines - 1);
-        timeoutId = setTimeout(() => setShowButton(true), 500);
-        return;
-      }
-      AudioManager.playSFX('ui_click');
-      setCurrentLine(lineIndex);
+      setCurrentLine((prev) => {
+        if (prev >= totalLines - 1) {
+          clearInterval(interval);
+          timeoutId = setTimeout(() => setShowButton(true), 500);
+          return prev;
+        }
+        AudioManager.playSFX('ui_click');
+        return prev + 1;
+      });
     }, 600);
 
     return () => {
