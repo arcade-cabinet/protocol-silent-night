@@ -431,14 +431,19 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should have balanced survivability', async ({ page }) => {
     await startGameplay(page, 'BUMBLE');
 
+    // Get initial HP to account for any early game damage
+    let initialState = await getGameState(page);
+    const initialHp = initialState?.playerHp || 200;
+
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    // Allow for slight variations due to timing/rounding (95-105 HP range)
-    expect(state?.playerHp).toBeGreaterThanOrEqual(95);
-    expect(state?.playerHp).toBeLessThanOrEqual(105);
+    // Expected HP is initialHp - 100, but allow for slight variations due to potential enemy damage
+    const expectedHp = initialHp - 100;
+    expect(state?.playerHp).toBeGreaterThanOrEqual(expectedHp - 10);
+    expect(state?.playerHp).toBeLessThanOrEqual(expectedHp + 5);
     expect(state?.gameState).toBe('PHASE_1');
 
     // One more hit at 100 damage kills
@@ -551,11 +556,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(50);
+
+    // Verify first kill registered with streak = 1
+    let state = await getGameState(page);
+    expect(state?.killStreak).toBe(1);
+    expect(state?.kills).toBe(1);
+
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
     await page.waitForTimeout(50);
 
-    let state = await getGameState(page);
+    state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -580,11 +591,15 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(50);
+
+    let state = await getGameState(page);
+    expect(state?.killStreak).toBe(1);
+
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
     await page.waitForTimeout(50);
 
-    let state = await getGameState(page);
+    state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
@@ -609,6 +624,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
+    expect(state?.killStreak).toBe(1);
 
     // Second kill - 25% bonus (streak of 2)
     const success2 = await triggerStoreAction(page, 'addKill', 100);
@@ -616,6 +632,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await page.waitForTimeout(50);
 
     state = await getGameState(page);
+    expect(state?.killStreak).toBe(2);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
     expect(state?.score).toBe(225);
 
@@ -705,8 +722,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       if (!success) {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
-      // Minimal delay to allow store state to stabilize between operations
-      await page.waitForTimeout(10);
+      // Delay to allow store state to stabilize between operations, especially during level-ups
+      await page.waitForTimeout(50);
     }
 
     // Resolve any level-up that may have occurred BEFORE waiting for boss phase

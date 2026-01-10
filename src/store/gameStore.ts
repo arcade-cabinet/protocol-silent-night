@@ -393,7 +393,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const now = Date.now(); // Capture timestamp inside functional update to avoid race conditions
       const newKills = stats.kills + 1;
 
-      const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+      // Calculate streak based on time difference
+      // On first kill, lastKillTime is 0, so difference will be large (> streakTimeout)
+      // This correctly sets streak to 1 for the first kill
+      const timeSinceLastKill = now - lastKillTime;
+      const isWithinStreakWindow = lastKillTime > 0 && timeSinceLastKill < streakTimeout;
+      const newStreak = isWithinStreakWindow ? killStreak + 1 : 1;
 
       const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
       const newScore = stats.score + points + streakBonus;
