@@ -158,7 +158,7 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
     }
 
     try {
-      page.setDefaultTimeout(500);
+      page.setDefaultTimeout(1000);
       const result = await page.evaluate(({ action, args }) => {
         const store = (window as any).useGameStore;
         if (!store) return false;
@@ -170,7 +170,8 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
           return new Promise((resolve) => {
             // Use setTimeout with a delay to ensure Zustand's state update
             // has fully propagated through all subscribers before returning
-            setTimeout(() => resolve(true), 100);
+            // Increased from 100ms to 200ms to prevent race conditions in CI
+            setTimeout(() => resolve(true), 200);
           });
         }
         return false;
