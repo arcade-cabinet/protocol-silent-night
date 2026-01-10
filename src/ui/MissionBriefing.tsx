@@ -70,7 +70,7 @@ export function MissionBriefing() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     // Only run when entering BRIEFING state, not when briefingLines changes
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   // Reset state when briefing starts
   useEffect(() => {
