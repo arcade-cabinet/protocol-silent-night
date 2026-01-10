@@ -55,7 +55,7 @@ async function waitForStore(page: Page, timeout = 3000) {
 
     // Safe wait with page close check - reduced timeout
     try {
-      await page.waitForTimeout(25);
+      await page.waitForTimeout(10);
     } catch (error) {
       if (page.isClosed()) {
         console.error('Page closed during timeout');
@@ -128,11 +128,11 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
     }
 
     // Ensure store is loaded first - use shorter timeout for store actions
-    const storeReady = await waitForStore(page, 1000);
+    const storeReady = await waitForStore(page, 500);
     if (!storeReady) {
       console.error(`Store not available for action: ${action}, attempt ${attempt + 1}`);
       if (attempt < maxRetries - 1) {
-        await page.waitForTimeout(25);
+        await page.waitForTimeout(10);
         continue;
       }
       return false;
@@ -706,7 +706,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
       // Minimal delay to allow store state to stabilize between operations
-      await page.waitForTimeout(20);
+      await page.waitForTimeout(10);
     }
 
     // Resolve any level-up that may have occurred BEFORE waiting for boss phase
@@ -759,7 +759,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
       // Minimal delay to allow store state to stabilize between operations
-      await page.waitForTimeout(20);
+      await page.waitForTimeout(10);
     }
 
     // Resolve any level-up that may have occurred BEFORE waiting for boss phase
@@ -800,7 +800,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
         throw new Error(`Failed to add kill ${i + 1}`);
       }
       // Minimal delay to allow store state to stabilize between operations
-      await page.waitForTimeout(20);
+      await page.waitForTimeout(10);
     }
 
     // Resolve any level-up that may have occurred BEFORE waiting for boss phase
