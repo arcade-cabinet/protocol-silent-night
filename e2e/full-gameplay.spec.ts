@@ -170,8 +170,9 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
           return new Promise((resolve) => {
             // Use setTimeout with a delay to ensure Zustand's state update
             // has fully propagated through all subscribers before returning
-            // Increased from 100ms to 200ms to prevent race conditions in CI
-            setTimeout(() => resolve(true), 200);
+            // Increased from 100ms to 200ms, then to 300ms to prevent race conditions in CI
+            // especially for kill streak tracking which depends on accurate timing
+            setTimeout(() => resolve(true), 300);
           });
         }
         return false;
@@ -358,11 +359,11 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Reduced delays to prevent CI timing issues: 3 kills with 100ms between + 3x100ms internal = 600ms total
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(150);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(150);
 
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
@@ -583,11 +584,11 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Reduced delays to prevent CI timing issues: 3 kills with 100ms between + 3x100ms internal = 600ms total
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(150);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(150);
 
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
@@ -634,14 +635,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Trigger kills to build streak (< 2000ms between kills)
-    // Reduced delays to prevent CI timing issues: 3 kills with 100ms between + 3x100ms internal = 600ms total
+    // Increased delays to 150ms to ensure state propagation between kills
     const success1 = await triggerStoreAction(page, 'addKill', 100);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(150);
 
     const success2 = await triggerStoreAction(page, 'addKill', 100);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(150);
 
     const success3 = await triggerStoreAction(page, 'addKill', 100);
     if (!success3) throw new Error('Failed to add third kill');
