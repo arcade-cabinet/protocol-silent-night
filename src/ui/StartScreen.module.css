@@ -59,7 +59,7 @@
   border: 1px solid #333;
   padding: 20px;
   width: 200px;
-  min-height: 165px; /* Enforce consistent height - matches visual regression snapshots */
+  min-height: 180px; /* Enforce consistent height */
   box-sizing: border-box; /* Include padding/border in height */
   cursor: pointer;
   transition: 0.3s;
