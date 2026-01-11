@@ -81,25 +81,11 @@ export async function simulateCombatUntilKills(page: Page, targetKills: number) 
 
 // Helper to wait for loading screen to complete
 export async function waitForLoadingScreen(page: Page) {
-  // Wait for the game store to be available (indicates app has loaded)
-  await page.waitForFunction(
-    () => {
-      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
-      return (window as any).useGameStore !== undefined;
-    },
-    null,
-    { timeout: 30000 }
-  );
-
-  // Also wait for loading screen to disappear if it's still visible
   const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
-  try {
-    // Give it a short time to appear if it hasn't yet
-    await loadingScreen.waitFor({ state: 'visible', timeout: 1000 });
-    // If it appeared, wait for it to disappear
+  // Initial check if loading screen is present
+  if (await loadingScreen.isVisible()) {
+    // Wait for it to disappear with generous timeout for CI
     await loadingScreen.waitFor({ state: 'detached', timeout: 45000 });
-  } catch {
-    // Loading screen already gone or never appeared, that's fine
   }
 }
 

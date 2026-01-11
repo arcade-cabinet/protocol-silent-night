@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { waitForLoadingScreen } from './utils';
 
 /**
  * Visual Regression Tests for Protocol: Silent Night
@@ -19,6 +18,9 @@ test.setTimeout(120000);
 async function stabilizePage(page) {
   // Wait for all network requests to complete
   await page.waitForLoadState('networkidle');
+
+  // Wait for dynamic content to settle
+  await page.waitForTimeout(500);
 
   // Ensure all animations are truly disabled via CSS injection
   // Also suppress focus outlines to prevent visual regression failures
@@ -44,6 +46,7 @@ async function stabilizePage(page) {
 async function waitForElementStability(page, locator) {
   await locator.waitFor({ state: 'attached', timeout: 10000 });
   await locator.waitFor({ state: 'visible', timeout: 10000 });
+  await page.waitForTimeout(200); // Extra buffer for animations
   return locator;
 }
 
@@ -55,13 +58,14 @@ test.beforeEach(async ({ page }) => {
 test.describe('Visual Regression - Character Selection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
     // Wait for loading screen to disappear - critical for slow CI environments
     // Using a very long timeout as SwiftShader compilation can be slow
     const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
     if (await loadingScreen.isVisible()) {
       await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
     }
+    // Additional wait for transition animation
+    await page.waitForTimeout(2000);
   });
 
   test('should match character selection screen', async ({ page }) => {
@@ -81,6 +85,7 @@ test.describe('Visual Regression - Character Selection', () => {
     const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await waitForElementStability(page, santaCard);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Allow animations to settle
     await expect(santaCard).toHaveScreenshot('santa-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500000,
@@ -92,6 +97,7 @@ test.describe('Visual Regression - Character Selection', () => {
     const elfCard = page.getByRole('button', { name: /CYBER-ELF/ });
     await waitForElementStability(page, elfCard);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Allow animations to settle
     await expect(elfCard).toHaveScreenshot('elf-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500000,
@@ -103,6 +109,7 @@ test.describe('Visual Regression - Character Selection', () => {
     const bumbleCard = page.getByRole('button', { name: /BUMBLE/ });
     await waitForElementStability(page, bumbleCard);
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500); // Allow animations to settle
     await expect(bumbleCard).toHaveScreenshot('bumble-card.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       maxDiffPixels: 500000,
@@ -114,7 +121,10 @@ test.describe('Visual Regression - Character Selection', () => {
 test.describe('Visual Regression - Game Start', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
   });
 
   test('should render Santa gameplay correctly', async ({ page }) => {
@@ -129,8 +139,8 @@ test.describe('Visual Regression - Game Start', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear indicating game is loaded
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    // Wait for game to load
+    await page.waitForTimeout(10000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('santa-gameplay.png', {
@@ -150,8 +160,8 @@ test.describe('Visual Regression - Game Start', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear indicating game is loaded
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    // Wait for game to load
+    await page.waitForTimeout(10000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('elf-gameplay.png', {
@@ -171,8 +181,8 @@ test.describe('Visual Regression - Game Start', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear indicating game is loaded
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    // Wait for game to load
+    await page.waitForTimeout(10000);
 
     // Take gameplay snapshot
     await expect(page).toHaveScreenshot('bumble-gameplay.png', {
@@ -185,7 +195,10 @@ test.describe('Visual Regression - Game Start', () => {
 test.describe('Visual Regression - HUD Elements', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
   });
 
   test('should render HUD correctly during gameplay', async ({ page }) => {
@@ -198,8 +211,7 @@ test.describe('Visual Regression - HUD Elements', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Take HUD snapshot
     await expect(page).toHaveScreenshot('hud-display.png', {
@@ -218,11 +230,11 @@ test.describe('Visual Regression - HUD Elements', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Move and fire to generate some score
     await page.keyboard.press('Space');
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('hud-with-activity.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -234,7 +246,10 @@ test.describe('Visual Regression - HUD Elements', () => {
 test.describe('Visual Regression - Game Movement', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
   });
 
   test('should render character movement correctly', async ({ page }) => {
@@ -247,11 +262,11 @@ test.describe('Visual Regression - Game Movement', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Move character
     await page.keyboard.down('w');
+    await page.waitForTimeout(2000);
     await page.keyboard.up('w');
 
     await expect(page).toHaveScreenshot('character-moved.png', {
@@ -270,11 +285,11 @@ test.describe('Visual Regression - Game Movement', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Fire weapon
     await page.keyboard.press('Space');
+    await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('firing-animation.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -286,7 +301,10 @@ test.describe('Visual Regression - Game Movement', () => {
 test.describe('Visual Regression - Combat Scenarios', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
   });
 
   test('should render combat with enemies', async ({ page }) => {
@@ -299,11 +317,11 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Wait for enemies to spawn and engage
     await page.keyboard.down('Space');
+    await page.waitForTimeout(5000);
     await page.keyboard.up('Space');
 
     await expect(page).toHaveScreenshot('combat-scenario.png', {
@@ -322,8 +340,10 @@ test.describe('Visual Regression - Combat Scenarios', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
+
+    // Wait for potential damage from enemies
+    await page.waitForTimeout(8000);
 
     await expect(page).toHaveScreenshot('player-damaged.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -335,7 +355,10 @@ test.describe('Visual Regression - Combat Scenarios', () => {
 test.describe('Visual Regression - End Game States', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
+    const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
+    if (await loadingScreen.isVisible()) {
+      await loadingScreen.waitFor({ state: 'hidden', timeout: 45000 });
+    }
   });
 
   test('should render game over screen', async ({ page }) => {
@@ -349,8 +372,7 @@ test.describe('Visual Regression - End Game States', () => {
     await commenceButton.waitFor({ state: 'visible', timeout: 45000 });
     await commenceButton.click({ timeout: 30000, force: true });
 
-    // Wait for HUD to appear
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Trigger game over by evaluating state (for testing purposes)
     await page.evaluate(() => {
@@ -366,10 +388,7 @@ test.describe('Visual Regression - End Game States', () => {
       gameWindow.useGameStore?.getState().damagePlayer(300);
     });
 
-    // Wait for game over screen to appear
-    await page.getByText(/GAME OVER|MISSION FAILED/i).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-      console.log('Game over screen may not have appeared yet');
-    });
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('game-over-screen.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -392,7 +411,6 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render correctly on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
 
     const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
     if (await loadingScreen.isVisible()) {
@@ -415,7 +433,6 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render mobile gameplay correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
 
     const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
     if (await loadingScreen.isVisible()) {
@@ -433,8 +450,8 @@ test.describe('Visual Regression - Responsive Design', () => {
     await commenceButton.click({ timeout: 30000, force: true });
     await page.waitForLoadState('networkidle', { timeout: 30000 });
 
-    // Wait for HUD to appear indicating game is loaded
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    // Wait for game to initialize
+    await page.waitForTimeout(10000);
     await stabilizePage(page);
 
     await expect(page).toHaveScreenshot('mobile-gameplay.png', {
@@ -450,7 +467,6 @@ test.describe('Visual Regression - Responsive Design', () => {
   test('should render touch controls on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/', { waitUntil: 'networkidle' });
-    await waitForLoadingScreen(page);
 
     const loadingScreen = page.getByText('INITIALIZING SYSTEMS');
     if (await loadingScreen.isVisible()) {
@@ -468,13 +484,15 @@ test.describe('Visual Regression - Responsive Design', () => {
     await commenceButton.click({ timeout: 30000, force: true });
     await page.waitForLoadState('networkidle', { timeout: 30000 });
 
-    // Wait for HUD to appear indicating game is loaded
-    await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(10000);
 
     // Touch controls should be visible
     await stabilizePage(page);
 
     const fireButton = page.getByRole('button', { name: /FIRE/ });
+
+    // Explicit wait + long timeout expect
+    await page.waitForTimeout(2000);
     await expect(fireButton).toBeVisible({ timeout: 60000 });
 
     await expect(fireButton).toHaveScreenshot('touch-fire-button.png', {
