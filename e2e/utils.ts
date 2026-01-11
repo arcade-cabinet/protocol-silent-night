@@ -125,3 +125,16 @@ export async function waitForGameReady(page: Page, timeout = 30000) {
     { timeout }
   );
 }
+
+// Helper to wait for store to be available after page navigation
+export async function waitForStoreReady(page: Page, timeout = 30000) {
+  await page.waitForFunction(
+    () => {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
+      const store = (window as any).useGameStore;
+      return store && typeof store.getState === 'function';
+    },
+    null,
+    { timeout }
+  );
+}
