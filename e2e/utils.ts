@@ -110,18 +110,18 @@ export async function startMission(page: Page) {
   await button.click({ timeout: 15000, force: true });
 }
 
-// Helper to wait for game store to be ready and game to start
+// Helper to wait for game to be initialized and playable
 export async function waitForGameReady(page: Page, timeout = 30000) {
-  // Wait for the store to be available and game to be in a playable state
   await page.waitForFunction(
     () => {
       // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
       const store = (window as any).useGameStore;
       if (!store) return false;
-      const state = store.getState();
-      // Check if we're in a playable state (not MENU, not loading)
-      return state.state === 'PHASE_1' || state.state === 'PHASE_2' || state.state === 'PHASE_3' || state.state === 'PHASE_BOSS';
+      const state = store.getState().state;
+      // Should be in a playable phase
+      return ['PHASE_1', 'PHASE_2', 'PHASE_3', 'PHASE_BOSS'].includes(state);
     },
+    null,
     { timeout }
   );
 }

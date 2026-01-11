@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacter, startMission, waitForGameReady } from './utils';
+import { selectCharacter, startMission } from './utils';
 
 /**
  * Component Snapshot Tests
@@ -19,8 +19,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
-    await page.waitForTimeout(2000); // Small additional wait for rendering to stabilize
+    await page.waitForTimeout(5000);
 
     // Focus on character by centering view
     await page.evaluate(() => {
@@ -43,8 +42,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await waitForGameReady(page);
-    await page.waitForTimeout(2000); // Small additional wait for rendering to stabilize
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -58,8 +56,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await waitForGameReady(page);
-    await page.waitForTimeout(2000); // Small additional wait for rendering to stabilize
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -75,8 +72,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
-    await page.waitForTimeout(2000); // Small additional wait for rendering to stabilize
+    await page.waitForTimeout(5000);
 
     // Move to see terrain better
     await page.keyboard.down('w');
@@ -99,8 +95,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
-    await page.waitForTimeout(2000); // Small additional wait for rendering to stabilize
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -279,8 +274,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
-    await page.waitForTimeout(2000); // Small additional wait for rendering to stabilize
+    await page.waitForTimeout(5000);
 
     // Trigger kill streak by rapid kills
     await page.evaluate(() => {
