@@ -23,7 +23,8 @@ export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
-  const phaseStartTimeRef = useRef(0); // Add phase start time tracking
+  // Initialize to current time to ensure grace period is active on first render
+  const phaseStartTimeRef = useRef(Date.now());
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
