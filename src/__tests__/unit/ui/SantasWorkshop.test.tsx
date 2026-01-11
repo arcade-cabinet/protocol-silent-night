@@ -78,7 +78,7 @@ describe('SantasWorkshop Component', () => {
     render(<SantasWorkshop show={true} onClose={onCloseMock} />);
 
     const weaponsTab = screen.getByRole('tab', { name: 'Weapons' });
-    const panel = screen.getByRole('tabpanel', { hidden: false });
+    const panel = screen.getByRole('tabpanel');
 
     expect(weaponsTab).toHaveAttribute('aria-controls', 'panel-weapons');
     expect(panel).toHaveAttribute('id', 'panel-weapons');
