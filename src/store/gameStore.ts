@@ -384,50 +384,70 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
-    const now = Date.now();
-    const newKills = stats.kills + 1;
-
     const streakTimeout = 2000;
-    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
 
-    const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
-    const newScore = stats.score + points + streakBonus;
+    // Capture the computed values inside the functional update
+    let computedStreak = 0;
+    let computedKills = 0;
 
-    const xpGain = 10 + (newStreak > 1 ? (newStreak - 1) * 5 : 0);
+    // Use functional update to ensure we always work with the latest state
+    // This prevents race conditions when multiple kills happen in rapid succession
+    set((currentState) => {
+      const { stats, lastKillTime, killStreak, metaProgress } = currentState;
+      const now = Date.now(); // Capture timestamp inside functional update to avoid race conditions
+      const newKills = stats.kills + 1;
+
+      // Calculate streak based on time difference
+      // On first kill, lastKillTime is 0, so difference will be large (> streakTimeout)
+      // This correctly sets streak to 1 for the first kill
+      const timeSinceLastKill = now - lastKillTime;
+      const isWithinStreakWindow = lastKillTime > 0 && timeSinceLastKill < streakTimeout;
+      const newStreak = isWithinStreakWindow ? killStreak + 1 : 1;
+
+      const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
+      const newScore = stats.score + points + streakBonus;
+
+      // Store computed values to use for side effects
+      computedStreak = newStreak;
+      computedKills = newKills;
+
+      return {
+        stats: { ...stats, kills: newKills, score: newScore },
+        killStreak: newStreak,
+        lastKillTime: now,
+        metaProgress: {
+          ...metaProgress,
+          totalKills: metaProgress.totalKills + 1,
+        },
+      };
+    });
+
+    // Use the computed values instead of get() to avoid race conditions
+    const xpGain = 10 + (computedStreak > 1 ? (computedStreak - 1) * 5 : 0);
     get().gainXP(xpGain);
 
     let npStreakBonus = 0;
-    if (newStreak === 2) npStreakBonus = 5;
-    else if (newStreak === 3) npStreakBonus = 10;
-    else if (newStreak === 4) npStreakBonus = 25;
-    else if (newStreak >= 5) npStreakBonus = 50;
+    if (computedStreak === 2) npStreakBonus = 5;
+    else if (computedStreak === 3) npStreakBonus = 10;
+    else if (computedStreak === 4) npStreakBonus = 25;
+    else if (computedStreak >= 5) npStreakBonus = 50;
 
     const npGain = Math.floor(points / 10) + npStreakBonus;
     get().earnNicePoints(npGain);
 
-    set({
-      stats: { ...stats, kills: newKills, score: newScore },
-      killStreak: newStreak,
-      lastKillTime: now,
-      metaProgress: {
-        ...get().metaProgress,
-        totalKills: metaProgress.totalKills + 1,
-      },
-    });
-
     AudioManager.playSFX('enemy_defeated');
     triggerHaptic(HapticPatterns.ENEMY_DEFEATED);
 
-    if (newStreak > 1 && newStreak % 3 === 0) {
+    if (computedStreak > 1 && computedStreak % 3 === 0) {
       AudioManager.playSFX('streak_start');
     }
 
-    // Scale requirement by wave
-    const waveReq = CONFIG.WAVE_REQ * get().runProgress.wave;
+    // Get current state for boss spawning logic
+    const { state, runProgress, enemies } = get();
+    const waveReq = CONFIG.WAVE_REQ * runProgress.wave;
 
-    if (newKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
-      const hasBoss = get().enemies.some((e) => e.type === 'boss');
+    if (computedKills >= waveReq && (state === 'PHASE_1' || state === 'LEVEL_UP')) {
+      const hasBoss = enemies.some((e) => e.type === 'boss');
       if (!hasBoss) {
         get().spawnBoss();
       }
@@ -925,6 +945,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       // Remove boss enemy
       get().removeEnemy('boss-krampus');
+
+      // Check if this is wave 1 (first boss) - transition to WIN
+      if (runProgress.wave === 1) {
+        set({
+          state: 'WIN',
+          bossActive: false,
+          stats: { ...stats, bossDefeated: true },
+          metaProgress: updatedMeta,
+        });
+
+        get().updateHighScore();
+        saveMetaProgress(updatedMeta);
+        AudioManager.playSFX('boss_defeated');
+
+        return true;
+      }
 
       // Endless mode: Increment wave and prepare for level up
       set({

@@ -25,8 +25,11 @@ test.describe('Character Class Tests', () => {
         console.log(`Console error: ${msg.text()}`);
       }
     });
-    
+
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    // Wait for loading screen to finish (1.5s minimum duration)
+    await page.waitForTimeout(2000);
   });
 
   // ============================================
@@ -48,6 +51,9 @@ test.describe('Character Class Tests', () => {
     
     // Click to start
     await santaButton.click();
+
+    // Wait for mission briefing to appear
+    await page.waitForSelector('text=MISSION BRIEFING', { timeout: 15000 });
 
     // Click "COMMENCE OPERATION" on the briefing screen
     const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
