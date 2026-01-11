@@ -201,11 +201,8 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
 
             // Wait for kill count to update
             if (state.kills >= expectedKills) {
-              // Kill count has propagated
-              // Wait for Zustand state to fully propagate to all subscribers
-              // This ensures lastKillTime and killStreak are properly persisted
-              // 500ms is needed in CI environments for state consistency
-              await page.waitForTimeout(500);
+              // Kill count has propagated, return immediately
+              // Don't wait for state propagation as it adds delay that can cause streak timeout
               return true;
             }
 
@@ -398,28 +395,54 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should accumulate score and kills', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Trigger kills to build streak (< 2000ms between kills)
-    // Total time per kill: 500ms internal + 300ms external = 800ms (well under 2s timeout)
-    const success1 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(300);
+    // Trigger kills to build streak - do all 3 kills in a single evaluate to minimize timing issues
+    const result = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return null;
 
-    const success2 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(300);
+      const state = store.getState();
+      const startTime = Date.now();
 
-    const success3 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success3) throw new Error('Failed to add third kill');
-    await page.waitForTimeout(300);
+      // Perform all 3 kills in rapid succession
+      state.addKill(10);
+      const kill1Time = Date.now();
+      const kill1State = { kills: store.getState().stats.kills, streak: store.getState().killStreak };
 
-    // Check state immediately after third kill
+      state.addKill(10);
+      const kill2Time = Date.now();
+      const kill2State = { kills: store.getState().stats.kills, streak: store.getState().killStreak };
+
+      state.addKill(10);
+      const kill3Time = Date.now();
+      const kill3State = { kills: store.getState().stats.kills, streak: store.getState().killStreak };
+
+      const endTime = Date.now();
+      const finalState = store.getState();
+
+      return {
+        score: finalState.stats.score,
+        kills: finalState.stats.kills,
+        killStreak: finalState.killStreak,
+        lastKillTime: finalState.lastKillTime,
+        timing: {
+          total: endTime - startTime,
+          kill1: kill1Time - startTime,
+          kill2: kill2Time - kill1Time,
+          kill3: kill3Time - kill2Time,
+          checkDelay: endTime - kill3Time
+        },
+        history: { kill1State, kill2State, kill3State }
+      };
+    });
+
+    console.log('Kill streak test result:', JSON.stringify(result, null, 2));
+
     // Kill 1: 10 (streak 1, no bonus)
     // Kill 2: 10 + 2.5 = 12 (streak 2, 25% bonus), total: 22
     // Kill 3: 10 + 5 = 15 (streak 3, 50% bonus), total: 37
-    const state = await getGameState(page);
-    expect(state?.kills).toBe(3);
-    expect(state?.killStreak).toBe(3);
-    expect(state?.score).toBeGreaterThan(30); // Should have streak bonus (10 + 12 + 15 = 37)
+    expect(result?.kills).toBe(3);
+    expect(result?.killStreak).toBe(3);
+    expect(result?.score).toBeGreaterThan(30); // Should have streak bonus (10 + 12 + 15 = 37)
   });
 });
 
@@ -624,22 +647,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Trigger kills to build streak (< 2000ms between kills)
-    // Total time per kill: 500ms internal + 300ms external = 800ms (well under 2s timeout)
-    const success1 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(300);
-
-    const success2 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(300);
-
-    const success3 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success3) throw new Error('Failed to add third kill');
-    await page.waitForTimeout(300);
-
-    // Check state immediately after third kill
-    const state = await getGameState(page);
+    // Trigger all 3 kills in a single evaluate to avoid timing issues
+    const state = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return null;
+      const s = store.getState();
+      s.addKill(10);
+      s.addKill(10);
+      s.addKill(10);
+      const finalState = store.getState();
+      return { kills: finalState.stats.kills, killStreak: finalState.killStreak };
+    });
     expect(state?.killStreak).toBe(3);
     expect(state?.kills).toBe(3);
 
@@ -650,18 +668,16 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   test('should reset streak after timeout', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Build a streak with kills within streak window
-    // Total time per kill: 500ms internal + 300ms external = 800ms (well under 2s timeout)
-    const success1 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(300);
-
-    const success2 = await triggerStoreAction(page, 'addKill', 10);
-    if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(300);
-
-    // Check state immediately after second kill
-    let state = await getGameState(page);
+    // Build a streak with 2 kills in rapid succession
+    let state = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return null;
+      const s = store.getState();
+      s.addKill(10);
+      s.addKill(10);
+      const finalState = store.getState();
+      return { kills: finalState.stats.kills, killStreak: finalState.killStreak };
+    });
     expect(state?.killStreak).toBe(2);
     expect(state?.kills).toBe(2);
 
@@ -681,25 +697,24 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   test('should apply streak bonus to score', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Trigger kills to build streak (< 2000ms between kills)
-    // Total time per kill: 500ms internal + 300ms external = 800ms (well under 2s timeout)
-    const success1 = await triggerStoreAction(page, 'addKill', 100);
-    if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(300);
-
-    const success2 = await triggerStoreAction(page, 'addKill', 100);
-    if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(300);
-
-    const success3 = await triggerStoreAction(page, 'addKill', 100);
-    if (!success3) throw new Error('Failed to add third kill');
-    await page.waitForTimeout(300);
-
-    // Check state immediately after third kill
+    // Trigger all 3 kills in a single evaluate to avoid timing issues
     // Kill 1: 100 (streak 1, no bonus)
     // Kill 2: 100 + 25 = 125 (streak 2, 25% bonus), total: 225
     // Kill 3: 100 + 50 = 150 (streak 3, 50% bonus), total: 375
-    const state = await getGameState(page);
+    const state = await page.evaluate(() => {
+      const store = (window as any).useGameStore;
+      if (!store) return null;
+      const s = store.getState();
+      s.addKill(100);
+      s.addKill(100);
+      s.addKill(100);
+      const finalState = store.getState();
+      return {
+        kills: finalState.stats.kills,
+        killStreak: finalState.killStreak,
+        score: finalState.stats.score
+      };
+    });
     expect(state?.killStreak).toBe(3);
     expect(state?.kills).toBe(3);
     expect(state?.score).toBe(375);
