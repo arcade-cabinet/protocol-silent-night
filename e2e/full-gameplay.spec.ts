@@ -175,9 +175,9 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
       if (result) {
         // Wait for state to propagate through Zustand in Node.js context
         // Zustand state updates need time to fully persist to all subscribers
-        // Increased to 500ms to ensure lastKillTime is properly persisted in CI environments
-        // Total time between kills: 500ms internal + 500ms external = 1000ms (well under 2s timeout)
-        await page.waitForTimeout(500);
+        // Increased to 750ms to ensure lastKillTime is properly persisted in CI environments
+        // Total time between kills: 750ms internal + 500ms external = 1250ms (well under 2s timeout)
+        await page.waitForTimeout(750);
         return true;
       }
 
@@ -355,7 +355,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Trigger kills to build streak (< 2000ms between kills)
     // Delays between kills ensure we stay well within the 2s streak window
-    // Total time per kill: 500ms internal + 500ms external = 1000ms (well under 2s timeout)
+    // Total time per kill: 750ms internal + 500ms external = 1250ms (well under 2s timeout)
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(500);
@@ -582,7 +582,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Trigger kills to build streak (< 2000ms between kills)
     // Delays between kills ensure we stay well within the 2s streak window
-    // Total time per kill: 500ms internal + 500ms external = 1000ms (well under 2s timeout)
+    // Total time per kill: 750ms internal + 500ms external = 1250ms (well under 2s timeout)
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(500);
@@ -608,7 +608,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Build a streak with kills within streak window
-    // Total time per kill: 1000ms internal + 500ms external = 1500ms (well under 2s timeout)
+    // Total time per kill: 750ms internal + 500ms external = 1250ms (well under 2s timeout)
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(500);
@@ -640,7 +640,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Trigger kills to build streak (< 2000ms between kills)
     // Delays between kills ensure we stay well within the 2s streak window
-    // Total time per kill: 500ms internal + 500ms external = 1000ms (well under 2s timeout)
+    // Total time per kill: 750ms internal + 500ms external = 1250ms (well under 2s timeout)
     const success1 = await triggerStoreAction(page, 'addKill', 100);
     if (!success1) throw new Error('Failed to add first kill');
     await page.waitForTimeout(500);
