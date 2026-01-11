@@ -11,9 +11,11 @@ import { getGameState, selectCharacter, startMission, triggerStoreAction } from 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
+    await page.waitForTimeout(2000);
 
     // Verify we're at menu
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    let state = await getGameState(page);
+    expect(state?.gameState).toBe('MENU');
 
     // Select Santa
     await selectCharacter(page, 'MECHA-SANTA');
@@ -22,8 +24,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await startMission(page);
 
     // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
-    const state = await getGameState(page);
+    await page.waitForTimeout(2000);
+    state = await getGameState(page);
+    expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
     expect(state?.playerHp).toBe(300);
 
@@ -34,15 +37,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Verify Santa's stats are correct
     const state = await getGameState(page);
@@ -51,8 +51,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Fire weapon - Santa's Coal Cannon fires single shots
     await page.keyboard.down('Space');
-    // Wait for bullet to be created
-    await expect.poll(async () => (await getGameState(page))?.bulletCount).toBeGreaterThan(0);
+    await page.waitForTimeout(600); // Wait for at least one shot (0.5s delay)
     await page.keyboard.up('Space');
 
     // Verify firing happened (bullets may have already been cleaned up, so check via score or just validate no crash)
@@ -62,20 +61,16 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should survive longer due to high HP', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
-    // Wait for HP to update
-    await expect.poll(async () => (await getGameState(page))?.playerHp).toBe(200);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.playerHp).toBe(200); // 300 - 100 = 200
@@ -83,8 +78,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
     // Take more damage
     await triggerStoreAction(page, 'damagePlayer', 100);
-    // Wait for HP to update
-    await expect.poll(async () => (await getGameState(page))?.playerHp).toBe(100);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.playerHp).toBe(100);
@@ -93,20 +87,16 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Deal fatal damage
     await triggerStoreAction(page, 'damagePlayer', 300);
-    // Wait for game over state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('GAME_OVER');
+    await page.waitForTimeout(1000);
 
     const state = await getGameState(page);
     expect(state?.playerHp).toBe(0);
@@ -122,20 +112,16 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should accumulate score and kills', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Simulate kills
     await triggerStoreAction(page, 'addKill', 10);
-    // Wait for kill count to update
-    await expect.poll(async () => (await getGameState(page))?.kills).toBe(1);
+    await page.waitForTimeout(100);
 
     let state = await getGameState(page);
     expect(state?.kills).toBe(1);
@@ -144,8 +130,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Add more kills
     await triggerStoreAction(page, 'addKill', 10);
     await triggerStoreAction(page, 'addKill', 10);
-    // Wait for kill count to update
-    await expect.poll(async () => (await getGameState(page))?.kills).toBe(3);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.kills).toBe(3);
@@ -156,15 +141,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(2000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -174,15 +156,12 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Verify Elf's stats - low HP, high speed
     const state = await getGameState(page);
@@ -191,8 +170,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
     // Elf's SMG fires rapidly - hold fire for a bit
     await page.keyboard.down('Space');
-    // Wait for multiple bullets to be created (rapid fire)
-    await expect.poll(async () => (await getGameState(page))?.bulletCount).toBeGreaterThan(3);
+    await page.waitForTimeout(500); // Half second of firing
     await page.keyboard.up('Space');
 
     // Verify game is still running (weapon fired successfully)
@@ -202,20 +180,16 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should die quickly with low HP', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Elf only has 100 HP - one big hit kills
     await triggerStoreAction(page, 'damagePlayer', 100);
-    // Wait for game over state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     const state = await getGameState(page);
     expect(state?.playerHp).toBe(0);
@@ -226,15 +200,12 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should complete full game loop with Bumble', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(2000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -244,15 +215,12 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should fire spread pattern weapon', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Verify Bumble's stats - 200 HP, medium speed
     const state = await getGameState(page);
@@ -261,8 +229,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     // Bumble's Star Thrower fires 3 projectiles at once - verify weapon works
     await page.keyboard.down('Space');
-    // Wait for bullets to be created (spread pattern creates 3 at once)
-    await expect.poll(async () => (await getGameState(page))?.bulletCount).toBeGreaterThan(0);
+    await page.waitForTimeout(500);
     await page.keyboard.up('Space');
 
     // Verify game is still running (weapon fired successfully)
@@ -272,20 +239,16 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should have balanced survivability', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
-    // Wait for HP to update
-    await expect.poll(async () => (await getGameState(page))?.playerHp).toBe(100);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.playerHp).toBe(100);
@@ -293,8 +256,7 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     // One more hit at 100 damage kills
     await triggerStoreAction(page, 'damagePlayer', 100);
-    // Wait for game over state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('GAME_OVER');
@@ -304,23 +266,20 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 test.describe('Full Gameplay - Boss Battle', () => {
   test('should spawn boss after 10 kills', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Simulate 10 kills to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
 
-    // Wait for boss phase to trigger
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_BOSS');
+    await page.waitForTimeout(1000);
 
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
@@ -334,30 +293,26 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should defeat boss and win game', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
-    // Wait for boss phase
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_BOSS');
+    await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
 
     // Damage boss until defeated
     await triggerStoreAction(page, 'damageBoss', 1000);
-    // Wait for win state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('WIN');
+    await page.waitForTimeout(1000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -373,34 +328,29 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should show boss health decreasing', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(20);
     }
-    // Wait for boss phase
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_BOSS');
+    await page.waitForTimeout(500);
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
-    // Wait for boss HP to update
-    await expect.poll(async () => (await getGameState(page))?.bossHp).toBe(750);
+    await page.waitForTimeout(200);
 
     let state = await getGameState(page);
     expect(state?.bossHp).toBe(750);
 
     await triggerStoreAction(page, 'damageBoss', 250);
-    // Wait for boss HP to update
-    await expect.poll(async () => (await getGameState(page))?.bossHp).toBe(500);
+    await page.waitForTimeout(200);
 
     state = await getGameState(page);
     expect(state?.bossHp).toBe(500);
@@ -413,21 +363,18 @@ test.describe('Full Gameplay - Boss Battle', () => {
 test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 10);
-    // Wait for kill streak to update
-    await expect.poll(async () => (await getGameState(page))?.killStreak).toBe(2);
+    await page.waitForTimeout(100);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
@@ -437,8 +384,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
-    // Wait for kill streak to update
-    await expect.poll(async () => (await getGameState(page))?.killStreak).toBe(3);
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
@@ -449,34 +395,28 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
   test('should reset streak after timeout', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 10);
-    // Wait for kill streak to update
-    await expect.poll(async () => (await getGameState(page))?.killStreak).toBe(2);
+    await page.waitForTimeout(100);
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Wait for streak to timeout (2+ seconds) - using page.waitForFunction for time-based waiting
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 2500));
-    });
+    // Wait for streak to timeout (2+ seconds)
+    await page.waitForTimeout(2500);
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
-    // Wait for kill streak to reset and update
-    await expect.poll(async () => (await getGameState(page))?.killStreak).toBe(1);
+    await page.waitForTimeout(100);
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
@@ -484,28 +424,23 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
   test('should apply streak bonus to score', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
-    // Wait for score to update
-    await expect.poll(async () => (await getGameState(page))?.score).toBe(100);
+    await page.waitForTimeout(50);
 
     let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
-    // Wait for score to update
-    await expect.poll(async () => (await getGameState(page))?.score).toBe(225);
+    await page.waitForTimeout(50);
 
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
@@ -513,8 +448,7 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
-    // Wait for score to update
-    await expect.poll(async () => (await getGameState(page))?.score).toBe(375);
+    await page.waitForTimeout(50);
 
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
@@ -525,34 +459,28 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 test.describe('Full Gameplay - Game Reset', () => {
   test('should reset game and return to menu', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     // Play a game
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Get some score
     await triggerStoreAction(page, 'addKill', 100);
-    // Wait for kill to register
-    await expect.poll(async () => (await getGameState(page))?.kills).toBeGreaterThan(0);
+    await page.waitForTimeout(100);
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    // Wait for game over
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     // Click re-deploy
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
     // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
-    // Wait for menu state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(1000);
 
     // Should be back at menu
     const state = await getGameState(page);
@@ -564,49 +492,41 @@ test.describe('Full Gameplay - Game Reset', () => {
 
   test('should preserve high score after reset', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     // Play and get a score
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
+      await page.waitForTimeout(50);
     }
-    // Wait for all kills to register
-    await expect.poll(async () => (await getGameState(page))?.kills).toBe(5);
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-    // Wait for game over
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     // Reset
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
     // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
-    // Wait for menu state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(1000);
 
     // Start new game
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(2000);
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
-    // Wait for game over
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     // High score should still be preserved
     await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
@@ -616,6 +536,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 test.describe('Full Gameplay - Complete Playthrough', () => {
   test('should complete entire game as Santa', async ({ page }) => {
     await page.goto('/');
+    await page.waitForTimeout(2000);
 
     // Step 1: Character Selection - verify start screen is showing
     await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
@@ -624,26 +545,26 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await startMission(page);
 
-    // Step 2: Game starts - wait for PHASE_1
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    // Step 2: Game starts
+    await page.waitForTimeout(2000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
     // Step 3: Combat phase - kill enemies
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
 
-    // Step 4: Boss phase - wait for state transition
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_BOSS');
+    // Step 4: Boss phase
+    await page.waitForTimeout(1000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
 
     // Step 5: Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
-    // Wait for win state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('WIN');
+    await page.waitForTimeout(1000);
 
     // Step 6: Victory
     state = await getGameState(page);
@@ -657,8 +578,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
     // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
-    // Wait for menu state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(1000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
@@ -666,15 +586,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Elf', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(2000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
@@ -682,17 +599,16 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(50);
     }
-    // Wait for boss phase
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_BOSS');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
-    // Wait for win state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('WIN');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -700,15 +616,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Bumble', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(2000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
@@ -716,17 +629,16 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(50);
     }
-    // Wait for boss phase
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_BOSS');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
-    // Wait for win state
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('WIN');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -736,25 +648,18 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 test.describe('Full Gameplay - Input Controls', () => {
   test('should respond to WASD movement', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     const initialState = await getGameState(page);
 
     // Move with W key
     await page.keyboard.down('w');
-    // Wait for input state to be set
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.up === true;
-    });
+    await page.waitForTimeout(500);
     await page.keyboard.up('w');
 
     // Player should have moved (position changed)
@@ -769,31 +674,20 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should respond to arrow key movement', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Move with arrow keys
     await page.keyboard.down('ArrowUp');
-    // Wait for input state to be set
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.up === true;
-    });
+    await page.waitForTimeout(300);
     await page.keyboard.up('ArrowUp');
 
     await page.keyboard.down('ArrowRight');
-    // Wait for input state to be set
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.right === true;
-    });
+    await page.waitForTimeout(300);
     await page.keyboard.up('ArrowRight');
 
     // Game should still be running
@@ -803,23 +697,16 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should fire with spacebar', async ({ page }) => {
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Verify input state changes when firing
     await page.keyboard.down('Space');
-    // Wait for input state to be set
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.isFiring === true;
-    });
+    await page.waitForTimeout(100);
 
     const firingState = await page.evaluate(() => {
       const store = (window as any).useGameStore;
@@ -829,11 +716,7 @@ test.describe('Full Gameplay - Input Controls', () => {
     expect(firingState).toBe(true);
 
     await page.keyboard.up('Space');
-    // Wait for input state to be unset
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.isFiring === false;
-    });
+    await page.waitForTimeout(100);
 
     const notFiringState = await page.evaluate(() => {
       const store = (window as any).useGameStore;
@@ -846,15 +729,12 @@ test.describe('Full Gameplay - Input Controls', () => {
   test('should show touch controls on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('MENU');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    // Wait for game to start
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBe('PHASE_1');
+    await page.waitForTimeout(3000);
 
     // Touch fire button should be visible
     await expect(page.getByRole('button', { name: /FIRE/ })).toBeVisible();

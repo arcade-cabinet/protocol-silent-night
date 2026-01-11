@@ -83,8 +83,7 @@ test.describe('Protocol: Silent Night', () => {
 
   test('should render canvas element', async ({ page }) => {
     // Wait for React to mount and loading screen to finish
-    const timeout = hasMcpSupport ? 3000 : 2500;
-    await page.waitForFunction((ms) => new Promise(resolve => setTimeout(() => resolve(true), ms)), timeout);
+    await page.waitForTimeout(hasMcpSupport ? 3000 : 2500);
 
     const canvas = page.locator('canvas');
     const canvasCount = await canvas.count();
@@ -104,8 +103,7 @@ test.describe('Protocol: Silent Night', () => {
 
   test('should display character selection UI', async ({ page }) => {
     // Wait for loading screen to finish
-    const timeout = hasMcpSupport ? 3000 : 2500;
-    await page.waitForFunction((ms) => new Promise(resolve => setTimeout(() => resolve(true), ms)), timeout);
+    await page.waitForTimeout(hasMcpSupport ? 3000 : 2500);
 
     if (hasMcpSupport) {
       // With MCP and WebGL, the full UI should render
@@ -131,7 +129,7 @@ test.describe('Protocol: Silent Night', () => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
     // Wait for loading screen
-    await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 3000)));
+    await page.waitForTimeout(3000);
 
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
     await expect(santaButton).toBeVisible({ timeout: 15000 });
@@ -153,7 +151,7 @@ test.describe('Protocol: Silent Night', () => {
   test('should display HUD elements during gameplay', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 3000)));
+    await page.waitForTimeout(3000);
 
     // Start game with Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
@@ -177,7 +175,7 @@ test.describe('Protocol: Silent Night', () => {
   test('should persist high score to localStorage', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 3000)));
+    await page.waitForTimeout(3000);
 
     // Start game
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
@@ -193,7 +191,7 @@ test.describe('Protocol: Silent Night', () => {
     await expect(commenceButton).not.toBeVisible({ timeout: 5000 });
 
     // Play for a moment
-    await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 2000)));
+    await page.waitForTimeout(2000);
 
     // Check if high score key exists in localStorage
     const highScoreKey = await page.evaluate(() => {

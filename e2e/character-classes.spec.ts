@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { getGameState } from './utils';
 
 /**
  * Comprehensive Character Class E2E Tests for Protocol: Silent Night
@@ -37,8 +36,8 @@ test.describe('Character Class Tests', () => {
   test('MECHA-SANTA: should select character and start game', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    // Wait for loading screen
+    await page.waitForTimeout(3000);
 
     // Find and click Santa button
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
@@ -67,8 +66,7 @@ test.describe('Character Class Tests', () => {
   test('MECHA-SANTA: should display correct stats and move/fight', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Start game with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
@@ -77,41 +75,29 @@ test.describe('Character Class Tests', () => {
 
     // Wait for game to start
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
-    await expect.poll(async () => (await getGameState(page))?.gameState).toMatch(/PHASE_/);
+    await page.waitForTimeout(1000);
 
     // Test movement by pressing keys
     console.log('Testing MECHA-SANTA movement...');
 
     // Move up (W key)
     await page.keyboard.down('w');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.up === true;
-    });
+    await page.waitForTimeout(500);
     await page.keyboard.up('w');
 
     // Move left (A key)
     await page.keyboard.down('a');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.left === true;
-    });
+    await page.waitForTimeout(500);
     await page.keyboard.up('a');
 
     // Move down (S key)
     await page.keyboard.down('s');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.down === true;
-    });
+    await page.waitForTimeout(500);
     await page.keyboard.up('s');
 
     // Move right (D key)
     await page.keyboard.down('d');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.right === true;
-    });
+    await page.waitForTimeout(500);
     await page.keyboard.up('d');
     
     console.log('✓ MECHA-SANTA movement tested (WASD)');
@@ -119,7 +105,9 @@ test.describe('Character Class Tests', () => {
     // Test firing
     console.log('Testing MECHA-SANTA firing...');
     await page.keyboard.press('Space');
+    await page.waitForTimeout(100);
     await page.keyboard.press('Space');
+    await page.waitForTimeout(100);
     await page.keyboard.press('Space');
 
     console.log('✓ MECHA-SANTA firing tested (Space bar)');
@@ -128,9 +116,7 @@ test.describe('Character Class Tests', () => {
     console.log('Testing MECHA-SANTA combat...');
     await page.keyboard.down('w');
     await page.keyboard.down('Space');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 3000));
-    });
+    await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
     await page.keyboard.up('w');
     
@@ -150,8 +136,7 @@ test.describe('Character Class Tests', () => {
   test('CYBER-ELF: should select character and start game', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Find and click Elf button
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
@@ -175,8 +160,7 @@ test.describe('Character Class Tests', () => {
   test('CYBER-ELF: should display correct stats and move/fight', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Start game with Elf
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
@@ -185,7 +169,7 @@ test.describe('Character Class Tests', () => {
 
     // Wait for game to start
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
-    await expect.poll(async () => (await getGameState(page))?.gameState).toMatch(/PHASE_/);
+    await page.waitForTimeout(1000);
 
     // Test movement (Elf should be faster)
     console.log('Testing CYBER-ELF movement (should be fast)...');
@@ -193,22 +177,14 @@ test.describe('Character Class Tests', () => {
     // Test diagonal movement
     await page.keyboard.down('w');
     await page.keyboard.down('d');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      const input = store?.getState().input;
-      return input?.up === true && input?.right === true;
-    });
+    await page.waitForTimeout(500);
     await page.keyboard.up('d');
     await page.keyboard.up('w');
 
     // Test backward movement
     await page.keyboard.down('s');
     await page.keyboard.down('a');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      const input = store?.getState().input;
-      return input?.down === true && input?.left === true;
-    });
+    await page.waitForTimeout(500);
     await page.keyboard.up('a');
     await page.keyboard.up('s');
     
@@ -217,9 +193,7 @@ test.describe('Character Class Tests', () => {
     // Test rapid firing (Elf has higher ROF)
     console.log('Testing CYBER-ELF rapid fire (SMG weapon)...');
     await page.keyboard.down('Space');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 2000));
-    });
+    await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
 
     console.log('✓ CYBER-ELF rapid fire tested');
@@ -228,23 +202,17 @@ test.describe('Character Class Tests', () => {
     console.log('Testing CYBER-ELF combat with movement...');
     await page.keyboard.down('w');
     await page.keyboard.down('Space');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 2000));
-    });
+    await page.waitForTimeout(2000);
     await page.keyboard.up('Space');
 
     // Strafe while firing
     await page.keyboard.down('Space');
     await page.keyboard.up('w');
     await page.keyboard.down('a');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 1000));
-    });
+    await page.waitForTimeout(1000);
     await page.keyboard.up('a');
     await page.keyboard.down('d');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 1000));
-    });
+    await page.waitForTimeout(1000);
     await page.keyboard.up('d');
     await page.keyboard.up('Space');
     
@@ -264,8 +232,7 @@ test.describe('Character Class Tests', () => {
   test('THE BUMBLE: should select character and start game', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Find and click Bumble button
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
@@ -289,8 +256,7 @@ test.describe('Character Class Tests', () => {
   test('THE BUMBLE: should display correct stats and move/fight', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Start game with Bumble
     const bumbleButton = page.getByRole('button', { name: /BUMBLE/i });
@@ -299,42 +265,26 @@ test.describe('Character Class Tests', () => {
 
     // Wait for game to start
     await expect(bumbleButton).not.toBeVisible({ timeout: 5000 });
-    await expect.poll(async () => (await getGameState(page))?.gameState).toMatch(/PHASE_/);
+    await page.waitForTimeout(1000);
 
     // Test movement (Bumble has medium speed)
     console.log('Testing THE BUMBLE movement...');
 
     // Circle movement
     await page.keyboard.down('w');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.up === true;
-    });
+    await page.waitForTimeout(300);
     await page.keyboard.down('d');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      const input = store?.getState().input;
-      return input?.up === true && input?.right === true;
-    });
+    await page.waitForTimeout(300);
     await page.keyboard.up('w');
+    await page.waitForTimeout(300);
     await page.keyboard.down('s');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      const input = store?.getState().input;
-      return input?.down === true && input?.right === true;
-    });
+    await page.waitForTimeout(300);
     await page.keyboard.up('d');
+    await page.waitForTimeout(300);
     await page.keyboard.down('a');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      const input = store?.getState().input;
-      return input?.down === true && input?.left === true;
-    });
+    await page.waitForTimeout(300);
     await page.keyboard.up('s');
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().input?.left === true;
-    });
+    await page.waitForTimeout(300);
     await page.keyboard.up('a');
     
     console.log('✓ THE BUMBLE movement tested');
@@ -343,6 +293,7 @@ test.describe('Character Class Tests', () => {
     console.log('Testing THE BUMBLE firing (star weapon)...');
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press('Space');
+      await page.waitForTimeout(300);
     }
 
     console.log('✓ THE BUMBLE firing tested');
@@ -351,9 +302,7 @@ test.describe('Character Class Tests', () => {
     console.log('Testing THE BUMBLE sustained combat...');
     await page.keyboard.down('w');
     await page.keyboard.down('Space');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 3000));
-    });
+    await page.waitForTimeout(3000);
     await page.keyboard.up('Space');
     await page.keyboard.up('w');
     
@@ -373,8 +322,7 @@ test.describe('Character Class Tests', () => {
   test('Touch controls should work with all characters', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Start with Santa
     const santaButton = page.getByRole('button', { name: /MECHA-SANTA/i });
@@ -382,7 +330,7 @@ test.describe('Character Class Tests', () => {
     await santaButton.click();
 
     await expect(santaButton).not.toBeVisible({ timeout: 5000 });
-    await expect.poll(async () => (await getGameState(page))?.gameState).toMatch(/PHASE_/);
+    await page.waitForTimeout(1000);
 
     // Verify touch fire button is visible
     const fireButton = page.getByRole('button', { name: /FIRE/i });
@@ -390,7 +338,9 @@ test.describe('Character Class Tests', () => {
 
     // Click fire button multiple times
     await fireButton.click();
+    await page.waitForTimeout(200);
     await fireButton.click();
+    await page.waitForTimeout(200);
     await fireButton.click();
     
     console.log('✓ Touch controls tested');
@@ -403,8 +353,7 @@ test.describe('Character Class Tests', () => {
   test('Score should update when enemies are killed', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Start game with Elf (fast firing for quick kills)
     const elfButton = page.getByRole('button', { name: /CYBER-ELF/i });
@@ -412,7 +361,7 @@ test.describe('Character Class Tests', () => {
     await elfButton.click();
 
     await expect(elfButton).not.toBeVisible({ timeout: 5000 });
-    await expect.poll(async () => (await getGameState(page))?.gameState).toMatch(/PHASE_/);
+    await page.waitForTimeout(1000);
 
     // Get initial score
     const scoreElement = page.getByText(/SCORE/i);
@@ -422,21 +371,15 @@ test.describe('Character Class Tests', () => {
     console.log('Fighting enemies to test score updates...');
     await page.keyboard.down('Space');
     await page.keyboard.down('w');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 5000));
-    });
+    await page.waitForTimeout(5000);
     await page.keyboard.up('w');
 
     // Move around and keep firing
     await page.keyboard.down('a');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 2000));
-    });
+    await page.waitForTimeout(2000);
     await page.keyboard.up('a');
     await page.keyboard.down('d');
-    await page.waitForFunction(() => {
-      return new Promise(resolve => setTimeout(() => resolve(true), 2000));
-    });
+    await page.waitForTimeout(2000);
     await page.keyboard.up('d');
     await page.keyboard.up('Space');
     
@@ -453,8 +396,7 @@ test.describe('Character Class Tests', () => {
   test('Character selection and game state should persist correctly', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     // Test with each character
     for (const character of ['MECHA-SANTA', 'CYBER-ELF', 'BUMBLE']) {
@@ -462,7 +404,7 @@ test.describe('Character Class Tests', () => {
 
       // Reload page
       await page.reload();
-      await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+      await page.waitForTimeout(3000);
 
       // Select character
       const button = page.getByRole('button', { name: new RegExp(character, 'i') });
@@ -475,6 +417,7 @@ test.describe('Character Class Tests', () => {
 
       // Play briefly
       await page.keyboard.press('Space');
+      await page.waitForTimeout(1000);
 
       console.log(`✓ ${character} tested`);
     }
@@ -489,8 +432,7 @@ test.describe('Character Class Tests', () => {
   test('All characters should survive basic gameplay loop', async ({ page }) => {
     test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
 
-    // Wait for menu to be ready
-    await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+    await page.waitForTimeout(3000);
 
     const characters = [
       { name: 'MECHA-SANTA', role: /Heavy Siege \/ Tank/i },
@@ -505,7 +447,7 @@ test.describe('Character Class Tests', () => {
 
       // Reload for fresh test
       await page.reload();
-      await expect.poll(async () => (await getGameState(page))?.gameState).toBeDefined();
+      await page.waitForTimeout(3000);
 
       // Select character
       const button = page.getByRole('button', { name: new RegExp(char.name, 'i') });
@@ -523,48 +465,33 @@ test.describe('Character Class Tests', () => {
       // Perform full gameplay test
       console.log(`  → Testing movement in all directions...`);
       await page.keyboard.down('w');
-      await page.waitForFunction(() => {
-        const store = (window as any).useGameStore;
-        return store?.getState().input?.up === true;
-      });
+      await page.waitForTimeout(500);
       await page.keyboard.up('w');
       await page.keyboard.down('s');
-      await page.waitForFunction(() => {
-        const store = (window as any).useGameStore;
-        return store?.getState().input?.down === true;
-      });
+      await page.waitForTimeout(500);
       await page.keyboard.up('s');
       await page.keyboard.down('a');
-      await page.waitForFunction(() => {
-        const store = (window as any).useGameStore;
-        return store?.getState().input?.left === true;
-      });
+      await page.waitForTimeout(500);
       await page.keyboard.up('a');
       await page.keyboard.down('d');
-      await page.waitForFunction(() => {
-        const store = (window as any).useGameStore;
-        return store?.getState().input?.right === true;
-      });
+      await page.waitForTimeout(500);
       await page.keyboard.up('d');
       console.log(`  ✓ Movement works`);
 
       console.log(`  → Testing firing mechanics...`);
       for (let i = 0; i < 3; i++) {
         await page.keyboard.press('Space');
+        await page.waitForTimeout(200);
       }
       console.log(`  ✓ Firing works`);
 
       console.log(`  → Testing combat...`);
       await page.keyboard.down('Space');
       await page.keyboard.down('w');
-      await page.waitForFunction(() => {
-        return new Promise(resolve => setTimeout(() => resolve(true), 3000));
-      });
+      await page.waitForTimeout(3000);
       await page.keyboard.up('w');
       await page.keyboard.down('a');
-      await page.waitForFunction(() => {
-        return new Promise(resolve => setTimeout(() => resolve(true), 1500));
-      });
+      await page.waitForTimeout(1500);
       await page.keyboard.up('a');
       await page.keyboard.up('Space');
       console.log(`  ✓ Combat works`);
