@@ -15,6 +15,7 @@ export function StartScreen() {
   const { state, selectClass, highScore } = useGameStore();
   const [showWorkshop, setShowWorkshop] = useState(false);
   const audioInitializedRef = useRef(false);
+  const workshopBtnRef = useRef<HTMLButtonElement>(null);
 
   // Initialize audio when screen is shown (on first interaction)
   useEffect(() => {
@@ -138,8 +139,14 @@ export function StartScreen() {
         {highScore > 0 && <p className={styles.highScore}>HIGH SCORE: {highScore}</p>}
       </div>
 
-      <WorkshopButton onOpen={() => setShowWorkshop(true)} />
-      <SantasWorkshop show={showWorkshop} onClose={() => setShowWorkshop(false)} />
+      <WorkshopButton ref={workshopBtnRef} onOpen={() => setShowWorkshop(true)} />
+      {showWorkshop && (
+        <SantasWorkshop
+          show={showWorkshop}
+          onClose={() => setShowWorkshop(false)}
+          triggerRef={workshopBtnRef}
+        />
+      )}
     </div>
   );
 }

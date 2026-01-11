@@ -147,6 +147,11 @@
   box-shadow: 0 0 10px #00ffcc;
 }
 
+.tabPanel:focus-visible {
+  outline: 2px solid #00ffcc;
+  outline-offset: 2px;
+}
+
 /* Content */
 .content {
   min-height: 400px;
