@@ -91,6 +91,9 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      // Reset animation guard when unmounting to handle React StrictMode
+      // where components mount, unmount, then remount in development/test
+      animationStartedRef.current = false;
     };
   }, [state]);
 
