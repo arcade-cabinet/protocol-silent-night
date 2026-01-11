@@ -175,9 +175,9 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
       if (result) {
         // Wait for state to propagate through Zustand in Node.js context
         // Zustand state updates need time to fully persist to all subscribers
-        // Set to 200ms to ensure lastKillTime is properly persisted before next action
-        // Total time between kills: 200ms internal + 500ms external = 700ms (well under 2s timeout)
-        await page.waitForTimeout(200);
+        // Set to 300ms to ensure lastKillTime is properly persisted before next action
+        // Total time between kills: 300ms internal + 500ms external = 800ms (well under 2s timeout)
+        await page.waitForTimeout(300);
         return true;
       }
 
