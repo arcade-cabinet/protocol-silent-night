@@ -43,6 +43,10 @@ class AudioManagerClass {
   private currentTrack: MusicTrack | null = null;
   private musicLoop: Tone.Loop | null = null;
 
+  // Audio timing management to prevent Tone.js "Start time must be strictly greater" errors
+  private lastSfxTime = 0;
+  private minSfxInterval = 0.001; // 1ms minimum between sound effects
+
   /**
    * Initialize audio system. Must be called after user interaction.
    */
@@ -181,6 +185,11 @@ class AudioManagerClass {
     const noiseSynth = this.synths.get('noise') as Tone.NoiseSynth;
     const now = Tone.now();
 
+    // Ensure start time is always greater than the last scheduled time
+    // This prevents Tone.js timing errors when multiple sounds are triggered rapidly
+    const startTime = Math.max(now, this.lastSfxTime + this.minSfxInterval);
+    this.lastSfxTime = startTime;
+
     const effectData = AUDIO_DATA.sfx[effect as keyof typeof AUDIO_DATA.sfx];
     if (!effectData) return;
 
@@ -189,18 +198,18 @@ class AudioManagerClass {
     if (effectData.sequence) {
       // @ts-expect-error
       for (const [note, duration, delay = 0] of effectData.sequence) {
-        sfxSynth.triggerAttackRelease(note, duration, now + delay);
+        sfxSynth.triggerAttackRelease(note, duration, startTime + delay);
       }
     } else {
       // @ts-expect-error
       if (effectData.note) {
         // @ts-expect-error
-        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, now);
+        sfxSynth.triggerAttackRelease(effectData.note, effectData.duration, startTime);
       }
       // @ts-expect-error
       if (effectData.noise) {
         // @ts-expect-error
-        noiseSynth.triggerAttackRelease(effectData.duration, now);
+        noiseSynth.triggerAttackRelease(effectData.duration, startTime);
       }
     }
   }
@@ -330,6 +339,7 @@ class AudioManagerClass {
     this.synths.clear();
 
     this.initialized = false;
+    this.lastSfxTime = 0; // Reset timing state
   }
 }
 
