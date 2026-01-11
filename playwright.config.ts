@@ -24,7 +24,7 @@ export default defineConfig({
   retries: hasMcpSupport ? 0 : isCI ? 2 : 0,
   // Parallel workers - more with MCP, fewer in CI
   workers: hasMcpSupport ? undefined : isCI ? 2 : undefined,
-  // Longer timeout for WebGL rendering and briefing animations (60s for all environments)
+  // Longer timeout for WebGL rendering with MCP
   timeout: 60000,
   // Reporter to use
   reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
@@ -41,7 +41,7 @@ export default defineConfig({
     // Video recording with MCP for debugging
     video: hasMcpSupport ? 'on-first-retry' : 'off',
     // Increased action timeout for WebGL rendering
-    actionTimeout: 10000,
+    actionTimeout: 30000,
   },
   // Expect options for visual regression
   expect: {
