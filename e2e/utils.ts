@@ -108,6 +108,9 @@ export async function startMission(page: Page) {
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
   await button.click({ timeout: 15000, force: true });
+
+  // Wait for game to actually start and be in a playable state
+  await waitForGameReady(page);
 }
 
 // Helper to wait for game to be initialized and playable
