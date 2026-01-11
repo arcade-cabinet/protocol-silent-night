@@ -183,29 +183,36 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
       page.setDefaultTimeout(15000);
 
       if (result) {
-        // For addKill, wait for the kill count to actually increment
+        // For addKill, wait for the kill count AND killStreak to actually update
         if (action === 'addKill') {
           const expectedKills = previousKills + 1;
           const pollStart = Date.now();
           const pollTimeout = 2000;
 
           while (Date.now() - pollStart < pollTimeout) {
-            const currentKills = await page.evaluate(() => {
+            const state = await page.evaluate(() => {
               const store = (window as any).useGameStore;
-              if (!store) return 0;
-              return store.getState().stats.kills;
+              if (!store) return { kills: 0, killStreak: 0 };
+              const s = store.getState();
+              return { kills: s.stats.kills, killStreak: s.killStreak };
             });
 
-            if (currentKills >= expectedKills) {
-              // State has propagated, wait a bit more for full consistency
-              await page.waitForTimeout(50);
+            if (state.kills >= expectedKills && state.killStreak > 0) {
+              // Both kill count and killStreak have propagated
+              // Wait a bit more for full consistency
+              await page.waitForTimeout(100);
               return true;
             }
 
             await page.waitForTimeout(10);
           }
 
-          console.error(`Timeout waiting for kill count to update from ${previousKills} to ${expectedKills}`);
+          console.error(`Timeout waiting for kill state to update. Expected kills: ${expectedKills}, got: ${await page.evaluate(() => {
+            const store = (window as any).useGameStore;
+            if (!store) return null;
+            const s = store.getState();
+            return { kills: s.stats.kills, killStreak: s.killStreak };
+          })}`);
           return false;
         }
 
