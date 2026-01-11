@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { waitForLoadingScreen } from './utils';
 
 /**
  * UI Component Refinement Tests
@@ -31,6 +32,7 @@ test.describe('UI Component Refinement', () => {
     });
 
     await page.goto('/');
+    await waitForLoadingScreen(page);
     await page.waitForLoadState('networkidle');
   });
 
@@ -168,9 +170,6 @@ test.describe('UI Component Refinement', () => {
       // Click commence
       await page.click('button:has-text("COMMENCE OPERATION")');
 
-      // Wait for game HUD to appear
-      await page.waitForTimeout(2000);
-
       // Check for HUD elements
       const hudStats = page.locator('text=/HP:|AMMO:|SPEED:/', { timeout: 3000 }).first();
       await expect(hudStats).toBeVisible({ timeout: 5000 }).catch(() => {
@@ -191,8 +190,10 @@ test.describe('UI Component Refinement', () => {
       await page.waitForSelector('text=MISSION BRIEFING', { timeout: 5000 });
       await page.click('button:has-text("COMMENCE OPERATION")');
 
-      // Wait for HUD
-      await page.waitForTimeout(2000);
+      // Wait for HUD to appear
+      await page.getByText(/OPERATOR STATUS/i).waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+        console.log('⚠️  HUD not immediately visible');
+      });
 
       // Check for weapon display
       const weaponDisplay = page.locator('text=/Plasma|Coal|Star/').first();
@@ -263,9 +264,6 @@ test.describe('UI Component Refinement', () => {
       // Set mobile viewport before navigation
       await page.setViewportSize({ width: 375, height: 667 });
 
-      // Wait for page to render at new size
-      await page.waitForTimeout(500);
-
       // Verify canvas and overlay elements exist
       const canvas = page.locator('canvas');
       const root = page.locator('#root');
@@ -280,7 +278,6 @@ test.describe('UI Component Refinement', () => {
     test('should display correctly on tablet viewport', async ({ page }) => {
       // Set tablet viewport
       await page.setViewportSize({ width: 768, height: 1024 });
-      await page.waitForTimeout(500);
 
       // Verify rendering surface exists
       const canvas = page.locator('canvas');
@@ -296,7 +293,6 @@ test.describe('UI Component Refinement', () => {
     test('should display correctly on desktop viewport', async ({ page }) => {
       // Set desktop viewport
       await page.setViewportSize({ width: 1920, height: 1080 });
-      await page.waitForTimeout(500);
 
       // Verify rendering surface exists
       const canvas = page.locator('canvas');
