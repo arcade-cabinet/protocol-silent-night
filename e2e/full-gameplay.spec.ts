@@ -160,14 +160,18 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
 
     try {
       page.setDefaultTimeout(1000);
-      // For addKill action, capture the current kill count before triggering
+      // For addKill action, capture the current kill count and killStreak before triggering
       let previousKills = 0;
+      let previousKillStreak = 0;
       if (action === 'addKill') {
-        previousKills = await page.evaluate(() => {
+        const beforeState = await page.evaluate(() => {
           const store = (window as any).useGameStore;
-          if (!store) return 0;
-          return store.getState().stats.kills;
+          if (!store) return { kills: 0, killStreak: 0 };
+          const s = store.getState();
+          return { kills: s.stats.kills, killStreak: s.killStreak };
         });
+        previousKills = beforeState.kills;
+        previousKillStreak = beforeState.killStreak;
       }
 
       const result = await page.evaluate(({ action, args }) => {
@@ -186,6 +190,7 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
         // For addKill, wait for the kill count AND killStreak to actually update
         if (action === 'addKill') {
           const expectedKills = previousKills + 1;
+          const expectedMinKillStreak = previousKillStreak + 1; // Streak should increment (or reset to 1 if timeout)
           const pollStart = Date.now();
           const pollTimeout = 2000;
 
@@ -197,7 +202,9 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
               return { kills: s.stats.kills, killStreak: s.killStreak };
             });
 
-            if (state.kills >= expectedKills && state.killStreak > 0) {
+            // Wait for kill count to update AND killStreak to change from its previous value
+            // killStreak should be > 0 and different from previous (either incremented or reset to 1)
+            if (state.kills >= expectedKills && state.killStreak > 0 && state.killStreak !== previousKillStreak) {
               // Both kill count and killStreak have propagated
               // Wait a bit more for full consistency
               await page.waitForTimeout(100);
@@ -207,7 +214,7 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
             await page.waitForTimeout(10);
           }
 
-          console.error(`Timeout waiting for kill state to update. Expected kills: ${expectedKills}, got: ${await page.evaluate(() => {
+          console.error(`Timeout waiting for kill state to update. Expected kills: ${expectedKills}, previous streak: ${previousKillStreak}, got: ${await page.evaluate(() => {
             const store = (window as any).useGameStore;
             if (!store) return null;
             const s = store.getState();
