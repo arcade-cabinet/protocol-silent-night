@@ -45,7 +45,7 @@ export function StartScreen() {
 
   if (state !== 'MENU') return null;
 
-  const handleSelectClass = async (type: PlayerClassType) => {
+  const handleSelectClass = (type: PlayerClassType) => {
     // Ensure audio is initialized, but don't block on it
     AudioManager.initialize()
       .then(() => {

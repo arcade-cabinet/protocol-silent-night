@@ -3,7 +3,7 @@
  * Displays mission objectives before starting the game
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { useGameStore } from '@/store/gameStore';
 import styles from './MissionBriefing.module.css';
@@ -19,6 +19,7 @@ export function MissionBriefing() {
   const { state, setState, playerClass, missionBriefing } = useGameStore();
   const [currentLine, setCurrentLine] = useState(0);
   const [showButton, setShowButton] = useState(false);
+  const animationStartedRef = useRef(false);
 
   const briefingLines = useMemo(() => {
     const lines: BriefingLine[] = [
@@ -45,7 +46,29 @@ export function MissionBriefing() {
   }, [playerClass, missionBriefing]);
 
   useEffect(() => {
-    if (state !== 'BRIEFING') return;
+    if (state !== 'BRIEFING') {
+      animationStartedRef.current = false;
+      // Reset state when leaving briefing to ensure fresh start on next entry
+      setCurrentLine(0);
+      setShowButton(false);
+      return;
+    }
+
+    // Capture total lines to avoid dependency on the array reference
+    const totalLines = briefingLines.length;
+
+    if (totalLines === 0) {
+      animationStartedRef.current = false;
+      return;
+    }
+
+    if (animationStartedRef.current) return;
+
+    animationStartedRef.current = true;
+
+    // Reset state when briefing starts
+    setCurrentLine(0);
+    setShowButton(false);
 
     // Play briefing sound
     AudioManager.playSFX('ui_click');
@@ -54,7 +77,7 @@ export function MissionBriefing() {
     let timeoutId: ReturnType<typeof setTimeout>;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
-        if (prev >= briefingLines.length - 1) {
+        if (prev >= totalLines - 1) {
           clearInterval(interval);
           timeoutId = setTimeout(() => setShowButton(true), 500);
           return prev;
@@ -67,16 +90,9 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
+      animationStartedRef.current = false;
     };
-  }, [state, briefingLines]);
-
-  // Reset state when briefing starts
-  useEffect(() => {
-    if (state === 'BRIEFING') {
-      setCurrentLine(0);
-      setShowButton(false);
-    }
-  }, [state]);
+  }, [state, briefingLines.length]);
 
   if (state !== 'BRIEFING') return null;
 

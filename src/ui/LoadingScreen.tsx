@@ -1,62 +1,50 @@
 /**
  * Loading Screen Component
- * Shows while WebGL context and assets are loading
+ * Initial game loading overlay
  */
 
 import { useEffect, useState } from 'react';
+import { useGameStore } from '@/store/gameStore';
 import styles from './LoadingScreen.module.css';
 
 interface LoadingScreenProps {
   minDuration?: number;
 }
 
-export function LoadingScreen({ minDuration = 1500 }: LoadingScreenProps) {
-  const [isVisible, setIsVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
+export function LoadingScreen(_props: LoadingScreenProps) {
+  const [visible, setVisible] = useState(true);
+  const [mounted, setMounted] = useState(true);
+  const { state } = useGameStore();
 
   useEffect(() => {
-    // Simulate loading progress
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 100);
+    // Only show during initial load or explicit loading states
+    // Hide when state becomes MENU (initial load done) or any other non-loading state
+    if (state !== 'LOADING') {
+      const animationDuration = 500; // CSS transition duration
 
-    // Hide after minimum duration
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, minDuration);
+      // Hide immediately when loading is done
+      setVisible(false);
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timer);
-    };
-  }, [minDuration]);
+      // Remove from DOM after fade out animation completes
+      const timer = setTimeout(() => setMounted(false), animationDuration);
 
-  if (!isVisible) return null;
+      return () => clearTimeout(timer);
+    }
+  }, [state]);
+
+  if (!mounted) return null;
 
   return (
-    <div className={styles.screen}>
+    <div className={`${styles.screen} ${!visible ? styles.hidden : ''}`}>
       <div className={styles.content}>
-        <h1 className={styles.title}>
-          PROTOCOL: <span className={styles.accent}>SILENT NIGHT</span>
-        </h1>
-        <div className={styles.subtitle}>INITIALIZING SYSTEMS</div>
-
-        <div className={styles.progressContainer}>
-          <div className={styles.progressBar} style={{ width: `${Math.min(progress, 100)}%` }} />
+        <div className={styles.logo}>
+          <div className={styles.icon}>🎄</div>
+          <h1 className={styles.title}>PROTOCOL: SILENT NIGHT</h1>
         </div>
-
-        <div className={styles.status}>
-          {progress < 30 && 'Loading WebGL context...'}
-          {progress >= 30 && progress < 60 && 'Initializing game systems...'}
-          {progress >= 60 && progress < 90 && 'Preparing operators...'}
-          {progress >= 90 && 'Ready for deployment'}
+        <div className={styles.loader}>
+          <div className={styles.bar} />
         </div>
+        <div className={styles.status}>INITIALIZING SYSTEMS...</div>
       </div>
     </div>
   );

@@ -1,23 +1,27 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MessageOverlay } from '@/ui/MessageOverlay';
 import { useGameStore } from '@/store/gameStore';
+import { MessageOverlay } from '@/ui/MessageOverlay';
 
-// Mock the game store
+// Mock the store
 vi.mock('@/store/gameStore', () => ({
   useGameStore: vi.fn(),
 }));
 
-describe('MessageOverlay', () => {
+const mockUseGameStore = vi.mocked(useGameStore);
+
+describe('MessageOverlay Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders boss warning when boss is active', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+      lastSfxTime: 0,
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
@@ -25,10 +29,12 @@ describe('MessageOverlay', () => {
   });
 
   it('renders mission complete when state is WIN', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'WIN',
       bossActive: false,
-    });
+      lastSfxTime: 0,
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
@@ -36,10 +42,12 @@ describe('MessageOverlay', () => {
   });
 
   it('renders operator down when state is GAME_OVER', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'GAME_OVER',
       bossActive: false,
-    });
+      lastSfxTime: 0,
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
@@ -47,15 +55,17 @@ describe('MessageOverlay', () => {
   });
 
   it('is accessible with role="alert"', () => {
-    (useGameStore as any).mockReturnValue({
+    mockUseGameStore.mockReturnValue({
       state: 'PHASE_BOSS',
       bossActive: true,
-    });
+      lastSfxTime: 0,
+      // biome-ignore lint/suspicious/noExplicitAny: Mocking partial store
+    } as unknown as any);
 
     render(<MessageOverlay />);
 
     const alert = screen.getByRole('alert');
     expect(alert).toBeInTheDocument();
-    expect(alert).toHaveTextContent(/WARNING: BOSS DETECTED/);
+    expect(alert).toHaveAttribute('aria-live', 'assertive');
   });
 });

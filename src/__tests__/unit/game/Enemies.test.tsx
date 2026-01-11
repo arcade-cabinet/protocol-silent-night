@@ -47,6 +47,10 @@ describe('Enemies Component', () => {
   });
 
   it('should damage player on collision', async () => {
+    vi.useFakeTimers();
+    const startTime = Date.now();
+    vi.setSystemTime(startTime);
+
     const enemy = {
       id: 'test-enemy',
       mesh: new THREE.Object3D(),
@@ -69,11 +73,15 @@ describe('Enemies Component', () => {
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
+    // Advance time past the grace period (2000ms)
+    vi.setSystemTime(startTime + 2500);
+
     await renderer.advanceFrames(1, 0.1);
 
     const state = useGameStore.getState();
     expect(state.playerHp).toBeLessThan(100);
 
     await renderer.unmount();
+    vi.useRealTimers();
   });
 });
