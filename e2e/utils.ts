@@ -1,7 +1,12 @@
 import { Page, expect } from '@playwright/test';
 
+// Helper to wait for a short duration - use sparingly
+async function wait(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Helper to get game state from the store
-export async function getGameState(page: Page) {
+export async function getGameState(page: Page, timeout = 10000) {
   return page.evaluate(() => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
     const store = (window as any).useGameStore;
@@ -20,7 +25,19 @@ export async function getGameState(page: Page) {
       enemyCount: state.enemies.length,
       bulletCount: state.bullets.length,
     };
-  });
+  }, { timeout });
+}
+
+// Helper to wait for game store to be available
+export async function waitForGameStore(page: Page, timeout = 30000) {
+  await page.waitForFunction(
+    () => {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+      const store = (window as any).useGameStore;
+      return store !== undefined && store !== null;
+    },
+    { timeout }
+  );
 }
 
 // Helper to wait for specific game state
@@ -93,6 +110,9 @@ export async function waitForLoadingScreen(page: Page) {
 export async function selectCharacter(page: Page, name: string) {
   // Ensure loading is complete before attempting interaction
   await waitForLoadingScreen(page);
+
+  // Ensure game store is loaded
+  await waitForGameStore(page);
 
   const button = page.locator('button', { hasText: name });
   // Wait for button to be visible with increased timeout for CI
