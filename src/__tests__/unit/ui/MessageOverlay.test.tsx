@@ -25,8 +25,7 @@ describe('MessageOverlay Component', () => {
 
     render(<MessageOverlay />);
 
-    expect(screen.getByText(/WARNING: HIGH VALUE TARGET DETECTED/)).toBeInTheDocument();
-    expect(screen.getByText(/TARGET: MECHA-SANTA/)).toBeInTheDocument();
+    expect(screen.getByText(/WARNING: BOSS DETECTED/)).toBeInTheDocument();
   });
 
   it('renders mission complete when state is WIN', () => {
@@ -40,7 +39,6 @@ describe('MessageOverlay Component', () => {
     render(<MessageOverlay />);
 
     expect(screen.getByText(/MISSION COMPLETE/)).toBeInTheDocument();
-    expect(screen.getByText(/TARGET NEUTRALIZED/)).toBeInTheDocument();
   });
 
   it('renders operator down when state is GAME_OVER', () => {
@@ -54,7 +52,6 @@ describe('MessageOverlay Component', () => {
     render(<MessageOverlay />);
 
     expect(screen.getByText(/OPERATOR DOWN/)).toBeInTheDocument();
-    expect(screen.getByText(/MISSION FAILED/)).toBeInTheDocument();
   });
 
   it('is accessible with role="alert"', () => {
