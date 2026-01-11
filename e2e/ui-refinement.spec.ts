@@ -35,7 +35,6 @@ test.describe('UI Component Refinement', () => {
   test.describe('Menu Screen', () => {
     test('should render menu with proper styling and layout', async ({ page }) => {
       // Wait for menu to fully render
-      await page.waitForLoadState('networkidle');
       await page.waitForSelector('h1', { state: 'visible', timeout: 20000 });
 
       // Verify title is visible
