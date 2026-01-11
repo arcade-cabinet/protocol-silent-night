@@ -356,17 +356,18 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Trigger kills to build streak (< 2000ms between kills)
-    // Reduced delays to prevent CI timing issues: 3 kills with 100ms between + 3x100ms internal = 600ms total
+    // Increased delays to 200ms to ensure state propagation between kills in CI
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(200);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(200);
 
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
+    await page.waitForTimeout(200); // Additional delay to ensure state propagates
 
     // Check state immediately after third kill - no polling to avoid timing issues
     // Kill 1: 10 (streak 1, no bonus)
@@ -581,17 +582,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Trigger kills to build streak (< 2000ms between kills)
-    // Reduced delays to prevent CI timing issues: 3 kills with 100ms between + 3x100ms internal = 600ms total
+    // Increased delays to 200ms to ensure state propagation between kills in CI
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(200);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(200);
 
     const success3 = await triggerStoreAction(page, 'addKill', 10);
     if (!success3) throw new Error('Failed to add third kill');
+    await page.waitForTimeout(200); // Additional delay to ensure state propagates
 
     // Check state immediately after third kill - no polling to avoid timing issues
     const state = await getGameState(page);
@@ -605,13 +607,14 @@ test.describe('Full Gameplay - Kill Streaks', () => {
   test('should reset streak after timeout', async ({ page }) => {
     await startGameplay(page, 'MECHA-SANTA');
 
-    // Build a streak with kills within streak window (reduced delay to prevent CI timing issues)
+    // Build a streak with kills within streak window (increased delay to ensure CI state propagation)
     const success1 = await triggerStoreAction(page, 'addKill', 10);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(200);
 
     const success2 = await triggerStoreAction(page, 'addKill', 10);
     if (!success2) throw new Error('Failed to add second kill');
+    await page.waitForTimeout(200); // Additional delay to ensure state propagates
 
     // Check state immediately after second kill - no polling to avoid timing issues
     let state = await getGameState(page);
@@ -635,17 +638,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGameplay(page, 'MECHA-SANTA');
 
     // Trigger kills to build streak (< 2000ms between kills)
-    // Increased delays to 150ms to ensure state propagation between kills
+    // Increased delays to 200ms to ensure state propagation between kills in CI
     const success1 = await triggerStoreAction(page, 'addKill', 100);
     if (!success1) throw new Error('Failed to add first kill');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(200);
 
     const success2 = await triggerStoreAction(page, 'addKill', 100);
     if (!success2) throw new Error('Failed to add second kill');
-    await page.waitForTimeout(150);
+    await page.waitForTimeout(200);
 
     const success3 = await triggerStoreAction(page, 'addKill', 100);
     if (!success3) throw new Error('Failed to add third kill');
+    await page.waitForTimeout(200); // Additional delay to ensure state propagates
 
     // Check state immediately after third kill - no polling to avoid timing issues
     // Kill 1: 100 (streak 1, no bonus)
