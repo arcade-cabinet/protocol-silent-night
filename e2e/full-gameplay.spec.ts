@@ -175,9 +175,8 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]): P
       if (result) {
         // Wait for state to propagate through Zustand in Node.js context
         // Zustand state updates need time to fully persist to all subscribers
-        // Increased to 1000ms to ensure kill streak timestamps are properly captured in CI
-        // This ensures that browser Date.now() timestamps are sufficiently spaced for streak tracking
-        await page.waitForTimeout(1000);
+        // Reduced to 100ms since external waits in tests provide adequate spacing for streak tracking
+        await page.waitForTimeout(100);
         return true;
       }
 
