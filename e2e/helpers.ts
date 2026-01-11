@@ -17,15 +17,21 @@ export async function startGame(page: Page, characterName: string) {
   // Capture browser console logs to help diagnose issues
   page.on('console', msg => console.log(`[Browser Console] ${msg.type()}: ${msg.text()}`));
 
+  // Set a flag to speed up briefing animations in E2E tests
+  await page.evaluate(() => {
+    (window as any).isE2ETest = true;
+  });
+
   // Select character
   console.log(`Selecting character: ${characterName}`);
   const characterButton = page.getByRole('button', { name: new RegExp(characterName, 'i') });
   await characterButton.waitFor({ state: 'visible', timeout: 60000 });
   await characterButton.click({ force: true, timeout: 60000 });
 
-  // Wait for briefing animation to complete (5-6 lines at 600ms + 500ms for button)
-  // We explicitly wait here to ensure the animation logic has time to run
-  await page.waitForTimeout(5000);
+  // Wait for briefing animation to complete
+  // With E2E optimizations: 6 lines * 100ms + 100ms button delay = ~700ms
+  // Add buffer for rendering and state updates
+  await page.waitForTimeout(1500);
 
   // Click COMMENCE OPERATION
   try {

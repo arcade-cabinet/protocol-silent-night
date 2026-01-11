@@ -191,8 +191,9 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     expect(state?.kills).toBe(1);
     expect(state?.score).toBe(10);
 
-    // Add more kills
+    // Add more kills quickly to maintain streak (< 2000ms apart)
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(50);
     await triggerStoreAction(page, 'addKill', 10);
     await page.waitForTimeout(100);
 

@@ -74,19 +74,25 @@ export function MissionBriefing() {
     // Play briefing sound
     AudioManager.playSFX('ui_click');
 
+    // Faster animation in E2E test environment
+    // @ts-expect-error - Set by E2E test helpers
+    const isE2ETest = typeof window !== 'undefined' && window.isE2ETest === true;
+    const lineDelay = isE2ETest ? 100 : 600;
+    const buttonDelay = isE2ETest ? 100 : 500;
+
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout>;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
         if (prev >= totalLines - 1) {
           clearInterval(interval);
-          timeoutId = setTimeout(() => setShowButton(true), 500);
+          timeoutId = setTimeout(() => setShowButton(true), buttonDelay);
           return prev;
         }
         AudioManager.playSFX('ui_click');
         return prev + 1;
       });
-    }, 600);
+    }, lineDelay);
 
     return () => {
       clearInterval(interval);
