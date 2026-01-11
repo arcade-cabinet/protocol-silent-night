@@ -169,7 +169,7 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for game HUD to appear
-      await page.waitForTimeout(2000);
+      await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 2000)));
 
       // Check for HUD elements
       const hudStats = page.locator('text=/HP:|AMMO:|SPEED:/', { timeout: 3000 }).first();
@@ -192,7 +192,7 @@ test.describe('UI Component Refinement', () => {
       await page.click('button:has-text("COMMENCE OPERATION")');
 
       // Wait for HUD
-      await page.waitForTimeout(2000);
+      await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 2000)));
 
       // Check for weapon display
       const weaponDisplay = page.locator('text=/Plasma|Coal|Star/').first();
@@ -264,7 +264,7 @@ test.describe('UI Component Refinement', () => {
       await page.setViewportSize({ width: 375, height: 667 });
 
       // Wait for page to render at new size
-      await page.waitForTimeout(500);
+      await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 500)));
 
       // Verify canvas and overlay elements exist
       const canvas = page.locator('canvas');
@@ -280,7 +280,7 @@ test.describe('UI Component Refinement', () => {
     test('should display correctly on tablet viewport', async ({ page }) => {
       // Set tablet viewport
       await page.setViewportSize({ width: 768, height: 1024 });
-      await page.waitForTimeout(500);
+      await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 500)));
 
       // Verify rendering surface exists
       const canvas = page.locator('canvas');
@@ -296,7 +296,7 @@ test.describe('UI Component Refinement', () => {
     test('should display correctly on desktop viewport', async ({ page }) => {
       // Set desktop viewport
       await page.setViewportSize({ width: 1920, height: 1080 });
-      await page.waitForTimeout(500);
+      await page.waitForFunction(() => new Promise(resolve => setTimeout(() => resolve(true), 500)));
 
       // Verify rendering surface exists
       const canvas = page.locator('canvas');
