@@ -3,7 +3,7 @@
  * Main menu hub for spending Nice Points on unlocks
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AudioManager } from '@/audio/AudioManager';
 import { WORKSHOP } from '@/data';
 import { useGameStore } from '@/store/gameStore';
@@ -25,6 +25,57 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
   const { metaProgress, spendNicePoints, unlockWeapon, unlockSkin, upgradePermanent } =
     useGameStore();
   const [activeTab, setActiveTab] = useState<TabType>('weapons');
+  const modalRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<Element | null>(null);
+  const tabRefs = {
+    weapons: useRef<HTMLButtonElement>(null),
+    skins: useRef<HTMLButtonElement>(null),
+    upgrades: useRef<HTMLButtonElement>(null),
+  };
+
+  useEffect(() => {
+    tabRefs[activeTab].current?.focus();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (show) {
+      triggerRef.current = document.activeElement;
+      modalRef.current?.focus();
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          onClose();
+        }
+
+        // Focus trapping
+        if (event.key === 'Tab' && modalRef.current) {
+          const focusableElements = modalRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          );
+          const firstElement = focusableElements[0] as HTMLElement;
+          const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+          if (event.shiftKey) {
+            if (document.activeElement === firstElement) {
+              lastElement.focus();
+              event.preventDefault();
+            }
+          } else if (document.activeElement === lastElement) {
+            firstElement.focus();
+            event.preventDefault();
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        if (triggerRef.current instanceof HTMLElement) {
+          triggerRef.current.focus();
+        }
+      };
+    }
+  }, [show, onClose]);
 
   if (!show) return null;
 
@@ -72,11 +123,31 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
     AudioManager.playSFX('ui_select');
   };
 
+  const handleTabKeyDown = (e: React.KeyboardEvent) => {
+    const tabs: TabType[] = ['weapons', 'skins', 'upgrades'];
+    const currentIndex = tabs.indexOf(activeTab);
+
+    if (e.key === 'ArrowRight') {
+      const nextIndex = (currentIndex + 1) % tabs.length;
+      changeTab(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft') {
+      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      changeTab(tabs[prevIndex]);
+    }
+  };
+
   return (
-    <div className={styles.screen}>
+    <div
+      className={styles.screen}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="workshop-title"
+      ref={modalRef}
+      tabIndex={-1}
+    >
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>
+          <h1 id="workshop-title" className={styles.title}>
             Santa's <span className={styles.accent}>Workshop</span>
           </h1>
           <div className={styles.nicePoints}>
@@ -88,35 +159,46 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
           </button>
         </div>
 
-        <div className={styles.tabs} role="tablist" aria-label="Workshop Categories">
+        <div
+          className={styles.tabs}
+          role="tablist"
+          aria-label="Workshop Categories"
+          onKeyDown={handleTabKeyDown}
+        >
           <button
+            ref={tabRefs.weapons}
             type="button"
             role="tab"
             aria-selected={activeTab === 'weapons'}
             aria-controls="panel-weapons"
             id="tab-weapons"
+            tabIndex={activeTab === 'weapons' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'weapons' ? styles.tabActive : ''}`}
             onClick={() => changeTab('weapons')}
           >
             Weapons
           </button>
           <button
+            ref={tabRefs.skins}
             type="button"
             role="tab"
             aria-selected={activeTab === 'skins'}
             aria-controls="panel-skins"
             id="tab-skins"
+            tabIndex={activeTab === 'skins' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'skins' ? styles.tabActive : ''}`}
             onClick={() => changeTab('skins')}
           >
             Skins
           </button>
           <button
+            ref={tabRefs.upgrades}
             type="button"
             role="tab"
             aria-selected={activeTab === 'upgrades'}
             aria-controls="panel-upgrades"
             id="tab-upgrades"
+            tabIndex={activeTab === 'upgrades' ? 0 : -1}
             className={`${styles.tab} ${activeTab === 'upgrades' ? styles.tabActive : ''}`}
             onClick={() => changeTab('upgrades')}
           >
@@ -173,6 +255,13 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
                         className={styles.purchaseBtn}
                         onClick={() => handlePurchaseWeapon(weapon)}
                         disabled={!canAfford}
+                        aria-label={
+                          isUnlocked
+                            ? `Weapon ${weapon.name} already unlocked`
+                            : canAfford
+                              ? `Unlock ${weapon.name} for ${weapon.cost} Nice Points`
+                              : `Cannot afford to unlock ${weapon.name}, cost is ${weapon.cost} Nice Points`
+                        }
                       >
                         {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
                       </button>
@@ -220,6 +309,13 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
                         className={styles.purchaseBtn}
                         onClick={() => handlePurchaseSkin(skin)}
                         disabled={!canAfford}
+                        aria-label={
+                          isUnlocked
+                            ? `Skin ${skin.name} already unlocked`
+                            : canAfford
+                              ? `Unlock ${skin.name} for ${skin.cost} Nice Points`
+                              : `Cannot afford to unlock ${skin.name}, cost is ${skin.cost} Nice Points`
+                        }
                       >
                         {canAfford ? 'UNLOCK' : 'INSUFFICIENT NP'}
                       </button>
@@ -276,6 +372,13 @@ export function SantasWorkshop({ show, onClose }: SantasWorkshopProps) {
                                 className={styles.purchaseBtn}
                                 onClick={() => handlePurchaseUpgrade(upgrade)}
                                 disabled={!canAfford}
+                                aria-label={
+                                  isMaxed
+                                    ? `Upgrade ${upgrade.name} is fully maxed out`
+                                    : canAfford
+                                      ? `Upgrade ${upgrade.name} for ${upgrade.cost} Nice Points`
+                                      : `Cannot afford to upgrade ${upgrade.name}, cost is ${upgrade.cost} Nice Points`
+                                }
                               >
                                 {canAfford ? 'UPGRADE' : 'INSUFFICIENT NP'}
                               </button>
