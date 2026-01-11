@@ -91,9 +91,6 @@ export function MissionBriefing() {
     return () => {
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
-      // Reset animation guard when unmounting to handle test environments
-      // where components may be reused across test runs
-      animationStartedRef.current = false;
     };
   }, [state]);
 
