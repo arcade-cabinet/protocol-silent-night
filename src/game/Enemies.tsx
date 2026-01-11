@@ -23,8 +23,8 @@ export function Enemies() {
   const groupRef = useRef<THREE.Group>(null);
   const spawnTimerRef = useRef(0);
   const lastDamageTimeRef = useRef(0);
-  // Initialize to current time to ensure grace period is active on first render
-  const phaseStartTimeRef = useRef(Date.now());
+  // Initialize to Infinity to ensure grace period is active until phase actually starts
+  const phaseStartTimeRef = useRef(Infinity);
 
   // Optimization: Select only what is needed for rendering
   const state = useGameStore((state) => state.state);
@@ -102,6 +102,7 @@ export function Enemies() {
 
     if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
       hasSpawnedInitialRef.current = false;
+      phaseStartTimeRef.current = Infinity; // Reset grace period when leaving game phases
     }
 
     return () => {
