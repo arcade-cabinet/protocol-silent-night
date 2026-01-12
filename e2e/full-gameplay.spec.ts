@@ -384,10 +384,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await startGame(page, 'MECHA-SANTA');
     await page.waitForTimeout(3000);
 
-    // Trigger boss spawn
+    // Trigger boss spawn - do kills without delays
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
     }
     await page.waitForTimeout(500);
 
@@ -452,31 +451,43 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await startGame(page, 'MECHA-SANTA');
     await page.waitForTimeout(3000);
 
-    // Rapid kills to build streak
+    // First kill
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
-    await handleLevelUp(page); // Handle potential level-up
+    await page.waitForTimeout(200);
+
+    // Second kill - should trigger DOUBLE KILL
     await triggerStoreAction(page, 'addKill', 10);
-    await page.waitForTimeout(100);
-    await handleLevelUp(page); // Handle potential level-up
+
+    // Wait for the killStreak state to update
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().killStreak === 2;
+    }, { timeout: 3000 });
 
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
-    // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show DOUBLE KILL notification
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
 
-    // Continue streak
-    await triggerStoreAction(page, 'addKill', 10);
+    // Wait a bit for notification, then continue streak
     await page.waitForTimeout(200);
-    await handleLevelUp(page); // Handle potential level-up
-    await page.waitForTimeout(300);
+    await triggerStoreAction(page, 'addKill', 10);
+
+    // Wait for the killStreak state to update to 3
+    await page.waitForFunction(() => {
+      const store = (window as any).useGameStore;
+      return store?.getState().killStreak === 3;
+    }, { timeout: 3000 });
 
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
-    // Should show TRIPLE KILL
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 2000 });
+    // Should show TRIPLE KILL notification
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
+
+    // Handle any level-ups at the end
+    await handleLevelUp(page);
   });
 
   test('should reset streak after timeout', async ({ page }) => {
@@ -568,11 +579,12 @@ test.describe('Full Gameplay - Game Reset', () => {
     await startGame(page, 'MECHA-SANTA');
     await page.waitForTimeout(3000);
 
+    // Do kills without delays to speed up test
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(50);
-      await handleLevelUp(page); // Handle potential level-up
     }
+    await page.waitForTimeout(200);
+    await handleLevelUp(page); // Handle potential level-ups
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
@@ -580,9 +592,13 @@ test.describe('Full Gameplay - Game Reset', () => {
     await triggerStoreAction(page, 'damagePlayer', 300);
     await page.waitForTimeout(500);
 
-    // Reset
+    // Wait for GAME_OVER state first
+    await waitForGameState(page, 'GAME_OVER', 5000);
+
+    // Reset - wait for button to be visible first
+    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
     await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
 
     // Wait for menu state to be active
     await waitForGameState(page, 'MENU', 5000);
@@ -613,10 +629,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Step 3: Combat phase - kill enemies
+    // Step 3: Combat phase - kill enemies without delays
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(100);
     }
 
     // Step 4: Handle level-up and check for boss phase
@@ -642,7 +657,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       timeout: 5000,
     });
 
-    // Step 7: Can restart
+    // Step 7: Can restart - wait for button first
+    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
     await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true });
     await page.waitForTimeout(1000);
 
