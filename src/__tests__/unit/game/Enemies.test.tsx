@@ -73,8 +73,8 @@ describe('Enemies Component', () => {
     // biome-ignore lint/suspicious/noExplicitAny: test-renderer types are incomplete
     const renderer = (await ReactTestRenderer.create(<Enemies />)) as any;
 
-    // Advance time past the grace period (2000ms)
-    vi.setSystemTime(startTime + 2500);
+    // Advance time past the grace period (5000ms)
+    vi.setSystemTime(startTime + 5500);
 
     await renderer.advanceFrames(1, 0.1);
 

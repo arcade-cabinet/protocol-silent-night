@@ -218,12 +218,14 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should have low HP but rapid fire weapon', async ({ page }) => {
     await page.goto('/');
     await startGame(page, 'CYBER-ELF');
-    await page.waitForTimeout(3000);
 
-    // Verify Elf's stats - low HP, high speed
+    // Verify Elf's stats immediately after game start (within grace period)
     const state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
     expect(state?.playerHp).toBe(100);
+
+    // Wait a bit for enemies to spawn
+    await page.waitForTimeout(2000);
 
     // Elf's SMG fires rapidly - hold fire for a bit
     await page.keyboard.down('Space');

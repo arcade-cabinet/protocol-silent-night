@@ -15,13 +15,12 @@ test.describe('UI Refinement - Character Cards', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    // Check all character cards
-    const cards = page.locator('.classCard');
+    // Check all character cards using role-based selector
+    const cards = page.getByRole('button', { name: /MECHA-SANTA|CYBER-ELF|THE BUMBLE/ });
     await expect(cards).toHaveCount(3);
 
-    // Take a snapshot of just the cards container
-    const container = page.locator('.classContainer');
-    await expect(container).toHaveScreenshot('character-cards-container.png', {
+    // Take a snapshot of the entire start screen
+    await expect(page).toHaveScreenshot('character-cards-container.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: SCREENSHOT_TIMEOUT,
     });
@@ -31,8 +30,8 @@ test.describe('UI Refinement - Character Cards', () => {
     await page.goto('/');
     await page.waitForTimeout(2000);
 
-    // Check Santa card stats specifically
-    const santaCard = page.locator('.classCard').first();
+    // Check Santa card stats specifically using role-based selector
+    const santaCard = page.getByRole('button', { name: /MECHA-SANTA/ });
     await expect(santaCard).toHaveScreenshot('santa-card-stats.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
       timeout: SCREENSHOT_TIMEOUT,
