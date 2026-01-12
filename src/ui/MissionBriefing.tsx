@@ -67,11 +67,9 @@ export function MissionBriefing() {
     }
 
     if (animationStartedRef.current) {
-      console.log('[MissionBriefing] Animation already started, skipping');
       return;
     }
 
-    console.log('[MissionBriefing] Starting animation with', totalLines, 'lines');
     animationStartedRef.current = true;
 
     // Reset state when briefing starts
@@ -87,22 +85,17 @@ export function MissionBriefing() {
     const lineDelay = isE2ETest ? 100 : 600;
     const buttonDelay = isE2ETest ? 100 : 500;
 
-    console.log('[MissionBriefing] E2E mode:', isE2ETest, 'lineDelay:', lineDelay, 'buttonDelay:', buttonDelay);
-
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let lineIndex = 0;
 
     const interval = setInterval(() => {
       lineIndex++;
-      console.log('[MissionBriefing] Revealing line', lineIndex, 'of', totalLines);
 
       setCurrentLine((prev) => {
         if (prev >= totalLines - 1) {
-          console.log('[MissionBriefing] All lines revealed, setting button timeout');
           clearInterval(interval);
           timeoutId = setTimeout(() => {
-            console.log('[MissionBriefing] Showing button');
             setShowButton(true);
           }, buttonDelay);
           return prev;
@@ -113,7 +106,6 @@ export function MissionBriefing() {
     }, lineDelay);
 
     return () => {
-      console.log('[MissionBriefing] Cleanup: clearing interval and timeout');
       clearInterval(interval);
       if (timeoutId) clearTimeout(timeoutId);
       // Reset animation guard when unmounting to handle React StrictMode

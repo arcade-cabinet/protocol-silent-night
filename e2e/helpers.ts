@@ -98,6 +98,7 @@ export async function startGame(page: Page, characterName: string) {
     throw error;
   }
 
-  // Wait for game phase to start
-  await page.waitForTimeout(1000);
+  // Wait for game phase to start and for grace period to be fully active
+  // Grace period is 3.5s, so wait 500ms to ensure it's initialized but still active
+  await page.waitForTimeout(500);
 }
