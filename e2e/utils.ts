@@ -1,7 +1,22 @@
 import { Page, expect } from '@playwright/test';
 
+// Helper to wait for the game store to be available
+export async function waitForStore(page: Page, timeout = 10000) {
+  await page.waitForFunction(
+    () => {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+      return !!(window as any).useGameStore;
+    },
+    null,
+    { timeout }
+  );
+}
+
 // Helper to get game state from the store
 export async function getGameState(page: Page) {
+  // Ensure store is available before accessing it
+  await waitForStore(page);
+
   return page.evaluate(() => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
     const store = (window as any).useGameStore;
@@ -20,7 +35,7 @@ export async function getGameState(page: Page) {
       enemyCount: state.enemies.length,
       bulletCount: state.bullets.length,
     };
-  });
+  }, null, { timeout: 10000 }); // Add 10s timeout to prevent hanging
 }
 
 // Helper to wait for specific game state
@@ -39,6 +54,9 @@ export async function waitForGameState(page: Page, targetState: string, timeout 
 // Helper to trigger game actions via store
 // biome-ignore lint/suspicious/noExplicitAny: Generic args for store actions
 export async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
+  // Ensure store is available before accessing it
+  await waitForStore(page);
+
   return page.evaluate(({ action, args }) => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
     const store = (window as any).useGameStore;
@@ -49,7 +67,7 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
       return true;
     }
     return false;
-  }, { action, args });
+  }, { action, args }, { timeout: 10000 }); // Add 10s timeout to prevent hanging
 }
 
 // Helper to simulate combat and verify kills
