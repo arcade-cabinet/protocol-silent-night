@@ -390,8 +390,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const now = Date.now();
     const newKills = stats.kills + 1;
 
+    // Calculate streak - if lastKillTime is 0 (first kill), start streak at 1
+    // Otherwise, check if within timeout window OR if we're currently in LEVEL_UP state
     const streakTimeout = 2000;
-    const newStreak = now - lastKillTime < streakTimeout ? killStreak + 1 : 1;
+    const timeSinceLastKill = now - lastKillTime;
+    let newStreak: number;
+
+    if (lastKillTime === 0) {
+      // First kill ever
+      newStreak = 1;
+    } else if (timeSinceLastKill < streakTimeout) {
+      // Within timeout window
+      newStreak = killStreak + 1;
+    } else if (state === 'LEVEL_UP' && killStreak > 0) {
+      // In LEVEL_UP state - preserve streak
+      newStreak = killStreak + 1;
+    } else {
+      // Timed out - reset
+      newStreak = 1;
+    }
 
     const streakBonus = newStreak > 1 ? Math.floor(points * (newStreak - 1) * 0.25) : 0;
     const newScore = stats.score + points + streakBonus;
@@ -536,7 +553,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   levelUp: () => {
-    const { runProgress } = get();
+    const { runProgress, lastKillTime, killStreak } = get();
 
     if (runProgress.level === 10) {
       const availableEvolution = get().checkEvolutionAvailability();
@@ -607,7 +624,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   selectLevelUpgrade: (upgradeId) => {
-    const { runProgress, playerMaxHp, playerHp, previousState } = get();
+    const { runProgress, playerMaxHp, playerHp, previousState, lastKillTime, killStreak } = get();
     const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === upgradeId);
 
     if (!upgrade) return;
