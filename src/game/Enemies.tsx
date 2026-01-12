@@ -79,6 +79,14 @@ export function Enemies() {
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
     const intervalIds: ReturnType<typeof setInterval>[] = [];
 
+    // Reset spawn flag when not in game phases
+    if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
+      hasSpawnedInitialRef.current = false;
+      phaseStartTimeRef.current = Infinity; // Reset grace period when leaving game phases
+      spawnTimerRef.current = 0; // Reset spawn timer
+      lastDamageTimeRef.current = 0; // Reset damage timer
+    }
+
     if ((state === 'PHASE_1' || state === 'PHASE_BOSS') && !hasSpawnedInitialRef.current) {
       hasSpawnedInitialRef.current = true;
       phaseStartTimeRef.current = Date.now(); // Set start time when phase begins
@@ -98,11 +106,6 @@ export function Enemies() {
         }
       }, 1000);
       intervalIds.push(checkId);
-    }
-
-    if (state !== 'PHASE_1' && state !== 'PHASE_BOSS' && state !== 'LEVEL_UP') {
-      hasSpawnedInitialRef.current = false;
-      phaseStartTimeRef.current = Infinity; // Reset grace period when leaving game phases
     }
 
     return () => {
@@ -163,8 +166,8 @@ export function Enemies() {
           ? ENEMY_SPAWN_CONFIG.hitRadiusBoss
           : ENEMY_SPAWN_CONFIG.hitRadiusMinion;
       if (distance < hitRadius) {
-        // Add 2s grace period after phase start to prevent instant damage
-        const isGracePeriod = now - phaseStartTimeRef.current < 2000;
+        // Add 3.5s grace period after phase start to prevent instant damage
+        const isGracePeriod = now - phaseStartTimeRef.current < 3500;
 
         if (!isGracePeriod && now - lastDamageTimeRef.current > ENEMY_SPAWN_CONFIG.damageCooldown) {
           // Only damage if enemy is properly initialized
