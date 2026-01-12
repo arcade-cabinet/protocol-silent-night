@@ -412,7 +412,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true });
+    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -458,33 +458,23 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     // Second kill - should trigger DOUBLE KILL
     await triggerStoreAction(page, 'addKill', 10);
 
-    // Wait for the killStreak state to update
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().killStreak === 2;
-    }, { timeout: 3000 });
+    // Should show DOUBLE KILL notification - check immediately
+    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
 
+    // Verify killStreak state
     let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
-
-    // Should show DOUBLE KILL notification
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 3000 });
 
     // Wait a bit for notification, then continue streak
     await page.waitForTimeout(200);
     await triggerStoreAction(page, 'addKill', 10);
 
-    // Wait for the killStreak state to update to 3
-    await page.waitForFunction(() => {
-      const store = (window as any).useGameStore;
-      return store?.getState().killStreak === 3;
-    }, { timeout: 3000 });
+    // Should show TRIPLE KILL notification - check immediately
+    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
 
+    // Verify killStreak state
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
-
-    // Should show TRIPLE KILL notification
-    await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 3000 });
 
     // Handle any level-ups at the end
     await handleLevelUp(page);
@@ -658,8 +648,8 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     });
 
     // Step 7: Can restart - wait for button first
-    await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 5000 });
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true });
+    await expect(page.getByRole('button', { name: /PLAY AGAIN/ })).toBeVisible({ timeout: 5000 });
+    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true });
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
