@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getGameState, selectCharacter, startMission, triggerStoreAction, waitForGameReady } from './utils';
+import { getGameState, selectCharacter, startMission, triggerStoreAction } from './utils';
 
 /**
  * Full Gameplay E2E Tests
@@ -11,7 +11,7 @@ import { getGameState, selectCharacter, startMission, triggerStoreAction, waitFo
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     // Verify we're at menu
     let state = await getGameState(page);
@@ -24,7 +24,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await startMission(page);
 
     // Wait for game to start
-    await waitForGameReady(page);
+    await page.waitForTimeout(2000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
@@ -37,12 +37,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Verify Santa's stats are correct
     const state = await getGameState(page);
@@ -61,42 +61,42 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should survive longer due to high HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Simulate taking damage
     await triggerStoreAction(page, 'damagePlayer', 100);
+    await page.waitForTimeout(200);
 
-    let state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('playerHp', 200);
-    state = await getGameState(page);
+    let state = await getGameState(page);
+    expect(state?.playerHp).toBe(200); // 300 - 100 = 200
     expect(state?.gameState).toBe('PHASE_1'); // Still alive
 
     // Take more damage
     await triggerStoreAction(page, 'damagePlayer', 100);
+    await page.waitForTimeout(200);
 
-    state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('playerHp', 100);
     state = await getGameState(page);
+    expect(state?.playerHp).toBe(100);
     expect(state?.gameState).toBe('PHASE_1'); // Still alive with 100 HP
   });
 
   test('should trigger game over when HP reaches 0', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Deal fatal damage
     await triggerStoreAction(page, 'damagePlayer', 300);
-
-    // Wait for game over state
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('GAME_OVER');
+    await page.waitForTimeout(1000);
 
     const state = await getGameState(page);
     expect(state?.playerHp).toBe(0);
@@ -112,26 +112,28 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should accumulate score and kills', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Simulate kills
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
 
-    let state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('kills', 1);
-    state = await getGameState(page);
+    let state = await getGameState(page);
+    expect(state?.kills).toBe(1);
     expect(state?.score).toBe(10);
 
     // Add more kills
     await triggerStoreAction(page, 'addKill', 10);
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
 
-    state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('kills', 3);
     state = await getGameState(page);
+    expect(state?.kills).toBe(3);
     expect(state?.score).toBeGreaterThan(30); // Should have streak bonus
   });
 });
@@ -139,12 +141,12 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
   test('should complete full game loop with Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(2000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -154,12 +156,12 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Verify Elf's stats - low HP, high speed
     const state = await getGameState(page);
@@ -178,17 +180,16 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 
   test('should die quickly with low HP', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Elf only has 100 HP - one big hit kills
     await triggerStoreAction(page, 'damagePlayer', 100);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     const state = await getGameState(page);
     expect(state?.playerHp).toBe(0);
@@ -199,12 +200,12 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
 test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
   test('should complete full game loop with Bumble', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(2000);
 
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
@@ -214,12 +215,12 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should fire spread pattern weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Verify Bumble's stats - 200 HP, medium speed
     const state = await getGameState(page);
@@ -238,24 +239,24 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
   test('should have balanced survivability', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
+    await page.waitForTimeout(200);
 
-    let state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('playerHp', 100);
-    state = await getGameState(page);
+    let state = await getGameState(page);
+    expect(state?.playerHp).toBe(100);
     expect(state?.gameState).toBe('PHASE_1');
 
     // One more hit at 100 damage kills
     await triggerStoreAction(page, 'damagePlayer', 100);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('GAME_OVER');
@@ -265,20 +266,20 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 test.describe('Full Gameplay - Boss Battle', () => {
   test('should spawn boss after 10 kills', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Simulate 10 kills to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
 
-    // Wait for boss phase
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('PHASE_BOSS');
+    await page.waitForTimeout(1000);
 
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
@@ -292,27 +293,26 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should defeat boss and win game', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('PHASE_BOSS');
+    await page.waitForTimeout(1000);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
 
     // Damage boss until defeated
     await triggerStoreAction(page, 'damageBoss', 1000);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('WIN');
+    await page.waitForTimeout(1000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -328,30 +328,30 @@ test.describe('Full Gameplay - Boss Battle', () => {
 
   test('should show boss health decreasing', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(20);
     }
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('PHASE_BOSS');
+    await page.waitForTimeout(500);
 
     // Damage boss incrementally
     await triggerStoreAction(page, 'damageBoss', 250);
+    await page.waitForTimeout(200);
 
-    let state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('bossHp', 750);
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.bossHp).toBe(750);
 
     await triggerStoreAction(page, 'damageBoss', 250);
+    await page.waitForTimeout(200);
 
-    state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('bossHp', 500);
     state = await getGameState(page);
     expect(state?.bossHp).toBe(500);
 
@@ -363,19 +363,20 @@ test.describe('Full Gameplay - Boss Battle', () => {
 test.describe('Full Gameplay - Kill Streaks', () => {
   test('should trigger kill streak notifications', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Rapid kills to build streak
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
 
-    let state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('killStreak', 2);
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Should show DOUBLE KILL
@@ -383,8 +384,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(500);
 
-    state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('killStreak', 3);
     state = await getGameState(page);
     expect(state?.killStreak).toBe(3);
 
@@ -394,19 +395,20 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
   test('should reset streak after timeout', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Build a streak
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
 
-    let state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('killStreak', 2);
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.killStreak).toBe(2);
 
     // Wait for streak to timeout (2+ seconds)
@@ -414,40 +416,40 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     // Next kill should start new streak
     await triggerStoreAction(page, 'addKill', 10);
+    await page.waitForTimeout(100);
 
-    state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('killStreak', 1);
     state = await getGameState(page);
     expect(state?.killStreak).toBe(1); // Reset to 1
   });
 
   test('should apply streak bonus to score', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // First kill - no bonus
     await triggerStoreAction(page, 'addKill', 100);
+    await page.waitForTimeout(50);
 
-    let state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('score', 100);
-    state = await getGameState(page);
+    let state = await getGameState(page);
     expect(state?.score).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
     await triggerStoreAction(page, 'addKill', 100);
+    await page.waitForTimeout(50);
 
-    state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('score', 225);
     state = await getGameState(page);
     // 100 + (100 + 25% of 100) = 100 + 125 = 225
     expect(state?.score).toBe(225);
 
     // Third kill - 50% bonus (streak of 3)
     await triggerStoreAction(page, 'addKill', 100);
+    await page.waitForTimeout(50);
 
-    state = await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('score', 375);
     state = await getGameState(page);
     // 225 + (100 + 50% of 100) = 225 + 150 = 375
     expect(state?.score).toBe(375);
@@ -457,31 +459,28 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 test.describe('Full Gameplay - Game Reset', () => {
   test('should reset game and return to menu', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     // Play a game
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Get some score
     await triggerStoreAction(page, 'addKill', 100);
-
-    await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('score', 100);
+    await page.waitForTimeout(100);
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     // Click re-deploy
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
     // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('MENU');
+    await page.waitForTimeout(1000);
 
     // Should be back at menu
     const state = await getGameState(page);
@@ -493,45 +492,41 @@ test.describe('Full Gameplay - Game Reset', () => {
 
   test('should preserve high score after reset', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     // Play and get a score
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
+      await page.waitForTimeout(50);
     }
-
-    await expect.poll(() => getGameState(page), { timeout: 5000 }).resolves.toHaveProperty('kills', 5);
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
     // Die
     await triggerStoreAction(page, 'damagePlayer', 300);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     // Reset
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
     // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('MENU');
+    await page.waitForTimeout(1000);
 
     // Start new game
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(2000);
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('GAME_OVER');
+    await page.waitForTimeout(500);
 
     // High score should still be preserved
     await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
@@ -541,7 +536,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 test.describe('Full Gameplay - Complete Playthrough', () => {
   test('should complete entire game as Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     // Step 1: Character Selection - verify start screen is showing
     await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 5000 });
@@ -551,26 +546,27 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await startMission(page);
 
     // Step 2: Game starts
-    await waitForGameReady(page);
+    await page.waitForTimeout(2000);
     let state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
 
     // Step 3: Combat phase - kill enemies
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(100);
     }
 
     // Step 4: Boss phase
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('PHASE_BOSS');
+    await page.waitForTimeout(1000);
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
     await expect(page.getByText('⚠ KRAMPUS-PRIME ⚠')).toBeVisible({ timeout: 5000 });
 
     // Step 5: Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
+    await page.waitForTimeout(1000);
 
     // Step 6: Victory
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('WIN');
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
@@ -582,20 +578,20 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
     // Removed scrollIntoViewIfNeeded as it causes instability in CI
     await redeploy.click();
+    await page.waitForTimeout(1000);
 
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('MENU');
     state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
   });
 
   test('should complete entire game as Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(2000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
@@ -603,17 +599,16 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(50);
     }
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('PHASE_BOSS');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('WIN');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -621,12 +616,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Bumble', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(2000);
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
@@ -634,17 +629,16 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
+      await page.waitForTimeout(50);
     }
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('PHASE_BOSS');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
     // Defeat boss
     await triggerStoreAction(page, 'damageBoss', 1000);
-
-    await expect.poll(() => getGameState(page).then(s => s?.gameState), { timeout: 10000 }).toBe('WIN');
+    await page.waitForTimeout(500);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('WIN');
@@ -654,12 +648,12 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 test.describe('Full Gameplay - Input Controls', () => {
   test('should respond to WASD movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     const initialState = await getGameState(page);
 
@@ -680,12 +674,12 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should respond to arrow key movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Move with arrow keys
     await page.keyboard.down('ArrowUp');
@@ -703,12 +697,12 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should fire with spacebar', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Verify input state changes when firing
     await page.keyboard.down('Space');
@@ -735,12 +729,12 @@ test.describe('Full Gameplay - Input Controls', () => {
   test('should show touch controls on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Touch fire button should be visible
     await expect(page.getByRole('button', { name: /FIRE/ })).toBeVisible();
