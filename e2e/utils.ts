@@ -106,10 +106,8 @@ export async function selectCharacter(page: Page, name: string) {
 export async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
-  await button.waitFor({ state: 'visible', timeout: 60000 });
-  await button.click({ timeout: 30000, force: true });
-  // Wait for game to actually be ready after clicking
-  await waitForGameReady(page, 45000);
+  await button.waitFor({ state: 'visible', timeout: 45000 });
+  await button.click({ timeout: 15000, force: true });
 }
 
 // Helper to wait for game to be initialized and playable
