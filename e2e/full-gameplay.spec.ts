@@ -45,9 +45,14 @@ async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
 }
 
 // Helper to handle level-up state by auto-selecting an upgrade
-async function handleLevelUp(page: Page) {
-  const state = await getGameState(page);
-  if (state?.gameState === 'LEVEL_UP') {
+async function handleLevelUp(page: Page, maxAttempts = 5) {
+  // Keep handling level-ups until we're no longer in LEVEL_UP state
+  for (let i = 0; i < maxAttempts; i++) {
+    const state = await getGameState(page);
+    if (state?.gameState !== 'LEVEL_UP') {
+      break;
+    }
+
     // Select the first available upgrade to continue
     await page.evaluate(() => {
       const store = (window as any).useGameStore;
@@ -361,6 +366,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await handleLevelUp(page);
     await page.waitForTimeout(500);
 
+    // Wait for boss phase to be active
+    await waitForGameState(page, 'PHASE_BOSS', 10000);
+
     const state = await getGameState(page);
     expect(state?.kills).toBe(10);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -386,6 +394,9 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Handle any level-up that may have occurred
     await handleLevelUp(page);
     await page.waitForTimeout(500);
+
+    // Wait for boss phase to be active
+    await waitForGameState(page, 'PHASE_BOSS', 10000);
 
     let state = await getGameState(page);
     expect(state?.bossActive).toBe(true);
@@ -571,7 +582,10 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Reset
     await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true });
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
+
+    // Wait for menu state to be active
+    await waitForGameState(page, 'MENU', 5000);
 
     // Start new game
     await startGame(page, 'CYBER-ELF');
@@ -591,7 +605,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.goto('/');
 
     // Step 1: Character Selection - verify start screen is showing
-    await expect(page.locator('text=Protocol:')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'Protocol: Silent Night', exact: true })).toBeVisible({ timeout: 10000 });
     await startGame(page, 'MECHA-SANTA');
 
     // Step 2: Game starts
@@ -609,6 +623,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await page.waitForTimeout(500);
     await handleLevelUp(page);
     await page.waitForTimeout(500);
+
+    // Wait for boss phase to be active
+    await waitForGameState(page, 'PHASE_BOSS', 10000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
@@ -652,6 +669,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     await handleLevelUp(page);
     await page.waitForTimeout(500);
 
+    // Wait for boss phase to be active
+    await waitForGameState(page, 'PHASE_BOSS', 10000);
+
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');
 
@@ -681,6 +701,9 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Handle any level-up that may have occurred
     await handleLevelUp(page);
     await page.waitForTimeout(500);
+
+    // Wait for boss phase to be active
+    await waitForGameState(page, 'PHASE_BOSS', 10000);
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_BOSS');

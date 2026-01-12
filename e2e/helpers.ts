@@ -84,6 +84,9 @@ export async function startGame(page: Page, characterName: string) {
     // Final check before clicking
     console.log('Button found. Clicking...');
     await button.scrollIntoViewIfNeeded().catch(() => {}); // Try scroll if possible, ignore error if fails
+
+    // Wait for button to be enabled and clickable
+    await page.waitForTimeout(500);
     await button.click({ force: true, timeout: 60000 });
   } catch (error) {
     console.log('Start game failed. Final diagnostics:');
