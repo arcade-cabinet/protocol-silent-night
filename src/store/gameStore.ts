@@ -151,6 +151,7 @@ interface GameStore {
   // Kill Streak
   killStreak: number;
   lastKillTime: number;
+  lastLevelUpExitTime: number;
 
   // RNG
   rng: SeededRandom;
@@ -283,6 +284,7 @@ const initialState = {
   damageFlash: false,
   killStreak: 0,
   lastKillTime: 0,
+  lastLevelUpExitTime: 0,
   rng: new SeededRandom(12345),
 };
 
@@ -386,24 +388,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   addKill: (points) => {
-    const { stats, state, lastKillTime, killStreak, metaProgress } = get();
+    const { stats, state, lastKillTime, killStreak, metaProgress, lastLevelUpExitTime } = get();
     const now = Date.now();
     const newKills = stats.kills + 1;
 
     // Calculate streak - if lastKillTime is 0 (first kill), start streak at 1
     // Otherwise, check if within timeout window OR if we're currently in LEVEL_UP state
+    // OR if we recently exited LEVEL_UP (within an extended grace period)
     const streakTimeout = 2000;
+    const levelUpGracePeriod = 3000; // Extended grace after exiting LEVEL_UP
     const timeSinceLastKill = now - lastKillTime;
+    const timeSinceLevelUpExit = now - lastLevelUpExitTime;
     let newStreak: number;
 
     if (lastKillTime === 0) {
       // First kill ever
       newStreak = 1;
     } else if (timeSinceLastKill < streakTimeout) {
-      // Within timeout window
+      // Within normal timeout window
       newStreak = killStreak + 1;
     } else if (state === 'LEVEL_UP' && killStreak > 0) {
-      // In LEVEL_UP state - preserve streak
+      // Currently in LEVEL_UP state - preserve streak
+      newStreak = killStreak + 1;
+    } else if (timeSinceLevelUpExit < levelUpGracePeriod && killStreak > 0) {
+      // Recently exited LEVEL_UP - preserve streak with extended grace period
       newStreak = killStreak + 1;
     } else {
       // Timed out - reset
@@ -666,6 +674,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
       playerMaxHp: newMaxHp,
       playerHp: newHp,
+      lastLevelUpExitTime: Date.now(), // Track when we exit LEVEL_UP state
     });
 
     AudioManager.playSFX('ui_select');
