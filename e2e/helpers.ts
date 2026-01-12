@@ -17,6 +17,9 @@ export async function startGame(page: Page, characterName: string) {
   // Capture browser console logs to help diagnose issues
   page.on('console', msg => console.log(`[Browser Console] ${msg.type()}: ${msg.text()}`));
 
+  // Wait for the game to be fully loaded before proceeding
+  await waitForGameReady(page);
+
   // Set a flag to speed up briefing animations in E2E tests
   await page.evaluate(() => {
     (window as any).isE2ETest = true;
