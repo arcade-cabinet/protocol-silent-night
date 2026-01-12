@@ -87,10 +87,8 @@ export function MissionBriefing() {
 
     // Reveal lines one by one
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let lineIndex = 0;
 
     const interval = setInterval(() => {
-      lineIndex++;
 
       setCurrentLine((prev) => {
         if (prev >= totalLines - 1) {

@@ -553,7 +553,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   levelUp: () => {
-    const { runProgress, lastKillTime, killStreak } = get();
+    const { runProgress } = get();
 
     if (runProgress.level === 10) {
       const availableEvolution = get().checkEvolutionAvailability();
@@ -624,7 +624,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   selectLevelUpgrade: (upgradeId) => {
-    const { runProgress, playerMaxHp, playerHp, previousState, lastKillTime, killStreak } = get();
+    const { runProgress, playerMaxHp, playerHp, previousState } = get();
     const upgrade = ROGUELIKE_UPGRADES.find((u) => u.id === upgradeId);
 
     if (!upgrade) return;
