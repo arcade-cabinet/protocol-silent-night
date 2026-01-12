@@ -653,7 +653,8 @@ test.describe('Full Gameplay - Input Controls', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    // startMission now waits for game ready
+    await page.waitForTimeout(500);
 
     const initialState = await getGameState(page);
 
@@ -679,7 +680,8 @@ test.describe('Full Gameplay - Input Controls', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    // startMission now waits for game ready
+    await page.waitForTimeout(500);
 
     // Move with arrow keys
     await page.keyboard.down('ArrowUp');
@@ -702,7 +704,8 @@ test.describe('Full Gameplay - Input Controls', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    // startMission now waits for game ready
+    await page.waitForTimeout(500);
 
     // Verify input state changes when firing
     await page.keyboard.down('Space');
