@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacter, startMission } from './utils';
+import { selectCharacter, startMission, waitForGameReady } from './utils';
 
 /**
  * Component Snapshot Tests
@@ -19,7 +19,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    await waitForGameReady(page);
 
     // Focus on character by centering view
     await page.evaluate(() => {
@@ -42,7 +42,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    await waitForGameReady(page);
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -56,7 +56,7 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    await waitForGameReady(page);
 
     await expect(page).toHaveScreenshot('bumble-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -72,7 +72,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    await waitForGameReady(page);
 
     // Move to see terrain better
     await page.keyboard.down('w');
@@ -95,7 +95,7 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    await waitForGameReady(page);
 
     await expect(page).toHaveScreenshot('lighting-atmosphere.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -111,7 +111,8 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(8000); // Wait for enemy spawns
+    await waitForGameReady(page);
+    await page.waitForTimeout(3000); // Wait for enemy spawns
 
     await expect(page).toHaveScreenshot('enemies-spawned.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -125,7 +126,8 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(8000);
+    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Fire at enemies
     await page.keyboard.down('Space');
@@ -146,7 +148,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    await waitForGameReady(page);
 
     // Fire weapon and capture projectiles
     await page.keyboard.press('Space');
@@ -164,7 +166,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    await waitForGameReady(page);
 
     // Fire SMG (rapid fire)
     await page.keyboard.down('Space');
@@ -183,7 +185,7 @@ test.describe('Component Snapshots - Weapon Effects', () => {
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    await waitForGameReady(page);
 
     // Fire star weapon
     await page.keyboard.press('Space');
@@ -203,7 +205,8 @@ test.describe('Component Snapshots - Particle Effects', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(8000);
+    await waitForGameReady(page);
+    await page.waitForTimeout(3000);
 
     // Fire and wait for hits
     await page.keyboard.down('Space');
@@ -224,7 +227,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    await waitForGameReady(page);
 
     await expect(page).toHaveScreenshot('camera-perspective.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,
@@ -238,7 +241,7 @@ test.describe('Component Snapshots - Camera System', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    await waitForGameReady(page);
 
     // Move in a pattern
     await page.keyboard.down('w');
@@ -261,9 +264,9 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await page.waitForTimeout(8000);
+    await waitForGameReady(page);
 
-    // Trigger damage by getting close to enemies
+    // Trigger damage by getting close to enemies - wait for enemies to spawn and attack
     await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot('damage-flash-overlay.png', {
@@ -278,7 +281,7 @@ test.describe('Component Snapshots - UI Overlays', () => {
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    await waitForGameReady(page);
 
     // Trigger kill streak by rapid kills
     await page.evaluate(() => {
