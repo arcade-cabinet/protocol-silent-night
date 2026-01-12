@@ -1,7 +1,22 @@
 import { Page, expect } from '@playwright/test';
 
+// Helper to wait for store to be available
+async function waitForStore(page: Page, timeout = 30000) {
+  await page.waitForFunction(
+    () => {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+      return typeof (window as any).useGameStore !== 'undefined';
+    },
+    null,
+    { timeout }
+  );
+}
+
 // Helper to get game state from the store
 export async function getGameState(page: Page) {
+  // First ensure the store is available
+  await waitForStore(page);
+
   return page.evaluate(() => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
     const store = (window as any).useGameStore;
@@ -25,6 +40,9 @@ export async function getGameState(page: Page) {
 
 // Helper to wait for specific game state
 export async function waitForGameState(page: Page, targetState: string, timeout = 10000) {
+  // First ensure the store is available
+  await waitForStore(page);
+
   await page.waitForFunction(
     (state) => {
       // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
@@ -39,6 +57,9 @@ export async function waitForGameState(page: Page, targetState: string, timeout 
 // Helper to trigger game actions via store
 // biome-ignore lint/suspicious/noExplicitAny: Generic args for store actions
 export async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
+  // First ensure the store is available
+  await waitForStore(page);
+
   return page.evaluate(({ action, args }) => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
     const store = (window as any).useGameStore;
@@ -54,6 +75,9 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
 
 // Helper to simulate combat and verify kills
 export async function simulateCombatUntilKills(page: Page, targetKills: number) {
+  // First ensure the store is available
+  await waitForStore(page);
+
   // Use evaluate to directly manipulate game state for stability
   // instead of trying to aim and shoot in WebGL via playwright actions
   await page.evaluate(async (target) => {
@@ -112,6 +136,9 @@ export async function startMission(page: Page) {
 
 // Helper to wait for game to be initialized and playable
 export async function waitForGameReady(page: Page, timeout = 30000) {
+  // First ensure the store is available
+  await waitForStore(page, timeout);
+
   await page.waitForFunction(
     () => {
       // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
