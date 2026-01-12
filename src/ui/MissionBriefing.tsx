@@ -81,7 +81,7 @@ export function MissionBriefing() {
     const buttonDelay = isE2ETest ? 100 : 500;
 
     // Reveal lines one by one
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const interval = setInterval(() => {
       setCurrentLine((prev) => {
         if (prev >= totalLines - 1) {

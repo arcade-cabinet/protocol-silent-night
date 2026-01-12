@@ -305,6 +305,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentWeapon: config.weaponType,
       currentEvolution: null,
       selectedSkin: null,
+      enemies: [], // Clear enemies when starting new game
+      bullets: [], // Clear bullets when starting new game
       runProgress: {
         xp: 0,
         level: 1,
