@@ -151,7 +151,7 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     const state = await getGameState(page);
     expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(100); // Elf has 100 HP
-    expect(state?.playerHp).toBeGreaterThanOrEqual(99); // Allow for potential early damage
+    expect(state?.playerHp).toBe(100);
   });
 
   test('should have low HP but rapid fire weapon', async ({ page }) => {
@@ -246,21 +246,16 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
 
     await page.waitForTimeout(3000);
 
-    // Get the current HP before testing damage
-    const initialState = await getGameState(page);
-    const initialHp = initialState?.playerHp || 200;
-
     // Bumble has 200 HP - medium survivability
     await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(200);
 
     let state = await getGameState(page);
-    expect(state?.playerHp).toBe(initialHp - 100);
+    expect(state?.playerHp).toBe(100);
     expect(state?.gameState).toBe('PHASE_1');
 
-    // Deal enough damage to reach 0 HP (take remaining HP)
-    const currentHp = state?.playerHp || 0;
-    await triggerStoreAction(page, 'damagePlayer', currentHp);
+    // One more hit at 100 damage kills
+    await triggerStoreAction(page, 'damagePlayer', 100);
     await page.waitForTimeout(500);
 
     state = await getGameState(page);
