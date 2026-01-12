@@ -58,7 +58,7 @@ async function handleLevelUp(page: Page, maxAttempts = 5) {
       const store = (window as any).useGameStore;
       if (!store) return;
       const state = store.getState();
-      const upgrades = state.runProgress?.availableUpgrades || [];
+      const upgrades = state.runProgress?.upgradeChoices || [];
       if (upgrades.length > 0) {
         state.selectLevelUpgrade(upgrades[0].id);
       }
