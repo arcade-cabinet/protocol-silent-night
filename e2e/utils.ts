@@ -39,7 +39,7 @@ export async function waitForGameState(page: Page, targetState: string, timeout 
 // Helper to trigger game actions via store
 // biome-ignore lint/suspicious/noExplicitAny: Generic args for store actions
 export async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  const result = await page.evaluate(({ action, args }) => {
+  return page.evaluate(({ action, args }) => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
     const store = (window as any).useGameStore;
     if (!store) return false;
@@ -50,10 +50,6 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
     }
     return false;
   }, { action, args });
-
-  // Add small delay to let state updates propagate
-  await page.waitForTimeout(50);
-  return result;
 }
 
 // Helper to simulate combat and verify kills
@@ -128,12 +124,4 @@ export async function waitForGameReady(page: Page, timeout = 30000) {
     null,
     { timeout }
   );
-}
-
-// Helper to wait after starting mission for game to be ready
-export async function waitAfterStartMission(page: Page) {
-  // Wait for game to actually start (not just button click)
-  await waitForGameState(page, 'PHASE_1', 15000);
-  // Give a small buffer for rendering to stabilize
-  await page.waitForTimeout(1000);
 }
