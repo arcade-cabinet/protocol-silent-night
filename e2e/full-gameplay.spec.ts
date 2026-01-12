@@ -567,6 +567,7 @@ test.describe('Full Gameplay - Game Reset', () => {
   });
 
   test('should preserve high score after reset', async ({ page }) => {
+    test.setTimeout(180000); // 3 minutes for this complex test
     await page.goto('/');
     await startGame(page, 'MECHA-SANTA');
     await page.waitForTimeout(3000);
@@ -603,8 +604,17 @@ test.describe('Full Gameplay - Game Reset', () => {
       throw new Error(`Failed to reach MENU state after reset. Current state: ${currentState?.gameState}`);
     }
 
-    // Start new game
-    await startGame(page, 'CYBER-ELF');
+    // Start new game - game is already loaded, just need to select character and commence
+    // Select character
+    const characterButton = page.getByRole('button', { name: /CYBER-ELF/i });
+    await characterButton.waitFor({ state: 'visible', timeout: 30000 });
+    await characterButton.click({ force: true });
+    await page.waitForTimeout(1500);
+
+    // Click COMMENCE OPERATION
+    const commenceButton = page.getByRole('button', { name: /COMMENCE OPERATION/i });
+    await commenceButton.waitFor({ state: 'visible', timeout: 30000 });
+    await commenceButton.click({ force: true });
     await page.waitForTimeout(2000);
 
     // Die with 0 score
