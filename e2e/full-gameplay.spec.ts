@@ -597,7 +597,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Reset - wait for button to be visible first with longer timeout
     await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 10000 });
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, noWaitAfter: true, timeout: 5000 });
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(1500);
 
     // Wait for menu state to be active
@@ -672,7 +672,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 7: Can restart - wait for button first
     await expect(page.getByRole('button', { name: /PLAY AGAIN/ })).toBeVisible({ timeout: 5000 });
-    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true, noWaitAfter: true, timeout: 5000 });
+    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
