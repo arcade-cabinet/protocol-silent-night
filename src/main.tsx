@@ -2,19 +2,12 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
-// Eagerly import and use store to ensure window.useGameStore is set before React renders
-import { useGameStore } from '@/store/gameStore';
+// Import store to trigger module loading and window.useGameStore assignment
+// The store module exposes itself on window as soon as it loads
+import '@/store/gameStore';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element not found');
-
-// Force store initialization to ensure window.useGameStore is available for E2E tests
-// This must happen before React renders anything
-if (typeof window !== 'undefined') {
-  (window as any).useGameStore = useGameStore;
-  // Trigger store initialization by accessing getState to ensure the store is fully ready
-  useGameStore.getState();
-}
 
 createRoot(root).render(
   <StrictMode>

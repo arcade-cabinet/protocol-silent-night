@@ -972,4 +972,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 }));
 
-// Note: Store is exposed on window in main.tsx to ensure proper initialization order
+// Expose store on window immediately after creation for E2E testing
+// This ensures the store is available as soon as this module loads,
+// regardless of React render timing or code splitting in production builds
+if (typeof window !== 'undefined') {
+  (window as any).useGameStore = useGameStore;
+}
