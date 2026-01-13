@@ -2,9 +2,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
-// Import store to trigger module loading and window.useGameStore assignment
-// The store module exposes itself on window as soon as it loads
-import '@/store/gameStore';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element not found');

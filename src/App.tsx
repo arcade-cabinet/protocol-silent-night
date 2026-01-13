@@ -3,6 +3,11 @@
  * Main Application Component
  */
 
+// CRITICAL: Import store first to ensure it's loaded and window.useGameStore is set
+// before any component renders. This is essential for E2E tests in production builds
+// with code splitting, where the store chunk must be loaded before React renders.
+import '@/store/gameStore';
+
 import { GameScene } from '@/game';
 import {
   BossHUD,
