@@ -3,12 +3,29 @@ import { Page, expect } from '@playwright/test';
 /**
  * Wait for the app to be fully loaded and store to be available
  * This is critical for CI environments where module loading can be slow
+ *
+ * Strategy: Wait for the React app to fully hydrate and render ANY UI.
+ * Once React has rendered something visible, the store will be available
+ * because it's imported by the App component.
  */
 async function ensureStoreAvailable(page: Page, timeout = 30000) {
+  // Wait for the React app to render any meaningful content
+  // This is more reliable than checking window.useGameStore directly
+  // because in production builds with code splitting, the store module
+  // may load asynchronously after the main chunk.
   await page.waitForFunction(
     () => {
+      // First check if the store is available
       // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
-      return typeof (window as any).useGameStore !== 'undefined';
+      const storeAvailable = typeof (window as any).useGameStore !== 'undefined';
+      if (!storeAvailable) return false;
+
+      // Then verify React has rendered by checking for any game UI
+      const hasButtons = document.querySelectorAll('button').length > 0;
+      const hasCanvas = document.querySelector('canvas') !== null;
+      const hasGameUI = hasButtons || hasCanvas;
+
+      return hasGameUI;
     },
     null,
     { timeout }
