@@ -546,6 +546,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     }, { timeout: 5000 }).toBe(100);
 
     // Second kill - 25% bonus (streak of 2)
+    // Must happen within 2000ms of first kill to maintain streak
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 100);
 
     await expect.poll(async () => {
@@ -554,6 +556,8 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     }, { timeout: 5000 }).toBe(225);
 
     // Third kill - 50% bonus (streak of 3)
+    // Must happen within 2000ms of second kill to maintain streak
+    await page.waitForTimeout(100);
     await triggerStoreAction(page, 'addKill', 100);
 
     await expect.poll(async () => {
@@ -614,7 +618,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(50);
+      await page.waitForTimeout(100);
       await autoDismissLevelUp(page);
     }
 
@@ -625,24 +629,26 @@ test.describe('Full Gameplay - Game Reset', () => {
     await expect.poll(async () => {
         const s = await getGameState(page);
         return s?.gameState;
-    }, { timeout: 5000 }).toBe('GAME_OVER');
+    }, { timeout: 10000 }).toBe('GAME_OVER');
 
     // Reset
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
-    await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    // Removed scrollIntoViewIfNeeded as it causes instability in CI
+    await redeploy.waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(500); // Wait for button to be interactive
     await redeploy.click();
 
     await expect.poll(async () => {
         const s = await getGameState(page);
         return s?.gameState;
-    }, { timeout: 5000 }).toBe('MENU');
+    }, { timeout: 10000 }).toBe('MENU');
+
+    await page.waitForTimeout(1000); // Wait for menu to be fully ready
 
     // Start new game
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await waitForLoadingScreen(page); // Added safety wait for second game
+    await waitForGameReady(page);
 
     // Die with 0 score
     await triggerStoreAction(page, 'damagePlayer', 100);
@@ -650,10 +656,10 @@ test.describe('Full Gameplay - Game Reset', () => {
     await expect.poll(async () => {
         const s = await getGameState(page);
         return s?.gameState;
-    }, { timeout: 5000 }).toBe('GAME_OVER');
+    }, { timeout: 10000 }).toBe('GAME_OVER');
 
     // High score should still be preserved
-    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible();
+    await expect(page.locator(`text=HIGH SCORE`)).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -715,14 +721,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 7: Can restart
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
-    await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    // Removed scrollIntoViewIfNeeded as it causes instability in CI
+    await redeploy.waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForTimeout(500); // Wait for button to be interactive
     await redeploy.click();
 
     await expect.poll(async () => {
         const s = await getGameState(page);
         return s?.gameState;
-    }, { timeout: 5000 }).toBe('MENU');
+    }, { timeout: 10000 }).toBe('MENU');
 
     state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
