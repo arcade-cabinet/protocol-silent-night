@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getGameState, selectCharacter, startMission, triggerStoreAction, waitForGameReady, waitForLoadingScreen } from './utils';
+import { getGameState, selectCharacter, startMission, triggerStoreAction, waitForGameReady, waitForLoadingScreen, autoDismissLevelUp } from './utils';
 
 /**
  * Full Gameplay E2E Tests
@@ -205,6 +205,10 @@ test.describe('Full Gameplay - CYBER-ELF (Scout Class)', () => {
     // Allow for immediate spawn damage
     expect(state?.playerHp).toBeGreaterThan(80);
 
+    // Focus on canvas for keyboard events
+    await page.click('canvas');
+    await page.waitForTimeout(100);
+
     // Elf's SMG fires rapidly - hold fire for a bit
     await page.keyboard.down('Space');
     // Poll for multiple bullets
@@ -339,10 +343,14 @@ test.describe('Full Gameplay - Boss Battle', () => {
       await triggerStoreAction(page, 'addKill', 10);
       // Small delay to allow state propagation
       await page.waitForTimeout(50);
+      await autoDismissLevelUp(page);
     }
 
     await expect.poll(async () => {
         const s = await getGameState(page);
+        if (s?.gameState === 'LEVEL_UP') {
+          await autoDismissLevelUp(page);
+        }
         return s?.gameState;
     }, { timeout: 10000 }).toBe('PHASE_BOSS');
 
@@ -368,10 +376,14 @@ test.describe('Full Gameplay - Boss Battle', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(50);
+      await autoDismissLevelUp(page);
     }
 
     await expect.poll(async () => {
         const s = await getGameState(page);
+        if (s?.gameState === 'LEVEL_UP') {
+          await autoDismissLevelUp(page);
+        }
         return s?.bossActive;
     }, { timeout: 10000 }).toBe(true);
 
@@ -407,9 +419,13 @@ test.describe('Full Gameplay - Boss Battle', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(50);
+      await autoDismissLevelUp(page);
     }
     await expect.poll(async () => {
         const s = await getGameState(page);
+        if (s?.gameState === 'LEVEL_UP') {
+          await autoDismissLevelUp(page);
+        }
         return s?.bossActive;
     }, { timeout: 10000 }).toBe(true);
 
@@ -585,6 +601,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
       await page.waitForTimeout(50);
+      await autoDismissLevelUp(page);
     }
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
@@ -647,11 +664,17 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(50);
+      // Auto-dismiss any level-ups that occur
+      await autoDismissLevelUp(page);
     }
 
     // Step 4: Boss phase
     await expect.poll(async () => {
         const s = await getGameState(page);
+        // Auto-dismiss level-ups if we're stuck
+        if (s?.gameState === 'LEVEL_UP') {
+          await autoDismissLevelUp(page);
+        }
         return s?.gameState;
     }, { timeout: 10000 }).toBe('PHASE_BOSS');
 
@@ -703,10 +726,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(50);
+      await autoDismissLevelUp(page);
     }
 
     await expect.poll(async () => {
         const s = await getGameState(page);
+        if (s?.gameState === 'LEVEL_UP') {
+          await autoDismissLevelUp(page);
+        }
         return s?.gameState;
     }, { timeout: 10000 }).toBe('PHASE_BOSS');
 
@@ -738,10 +765,14 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
       await page.waitForTimeout(50);
+      await autoDismissLevelUp(page);
     }
 
     await expect.poll(async () => {
         const s = await getGameState(page);
+        if (s?.gameState === 'LEVEL_UP') {
+          await autoDismissLevelUp(page);
+        }
         return s?.gameState;
     }, { timeout: 10000 }).toBe('PHASE_BOSS');
 
@@ -816,6 +847,10 @@ test.describe('Full Gameplay - Input Controls', () => {
     await startMission(page);
 
     await waitForGameReady(page);
+
+    // Focus on the canvas to ensure keyboard events are captured
+    await page.click('canvas');
+    await page.waitForTimeout(100);
 
     // Verify input state changes when firing
     await page.keyboard.down('Space');

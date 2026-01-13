@@ -208,3 +208,24 @@ export async function waitForGameReady(page: Page, timeout = 50000) {
     { timeout }
   );
 }
+
+// Helper to auto-dismiss level-up screens by selecting first available upgrade
+export async function autoDismissLevelUp(page: Page) {
+  const state = await getGameState(page);
+  if (state?.gameState !== 'LEVEL_UP') return;
+
+  await page.evaluate(() => {
+    // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
+    const store = (window as any).useGameStore;
+    if (!store) return;
+
+    const { runProgress, state: gameState } = store.getState();
+    if (gameState !== 'LEVEL_UP') return;
+
+    const choices = runProgress.upgradeChoices;
+    if (choices && choices.length > 0) {
+      // Select the first upgrade to continue
+      store.getState().selectLevelUpgrade(choices[0].id);
+    }
+  });
+}
