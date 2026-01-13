@@ -12,6 +12,8 @@ if (!root) throw new Error('Root element not found');
 // This must happen before React renders anything
 if (typeof window !== 'undefined') {
   (window as any).useGameStore = useGameStore;
+  // Trigger store initialization by accessing getState to ensure the store is fully ready
+  useGameStore.getState();
 }
 
 createRoot(root).render(

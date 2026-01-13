@@ -972,7 +972,4 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 }));
 
-// Expose store on window for e2e testing
-if (typeof window !== 'undefined') {
-  (window as unknown as { useGameStore: unknown }).useGameStore = useGameStore;
-}
+// Note: Store is exposed on window in main.tsx to ensure proper initialization order
