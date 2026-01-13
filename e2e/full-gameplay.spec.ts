@@ -11,9 +11,8 @@ import { getGameState, selectCharacter, startMission, triggerStoreAction } from 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
-    // Verify we're at menu
+    // Verify we're at menu (getGameState will wait for store availability)
     let state = await getGameState(page);
     expect(state?.gameState).toBe('MENU');
 
@@ -23,10 +22,13 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     // Click "COMMENCE OPERATION" on the briefing screen
     await startMission(page);
 
-    // Wait for game to start
-    await page.waitForTimeout(2000);
+    // Wait for game to start (poll state instead of fixed timeout)
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
+
     state = await getGameState(page);
-    expect(state?.gameState).toBe('PHASE_1');
     expect(state?.playerMaxHp).toBe(300); // Santa has 300 HP
     expect(state?.playerHp).toBe(300);
 
@@ -37,12 +39,15 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
 
   test('should have correct Santa stats and weapon', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    // Wait for game to be in playable state
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
 
     // Verify Santa's stats are correct
     const state = await getGameState(page);
@@ -586,12 +591,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Elf', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start and get initial state
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(100);
@@ -616,12 +624,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
   test('should complete entire game as Bumble', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'BUMBLE');
     await startMission(page);
 
-    await page.waitForTimeout(2000);
+    // Wait for game to start and get initial state
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
 
     let state = await getGameState(page);
     expect(state?.playerMaxHp).toBe(200);
@@ -648,12 +659,15 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 test.describe('Full Gameplay - Input Controls', () => {
   test('should respond to WASD movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    // Wait for game to be ready
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
 
     const initialState = await getGameState(page);
 
@@ -674,12 +688,15 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should respond to arrow key movement', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    // Wait for game to be ready
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
 
     // Move with arrow keys
     await page.keyboard.down('ArrowUp');
@@ -697,12 +714,15 @@ test.describe('Full Gameplay - Input Controls', () => {
 
   test('should fire with spacebar', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(2000);
 
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(3000);
+    // Wait for game to be ready
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
 
     // Verify input state changes when firing
     await page.keyboard.down('Space');

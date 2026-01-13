@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { selectCharacter, startMission } from './utils';
+import { selectCharacter, startMission, getGameState } from './utils';
 
 /**
  * Component Snapshot Tests
@@ -13,13 +13,19 @@ const VISUAL_THRESHOLD = 0.2;
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
 
     // Start with Santa
     await selectCharacter(page, 'MECHA-SANTA');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    // Wait for game to be ready
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
+
+    // Allow a moment for rendering to stabilize
+    await page.waitForTimeout(2000);
 
     // Focus on character by centering view
     await page.evaluate(() => {
@@ -37,12 +43,18 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
   test('should render Elf character model', async ({ page }) => {
     await page.goto('/');
-    await page.waitForTimeout(3000);
 
     await selectCharacter(page, 'CYBER-ELF');
     await startMission(page);
 
-    await page.waitForTimeout(5000);
+    // Wait for game to be ready
+    await expect.poll(async () => {
+      const s = await getGameState(page);
+      return s?.gameState;
+    }, { timeout: 10000 }).toBe('PHASE_1');
+
+    // Allow a moment for rendering to stabilize
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot('elf-character-render.png', {
       maxDiffPixelRatio: VISUAL_THRESHOLD,

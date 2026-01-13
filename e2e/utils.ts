@@ -1,5 +1,8 @@
 import { Page, expect } from '@playwright/test';
 
+// Track which pages have had their store availability checked
+const storeCheckedPages = new WeakSet<Page>();
+
 /**
  * Wait for the app to be fully loaded and store to be available
  * This is critical for CI environments where module loading can be slow
@@ -8,7 +11,11 @@ import { Page, expect } from '@playwright/test';
  * Once React has rendered something visible, the store will be available
  * because it's imported by the App component.
  */
-async function ensureStoreAvailable(page: Page, timeout = 30000) {
+async function ensureStoreAvailable(page: Page, timeout = 60000) {
+  // If we've already checked this page, skip the check
+  if (storeCheckedPages.has(page)) {
+    return;
+  }
   // Wait for the React app to render any meaningful content
   // This is more reliable than checking window.useGameStore directly
   // because in production builds with code splitting, the store module
@@ -28,8 +35,11 @@ async function ensureStoreAvailable(page: Page, timeout = 30000) {
       return hasGameUI;
     },
     null,
-    { timeout }
+    { timeout, polling: 100 } // Poll every 100ms for faster detection
   );
+
+  // Mark this page as having its store checked
+  storeCheckedPages.add(page);
 }
 
 // Helper to get game state from the store
@@ -74,13 +84,14 @@ export async function waitForGameState(page: Page, targetState: string, timeout 
 // Helper to trigger game actions via store
 // biome-ignore lint/suspicious/noExplicitAny: Generic args for store actions
 export async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  // First ensure the store is available
-  await ensureStoreAvailable(page);
-
+  // Only check store availability once per page, not on every action
+  // This prevents repeated 60s timeout checks in tight loops
   return page.evaluate(({ action, args }) => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
     const store = (window as any).useGameStore;
-    if (!store) return false;
+    if (!store) {
+      throw new Error('Store not available - ensureStoreAvailable should be called first');
+    }
     const state = store.getState();
     if (typeof state[action] === 'function') {
       state[action](...args);
