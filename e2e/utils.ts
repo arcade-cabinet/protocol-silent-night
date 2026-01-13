@@ -1,16 +1,24 @@
 import { Page, expect } from '@playwright/test';
 
-// Helper to get game state from the store
-export async function getGameState(page: Page) {
-  // First ensure the store is available
+/**
+ * Wait for the app to be fully loaded and store to be available
+ * This is critical for CI environments where module loading can be slow
+ */
+async function ensureStoreAvailable(page: Page, timeout = 30000) {
   await page.waitForFunction(
     () => {
       // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
       return typeof (window as any).useGameStore !== 'undefined';
     },
     null,
-    { timeout: 10000 }
+    { timeout }
   );
+}
+
+// Helper to get game state from the store
+export async function getGameState(page: Page) {
+  // First ensure the store is available
+  await ensureStoreAvailable(page);
 
   return page.evaluate(() => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
@@ -50,14 +58,7 @@ export async function waitForGameState(page: Page, targetState: string, timeout 
 // biome-ignore lint/suspicious/noExplicitAny: Generic args for store actions
 export async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
   // First ensure the store is available
-  await page.waitForFunction(
-    () => {
-      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
-      return typeof (window as any).useGameStore !== 'undefined';
-    },
-    null,
-    { timeout: 10000 }
-  );
+  await ensureStoreAvailable(page);
 
   return page.evaluate(({ action, args }) => {
     // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
