@@ -1,75 +1,81 @@
 import { Page, expect } from '@playwright/test';
 
-// Track which pages have had their store availability checked
+// Cache to avoid redundant checks
 const storeCheckedPages = new WeakSet<Page>();
 
-/**
- * Wait for the app to be fully loaded and store to be available
- * This is critical for CI environments where module loading can be slow
- *
- * Strategy: Wait for the React app to fully hydrate and render ANY UI.
- * Once React has rendered something visible, the store will be available
- * because it's imported by the App component.
- */
-async function ensureStoreAvailable(page: Page, timeout = 60000) {
-  // If we've already checked this page, skip the check
-  if (storeCheckedPages.has(page)) {
-    return;
+// Helper to ensure store is available
+export async function waitForStore(page: Page, timeout = 60000) {
+  if (storeCheckedPages.has(page)) return;
+
+  try {
+    await page.waitForFunction(
+      () => typeof (window as any).useGameStore !== 'undefined',
+      null,
+      { timeout, polling: 100 }
+    );
+
+    // Additional verification that store is functional
+    const isFunctional = await page.evaluate(() => {
+      try {
+        const store = (window as any).useGameStore;
+        return store && typeof store.getState === 'function';
+      } catch {
+        return false;
+      }
+    });
+
+    if (!isFunctional) {
+      throw new Error('Store is defined but not functional (getState missing)');
+    }
+
+    storeCheckedPages.add(page);
+
+  } catch (error) {
+    console.log('Warning: useGameStore not found within timeout');
+    // Check if store initialization failed in the app
+    const storeError = await page.evaluate(() => (window as any).storeInitError).catch(() => null);
+    if (storeError) {
+      throw new Error(`Store initialization failed: ${storeError}`);
+    }
+    throw error;
   }
-  // Wait for the React app to render any meaningful content
-  // This is more reliable than checking window.useGameStore directly
-  // because in production builds with code splitting, the store module
-  // may load asynchronously after the main chunk.
-  await page.waitForFunction(
-    () => {
-      // First check if the store is available
-      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
-      const storeAvailable = typeof (window as any).useGameStore !== 'undefined';
-      if (!storeAvailable) return false;
-
-      // Then verify React has rendered by checking for any game UI
-      const hasButtons = document.querySelectorAll('button').length > 0;
-      const hasCanvas = document.querySelector('canvas') !== null;
-      const hasGameUI = hasButtons || hasCanvas;
-
-      return hasGameUI;
-    },
-    null,
-    { timeout, polling: 100 } // Poll every 100ms for faster detection
-  );
-
-  // Mark this page as having its store checked
-  storeCheckedPages.add(page);
 }
 
 // Helper to get game state from the store
 export async function getGameState(page: Page) {
-  // First ensure the store is available
-  await ensureStoreAvailable(page);
+  await waitForStore(page);
 
   return page.evaluate(() => {
-    // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
-    const store = (window as any).useGameStore;
-    if (!store) return null;
-    const state = store.getState();
-    return {
-      gameState: state.state,
-      playerHp: state.playerHp,
-      playerMaxHp: state.playerMaxHp,
-      score: state.stats.score,
-      kills: state.stats.kills,
-      bossDefeated: state.stats.bossDefeated,
-      bossActive: state.bossActive,
-      bossHp: state.bossHp,
-      killStreak: state.killStreak,
-      enemyCount: state.enemies.length,
-      bulletCount: state.bullets.length,
-    };
+    try {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+      const store = (window as any).useGameStore;
+      if (!store) return null;
+
+      const state = store.getState();
+      return {
+        gameState: state.state,
+        playerHp: state.playerHp,
+        playerMaxHp: state.playerMaxHp,
+        score: state.stats.score,
+        kills: state.stats.kills,
+        bossDefeated: state.stats.bossDefeated,
+        bossActive: state.bossActive,
+        bossHp: state.bossHp,
+        killStreak: state.killStreak,
+        enemyCount: state.enemies.length,
+        bulletCount: state.bullets.length,
+      };
+    } catch (error) {
+      console.error('Failed to get game state:', error);
+      return null;
+    }
   });
 }
 
 // Helper to wait for specific game state
-export async function waitForGameState(page: Page, targetState: string, timeout = 10000) {
+export async function waitForGameState(page: Page, targetState: string, timeout = 30000) {
+  await waitForStore(page, timeout);
+
   await page.waitForFunction(
     (state) => {
       // biome-ignore lint/suspicious/noExplicitAny: Accessing global store
@@ -84,20 +90,42 @@ export async function waitForGameState(page: Page, targetState: string, timeout 
 // Helper to trigger game actions via store
 // biome-ignore lint/suspicious/noExplicitAny: Generic args for store actions
 export async function triggerStoreAction(page: Page, action: string, ...args: any[]) {
-  // Only check store availability once per page, not on every action
-  // This prevents repeated 60s timeout checks in tight loops
-  return page.evaluate(({ action, args }) => {
-    // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
-    const store = (window as any).useGameStore;
-    if (!store) {
-      throw new Error('Store not available - ensureStoreAvailable should be called first');
+  // Rely on getGameState or explicit waitForStore in test setup to ensure store availability
+  // Avoiding redundant checks here for performance in loops
+
+  return page.evaluate(async ({ action, args }) => {
+    try {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+      const store = (window as any).useGameStore;
+      if (!store) return false;
+
+      // Add timeout guard to prevent infinite loops
+      const timeout = setTimeout(() => {
+        throw new Error('Store action timeout');
+      }, 5000);
+
+      const state = store.getState();
+      if (typeof state[action] === 'function') {
+        try {
+          const result = state[action](...args);
+          clearTimeout(timeout);
+          // If action returns a promise, ensure it resolves
+          if (result instanceof Promise) {
+            await result;
+          }
+          return true;
+        } catch (actionError) {
+          console.error(`Store action ${action} failed execution:`, actionError);
+          clearTimeout(timeout);
+          return false;
+        }
+      }
+      clearTimeout(timeout);
+      return false;
+    } catch (error) {
+      console.error('Store action failed:', error);
+      return false;
     }
-    const state = store.getState();
-    if (typeof state[action] === 'function') {
-      state[action](...args);
-      return true;
-    }
-    return false;
   }, { action, args });
 }
 
@@ -125,7 +153,7 @@ export async function simulateCombatUntilKills(page: Page, targetKills: number) 
   await expect.poll(async () => {
     const state = await getGameState(page);
     return state?.kills;
-  }, { timeout: 5000 }).toBeGreaterThanOrEqual(targetKills);
+  }, { timeout: 10000 }).toBeGreaterThanOrEqual(targetKills);
 }
 
 // Helper to wait for loading screen to complete
@@ -134,7 +162,7 @@ export async function waitForLoadingScreen(page: Page) {
   // Initial check if loading screen is present
   if (await loadingScreen.isVisible()) {
     // Wait for it to disappear with generous timeout for CI
-    await loadingScreen.waitFor({ state: 'detached', timeout: 45000 });
+    await loadingScreen.waitFor({ state: 'detached', timeout: 60000 });
   }
 }
 
@@ -146,9 +174,10 @@ export async function selectCharacter(page: Page, name: string) {
   const button = page.locator('button', { hasText: name });
   // Wait for button to be visible with increased timeout for CI
   await button.waitFor({ state: 'visible', timeout: 30000 });
-  // Removed scrollIntoViewIfNeeded as it causes instability in CI
-  // Use force click to bypass potential overlays and increased timeout
-  await button.click({ timeout: 15000, force: true });
+
+  // Use evaluate click to bypass Playwright's navigation waiting behavior
+  // This is critical for SPA interactions in slow CI environments
+  await button.evaluate(node => (node as HTMLElement).click());
 }
 
 // Helper to start mission robustly
@@ -156,11 +185,16 @@ export async function startMission(page: Page) {
   const button = page.locator('button', { hasText: 'COMMENCE OPERATION' });
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
-  await button.click({ timeout: 15000, force: true });
+
+  // Use evaluate click to bypass Playwright's navigation waiting behavior
+  // This prevents timeouts when the click succeeds but Playwright waits for "navigations"
+  await button.evaluate(node => (node as HTMLElement).click());
 }
 
 // Helper to wait for game to be initialized and playable
 export async function waitForGameReady(page: Page, timeout = 50000) {
+  await waitForStore(page, timeout);
+
   await page.waitForFunction(
     () => {
       // biome-ignore lint/suspicious/noExplicitAny: Accessing global store

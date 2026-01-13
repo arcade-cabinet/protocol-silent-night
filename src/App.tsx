@@ -3,11 +3,7 @@
  * Main Application Component
  */
 
-// CRITICAL: Import store first to ensure it's loaded and window.useGameStore is set
-// before any component renders. This is essential for E2E tests in production builds
-// with code splitting, where the store chunk must be loaded before React renders.
-import '@/store/gameStore';
-
+import { useGameStore } from '@/store/gameStore';
 import { GameScene } from '@/game';
 import {
   BossHUD,
@@ -24,6 +20,14 @@ import {
   StartScreen,
   WeaponHUD,
 } from '@/ui';
+
+// Explicitly initialize store and expose to window for E2E tests
+// This must be done here to ensure it's loaded synchronously with the app bundle
+if (typeof window !== 'undefined') {
+  (window as unknown as { useGameStore: unknown }).useGameStore = useGameStore;
+  // Force initialization of the store
+  useGameStore.getState();
+}
 
 export default function App() {
   return (

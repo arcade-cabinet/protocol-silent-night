@@ -971,10 +971,3 @@ export const useGameStore = create<GameStore>((set, get) => ({
       rng: new SeededRandom(Date.now()),
     }),
 }));
-
-// Expose store on window immediately after creation for E2E testing
-// This ensures the store is available as soon as this module loads,
-// regardless of React render timing or code splitting in production builds
-if (typeof window !== 'undefined') {
-  (window as any).useGameStore = useGameStore;
-}
