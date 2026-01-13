@@ -473,27 +473,18 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await waitForGameReady(page);
 
-    // Rapid kills to build streak
+    // Rapid kills to build streak - do all kills first without polling to maintain streak timing
     await triggerStoreAction(page, 'addKill', 10);
     await triggerStoreAction(page, 'addKill', 10);
-
-    await expect.poll(async () => {
-        const s = await getGameState(page);
-        return s?.killStreak;
-    }, { timeout: 5000 }).toBe(2);
-
-    // Should show DOUBLE KILL
-    await expect(page.locator('text=DOUBLE KILL')).toBeVisible({ timeout: 5000 });
-
-    // Continue streak
     await triggerStoreAction(page, 'addKill', 10);
 
+    // Now verify the streak value after all kills
     await expect.poll(async () => {
         const s = await getGameState(page);
         return s?.killStreak;
     }, { timeout: 5000 }).toBe(3);
 
-    // Should show TRIPLE KILL
+    // Should show TRIPLE KILL (the latest streak notification)
     await expect(page.locator('text=TRIPLE KILL')).toBeVisible({ timeout: 5000 });
   });
 
@@ -537,33 +528,26 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await waitForGameReady(page);
 
-    // First kill - no bonus
+    // Do all kills rapidly to maintain streak timing (within 2000ms window)
+    // First kill - no bonus: 100
+    // Second kill - 25% bonus (streak of 2): 100 + 25 = 125
+    // Third kill - 50% bonus (streak of 3): 100 + 50 = 150
+    // Total expected: 100 + 125 + 150 = 375
+    await triggerStoreAction(page, 'addKill', 100);
+    await triggerStoreAction(page, 'addKill', 100);
     await triggerStoreAction(page, 'addKill', 100);
 
-    await expect.poll(async () => {
-        const s = await getGameState(page);
-        return s?.score;
-    }, { timeout: 5000 }).toBe(100);
-
-    // Second kill - 25% bonus (streak of 2)
-    // Must happen within 2000ms of first kill to maintain streak
-    await page.waitForTimeout(100);
-    await triggerStoreAction(page, 'addKill', 100);
-
-    await expect.poll(async () => {
-        const s = await getGameState(page);
-        return s?.score;
-    }, { timeout: 5000 }).toBe(225);
-
-    // Third kill - 50% bonus (streak of 3)
-    // Must happen within 2000ms of second kill to maintain streak
-    await page.waitForTimeout(100);
-    await triggerStoreAction(page, 'addKill', 100);
-
+    // Verify final score after all kills
     await expect.poll(async () => {
         const s = await getGameState(page);
         return s?.score;
     }, { timeout: 5000 }).toBe(375);
+
+    // Verify streak reached 3
+    await expect.poll(async () => {
+        const s = await getGameState(page);
+        return s?.killStreak;
+    }, { timeout: 5000 }).toBe(3);
   });
 });
 
