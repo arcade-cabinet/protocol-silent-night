@@ -289,6 +289,10 @@ test.describe('Full Gameplay - THE BUMBLE (Bruiser Class)', () => {
     expect(state?.playerHp).toBeGreaterThan(180);
 
     // Bumble's Star Thrower fires 3 projectiles at once - verify weapon works
+    // Focus on canvas to ensure keyboard events are captured
+    await page.click('canvas');
+    await page.waitForTimeout(200);
+
     await page.keyboard.down('Space');
     await expect.poll(async () => {
         const s = await getGameState(page);
@@ -351,8 +355,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Simulate 10 kills to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      // Small delay to allow state propagation
-      await page.waitForTimeout(50);
       await autoDismissLevelUp(page);
     }
 
@@ -385,7 +387,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
       await autoDismissLevelUp(page);
     }
 
@@ -432,7 +433,6 @@ test.describe('Full Gameplay - Boss Battle', () => {
     // Trigger boss spawn
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
       await autoDismissLevelUp(page);
     }
     await expect.poll(async () => {
@@ -459,7 +459,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     }, { timeout: 5000 }).toBe(500);
 
     // Verify boss HP display
-    await expect(page.locator('text=500 / 1000')).toBeVisible();
+    await expect(page.locator('text=500 / 1000')).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -602,7 +602,6 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     for (let i = 0; i < 5; i++) {
       await triggerStoreAction(page, 'addKill', 100);
-      await page.waitForTimeout(100);
       await autoDismissLevelUp(page);
     }
 
@@ -667,7 +666,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Step 3: Combat phase - kill enemies
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
       // Auto-dismiss any level-ups that occur
       await autoDismissLevelUp(page);
     }
@@ -733,7 +731,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
       await autoDismissLevelUp(page);
     }
 
@@ -776,7 +773,6 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
     // Kill enemies to trigger boss
     for (let i = 0; i < 10; i++) {
       await triggerStoreAction(page, 'addKill', 10);
-      await page.waitForTimeout(50);
       await autoDismissLevelUp(page);
     }
 
