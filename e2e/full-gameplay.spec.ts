@@ -218,7 +218,7 @@ test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
     await expect(page.getByRole('heading', { name: 'OPERATOR DOWN' })).toBeVisible({
       timeout: 5000,
     });
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true });
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, noWaitAfter: true });
   });
 
   test('should accumulate score and kills', async ({ page }) => {
@@ -417,7 +417,7 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true });
+    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true, noWaitAfter: true });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -558,7 +558,7 @@ test.describe('Full Gameplay - Game Reset', () => {
     await page.waitForTimeout(500);
 
     // Click re-deploy
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true });
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, noWaitAfter: true });
     await page.waitForTimeout(1000);
 
     // Should be back at menu
@@ -597,7 +597,7 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     // Reset - wait for button to be visible first with longer timeout
     await expect(page.getByRole('button', { name: /RE-DEPLOY/ })).toBeVisible({ timeout: 10000 });
-    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, timeout: 5000 });
+    await page.getByRole('button', { name: /RE-DEPLOY/ }).click({ force: true, noWaitAfter: true, timeout: 5000 });
     await page.waitForTimeout(1500);
 
     // Wait for menu state to be active
@@ -672,7 +672,7 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
 
     // Step 7: Can restart - wait for button first
     await expect(page.getByRole('button', { name: /PLAY AGAIN/ })).toBeVisible({ timeout: 5000 });
-    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true, timeout: 5000 });
+    await page.getByRole('button', { name: /PLAY AGAIN/ }).click({ force: true, noWaitAfter: true, timeout: 5000 });
     await page.waitForTimeout(1000);
 
     state = await getGameState(page);
