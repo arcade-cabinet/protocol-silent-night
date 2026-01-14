@@ -473,10 +473,17 @@ test.describe('Full Gameplay - Kill Streaks', () => {
 
     await waitForGameReady(page);
 
-    // Rapid kills to build streak - do all kills first without polling to maintain streak timing
-    await triggerStoreAction(page, 'addKill', 10);
-    await triggerStoreAction(page, 'addKill', 10);
-    await triggerStoreAction(page, 'addKill', 10);
+    // Rapid kills to build streak - execute all in a single evaluate to maintain streak timing
+    await page.evaluate(() => {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        state.addKill(10);
+        state.addKill(10);
+        state.addKill(10);
+      }
+    });
 
     // Now verify the streak value after all kills
     await expect.poll(async () => {
@@ -529,13 +536,21 @@ test.describe('Full Gameplay - Kill Streaks', () => {
     await waitForGameReady(page);
 
     // Do all kills rapidly to maintain streak timing (within 2000ms window)
+    // Execute all in a single evaluate to ensure rapid succession
     // First kill - no bonus: 100
     // Second kill - 25% bonus (streak of 2): 100 + 25 = 125
     // Third kill - 50% bonus (streak of 3): 100 + 50 = 150
     // Total expected: 100 + 125 + 150 = 375
-    await triggerStoreAction(page, 'addKill', 100);
-    await triggerStoreAction(page, 'addKill', 100);
-    await triggerStoreAction(page, 'addKill', 100);
+    await page.evaluate(() => {
+      // biome-ignore lint/suspicious/noExplicitAny: Accessing global store for testing
+      const store = (window as any).useGameStore;
+      if (store) {
+        const state = store.getState();
+        state.addKill(100);
+        state.addKill(100);
+        state.addKill(100);
+      }
+    });
 
     // Verify final score after all kills
     await expect.poll(async () => {
