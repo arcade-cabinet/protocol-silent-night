@@ -175,9 +175,12 @@ export async function selectCharacter(page: Page, name: string) {
   // Wait for button to be visible with increased timeout for CI
   await button.waitFor({ state: 'visible', timeout: 30000 });
 
-  // Use evaluate click to bypass Playwright's navigation waiting behavior
-  // This is critical for SPA interactions in slow CI environments
-  await button.evaluate(node => (node as HTMLElement).click());
+  // Wait a bit to ensure the component is stable
+  await page.waitForTimeout(300);
+
+  // Use regular click with noWaitAfter to prevent navigation waiting
+  // This is more reliable in CI than evaluate() which can cause browser hangs
+  await button.click({ noWaitAfter: true });
 }
 
 // Helper to start mission robustly
@@ -186,9 +189,12 @@ export async function startMission(page: Page) {
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
 
-  // Use evaluate click to bypass Playwright's navigation waiting behavior
-  // This prevents timeouts when the click succeeds but Playwright waits for "navigations"
-  await button.evaluate(node => (node as HTMLElement).click());
+  // Wait a bit to ensure animations complete and component is stable
+  await page.waitForTimeout(500);
+
+  // Use regular click with noWaitAfter to prevent navigation waiting
+  // This is more reliable in CI than evaluate() which can cause browser hangs
+  await button.click({ noWaitAfter: true });
 }
 
 // Helper to wait for game to be initialized and playable
