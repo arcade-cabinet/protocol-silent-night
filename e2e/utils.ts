@@ -186,9 +186,9 @@ export async function startMission(page: Page) {
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
 
-  // Use click with timeout and noWaitAfter to prevent navigation waiting in SPA
-  // The timeout ensures we don't hang indefinitely if the button becomes unresponsive
-  await button.click({ timeout: 5000, noWaitAfter: true });
+  // Use force click to bypass actionability checks and prevent timeout issues
+  // Similar to character selection, the button may have overlapping elements during animations
+  await button.click({ force: true, noWaitAfter: true });
 }
 
 // Helper to wait for game to be initialized and playable
