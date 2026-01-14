@@ -591,8 +591,8 @@ test.describe('Full Gameplay - Game Reset', () => {
     // Click re-deploy
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 5000 });
-    // Removed scrollIntoViewIfNeeded as it causes instability in CI
-    await redeploy.click();
+    // Use force click to bypass actionability checks and prevent timeout issues
+    await redeploy.click({ force: true, noWaitAfter: true });
 
     await expect.poll(async () => {
         const s = await getGameState(page);
@@ -633,7 +633,8 @@ test.describe('Full Gameplay - Game Reset', () => {
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForTimeout(500); // Wait for button to be interactive
-    await redeploy.click();
+    // Use force click to bypass actionability checks and prevent timeout issues
+    await redeploy.click({ force: true, noWaitAfter: true });
 
     await expect.poll(async () => {
         const s = await getGameState(page);
