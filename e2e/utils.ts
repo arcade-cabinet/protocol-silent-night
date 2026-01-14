@@ -22,7 +22,7 @@ export async function waitForStore(page: Page, timeout = 60000) {
       } catch {
         return false;
       }
-    }, { timeout: 5000 });
+    });
 
     if (!isFunctional) {
       throw new Error('Store is defined but not functional (getState missing)');
@@ -33,7 +33,7 @@ export async function waitForStore(page: Page, timeout = 60000) {
   } catch (error) {
     console.log('Warning: useGameStore not found within timeout');
     // Check if store initialization failed in the app
-    const storeError = await page.evaluate(() => (window as any).storeInitError, { timeout: 5000 }).catch(() => null);
+    const storeError = await page.evaluate(() => (window as any).storeInitError).catch(() => null);
     if (storeError) {
       throw new Error(`Store initialization failed: ${storeError}`);
     }
@@ -69,7 +69,7 @@ export async function getGameState(page: Page) {
       console.error('Failed to get game state:', error);
       return null;
     }
-  }, { timeout: 10000 });
+  });
 }
 
 // Helper to wait for specific game state
@@ -126,7 +126,7 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
       console.error('Store action failed:', error);
       return false;
     }
-  }, { action, args, timeout: 10000 });
+  }, { action, args });
 }
 
 // Helper to simulate combat and verify kills
@@ -147,7 +147,7 @@ export async function simulateCombatUntilKills(page: Page, targetKills: number) 
       // Small delay to allow store updates to propagate if needed
       await new Promise(resolve => setTimeout(resolve, 10));
     }
-  }, targetKills, { timeout: 15000 });
+  }, targetKills);
 
   // Verify the state updated
   await expect.poll(async () => {
@@ -227,5 +227,5 @@ export async function autoDismissLevelUp(page: Page) {
       // Select the first upgrade to continue
       store.getState().selectLevelUpgrade(choices[0].id);
     }
-  }, { timeout: 5000 });
+  });
 }
