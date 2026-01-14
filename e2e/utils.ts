@@ -175,9 +175,9 @@ export async function selectCharacter(page: Page, name: string) {
   // Wait for button to be visible with increased timeout for CI
   await button.waitFor({ state: 'visible', timeout: 30000 });
 
-  // Use click with timeout and noWaitAfter to prevent navigation waiting in SPA
-  // The timeout ensures we don't hang indefinitely if the button becomes unresponsive
-  await button.click({ timeout: 5000, noWaitAfter: true });
+  // Force click without actionability checks to avoid hanging on scrollIntoView
+  // This is necessary because SPA navigation can interfere with normal click flow
+  await button.click({ force: true, noWaitAfter: true });
 }
 
 // Helper to start mission robustly
