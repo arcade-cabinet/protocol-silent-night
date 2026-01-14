@@ -22,7 +22,7 @@ export async function waitForStore(page: Page, timeout = 60000) {
       } catch {
         return false;
       }
-    });
+    }, { timeout: 5000 });
 
     if (!isFunctional) {
       throw new Error('Store is defined but not functional (getState missing)');
@@ -33,7 +33,7 @@ export async function waitForStore(page: Page, timeout = 60000) {
   } catch (error) {
     console.log('Warning: useGameStore not found within timeout');
     // Check if store initialization failed in the app
-    const storeError = await page.evaluate(() => (window as any).storeInitError).catch(() => null);
+    const storeError = await page.evaluate(() => (window as any).storeInitError, { timeout: 5000 }).catch(() => null);
     if (storeError) {
       throw new Error(`Store initialization failed: ${storeError}`);
     }
@@ -69,7 +69,7 @@ export async function getGameState(page: Page) {
       console.error('Failed to get game state:', error);
       return null;
     }
-  });
+  }, { timeout: 10000 });
 }
 
 // Helper to wait for specific game state
@@ -126,7 +126,7 @@ export async function triggerStoreAction(page: Page, action: string, ...args: an
       console.error('Store action failed:', error);
       return false;
     }
-  }, { action, args });
+  }, { action, args, timeout: 10000 });
 }
 
 // Helper to simulate combat and verify kills
@@ -147,7 +147,7 @@ export async function simulateCombatUntilKills(page: Page, targetKills: number) 
       // Small delay to allow store updates to propagate if needed
       await new Promise(resolve => setTimeout(resolve, 10));
     }
-  }, targetKills);
+  }, targetKills, { timeout: 15000 });
 
   // Verify the state updated
   await expect.poll(async () => {
@@ -175,12 +175,9 @@ export async function selectCharacter(page: Page, name: string) {
   // Wait for button to be visible with increased timeout for CI
   await button.waitFor({ state: 'visible', timeout: 30000 });
 
-  // Wait a bit to ensure the component is stable
-  await page.waitForTimeout(300);
-
-  // Use regular click with noWaitAfter to prevent navigation waiting
-  // This is more reliable in CI than evaluate() which can cause browser hangs
-  await button.click({ noWaitAfter: true });
+  // Use evaluate click to bypass Playwright's navigation waiting behavior
+  // This is critical for SPA interactions in slow CI environments
+  await button.evaluate(node => (node as HTMLElement).click());
 }
 
 // Helper to start mission robustly
@@ -189,12 +186,9 @@ export async function startMission(page: Page) {
   // Mission briefing has a typing animation (~4s) plus potential CI slowness
   await button.waitFor({ state: 'visible', timeout: 45000 });
 
-  // Wait a bit to ensure animations complete and component is stable
-  await page.waitForTimeout(500);
-
-  // Use regular click with noWaitAfter to prevent navigation waiting
-  // This is more reliable in CI than evaluate() which can cause browser hangs
-  await button.click({ noWaitAfter: true });
+  // Use evaluate click to bypass Playwright's navigation waiting behavior
+  // This prevents timeouts when the click succeeds but Playwright waits for "navigations"
+  await button.evaluate(node => (node as HTMLElement).click());
 }
 
 // Helper to wait for game to be initialized and playable
@@ -233,5 +227,5 @@ export async function autoDismissLevelUp(page: Page) {
       // Select the first upgrade to continue
       store.getState().selectLevelUpgrade(choices[0].id);
     }
-  });
+  }, { timeout: 5000 });
 }
