@@ -417,8 +417,8 @@ test.describe('Full Gameplay - Boss Battle', () => {
     await expect(page.getByRole('heading', { name: 'MISSION COMPLETE' })).toBeVisible({
       timeout: 5000,
     });
-    const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
-    await expect(redeploy).toBeVisible({ timeout: 5000 });
+    const playAgain = page.locator('button', { hasText: 'PLAY AGAIN' });
+    await expect(playAgain).toBeVisible({ timeout: 5000 });
   });
 
   test('should show boss health decreasing', async ({ page }) => {
@@ -614,7 +614,7 @@ test.describe('Full Gameplay - Game Reset', () => {
         return s?.gameState;
     }, { timeout: 10000 }).toBe('GAME_OVER');
 
-    // Reset
+    // Reset - Game over shows RE-DEPLOY button
     const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
     await redeploy.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForTimeout(500); // Wait for button to be interactive
@@ -701,11 +701,11 @@ test.describe('Full Gameplay - Complete Playthrough', () => {
       timeout: 5000,
     });
 
-    // Step 7: Can restart
-    const redeploy = page.locator('button', { hasText: 'RE-DEPLOY' });
-    await redeploy.waitFor({ state: 'visible', timeout: 10000 });
+    // Step 7: Can restart - Win shows PLAY AGAIN button
+    const playAgain = page.locator('button', { hasText: 'PLAY AGAIN' });
+    await playAgain.waitFor({ state: 'visible', timeout: 10000 });
     await page.waitForTimeout(500); // Wait for button to be interactive
-    await redeploy.click();
+    await playAgain.click();
 
     await expect.poll(async () => {
         const s = await getGameState(page);
