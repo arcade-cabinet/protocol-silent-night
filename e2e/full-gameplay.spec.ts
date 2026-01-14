@@ -622,8 +622,8 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     const scoreBeforeDeath = (await getGameState(page))?.score || 0;
 
-    // Die
-    await triggerStoreAction(page, 'damagePlayer', 300);
+    // Die - MECHA-SANTA has 300 HP, damage with 500 to ensure death even if revive upgrade was selected
+    await triggerStoreAction(page, 'damagePlayer', 500);
     await expect.poll(async () => {
         const s = await getGameState(page);
         return s?.gameState;
@@ -649,8 +649,8 @@ test.describe('Full Gameplay - Game Reset', () => {
 
     await waitForGameReady(page);
 
-    // Die with 0 score
-    await triggerStoreAction(page, 'damagePlayer', 100);
+    // Die with 0 score - CYBER-ELF has 100 HP, damage with 200 to ensure death
+    await triggerStoreAction(page, 'damagePlayer', 200);
 
     await expect.poll(async () => {
         const s = await getGameState(page);
