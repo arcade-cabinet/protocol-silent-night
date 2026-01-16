@@ -11,10 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@babylonjs/core": "^7.43.2",
-    "@babylonjs/loaders": "^7.43.2",
-    "@babylonjs/react-native": "^2.3.4",
-    "@babylonjs/react-native-iosandroid-0-71": "^2.3.4",
+    "@babylonjs/core": "^8.46.2",
+    "@babylonjs/loaders": "^8.46.2",
+    "@babylonjs/react-native": "^1.9.0",
+    "@babylonjs/react-native-iosandroid-0-71": "^1.9.0",
+    "react-native-permissions": "^4.1.5",
     "@expo/vector-icons": "^14.0.4",
     "@protocol-silent-night/game-core": "workspace:*",
     "@react-navigation/native": "^7.0.14",
