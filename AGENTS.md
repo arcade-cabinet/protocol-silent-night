@@ -5,8 +5,31 @@
 **Classification:** Data-Driven Mobile Arcade RPG
 **Architecture:** Monorepo with shared game-core, native GPU rendering, and JSON DDLs
 
-> **ARCHITECTURE PIVOT IN PROGRESS:** See `docs/VISION_1.0.md` and `.kiro/specs/` for migration plan.
+> **⚠️ ARCHITECTURE PIVOT IN PROGRESS:** See `docs/VISION_1.0.md` and `.kiro/specs/` for migration plan.
 > The v4.0 web-first architecture (Three.js/R3F) is being replaced with mobile-native BabylonJS.
+
+---
+
+## 📚 AGENT ONBOARDING
+
+**All agents MUST read `memory-bank/` before starting work.**
+
+```bash
+# Required reading order
+cat memory-bank/activeContext.md   # Current priorities
+cat memory-bank/progress.md        # Work status
+cat memory-bank/systemPatterns.md  # Architecture patterns
+```
+
+| Memory Bank File | When to Read |
+|-----------------|--------------|
+| `activeContext.md` | **Every session** - Current focus and blockers |
+| `progress.md` | Continuing previous work |
+| `projectbrief.md` | Understanding project goals |
+| `productContext.md` | Feature implementation |
+| `techContext.md` | Technology decisions |
+| `systemPatterns.md` | Writing code |
+| `codebaseSummary.md` | Finding files |
 
 ---
 
@@ -137,11 +160,31 @@ protocol-silent-night/
 
 | Document | Purpose |
 |----------|---------|
+| **`memory-bank/`** | **Multi-agent shared context (READ FIRST)** |
 | `docs/VISION_1.0.md` | 1.0 release vision and architecture |
 | `docs/TRIAGE_REPORT_2026-01.md` | Comprehensive triage and recommendations |
 | `docs/MOBILE_ROADMAP.md` | Mobile-first feature requirements |
 | `.kiro/specs/` | Implementation specifications |
 | `.kiro/steering/` | Development guidelines |
+
+---
+
+## 8. AGENT ASSIGNMENTS
+
+| Agent | Primary Role | Current Task |
+|-------|--------------|--------------|
+| **Claude Code** | Architecture, implementation | Memory bank setup, 1.0 foundation |
+| **Jules** | Refactoring, multi-file changes | Available for procedural character work |
+| **Cursor Cloud** | Long-running autonomous tasks | Standby |
+| **Sage** | Quick explanations | On-demand |
+
+### Handoff Protocol
+
+When switching agents:
+1. Update `memory-bank/activeContext.md` with current state
+2. Update `memory-bank/progress.md` with completed work
+3. Commit and push changes
+4. Next agent reads memory-bank before starting
 
 ---
 
