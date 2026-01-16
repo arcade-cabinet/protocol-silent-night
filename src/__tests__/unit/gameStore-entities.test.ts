@@ -398,6 +398,10 @@ describe('GameStore - Boss Management', () => {
     });
 
     it('should set state to LEVEL_UP when boss is killed (Endless Mode)', () => {
+      // Set wave > 1 to trigger Endless Mode behavior (wave 1 triggers WIN)
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, wave: 2 },
+      });
       const { damageBoss } = useGameStore.getState();
       const initialWave = useGameStore.getState().runProgress.wave;
 
