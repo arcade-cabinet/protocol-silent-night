@@ -24,7 +24,7 @@ describe('Game Flow Integration Tests', () => {
 
       // 2b. Transition to PHASE_1 (simulating briefing completion)
       store.setState('PHASE_1');
-      // Set high level to avoid level up system interruptions
+      // Set high level to avoid level up system interruptions (keep wave 1 for boss spawn)
       useGameStore.setState({
         runProgress: { ...useGameStore.getState().runProgress, level: 100 },
       });
@@ -45,11 +45,16 @@ describe('Game Flow Integration Tests', () => {
       expect(state.bossActive).toBe(true);
       expect(state.stats.kills).toBe(10);
 
-      // 5. Defeat boss
+      // 5. Set wave > 1 for Endless Mode behavior before defeating boss (wave 1 triggers WIN)
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, wave: 2 },
+      });
+
+      // 6. Defeat boss
       const killed = store.damageBoss(1000);
 
       state = useGameStore.getState();
-      // 6. Boss Defeated (Endless Mode)
+      // 7. Boss Defeated (Endless Mode)
       expect(killed).toBe(true);
       expect(state.state).toBe('LEVEL_UP');
       expect(state.stats.bossDefeated).toBe(true);
@@ -259,16 +264,21 @@ describe('Game Flow Integration Tests', () => {
     beforeEach(() => {
       const store = useGameStore.getState();
       store.selectClass('santa');
-      // Set high level before kills to avoid level up system interruptions
+      // Set high level to avoid level up system interruptions (keep wave 1 for boss spawn)
       useGameStore.setState({
         runProgress: { ...useGameStore.getState().runProgress, level: 100 },
       });
       store.setState('PHASE_1');
 
-      // Trigger boss spawn
+      // Trigger boss spawn with 10 kills
       for (let i = 0; i < 10; i++) {
         useGameStore.getState().addKill(50);
       }
+
+      // Set wave > 1 for Endless Mode behavior (wave 1 boss defeat triggers WIN)
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, wave: 2 },
+      });
     });
 
     it('should handle full boss fight', () => {
@@ -435,7 +445,7 @@ describe('Game Flow Integration Tests', () => {
       store.setState('PHASE_1');
       expect(useGameStore.getState().state).toBe('PHASE_1');
 
-      // Set high level to avoid level-up system interruptions
+      // Set high level to avoid level up system interruptions (keep wave 1 for boss spawn)
       useGameStore.setState({
         runProgress: { ...useGameStore.getState().runProgress, level: 100 },
       });
@@ -445,6 +455,11 @@ describe('Game Flow Integration Tests', () => {
         store.addKill(50);
       }
       expect(useGameStore.getState().state).toBe('PHASE_BOSS');
+
+      // Set wave > 1 for Endless Mode before defeating boss (wave 1 triggers WIN)
+      useGameStore.setState({
+        runProgress: { ...useGameStore.getState().runProgress, wave: 2 },
+      });
 
       // PHASE_BOSS -> LEVEL_UP (Endless Cycle)
       store.damageBoss(1000);
