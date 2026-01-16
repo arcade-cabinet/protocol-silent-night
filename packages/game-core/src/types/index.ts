@@ -1,9 +1,32 @@
 /**
  * @fileoverview Type definitions for Protocol: Silent Night
  * @module types
+ *
+ * Platform-agnostic types that work with both Three.js (web) and BabylonJS (mobile)
  */
 
-import type * as THREE from 'three';
+/**
+ * Platform-agnostic 3D vector type
+ */
+export interface Vector3Like {
+  x: number;
+  y: number;
+  z: number;
+}
+
+/**
+ * Platform-agnostic color type
+ */
+export interface ColorLike {
+  r: number;
+  g: number;
+  b: number;
+}
+
+/**
+ * Platform-agnostic mesh reference (use with generics in platform code)
+ */
+export type MeshRef = unknown;
 
 /**
  * Game state machine states
@@ -133,8 +156,8 @@ export type EnemyType = 'minion' | 'boss';
  */
 export interface EntityData {
   id: string;
-  mesh: THREE.Object3D;
-  velocity: THREE.Vector3;
+  mesh: MeshRef;
+  velocity: Vector3Like;
   hp: number;
   maxHp: number;
   isActive: boolean;
@@ -144,7 +167,7 @@ export interface EntityData {
  * Projectile data
  */
 export interface BulletData extends EntityData {
-  direction: THREE.Vector3;
+  direction: Vector3Like;
   isEnemy: boolean;
   damage: number;
   life: number;
@@ -178,11 +201,11 @@ export type ChristmasObjectType = 'present' | 'tree' | 'candy_cane' | 'pillar';
  * Data for Christmas-themed terrain obstacles
  */
 export interface ChristmasObstacle {
-  position: THREE.Vector3;
+  position: Vector3Like;
   type: ChristmasObjectType;
   radius: number;
   height: number;
-  color: THREE.Color;
+  color: ColorLike;
 }
 
 /**

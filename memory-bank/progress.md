@@ -98,6 +98,19 @@
 | 2026-01-16 | @jbcom/strata deprecated | Replace with BabylonJS procedural | In Progress |
 | 2026-01-16 | 23 conflicting PRs | Closed all, fresh start | Resolved |
 | 2026-01-16 | Failing tests | Fixed EndScreen, Workshop, game-flow | Resolved |
+| 2026-01-16 | React 18/19 type conflict | pnpm hoists root React 19 types; mobile needs React 18 | Needs Resolution |
+
+### TypeScript Type Checking Issue
+
+The mobile app has a type checking conflict due to the monorepo structure:
+- **Root project:** Uses React 19 with `@types/react@19.2.7`
+- **Mobile app:** Uses React 18 with `@types/react@18.3.27`
+- **Problem:** pnpm hoists the React 19 types, causing JSX element errors
+
+**Current workaround:** `skipLibCheck: true` in mobile tsconfig
+**Proper fix needed:** Configure pnpm to isolate React types per workspace
+
+This does NOT affect runtime - the app uses React 18.3.1 correctly.
 
 ## Decision Log
 
