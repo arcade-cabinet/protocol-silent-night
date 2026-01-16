@@ -1,0 +1,104 @@
+{
+  "type": "elf",
+  "name": "CYBER-ELF",
+  "role": "Recon / Scout",
+  "hp": 100,
+  "speed": 18,
+  "rof": 0.1,
+  "damage": 8,
+  "color": "#00ffcc",
+  "scale": 0.8,
+  "weaponType": "smg",
+  "furOptions": {
+    "baseColor": "#006659",
+    "tipColor": "#33ccb3",
+    "layerCount": 6,
+    "spacing": 0.012,
+    "windStrength": 1.2
+  },
+  "customizations": [
+    {
+      "joint": "head",
+      "name": "ear_l",
+      "type": "cone",
+      "args": [0.05, 0.2, 4],
+      "material": { "color": "#ffe4c4", "roughness": 0.7 },
+      "position": [0.18, 0.08, 0],
+      "rotation": [0, 0, 0.5]
+    },
+    {
+      "joint": "head",
+      "name": "ear_r",
+      "type": "cone",
+      "args": [0.05, 0.2, 4],
+      "material": { "color": "#ffe4c4", "roughness": 0.7 },
+      "position": [-0.18, 0.08, 0],
+      "rotation": [0, 0, -0.5]
+    },
+    {
+      "joint": "head",
+      "name": "visor",
+      "type": "box",
+      "args": [0.26, 0.06, 0.03],
+      "material": {
+        "color": "#001122",
+        "emissive": "#00ffff",
+        "emissiveIntensity": 1.8,
+        "transparent": true,
+        "opacity": 0.85,
+        "metalness": 0.9,
+        "roughness": 0.1
+      },
+      "position": [0, 0.02, 0.21]
+    },
+    {
+      "joint": "head",
+      "name": "eye_light",
+      "type": "pointLight",
+      "args": ["#00ffff", 1, 2.5],
+      "position": [0, 0.02, 0.18]
+    },
+    {
+      "joint": "torso",
+      "name": "chest_core",
+      "type": "octahedron",
+      "args": [0.04],
+      "material": { "color": "#00ffcc" },
+      "position": [0, 0.1, 0.32]
+    },
+    {
+      "joint": "torso",
+      "name": "core_light",
+      "type": "pointLight",
+      "args": ["#00ffcc", 0.6, 1.5],
+      "position": [0, 0.1, 0.35]
+    },
+    {
+      "joint": "armR",
+      "name": "weapon_group",
+      "type": "group",
+      "position": [0, -0.2, 0.12],
+      "rotation": [1.57, 0, 0],
+      "children": [
+        {
+          "name": "smg_body",
+          "type": "box",
+          "args": [0.045, 0.22, 0.065],
+          "material": {
+            "color": "#111111",
+            "emissive": "#00ffcc",
+            "emissiveIntensity": 0.25,
+            "metalness": 0.95,
+            "roughness": 0.1
+          }
+        },
+        {
+          "name": "muzzle_flash",
+          "type": "pointLight",
+          "args": ["#00ffcc", 0, 4],
+          "position": [0, 0.26, 0]
+        }
+      ]
+    }
+  ]
+}
