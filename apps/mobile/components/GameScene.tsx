@@ -5,7 +5,7 @@
  * It uses the new Architecture (Fabric) for optimal performance.
  */
 
-import { useRef, useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { EngineView, useEngine } from '@babylonjs/react-native';
 import {
