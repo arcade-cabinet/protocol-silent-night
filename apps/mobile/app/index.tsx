@@ -2,12 +2,29 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
+/**
+ * Main menu screen - game entry point
+ *
+ * Provides navigation to:
+ * - Character select (starts new mission)
+ * - Workshop (meta-progression hub)
+ *
+ * Features cyberpunk-themed UI with neon green accents
+ */
 export default function MenuScreen() {
+  /**
+   * Handles navigation to character select screen
+   * Provides medium haptic feedback to indicate primary action
+   */
   const handleStartGame = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     router.push('/character-select');
   };
 
+  /**
+   * Handles navigation to workshop screen
+   * Provides light haptic feedback for secondary action
+   */
   const handleWorkshop = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push('/workshop');
@@ -41,7 +58,7 @@ export default function MenuScreen() {
           ]}
           onPress={handleWorkshop}
         >
-          <Text style={styles.buttonText}>SANTA'S WORKSHOP</Text>
+          <Text style={[styles.buttonText, styles.secondaryButtonText]}>SANTA'S WORKSHOP</Text>
         </Pressable>
       </View>
 
@@ -114,6 +131,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#0a0a1a',
     letterSpacing: 2,
+  },
+  secondaryButtonText: {
+    color: '#00ff66',
   },
   footer: {
     position: 'absolute',

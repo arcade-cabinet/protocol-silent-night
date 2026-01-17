@@ -1,24 +1,70 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { GameScene } from '../components/GameScene';
+import { useGameStore, PLAYER_CLASSES } from '@protocol-silent-night/game-core';
+import type { PlayerClassType } from '@protocol-silent-night/game-core';
 
+/**
+ * Game screen component - main gameplay view
+ *
+ * Handles:
+ * - BabylonJS game scene rendering
+ * - HUD display (HP, score, kills)
+ * - Loading overlay
+ * - Pause menu
+ *
+ * @param classType - Selected character class from navigation params
+ *
+ * Reads from Zustand game store for:
+ * - Player HP and max HP
+ * - Current score
+ * - Kill count
+ */
 export default function GameScreen() {
   const { classType } = useLocalSearchParams<{ classType: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Get game state from store
+  const { player, stats, initializePlayer, resetGame } = useGameStore();
+
+  // Initialize player when component mounts
+  useEffect(() => {
+    const selectedClass = PLAYER_CLASSES[classType as PlayerClassType];
+    if (selectedClass) {
+      initializePlayer(classType as PlayerClassType, selectedClass.hp);
+    }
+
+    // Reset game when component unmounts
+    return () => {
+      resetGame();
+    };
+  }, [classType, initializePlayer, resetGame]);
+
+  /**
+   * Handles BabylonJS scene ready event
+   * Hides loading overlay and triggers success haptic feedback
+   */
   const handleReady = () => {
     setIsLoading(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
+  /**
+   * Toggles pause state and shows/hides pause menu
+   * Provides light haptic feedback on toggle
+   */
   const handlePause = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setIsPaused(!isPaused);
   };
 
+  /**
+   * Exits game and returns to main menu
+   * Provides heavy haptic feedback to confirm destructive exit action
+   */
   const handleExit = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     router.replace('/');
@@ -46,7 +92,12 @@ export default function GameScreen() {
             <View style={styles.healthContainer}>
               <Text style={styles.healthLabel}>HP</Text>
               <View style={styles.healthBar}>
-                <View style={[styles.healthFill, { width: '100%' }]} />
+                <View
+                  style={[
+                    styles.healthFill,
+                    { width: `${(player.hp / player.maxHp) * 100}%` },
+                  ]}
+                />
               </View>
             </View>
             <Pressable style={styles.pauseButton} onPress={handlePause}>
@@ -55,8 +106,8 @@ export default function GameScreen() {
           </View>
 
           <View style={styles.hudBottom}>
-            <Text style={styles.scoreText}>SCORE: 0</Text>
-            <Text style={styles.killsText}>KILLS: 0/10</Text>
+            <Text style={styles.scoreText}>SCORE: {stats.score}</Text>
+            <Text style={styles.killsText}>KILLS: {stats.kills}/10</Text>
           </View>
         </View>
       )}

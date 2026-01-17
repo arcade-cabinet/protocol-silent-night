@@ -2,7 +2,25 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 
+/**
+ * Santa's Workshop screen - meta-progression hub
+ *
+ * Phase 2 implementation for:
+ * - Weapon unlocks (using Nice Points currency)
+ * - Character skins
+ * - Permanent upgrades
+ *
+ * Currently shows placeholder UI with Nice Points counter
+ * DDL data exists in `packages/game-core/src/data/workshop.json`
+ *
+ * TODO: Implement workshop UI in Phase 2
+ * TODO: Connect to meta-progression store
+ */
 export default function WorkshopScreen() {
+  /**
+   * Handles back navigation to main menu
+   * Provides light haptic feedback for non-destructive action
+   */
   const handleBack = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.back();

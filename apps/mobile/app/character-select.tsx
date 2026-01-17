@@ -1,11 +1,28 @@
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { PLAYER_CLASSES } from '@protocol-silent-night/game-core';
+import { PLAYER_CLASSES, MAX_STAT_VALUES } from '@protocol-silent-night/game-core';
 
 const classes = Object.values(PLAYER_CLASSES);
 
+/**
+ * Character selection screen - "Operator" selection
+ *
+ * Displays all available player classes from game-core DDL:
+ * - Santa (Tank/Support)
+ * - Elf (Speedster)
+ * - Bumble (Brawler)
+ *
+ * Shows stats (HP, SPD, DMG) with visual stat bars
+ * Uses horizontal scroll for class cards
+ */
 export default function CharacterSelectScreen() {
+  /**
+   * Handles class selection and navigation to game screen
+   * @param classType - Selected character class identifier
+   *
+   * Provides heavy haptic feedback to confirm important choice
+   */
   const handleSelectClass = async (classType: string) => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     router.push({
@@ -14,6 +31,10 @@ export default function CharacterSelectScreen() {
     });
   };
 
+  /**
+   * Handles back navigation to main menu
+   * Provides light haptic feedback for non-destructive action
+   */
   const handleBack = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.back();
@@ -58,7 +79,7 @@ export default function CharacterSelectScreen() {
                   <View
                     style={[
                       styles.statFill,
-                      { width: `${(playerClass.hp / 300) * 100}%` },
+                      { width: `${(playerClass.hp / MAX_STAT_VALUES.HP) * 100}%` },
                     ]}
                   />
                 </View>
@@ -69,7 +90,7 @@ export default function CharacterSelectScreen() {
                   <View
                     style={[
                       styles.statFill,
-                      { width: `${(playerClass.speed / 20) * 100}%` },
+                      { width: `${(playerClass.speed / MAX_STAT_VALUES.SPEED) * 100}%` },
                     ]}
                   />
                 </View>
@@ -80,7 +101,7 @@ export default function CharacterSelectScreen() {
                   <View
                     style={[
                       styles.statFill,
-                      { width: `${(playerClass.damage / 50) * 100}%` },
+                      { width: `${(playerClass.damage / MAX_STAT_VALUES.DAMAGE) * 100}%` },
                     ]}
                   />
                 </View>
