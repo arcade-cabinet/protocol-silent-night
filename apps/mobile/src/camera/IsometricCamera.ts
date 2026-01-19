@@ -11,12 +11,9 @@
  */
 
 import {
-  Scene,
+  type Scene,
   ArcRotateCamera,
   Vector3,
-  Animation,
-  EasingFunction,
-  CubicEase,
 } from '@babylonjs/core';
 
 /**
@@ -198,7 +195,7 @@ export function createIsometricCamera(
   /**
    * Update camera position (call each frame)
    */
-  function update(deltaTime: number): void {
+  function update(_deltaTime: number): void {
     // Smooth follow target
     const currentTarget = camera.target;
     const newTarget = Vector3.Lerp(

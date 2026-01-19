@@ -7,13 +7,13 @@
  */
 
 import {
-  Scene,
+  type Scene,
   StandardMaterial,
   PBRMaterial,
   Color3,
   GlowLayer,
-  Mesh,
-  AbstractMesh,
+  type Mesh,
+  type AbstractMesh,
 } from '@babylonjs/core';
 import type { GlowSystemProps, GlowSystemResult, HexColor } from './LightingTypes';
 import { hexToColor3 } from './LightingSystem';

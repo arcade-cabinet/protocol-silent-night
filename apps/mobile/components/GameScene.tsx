@@ -68,7 +68,6 @@ export function GameScene({
     phase,
     player,
     screenShake,
-    input,
     updatePlayerPosition,
     damagePlayer,
     addKill,
@@ -127,7 +126,7 @@ export function GameScene({
     sceneRef.current = scene;
 
     // 1. Setup lighting from DDL
-    const lighting = createLightingSystem({ scene, theme });
+    const _lighting = createLightingSystem({ scene, theme });
 
     // 2. Create terrain with PBR material
     const terrain = createTerrain(scene, terrainConfig);
@@ -140,7 +139,7 @@ export function GameScene({
     }
 
     // 3. Create obstacles
-    const obstacles = createObstacleSystem(scene, []);
+    const _obstacles = createObstacleSystem(scene, []);
 
     // 4. Create player character - try GLB first, fallback to procedural
     let playerCharacter: ReturnType<typeof createAnimeHero> | GLBCharacterController;
@@ -285,7 +284,7 @@ export function GameScene({
       cameraSystemRef.current?.dispose();
       sceneRef.current?.dispose();
     };
-  }, [engine, classType, onReady]);
+  }, [engine, classType, onReady, addKill, phase, damagePlayer, updatePlayerPosition]);
 
   // Handle joystick input
   const handleJoystickMove = useCallback(

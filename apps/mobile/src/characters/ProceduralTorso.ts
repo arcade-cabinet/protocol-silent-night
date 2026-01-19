@@ -7,7 +7,7 @@
  */
 
 import {
-  Scene,
+  type Scene,
   Mesh,
   MeshBuilder,
   Vector3,
@@ -141,7 +141,7 @@ export function createTorsoMesh(
   color: string = '#2a2a3a'
 ): Mesh {
   const fullConfig: TorsoConfig = { ...DEFAULT_TORSO_CONFIG, ...config };
-  const { depth, scale, segments } = fullConfig;
+  const { depth, scale } = fullConfig;
 
   // Generate the cross-section shape
   const shape = generateTorsoCrossSection(1, depth, 0.05, 4);

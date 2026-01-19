@@ -202,7 +202,7 @@ export function checkCollisionSimple(
 export function calculateBossMovement(
   boss: EnemyInstance,
   playerPosition: Vector3,
-  deltaTime: number,
+  _deltaTime: number,
   phase: 'chase' | 'barrage'
 ): Vector3 {
   const bossPos = new Vector3(

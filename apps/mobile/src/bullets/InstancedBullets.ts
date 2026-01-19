@@ -9,11 +9,10 @@
  */
 
 import {
-  Scene,
+  type Scene,
   SolidParticleSystem,
-  SolidParticle,
   Mesh,
-  Vector3,
+  type Vector3,
   Color4,
   GlowLayer,
 } from '@babylonjs/core';
@@ -157,7 +156,9 @@ export function createBulletSPS(config: BulletSPSConfig): BulletSPSResult {
         toDelete.push(bulletId);
       }
     });
-    toDelete.forEach((id) => bulletToParticle.delete(id));
+    toDelete.forEach((id) => {
+      bulletToParticle.delete(id);
+    });
 
     // Update or create particles for active bullets
     for (const bullet of bullets) {

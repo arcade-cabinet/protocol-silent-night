@@ -221,7 +221,7 @@ code, pre, .highlight {
 
 /* Code blocks */
 .highlight {
-  background: var(--jb-bg-paper) !important;
+  background: var(--jb-bg-paper);
   border: 1px solid var(--jb-border);
   border-radius: var(--jb-radius-md);
 }
@@ -412,9 +412,9 @@ html[data-theme="dark"] .navbar {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
   }
 }
 

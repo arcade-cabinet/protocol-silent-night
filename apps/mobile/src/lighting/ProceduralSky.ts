@@ -8,20 +8,15 @@
  */
 
 import {
-  Scene,
   MeshBuilder,
   ShaderMaterial,
-  Vector3,
-  Color3,
   Effect,
   Mesh,
 } from '@babylonjs/core';
 import type {
   ProceduralSkyProps,
   ProceduralSkyResult,
-  SkyConfig,
   GradientSkyConfig,
-  HexColor,
 } from './LightingTypes';
 import { hexToColor3 } from './LightingSystem';
 
@@ -177,12 +172,12 @@ const SKY_FRAGMENT_SHADER = `
  * Register custom sky shader with BabylonJS
  */
 function registerSkyShader(): void {
-  if (Effect.ShadersStore['proceduralSkyVertexShader']) {
+  if (Effect.ShadersStore.proceduralSkyVertexShader) {
     return; // Already registered
   }
 
-  Effect.ShadersStore['proceduralSkyVertexShader'] = SKY_VERTEX_SHADER;
-  Effect.ShadersStore['proceduralSkyFragmentShader'] = SKY_FRAGMENT_SHADER;
+  Effect.ShadersStore.proceduralSkyVertexShader = SKY_VERTEX_SHADER;
+  Effect.ShadersStore.proceduralSkyFragmentShader = SKY_FRAGMENT_SHADER;
 }
 
 /**

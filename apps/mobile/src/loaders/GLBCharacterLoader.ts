@@ -6,11 +6,11 @@
  */
 
 import {
-  Scene,
+  type Scene,
   SceneLoader,
-  AbstractMesh,
-  AnimationGroup,
-  Skeleton,
+  type AbstractMesh,
+  type AnimationGroup,
+  type Skeleton,
   TransformNode,
   Vector3,
 } from '@babylonjs/core';
@@ -226,7 +226,7 @@ export class GLBCharacterController {
   /**
    * Update character state based on movement/firing
    */
-  update(deltaTime: number, isMoving: boolean, isFiring: boolean): void {
+  update(_deltaTime: number, isMoving: boolean, isFiring: boolean): void {
     // Determine which animation to play
     if (isFiring && !this._isFiring) {
       this.playAnimation('attack', false);

@@ -7,9 +7,7 @@
  */
 
 import {
-  Scene,
   DefaultRenderingPipeline,
-  Camera,
   Color4,
   ImageProcessingConfiguration,
 } from '@babylonjs/core';

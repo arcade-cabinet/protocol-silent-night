@@ -6,7 +6,7 @@
  */
 
 import {
-  Scene,
+  type Scene,
   Mesh,
   MeshBuilder,
   StandardMaterial,

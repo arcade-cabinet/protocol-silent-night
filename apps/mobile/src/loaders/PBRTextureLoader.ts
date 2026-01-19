@@ -6,10 +6,10 @@
  */
 
 import {
-  Scene,
+  type Scene,
   Texture,
   PBRMaterial,
-  Color3,
+  type Color3,
 } from '@babylonjs/core';
 
 // ============================================================================

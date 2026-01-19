@@ -7,12 +7,12 @@
  */
 
 import {
-  Scene,
+  type Scene,
   Animation,
   AnimationGroup,
   Vector3,
   Quaternion,
-  TransformNode,
+  type TransformNode,
   EasingFunction,
   SineEase,
   BezierCurveEase,
@@ -427,7 +427,7 @@ export function createAnimationController(
  * @returns Animation object
  */
 export function createBobAnimation(
-  scene: Scene,
+  _scene: Scene,
   target: TransformNode,
   amplitude: number = 0.1,
   speed: number = 1.0

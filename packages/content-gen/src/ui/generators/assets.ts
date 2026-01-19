@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs-extra';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { ASSET_LIST, SVG_ICON_PROMPT } from '../prompts';
 
 const __filename = fileURLToPath(import.meta.url);

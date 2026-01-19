@@ -7,7 +7,7 @@
  */
 
 import {
-  Scene,
+  type Scene,
   Skeleton,
   Bone,
   TransformNode,
@@ -340,7 +340,7 @@ export function createIKChain(
   const lowerLength = end.position.length();
   const chainLength = upperLength + lowerLength;
 
-  return (target: Vector3, poleTarget?: Vector3): void => {
+  return (target: Vector3, _poleTarget?: Vector3): void => {
     const startPos = start.getAbsolutePosition();
     const toTarget = target.subtract(startPos);
     const distance = Math.min(toTarget.length(), chainLength * 0.999);

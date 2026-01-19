@@ -9,13 +9,12 @@
  */
 
 import {
-  Scene,
+  type Scene,
   Mesh,
   MeshBuilder,
   StandardMaterial,
   Color3,
   VertexData,
-  Vector3,
 } from '@babylonjs/core';
 
 /**

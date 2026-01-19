@@ -6,7 +6,7 @@
  */
 
 import {
-  Scene,
+  type Scene,
   SolidParticleSystem,
   MeshBuilder,
   StandardMaterial,

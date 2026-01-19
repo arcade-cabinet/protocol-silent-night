@@ -7,8 +7,8 @@
  */
 
 import {
-  Scene,
-  Mesh,
+  type Scene,
+  type Mesh,
   MeshBuilder,
   TransformNode,
   StandardMaterial,
@@ -189,7 +189,7 @@ function createTorusMesh(
   args: [number, number, number, number],
   material: CustomizationMaterial
 ): Mesh {
-  const [diameter, thickness, tessellation, radialSegments] = args;
+  const [diameter, thickness, tessellation, _radialSegments] = args;
 
   const mesh = MeshBuilder.CreateTorus(
     name,

@@ -8,7 +8,7 @@
  * to minimize garbage collection pressure.
  */
 
-import { Vector3 } from '@babylonjs/core';
+import type { Vector3 } from '@babylonjs/core';
 
 /**
  * Check sphere-sphere collision between a bullet and an enemy

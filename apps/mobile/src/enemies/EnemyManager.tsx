@@ -5,7 +5,7 @@
  * Coordinates between minion SPS and boss mesh systems.
  */
 
-import { Scene, Vector3 } from '@babylonjs/core';
+import { type Scene, Vector3 } from '@babylonjs/core';
 
 import {
   calculateEnemyMovement,
@@ -289,7 +289,7 @@ export function createEnemyManager(
     // Update boss mesh position
     if (bossMesh && bossId) {
       const boss = enemies.get(bossId);
-      if (boss && boss.isActive) {
+      if (boss?.isActive) {
         bossMesh.setPosition(
           new Vector3(boss.position.x, boss.position.y, boss.position.z)
         );

@@ -221,7 +221,7 @@ export class MeshyClient {
 
         // Only retry on rate limit errors
         if (error instanceof RateLimitError && attempt < this.maxRetries) {
-          const delay = this.retryDelayMs * Math.pow(2, attempt);
+          const delay = this.retryDelayMs * 2 ** attempt;
           console.log(`  Rate limited. Retrying in ${delay}ms...`);
           await this.sleep(delay);
           continue;

@@ -11,8 +11,8 @@
  * - Smooth visual feedback
  */
 
-import React, { useCallback, useRef, useState } from 'react';
-import { View, StyleSheet, PanResponder, LayoutChangeEvent } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { View, StyleSheet, PanResponder, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,

@@ -201,7 +201,9 @@ export function createInputManager(
    */
   function notifySubscribers(): void {
     state.lastUpdate = Date.now();
-    subscribers.forEach((callback) => callback(state));
+    subscribers.forEach((callback) => {
+      callback(state);
+    });
   }
 
   /**

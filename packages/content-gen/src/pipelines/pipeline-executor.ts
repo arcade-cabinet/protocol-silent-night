@@ -11,7 +11,7 @@ import { pipeline as streamPipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import seedrandom from 'seedrandom';
-import { MeshyClient, type TaskResult } from '../api/meshy-client';
+import { MeshyClient, } from '../api/meshy-client';
 import { ANIMATION_IDS } from '../tasks/registry';
 import type { AnimationTaskState, AssetManifest } from '../types/manifest';
 
@@ -553,7 +553,7 @@ export class PipelineExecutor {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    // @ts-ignore - Node streams
+    // @ts-expect-error - Node streams
     await streamPipeline(response.body, createWriteStream(dest));
   }
 
@@ -582,7 +582,7 @@ export class PipelineExecutor {
   private getExistingStepResult(
     stepId: string,
     manifest: AssetManifest,
-    pipeline: PipelineDefinition
+    _pipeline: PipelineDefinition
   ): StepResult | undefined {
     // Direct access to task state in manifest
     const tasks = manifest.tasks as Record<string, unknown>;
@@ -627,7 +627,7 @@ export class PipelineExecutor {
    */
   private updateManifestState(
     step: PipelineStep,
-    pipeline: PipelineDefinition,
+    _pipeline: PipelineDefinition,
     context: ExecutionContext,
     result: StepResult,
     iterationLabel?: string

@@ -7,14 +7,13 @@
  */
 
 import {
-  Scene,
+  type Scene,
   Mesh,
   MeshBuilder,
   Vector3,
   StandardMaterial,
   Color3,
   TransformNode,
-  Path3D,
 } from '@babylonjs/core';
 import type { LimbConfig } from './CharacterTypes';
 
@@ -81,11 +80,11 @@ function generateLimbPath(
  * Radius function for limb tubes
  * Creates tapered limbs from joint to end
  */
-function limbRadiusFunction(
+function _limbRadiusFunction(
   jointRadius: number,
   endRadius: number
 ): (i: number, distance: number) => number {
-  return (i: number, distance: number): number => {
+  return (_i: number, distance: number): number => {
     // Simple linear interpolation
     const t = distance;
     return jointRadius + (endRadius - jointRadius) * t;

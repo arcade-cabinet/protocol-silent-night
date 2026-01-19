@@ -6,7 +6,7 @@
  * Uses BabylonJS built-in fog with optional height-based volumetric effect.
  */
 
-import { Scene, Color3, Vector3, Effect, ShaderMaterial, MeshBuilder, Mesh } from '@babylonjs/core';
+import { type Scene, Vector3, Effect, ShaderMaterial, MeshBuilder, type Mesh } from '@babylonjs/core';
 import type { BasicFogConfig, VolumetricFogConfig, HexColor } from './LightingTypes';
 import { hexToColor3 } from './LightingSystem';
 
@@ -188,12 +188,12 @@ export interface VolumetricFogResult {
  * Register volumetric fog shader
  */
 function registerVolumetricFogShader(): void {
-  if (Effect.ShadersStore['volumetricFogVertexShader']) {
+  if (Effect.ShadersStore.volumetricFogVertexShader) {
     return;
   }
 
-  Effect.ShadersStore['volumetricFogVertexShader'] = VOLUMETRIC_FOG_VERTEX_SHADER;
-  Effect.ShadersStore['volumetricFogFragmentShader'] = VOLUMETRIC_FOG_FRAGMENT_SHADER;
+  Effect.ShadersStore.volumetricFogVertexShader = VOLUMETRIC_FOG_VERTEX_SHADER;
+  Effect.ShadersStore.volumetricFogFragmentShader = VOLUMETRIC_FOG_FRAGMENT_SHADER;
 }
 
 /**

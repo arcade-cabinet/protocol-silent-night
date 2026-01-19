@@ -10,7 +10,7 @@
  * Uses Perlin-like noise for organic shake feel.
  */
 
-import { ArcRotateCamera, Vector3 } from '@babylonjs/core';
+import { type ArcRotateCamera, Vector3 } from '@babylonjs/core';
 
 /**
  * Shake effect configuration
@@ -83,7 +83,7 @@ function generateShakeOffset(
  * Calculate shake decay based on progress and decay exponent
  */
 function calculateDecay(progress: number, decay: number): number {
-  return Math.pow(1 - progress, decay);
+  return (1 - progress) ** decay;
 }
 
 /**

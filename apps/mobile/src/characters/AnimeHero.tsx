@@ -8,19 +8,18 @@
  */
 
 import {
-  Scene,
-  Mesh,
-  TransformNode,
+  type Scene,
+  type Mesh,
+  type TransformNode,
   Vector3,
   Color3,
   StandardMaterial,
-  PointLight,
+  type PointLight,
 } from '@babylonjs/core';
 import type { PlayerClassConfig } from '@protocol-silent-night/game-core';
 import type {
   AnimeHeroProps,
   AnimeHeroResult,
-  JointName,
   FaceConfig,
 } from './CharacterTypes';
 import {
@@ -47,7 +46,6 @@ import {
 import { createAnimationController } from './CharacterAnimations';
 import {
   buildCustomizations,
-  getWeaponGroup,
   setMuzzleFlashIntensity,
 } from './CustomizationBuilder';
 

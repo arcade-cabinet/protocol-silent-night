@@ -10,16 +10,14 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, type ViewStyle } from 'react-native';
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import Animated, {
-  useAnimatedStyle,
   useSharedValue,
-  withSpring,
   runOnJS,
 } from 'react-native-reanimated';
 
@@ -78,7 +76,7 @@ export interface GestureHandlerProps {
 }
 
 // Spring config for smooth animations
-const SPRING_CONFIG = {
+const _SPRING_CONFIG = {
   damping: 20,
   stiffness: 200,
   mass: 0.5,

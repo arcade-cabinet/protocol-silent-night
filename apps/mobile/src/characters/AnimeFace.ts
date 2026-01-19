@@ -7,8 +7,8 @@
  */
 
 import {
-  Scene,
-  Mesh,
+  type Scene,
+  type Mesh,
   MeshBuilder,
   DynamicTexture,
   StandardMaterial,
@@ -471,7 +471,7 @@ export function createAnimeFaceHead(
  * @param expression - New expression to display
  */
 export function updateFaceExpression(
-  scene: Scene,
+  _scene: Scene,
   texture: DynamicTexture,
   config: Partial<FaceConfig> = {},
   expression: FaceExpression

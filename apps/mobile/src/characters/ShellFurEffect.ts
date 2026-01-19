@@ -11,12 +11,11 @@
  */
 
 import {
-  Scene,
-  Mesh,
+  type Scene,
+  type Mesh,
   ShaderMaterial,
   Color3,
   Effect,
-  VertexBuffer,
 } from '@babylonjs/core';
 
 /**
@@ -179,8 +178,8 @@ let shaderRegistered = false;
 function registerFurShader(): void {
   if (shaderRegistered) return;
 
-  Effect.ShadersStore['furVertexShader'] = furVertexShader;
-  Effect.ShadersStore['furFragmentShader'] = furFragmentShader;
+  Effect.ShadersStore.furVertexShader = furVertexShader;
+  Effect.ShadersStore.furFragmentShader = furFragmentShader;
   shaderRegistered = true;
 }
 
@@ -328,7 +327,7 @@ export function createFurEffect(
  * @returns FurEffectResult
  */
 export function createSimpleFurEffect(
-  scene: Scene,
+  _scene: Scene,
   baseMesh: Mesh,
   config: Partial<FurConfig> = {}
 ): FurEffectResult {
@@ -350,7 +349,7 @@ export function createSimpleFurEffect(
     // Make outer shells more transparent
     if (shell.material) {
       const mat = shell.material.clone(`simpleFurMat_${i}`);
-      // @ts-ignore - alpha property exists
+      // @ts-expect-error - alpha property exists
       mat.alpha = 1 - i * 0.2;
       shell.material = mat;
     }

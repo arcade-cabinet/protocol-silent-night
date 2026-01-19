@@ -7,7 +7,6 @@
  */
 
 import {
-  Scene,
   HemisphericLight,
   DirectionalLight,
   ShadowGenerator,
@@ -197,7 +196,7 @@ export function createLightingSystem(
  */
 export function enableShadowReceiver(
   mesh: { receiveShadows: boolean },
-  shadowGenerator: ShadowGenerator
+  _shadowGenerator: ShadowGenerator
 ): void {
   mesh.receiveShadows = true;
   // Note: Shadow generator reference stored implicitly via scene

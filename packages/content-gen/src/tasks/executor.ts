@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
-import { MeshyClient, type TaskResult } from '../api/meshy-client';
+import type { MeshyClient, } from '../api/meshy-client';
 import type { TaskDefinition, TaskContext, TaskRecord, TaskInputDef } from './types';
 
 // ============================================================================
@@ -202,7 +202,7 @@ export class TaskExecutor {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    // @ts-ignore - Node streams compatibility
+    // @ts-expect-error - Node streams compatibility
     await pipeline(response.body, createWriteStream(dest));
   }
 }

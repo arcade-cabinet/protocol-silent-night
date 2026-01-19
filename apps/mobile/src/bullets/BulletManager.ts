@@ -11,14 +11,13 @@
  * Target: 200+ active bullets at 60fps.
  */
 
-import { Scene, Vector3 } from '@babylonjs/core';
+import { type Scene, Vector3 } from '@babylonjs/core';
 import {
   BulletSPSManager,
   type BulletInstance,
 } from './InstancedBullets';
 import {
   SpatialHashGrid,
-  type CollisionEntity,
   type CollisionResult,
   isWithinBounds,
 } from './BulletCollision';
@@ -344,7 +343,9 @@ export function createBulletManager(
 
     // Update SPS rendering
     const bulletArray: BulletInstance[] = [];
-    bullets.forEach((b) => bulletArray.push(b));
+    bullets.forEach((b) => {
+      bulletArray.push(b);
+    });
     spsManager.updateAll(bulletArray);
   };
 
@@ -353,7 +354,9 @@ export function createBulletManager(
    */
   const getBullets = (): BulletInstance[] => {
     const result: BulletInstance[] = [];
-    bullets.forEach((b) => result.push(b));
+    bullets.forEach((b) => {
+      result.push(b);
+    });
     return result;
   };
 

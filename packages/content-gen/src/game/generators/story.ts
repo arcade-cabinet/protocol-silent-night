@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { STORY_A_PROMPT, STORY_B_PROMPT, STORY_C_PROMPT } from '../prompts';
 
 const __filename = fileURLToPath(import.meta.url);
