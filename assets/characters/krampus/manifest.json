@@ -57,7 +57,82 @@
         "textureUrl": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd646-7526-72a1-a264-44fa83251345/output/texture_0.png?Expires=1769085927&Signature=BTSP6cwonePLl7zEoQk4rb2mnaqGC6DwMkTwzhLICL6AE8uQzYm9tuTzmEFfh2zYh7xTItr9iaRHT-gizT6Y8CPrbL9dsGjHle3m6RyLK0C~nwBBWi5TFGLKbrMTaEOYeLHEQeo1Msj~DKHjvgyJFHhKIgwruCu7z7xeHRQGZdwlYXqkURQU2Ch1U9H59kre7OFUYkM8lMES612SBxLHvw~twKBbKVJIGEznXOmGb2DSL1INd-HFzTaYGljBffCI5NANuCNQeHgZrgCyNcocfBFmEdeiWBMUaM7rB0qrn-RQh99yvc9IV211bONSq5r1BMrVl4~k8VX8ro6Fjbtz4w__&Key-Pair-Id=KL5I0C8H7HX83"
       },
       "artifacts": {}
-    }
+    },
+    "rigging": {
+      "taskId": "019bd649-ec9b-717b-9bf0-ec5670ba2da3",
+      "status": "SUCCEEDED",
+      "completedAt": 1768826771743,
+      "outputs": {
+        "taskId": "019bd649-ec9b-717b-9bf0-ec5670ba2da3",
+        "riggedModel": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd649-ec9b-717b-9bf0-ec5670ba2da3/output/Character_output.glb?Expires=1769085971&Signature=mfSXPp0ALIhgCAsOS9~9vscgjJ87-CMYTXMi6UiSjtCZNJoCzQ6Z~NYTrATenPeZci~t~ghDP1f3lAtaaebfSBNWFdN0tRHbmPkNT3DK~hnI6Kvgk6vh9t5VDj5~CReYPHKXlIRRe~pU2gO0FnW5fC56czTAmE6o85QgZbMspRoT0Pi1WOfWoGNPVt6zn6F6YYyjKBmEI0oDCDV5adUEx4dydriKSNd4t9YKgCH8w3f3VjipalSwPbEhGVpAfn4Ys4CCONYcSzfMGwaerSjURS6Cx6gk1CWYDCLN6kttO-E1kwGdVUBWKvmEffAg65dU7MbRacUGY-sTdDto9FqDrw__&Key-Pair-Id=KL5I0C8H7HX83"
+      },
+      "artifacts": {}
+    },
+    "animations": [
+      {
+        "taskId": "019bd64a-99c9-7327-9dc3-761681535a3d",
+        "status": "SUCCEEDED",
+        "animationName": "COMBAT_STANCE",
+        "completedAt": 1768826782753,
+        "outputs": {
+          "animations/combat_stance.glb": "animations/combat_stance.glb"
+        }
+      },
+      {
+        "taskId": "019bd64a-c4cc-732c-b07d-190b1b8dfc26",
+        "status": "SUCCEEDED",
+        "animationName": "RUNFAST",
+        "completedAt": 1768826794228,
+        "outputs": {
+          "animations/runfast.glb": "animations/runfast.glb"
+        }
+      },
+      {
+        "taskId": "019bd64a-f197-732c-8c93-0c792abad662",
+        "status": "SUCCEEDED",
+        "animationName": "DOUBLE_COMBO_ATTACK",
+        "completedAt": 1768826807110,
+        "outputs": {
+          "animations/double_combo_attack.glb": "animations/double_combo_attack.glb"
+        }
+      },
+      {
+        "taskId": "019bd64b-23f0-73a4-a4dd-b8e3e382071a",
+        "status": "SUCCEEDED",
+        "animationName": "KUNG_FU_PUNCH",
+        "completedAt": 1768826829500,
+        "outputs": {
+          "animations/kung_fu_punch.glb": "animations/kung_fu_punch.glb"
+        }
+      },
+      {
+        "taskId": "019bd64b-7b60-73aa-b685-cf059a67757c",
+        "status": "SUCCEEDED",
+        "animationName": "BEHIT_FLYUP",
+        "completedAt": 1768826859703,
+        "outputs": {
+          "animations/behit_flyup.glb": "animations/behit_flyup.glb"
+        }
+      },
+      {
+        "taskId": "019bd64b-f15d-71ae-9b76-995b60426a1f",
+        "status": "SUCCEEDED",
+        "animationName": "DEAD",
+        "completedAt": 1768826883050,
+        "outputs": {
+          "animations/dead.glb": "animations/dead.glb"
+        }
+      },
+      {
+        "taskId": "019bd64c-4c90-7360-9f9f-424dc5475f45",
+        "status": "SUCCEEDED",
+        "animationName": "BLOCK1",
+        "completedAt": 1768826915314,
+        "outputs": {
+          "animations/block1.glb": "animations/block1.glb"
+        }
+      }
+    ]
   },
   "seed": 32162920
 }
