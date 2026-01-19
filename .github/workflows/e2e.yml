@@ -1,0 +1,272 @@
+# E2E Tests - Non-blocking workflow with auto-healing
+#
+# This workflow runs Playwright E2E tests separately from the main CI.
+# It is designed to:
+# - Not block PR merges (uses workflow_run trigger)
+# - Capture screenshots and artifacts
+# - Auto-heal failures with Claude
+# - Post updates to PRs
+#
+# Based on recommended patterns from:
+# - https://playwright.dev/docs/ci-intro
+# - https://github.com/anthropics/claude-code-action/tree/main/examples
+
+name: E2E Tests
+
+on:
+  # Run after main CI workflow completes (success or failure)
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  # Also allow manual triggering
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to test'
+        required: false
+        type: number
+
+concurrency:
+  group: e2e-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 20
+  PNPM_VERSION: 9
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+  id-token: write
+
+jobs:
+  # E2E Tests job - runs independently from CI
+  e2e:
+    name: Playwright Tests
+    runs-on: ubuntu-latest
+    # Only run on successful CI or manual dispatch
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    # Do not fail the workflow on test failures - we'll handle them with auto-heal
+    continue-on-error: true
+    outputs:
+      result: ${{ steps.playwright.outcome }}
+      pr_number: ${{ steps.pr-info.outputs.pr_number }}
+
+    steps:
+      - name: Get PR info
+        id: pr-info
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "pr_number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ github.event.workflow_run.pull_requests[0].number }}" ]; then
+            echo "pr_number=${{ github.event.workflow_run.pull_requests[0].number }}" >> $GITHUB_OUTPUT
+          else
+            echo "pr_number=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0c17529a66aca453f9227af23103ed11469b1e47 # v4.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm list @playwright/test --json | jq -r '.[0].dependencies["@playwright/test"].version // .[0].devDependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      # Use Playwright CLI for browser installation (recommended approach)
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Run Playwright tests
+        id: playwright
+        run: pnpm test:e2e
+        env:
+          # Enable HTML report
+          PLAYWRIGHT_HTML_REPORT: playwright-report
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+      - name: Comment on PR - Success
+        if: steps.playwright.outcome == 'success' && steps.pr-info.outputs.pr_number
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ steps.pr-info.outputs.pr_number }} --body "$(cat <<'EOF'
+          ## ✅ E2E Tests Passed
+
+          All Playwright E2E tests passed successfully.
+
+          [View test run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+          )"
+
+      - name: Comment on PR - Failure
+        if: steps.playwright.outcome == 'failure' && steps.pr-info.outputs.pr_number
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ steps.pr-info.outputs.pr_number }} --body "$(cat <<'EOF'
+          ## ❌ E2E Tests Failed
+
+          Some Playwright E2E tests failed. Auto-heal will attempt to fix.
+
+          [View test run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          [Download report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)
+
+          <details>
+          <summary>🔧 Auto-heal in progress...</summary>
+
+          Claude is analyzing the failures and will attempt to fix them automatically.
+          </details>
+          EOF
+          )"
+
+  # Auto-heal job - runs if tests fail
+  auto-heal:
+    name: Auto-Heal E2E Failures
+    runs-on: ubuntu-latest
+    needs: e2e
+    if: needs.e2e.outputs.result == 'failure' && needs.e2e.outputs.pr_number != ''
+
+    steps:
+      - name: Security Check
+        id: security
+        run: |
+          if [ "${{ github.event.workflow_run.head_repository.full_name || github.repository }}" != "${{ github.repository }}" ]; then
+            echo "⚠️ Fork PR detected. Skipping auto-heal for security."
+            echo "is_fork=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout
+        if: steps.security.outputs.is_fork == 'false'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        if: steps.security.outputs.is_fork == 'false'
+        uses: pnpm/action-setup@0c17529a66aca453f9227af23103ed11469b1e47 # v4.0.0
+
+      - name: Setup Node.js
+        if: steps.security.outputs.is_fork == 'false'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        if: steps.security.outputs.is_fork == 'false'
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Install Playwright
+        if: steps.security.outputs.is_fork == 'false'
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Download test artifacts
+        if: steps.security.outputs.is_fork == 'false'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: test-artifacts/
+        continue-on-error: true
+
+      - name: Run Claude to fix E2E tests
+        if: steps.security.outputs.is_fork == 'false'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          additional_permissions: |
+            actions: read
+
+          prompt: |
+            ## 🔧 E2E Test Auto-Heal
+
+            **PR:** #${{ needs.e2e.outputs.pr_number }}
+            **Branch:** ${{ github.event.workflow_run.head_branch || github.ref_name }}
+            **Test Run:** https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            ## Project: Protocol: Silent Night
+
+            Commands:
+            - Build: `pnpm build`
+            - E2E tests: `pnpm test:e2e`
+            - Single test: `pnpm exec playwright test <test-file>`
+
+            ## Test Artifacts
+
+            Check the `test-artifacts/` directory for:
+            - playwright-report/index.html - HTML test report
+            - test-results/ - Screenshots and traces of failed tests
+
+            ## Instructions
+
+            1. Analyze the test failures from playwright-report
+            2. Check screenshots in test-results for visual clues
+            3. Identify whether it's a test issue or app bug
+            4. Make the fix (prefer fixing app code over test code)
+            5. Run `pnpm test:e2e` to verify
+            6. Commit and push the fix
+            7. Update PR with explanation of the fix
+
+            Focus on:
+            - Selector stability (use data-testid attributes)
+            - Timing issues (use proper waits, not arbitrary delays)
+            - State management (ensure proper test isolation)
+
+          claude_args: |
+            --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(pnpm:*),Bash(git:*),Bash(gh:*),Bash(cat:*),Bash(ls:*),Bash(rg:*),Bash(playwright:*)"
+
+      - name: Update PR comment
+        if: steps.security.outputs.is_fork == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ needs.e2e.outputs.pr_number }} --body "$(cat <<'EOF'
+          ## 🔧 E2E Auto-Heal Complete
+
+          Claude has analyzed and attempted to fix the E2E test failures.
+
+          Check the latest commits for any automated fixes.
+
+          [View auto-heal run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+          )"
