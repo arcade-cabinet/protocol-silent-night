@@ -29,3 +29,15 @@ export {
   type PBRMaterialOptions,
   type TextureCategory,
 } from './PBRTextureLoader';
+
+export {
+  loadSkybox,
+  loadMobileSkybox,
+  loadHDRSkybox,
+  createGradientSkybox,
+  getAvailableSkyboxes,
+  hasSkyboxPreset,
+  type SkyboxOptions,
+  type SkyboxResult,
+  type SkyboxPreset,
+} from './SkyboxLoader';

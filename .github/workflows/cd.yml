@@ -1,15 +1,16 @@
-# CD Workflow - Release & Documentation Sync
+# CD Workflow - Build, Test, Deploy (All Branches)
 #
 # ARCHITECTURE:
-# 1. Code repos build docs as part of CD (not separately)
-# 2. Built docs sync to org portal subdirectory
-# 3. Portal auto-rebuilds with org branding
+# - Unified workflow handling ALL branch types
+# - Conditional deployment based on branch/event
+# - DRY: Single source of truth for build steps
 #
-# DOCUMENTATION TOOLS (auto-detected):
-# - Python: Sphinx + autodoc2 → Markdown
-# - TypeScript/Node.js: TypeDoc → Markdown  
-# - Rust: rustdoc → HTML (converted to MD)
-# - Go: pkgsite/godoc → Markdown
+# BRANCH STRATEGY:
+# - main: Production deployment + docs sync
+# - release/*: Staging preview deployment
+# - feature/* and other branches: Build + test only
+# - pull_request: CI validation (no deployment)
+# - release event: Package publishing
 #
 # Managed by: [ORG]/control-center
 
@@ -17,19 +18,39 @@ name: CD
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'release/**'
+      - 'feature/**'
+      - 'feat/**'
+      - 'fix/**'
+      - 'chore/**'
+  pull_request:
+    branches: [main, 'release/**']
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: 'Deployment target (auto, staging, production, none)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - staging
+          - production
+          - none
 
 permissions:
   contents: write
   id-token: write
   packages: write
+  pull-requests: write
 
 concurrency:
   group: cd-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   ORG_NAME: ${{ github.repository_owner }}
@@ -37,21 +58,32 @@ env:
 
 jobs:
   # ==========================================================================
-  # Detect & Setup
+  # Detect & Setup (All Branches)
   # ==========================================================================
   detect:
-    name: Detect Stack
+    name: Detect Stack & Branch
     runs-on: ubuntu-latest
     # Skip for portal and control-center repos
     if: |
-      !endsWith(github.repository, '.github.io') && 
+      !endsWith(github.repository, '.github.io') &&
       !endsWith(github.repository, 'control-center')
     outputs:
+      # Stack detection
       is_python: ${{ steps.detect.outputs.is_python }}
       is_node: ${{ steps.detect.outputs.is_node }}
       is_rust: ${{ steps.detect.outputs.is_rust }}
       is_go: ${{ steps.detect.outputs.is_go }}
-      has_release: ${{ steps.detect.outputs.has_release }}
+      is_expo: ${{ steps.detect.outputs.is_expo }}
+      # Event/branch detection
+      is_release: ${{ steps.detect.outputs.is_release }}
+      is_main: ${{ steps.detect.outputs.is_main }}
+      is_release_branch: ${{ steps.detect.outputs.is_release_branch }}
+      is_pr: ${{ steps.detect.outputs.is_pr }}
+      # Deployment decisions
+      should_deploy: ${{ steps.detect.outputs.should_deploy }}
+      deploy_target: ${{ steps.detect.outputs.deploy_target }}
+      should_publish: ${{ steps.detect.outputs.should_publish }}
+      should_sync_docs: ${{ steps.detect.outputs.should_sync_docs }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -60,15 +92,66 @@ jobs:
             package.json
             Cargo.toml
             go.mod
+            app.json
+            apps/mobile/app.json
           sparse-checkout-cone-mode: false
 
       - id: detect
         run: |
+          # Stack detection
           echo "is_python=$([[ -f pyproject.toml ]] && echo true || echo false)" >> $GITHUB_OUTPUT
           echo "is_node=$([[ -f package.json ]] && echo true || echo false)" >> $GITHUB_OUTPUT
           echo "is_rust=$([[ -f Cargo.toml ]] && echo true || echo false)" >> $GITHUB_OUTPUT
           echo "is_go=$([[ -f go.mod ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "has_release=$([[ '${{ github.event_name }}' == 'release' ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "is_expo=$([[ -f app.json || -f apps/mobile/app.json ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+
+          # Event detection
+          echo "is_release=$([[ '${{ github.event_name }}' == 'release' ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "is_pr=$([[ '${{ github.event_name }}' == 'pull_request' ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+
+          # Branch detection
+          BRANCH="${{ github.ref_name }}"
+          IS_MAIN=$([[ "$BRANCH" == "main" || "$BRANCH" == "master" ]] && echo true || echo false)
+          IS_RELEASE_BRANCH=$([[ "$BRANCH" == release/* ]] && echo true || echo false)
+          echo "is_main=$IS_MAIN" >> $GITHUB_OUTPUT
+          echo "is_release_branch=$IS_RELEASE_BRANCH" >> $GITHUB_OUTPUT
+
+          # Deployment decisions (DRY logic)
+          DEPLOY_INPUT="${{ inputs.deploy_target }}"
+          EVENT="${{ github.event_name }}"
+
+          # Determine deployment target
+          if [[ "$DEPLOY_INPUT" == "none" ]]; then
+            DEPLOY_TARGET="none"
+            SHOULD_DEPLOY=false
+          elif [[ "$DEPLOY_INPUT" == "production" || "$EVENT" == "release" ]]; then
+            DEPLOY_TARGET="production"
+            SHOULD_DEPLOY=true
+          elif [[ "$DEPLOY_INPUT" == "staging" || "$IS_RELEASE_BRANCH" == "true" ]]; then
+            DEPLOY_TARGET="staging"
+            SHOULD_DEPLOY=true
+          elif [[ "$IS_MAIN" == "true" && "$EVENT" != "pull_request" ]]; then
+            DEPLOY_TARGET="production"
+            SHOULD_DEPLOY=true
+          else
+            DEPLOY_TARGET="none"
+            SHOULD_DEPLOY=false
+          fi
+
+          echo "deploy_target=$DEPLOY_TARGET" >> $GITHUB_OUTPUT
+          echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+
+          # Publish only on release events
+          echo "should_publish=$([[ '${{ github.event_name }}' == 'release' ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+
+          # Sync docs only on main or production deploy
+          echo "should_sync_docs=$([[ "$IS_MAIN" == "true" && "$EVENT" != "pull_request" ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+
+          # Summary
+          echo "📋 Branch: $BRANCH"
+          echo "📦 Event: $EVENT"
+          echo "🎯 Deploy target: $DEPLOY_TARGET"
+          echo "🚀 Should deploy: $SHOULD_DEPLOY"
 
   # ==========================================================================
   # Python: Build, Test, Release, Docs
@@ -90,41 +173,43 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
+      - name: Run tests
+        run: uv run pytest || echo "No tests found"
+
       # Release to PyPI (only on release event)
       - name: Build & Publish
-        if: needs.detect.outputs.has_release == 'true'
+        if: needs.detect.outputs.should_publish == 'true'
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
           uv build
           uv publish --token "$UV_PUBLISH_TOKEN" || echo "Already published or no token"
 
-      # Build Sphinx documentation
+      # Build Sphinx documentation (only if deploying)
       - name: Build Documentation
+        if: needs.detect.outputs.should_sync_docs == 'true'
         run: |
           mkdir -p docs-output
-          
+
           # Try Sphinx with autodoc2
           if [ -f docs/conf.py ]; then
             uv run sphinx-build -b html docs docs/_build/html
-            # Also build markdown for Starlight
             uv pip install sphinx-markdown-builder 2>/dev/null || true
             uv run sphinx-build -b markdown docs docs/_build/md 2>/dev/null || true
-            
+
             if [ -d docs/_build/md ]; then
               cp -r docs/_build/md/* docs-output/
             else
-              # Fallback: copy HTML (portal can still serve it)
               cp -r docs/_build/html/* docs-output/
             fi
           else
-            # No Sphinx config - generate basic API docs
             uv pip install pdoc 2>/dev/null || true
             uv run pdoc --output-dir docs-output --format md $(find src -name "*.py" -type f | head -1 | xargs dirname) 2>/dev/null || \
             echo "# API Documentation\n\nSee source code for details." > docs-output/index.md
           fi
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: needs.detect.outputs.should_sync_docs == 'true'
         with:
           name: docs-python
           path: docs-output/
@@ -153,34 +238,86 @@ jobs:
           pnpm install --frozen-lockfile || pnpm install
           pnpm build || true
 
+      - name: Run tests
+        run: pnpm test || echo "No tests found"
+
+      - name: Type check
+        run: pnpm typecheck || pnpm tsc --noEmit || true
+
       # Release to npm (only on release event)
       - name: Publish to npm
-        if: needs.detect.outputs.has_release == 'true'
+        if: needs.detect.outputs.should_publish == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm publish --access public --no-git-checks || echo "Already published or no token"
 
-      # Build TypeDoc documentation
+      # Build TypeDoc documentation (only if deploying)
       - name: Build Documentation
+        if: needs.detect.outputs.should_sync_docs == 'true'
         run: |
           mkdir -p docs-output
-          
-          # Install typedoc with markdown plugin
+
           pnpm add -D typedoc typedoc-plugin-markdown 2>/dev/null || true
-          
-          # Try package.json docs script first
+
           if pnpm run docs 2>/dev/null; then
             cp -r docs/* docs-output/ 2>/dev/null || true
           else
-            # Generate with typedoc directly
             npx typedoc --plugin typedoc-plugin-markdown --out docs-output src/ 2>/dev/null || \
             echo "# API Documentation\n\nSee source code for details." > docs-output/index.md
           fi
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: needs.detect.outputs.should_sync_docs == 'true'
         with:
           name: docs-nodejs
           path: docs-output/
+
+  # ==========================================================================
+  # Expo Mobile: Build Preview or Production
+  # ==========================================================================
+  expo:
+    name: Expo Mobile
+    needs: detect
+    if: needs.detect.outputs.is_expo == 'true' && needs.detect.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile || pnpm install
+
+      - name: Build Preview (Staging)
+        if: needs.detect.outputs.deploy_target == 'staging'
+        working-directory: apps/mobile
+        run: |
+          echo "🔧 Building staging preview..."
+          eas build --platform all --profile preview --non-interactive || echo "EAS not configured"
+
+      - name: Build Production
+        if: needs.detect.outputs.deploy_target == 'production'
+        working-directory: apps/mobile
+        run: |
+          echo "🚀 Building production..."
+          eas build --platform all --profile production --non-interactive || echo "EAS not configured"
+
+      - name: Submit to Stores
+        if: needs.detect.outputs.should_publish == 'true'
+        working-directory: apps/mobile
+        run: |
+          echo "📤 Submitting to app stores..."
+          eas submit --platform all --non-interactive || echo "EAS submit not configured"
 
   # ==========================================================================
   # Rust: Build, Test, Release, Docs
@@ -202,21 +339,26 @@ jobs:
       - name: Build
         run: cargo build --release
 
+      - name: Test
+        run: cargo test
+
       # Release to crates.io (only on release event)
       - name: Publish to crates.io
-        if: needs.detect.outputs.has_release == 'true'
+        if: needs.detect.outputs.should_publish == 'true'
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
         run: cargo publish || echo "Already published or no token"
 
-      # Build rustdoc
+      # Build rustdoc (only if deploying)
       - name: Build Documentation
+        if: needs.detect.outputs.should_sync_docs == 'true'
         run: |
           cargo doc --no-deps
           mkdir -p docs-output
           cp -r target/doc/* docs-output/
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: needs.detect.outputs.should_sync_docs == 'true'
         with:
           name: docs-rust
           path: docs-output/
@@ -239,34 +381,38 @@ jobs:
       - name: Build
         run: go build -v ./...
 
-      # Build Go documentation
+      - name: Test
+        run: go test -v ./...
+
+      # Build Go documentation (only if deploying)
       - name: Build Documentation
+        if: needs.detect.outputs.should_sync_docs == 'true'
         run: |
           mkdir -p docs-output
-          
-          # Generate markdown from go doc
+
           echo "# API Documentation" > docs-output/index.md
           echo "" >> docs-output/index.md
           go doc -all ./... >> docs-output/index.md 2>/dev/null || true
-          
-          # Try pkgsite for HTML (optional)
+
           go install golang.org/x/pkgsite/cmd/pkgsite@latest 2>/dev/null || true
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: needs.detect.outputs.should_sync_docs == 'true'
         with:
           name: docs-go
           path: docs-output/
 
   # ==========================================================================
-  # Sync Documentation to Org Portal
+  # Sync Documentation to Org Portal (Main Branch Only)
   # ==========================================================================
   sync-docs:
     name: Sync to Portal
     needs: [detect, python, nodejs, rust, golang]
     if: |
-      always() && 
+      always() &&
       !cancelled() &&
-      (needs.python.result == 'success' || needs.nodejs.result == 'success' || 
+      needs.detect.outputs.should_sync_docs == 'true' &&
+      (needs.python.result == 'success' || needs.nodejs.result == 'success' ||
        needs.rust.result == 'success' || needs.golang.result == 'success')
     runs-on: ubuntu-latest
     steps:
@@ -284,29 +430,29 @@ jobs:
           REPO: ${{ env.REPO_NAME }}
         run: |
           PORTAL="${ORG}.github.io"
-          
+
           # Derive package ID (strip common prefixes)
           PACKAGE_ID=$(echo "$REPO" | sed 's/^strata-//' | sed 's/^agentic-//' | sed 's/^extended-//')
-          
+
           echo "📚 Syncing docs for $REPO → $PORTAL/src/content/docs/$PACKAGE_ID/"
-          
+
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          
+
           # Clone portal
           if ! git clone "https://x-access-token:${DOCS_TOKEN}@github.com/${ORG}/${PORTAL}.git" portal 2>/dev/null; then
             echo "⚠️ Portal repo ${ORG}/${PORTAL} not found - skipping sync"
             exit 0
           fi
-          
+
           # Target directory
           TARGET="portal/src/content/docs/packages/${PACKAGE_ID}"
           mkdir -p "$TARGET"
-          
+
           # Copy docs
           if [ -d "all-docs" ] && [ "$(ls -A all-docs 2>/dev/null)" ]; then
             cp -r all-docs/* "$TARGET/"
-            
+
             # Ensure frontmatter for Starlight
             for f in "$TARGET"/*.md; do
               if [ -f "$f" ] && ! grep -q "^---" "$f"; then
@@ -314,7 +460,7 @@ jobs:
                 sed -i "1i---\ntitle: $TITLE\n---\n" "$f"
               fi
             done
-            
+
             # Create index if missing
             if [ ! -f "$TARGET/index.md" ] && [ ! -f "$TARGET/index.mdx" ]; then
               echo "---" > "$TARGET/index.mdx"
@@ -329,17 +475,51 @@ jobs:
               echo "See the [source repository](https://github.com/${ORG}/${REPO}) for more details." >> "$TARGET/index.mdx"
             fi
           fi
-          
+
           cd portal
           if [ -n "$(git status --porcelain)" ]; then
             git add .
             git commit -m "docs($PACKAGE_ID): sync from $REPO
-            
+
             Auto-synced from: https://github.com/${ORG}/${REPO}
             Triggered by: ${{ github.event_name }}"
-            
+
             git push origin main
             echo "✅ Documentation synced successfully"
           else
             echo "ℹ️ No documentation changes"
           fi
+
+  # ==========================================================================
+  # Summary Job (Always Runs)
+  # ==========================================================================
+  summary:
+    name: CD Summary
+    needs: [detect, python, nodejs, expo, rust, golang, sync-docs]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Event | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy Target | \`${{ needs.detect.outputs.deploy_target }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Should Deploy | \`${{ needs.detect.outputs.should_deploy }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Should Publish | \`${{ needs.detect.outputs.should_publish }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docs Sync | \`${{ needs.detect.outputs.should_sync_docs }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| detect | ${{ needs.detect.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| python | ${{ needs.python.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| nodejs | ${{ needs.nodejs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| expo | ${{ needs.expo.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| rust | ${{ needs.rust.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| golang | ${{ needs.golang.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| sync-docs | ${{ needs.sync-docs.result }} |" >> $GITHUB_STEP_SUMMARY

@@ -65,18 +65,8 @@ export function GameScene({
   const engine = useEngine();
   const [camera, setCamera] = useState<Camera | undefined>();
 
-  // Game store state
-  const {
-    gameState,
-    phase,
-    player,
-    screenShake,
-    updatePlayerPosition,
-    damagePlayer,
-    addKill,
-    setMovement,
-    setFiring,
-  } = useGameStore();
+  // Game store state (reactive subscriptions for UI)
+  const { gameState, player, screenShake, setMovement, setFiring } = useGameStore();
 
   // Refs for game systems
   const sceneRef = useRef<Scene | null>(null);
@@ -85,6 +75,15 @@ export function GameScene({
   const bulletManagerRef = useRef<ReturnType<typeof createBulletManager> | null>(null);
   const cameraSystemRef = useRef<ReturnType<typeof createIsometricCamera> | null>(null);
   const useGLBRef = useRef<boolean>(false);
+
+  // Combat timing refs (prevent per-frame damage/firing)
+  const lastDamageTimeRef = useRef<number>(0);
+  const lastFireTimeRef = useRef<number>(0);
+  const playerFacingRef = useRef<Vector3>(new Vector3(0, 0, 1));
+
+  // Damage cooldown in seconds
+  const DAMAGE_COOLDOWN = 0.5;
+  // Fire rate will be loaded from weapon config
 
   // Handle game state changes
   useEffect(() => {
@@ -114,7 +113,7 @@ export function GameScene({
     const themes = loadThemes();
     const terrainConfig = loadTerrainConfig();
     const enemyData = loadEnemies();
-    const _weapons = loadWeapons();
+    const weapons = loadWeapons();
 
     const classConfig = classes[classType];
     if (!classConfig) {
@@ -220,7 +219,8 @@ export function GameScene({
         fpsUpdateTime = 0;
       }
 
-      if (phase !== 'PHASE_1' && phase !== 'PHASE_BOSS') return;
+      const currentPhase = useGameStore.getState().phase;
+      if (currentPhase !== 'PHASE_1' && currentPhase !== 'PHASE_BOSS') return;
 
       // Get current player position from store
       const playerPos = useGameStore.getState().player.position;
@@ -234,9 +234,11 @@ export function GameScene({
       if (moveX !== 0 || moveZ !== 0) {
         const newX = playerPos.x + moveX;
         const newZ = playerPos.z + moveZ;
-        updatePlayerPosition(newX, 0, newZ);
+        useGameStore.getState().updatePlayerPosition(newX, 0, newZ);
         playerCharacter.update(deltaTime, true, currentInput.isFiring);
         cameraSystem.followTarget(new Vector3(newX, 0, newZ));
+        // Update player facing direction based on movement
+        playerFacingRef.current = new Vector3(moveX, 0, moveZ).normalize();
       } else {
         playerCharacter.update(deltaTime, false, currentInput.isFiring);
       }
@@ -262,31 +264,45 @@ export function GameScene({
         if (killed) {
           const enemy = enemies.getEnemies().find((e) => e.id === collision.enemyId);
           if (enemy) {
-            addKill(enemy.type === 'boss' ? 500 : 100);
+            useGameStore.getState().addKill(enemy.type === 'boss' ? 500 : 100);
           }
         }
       }
 
-      // Check enemy-player collisions
+      // Check enemy-player collisions (with damage cooldown)
+      const currentTime = now / 1000; // Convert to seconds
       for (const enemy of enemies.getEnemies()) {
         const dist = Math.sqrt(
           (enemy.position.x - playerPos.x) ** 2 +
           (enemy.position.z - playerPos.z) ** 2
         );
-        if (dist < 2) {
-          damagePlayer(enemy.type === 'boss' ? 20 : 5);
+        if (dist < 2 && currentTime - lastDamageTimeRef.current >= DAMAGE_COOLDOWN) {
+          useGameStore.getState().damagePlayer(enemy.type === 'boss' ? 20 : 5);
+          lastDamageTimeRef.current = currentTime;
+          break; // Only take damage from one enemy per cooldown
         }
       }
 
-      // Fire bullets
+      // Fire bullets (with rate limiting)
       if (currentInput.isFiring) {
-        const direction = new Vector3(0, 0, 1); // Forward
-        bullets.fire(
-          classConfig.weaponType,
-          new Vector3(playerPos.x, 1, playerPos.z),
-          direction,
-          classConfig.damage
-        );
+        // Get fire rate from weapon config (default 0.15s = ~6.6 shots/sec)
+        const weaponConfig = weapons[classConfig.weaponType as keyof typeof weapons];
+        const fireRate = weaponConfig?.fireRate ?? 0.15;
+
+        if (currentTime - lastFireTimeRef.current >= fireRate) {
+          // Use player facing direction (normalized)
+          const direction = playerFacingRef.current.length() > 0
+            ? playerFacingRef.current.clone().normalize()
+            : new Vector3(0, 0, 1); // Default forward if no movement yet
+
+          bullets.fire(
+            classConfig.weaponType,
+            new Vector3(playerPos.x, 1, playerPos.z),
+            direction,
+            classConfig.damage
+          );
+          lastFireTimeRef.current = currentTime;
+        }
       }
     });
 
@@ -308,7 +324,9 @@ export function GameScene({
       cameraSystemRef.current?.dispose();
       sceneRef.current?.dispose();
     };
-  }, [engine, classType, onReady, addKill, phase, damagePlayer, updatePlayerPosition]);
+  // Note: Store actions accessed via useGameStore.getState() inside callbacks
+  // to avoid re-running effect when they change (they're stable but React doesn't know)
+  }, [engine, classType, onReady]);
 
   // Handle joystick input
   const handleJoystickMove = useCallback(

@@ -35,15 +35,16 @@ export interface PBRMaterialOptions {
 }
 
 // Texture categories available
-export type TextureCategory = 'terrain' | 'metal' | 'ice' | 'tiles' | 'decals';
+export type TextureCategory = 'terrain' | 'metal' | 'ice' | 'tiles' | 'decals' | 'concrete';
 
-// Available textures per category
+// Available textures per category (updated with integrated AmbientCG assets)
 const TEXTURE_CATALOG: Record<TextureCategory, string[]> = {
   terrain: ['Concrete017', 'Ground003'],
-  metal: ['Metal007', 'Metal012', 'Metal026', 'Plastic006'],
+  metal: ['Metal001', 'Metal007', 'Metal008', 'Metal012', 'Metal015', 'Metal026', 'Metal030', 'Plastic006'],
   ice: ['Ice001', 'Ice002'],
   tiles: ['Tiles021', 'Tiles030'],
   decals: ['RoadLines001', 'ManholeCover003'],
+  concrete: ['Concrete003', 'Concrete015', 'Concrete017', 'Concrete025'],
 };
 
 // ============================================================================
@@ -58,44 +59,45 @@ export function loadPBRTextureSet(
   category: TextureCategory,
   textureName: string
 ): PBRTextureSet {
-  const basePath = `../../assets/textures/${category}/${textureName}/`;
-  const prefix = `${textureName}_1K-JPG`;
+  // Assets are organized in materials/ directory with simplified naming
+  // e.g., assets/materials/Metal001/diffuse.jpg
+  const basePath = `../../assets/materials/${textureName}/`;
 
   const textures: PBRTextureSet = {};
 
-  // Color/Albedo
+  // Color/Albedo (diffuse.jpg)
   try {
-    textures.color = new Texture(`${basePath}${prefix}_Color.jpg`, scene);
+    textures.color = new Texture(`${basePath}diffuse.jpg`, scene);
   } catch {
-    console.warn(`Color texture not found for ${textureName}`);
+    console.warn(`Diffuse texture not found for ${textureName}`);
   }
 
-  // Normal map (use OpenGL format for BabylonJS)
+  // Normal map (normal.jpg - already in OpenGL format)
   try {
-    textures.normal = new Texture(`${basePath}${prefix}_NormalGL.jpg`, scene);
+    textures.normal = new Texture(`${basePath}normal.jpg`, scene);
   } catch {
     console.warn(`Normal texture not found for ${textureName}`);
   }
 
   // Roughness
   try {
-    textures.roughness = new Texture(`${basePath}${prefix}_Roughness.jpg`, scene);
+    textures.roughness = new Texture(`${basePath}roughness.jpg`, scene);
   } catch {
     console.warn(`Roughness texture not found for ${textureName}`);
   }
 
   // Metalness
   try {
-    textures.metalness = new Texture(`${basePath}${prefix}_Metalness.jpg`, scene);
+    textures.metalness = new Texture(`${basePath}metallic.jpg`, scene);
   } catch {
     console.warn(`Metalness texture not found for ${textureName}`);
   }
 
-  // Displacement
+  // Ambient Occlusion
   try {
-    textures.displacement = new Texture(`${basePath}${prefix}_Displacement.jpg`, scene);
+    textures.ao = new Texture(`${basePath}ao.jpg`, scene);
   } catch {
-    console.warn(`Displacement texture not found for ${textureName}`);
+    console.warn(`AO texture not found for ${textureName}`);
   }
 
   return textures;

@@ -167,19 +167,20 @@ export function VirtualJoystick({
       onStartShouldSetPanResponder: () => !disabled,
       onMoveShouldSetPanResponder: () => !disabled,
 
-      onPanResponderGrant: (_, gestureState) => {
+      onPanResponderGrant: (event) => {
         setIsActive(true);
         scale.value = withSpring(1.1, SPRING_CONFIG);
 
-        const { x, y } = calculateValues(gestureState.x0, gestureState.y0);
+        // Use nativeEvent for view-relative coordinates on initial touch
+        const { locationX, locationY } = event.nativeEvent;
+        const { x, y } = calculateValues(locationX, locationY);
         onMove(x, y);
       },
 
-      onPanResponderMove: (_, gestureState) => {
-        const { x, y } = calculateValues(
-          gestureState.moveX - baseLayout.current.x,
-          gestureState.moveY - baseLayout.current.y
-        );
+      onPanResponderMove: (event) => {
+        // Use nativeEvent for view-relative coordinates
+        const { locationX, locationY } = event.nativeEvent;
+        const { x, y } = calculateValues(locationX, locationY);
         onMove(x, y);
       },
 

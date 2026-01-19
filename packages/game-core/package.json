@@ -21,7 +21,12 @@
     "./types": {
       "import": "./dist/types/index.js",
       "types": "./dist/types/index.d.ts"
-    }
+    },
+    "./assets": {
+      "import": "./dist/assets/index.js",
+      "types": "./dist/assets/index.d.ts"
+    },
+    "./assets/*": "./assets/*"
   },
   "scripts": {
     "build": "tsc",

@@ -179,7 +179,7 @@
         "config": "terrain_warehouse"
       },
       "environment": {
-        "skybox": "skyboxes/night_industrial.hdr",
+        "skybox": "night_industrial",
         "fog": {
           "color": "#0a0a1a",
           "density": 0.02
@@ -198,7 +198,7 @@
         "config": "terrain_factory"
       },
       "environment": {
-        "skybox": "skyboxes/smoke_red.hdr",
+        "skybox": "night_clouds",
         "fog": {
           "color": "#1a0a0a",
           "density": 0.03
@@ -217,7 +217,7 @@
         "config": "terrain_boss_arena"
       },
       "environment": {
-        "skybox": "skyboxes/void_blue.hdr",
+        "skybox": "environment_blue",
         "fog": {
           "color": "#0a1020",
           "density": 0.01
@@ -232,14 +232,44 @@
 
   "ui": {
     "sounds": {
-      "click": "audio/ui/click-a.ogg",
-      "hover": "audio/ui/tap-a.ogg",
-      "confirm": "audio/ui/switch-a.ogg",
-      "cancel": "audio/ui/switch-b.ogg",
-      "victory": "audio/jingles/jingles-retro_00.ogg",
-      "defeat": "audio/jingles/jingles-retro_15.ogg",
-      "level_complete": "audio/jingles/jingles-pizzicato_00.ogg"
+      "click": "audio/ui/click.ogg",
+      "click_alt": "audio/ui/click-alt.ogg",
+      "hover": "audio/ui/hover.ogg",
+      "hover_alt": "audio/ui/hover-alt.ogg",
+      "confirm": "audio/ui/confirm.ogg",
+      "cancel": "audio/ui/cancel.ogg",
+      "toggle": "audio/ui/toggle.ogg",
+      "select": "audio/ui/select.ogg",
+      "victory": "audio/jingles/victory.ogg",
+      "defeat": "audio/jingles/defeat.ogg",
+      "level_complete": "audio/jingles/level-complete.ogg",
+      "boss_intro": "audio/jingles/boss-intro.ogg",
+      "wave_complete": "audio/jingles/wave-complete.ogg",
+      "achievement": "audio/jingles/achievement.ogg",
+      "fanfare": "audio/jingles/fanfare.ogg"
     }
+  },
+
+  "materials": {
+    "metal": {
+      "Metal001": "materials/Metal001",
+      "Metal008": "materials/Metal008",
+      "Metal015": "materials/Metal015",
+      "Metal030": "materials/Metal030"
+    },
+    "concrete": {
+      "Concrete003": "materials/Concrete003",
+      "Concrete015": "materials/Concrete015",
+      "Concrete025": "materials/Concrete025"
+    }
+  },
+
+  "skyboxes": {
+    "night_clear": "skyboxes/EveningSkyHDRI001A_1K",
+    "night_clouds": "skyboxes/EveningSkyHDRI005A_1K",
+    "night_industrial": "skyboxes/EveningSkyHDRI010A_1K",
+    "environment_dark": "skyboxes/EveningEnvironmentHDRI001_1K",
+    "environment_blue": "skyboxes/EveningEnvironmentHDRI003_1K"
   },
 
   "external_sources": {
@@ -257,6 +287,11 @@
       "base_path": "~/assets/Quaternius",
       "license": "CC0",
       "categories": ["Medieval", "Nature", "Characters and Animals"]
+    },
+    "ambientcg": {
+      "base_path": "~/assets/AmbientCG",
+      "license": "CC0",
+      "categories": ["HDRI", "Materials", "PBR Textures"]
     }
   }
 }

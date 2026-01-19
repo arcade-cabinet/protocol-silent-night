@@ -50,10 +50,12 @@ const GRAD3: number[][] = [
 ];
 
 /**
- * Fast floor function
+ * Fast floor function using bitwise truncation
+ * Correctly handles negative numbers: fastFloor(-0.5) = -1
  */
 function fastFloor(x: number): number {
-  return x > 0 ? Math.floor(x) : Math.floor(x) - (x !== Math.floor(x) ? 1 : 0);
+  const xi = x | 0; // Truncate toward zero
+  return x < xi ? xi - 1 : xi;
 }
 
 /**
