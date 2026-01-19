@@ -1,0 +1,56 @@
+{
+  "terrain": {
+    "gridSize": 80,
+    "cubeSize": 1.8,
+    "cubeHeight": 4,
+    "noiseScale": 0.1,
+    "detailNoiseScale": 0.05,
+    "heightMultiplier": 2,
+    "detailHeightMultiplier": 1.5,
+    "baseElevation": -3,
+    "glitchChance": 0.005,
+    "obstacleThreshold": 0.4
+  },
+  "obstacles": {
+    "present_red": {
+      "type": "present",
+      "color": "#ff0044",
+      "heightRange": [2, 4],
+      "radius": 0.9,
+      "scale": [1.2, 1, 1.2],
+      "yOffset": 1
+    },
+    "present_green": {
+      "type": "present",
+      "color": "#00ff88",
+      "heightRange": [2, 4],
+      "radius": 0.9,
+      "scale": [1.2, 1, 1.2],
+      "yOffset": 1
+    },
+    "tree": {
+      "type": "tree",
+      "color": "#00aa44",
+      "heightRange": [4, 8],
+      "radius": 1.2,
+      "scale": [1, 1, 1],
+      "yOffset": 2
+    },
+    "candy_cane": {
+      "type": "candy_cane",
+      "color": "#ff4477",
+      "heightRange": [3, 5],
+      "radius": 0.9,
+      "scale": [0.5, 1, 0.5],
+      "yOffset": 1.5
+    },
+    "pillar": {
+      "type": "pillar",
+      "color": "#00ffcc",
+      "heightRange": [5, 10],
+      "radius": 0.9,
+      "scale": [1, 1, 1],
+      "yOffset": 0
+    }
+  }
+}

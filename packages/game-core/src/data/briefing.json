@@ -1,0 +1,10 @@
+{
+  "title": "SILENT NIGHT",
+  "objective": "Neutralize hostile Grinch-Bots and eliminate Krampus-Prime",
+  "intel": [
+    "Eliminate hostile Grinch-Bot forces",
+    "Neutralize Krampus-Prime command unit",
+    "Defeat 10 Grinch-Bots to draw out Krampus-Prime"
+  ],
+  "warning": "Hostiles are aggressive - engage on sight"
+}

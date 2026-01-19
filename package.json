@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mobile": "pnpm --filter @protocol-silent-night/mobile start",
     "build": "tsc -b && vite build",
+    "build:ios": "pnpm --filter @protocol-silent-night/mobile ios",
+    "build:android": "pnpm --filter @protocol-silent-night/mobile android",
     "preview": "vite preview",
     "lint": "biome lint .",
     "format": "biome format --write .",

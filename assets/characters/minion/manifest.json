@@ -1,0 +1,117 @@
+{
+  "id": "minion",
+  "name": "Glitch Gremlin",
+  "type": "character",
+  "description": "Corrupted digital Christmas gremlin enemy - basic humanoid enemy type",
+  "textToImageTask": {
+    "prompt": "A small humanoid gremlin creature in A-pose with arms outstretched. Bipedal humanoid body with two arms, two legs, torso, and head. Short stature, mischievous imp-like proportions. Cracked holographic skin with digital glitch effects. Red and green Christmas colors corrupted to magenta and cyan. Large pointed ears. Glowing red eyes. Sharp teeth in wicked grin. Wearing tattered digital elf costume. Very clear humanoid silhouette. Low poly game character style. Full body front view, A-pose stance.",
+    "generateMultiView": true,
+    "poseMode": "a-pose"
+  },
+  "multiImageTo3DTask": {
+    "topology": "quad",
+    "targetPolycount": 5000,
+    "symmetryMode": "auto",
+    "shouldRemesh": true,
+    "shouldTexture": true,
+    "enablePbr": false,
+    "poseMode": "a-pose",
+    "texturePrompt": "Cracked holographic skin with digital glitch effects, magenta and cyan corruption colors, glowing red eyes, tattered digital elf costume"
+  },
+  "riggingTask": {
+    "heightMeters": 0.8
+  },
+  "animationTask": {
+    "preset": "enemy"
+  },
+  "tasks": {
+    "concept": {
+      "taskId": "019bd74c-78c9-7cc9-8272-32fa8faf00e7",
+      "status": "SUCCEEDED",
+      "completedAt": 1768843695711,
+      "outputs": {
+        "taskId": "019bd74c-78c9-7cc9-8272-32fa8faf00e7",
+        "imageUrls": [
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd74c-d405-7b9b-813e-a16439b7ba63_part_0.png?Expires=1769102895&Signature=cVhDfMhLcH6~H8C0sO8ag5~gIXzNI4urarCQyGmNUmPBjH6OBjJ88mKro71UU-7z7btsuPxCvjhsZUc8ZX7CNvm~sp9rXJVFlPAD3V2MQiEN2st~XceOX4XtWcD1uHksbP5WnF2~4vUbqAhJN5CItHEsxILV1dYMynwSwpUSZFQBXPBjTGGPWxxmn513tudggzhMpAixsv~xYC4W18WmEOEGIENqKoN7TNMu~tKhuHPJ9ZQiW3d2Mzj24OQtGGwaLpXMqOPK3RRYC7AxfWudJM2OFZOWNFLS5h~9-EyekTnX-Z3hNtFO0XMBdOBua5wIVX9Gg49a7UXW~T0GKCX4~Q__&Key-Pair-Id=KL5I0C8H7HX83",
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd74c-d405-7b9b-813e-a16439b7ba63_part_1.png?Expires=1769102895&Signature=b2ZKTDfWlc~ujVr7LLK4l992u8CNvDdDForwEdLaekJHaHbG2jtiyuS-Mx02npCrHDL0usqT7-Y6PRx-zCXhTQWaTMnaob-~wtnftKhj3j3JkkcDvNClO~gQbvnvq2xSDe5MEJ-I0t~EXFHJxEu4bdy52i8hCQs3vvig-Ds1zIPA5BAy-MbsZ7PoPPH0izzFZFdyaC6zwuznJdxPZakxCx1swm31EEmqNSoHuVcLi23U-3MeDI1st6eMGotsowu~RiWlVnNOL7QGkpmzQJ8d9yKs7poflcO3zEg-ZXVCvB21~1mhjxQxnTDAs~9yLiy6Azv8Aq73OGXv0Wv29-ZU7g__&Key-Pair-Id=KL5I0C8H7HX83",
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd74c-d405-7b9b-813e-a16439b7ba63_part_2.png?Expires=1769102895&Signature=fTRRLh4Os7XcyPT9UpmGazEAIYJditoxh6YeGjSeDZr-UYw8y9aRwBqDxBNilQZRgcV8fSCbtb0u-TGIlX-bIcSPZrqi1dCtrVGOS-guIVA8~q69jUKO7hsV6Is72yEo0oNGwQrmDR0RxdlMQbX13cwAVT99QnM4ZwvzrfeJ0pAjKHdaCt9UuLvWhtg8HHG3BorSHu1yvKlBSIL8vuFbEYI9w3ax4lHqlL519nojt6pV1n7xWjXnTKSHETCdAl0CXGMR5KIDEGcB5WrKl1-AMy5I9-jIh~lgt~D1ruh2Fb~yrXx0yLoOIUC2nL~g7O4pVzaDx7TmAeBUBwcZv4TmuA__&Key-Pair-Id=KL5I0C8H7HX83"
+        ]
+      },
+      "artifacts": {}
+    },
+    "model": {
+      "taskId": "019bd74c-d704-7cd0-b5c3-5f7321012bbb",
+      "status": "SUCCEEDED",
+      "completedAt": 1768843871065,
+      "outputs": {
+        "taskId": "019bd74c-d704-7cd0-b5c3-5f7321012bbb",
+        "model": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd74c-d704-7cd0-b5c3-5f7321012bbb/output/model.glb?Expires=1769103070&Signature=rQUswPZdeN7MSLk1pWFFFgs2Pe4PhiB9~BZAXmUncFbkFZprx1ced2J0U71NjW1aP4YOe~Oz-2aKRiO~UtK7ed1DVW-LxHYShef1UgfYtkEVAxBnhgMNv3bKKGM9vKqQvhozYBfNRyi2rUgRUiu~Xl7VVB4-89OU3tzahqpQWdy44H1ADaauX3whFDlbJsJpO-aALo81lPLH-fffbrmkUiOXdOyBDK5Xc~LPyQm4nez6UmZjgArKn4xU-jxg3tiIaXf8MtQBersn3Ofa2Omj0FaZobbMBOQYCHh57R~BNIcfKNv0Vx7r2jaR-PETftJpEGVSH2-2Wsfnbvj8uNR0nQ__&Key-Pair-Id=KL5I0C8H7HX83",
+        "textures": [
+          {
+            "base_color": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd74c-d704-7cd0-b5c3-5f7321012bbb/output/texture_0.png?Expires=1769103070&Signature=QymUcunY~P3ZiwPJt56RvdMJGM0SO8wATHsK4lNxDtS1GIbjbrpVuLQW8WIPl5xwAdqRNkwZ4hJcT5se4RXoAp~u0a6tBY-KZngKzdW3kPbZnjU1Wb3aqtcWxNiDeub5r3-o9svFI7WaSc2SmUDouPo9esSc4wtnXS2ejsyZ-4pZWWI1yzGgQmp3gw5DY0qUYJqKG8Rv5zXwfyQWR99A0iNyFPbw39ed1eDyPDueNvDf3nn6Pz86bg8R8pCybpLj4-YbG9HMDhUjMzBmU8xUo1PlU8ASszh90bvTjR-vzkMskfNTeSSqRkXEkmOTeMSDnGp0NvvLHoTSwDlwwhPqRw__&Key-Pair-Id=KL5I0C8H7HX83"
+          }
+        ],
+        "textureUrl": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd74c-d704-7cd0-b5c3-5f7321012bbb/output/texture_0.png?Expires=1769103070&Signature=QymUcunY~P3ZiwPJt56RvdMJGM0SO8wATHsK4lNxDtS1GIbjbrpVuLQW8WIPl5xwAdqRNkwZ4hJcT5se4RXoAp~u0a6tBY-KZngKzdW3kPbZnjU1Wb3aqtcWxNiDeub5r3-o9svFI7WaSc2SmUDouPo9esSc4wtnXS2ejsyZ-4pZWWI1yzGgQmp3gw5DY0qUYJqKG8Rv5zXwfyQWR99A0iNyFPbw39ed1eDyPDueNvDf3nn6Pz86bg8R8pCybpLj4-YbG9HMDhUjMzBmU8xUo1PlU8ASszh90bvTjR-vzkMskfNTeSSqRkXEkmOTeMSDnGp0NvvLHoTSwDlwwhPqRw__&Key-Pair-Id=KL5I0C8H7HX83"
+      },
+      "artifacts": {}
+    },
+    "rigging": {
+      "taskId": "019bd74f-83ff-7d12-81d0-2b827b52b8e9",
+      "status": "SUCCEEDED",
+      "completedAt": 1768843888019,
+      "outputs": {
+        "taskId": "019bd74f-83ff-7d12-81d0-2b827b52b8e9",
+        "riggedModel": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd74f-83ff-7d12-81d0-2b827b52b8e9/output/Character_output.glb?Expires=1769103087&Signature=LuviCUdgMSaq7AmzYpOTggIR-zBunXXPlYhPwSvilee40a7tamA0Kpv9~OgR3mVfL3juFtU0nO3A7B-cbYNsH7RPETjqGrIdf3F1AJ-wIduns4T8ylpmzdbljUQFOr~vqRaVT2HV6kjVFHXXbRpGo8FuV74p76ydmhlJ8LWS0Em4LSmO-GoBNlD3qpoV0P3x5A4NM8jgUUzVjxs1SfZA7HDTLWXu8OM-FXn4uz6msOHxOQXyUjCFX9lp9dmMatnx1bBYq2wHh4f3YGNBh4wyA3VjVcksfg9lcBpHsQxqags4hP1j4rz7e6Q7Fn8L9UC9h-gH9D8c9hKUrLgXjLoHvg__&Key-Pair-Id=KL5I0C8H7HX83"
+      },
+      "artifacts": {}
+    },
+    "animations": [
+      {
+        "taskId": "019bd74f-c63d-7a56-9840-5a8ea0926e24",
+        "status": "SUCCEEDED",
+        "animationName": "COMBAT_STANCE",
+        "completedAt": 1768843895293,
+        "outputs": {
+          "animations/combat_stance.glb": "animations/combat_stance.glb"
+        }
+      },
+      {
+        "taskId": "019bd74f-e29d-7bde-a096-0a4429c2a8e1",
+        "status": "SUCCEEDED",
+        "animationName": "RUNFAST",
+        "completedAt": 1768843904947,
+        "outputs": {
+          "animations/runfast.glb": "animations/runfast.glb"
+        }
+      },
+      {
+        "taskId": "019bd750-0859-7a58-b9af-d50ebccd374b",
+        "status": "SUCCEEDED",
+        "animationName": "DOUBLE_COMBO_ATTACK",
+        "completedAt": 1768843924034,
+        "outputs": {
+          "animations/double_combo_attack.glb": "animations/double_combo_attack.glb"
+        }
+      },
+      {
+        "taskId": "019bd750-52e0-7a7b-a779-345a4c4a846c",
+        "status": "SUCCEEDED",
+        "animationName": "BEHIT_FLYUP",
+        "completedAt": 1768843931283,
+        "outputs": {
+          "animations/behit_flyup.glb": "animations/behit_flyup.glb"
+        }
+      },
+      {
+        "taskId": "019bd750-6f37-7d3c-8129-cca309f916f9",
+        "status": "SUCCEEDED",
+        "animationName": "DEAD",
+        "completedAt": 1768843948297,
+        "outputs": {
+          "animations/dead.glb": "animations/dead.glb"
+        }
+      }
+    ]
+  },
+  "seed": 3894811399
+}

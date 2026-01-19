@@ -1,0 +1,23 @@
+[gd_resource type="StandardMaterial3D" load_steps=7 format=3 uid="1f4ntuav2mrk"]
+
+[ext_resource type="Texture2D" uid="uid://v0tmjhbdr7z5" id="ce1d62vnsbfq" path="./ManholeCover003_1K-JPG_Color.jpg"]
+[ext_resource type="Texture2D" uid="uid://mab3f8v9qiht" id="34jnwb5ugam8" path="./ManholeCover003_1K-JPG_AmbientOcclusion.jpg"]
+[ext_resource type="Texture2D" uid="uid://mptivojzf870" id="7bakl8uco53w" path="./ManholeCover003_1K-JPG_Metalness.jpg"]
+[ext_resource type="Texture2D" uid="uid://zo5wy8hem2r1" id="asupkgl57doj" path="./ManholeCover003_1K-JPG_Displacement.jpg"]
+[ext_resource type="Texture2D" uid="uid://zlhf8gptwvao" id="32db5ekluszp" path="./ManholeCover003_1K-JPG_Roughness.jpg"]
+[ext_resource type="Texture2D" uid="uid://ufopasli0r8e" id="wsfv2tpho1y9" path="./ManholeCover003_1K-JPG_NormalGL.jpg"]
+[resource]
+albedo_texture = ExtResource("ce1d62vnsbfq")
+ao_enabled = true
+ao_texture = ExtResource("34jnwb5ugam8")
+ao_texture_channel = 4
+metallic_texture = ExtResource("7bakl8uco53w")
+metallic = 1.0
+metallic_texture_channel = 4
+roughness_texture = ExtResource("32db5ekluszp")
+roughness_texture_channel = 4
+normal_texture = ExtResource("wsfv2tpho1y9")
+normal_enabled = true
+heightmap_texture = ExtResource("asupkgl57doj")
+heightmap_scale = 1.0
+heightmap_enabled = true

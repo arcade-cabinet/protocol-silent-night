@@ -1,0 +1,104 @@
+{
+  "type": "text-to-3d-preview",
+  "name": "Text to 3D Preview",
+  "apiVersion": "v2",
+  "endpoint": "text-to-3d",
+  "inputs": [
+    {
+      "name": "mode",
+      "type": "string",
+      "required": true,
+      "default": "preview",
+      "description": "Must be 'preview' for this task"
+    },
+    {
+      "name": "prompt",
+      "type": "string",
+      "required": true,
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.prompt",
+      "description": "Object description, max 600 characters"
+    },
+    {
+      "name": "art_style",
+      "type": "string",
+      "required": false,
+      "default": "realistic",
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.artStyle",
+      "description": "Art style: 'realistic' or 'sculpture'"
+    },
+    {
+      "name": "ai_model",
+      "type": "string",
+      "required": false,
+      "default": "latest",
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.aiModel",
+      "description": "AI model: 'meshy-5' or 'latest'"
+    },
+    {
+      "name": "topology",
+      "type": "string",
+      "required": false,
+      "default": "quad",
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.topology",
+      "description": "Mesh topology: 'quad' or 'triangle'"
+    },
+    {
+      "name": "target_polycount",
+      "type": "number",
+      "required": false,
+      "default": 30000,
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.targetPolycount",
+      "description": "Target polygon count: 100-300,000"
+    },
+    {
+      "name": "should_remesh",
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.shouldRemesh",
+      "description": "Enable remeshing"
+    },
+    {
+      "name": "symmetry_mode",
+      "type": "string",
+      "required": false,
+      "default": "auto",
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.symmetryMode",
+      "description": "Symmetry mode: 'off', 'auto', or 'on'"
+    },
+    {
+      "name": "pose_mode",
+      "type": "string",
+      "required": false,
+      "default": "",
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.poseMode",
+      "description": "Pose mode: 'a-pose', 't-pose', or empty"
+    },
+    {
+      "name": "moderation",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "source": "manifest",
+      "sourcePath": "textTo3DPreviewTask.moderation",
+      "description": "Enable content moderation"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "model",
+      "responsePath": "model_urls.glb",
+      "localFilename": "preview.glb",
+      "required": true
+    }
+  ],
+  "dependsOn": []
+}

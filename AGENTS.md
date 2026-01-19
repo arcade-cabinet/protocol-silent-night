@@ -1,9 +1,35 @@
 # PROTOCOL: SILENT NIGHT // AGENT REGISTRY
 
-**System Version:** 4.0 (DDL Edition)
-**Target Runtime:** React Three Fiber / Three.js / WebGL
-**Classification:** Data-Driven Arcade RPG Simulation
-**Architecture:** Modular TypeScript with Zustand State Management and JSON DDLs
+**System Version:** 5.0 (Mobile-Native Edition)
+**Target Runtime:** React Native + Expo + BabylonJS React Native (Reactylon)
+**Classification:** Data-Driven Mobile Arcade RPG
+**Architecture:** Monorepo with shared game-core, native GPU rendering, and JSON DDLs
+
+> **⚠️ ARCHITECTURE PIVOT IN PROGRESS:** See `docs/VISION_1.0.md` and `.kiro/specs/` for migration plan.
+> The v4.0 web-first architecture (Three.js/R3F) is being replaced with mobile-native BabylonJS.
+
+---
+
+## 📚 AGENT ONBOARDING
+
+**All agents MUST read `memory-bank/` before starting work.**
+
+```bash
+# Required reading order
+cat memory-bank/activeContext.md   # Current priorities
+cat memory-bank/progress.md        # Work status
+cat memory-bank/systemPatterns.md  # Architecture patterns
+```
+
+| Memory Bank File | When to Read |
+|-----------------|--------------|
+| `activeContext.md` | **Every session** - Current focus and blockers |
+| `progress.md` | Continuing previous work |
+| `projectbrief.md` | Understanding project goals |
+| `productContext.md` | Feature implementation |
+| `techContext.md` | Technology decisions |
+| `systemPatterns.md` | Writing code |
+| `codebaseSummary.md` | Finding files |
 
 ---
 
@@ -70,39 +96,96 @@ Hostile agents are controlled by the central Game loop using definition-aware be
 
 ---
 
-## 5. STRATA INTEGRATION
+## 5. CHARACTER RENDERING (1.0 MIGRATION)
 
-This project is fully powered by [@jbcom/strata](https://github.com/strata-game-library/core) and the new `StrataCharacter` interpreter.
+> **DEPRECATED:** @jbcom/strata is no longer maintained. See `.kiro/specs/1.0-procedural-characters.md`.
 
-### Custom Component: `<StrataCharacter />`
+### Legacy (v4.x - Web)
 ```tsx
-// This component now handles all rendering by interpreting DDLs
-<StrataCharacter 
-  config={classes.santa} 
-  isMoving={true} 
-  isFiring={false} 
+// DEPRECATED - Do not use
+<StrataCharacter config={classes.santa} />
+```
+
+### Target (v5.0 - Mobile-Native)
+```tsx
+// Reactylon + BabylonJS procedural generation
+<AnimeHero
+  config={classes.santa}
+  position={playerPosition}
+  isMoving={true}
+  isFiring={false}
 />
 ```
 
+Key differences:
+- **No external character library** - Procedural BabylonJS meshes
+- **Lofted splines** - Smooth anime-style bodies, not primitive stacks
+- **DynamicTexture faces** - Canvas-rendered anime eyes
+- **Rigged skeletons** - Native bone animation support
+
 ---
 
-## 6. PROJECT STRUCTURE (v4.0)
+## 6. PROJECT STRUCTURE
 
+### Current (v4.x - Web-First)
 ```
 src/
 ├── data/                   # JSON DDLs (The Source of Truth)
 ├── characters/             # Generic rendering brains
-│   ├── StrataCharacter.tsx # Interprets class/skin JSON
-│   └── PlayerController.tsx # Generic movement/firing brain
 ├── game/                   # Optimized game systems
-│   ├── Enemies.tsx         # Instanced enemy management
-│   ├── Bullets.tsx         # Instanced projectile management
-│   └── ...
 ├── store/                  # Unified State & Data Loading
-│   └── gameStore.ts        # Roguelike + Meta-progression
 └── ui/                     # Modular React interfaces
+```
+
+### Target (v5.0 - Mobile-Native Monorepo)
+```
+protocol-silent-night/
+├── apps/
+│   ├── mobile/             # React Native + Expo
+│   │   ├── app/            # Expo Router pages
+│   │   └── src/            # Mobile-specific code
+│   └── web/                # Legacy (maintenance mode)
+├── packages/
+│   └── game-core/          # Shared DDLs and game logic
+│       ├── data/           # JSON DDLs
+│       ├── systems/        # Combat, progression, etc.
+│       └── types/          # TypeScript types
+├── .kiro/                  # Kiro specs and steering
+└── docs/                   # Documentation
 ```
 
 ---
 
-*Generated for Protocol: Silent Night v4.0 (DDL Edition)*
+## 7. REFERENCE DOCUMENTS
+
+| Document | Purpose |
+|----------|---------|
+| **`memory-bank/`** | **Multi-agent shared context (READ FIRST)** |
+| `docs/VISION_1.0.md` | 1.0 release vision and architecture |
+| `docs/TRIAGE_REPORT_2026-01.md` | Comprehensive triage and recommendations |
+| `docs/MOBILE_ROADMAP.md` | Mobile-first feature requirements |
+| `.kiro/specs/` | Implementation specifications |
+| `.kiro/steering/` | Development guidelines |
+
+---
+
+## 8. AGENT ASSIGNMENTS
+
+| Agent | Primary Role | Current Task |
+|-------|--------------|--------------|
+| **Claude Code** | Architecture, implementation | Memory bank setup, 1.0 foundation |
+| **Jules** | Refactoring, multi-file changes | Available for procedural character work |
+| **Cursor Cloud** | Long-running autonomous tasks | Standby |
+| **Sage** | Quick explanations | On-demand |
+
+### Handoff Protocol
+
+When switching agents:
+1. Update `memory-bank/activeContext.md` with current state
+2. Update `memory-bank/progress.md` with completed work
+3. Commit and push changes
+4. Next agent reads memory-bank before starting
+
+---
+
+*Protocol: Silent Night - Transitioning to v5.0 Mobile-Native Edition*

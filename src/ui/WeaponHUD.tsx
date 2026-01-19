@@ -10,19 +10,29 @@ import { useGameStore } from '@/store/gameStore';
 import styles from './WeaponHUD.module.css';
 
 export function WeaponHUD() {
-  const { state, currentWeapon, metaProgress, setWeapon } = useGameStore(
+  const { state, currentWeapon, metaProgress, playerClass, setWeapon } = useGameStore(
     useShallow((state) => ({
       state: state.state,
       currentWeapon: state.currentWeapon,
       metaProgress: state.metaProgress,
+      playerClass: state.playerClass,
       setWeapon: state.setWeapon,
     }))
   );
 
   const currentWeaponConfig = WEAPONS[currentWeapon as keyof typeof WEAPONS];
-  const unlockedWeapons = metaProgress.unlockedWeapons
+
+  // Build available weapons: class weapon first, then any purchased weapons
+  const classWeaponId = playerClass?.weaponType;
+  const classWeapon = classWeaponId ? WEAPONS[classWeaponId as keyof typeof WEAPONS] : null;
+  const purchasedWeapons = metaProgress.unlockedWeapons
+    .filter((id) => id !== classWeaponId) // Don't duplicate class weapon
     .map((id) => WEAPONS[id as keyof typeof WEAPONS])
     .filter(Boolean);
+
+  const unlockedWeapons = classWeapon
+    ? [classWeapon, ...purchasedWeapons]
+    : purchasedWeapons;
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

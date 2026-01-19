@@ -1,0 +1,47 @@
+{
+  "type": "animation",
+  "name": "Animation Generation",
+  "apiVersion": "v1",
+  "endpoint": "animations",
+  "inputs": [
+    {
+      "name": "rig_task_id",
+      "type": "string",
+      "required": true,
+      "source": "previousTask",
+      "sourcePath": "rigging.taskId",
+      "description": "Task ID from completed rigging task"
+    },
+    {
+      "name": "action_id",
+      "type": "number",
+      "required": true,
+      "source": "config",
+      "sourcePath": "actionId",
+      "description": "Animation action ID from the animation library"
+    },
+    {
+      "name": "post_process",
+      "type": "object",
+      "required": false,
+      "source": "manifest",
+      "sourcePath": "animationTask.postProcess",
+      "description": "Post-processing options (operation_type, fps)"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "animation",
+      "responsePath": "result.animation_glb_url",
+      "localFilename": "animations/{animationName}.glb",
+      "required": true
+    },
+    {
+      "name": "animationFbx",
+      "responsePath": "result.animation_fbx_url",
+      "localFilename": "animations/{animationName}.fbx",
+      "required": false
+    }
+  ],
+  "dependsOn": ["rigging"]
+}
