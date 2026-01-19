@@ -67,7 +67,72 @@
         "riggedModel": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd648-ab97-7f00-931c-9e30a66f5600/output/Character_output.glb?Expires=1769085869&Signature=PHeSvOeJKA4FR1PCEAlhdlMjTtvpXanDlJwK99EJG6PLhFudHixvzmLoBS2ecZ6I5Kyb-xv0sRtDXgZrR07PCqn1WtgXKW3f2rZNijOjm1YmKJJLWrFrYC9InBVFUZJrAugJKpQyKNhhhLCbuMIefIvW4S1CXdJTnHq-xYM7mGJ5Si1jriPiKhp3f9JEUGFj01yIK1XMTe1wW1eeFdZloSxwX1mqEOtaGyqYvibO1tXpNl4cozbA13wEF0X0oUIe9zZ6hb2VGgUwHBVdL0lSqziePRq0tZ0oywGEBpPsNwse7Q32AzZpj40TjpPNRbV-guuKgLGkO0m1BcL~blHmUA__&Key-Pair-Id=KL5I0C8H7HX83"
       },
       "artifacts": {}
-    }
+    },
+    "animations": [
+      {
+        "taskId": "019bd64c-1407-734e-916d-2d4caa00a527",
+        "status": "SUCCEEDED",
+        "animationName": "COMBAT_STANCE",
+        "completedAt": 1768826878874,
+        "outputs": {
+          "animations/combat_stance.glb": "animations/combat_stance.glb"
+        }
+      },
+      {
+        "taskId": "019bd64c-3c42-7f99-8626-ba35eac197e9",
+        "status": "SUCCEEDED",
+        "animationName": "RUNFAST",
+        "completedAt": 1768826888420,
+        "outputs": {
+          "animations/runfast.glb": "animations/runfast.glb"
+        }
+      },
+      {
+        "taskId": "019bd64c-618f-73e9-b27f-e1fcc226601f",
+        "status": "SUCCEEDED",
+        "animationName": "KUNG_FU_PUNCH",
+        "completedAt": 1768826917719,
+        "outputs": {
+          "animations/kung_fu_punch.glb": "animations/kung_fu_punch.glb"
+        }
+      },
+      {
+        "taskId": "019bd64c-d400-73f4-bc97-e9e42b1f6dc1",
+        "status": "SUCCEEDED",
+        "animationName": "BEHIT_FLYUP",
+        "completedAt": 1768826925415,
+        "outputs": {
+          "animations/behit_flyup.glb": "animations/behit_flyup.glb"
+        }
+      },
+      {
+        "taskId": "019bd64c-f210-7f9f-9c2f-483f2e926872",
+        "status": "SUCCEEDED",
+        "animationName": "DEAD",
+        "completedAt": 1768826972857,
+        "outputs": {
+          "animations/dead.glb": "animations/dead.glb"
+        }
+      },
+      {
+        "taskId": "019bd64d-ab5d-71e1-8b9e-19cad9d083a2",
+        "status": "SUCCEEDED",
+        "animationName": "BASIC_JUMP",
+        "completedAt": 1768826986201,
+        "outputs": {
+          "animations/basic_jump.glb": "animations/basic_jump.glb"
+        }
+      },
+      {
+        "taskId": "019bd64d-df81-7410-9e4c-989a5a5b75ca",
+        "status": "SUCCEEDED",
+        "animationName": "DODGE_AND_COUNTER",
+        "completedAt": 1768827005715,
+        "outputs": {
+          "animations/dodge_and_counter.glb": "animations/dodge_and_counter.glb"
+        }
+      }
+    ]
   },
   "seed": 1610458302
 }
