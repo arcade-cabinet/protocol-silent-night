@@ -8,6 +8,15 @@
     "scheme": "protocol-silent-night",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "owner": "jbcom",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/protocol-silent-night",
+      "enabled": true,
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -17,7 +26,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.jbcom.protocolsilentnight",
       "buildNumber": "1.0.0",
-      "requireFullScreen": true,
+      "requireFullScreen": false,
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -28,7 +37,14 @@
         "backgroundColor": "#0a0a1a"
       },
       "package": "com.jbcom.protocolsilentnight",
-      "versionCode": 1
+      "versionCode": 1,
+      "resizeableActivity": true,
+      "allowBackup": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
@@ -44,6 +60,39 @@
       },
       "eas": {
         "projectId": "protocol-silent-night"
+      },
+      "targetDevices": {
+        "pixel8a": {
+          "name": "Google Pixel 8a",
+          "width": 1080,
+          "height": 2400,
+          "density": 2.625
+        },
+        "oneplusOpen": {
+          "name": "OnePlus Open",
+          "folded": {
+            "width": 1116,
+            "height": 2484
+          },
+          "unfolded": {
+            "width": 2268,
+            "height": 2076
+          },
+          "density": 2.75,
+          "foldable": true
+        },
+        "iphone16ProMax": {
+          "name": "iPhone 16 Pro Max",
+          "width": 1320,
+          "height": 2868,
+          "density": 3.0
+        },
+        "ipadPro13": {
+          "name": "iPad Pro 13-inch",
+          "width": 2064,
+          "height": 2752,
+          "density": 2.0
+        }
       }
     }
   }
