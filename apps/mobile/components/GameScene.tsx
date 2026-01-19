@@ -46,6 +46,9 @@ import {
 // Store
 import { useGameStore } from '@protocol-silent-night/game-core';
 
+// Debug API (development only)
+import { initDebugAPI, cleanupDebugAPI, updateDebugFPS } from '../src/debug';
+
 interface GameSceneProps {
   classType: 'santa' | 'elf' | 'bumble';
   onReady?: () => void;
@@ -189,13 +192,33 @@ export function GameScene({
     const bullets = createBulletManager(scene);
     bulletManagerRef.current = bullets;
 
-    // 8. Game loop
+    // 8. Initialize debug API (development only)
+    initDebugAPI({
+      scene,
+      player: playerCharacter,
+      enemies,
+      bullets,
+      camera: cameraSystem,
+    });
+
+    // 9. Game loop
     let lastTime = performance.now();
+    let frameCount = 0;
+    let fpsUpdateTime = 0;
 
     scene.onBeforeRenderObservable.add(() => {
       const now = performance.now();
       const deltaTime = (now - lastTime) / 1000;
       lastTime = now;
+
+      // Update debug FPS counter
+      frameCount++;
+      fpsUpdateTime += deltaTime;
+      if (fpsUpdateTime >= 1.0) {
+        updateDebugFPS(Math.round(frameCount / fpsUpdateTime));
+        frameCount = 0;
+        fpsUpdateTime = 0;
+      }
 
       if (phase !== 'PHASE_1' && phase !== 'PHASE_BOSS') return;
 
@@ -278,6 +301,7 @@ export function GameScene({
     // Cleanup
     return () => {
       disposed = true;
+      cleanupDebugAPI();
       playerRef.current?.dispose();
       enemyManagerRef.current?.dispose();
       bulletManagerRef.current?.dispose();
