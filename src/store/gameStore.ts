@@ -166,7 +166,7 @@ const loadMetaProgress = (): MetaProgressData => {
     totalPointsEarned: 0,
     runsCompleted: 0,
     bossesDefeated: 0,
-    unlockedWeapons: ['cannon', 'smg', 'star'],
+    unlockedWeapons: [], // Empty by default - class weapons are always available via class selection
     unlockedSkins: [],
     permanentUpgrades: {},
     highScore: 0,
@@ -379,8 +379,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPlayerRotation: (rotation) => set({ playerRotation: rotation }),
 
   setWeapon: (weaponType) => {
-    const { metaProgress } = get();
-    if (metaProgress.unlockedWeapons.includes(weaponType)) {
+    const { metaProgress, playerClass } = get();
+    // Allow class weapon OR any unlocked weapon
+    const isClassWeapon = playerClass?.weaponType === weaponType;
+    const isUnlocked = metaProgress.unlockedWeapons.includes(weaponType);
+    if (isClassWeapon || isUnlocked) {
       set({ currentWeapon: weaponType });
       AudioManager.playSFX('ui_select');
     }

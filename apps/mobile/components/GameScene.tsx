@@ -17,7 +17,7 @@ import {
   Color3,
   StandardMaterial,
   Color4,
-  Camera,
+  type Camera,
 } from '@babylonjs/core';
 
 interface GameSceneProps {
