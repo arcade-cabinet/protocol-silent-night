@@ -32,9 +32,16 @@ export default function GameScreen() {
 
   // Initialize player when component mounts
   useEffect(() => {
-    const selectedClass = PLAYER_CLASSES[classType as PlayerClassType];
+    // Guard against invalid classType - default to 'santa' if not valid
+    const validClassType = (classType as PlayerClassType) || 'santa';
+    const selectedClass = PLAYER_CLASSES[validClassType];
+
     if (selectedClass) {
-      initializePlayer(classType as PlayerClassType, selectedClass.hp);
+      initializePlayer(validClassType, selectedClass.hp);
+    } else {
+      // Fallback to santa if somehow invalid
+      const fallbackClass = PLAYER_CLASSES['santa'];
+      initializePlayer('santa', fallbackClass.hp);
     }
 
     // Reset game when component unmounts
@@ -98,7 +105,9 @@ export default function GameScreen() {
                 <View
                   style={[
                     styles.healthFill,
-                    { width: `${(player.hp / player.maxHp) * 100}%` },
+                    {
+                      width: `${Math.min(100, Math.max(0, (player.hp / player.maxHp) * 100))}%`,
+                    },
                   ]}
                 />
               </View>
