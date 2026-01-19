@@ -1,0 +1,48 @@
+{
+  "type": "rigging",
+  "name": "Auto-Rigging",
+  "apiVersion": "v1",
+  "endpoint": "rigging",
+  "inputs": [
+    {
+      "name": "input_task_id",
+      "type": "string",
+      "required": true,
+      "source": "previousTask",
+      "sourcePath": "text-to-3d-refine.taskId",
+      "description": "Task ID from completed Text-to-3D refine task"
+    },
+    {
+      "name": "height_meters",
+      "type": "number",
+      "required": false,
+      "default": 1.7,
+      "source": "manifest",
+      "sourcePath": "riggingTask.heightMeters",
+      "description": "Character height in meters"
+    },
+    {
+      "name": "texture_image_url",
+      "type": "string",
+      "required": false,
+      "source": "manifest",
+      "sourcePath": "riggingTask.textureImageUrl",
+      "description": "UV-unwrapped base color texture in PNG format"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "riggedModel",
+      "responsePath": "result.rigged_character_glb_url",
+      "localFilename": "rigged.glb",
+      "required": true
+    },
+    {
+      "name": "riggedFbx",
+      "responsePath": "result.rigged_character_fbx_url",
+      "localFilename": "rigged.fbx",
+      "required": false
+    }
+  ],
+  "dependsOn": ["text-to-3d-refine"]
+}

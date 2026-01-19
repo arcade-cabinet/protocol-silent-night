@@ -1,0 +1,60 @@
+{
+  "id": "minion",
+  "name": "Glitch Minion",
+  "type": "character",
+  "description": "Corrupted digital Christmas ornament enemy - basic enemy type with spider-like legs",
+  "textToImageTask": {
+    "prompt": "A corrupted digital Christmas ornament enemy creature. Spherical body with cracked holographic surface. Glitching pixels and scan lines across body. Red and green colors that shift to magenta and cyan corruption. Spider-like mechanical legs sprouting from bottom. Single glowing red eye sensor. Floating slightly above ground. Menacing but simple design. Very low poly for mobile performance. Front view.",
+    "generateMultiView": true,
+    "poseMode": ""
+  },
+  "multiImageTo3DTask": {
+    "topology": "quad",
+    "targetPolycount": 5000,
+    "symmetryMode": "auto",
+    "shouldRemesh": true,
+    "shouldTexture": true,
+    "enablePbr": false,
+    "poseMode": "",
+    "texturePrompt": "Cracked holographic surface with digital glitch effects, magenta and cyan corruption colors, glowing red eye, metallic spider legs"
+  },
+  "riggingTask": {
+    "heightMeters": 0.6
+  },
+  "animationTask": {
+    "preset": "enemy"
+  },
+  "tasks": {
+    "concept": {
+      "taskId": "019bd646-0bac-72fb-9af3-81fe4b2e7d49",
+      "status": "SUCCEEDED",
+      "completedAt": 1768826495134,
+      "outputs": {
+        "taskId": "019bd646-0bac-72fb-9af3-81fe4b2e7d49",
+        "imageUrls": [
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd646-5e36-760a-9822-14514a57949e_part_0.png?Expires=1769085695&Signature=SIRCTEot8B7Gy1mjBGFp-culRUIxD3ktg8A~mqNin8dIjm6~g1Jf1UWfHJ1p4W8Cid~p7OXNU0X3WXLkn5eK-oGHDbGf8syylk49zRAEYT-TeuO~tlTq9McN773LMigfwe-u10GP8uWkOzcjfkiL11CxVpzsdsdEPuxyfquzJD5NuHIQUvSqWK6--zBH0IXF5AmY0ygkzoFsQlOvfmL6G-hcvpjKBam2hxXx9o2OPpqQnt47ediFywLNHZaxPBobPK9N~eRIBArwNo39anERAN2tfTfbwt3VyqFT4JbyjYinXY6QYcbxMcZZi1kHwdriRLtWi1P2t1ODJO2JgJXz6Q__&Key-Pair-Id=KL5I0C8H7HX83",
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd646-5e36-760a-9822-14514a57949e_part_1.png?Expires=1769085695&Signature=njoW64yaIPEp0imnncEFI4MyDkG7WSbRWkNojGdx66M9KW2xoCXVYpTdQu8-~kdmJFNHWzPznc3VvA5N8~ApT7WRlZfa375QAQO8Odo94SxaMG1hCnS0VzBP0aWOQ4PU~ED8Xx~WEbnS-X4QHcHJ-PHQUfe6wAMJmcxKBFWkVQJjjbY8NewQ1kR7F5dxwEF-SysN106L-DiL0Y3pIpeh8maq6M16uc5inWUxyIkMJqbqIc4mbKexLbDxVdEtg82eElF0JtgPnu80eI5DU0gUIRAAsscEbY7Q8xnZu-4XjbQx4NCGIXSrKEhxZH8gcynmq9tWDVnznp2EGoU-5HX5NA__&Key-Pair-Id=KL5I0C8H7HX83",
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd646-5e36-760a-9822-14514a57949e_part_2.png?Expires=1769085695&Signature=BDlf3aIljOSPZMllu7BkmGH33ak1cx-rvwhm46ijk7O9oLJsTRX-jmuc69pDMLa-HE65kDKKodBzmt039yEGedUKdJ8BhDWzK7V7zXLg3owi7bt8gcUnT5gL8yrgR2vMRJEVfIqbjCFQmhAOFZYYWrSbH4SGyMUdNmO1lN0tS1it0CN6qeq3ykTtaADChTibhERT013ymtUW5DsZOf7aOjYiQP37EQ2BjSWjpVjq~wmnsTYpnoJND8psmr5NeSJuhZ09aUUNKhqtuPw7Q4ppySMjMoh-xzwxYX5VDqeUWCyQd32BloWdt614sk8HZW1ZScixcs4vxqmvYgH6BK0Nvg__&Key-Pair-Id=KL5I0C8H7HX83"
+        ]
+      },
+      "artifacts": {}
+    },
+    "model": {
+      "taskId": "019bd646-614b-7eae-82ce-d863e4820236",
+      "status": "SUCCEEDED",
+      "completedAt": 1768826702226,
+      "outputs": {
+        "taskId": "019bd646-614b-7eae-82ce-d863e4820236",
+        "model": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd646-614b-7eae-82ce-d863e4820236/output/model.glb?Expires=1769085902&Signature=oBJS40YUiKBA57T4ue3yjnNsfroEmX5mGgWm0RwaT0WHre-94Wuh7t~gCVT3NMbZoSPr9dpOI8nYGkPrpEDHJkr2Cdz91JiLUJsXkIwT4QJj5nK~YwXRNV-PKZHhG7mQ-mxTFS1Q72v7NXYZw21LIp1UG2dQZWISesqnFjQXjFFQd7DpLXT8dtHKGnT6bImBUok6~en4oULMahEqVZYDd0JQ8FZCIbYDk6uJ5wlUKNGtm9QKgVzSy4AbbldAAtYihF2w9Ry7YpXdS0rIO4MQ49cLxis87kKn6j1ZGOqdjZ25eviTNpSJgSKvbbt8OTpZlb3XnwBdtQxLarQBBpmjEw__&Key-Pair-Id=KL5I0C8H7HX83",
+        "textures": [
+          {
+            "base_color": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd646-614b-7eae-82ce-d863e4820236/output/texture_0.png?Expires=1769085902&Signature=IVDFb6x4YrYUnCAeughvH1ecXHq5EIZTADf67D77Yfnyj~5XWsTXddLCqLYPTU0WstMMr5gWlJkpxdzBxT0CxDYGlAuEFfOwWPFpelaU2Qxhirznyr21LIxopnjngjDLkYPyPbk37D5nxmqrI5kGrGrZRAtmDClZUquRBlS6BZK2F1a0N7qtPcUI2GuI~SOmO4xP2oXnEUP1awwt52UQNGrd7fpR3kwK3U5Tu4F~DVSjvtzxzqj90QgM3rpicyxM1-afFNVT4WclAuELRzpH8SwinvcYivOL0DQ9EvXIwWiHVYHny5Z-pUTntjGtlp2s8hD1a5F15h-TxIf2dJSohg__&Key-Pair-Id=KL5I0C8H7HX83"
+          }
+        ],
+        "textureUrl": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd646-614b-7eae-82ce-d863e4820236/output/texture_0.png?Expires=1769085902&Signature=IVDFb6x4YrYUnCAeughvH1ecXHq5EIZTADf67D77Yfnyj~5XWsTXddLCqLYPTU0WstMMr5gWlJkpxdzBxT0CxDYGlAuEFfOwWPFpelaU2Qxhirznyr21LIxopnjngjDLkYPyPbk37D5nxmqrI5kGrGrZRAtmDClZUquRBlS6BZK2F1a0N7qtPcUI2GuI~SOmO4xP2oXnEUP1awwt52UQNGrd7fpR3kwK3U5Tu4F~DVSjvtzxzqj90QgM3rpicyxM1-afFNVT4WclAuELRzpH8SwinvcYivOL0DQ9EvXIwWiHVYHny5Z-pUTntjGtlp2s8hD1a5F15h-TxIf2dJSohg__&Key-Pair-Id=KL5I0C8H7HX83"
+      },
+      "artifacts": {}
+    }
+  },
+  "seed": 3518337502
+}

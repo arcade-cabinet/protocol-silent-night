@@ -1,0 +1,61 @@
+{
+  "type": "text-to-image",
+  "name": "Text to Image",
+  "apiVersion": "v1",
+  "endpoint": "text-to-image",
+  "inputs": [
+    {
+      "name": "prompt",
+      "type": "string",
+      "required": true,
+      "source": "manifest",
+      "sourcePath": "textToImageTask.prompt",
+      "description": "Image description prompt"
+    },
+    {
+      "name": "ai_model",
+      "type": "string",
+      "required": false,
+      "default": "nano-banana",
+      "source": "manifest",
+      "sourcePath": "textToImageTask.aiModel",
+      "description": "AI model: 'nano-banana' or 'nano-banana-pro'"
+    },
+    {
+      "name": "generate_multi_view",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "source": "manifest",
+      "sourcePath": "textToImageTask.generateMultiView",
+      "description": "Generate multi-view image showing subject from multiple angles"
+    },
+    {
+      "name": "pose_mode",
+      "type": "string",
+      "required": false,
+      "default": "",
+      "source": "manifest",
+      "sourcePath": "textToImageTask.poseMode",
+      "description": "Pose mode: 'a-pose', 't-pose', or empty"
+    },
+    {
+      "name": "aspect_ratio",
+      "type": "string",
+      "required": false,
+      "default": "1:1",
+      "source": "manifest",
+      "sourcePath": "textToImageTask.aspectRatio",
+      "description": "Aspect ratio: '1:1', '16:9', '9:16', '4:3', '3:4'"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "images",
+      "responsePath": "image_urls",
+      "localFilename": "concept.png",
+      "required": true
+    }
+  ],
+  "dependsOn": []
+}

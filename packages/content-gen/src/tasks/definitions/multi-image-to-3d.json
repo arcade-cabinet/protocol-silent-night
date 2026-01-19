@@ -1,0 +1,102 @@
+{
+  "type": "multi-image-to-3d",
+  "name": "Multi-Image to 3D",
+  "apiVersion": "v1",
+  "endpoint": "image-to-3d",
+  "inputs": [
+    {
+      "name": "image_urls",
+      "type": "array",
+      "required": true,
+      "source": "step",
+      "description": "Array of image URLs from concept generation"
+    },
+    {
+      "name": "ai_model",
+      "type": "string",
+      "required": false,
+      "default": "latest",
+      "description": "Always use latest"
+    },
+    {
+      "name": "topology",
+      "type": "string",
+      "required": false,
+      "default": "quad",
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.topology",
+      "description": "Mesh topology: 'quad' or 'triangle'"
+    },
+    {
+      "name": "target_polycount",
+      "type": "number",
+      "required": false,
+      "default": 30000,
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.targetPolycount",
+      "description": "Target polygon count: 100-300,000"
+    },
+    {
+      "name": "symmetry_mode",
+      "type": "string",
+      "required": false,
+      "default": "auto",
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.symmetryMode",
+      "description": "Symmetry mode: 'off', 'auto', or 'on'"
+    },
+    {
+      "name": "should_remesh",
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.shouldRemesh",
+      "description": "Enable remeshing"
+    },
+    {
+      "name": "should_texture",
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.shouldTexture",
+      "description": "Generate textures"
+    },
+    {
+      "name": "enable_pbr",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.enablePbr",
+      "description": "Generate PBR maps"
+    },
+    {
+      "name": "pose_mode",
+      "type": "string",
+      "required": false,
+      "default": "a-pose",
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.poseMode",
+      "description": "Pose mode: 'a-pose', 't-pose', or empty"
+    },
+    {
+      "name": "texture_prompt",
+      "type": "string",
+      "required": false,
+      "source": "manifest",
+      "sourcePath": "multiImageTo3DTask.texturePrompt",
+      "description": "Texture guidance prompt"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "model",
+      "responsePath": "model_urls.glb",
+      "localFilename": "model.glb",
+      "required": true
+    }
+  ],
+  "dependsOn": ["concept"]
+}

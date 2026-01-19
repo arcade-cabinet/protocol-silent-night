@@ -1,0 +1,52 @@
+{
+  "$schema": "../pipeline.schema.json",
+  "name": "prop",
+  "description": "Prop pipeline: concept → multi-image-to-3d (no rigging or animations)",
+  "version": "1.0.0",
+
+  "steps": [
+    {
+      "id": "concept",
+      "task": "text-to-image",
+      "inputs": {
+        "prompt": { "source": "manifest", "path": "textToImageTask.prompt" },
+        "ai_model": { "value": "nano-banana-pro" },
+        "generate_multi_view": { "source": "manifest", "path": "textToImageTask.generateMultiView", "default": true },
+        "pose_mode": { "source": "manifest", "path": "textToImageTask.poseMode", "default": "a-pose" }
+      },
+      "outputs": {
+        "taskId": "$.id",
+        "imageUrls": "$.image_urls"
+      }
+    },
+
+    {
+      "id": "model",
+      "task": "multi-image-to-3d",
+      "dependsOn": ["concept"],
+      "inputs": {
+        "image_urls": { "source": "step", "step": "concept", "path": "imageUrls" },
+        "ai_model": { "value": "latest" },
+        "topology": { "source": "manifest", "path": "multiImageTo3DTask.topology", "default": "quad" },
+        "target_polycount": { "source": "manifest", "path": "multiImageTo3DTask.targetPolycount", "default": 10000 },
+        "symmetry_mode": { "source": "manifest", "path": "multiImageTo3DTask.symmetryMode", "default": "off" },
+        "should_remesh": { "source": "manifest", "path": "multiImageTo3DTask.shouldRemesh", "default": true },
+        "should_texture": { "source": "manifest", "path": "multiImageTo3DTask.shouldTexture", "default": true },
+        "enable_pbr": { "source": "manifest", "path": "multiImageTo3DTask.enablePbr", "default": false },
+        "pose_mode": { "source": "manifest", "path": "multiImageTo3DTask.poseMode", "default": "a-pose" },
+        "texture_prompt": { "source": "manifest", "path": "multiImageTo3DTask.texturePrompt" }
+      },
+      "outputs": {
+        "taskId": "$.id",
+        "model": "$.model_urls.glb",
+        "textures": "$.texture_urls",
+        "textureUrl": "$.texture_urls[0].base_color"
+      }
+    }
+  ],
+
+  "stateMapping": {
+    "text-to-image": "tasks['text-to-image']",
+    "multi-image-to-3d": "tasks['multi-image-to-3d']"
+  }
+}

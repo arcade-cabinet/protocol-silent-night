@@ -19,6 +19,11 @@ interface PlayerState {
   position: { x: number; y: number; z: number };
 }
 
+interface InputState {
+  movement: { x: number; y: number };
+  isFiring: boolean;
+}
+
 interface GameStoreState {
   // Game state machine
   gameState: GameState;
@@ -36,16 +41,27 @@ interface GameStoreState {
   // Time tracking
   timeSurvived: number;
 
+  // Input state (for mobile)
+  input: InputState;
+
+  // Screen shake intensity (0-1)
+  screenShake: number;
+
   // Actions
   setGameState: (state: GameState) => void;
   initializePlayer: (classType: PlayerClassType, maxHp: number) => void;
   updatePlayerHp: (hp: number) => void;
   updatePlayerPosition: (x: number, y: number, z: number) => void;
+  damagePlayer: (amount: number) => void;
   incrementKills: () => void;
   addScore: (points: number) => void;
+  addKill: (points: number) => void;
   setWave: (wave: number) => void;
   setPhase: (phase: 'PHASE_1' | 'PHASE_BOSS' | null) => void;
   updateTime: (deltaTime: number) => void;
+  setMovement: (x: number, y: number) => void;
+  setFiring: (firing: boolean) => void;
+  triggerScreenShake: (intensity: number) => void;
   resetGame: () => void;
 }
 
@@ -65,6 +81,11 @@ const initialState = {
   wave: 1,
   phase: null as 'PHASE_1' | 'PHASE_BOSS' | null,
   timeSurvived: 0,
+  input: {
+    movement: { x: 0, y: 0 },
+    isFiring: false,
+  },
+  screenShake: 0,
 };
 
 /**
@@ -101,6 +122,15 @@ export const useGameStore = create<GameStoreState>((set) => ({
       player: { ...state.player, position: { x, y, z } },
     })),
 
+  damagePlayer: (amount) =>
+    set((state) => ({
+      player: {
+        ...state.player,
+        hp: Math.max(0, state.player.hp - amount),
+      },
+      screenShake: Math.min(1, state.screenShake + amount / 50),
+    })),
+
   incrementKills: () =>
     set((state) => ({
       stats: { ...state.stats, kills: state.stats.kills + 1 },
@@ -111,6 +141,15 @@ export const useGameStore = create<GameStoreState>((set) => ({
       stats: { ...state.stats, score: state.stats.score + points },
     })),
 
+  addKill: (points) =>
+    set((state) => ({
+      stats: {
+        ...state.stats,
+        kills: state.stats.kills + 1,
+        score: state.stats.score + points,
+      },
+    })),
+
   setWave: (wave) => set({ wave }),
 
   setPhase: (phase) => set({ phase }),
@@ -118,6 +157,23 @@ export const useGameStore = create<GameStoreState>((set) => ({
   updateTime: (deltaTime) =>
     set((state) => ({
       timeSurvived: state.timeSurvived + deltaTime,
+      // Decay screen shake over time
+      screenShake: Math.max(0, state.screenShake - deltaTime * 2),
+    })),
+
+  setMovement: (x, y) =>
+    set((state) => ({
+      input: { ...state.input, movement: { x, y } },
+    })),
+
+  setFiring: (isFiring) =>
+    set((state) => ({
+      input: { ...state.input, isFiring },
+    })),
+
+  triggerScreenShake: (intensity) =>
+    set((state) => ({
+      screenShake: Math.min(1, state.screenShake + intensity),
     })),
 
   resetGame: () => set(initialState),

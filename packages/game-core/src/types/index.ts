@@ -58,7 +58,8 @@ export type WeaponType =
   | 'light_string'
   | 'gingerbread'
   | 'jingle_bell'
-  | 'quantum_gift';
+  | 'quantum_gift'
+  | 'harpoon';
 
 /**
  * Configuration for a player character class

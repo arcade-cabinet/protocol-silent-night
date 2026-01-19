@@ -1,0 +1,91 @@
+{
+  "$schema": "../pipeline.schema.json",
+  "name": "character",
+  "description": "Character pipeline: concept → multi-image-to-3d → rigging → animations",
+  "version": "2.0.0",
+
+  "steps": [
+    {
+      "id": "concept",
+      "task": "text-to-image",
+      "inputs": {
+        "prompt": { "source": "manifest", "path": "textToImageTask.prompt" },
+        "ai_model": { "value": "nano-banana-pro" },
+        "generate_multi_view": { "source": "manifest", "path": "textToImageTask.generateMultiView", "default": true },
+        "pose_mode": { "source": "manifest", "path": "textToImageTask.poseMode", "default": "a-pose" }
+      },
+      "outputs": {
+        "taskId": "$.id",
+        "imageUrls": "$.image_urls"
+      }
+    },
+
+    {
+      "id": "model",
+      "task": "multi-image-to-3d",
+      "dependsOn": ["concept"],
+      "inputs": {
+        "image_urls": { "source": "step", "step": "concept", "path": "imageUrls" },
+        "ai_model": { "value": "latest" },
+        "topology": { "source": "manifest", "path": "multiImageTo3DTask.topology", "default": "quad" },
+        "target_polycount": { "source": "manifest", "path": "multiImageTo3DTask.targetPolycount", "default": 30000 },
+        "symmetry_mode": { "source": "manifest", "path": "multiImageTo3DTask.symmetryMode", "default": "auto" },
+        "should_remesh": { "source": "manifest", "path": "multiImageTo3DTask.shouldRemesh", "default": true },
+        "should_texture": { "source": "manifest", "path": "multiImageTo3DTask.shouldTexture", "default": true },
+        "enable_pbr": { "source": "manifest", "path": "multiImageTo3DTask.enablePbr", "default": false },
+        "pose_mode": { "source": "manifest", "path": "multiImageTo3DTask.poseMode", "default": "a-pose" },
+        "texture_prompt": { "source": "manifest", "path": "multiImageTo3DTask.texturePrompt" }
+      },
+      "outputs": {
+        "taskId": "$.id",
+        "model": "$.model_urls.glb",
+        "textures": "$.texture_urls",
+        "textureUrl": "$.texture_urls[0].base_color"
+      }
+    },
+
+    {
+      "id": "rigging",
+      "task": "rigging",
+      "dependsOn": ["model"],
+      "inputs": {
+        "input_task_id": { "source": "step", "step": "model", "path": "taskId" },
+        "height_meters": { "source": "manifest", "path": "riggingTask.heightMeters", "default": 1.7 },
+        "texture_image_url": { "source": "step", "step": "model", "path": "textureUrl" }
+      },
+      "outputs": {
+        "taskId": "$.id",
+        "riggedModel": "$.result.rigged_character_glb_url"
+      }
+    },
+
+    {
+      "id": "animations",
+      "task": "animation",
+      "dependsOn": ["rigging"],
+      "forEach": {
+        "source": "manifest",
+        "path": "animationTask.animations",
+        "as": "animationName"
+      },
+      "inputs": {
+        "rig_task_id": { "source": "step", "step": "rigging", "path": "taskId" },
+        "action_id": { "source": "lookup", "table": "ANIMATION_IDS", "key": "{{animationName}}" }
+      },
+      "outputs": {
+        "taskId": "$.id",
+        "animation": "$.result.animation_glb_url"
+      },
+      "artifacts": {
+        "animations/{{animationName | lowercase}}.glb": "$.result.animation_glb_url"
+      }
+    }
+  ],
+
+  "stateMapping": {
+    "text-to-image": "tasks['text-to-image']",
+    "multi-image-to-3d": "tasks['multi-image-to-3d']",
+    "rigging": "tasks.rigging",
+    "animation": "tasks.animations[]"
+  }
+}

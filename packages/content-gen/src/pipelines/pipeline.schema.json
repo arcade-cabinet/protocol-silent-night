@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pipeline.schema.json",
+  "title": "Pipeline Definition",
+  "description": "Declarative pipeline definition for orchestrating task execution",
+  "type": "object",
+  "required": ["name", "steps"],
+
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Pipeline identifier"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version"
+    },
+
+    "steps": {
+      "type": "array",
+      "description": "Ordered list of pipeline steps",
+      "items": { "$ref": "#/definitions/step" }
+    },
+
+    "stateMapping": {
+      "type": "object",
+      "description": "Maps task types to manifest state paths",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+
+  "definitions": {
+    "step": {
+      "type": "object",
+      "required": ["id", "task", "inputs", "outputs"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique step identifier"
+        },
+        "task": {
+          "type": "string",
+          "description": "Task definition type to execute"
+        },
+        "dependsOn": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Step IDs that must complete before this step"
+        },
+        "forEach": {
+          "$ref": "#/definitions/forEach",
+          "description": "Loop configuration for repeated execution"
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/inputBinding" },
+          "description": "Input parameter bindings"
+        },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Output value mappings (JSONPath from API response)"
+        },
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Files to download (local path -> response JSONPath)"
+        }
+      }
+    },
+
+    "inputBinding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["value"],
+          "properties": {
+            "value": { "description": "Static value" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["source", "path"],
+          "properties": {
+            "source": { "enum": ["manifest", "step", "lookup"] },
+            "path": { "type": "string" },
+            "step": { "type": "string" },
+            "table": { "type": "string" },
+            "key": { "type": "string" },
+            "default": { "description": "Default value if path not found" }
+          }
+        }
+      ]
+    },
+
+    "forEach": {
+      "type": "object",
+      "required": ["source", "path", "as"],
+      "properties": {
+        "source": { "type": "string" },
+        "path": { "type": "string" },
+        "as": { "type": "string", "description": "Variable name for iteration" }
+      }
+    }
+  }
+}

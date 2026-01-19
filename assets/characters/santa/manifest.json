@@ -1,0 +1,138 @@
+{
+  "id": "santa",
+  "name": "Cyber Santa",
+  "type": "character",
+  "description": "Futuristic cyberpunk Santa Claus warrior - the tank class hero with heavy armor and coal cannon weapon system",
+  "textToImageTask": {
+    "prompt": "A futuristic cyberpunk Santa Claus warrior character. Bulky muscular build with thick red and black tactical armor. Glowing cyan LED trim on suit edges. Cybernetic eye implant. White flowing digital beard with fiber optic strands. Heavy combat boots with shock absorbers. Shoulder-mounted coal cannon weapon system. Christmas themed but militaristic and battle-ready. Low poly game character style, suitable for mobile games. Full body visible, front view.",
+    "generateMultiView": true,
+    "poseMode": "a-pose"
+  },
+  "multiImageTo3DTask": {
+    "topology": "quad",
+    "targetPolycount": 15000,
+    "symmetryMode": "auto",
+    "shouldRemesh": true,
+    "shouldTexture": true,
+    "enablePbr": true,
+    "poseMode": "a-pose",
+    "texturePrompt": "Cyberpunk tactical armor with red and black color scheme, glowing cyan LED accents, metallic surfaces, digital beard with fiber optic glow"
+  },
+  "riggingTask": {
+    "heightMeters": 1.9
+  },
+  "animationTask": {
+    "preset": "hero"
+  },
+  "tasks": {
+    "concept": {
+      "taskId": "019bd63e-9bc3-7fb4-bbe7-36af7c372de4",
+      "status": "SUCCEEDED",
+      "completedAt": 1768826008551,
+      "outputs": {
+        "taskId": "019bd63e-9bc3-7fb4-bbe7-36af7c372de4",
+        "imageUrls": [
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd63e-f1ad-7758-b836-5ec9ac0bf181_part_0.png?Expires=1769085208&Signature=oRX2gYLpHlR7L802rLIKlU25SJCU76m3c4vZy5JbGGsQhgcTMpFnqCsqmwBxFdLovSfHXXhDaj9gDGLNmLbU2NRP6e33mvSOpoLhUXuf3rT7V0QJM0L6tSp9dPvsm15HkUy0Jw-X-t~pB0JKrHjiClTfbXFqSsdQ50AlImaxW9pGuqtxeka~CKuTZXPYj0VYWRjdD~VH8E8jW2OS-mrdIHoAFHQBximpaqL02nBopCkNbyV8Vy7SFJSub~CahYN3iQPJAS79ZJQwHt-d5n9MYkchWQi7u8EJ80m9hAfEg78lX96SelHusQ-5wN4AX8LC4rNN~A~yywwpgVgvwuU62Q__&Key-Pair-Id=KL5I0C8H7HX83",
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd63e-f1ad-7758-b836-5ec9ac0bf181_part_1.png?Expires=1769085208&Signature=nqXlSf~Igibf4kNScku97iqfCMy5BP4cI1Bj7PEdTx2t3BU-59eLLdG-r8ri94O8BZh8vAo~NkoJYVkT4B5E1RubpvDLuFLjYdMZELK8CerMENNTPdCmLGkHC6~QzBqFwaWXtut7xNeF9oUPcx1hfwFI4GPhmjlkj0kXuz40ihE7IfHYfXZiX8zb5hdpDms~r1vWkhM32~aqcsu9tiKdm29dL8dr9W-4TtRVT8~UZ4Rtb0iQoW9buAJknFwAlEOVlCBdKycl9opCr6RBZyZCRvyEh2UDpq0EPj47lbKnRLYnYSuJLIT4f2R0i7fptSKc3FRfI5ZkYuQiw6Ig1W8S~A__&Key-Pair-Id=KL5I0C8H7HX83",
+          "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/uploads/multi_view_image_019bd63e-f1ad-7758-b836-5ec9ac0bf181_part_2.png?Expires=1769085208&Signature=NfTQ5SvQycwhZFloW7Almw8~86eDvgJLLgv~BQsTNp3s0CSA37XbIsMuNhJWVZ32LeYHsVxTXXjkOCKeXj~p4qHTCGnBt780bs-mdWK3Ax0htoRclMLVvUTRWlkxJ9WAzXAbzicsoVVg71U9roqLsEF7Fckp~tpS-tzCd9dAFmBAgsxBrPkKG3dNLzm5U6~4gyK8ywtaYsdRvS2Z9VosZ6SBzhTz3UG3x45SkFCJoFq78JDDtjIccrh4H9vG3xReNtGS5bnp5G96QtCF5NLrWiDqBexz-zoUt5W~rhmuJiSGWWOe80CxoKBx6MiE4SFlWvU5ec648qRkTe~EEL--Cg__&Key-Pair-Id=KL5I0C8H7HX83"
+        ]
+      },
+      "artifacts": {}
+    },
+    "model": {
+      "taskId": "019bd640-dbf1-71d4-b3af-2eb93c73b9ac",
+      "status": "SUCCEEDED",
+      "completedAt": 1768826311837,
+      "outputs": {
+        "taskId": "019bd640-dbf1-71d4-b3af-2eb93c73b9ac",
+        "model": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd640-dbf1-71d4-b3af-2eb93c73b9ac/output/model.glb?Expires=1769085511&Signature=b44WI0VcycX~wxkmtnl3tEXJbMFO3FdmW-cJNUOE68STGO02TciChAto3m9~bsx7Qh2A-GKsQUvn02o2nhP84G9Zw8ZGVWQhNdIshtu8IPIXKK0nnmw054tsm2GlkttDqj5VClgbeK0mLtp1uVTIFz8O08qlZBSI9VO1ffnED67moUT5YAsYfBSPqgaGuf9ISHCFWTUF5T-40bZoxwdkOuT-i97u8LKOEKY25b52Oh0F8sT3etAM3ZQo4eodo4idAlRddd7ZGJcSkMfdCGkqppDsvVJVrkAQ6Xg63DeOwvZO7839~foOjRoxxc6jghYPmZxp4lPhXl6zK0IuwrPpDQ__&Key-Pair-Id=KL5I0C8H7HX83",
+        "textures": [
+          {
+            "base_color": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd640-dbf1-71d4-b3af-2eb93c73b9ac/output/texture_0.png?Expires=1769085511&Signature=f4mdPBAcklHlA4thZ4P92TnLruVxLPN66~a5u3AZ2CQAO7slJZLicyJu5Hhh7aHwivMe0in8j5yE5FtIewvnag-1eIOC0TUNj~5NIbCTHHiko0rkrwSZlm6~wU7QqebG9kr-KxSABwOHQ7jCs7rRp9MxwMT19UrWye0XJ-pEQr9fpNZTRWq4W47lSuEl~C~n8dnqniozSQUhCkpG5Kz8ze0cLZ--4SH3myGKf4XPTVnV7enzbAYFFQHx4xsewyywo1nm0tCXmi~j-u6Hf2aHKluKuDAlqiFtZ96iAP4TmcRcr5D-q2-PRLUXS8cZ9OorGzgeQYNL692L9DdGQT3fIA__&Key-Pair-Id=KL5I0C8H7HX83",
+            "metallic": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd640-dbf1-71d4-b3af-2eb93c73b9ac/output/texture_0_metallic.png?Expires=1769085511&Signature=fSVG~z09JyBl8CudRKOa6BHlL2VZNdQF4hKQADRa8k-oFu41H0J7tJy0Zutb1sy-1fRft-wI7CrBBfgBb56Idok79h~SCsi-VS5FwkhQBoiDqF~yuPF8alNYnLtQu~2zoneJCUjoSx5demgB~1dYphOhkqH-m6nrIi9-Yowe~eIrAMwuQmY0oSG6uafAZLi7jS4QP~5egG8l2nWrsdzzZCx-xOOIJ-m-5JvbTZIHElnJWrt5QqgiZs53ixiKaVLbxcvVAQLYzzvprLPrz1VgRdOefQYtXj3Vxj7RNN2-7uvZed9rnjBHF4JEwNOC3WeUKqqY3SbgJJc-Lb8wA~6CVA__&Key-Pair-Id=KL5I0C8H7HX83",
+            "roughness": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd640-dbf1-71d4-b3af-2eb93c73b9ac/output/texture_0_roughness.png?Expires=1769085511&Signature=M-r6Boas0kb6bE2ir5wLGjDBPH9xlECtqHv~03LZrjzyh0c-uAhHwfGYVY~E94wa3FLhXKkDya2GuQ8KmRAxMgJvYUCDm6ZueYREFxHKLl2zfd09PWNFRzN5RPKyy23hZOsJP4AiIpZwYFD9-zUOALMxCFreSiTdxpovdTLgqQLXaOW~8pMkfzLXzU7gcoMVp9sZjdizmuwuP4eROIhJNOfvW--MOZP8KV2Q6kfNLjin3zz4YaJWWe-pG~su2wG0UEMJGIIguqaoXOZoMPI9z7lrruAB-ifqEx7ufYif7DJ6D4~X4g60-nXX6JfCL38nLg2fFpP325en19v-a7nHhA__&Key-Pair-Id=KL5I0C8H7HX83",
+            "normal": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd640-dbf1-71d4-b3af-2eb93c73b9ac/output/texture_0_normal.png?Expires=1769085511&Signature=P2OkfbJRA9n5uxuwMQ2Fjctwxwu2Ac4Ol5ip~o8FB9N~XX1zNGUjk-mSR-cBEQxPawJgCuYkKSjmIJqy4c7R5-XOubwboZ-9Ig04pozgOZZhWkx~8B1bS8oE57svPLY4h9Pe~AoQKNHzKc0EEldIYjHAdSKH79ptAQ7IMZUhP8KQ3NRBK12lxHVFacGr5btbmA~A6MdSTo0Sa-1PzcVlp1BgnUiTk6EXjLKg5PWRr12cExiPu207wU0cm7KOKVUwl3Gd~J5hww6ATweezNM9Vb7a3HRZU5cd1HPettnfHUr6FtScFZCBBbzPNVhDH~3grsl1BGZya26JGAJ0vZHeSQ__&Key-Pair-Id=KL5I0C8H7HX83"
+          }
+        ],
+        "textureUrl": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd640-dbf1-71d4-b3af-2eb93c73b9ac/output/texture_0.png?Expires=1769085511&Signature=f4mdPBAcklHlA4thZ4P92TnLruVxLPN66~a5u3AZ2CQAO7slJZLicyJu5Hhh7aHwivMe0in8j5yE5FtIewvnag-1eIOC0TUNj~5NIbCTHHiko0rkrwSZlm6~wU7QqebG9kr-KxSABwOHQ7jCs7rRp9MxwMT19UrWye0XJ-pEQr9fpNZTRWq4W47lSuEl~C~n8dnqniozSQUhCkpG5Kz8ze0cLZ--4SH3myGKf4XPTVnV7enzbAYFFQHx4xsewyywo1nm0tCXmi~j-u6Hf2aHKluKuDAlqiFtZ96iAP4TmcRcr5D-q2-PRLUXS8cZ9OorGzgeQYNL692L9DdGQT3fIA__&Key-Pair-Id=KL5I0C8H7HX83"
+      },
+      "artifacts": {}
+    },
+    "rigging": {
+      "taskId": "019bd643-954b-70a8-a828-0cfadde4898a",
+      "status": "SUCCEEDED",
+      "completedAt": 1768826336956,
+      "outputs": {
+        "taskId": "019bd643-954b-70a8-a828-0cfadde4898a",
+        "riggedModel": "https://assets.meshy.ai/b0dbbbaf-b086-4bee-9845-d9c2576d26db/tasks/019bd643-954b-70a8-a828-0cfadde4898a/output/Character_output.glb?Expires=1769085536&Signature=KmJ-TwTfjigeaPL1Tg-JBFcIWfo6wOyqcmRcYYDwFJA2Cic9JfTTOeLmZFFkKRlZgBxHY~FkVOS~wT9PjfPNnylQvbrxaQtCkK-pqxZauiLQpgHqvp0fzwB7YvfaJygKeg2~VliBHaaym3rph9V-XEFgPMCJ~AkgFRZpY-G7NXJkSUnHgYy-aL7MRbcdpw3kWhzORnBa06eipcVyIEqwf4221Sn9gqlIilPXa5-OBAErhBt-K-Z73iXlH6zZOjVkKoCo4cTBPg~AUeMifuhsPBKGBg0Z~XGQb689UOPOmWEyji4RoZc8ivflwoTjY1HCH5iGIUdkwPdgBjbtIFlnlw__&Key-Pair-Id=KL5I0C8H7HX83"
+      },
+      "artifacts": {}
+    },
+    "animations": [
+      {
+        "taskId": "019bd643-f773-727b-b2e1-5ac12e7cce27",
+        "status": "SUCCEEDED",
+        "animationName": "COMBAT_STANCE",
+        "completedAt": 1768826344623,
+        "outputs": {
+          "animations/combat_stance.glb": "animations/combat_stance.glb"
+        }
+      },
+      {
+        "taskId": "019bd644-155a-7e73-9e6d-86d7f5cd4bf4",
+        "status": "SUCCEEDED",
+        "animationName": "RUNFAST",
+        "completedAt": 1768826353686,
+        "outputs": {
+          "animations/runfast.glb": "animations/runfast.glb"
+        }
+      },
+      {
+        "taskId": "019bd644-38c4-7e74-83fc-97c35b8fc8ed",
+        "status": "SUCCEEDED",
+        "animationName": "KUNG_FU_PUNCH",
+        "completedAt": 1768826369621,
+        "outputs": {
+          "animations/kung_fu_punch.glb": "animations/kung_fu_punch.glb"
+        }
+      },
+      {
+        "taskId": "019bd644-76fe-7241-98c9-27b4f5a6e36f",
+        "status": "SUCCEEDED",
+        "animationName": "BEHIT_FLYUP",
+        "completedAt": 1768826377575,
+        "outputs": {
+          "animations/behit_flyup.glb": "animations/behit_flyup.glb"
+        }
+      },
+      {
+        "taskId": "019bd644-9619-70df-9865-6b41607d5483",
+        "status": "SUCCEEDED",
+        "animationName": "DEAD",
+        "completedAt": 1768826394069,
+        "outputs": {
+          "animations/dead.glb": "animations/dead.glb"
+        }
+      },
+      {
+        "taskId": "019bd644-d67d-7253-8366-d49f25fd7a0b",
+        "status": "SUCCEEDED",
+        "animationName": "BASIC_JUMP",
+        "completedAt": 1768826416180,
+        "outputs": {
+          "animations/basic_jump.glb": "animations/basic_jump.glb"
+        }
+      },
+      {
+        "taskId": "019bd645-2cde-7e8a-8287-c2d5a14b7304",
+        "status": "SUCCEEDED",
+        "animationName": "DODGE_AND_COUNTER",
+        "completedAt": 1768826434212,
+        "outputs": {
+          "animations/dodge_and_counter.glb": "animations/dodge_and_counter.glb"
+        }
+      }
+    ]
+  },
+  "seed": 4199032809
+}

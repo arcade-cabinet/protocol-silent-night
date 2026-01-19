@@ -3,10 +3,11 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "paths": {
       "@/*": ["./app/*"],
       "@components/*": ["./components/*"],
+      "@src/*": ["./src/*"],
       "@protocol-silent-night/game-core": ["../../packages/game-core/src/index.ts"],
       "@protocol-silent-night/game-core/*": ["../../packages/game-core/src/*"]
     }

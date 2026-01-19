@@ -16,6 +16,7 @@ export default function RootLayout() {
     <ErrorBoundary>
       <View style={styles.container}>
         <StatusBar style="light" hidden />
+        {/* @ts-expect-error React 19 type compatibility with expo-router */}
         <Stack
           screenOptions={{
             headerShown: false,

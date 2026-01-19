@@ -1,0 +1,38 @@
+{
+  "name": "@protocol-silent-night/content-gen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "generate": "tsx src/cli.ts characters",
+    "gen:heroes": "tsx src/cli.ts heroes",
+    "gen:enemies": "tsx src/cli.ts enemies",
+    "gen:character": "tsx src/cli.ts character",
+    "sync-animations": "tsx src/cli.ts sync-animations",
+    "list": "tsx src/cli.ts list"
+  },
+  "devDependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^25.0.9",
+    "@types/seedrandom": "^3.0.8",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "fs-extra": "^11.3.3",
+    "seedrandom": "^3.0.5",
+    "sharp": "^0.34.5",
+    "zod": "^4.3.5"
+  }
+}

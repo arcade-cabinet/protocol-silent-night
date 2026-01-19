@@ -1,0 +1,99 @@
+{
+  "type": "text-to-3d-refine",
+  "name": "Text to 3D Refine",
+  "apiVersion": "v2",
+  "endpoint": "text-to-3d",
+  "inputs": [
+    {
+      "name": "mode",
+      "type": "string",
+      "required": true,
+      "default": "refine",
+      "description": "Must be 'refine' for this task"
+    },
+    {
+      "name": "preview_task_id",
+      "type": "string",
+      "required": true,
+      "source": "previousTask",
+      "sourcePath": "text-to-3d-preview.taskId",
+      "description": "Task ID from completed preview task"
+    },
+    {
+      "name": "enable_pbr",
+      "type": "boolean",
+      "required": false,
+      "default": true,
+      "source": "manifest",
+      "sourcePath": "textTo3DRefineTask.enablePbr",
+      "description": "Generate PBR maps (metallic, roughness, normal)"
+    },
+    {
+      "name": "texture_prompt",
+      "type": "string",
+      "required": false,
+      "source": "manifest",
+      "sourcePath": "textTo3DRefineTask.texturePrompt",
+      "description": "Texturing guidance, max 600 characters"
+    },
+    {
+      "name": "texture_image_url",
+      "type": "string",
+      "required": false,
+      "source": "manifest",
+      "sourcePath": "textTo3DRefineTask.textureImageUrl",
+      "description": "Reference image URL for texture style"
+    },
+    {
+      "name": "ai_model",
+      "type": "string",
+      "required": false,
+      "default": "latest",
+      "source": "manifest",
+      "sourcePath": "textTo3DRefineTask.aiModel",
+      "description": "AI model: 'meshy-5' or 'latest'"
+    },
+    {
+      "name": "moderation",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "source": "manifest",
+      "sourcePath": "textTo3DRefineTask.moderation",
+      "description": "Enable content moderation"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "model",
+      "responsePath": "model_urls.glb",
+      "localFilename": "model.glb",
+      "required": true
+    },
+    {
+      "name": "baseColor",
+      "responsePath": "texture_urls[0].base_color",
+      "localFilename": "textures/base_color.png",
+      "required": false
+    },
+    {
+      "name": "metallic",
+      "responsePath": "texture_urls[0].metallic",
+      "localFilename": "textures/metallic.png",
+      "required": false
+    },
+    {
+      "name": "normal",
+      "responsePath": "texture_urls[0].normal",
+      "localFilename": "textures/normal.png",
+      "required": false
+    },
+    {
+      "name": "roughness",
+      "responsePath": "texture_urls[0].roughness",
+      "localFilename": "textures/roughness.png",
+      "required": false
+    }
+  ],
+  "dependsOn": ["text-to-3d-preview"]
+}

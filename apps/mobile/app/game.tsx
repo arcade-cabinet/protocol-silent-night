@@ -73,7 +73,10 @@ export default function GameScreen() {
   return (
     <View style={styles.container}>
       {/* Game Scene */}
-      <GameScene onReady={handleReady} />
+      <GameScene
+        classType={(classType as 'santa' | 'elf' | 'bumble') ?? 'santa'}
+        onReady={handleReady}
+      />
 
       {/* Loading Overlay */}
       {isLoading && (
