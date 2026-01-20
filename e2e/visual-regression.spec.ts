@@ -7,12 +7,20 @@ import { selectCharacterAndStartMission, captureGameplaySnapshot, MOBILE_TEST_CO
  * Uses Playwright's screenshot comparison to validate visual rendering
  * of 3D game components, characters, and gameplay scenarios.
  *
+ * Requires: PLAYWRIGHT_MCP=true for WebGL/canvas rendering
  * Run with: PLAYWRIGHT_MCP=true pnpm test:e2e
  */
+
+// Check if running with full MCP capabilities
+const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variations in CI
 
 test.describe('Visual Regression - Character Selection', () => {
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should match character selection screen', async ({ page }) => {
     await page.goto('/');
 
@@ -73,6 +81,10 @@ test.describe('Visual Regression - Character Selection', () => {
 });
 
 test.describe('Visual Regression - Game Start', () => {
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render Santa gameplay correctly', async ({ page }) => {
     await captureGameplaySnapshot(page, /MECHA-SANTA/, 'santa-gameplay.png', {
       characterOptions: {
@@ -105,6 +117,10 @@ test.describe('Visual Regression - Game Start', () => {
 });
 
 test.describe('Visual Regression - HUD Elements', () => {
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render HUD correctly during gameplay', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);

@@ -14,7 +14,7 @@
     "build:legacy": "tsc -b && vite build",
     "build:ios": "pnpm --filter @protocol-silent-night/mobile build:ios",
     "build:android": "pnpm --filter @protocol-silent-night/mobile build:android",
-    "preview": "vite preview",
+    "preview": "pnpm --filter @protocol-silent-night/web preview",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write .",
