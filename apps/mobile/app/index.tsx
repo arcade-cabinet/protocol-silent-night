@@ -17,7 +17,7 @@ import {
   StandardMaterial,
   Color3,
   Color4,
-  Mesh,
+  type Mesh,
   GlowLayer,
 } from '@babylonjs/core';
 import { useGameStore, CLASSES, ENEMIES, WEAPONS, TERRAIN } from '@protocol-silent-night/game-core';
@@ -235,7 +235,7 @@ function GameScreen() {
     return () => {
       scene.dispose();
     };
-  }, [engine]);
+  }, [engine]); // spawnEnemy and updateGame are stable useCallback functions
 
   const spawnEnemy = useCallback((scene: Scene) => {
     const store = useGameStore.getState();
@@ -511,7 +511,7 @@ function GameScreen() {
     if (store.state === 'BOSS_FIGHT' && store.bossHp <= 0) {
       useGameStore.setState({ state: 'VICTORY' });
     }
-  }, [moveDir, playerSpeed, fireRate, fireBullet, spawnEnemy]);
+  }, [moveDir, playerSpeed, fireRate, fireBullet, spawnEnemy]); // spawnBoss is stable
 
   const spawnBoss = useCallback((scene: Scene) => {
     const player = playerRef.current;

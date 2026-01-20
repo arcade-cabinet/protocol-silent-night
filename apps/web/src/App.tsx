@@ -15,7 +15,7 @@ import {
   StandardMaterial,
   Color3,
   Color4,
-  Mesh,
+  type Mesh,
   GlowLayer,
   KeyboardEventTypes,
 } from '@babylonjs/core';
@@ -63,8 +63,11 @@ function MenuScreen() {
           return (
             <div
               key={classType}
-              className={'class-card' + (selectedClass === classType ? ' selected' : '')}
+              className={`class-card${selectedClass === classType ? ' selected' : ''}`}
               onClick={() => handleSelect(classType)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSelect(classType)}
+              role="button"
+              tabIndex={0}
             >
               <h3>{cls.name}</h3>
               <p>{cls.role}</p>
@@ -73,7 +76,7 @@ function MenuScreen() {
           );
         })}
       </div>
-      <button onClick={handleStart} disabled={!selectedClass}>START MISSION</button>
+      <button type="button" onClick={handleStart} disabled={!selectedClass}>START MISSION</button>
     </div>
   );
 }
@@ -92,7 +95,7 @@ function BriefingScreen() {
         <p><strong>OBJECTIVE:</strong> Eliminate Grinch-Bot forces</p>
         <p><strong>INTEL:</strong> Defeat {KILLS_FOR_BOSS} minions to draw out the boss</p>
       </div>
-      <button onClick={() => setState('PHASE_1')}>COMMENCE OPERATION</button>
+      <button type="button" onClick={() => setState('PHASE_1')}>COMMENCE OPERATION</button>
     </div>
   );
 }
@@ -759,7 +762,7 @@ function GameOverScreen() {
         <p>Final Score: {score}</p>
         <p>Enemies Eliminated: {kills}</p>
       </div>
-      <button onClick={reset}>RETRY MISSION</button>
+      <button type="button" onClick={reset}>RETRY MISSION</button>
     </div>
   );
 }
@@ -779,7 +782,7 @@ function VictoryScreen() {
         <p>Enemies Eliminated: {kills}</p>
         <p>Final Level: {level}</p>
       </div>
-      <button onClick={reset}>NEW GAME</button>
+      <button type="button" onClick={reset}>NEW GAME</button>
     </div>
   );
 }

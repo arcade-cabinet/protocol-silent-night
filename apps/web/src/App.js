@@ -24,14 +24,14 @@ function MenuScreen() {
     const classTypes = Object.keys(CLASSES);
     return (_jsxs("div", { className: "menu-screen", children: [_jsxs("h1", { className: "title", children: ["PROTOCOL: ", _jsx("span", { className: "highlight", children: "SILENT NIGHT" })] }), _jsx("p", { className: "subtitle", children: "BABYLONJS EDITION" }), _jsx("div", { className: "class-grid", children: classTypes.map((classType) => {
                     const cls = CLASSES[classType];
-                    return (_jsxs("div", { className: 'class-card' + (selectedClass === classType ? ' selected' : ''), onClick: () => handleSelect(classType), children: [_jsx("h3", { children: cls.name }), _jsx("p", { children: cls.role }), _jsxs("p", { children: ["HP: ", cls.hp, " | SPEED: ", cls.speed] })] }, classType));
-                }) }), _jsx("button", { onClick: handleStart, disabled: !selectedClass, children: "START MISSION" })] }));
+                    return (_jsxs("div", { className: `class-card${selectedClass === classType ? ' selected' : ''}`, onClick: () => handleSelect(classType), onKeyDown: (e) => e.key === 'Enter' && handleSelect(classType), role: "button", tabIndex: 0, children: [_jsx("h3", { children: cls.name }), _jsx("p", { children: cls.role }), _jsxs("p", { children: ["HP: ", cls.hp, " | SPEED: ", cls.speed] })] }, classType));
+                }) }), _jsx("button", { type: "button", onClick: handleStart, disabled: !selectedClass, children: "START MISSION" })] }));
 }
 function BriefingScreen() {
     const setState = useGameStore((s) => s.setState);
     const selectedClass = useGameStore((s) => s.selectedClass);
     const classConfig = selectedClass ? CLASSES[selectedClass] : null;
-    return (_jsxs("div", { className: "briefing-screen", children: [_jsx("h2", { children: "MISSION BRIEFING" }), _jsxs("div", { className: "briefing-content", children: [_jsxs("p", { children: [_jsx("strong", { children: "OPERATOR:" }), " ", classConfig?.name] }), _jsxs("p", { children: [_jsx("strong", { children: "ROLE:" }), " ", classConfig?.role] }), _jsxs("p", { children: [_jsx("strong", { children: "OBJECTIVE:" }), " Eliminate Grinch-Bot forces"] }), _jsxs("p", { children: [_jsx("strong", { children: "INTEL:" }), " Defeat ", KILLS_FOR_BOSS, " minions to draw out the boss"] })] }), _jsx("button", { onClick: () => setState('PHASE_1'), children: "COMMENCE OPERATION" })] }));
+    return (_jsxs("div", { className: "briefing-screen", children: [_jsx("h2", { children: "MISSION BRIEFING" }), _jsxs("div", { className: "briefing-content", children: [_jsxs("p", { children: [_jsx("strong", { children: "OPERATOR:" }), " ", classConfig?.name] }), _jsxs("p", { children: [_jsx("strong", { children: "ROLE:" }), " ", classConfig?.role] }), _jsxs("p", { children: [_jsx("strong", { children: "OBJECTIVE:" }), " Eliminate Grinch-Bot forces"] }), _jsxs("p", { children: [_jsx("strong", { children: "INTEL:" }), " Defeat ", KILLS_FOR_BOSS, " minions to draw out the boss"] })] }), _jsx("button", { type: "button", onClick: () => setState('PHASE_1'), children: "COMMENCE OPERATION" })] }));
 }
 function GameCanvas() {
     const canvasRef = useRef(null);
@@ -554,12 +554,12 @@ function GameOverScreen() {
     const reset = useGameStore((s) => s.reset);
     const score = useGameStore((s) => s.score);
     const kills = useGameStore((s) => s.kills);
-    return (_jsxs("div", { className: "end-screen game-over", children: [_jsx("h1", { children: "OPERATOR DOWN" }), _jsxs("div", { className: "stats", children: [_jsxs("p", { children: ["Final Score: ", score] }), _jsxs("p", { children: ["Enemies Eliminated: ", kills] })] }), _jsx("button", { onClick: reset, children: "RETRY MISSION" })] }));
+    return (_jsxs("div", { className: "end-screen game-over", children: [_jsx("h1", { children: "OPERATOR DOWN" }), _jsxs("div", { className: "stats", children: [_jsxs("p", { children: ["Final Score: ", score] }), _jsxs("p", { children: ["Enemies Eliminated: ", kills] })] }), _jsx("button", { type: "button", onClick: reset, children: "RETRY MISSION" })] }));
 }
 function VictoryScreen() {
     const reset = useGameStore((s) => s.reset);
     const score = useGameStore((s) => s.score);
     const kills = useGameStore((s) => s.kills);
     const level = useGameStore((s) => s.playerLevel);
-    return (_jsxs("div", { className: "end-screen victory", children: [_jsx("h1", { children: "\uD83C\uDF84 MISSION COMPLETE \uD83C\uDF84" }), _jsx("h2", { children: "Christmas is Saved!" }), _jsxs("div", { className: "stats", children: [_jsxs("p", { children: ["Final Score: ", score] }), _jsxs("p", { children: ["Enemies Eliminated: ", kills] }), _jsxs("p", { children: ["Final Level: ", level] })] }), _jsx("button", { onClick: reset, children: "NEW GAME" })] }));
+    return (_jsxs("div", { className: "end-screen victory", children: [_jsx("h1", { children: "\uD83C\uDF84 MISSION COMPLETE \uD83C\uDF84" }), _jsx("h2", { children: "Christmas is Saved!" }), _jsxs("div", { className: "stats", children: [_jsxs("p", { children: ["Final Score: ", score] }), _jsxs("p", { children: ["Enemies Eliminated: ", kills] }), _jsxs("p", { children: ["Final Level: ", level] })] }), _jsx("button", { type: "button", onClick: reset, children: "NEW GAME" })] }));
 }

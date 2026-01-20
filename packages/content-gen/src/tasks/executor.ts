@@ -31,7 +31,7 @@ export class TaskExecutor {
     context: TaskContext,
     additionalInputs?: Record<string, unknown>
   ): Promise<TaskRecord> {
-    const { assetDir, manifest, completedTasks, log } = context;
+    const { assetDir, log } = context;
 
     log(`\n[${definition.name}] Starting...`);
 

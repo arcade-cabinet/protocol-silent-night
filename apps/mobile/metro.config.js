@@ -6,7 +6,7 @@
  */
 
 const { getDefaultConfig } = require('expo/metro-config');
-const path = require('path');
+const path = require('node:path');
 
 // Get the monorepo root (two levels up from apps/mobile)
 const projectRoot = __dirname;
