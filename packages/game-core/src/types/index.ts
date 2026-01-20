@@ -1,361 +1,263 @@
 /**
- * @fileoverview Type definitions for Protocol: Silent Night
- * @module types
- *
- * Platform-agnostic types that work with both Three.js (web) and BabylonJS (mobile)
+ * Shared Types for Protocol: Silent Night
+ * Used by both web and mobile apps via @protocol-silent-night/game-core
  */
 
-/**
- * Platform-agnostic 3D vector type
- */
-export interface Vector3Like {
+// Game state machine
+export type GameState =
+  | 'MENU'
+  | 'BRIEFING'
+  | 'PHASE_1'
+  | 'BOSS_TRANSITION'
+  | 'BOSS_FIGHT'
+  | 'VICTORY'
+  | 'GAME_OVER';
+
+// Player classes
+export type ClassType = 'santa' | 'elf' | 'bumble';
+
+// Bullet types
+export type BulletType = 'cannon' | 'smg' | 'star' | 'snowball' | 'ice_shard';
+
+// Obstacle types
+export type ObstacleType =
+  | 'tree'
+  | 'present_red'
+  | 'present_green'
+  | 'candy_cane'
+  | 'pillar'
+  | 'snowman'
+  | 'rocks'
+  | 'bench'
+  | 'lantern'
+  | 'snow_pile';
+
+// Enemy types
+export type EnemyType = 'minion' | 'boss';
+
+// Vector3 for positions (platform-agnostic)
+export interface Vector3 {
   x: number;
   y: number;
   z: number;
 }
 
-/**
- * Platform-agnostic color type
- */
-export interface ColorLike {
+// Color3 for colors (platform-agnostic)
+export interface Color3 {
   r: number;
   g: number;
   b: number;
 }
 
-/**
- * Platform-agnostic mesh reference (use with generics in platform code)
- */
-export type MeshRef = unknown;
+// Player state
+export interface PlayerState {
+  classType: ClassType;
+  position: Vector3;
+  hp: number;
+  maxHp: number;
+  speed: number;
+  level: number;
+  xp: number;
+  xpToNext: number;
+}
 
-/**
- * Game state machine states
- */
-export type GameState =
-  | 'MENU'
-  | 'BRIEFING'
-  | 'PHASE_1'
-  | 'PHASE_BOSS'
-  | 'WIN'
-  | 'GAME_OVER'
-  | 'LEVEL_UP';
+// Enemy entity
+export interface Enemy {
+  id: string;
+  type: EnemyType;
+  position: Vector3;
+  hp: number;
+  maxHp: number;
+  speed: number;
+  pointValue: number;
+  damage: number;
+}
 
-/**
- * Available player character classes
- */
-export type PlayerClassType = 'santa' | 'elf' | 'bumble';
+// Bullet/projectile entity
+export interface Bullet {
+  id: string;
+  type: BulletType;
+  position: Vector3;
+  velocity: Vector3;
+  damage: number;
+  ownerId: string;
+  ttl: number; // Time to live in ms
+}
 
-/**
- * Weapon identifiers
- */
-export type WeaponType =
-  | 'cannon'
-  | 'smg'
-  | 'star'
-  | 'snowball'
-  | 'candy_cane'
-  | 'ornament'
-  | 'light_string'
-  | 'gingerbread'
-  | 'jingle_bell'
-  | 'quantum_gift'
-  | 'harpoon';
+// Obstacle (terrain decoration with collision)
+export interface ChristmasObstacle {
+  id: string;
+  type: ObstacleType;
+  position: Vector3;
+  rotation?: number;
+  scale?: number;
+  radius: number;
+  height: number;
+}
 
-/**
- * Configuration for a player character class
- */
-export interface PlayerClassConfig {
-  type: PlayerClassType;
+// Class definition from DDL
+export interface ClassDefinition {
+  type: ClassType;
   name: string;
   role: string;
   hp: number;
   speed: number;
-  rof: number;
-  damage: number;
-  color: string;
-  scale: number;
-  weaponType: WeaponType;
-  furOptions: {
-    baseColor: string;
-    tipColor: string;
-    layerCount: number;
-    spacing: number;
-    windStrength: number;
-    gravityDroop?: number;
-  };
-  customizations?: unknown[];
+  weaponType: string;
+  passive: string;
+  ultimate: string;
+  description?: string;
+  color?: string;
 }
 
-/**
- * Weapon evolution identifiers
- */
-export type WeaponEvolutionType =
-  | 'mega-coal-mortar'
-  | 'plasma-storm'
-  | 'supernova-burst'
-  | 'blizzard-cannon'
-  | 'peppermint-tornado';
-
-/**
- * Configuration for weapon evolution
- */
-export interface WeaponEvolutionConfig {
-  id: WeaponEvolutionType;
-  name: string;
-  baseWeapon: WeaponType;
-  minLevel: number;
-  requiredUpgrades?: string[];
-  modifiers: {
-    damageMultiplier?: number;
-    rofMultiplier?: number;
-    speedMultiplier?: number;
-    projectileCount?: number;
-    spreadAngle?: number;
-    size?: number;
-    penetration?: boolean;
-    explosive?: boolean;
-  };
-}
-
-/**
- * Weapon configuration
- */
-export interface WeaponConfig {
-  id: WeaponType;
-  name: string;
-  description: string;
-  cost: number;
-  icon: string;
-  damage: number;
-  rof: number;
-  speed: number;
-  life: number;
-  behavior?: BulletData['behavior'];
-  projectileCount?: number;
-  spreadAngle?: number;
-  bulletType: 'cannon' | 'smg' | 'star';
-}
-
-/**
- * Enemy configuration
- */
-export interface EnemyConfig {
-  type: EnemyType;
-  hp: number;
-  speed: number;
-  damage: number;
-  pointValue: number;
-}
-
-/**
- * Enemy type identifiers
- */
-export type EnemyType = 'minion' | 'boss';
-
-/**
- * Base entity data
- */
-export interface EntityData {
+// Weapon definition from DDL
+export interface WeaponDefinition {
   id: string;
-  mesh: MeshRef;
-  velocity: Vector3Like;
-  hp: number;
-  maxHp: number;
-  isActive: boolean;
-}
-
-/**
- * Projectile data
- */
-export interface BulletData extends EntityData {
-  direction: Vector3Like;
-  isEnemy: boolean;
+  name: string;
   damage: number;
-  life: number;
-  speed: number;
-  type?: WeaponType;
-  evolutionType?: WeaponEvolutionType;
-  size?: number;
-  penetration?: boolean;
+  fireRate: number;
+  bulletType: BulletType;
+  bulletSpeed: number;
+  bulletSize: number;
+  bulletColor: string;
+  spreadAngle?: number;
+  projectileCount?: number;
+  piercing?: boolean;
   explosive?: boolean;
-  behavior?: 'freeze' | 'melee' | 'aoe' | 'chain' | 'turret' | 'spread' | 'random';
+  explosionRadius?: number;
 }
 
-/**
- * Enemy entity data
- */
-export interface EnemyData extends EntityData {
+// Evolution definition from DDL
+export interface EvolutionDefinition {
+  id: string;
+  name: string;
+  baseWeapon: string;
+  damage: number;
+  fireRate: number;
+  bulletType: BulletType;
+  bulletSpeed: number;
+  bulletSize: number;
+  bulletColor: string;
+  effects?: string[];
+}
+
+// Enemy definition from DDL
+export interface EnemyDefinition {
   type: EnemyType;
+  hp: number;
   speed: number;
   damage: number;
   pointValue: number;
-  attackTimer?: number;
-  phase?: 'chase' | 'barrage';
+  xpValue: number;
+  color?: string;
 }
 
-/**
- * Christmas object types
- */
-export type ChristmasObjectType = 'present' | 'tree' | 'candy_cane' | 'pillar';
+// Spawn configuration from DDL
+export interface SpawnConfig {
+  initialMinions: number;
+  maxMinions: number;
+  spawnRate: number;
+  spawnRateIncrease: number;
+  killsForBoss: number;
+  hitRadiusMinion: number;
+  hitRadiusBoss: number;
+}
 
-/**
- * Data for Christmas-themed terrain obstacles
- */
-export interface ChristmasObstacle {
-  position: Vector3Like;
-  type: ChristmasObjectType;
+// Terrain configuration from DDL
+export interface TerrainConfig {
+  gridSize: number;
+  cubeSize: number;
+  noiseScale: number;
+  minHeight: number;
+  maxHeight: number;
+  baseColor: string;
+  snowColor: string;
+  snowThreshold: number;
+}
+
+// Obstacle definition from DDL
+export interface ObstacleDefinition {
+  type: ObstacleType;
+  count: number;
+  heightRange: [number, number];
   radius: number;
-  height: number;
-  color: ColorLike;
+  colors?: string[];
 }
 
-/**
- * Player input state
- */
-export interface InputState {
-  movement: { x: number; y: number };
-  isFiring: boolean;
-  joystickActive: boolean;
-  joystickOrigin: { x: number; y: number };
+// Theme lighting config from DDL
+export interface LightingConfig {
+  ambient: {
+    color: string;
+    intensity: number;
+  };
+  moonlight: {
+    color: string;
+    intensity: number;
+    position: [number, number, number];
+  };
+  rimLight?: {
+    color: string;
+    intensity: number;
+    position: [number, number, number];
+  };
 }
 
-/**
- * Player statistics
- */
+// Theme fog config from DDL
+export interface FogConfig {
+  color: string;
+  near: number;
+  far: number;
+  density?: number;
+}
+
+// Theme sky config from DDL
+export interface SkyConfig {
+  topColor: string;
+  bottomColor: string;
+  starCount?: number;
+  auroraEnabled?: boolean;
+  moonEnabled?: boolean;
+}
+
+// Post-processing config from DDL
+export interface PostProcessingConfig {
+  bloom: {
+    threshold: number;
+    intensity: number;
+    radius: number;
+  };
+  vignette?: {
+    intensity: number;
+    offset: number;
+  };
+  chromaticAberration?: {
+    offset: number;
+  };
+}
+
+// Complete theme from DDL
+export interface ThemeDefinition {
+  name: string;
+  lighting: LightingConfig;
+  fog: FogConfig;
+  sky: SkyConfig;
+  postProcessing: PostProcessingConfig;
+}
+
+// Game statistics
 export interface GameStats {
   score: number;
   kills: number;
-  bossDefeated: boolean;
-}
-
-/**
- * Meta-progression data
- */
-export interface MetaProgressData {
   nicePoints: number;
-  totalPointsEarned: number;
-  runsCompleted: number;
-  bossesDefeated: number;
-  unlockedWeapons: string[];
-  unlockedSkins: string[];
-  permanentUpgrades: Record<string, number>;
-  highScore: number;
-  totalKills: number;
-  totalDeaths: number;
-}
-
-/**
- * Roguelike upgrade definition
- */
-export interface RoguelikeUpgrade {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  category: 'offensive' | 'defensive' | 'utility' | 'special' | 'christmas';
-  maxStacks: number;
-  stats?: Record<string, { value: number; type: 'multiply' | 'add' | 'percent' }>;
-  special?: string[];
-}
-
-/**
- * Progress data for current run
- */
-export interface RunProgressData {
-  xp: number;
   level: number;
-  selectedUpgrades: string[];
-  weaponEvolutions: WeaponEvolutionType[];
-  activeUpgrades: Record<string, number>;
-  wave: number;
   timeSurvived: number;
-  pendingLevelUp: boolean;
-  upgradeChoices: RoguelikeUpgrade[];
+  damageDealt: number;
+  damageTaken: number;
 }
 
-/**
- * Mission briefing line
- */
-export interface BriefingLine {
-  label: string;
-  text: string;
-  accent?: boolean;
-  warning?: boolean;
+// Input state (for mobile touch controls)
+export interface InputState {
+  moveDirection: Vector3;
+  aimDirection: Vector3;
+  isFiring: boolean;
+  isUsingUltimate: boolean;
 }
-
-/**
- * Obstacle type configuration
- */
-export interface ObstacleTypeConfig {
-  type: ChristmasObjectType;
-  color: number | string;
-  heightRange: [number, number];
-  radius: number;
-  scale: [number, number, number];
-  yOffset: number;
-}
-
-/**
- * Skin definition
- */
-export interface SkinConfig {
-  id: string;
-  name: string;
-  cost: number;
-  character: PlayerClassType;
-  description: string;
-  colors?: {
-    skin?: string;
-    primary?: string;
-    secondary?: string;
-    accent?: string;
-    fur?: {
-      baseColor: string;
-      tipColor: string;
-    };
-  };
-}
-
-/**
- * Permanent upgrade definition
- */
-export interface PermanentUpgradeConfig {
-  id: string;
-  name: string;
-  cost: number;
-  tier: 1 | 2 | 3;
-  maxLevel: number;
-  description: string;
-}
-
-/**
- * Workshop weapon unlock
- */
-export interface WeaponUnlock {
-  id: WeaponType;
-  name: string;
-  cost: number;
-  type: string;
-  damage: string;
-  fireRate: string;
-  special: string;
-  flavor: string;
-}
-
-/**
- * Helper to get bullet type from weapon type
- */
-export const getBulletTypeFromWeapon = (weaponType: WeaponType): 'cannon' | 'smg' | 'star' => {
-  switch (weaponType) {
-    case 'cannon':
-    case 'ornament':
-    case 'snowball':
-      return 'cannon';
-    case 'smg':
-    case 'light_string':
-      return 'smg';
-    default:
-      return 'star';
-  }
-};

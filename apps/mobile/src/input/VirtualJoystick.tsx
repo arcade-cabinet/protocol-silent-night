@@ -11,7 +11,7 @@
  * - Smooth visual feedback
  */
 
-import { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { View, StyleSheet, PanResponder, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -83,7 +83,7 @@ export function VirtualJoystick({
   baseColor = 'rgba(255, 255, 255, 0.2)',
   stickColor = 'rgba(0, 255, 102, 0.8)',
   disabled = false,
-}: VirtualJoystickProps): JSX.Element {
+}: VirtualJoystickProps): React.ReactNode {
   const [isActive, setIsActive] = useState(false);
 
   // Animated values for stick position
@@ -248,7 +248,6 @@ export function VirtualJoystick({
       />
 
       {/* Stick */}
-      {/* @ts-expect-error React 19 type compatibility with react-native-reanimated */}
       <Animated.View
         style={[
           styles.stick,

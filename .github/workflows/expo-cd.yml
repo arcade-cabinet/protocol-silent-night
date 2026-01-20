@@ -14,6 +14,8 @@ name: Expo CD
 on:
   push:
     branches: [main, release/*]
+    tags:
+      - 'v*'
     paths:
       - 'apps/mobile/**'
       - 'packages/game-core/**'
@@ -196,22 +198,42 @@ jobs:
         run: pnpm --filter @protocol-silent-night/game-core build
 
       - name: Build Android APK (Preview)
+        id: eas-build
         working-directory: apps/mobile
         run: |
-          eas build \
-            --platform android \
-            --profile preview-apk-all-archs \
-            --non-interactive \
-            --no-wait
+          # For releases, wait for build; for PRs, don't wait
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            eas build \
+              --platform android \
+              --profile preview-apk-all-archs \
+              --non-interactive \
+              --json > build-result.json
+            echo "build_id=$(jq -r '.[0].id' build-result.json)" >> $GITHUB_OUTPUT
+          else
+            eas build \
+              --platform android \
+              --profile preview-apk-all-archs \
+              --non-interactive \
+              --no-wait
+          fi
         env:
           EXPO_PUBLIC_TARGET_DEVICE: all
 
-      - name: Get build URL
-        id: build-url
+      - name: Download APK artifact
+        if: startsWith(github.ref, 'refs/tags/')
         working-directory: apps/mobile
         run: |
-          BUILD_URL=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].artifacts.buildUrl // empty')
-          echo "url=$BUILD_URL" >> $GITHUB_OUTPUT
+          # Get the artifact URL from the build
+          BUILD_URL=$(eas build:view ${{ steps.eas-build.outputs.build_id }} --json | jq -r '.artifacts.buildUrl')
+          curl -L -o protocol-silent-night.apk "$BUILD_URL"
+          echo "apk_path=apps/mobile/protocol-silent-night.apk" >> $GITHUB_OUTPUT
+
+      - name: Upload APK artifact
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-apk
+          path: apps/mobile/protocol-silent-night.apk
 
       - name: Comment build status on PR
         if: github.event_name == 'pull_request'
@@ -349,3 +371,64 @@ jobs:
             # TODO: Add Maestro E2E tests
             echo "Device profile: ${{ matrix.device.profile }}"
             echo "Foldable: ${{ matrix.device.foldable || 'false' }}"
+
+  # ==========================================================================
+  # Create GitHub Release with APK (on tags)
+  # ==========================================================================
+  create-release:
+    name: Create GitHub Release
+    needs: [build-android]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Download APK artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: android-apk
+          path: ./release-assets
+
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Rename APK with version
+        run: |
+          mv ./release-assets/protocol-silent-night.apk \
+             ./release-assets/protocol-silent-night-${{ steps.version.outputs.version }}.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2
+        with:
+          name: Protocol Silent Night ${{ steps.version.outputs.version }}
+          body: |
+            ## Protocol: Silent Night ${{ steps.version.outputs.version }}
+
+            ### 📱 Android APK (Universal - All Architectures)
+
+            The APK supports all Android architectures:
+            - arm64-v8a (64-bit ARM)
+            - armeabi-v7a (32-bit ARM)
+            - x86_64 (64-bit Intel/AMD)
+            - x86 (32-bit Intel/AMD)
+
+            ### Installation
+
+            1. Download the APK file below
+            2. Enable "Install from unknown sources" in Android settings
+            3. Open the APK file to install
+
+            ### Tested Devices
+            - Google Pixel 8a
+            - OnePlus Open (Foldable)
+
+            ---
+            Built with [Expo](https://expo.dev) and [BabylonJS React Native](https://babylonjs.com)
+          files: |
+            ./release-assets/protocol-silent-night-${{ steps.version.outputs.version }}.apk
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          generate_release_notes: true

@@ -1,84 +1,35 @@
 /**
  * @protocol-silent-night/game-core
- *
- * Shared game logic for Protocol: Silent Night
- * Platform-agnostic core that can be used by web (Three.js/R3F) and mobile (BabylonJS RN)
+ * Shared game logic, types, and assets for Protocol: Silent Night
+ * Used by both web (BabylonJS + Reactylon) and mobile (BabylonJS React Native)
  */
 
-export * from './constants';
-export * from './data';
-export * from './loaders';
-// Export schemas with explicit re-exports to avoid conflicts with types
-export {
-  ClassesSchema,
-  CustomizationSchema,
-  FurOptionsSchema,
-  GroupCustomizationSchema,
-  JointMeshCustomizationSchema,
-  MaterialSchema,
-  MeshCustomizationSchema,
-  PlayerClassConfigSchema,
-  PlayerClassTypeSchema,
-  PointLightSchema,
-  ScaleCustomizationSchema,
-  WeaponTypeSchema,
-  type ClassesData,
-  type Customization,
-  type FurOptions,
-  type Material,
-  type PlayerClassConfigValidated,
-  EnemiesSchema,
-  EnemyConfigSchema,
-  EnemyTypeSchema,
-  SpawnConfigSchema,
-  type EnemiesData,
-  type EnemyConfigValidated,
-  type SpawnConfig,
-  ObstacleConfigSchema,
-  ObstacleTypeSchema,
-  TerrainConfigSchema,
-  TerrainSchema,
-  type ObstacleConfig,
-  type ObstacleType,
-  type TerrainConfigValidated,
-  type TerrainData,
-  AmbientLightSchema,
-  BloomConfigSchema,
-  FogSchema,
-  HemisphereLightSchema,
-  LightingConfigSchema,
-  MoonlightAnimationSchema,
-  MoonlightSchema,
-  Position3DSchema,
-  PostProcessingConfigSchema,
-  RimLightSchema,
-  SkyConfigSchema,
-  ThemeConfigSchema,
-  ThemesSchema,
-  VolumetricFogSchema,
-  type LightingConfig,
-  type Position3D,
-  type PostProcessingConfig,
-  type SkyConfig,
-  type ThemeConfigValidated,
-  type ThemesData,
-  BulletTypeSchema,
-  EvolutionModifiersSchema,
-  WeaponBehaviorSchema,
-  WeaponConfigSchema,
-  WeaponEvolutionConfigSchema,
-  WeaponEvolutionIdSchema,
-  WeaponIdSchema,
-  WeaponsSchema,
-  type BulletType,
-  type EvolutionModifiers,
-  type WeaponBehavior,
-  type WeaponConfigValidated,
-  type WeaponEvolutionConfigValidated,
-  type WeaponEvolutionId,
-  type WeaponId,
-  type WeaponsData,
-} from './schemas';
-export * from './store';
+// Types
 export * from './types';
-export * from './utils';
+
+// Store
+export { useGameStore } from './store';
+
+// Loaders
+export * from './loaders';
+
+// Schema types (re-export commonly used types from schemas)
+export type { PlayerClassConfigValidated as PlayerClassConfig } from './schemas';
+export type { ClassesData, EnemiesData, TerrainData, ThemesData, WeaponsData } from './schemas';
+export type { WeaponConfigValidated, WeaponEvolutionConfigValidated } from './schemas';
+
+// Data (re-export JSON imports)
+import classesData from './data/classes.json';
+import enemiesData from './data/enemies.json';
+import terrainData from './data/terrain.json';
+import themesData from './data/themes.json';
+import weaponsData from './data/weapons.json';
+
+export const CLASSES = classesData;
+export const ENEMIES = enemiesData;
+export const TERRAIN = terrainData;
+export const THEMES = themesData;
+export const WEAPONS = weaponsData;
+
+// Obstacle types shortcut
+export const OBSTACLE_TYPES = terrainData.obstacles;

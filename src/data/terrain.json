@@ -1,15 +1,15 @@
 {
   "terrain": {
-    "gridSize": 80,
-    "cubeSize": 1.8,
-    "cubeHeight": 4,
-    "noiseScale": 0.1,
-    "detailNoiseScale": 0.05,
-    "heightMultiplier": 2,
-    "detailHeightMultiplier": 1.5,
-    "baseElevation": -3,
-    "glitchChance": 0.005,
-    "obstacleThreshold": 0.4
+    "gridSize": 40,
+    "cubeSize": 2.5,
+    "cubeHeight": 0.3,
+    "noiseScale": 0.02,
+    "detailNoiseScale": 0.01,
+    "heightMultiplier": 0.2,
+    "detailHeightMultiplier": 0.1,
+    "baseElevation": -1,
+    "glitchChance": 0.001,
+    "obstacleThreshold": 0.75
   },
   "obstacles": {
     "present_red": {

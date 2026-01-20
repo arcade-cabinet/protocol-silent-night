@@ -130,21 +130,50 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
 
-      - name: Run Playwright tests
-        id: playwright
+      - name: Run Playwright tests (Web)
+        id: playwright-web
         run: pnpm test:e2e
+        continue-on-error: true
         env:
           # Enable HTML report
           PLAYWRIGHT_HTML_REPORT: playwright-report
 
-      - name: Upload Playwright report
+      - name: Run Playwright tests (Mobile/BabylonJS)
+        id: playwright-mobile
+        run: pnpm test:e2e:mobile
+        continue-on-error: true
+        env:
+          PLAYWRIGHT_HTML_REPORT: apps/mobile/playwright-report
+
+      - name: Set combined test result
+        id: playwright
+        run: |
+          if [ "${{ steps.playwright-web.outcome }}" == "failure" ] || [ "${{ steps.playwright-mobile.outcome }}" == "failure" ]; then
+            echo "outcome=failure" >> $GITHUB_OUTPUT
+            exit 1
+          else
+            echo "outcome=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Playwright report (Web)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ github.run_id }}
+          name: playwright-report-web-${{ github.run_id }}
           path: |
             playwright-report/
             test-results/
+          retention-days: 30
+
+      - name: Upload Playwright report (Mobile)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-mobile-${{ github.run_id }}
+          path: |
+            apps/mobile/playwright-report/
+            apps/mobile/test-results/
+            apps/mobile/e2e/__snapshots__/
           retention-days: 30
 
       - name: Comment on PR - Success
@@ -232,12 +261,20 @@ jobs:
         if: steps.security.outputs.is_fork == 'false'
         run: pnpm exec playwright install chromium --with-deps
 
-      - name: Download test artifacts
+      - name: Download test artifacts (Web)
         if: steps.security.outputs.is_fork == 'false'
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: playwright-report-${{ github.run_id }}
-          path: test-artifacts/
+          name: playwright-report-web-${{ github.run_id }}
+          path: test-artifacts/web/
+        continue-on-error: true
+
+      - name: Download test artifacts (Mobile)
+        if: steps.security.outputs.is_fork == 'false'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: playwright-report-mobile-${{ github.run_id }}
+          path: test-artifacts/mobile/
         continue-on-error: true
 
       - name: Run Claude to fix E2E tests
@@ -260,22 +297,26 @@ jobs:
 
             Commands:
             - Build: `pnpm build`
-            - E2E tests: `pnpm test:e2e`
+            - E2E tests (web): `pnpm test:e2e`
+            - E2E tests (mobile/BabylonJS): `pnpm test:e2e:mobile`
             - Single test: `pnpm exec playwright test <test-file>`
 
             ## Test Artifacts
 
             Check the `test-artifacts/` directory for:
-            - playwright-report/index.html - HTML test report
-            - test-results/ - Screenshots and traces of failed tests
+            - `web/playwright-report/index.html` - Web (Three.js) test report
+            - `web/test-results/` - Web screenshots and traces
+            - `mobile/playwright-report/index.html` - Mobile (BabylonJS) test report
+            - `mobile/test-results/` - Mobile screenshots and traces
+            - `mobile/e2e/__snapshots__/` - Visual regression baselines
 
             ## Instructions
 
-            1. Analyze the test failures from playwright-report
+            1. Analyze the test failures from both playwright reports
             2. Check screenshots in test-results for visual clues
             3. Identify whether it's a test issue or app bug
             4. Make the fix (prefer fixing app code over test code)
-            5. Run `pnpm test:e2e` to verify
+            5. Run `pnpm test:e2e` and/or `pnpm test:e2e:mobile` to verify
             6. Commit and push the fix
             7. Update PR with explanation of the fix
 
@@ -283,6 +324,8 @@ jobs:
             - Selector stability (use data-testid attributes)
             - Timing issues (use proper waits, not arbitrary delays)
             - State management (ensure proper test isolation)
+            - BabylonJS scene initialization (WebGL can be slow)
+            - Visual regression thresholds (20-25% for WebGL)
 
           claude_args: |
             --allowedTools "Edit,MultiEdit,Write,Read,Glob,Grep,LS,Bash(pnpm:*),Bash(git:*),Bash(gh:*),Bash(cat:*),Bash(ls:*),Bash(rg:*),Bash(playwright:*)"

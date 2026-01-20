@@ -1,81 +1,82 @@
 /**
- * @fileoverview DDL loader exports with Zod validation
- * @module loaders
+ * DDL Loaders with Zod validation
+ * Load and validate game configuration from JSON files
  *
- * Provides type-safe loaders for all game data definition files.
- * Each loader validates JSON data against Zod schemas at runtime.
+ * Re-exports all loader functions from individual modules
  */
-
-// Import cache clearing functions for use in clearAllCaches
-import { clearClassesCache } from './classLoader';
-import { clearEnemiesCache } from './enemyLoader';
-import { clearTerrainCache } from './terrainLoader';
-import { clearThemesCache } from './themeLoader';
-import { clearWeaponsCache } from './weaponLoader';
 
 // Class loaders
 export {
-  clearClassesCache,
-  getClassTypes,
-  loadClassByType,
   loadClasses,
+  loadClassByType,
+  getClassTypes,
   validateClasses,
+  clearClassesCache,
 } from './classLoader';
 
 // Enemy loaders
 export {
-  clearEnemiesCache,
-  getEnemyTypes,
   loadEnemies,
   loadEnemyByType,
   loadSpawnConfig,
+  getEnemyTypes,
   validateEnemies,
+  clearEnemiesCache,
 } from './enemyLoader';
 
 // Terrain loaders
 export {
-  clearTerrainCache,
-  getObstacleKeys,
-  loadObstacleByKey,
-  loadObstacles,
   loadTerrain,
   loadTerrainConfig,
+  loadObstacles,
+  loadObstacleByKey,
+  getObstacleKeys,
   validateTerrain,
+  clearTerrainCache,
 } from './terrainLoader';
 
 // Theme loaders
 export {
-  clearThemesCache,
-  getThemeNames,
+  loadThemes,
+  loadThemeByName,
   loadDefaultTheme,
   loadLightingConfig,
-  loadPostProcessingConfig,
   loadSkyConfig,
-  loadThemeByName,
-  loadThemes,
+  loadPostProcessingConfig,
+  getThemeNames,
   validateThemes,
+  clearThemesCache,
 } from './themeLoader';
 
 // Weapon loaders
 export {
-  clearWeaponsCache,
-  getEvolutionIds,
+  loadWeapons,
+  loadAllWeapons,
+  loadWeaponById,
+  loadAllEvolutions,
+  loadEvolutionById,
   getEvolutionsForWeapon,
   getWeaponIds,
+  getEvolutionIds,
   getWeaponsByCost,
-  loadAllEvolutions,
-  loadAllWeapons,
-  loadEvolutionById,
-  loadWeaponById,
-  loadWeapons,
   validateWeapons,
+  clearWeaponsCache,
 } from './weaponLoader';
 
+// Types are available from the main package export or from schemas directly
+// Avoid re-exporting here to prevent conflicts with ./types
+
 /**
- * Clear all cached loader data
- * Useful for hot reloading or testing scenarios
+ * Clear all loader caches (useful for hot reloading)
  */
 export function clearAllCaches(): void {
+  // Import the clear functions dynamically to avoid circular deps
+  const { clearClassesCache } = require('./classLoader');
+  const { clearEnemiesCache } = require('./enemyLoader');
+  const { clearTerrainCache } = require('./terrainLoader');
+  const { clearThemesCache } = require('./themeLoader');
+  const { clearWeaponsCache } = require('./weaponLoader');
+
   clearClassesCache();
   clearEnemiesCache();
   clearTerrainCache();
