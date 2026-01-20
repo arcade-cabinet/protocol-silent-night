@@ -6,7 +6,12 @@ import { selectCharacterAndStartMission } from './test-helpers';
  *
  * Comprehensive tests that play through the entire game from start to finish
  * for each character class, testing all game mechanics and state transitions.
+ *
+ * Requires: PLAYWRIGHT_MCP=true for WebGL/canvas rendering
  */
+
+// Check if running with full MCP capabilities
+const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 // Helper to get game state from the store
 async function getGameState(page: Page) {
@@ -124,6 +129,11 @@ async function waitForBossPhase(page: Page, timeout = 5000) {
 
 test.describe('Full Gameplay - MECHA-SANTA (Tank Class)', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should complete full game loop with Santa', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(2000);

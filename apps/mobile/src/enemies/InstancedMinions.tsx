@@ -224,14 +224,19 @@ export function createMinionSPS(
    * Update all particles to match enemy positions
    */
   const updateParticles = (enemies: EnemyInstance[]) => {
-    // Build a set of active enemy IDs
+    // FIRST PASS: Build complete set of active enemy IDs before any particle assignment
+    // This prevents stealing particles from enemies we haven't processed yet
     const activeEnemyIds = new Set<string>();
+    const activeMinions: EnemyInstance[] = [];
 
     for (const enemy of enemies) {
       if (enemy.type !== 'minion' || !enemy.isActive) continue;
-
       activeEnemyIds.add(enemy.id);
+      activeMinions.push(enemy);
+    }
 
+    // SECOND PASS: Assign/update particles with complete knowledge of active enemies
+    for (const enemy of activeMinions) {
       // Get or assign particle index
       let particleIndex = enemyToParticle.get(enemy.id);
 
@@ -241,7 +246,7 @@ export function createMinionSPS(
           particleIndex = nextParticleIndex++;
           enemyToParticle.set(enemy.id, particleIndex);
         } else {
-          // Reuse a particle from a dead enemy
+          // Reuse a particle from a dead enemy (safe now - activeEnemyIds is complete)
           for (const [id, idx] of enemyToParticle.entries()) {
             if (!activeEnemyIds.has(id)) {
               enemyToParticle.delete(id);
@@ -358,16 +363,35 @@ export function createSimpleMinionSPS(
   sps.setParticles();
 
   const updateParticles = (enemies: EnemyInstance[]) => {
+    // FIRST PASS: Build complete set of active enemy IDs
     const activeIds = new Set<string>();
+    const activeMinions: EnemyInstance[] = [];
 
     for (const enemy of enemies) {
       if (enemy.type !== 'minion' || !enemy.isActive) continue;
       activeIds.add(enemy.id);
+      activeMinions.push(enemy);
+    }
 
+    // SECOND PASS: Assign/update particles
+    for (const enemy of activeMinions) {
       let idx = enemyToParticle.get(enemy.id);
-      if (idx === undefined && nextIndex < maxCount) {
-        idx = nextIndex++;
-        enemyToParticle.set(enemy.id, idx);
+
+      if (idx === undefined) {
+        if (nextIndex < maxCount) {
+          idx = nextIndex++;
+          enemyToParticle.set(enemy.id, idx);
+        } else {
+          // Reuse particle from dead enemy (safe - activeIds is complete)
+          for (const [id, pidx] of enemyToParticle.entries()) {
+            if (!activeIds.has(id)) {
+              enemyToParticle.delete(id);
+              idx = pidx;
+              enemyToParticle.set(enemy.id, idx);
+              break;
+            }
+          }
+        }
       }
 
       if (idx === undefined) continue;
@@ -385,6 +409,7 @@ export function createSimpleMinionSPS(
       }
     }
 
+    // Hide particles for dead enemies
     for (const [id, idx] of enemyToParticle.entries()) {
       if (!activeIds.has(id)) {
         const p = sps.particles[idx];

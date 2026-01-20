@@ -15,13 +15,18 @@
       "recommended": true,
       "correctness": {
         "noUnusedImports": "warn",
-        "noUnusedVariables": "warn"
+        "noUnusedVariables": "warn",
+        "useExhaustiveDependencies": "warn"
       },
       "style": {
         "noNonNullAssertion": "off"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "warn"
+      },
+      "a11y": {
+        "useSemanticElements": "warn"
       }
     }
   },

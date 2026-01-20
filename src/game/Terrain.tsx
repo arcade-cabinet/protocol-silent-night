@@ -1,411 +1,380 @@
 /**
- * Terrain System
- * Christmas-themed procedural terrain with collision-enabled obstacles
- * Data-driven configuration for terrain and obstacles
+ * Terrain System - Simple Procedural Geometry
+ * No external assets - everything renders immediately
  */
 
-import { fbm, noise3D } from '@jbcom/strata';
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { OBSTACLE_TYPES, TERRAIN_CONFIG } from '@/data';
-import { terrainFragmentShader, terrainVertexShader } from '@/shaders/terrain';
+import { OBSTACLE_TYPES } from '@/data';
 import { useGameStore } from '@/store/gameStore';
-import type { ChristmasObstacle } from '@/types';
+import type { ChristmasObjectType, ChristmasObstacle } from '@/types';
+
+const PLAY_AREA = { width: 80, depth: 80 };
+
+// ============================================================================
+// MAIN TERRAIN
+// ============================================================================
 
 export function Terrain() {
-  const meshRef = useRef<THREE.InstancedMesh>(null);
   const setObstacles = useGameStore((state) => state.setObstacles);
-  const playerPosition = useGameStore((state) => state.playerPosition);
+  const obstacleData = useMemo(() => generateObstacles(), []);
 
-  // Create geometry and material
-  const geometry = useMemo(
-    () =>
-      new THREE.BoxGeometry(
-        TERRAIN_CONFIG.cubeSize,
-        TERRAIN_CONFIG.cubeHeight,
-        TERRAIN_CONFIG.cubeSize
-      ),
-    []
-  );
-
-  const material = useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        vertexShader: terrainVertexShader,
-        fragmentShader: terrainFragmentShader,
-        uniforms: {
-          time: { value: 0 },
-        },
-      }),
-    []
-  );
-
-  // Generate Christmas-themed obstacles using Strata's noise functions
-  const { matrices, count, obstacles } = useMemo(() => {
-    const size = TERRAIN_CONFIG.gridSize;
-    const instanceCount = size * size;
-    const matrices: THREE.Matrix4[] = [];
-    const obstacleList: ChristmasObstacle[] = [];
-    const dummy = new THREE.Object3D();
-
-    for (let x = -size / 2; x < size / 2; x++) {
-      for (let z = -size / 2; z < size / 2; z++) {
-        // Reset scale and position for each instance
-        dummy.scale.set(1, 1, 1);
-
-        // Use Strata's noise3D and fbm for procedural height
-        const baseNoise =
-          noise3D(x * TERRAIN_CONFIG.noiseScale, 0, z * TERRAIN_CONFIG.noiseScale) *
-          TERRAIN_CONFIG.heightMultiplier;
-        const detailNoise =
-          fbm(x * TERRAIN_CONFIG.detailNoiseScale, 0, z * TERRAIN_CONFIG.detailNoiseScale, 3) *
-          TERRAIN_CONFIG.detailHeightMultiplier;
-
-        // Combine for final height
-        const h = baseNoise + detailNoise + TERRAIN_CONFIG.baseElevation;
-
-        dummy.position.set(x * TERRAIN_CONFIG.cubeSize, h, z * TERRAIN_CONFIG.cubeSize);
-
-        // Determine Christmas object type using Strata noise
-        const objectTypeNoise = noise3D(x * 0.3, z * 0.3, 42);
-        const isObstacle = noise3D(x * 0.5, z * 0.5, 0);
-
-        if (isObstacle > TERRAIN_CONFIG.obstacleThreshold) {
-          let config = OBSTACLE_TYPES.pillar; // Default
-
-          if (objectTypeNoise > 0.7) {
-            config =
-              objectTypeNoise > 0.85 ? OBSTACLE_TYPES.present_red : OBSTACLE_TYPES.present_green;
-          } else if (objectTypeNoise > 0.4) {
-            config = OBSTACLE_TYPES.tree;
-          } else if (objectTypeNoise > 0) {
-            config = OBSTACLE_TYPES.candy_cane;
-          }
-
-          const hRange = config.heightRange;
-          const obstacleHeight = hRange[0] + Math.random() * (hRange[1] - hRange[0]);
-
-          dummy.position.y = h + (config.yOffset || obstacleHeight / 2);
-
-          // Store obstacle for collision detection
-          obstacleList.push({
-            position: dummy.position.clone(),
-            type: config.type,
-            radius: config.radius,
-            height: obstacleHeight,
-            color: new THREE.Color(config.color),
-          });
-
-          // Apply scale
-          dummy.scale.set(config.scale[0], obstacleHeight / 4, config.scale[2]);
-        }
-
-        dummy.updateMatrix();
-        matrices.push(dummy.matrix.clone());
-      }
-    }
-
-    return { matrices, count: instanceCount, obstacles: obstacleList };
-  }, []);
-
-  // Sync obstacles to store and apply matrices to instanced mesh
   useEffect(() => {
+    const obstacles: ChristmasObstacle[] = obstacleData.map((d) => ({
+      position: new THREE.Vector3(d.x, 0, d.z),
+      type: d.type as ChristmasObjectType,
+      radius: d.radius,
+      height: d.height,
+      color: new THREE.Color(d.color),
+    }));
     setObstacles(obstacles);
-  }, [obstacles, setObstacles]);
-
-  useEffect(() => {
-    if (meshRef.current && typeof meshRef.current.setMatrixAt === 'function') {
-      for (let i = 0; i < matrices.length; i++) {
-        meshRef.current.setMatrixAt(i, matrices[i]);
-      }
-      meshRef.current.instanceMatrix.needsUpdate = true;
-    }
-  }, [matrices]);
-
-  useFrame((state) => {
-    if (material.uniforms) {
-      material.uniforms.time.value = state.clock.elapsedTime;
-    }
-  });
+  }, [obstacleData, setObstacles]);
 
   return (
     <>
-      {/* Main terrain - instanced boxes with Christmas shader */}
-      <instancedMesh
-        ref={meshRef}
-        args={[geometry, material, count]}
-        receiveShadow
-        castShadow
-        frustumCulled={false}
-      />
-
-      {/* Christmas-themed obstacles (rendered as individual meshes for better visual variety) */}
-      {/* Limit rendering to nearby obstacles for performance optimization */}
-      {obstacles
-        .filter((obstacle) => {
-          // Only render obstacles within visible range (~150 units from player)
-          const dx = obstacle.position.x - playerPosition.x;
-          const dz = obstacle.position.z - playerPosition.z;
-          const distSq = dx * dx + dz * dz;
-          return distSq < 150 * 150; // Use squared distance for performance
-        })
-        .map((obstacle) => (
-          <ChristmasObstacleMesh
-            key={`${obstacle.position.x}-${obstacle.position.z}`}
-            obstacle={obstacle}
-          />
-        ))}
-
-      {/* Grid Floor Helper - darker for cyberpunk vibe */}
-      <gridHelper args={[200, 100, 0x001111, 0x000505]} position={[0, -2, 0]} />
+      <Background />
+      <Ground />
+      {obstacleData.map((obs, i) => (
+        <Obstacle key={i} {...obs} />
+      ))}
+      <Boundaries />
     </>
   );
 }
 
-// Individual Christmas obstacle component for visual variety
-function ChristmasObstacleMesh({ obstacle }: { obstacle: ChristmasObstacle }) {
-  const posArray: [number, number, number] = useMemo(
-    () => [obstacle.position.x, obstacle.position.y, obstacle.position.z],
-    [obstacle.position]
-  );
+// ============================================================================
+// BACKGROUND
+// ============================================================================
 
-  // Different renderers for each type
-  if (obstacle.type === 'tree') {
-    return <CyberpunkTree position={posArray} height={obstacle.height} />;
-  }
-
-  if (obstacle.type === 'present') {
-    return <CyberpunkPresent position={posArray} height={obstacle.height} color={obstacle.color} />;
-  }
-
-  if (obstacle.type === 'candy_cane') {
-    return <CyberpunkCandyCane position={posArray} height={obstacle.height} />;
-  }
-
-  if (obstacle.type === 'pillar') {
-    return <CyberpunkPillar position={posArray} height={obstacle.height} />;
-  }
-
-  // Fallback to Present if unknown type (better than just a box)
-  return <CyberpunkPresent position={posArray} height={obstacle.height} color={obstacle.color} />;
-}
-
-// Cyberpunk Christmas Tree - Holographic with neon decorations
-function CyberpunkTree({
-  position,
-  height,
-}: {
-  position: [number, number, number];
-  height: number;
-}) {
+function Background() {
   const groupRef = useRef<THREE.Group>(null);
+  const playerX = useGameStore((s) => s.playerPosition.x);
 
-  useFrame((state) => {
-    if (groupRef.current) {
-      // Subtle sway
-      groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.02;
-    }
+  useFrame(() => {
+    if (groupRef.current) groupRef.current.position.x = -playerX * 0.08;
   });
 
   return (
-    <group ref={groupRef} position={position}>
-      {/* Main tree cone - dark with neon edges */}
-      <mesh castShadow>
-        <coneGeometry args={[1.2, height, 8]} />
-        <meshStandardMaterial
-          color={0x001100}
-          emissive={0x00ff44}
-          emissiveIntensity={0.15}
-          metalness={0.3}
-          roughness={0.8}
-        />
+    <group ref={groupRef}>
+      {/* Moon */}
+      <mesh position={[25, 30, -70]}>
+        <circleGeometry args={[5, 32]} />
+        <meshBasicMaterial color="#ffffdd" />
       </mesh>
 
-      {/* Holographic rings */}
-      {[0.2, 0.4, 0.6, 0.8].map((y, i) => (
-        <mesh
-          key={`ring-${y}`}
-          position={[0, height * y - height / 2, 0]}
-          rotation={[Math.PI / 2, 0, 0]}
-        >
-          <torusGeometry args={[1.1 - y * 0.8, 0.02, 8, 16]} />
-          <meshBasicMaterial color={i % 2 === 0 ? 0x00ffcc : 0xff0066} transparent opacity={0.8} />
+      {/* Stars */}
+      {[...Array(40)].map((_, i) => (
+        <mesh key={i} position={[(i - 20) * 4, 15 + (i % 5) * 4, -65]}>
+          <circleGeometry args={[0.15, 6]} />
+          <meshBasicMaterial color="#ffffff" />
         </mesh>
       ))}
 
-      {/* Star on top */}
-      <mesh position={[0, height / 2 + 0.3, 0]}>
-        <octahedronGeometry args={[0.2]} />
-        <meshBasicMaterial color={0xffd700} />
-      </mesh>
+      {/* Mountains */}
+      {[-50, -20, 10, 40].map((x, i) => (
+        <mesh key={i} position={[x, 0, -55]} rotation={[0, 0, 0]}>
+          <coneGeometry args={[12 + i * 2, 18 + i * 3, 4]} />
+          <meshBasicMaterial color={`hsl(200, 30%, ${8 + i * 2}%)`} />
+        </mesh>
+      ))}
 
-      {/* Ornament lights */}
-      {[0, 1, 2].map((i) => {
-        const angle = (i / 3) * Math.PI * 2;
-        const y = 0.3 + i * 0.25;
-        const r = 0.8 - i * 0.2;
-        return (
-          <mesh
-            key={`ornament-${i}`}
-            position={[Math.cos(angle) * r, y * height - height / 2, Math.sin(angle) * r]}
-          >
-            <sphereGeometry args={[0.1, 8, 8]} />
-            <meshBasicMaterial color={[0xff0044, 0x00ffcc, 0xffd700][i]} />
+      {/* Far trees */}
+      {[-45, -25, -5, 15, 35, 55].map((x, i) => (
+        <group key={i} position={[x, 0, -45]}>
+          <mesh position={[0, 5, 0]}>
+            <coneGeometry args={[2.5, 10, 8]} />
+            <meshBasicMaterial color="#0a2030" />
           </mesh>
-        );
-      })}
+          <mesh position={[0, 0.5, 0]}>
+            <cylinderGeometry args={[0.3, 0.4, 1]} />
+            <meshBasicMaterial color="#1a1008" />
+          </mesh>
+        </group>
+      ))}
     </group>
   );
 }
 
-// Cyberpunk Present - Glowing gift box with circuit patterns
-function CyberpunkPresent({
-  position,
-  height,
-  color,
-}: {
-  position: [number, number, number];
-  height: number;
-  color: THREE.Color;
-}) {
-  const boxRef = useRef<THREE.Mesh>(null);
+// ============================================================================
+// GROUND
+// ============================================================================
 
-  useFrame((state) => {
-    if (boxRef.current) {
-      const pulse = Math.sin(state.clock.elapsedTime * 3 + position[0] + position[2]) * 0.1 + 0.9;
-      boxRef.current.scale.setScalar(pulse);
+function Ground() {
+  return (
+    <group>
+      {/* Main ground */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+        <planeGeometry args={[120, 120]} />
+        <meshStandardMaterial color="#0a1520" roughness={0.9} metalness={0.1} />
+      </mesh>
+
+      {/* Grid */}
+      <gridHelper args={[100, 50, 0x002233, 0x001122]} position={[0, -0.45, 0]} />
+
+      {/* Boundary ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
+        <ringGeometry args={[38, 40, 64]} />
+        <meshBasicMaterial color="#00ffcc" transparent opacity={0.2} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
+
+// ============================================================================
+// OBSTACLES
+// ============================================================================
+
+interface ObstacleProps {
+  x: number;
+  z: number;
+  type: string;
+  color: string;
+  height: number;
+  radius: number;
+  rotation: number;
+}
+
+function Obstacle({ x, z, type, color, height, rotation }: ObstacleProps) {
+  switch (type) {
+    case 'tree':
+      return (
+        <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+          <mesh position={[0, height / 2, 0]} castShadow>
+            <coneGeometry args={[1.5, height, 8]} />
+            <meshStandardMaterial color="#0f4f2f" emissive="#001f0f" emissiveIntensity={0.2} />
+          </mesh>
+          <mesh position={[0, 0.5, 0]} castShadow>
+            <cylinderGeometry args={[0.3, 0.4, 1]} />
+            <meshStandardMaterial color="#3d2817" />
+          </mesh>
+        </group>
+      );
+
+    case 'present':
+      return (
+        <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+          <mesh position={[0, 0.75, 0]} castShadow>
+            <boxGeometry args={[1.2, 1.5, 1.2]} />
+            <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+          </mesh>
+          <mesh position={[0, 1.55, 0]} castShadow>
+            <boxGeometry args={[0.3, 0.1, 1.4]} />
+            <meshStandardMaterial color="#ffdd00" />
+          </mesh>
+          <mesh position={[0, 1.55, 0]} castShadow>
+            <boxGeometry args={[1.4, 0.1, 0.3]} />
+            <meshStandardMaterial color="#ffdd00" />
+          </mesh>
+        </group>
+      );
+
+    case 'candy_cane':
+      return (
+        <group position={[x, 0, z]} rotation={[0, rotation, 0.15]}>
+          <mesh position={[0, 2, 0]} castShadow>
+            <cylinderGeometry args={[0.15, 0.15, 4]} />
+            <meshStandardMaterial color="#ff3333" emissive="#ff0000" emissiveIntensity={0.2} />
+          </mesh>
+          <mesh position={[0.3, 3.8, 0]} rotation={[0, 0, -Math.PI / 3]} castShadow>
+            <cylinderGeometry args={[0.15, 0.15, 1]} />
+            <meshStandardMaterial color="#ffffff" />
+          </mesh>
+        </group>
+      );
+
+    case 'snowman':
+      return (
+        <group position={[x, 0, z]} rotation={[0, rotation, 0]}>
+          <mesh position={[0, 0.8, 0]} castShadow>
+            <sphereGeometry args={[0.8, 16, 16]} />
+            <meshStandardMaterial color="#f0f0f0" />
+          </mesh>
+          <mesh position={[0, 1.9, 0]} castShadow>
+            <sphereGeometry args={[0.55, 16, 16]} />
+            <meshStandardMaterial color="#f0f0f0" />
+          </mesh>
+          <mesh position={[0, 2.7, 0]} castShadow>
+            <sphereGeometry args={[0.4, 16, 16]} />
+            <meshStandardMaterial color="#f0f0f0" />
+          </mesh>
+          <mesh position={[0, 3.2, 0]} castShadow>
+            <cylinderGeometry args={[0.3, 0.4, 0.4]} />
+            <meshStandardMaterial color="#111111" />
+          </mesh>
+        </group>
+      );
+
+    case 'rock':
+      return (
+        <mesh position={[x, 0.6, z]} rotation={[0.1, rotation, 0.1]} castShadow>
+          <dodecahedronGeometry args={[1.2, 0]} />
+          <meshStandardMaterial color="#3a3a3a" roughness={1} />
+        </mesh>
+      );
+
+    default:
+      return (
+        <mesh position={[x, 1, z]} castShadow>
+          <boxGeometry args={[1, 2, 1]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+      );
+  }
+}
+
+// ============================================================================
+// BOUNDARIES
+// ============================================================================
+
+function Boundaries() {
+  const half = PLAY_AREA.width / 2 - 2;
+  const corners = [
+    [-half, half],
+    [half, half],
+    [-half, -half],
+    [half, -half],
+  ];
+
+  return (
+    <>
+      {corners.map(([x, z], i) => (
+        <group key={i} position={[x, 0, z]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.3, 0.4, 6, 6]} />
+            <meshStandardMaterial
+              color="#001111"
+              emissive="#00ffcc"
+              emissiveIntensity={0.3}
+              metalness={0.8}
+              roughness={0.2}
+            />
+          </mesh>
+          <mesh position={[0, 3, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.5, 0.05, 8, 16]} />
+            <meshBasicMaterial color="#00ffcc" />
+          </mesh>
+        </group>
+      ))}
+    </>
+  );
+}
+
+// ============================================================================
+// OBSTACLE GENERATION
+// ============================================================================
+
+interface GeneratedObstacle {
+  x: number;
+  z: number;
+  type: string;
+  color: string;
+  height: number;
+  radius: number;
+  rotation: number;
+}
+
+function generateObstacles(): GeneratedObstacle[] {
+  const obstacles: GeneratedObstacle[] = [];
+  const occupied: [number, number][] = [];
+
+  const isValid = (x: number, z: number) => {
+    if (Math.abs(x) < 12 && Math.abs(z) < 12) return false;
+    for (const [ox, oz] of occupied) {
+      if (Math.sqrt((x - ox) ** 2 + (z - oz) ** 2) < 8) return false;
     }
-  });
+    return true;
+  };
 
-  const colorHex = color.getHex();
+  const getPos = (): [number, number] | null => {
+    for (let i = 0; i < 50; i++) {
+      const x = (Math.random() - 0.5) * 70;
+      const z = (Math.random() - 0.5) * 70;
+      if (isValid(x, z)) return [x, z];
+    }
+    return null;
+  };
 
-  return (
-    <group position={position}>
-      {/* Main box */}
-      <mesh ref={boxRef} castShadow>
-        <boxGeometry args={[1.5, height, 1.5]} />
-        <meshStandardMaterial
-          color={colorHex}
-          emissive={colorHex}
-          emissiveIntensity={0.3}
-          metalness={0.5}
-          roughness={0.3}
-        />
-      </mesh>
+  // Trees
+  for (let i = 0; i < 12; i++) {
+    const pos = getPos();
+    if (!pos) continue;
+    occupied.push(pos);
+    obstacles.push({
+      x: pos[0],
+      z: pos[1],
+      type: 'tree',
+      color: String(OBSTACLE_TYPES.tree.color),
+      height: 5 + Math.random() * 3,
+      radius: OBSTACLE_TYPES.tree.radius,
+      rotation: Math.random() * Math.PI * 2,
+    });
+  }
 
-      {/* Ribbon cross - vertical - Made thicker for better visibility */}
-      <mesh position={[0, 0, 0.76]}>
-        <boxGeometry args={[0.4, height + 0.1, 0.05]} />
-        <meshBasicMaterial color={0xffd700} />
-      </mesh>
-      <mesh position={[0, 0, -0.76]}>
-        <boxGeometry args={[0.4, height + 0.1, 0.05]} />
-        <meshBasicMaterial color={0xffd700} />
-      </mesh>
+  // Presents
+  for (let i = 0; i < 10; i++) {
+    const pos = getPos();
+    if (!pos) continue;
+    occupied.push(pos);
+    const isGreen = Math.random() > 0.5;
+    obstacles.push({
+      x: pos[0],
+      z: pos[1],
+      type: 'present',
+      color: isGreen ? '#22cc44' : '#cc2244',
+      height: 1.5,
+      radius: OBSTACLE_TYPES.present_red.radius,
+      rotation: Math.random() * Math.PI * 2,
+    });
+  }
 
-      {/* Ribbon cross - horizontal - Made thicker for better visibility */}
-      <mesh position={[0.76, 0, 0]}>
-        <boxGeometry args={[0.05, height + 0.1, 0.4]} />
-        <meshBasicMaterial color={0xffd700} />
-      </mesh>
-      <mesh position={[-0.76, 0, 0]}>
-        <boxGeometry args={[0.05, height + 0.1, 0.4]} />
-        <meshBasicMaterial color={0xffd700} />
-      </mesh>
+  // Candy canes
+  for (let i = 0; i < 8; i++) {
+    const pos = getPos();
+    if (!pos) continue;
+    occupied.push(pos);
+    obstacles.push({
+      x: pos[0],
+      z: pos[1],
+      type: 'candy_cane',
+      color: String(OBSTACLE_TYPES.candy_cane.color),
+      height: 4,
+      radius: OBSTACLE_TYPES.candy_cane.radius,
+      rotation: Math.random() * Math.PI * 2,
+    });
+  }
 
-      {/* Bow on top */}
-      <mesh position={[0, height / 2 + 0.2, 0]}>
-        <torusGeometry args={[0.15, 0.05, 8, 16]} />
-        <meshBasicMaterial color={0xffd700} />
-      </mesh>
-    </group>
-  );
-}
+  // Snowmen
+  for (let i = 0; i < 3; i++) {
+    const pos = getPos();
+    if (!pos) continue;
+    occupied.push(pos);
+    obstacles.push({
+      x: pos[0],
+      z: pos[1],
+      type: 'snowman',
+      color: '#ffffff',
+      height: 3,
+      radius: 1.2,
+      rotation: Math.random() * Math.PI * 2,
+    });
+  }
 
-// Cyberpunk Candy Cane - Neon striped pole
-function CyberpunkCandyCane({
-  position,
-  height,
-}: {
-  position: [number, number, number];
-  height: number;
-}) {
-  return (
-    <group position={position}>
-      {/* Main pole */}
-      <mesh castShadow>
-        <cylinderGeometry args={[0.15, 0.15, height, 8]} />
-        <meshStandardMaterial
-          color={0x110011}
-          emissive={0xff0066}
-          emissiveIntensity={0.2}
-          metalness={0.7}
-          roughness={0.3}
-        />
-      </mesh>
+  // Rocks
+  for (let i = 0; i < 6; i++) {
+    const pos = getPos();
+    if (!pos) continue;
+    occupied.push(pos);
+    obstacles.push({
+      x: pos[0],
+      z: pos[1],
+      type: 'rock',
+      color: '#555555',
+      height: 2,
+      radius: 1.5,
+      rotation: Math.random() * Math.PI * 2,
+    });
+  }
 
-      {/* Neon stripes */}
-      {Array.from({ length: Math.floor(height / 0.5) }, (_, i) => {
-        const yPos = -height / 2 + 0.25 + i * 0.5;
-        return (
-          <mesh key={`stripe-${yPos}`} position={[0, yPos, 0]}>
-            <torusGeometry args={[0.16, 0.03, 8, 16]} />
-            <meshBasicMaterial color={i % 2 === 0 ? 0xff0066 : 0xffffff} />
-          </mesh>
-        );
-      })}
-
-      {/* Top hook (simplified) */}
-      <mesh position={[0.15, height / 2, 0]} rotation={[0, 0, Math.PI / 4]}>
-        <torusGeometry args={[0.15, 0.05, 8, 8, Math.PI]} />
-        <meshBasicMaterial color={0xff0066} />
-      </mesh>
-    </group>
-  );
-}
-
-// Cyberpunk Pillar - Tech monolith with scanlines
-function CyberpunkPillar({
-  position,
-  height,
-}: {
-  position: [number, number, number];
-  height: number;
-}) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  return (
-    <group ref={groupRef} position={position}>
-      {/* Main pillar */}
-      <mesh castShadow>
-        <cylinderGeometry args={[0.6, 0.8, height, 6]} />
-        <meshStandardMaterial
-          color={0x001111}
-          emissive={0x00ffcc}
-          emissiveIntensity={0.15}
-          metalness={0.9}
-          roughness={0.1}
-        />
-      </mesh>
-
-      {/* Data rings */}
-      {[0.2, 0.5, 0.8].map((y, i) => (
-        <mesh
-          key={`data-${y}`}
-          position={[0, height * y - height / 2, 0]}
-          rotation={[Math.PI / 2, 0, 0]}
-        >
-          <torusGeometry args={[0.7 + i * 0.05, 0.02, 8, 16]} />
-          <meshBasicMaterial color={0x00ffcc} transparent opacity={0.6} />
-        </mesh>
-      ))}
-
-      {/* Top cap with light */}
-      <mesh position={[0, height / 2, 0]}>
-        <cylinderGeometry args={[0.5, 0.6, 0.2, 6]} />
-        <meshStandardMaterial color={0x002222} emissive={0x00ffcc} emissiveIntensity={0.5} />
-      </mesh>
-    </group>
-  );
+  return obstacles;
 }

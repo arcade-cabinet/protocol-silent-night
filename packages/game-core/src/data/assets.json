@@ -1,0 +1,297 @@
+{
+  "$schema": "./schemas/assets.schema.json",
+  "version": "1.0.0",
+  "description": "Protocol: Silent Night asset manifest - scalable content pipeline",
+
+  "characters": {
+    "santa": {
+      "id": "santa",
+      "name": "CYBER-SANTA",
+      "model": {
+        "type": "glb",
+        "path": "characters/santa.glb",
+        "fallback": "procedural",
+        "scale": 1.0
+      },
+      "textures": {
+        "diffuse": "characters/textures/santa_diffuse.png",
+        "normal": "characters/textures/santa_normal.png",
+        "emissive": "characters/textures/santa_emissive.png"
+      },
+      "animations": {
+        "idle": "animations/santa_idle.glb",
+        "run": "animations/santa_run.glb",
+        "attack": "animations/santa_attack.glb",
+        "death": "animations/santa_death.glb"
+      },
+      "sounds": {
+        "footstep": "audio/sfx/footstep_heavy.ogg",
+        "attack": "audio/sfx/laser_heavy.ogg",
+        "hurt": "audio/sfx/grunt_santa.ogg",
+        "death": "audio/sfx/death_santa.ogg"
+      },
+      "portrait": "ui/portraits/santa.png"
+    },
+    "elf": {
+      "id": "elf",
+      "name": "CYBER-ELF",
+      "model": {
+        "type": "glb",
+        "path": "characters/cyberelf.glb",
+        "fallback": "procedural",
+        "scale": 0.8
+      },
+      "textures": {
+        "diffuse": "characters/textures/elf_diffuse.png",
+        "normal": "characters/textures/elf_normal.png",
+        "emissive": "characters/textures/elf_emissive.png"
+      },
+      "animations": {
+        "idle": "animations/elf_idle.glb",
+        "run": "animations/elf_run.glb",
+        "attack": "animations/elf_attack.glb",
+        "death": "animations/elf_death.glb"
+      },
+      "sounds": {
+        "footstep": "audio/sfx/footstep_light.ogg",
+        "attack": "audio/sfx/laser_rapid.ogg",
+        "hurt": "audio/sfx/grunt_elf.ogg",
+        "death": "audio/sfx/death_elf.ogg"
+      },
+      "portrait": "ui/portraits/elf.png"
+    },
+    "bumble": {
+      "id": "bumble",
+      "name": "CYBER-BUMBLE",
+      "model": {
+        "type": "glb",
+        "path": "characters/bumble.glb",
+        "fallback": "procedural",
+        "scale": 1.5
+      },
+      "textures": {
+        "diffuse": "characters/textures/bumble_diffuse.png",
+        "normal": "characters/textures/bumble_normal.png",
+        "emissive": "characters/textures/bumble_emissive.png"
+      },
+      "animations": {
+        "idle": "animations/bumble_idle.glb",
+        "run": "animations/bumble_run.glb",
+        "attack": "animations/bumble_attack.glb",
+        "death": "animations/bumble_death.glb"
+      },
+      "sounds": {
+        "footstep": "audio/sfx/footstep_stomp.ogg",
+        "attack": "audio/sfx/melee_smash.ogg",
+        "hurt": "audio/sfx/grunt_bumble.ogg",
+        "death": "audio/sfx/death_bumble.ogg"
+      },
+      "portrait": "ui/portraits/bumble.png"
+    }
+  },
+
+  "enemies": {
+    "minion": {
+      "id": "minion",
+      "name": "Corrupted Automaton",
+      "model": {
+        "type": "glb",
+        "path": "enemies/minion.glb",
+        "fallback": "procedural",
+        "scale": 0.7
+      },
+      "variants": ["red", "blue", "green"],
+      "sounds": {
+        "spawn": "audio/sfx/enemy_spawn.ogg",
+        "attack": "audio/sfx/enemy_attack.ogg",
+        "death": "audio/sfx/enemy_death.ogg"
+      }
+    },
+    "boss": {
+      "id": "boss",
+      "name": "Frost Core AI",
+      "model": {
+        "type": "glb",
+        "path": "enemies/frost_boss.glb",
+        "fallback": "procedural",
+        "scale": 3.0
+      },
+      "phases": 3,
+      "sounds": {
+        "intro": "audio/sfx/boss_intro.ogg",
+        "attack": "audio/sfx/boss_attack.ogg",
+        "phase_change": "audio/sfx/boss_phase.ogg",
+        "death": "audio/sfx/boss_death.ogg"
+      }
+    }
+  },
+
+  "weapons": {
+    "plasma_shotgun": {
+      "id": "plasma_shotgun",
+      "model": "weapons/shotgun.glb",
+      "projectile": {
+        "type": "spread",
+        "count": 5,
+        "color": "#ff4444",
+        "trail": true
+      },
+      "sounds": {
+        "fire": "audio/sfx/shotgun_fire.ogg",
+        "reload": "audio/sfx/shotgun_reload.ogg",
+        "empty": "audio/sfx/weapon_empty.ogg"
+      }
+    },
+    "plasma_smg": {
+      "id": "plasma_smg",
+      "model": "weapons/smg.glb",
+      "projectile": {
+        "type": "rapid",
+        "color": "#00ff66",
+        "trail": true
+      },
+      "sounds": {
+        "fire": "audio/sfx/smg_fire.ogg",
+        "reload": "audio/sfx/smg_reload.ogg"
+      }
+    },
+    "frost_fists": {
+      "id": "frost_fists",
+      "model": null,
+      "projectile": {
+        "type": "melee",
+        "color": "#66ccff",
+        "aoe": true
+      },
+      "sounds": {
+        "swing": "audio/sfx/fist_swing.ogg",
+        "impact": "audio/sfx/fist_impact.ogg"
+      }
+    }
+  },
+
+  "levels": {
+    "level_01": {
+      "id": "level_01",
+      "name": "Frozen Warehouse",
+      "terrain": {
+        "type": "procedural",
+        "config": "terrain_warehouse"
+      },
+      "environment": {
+        "skybox": "night_industrial",
+        "fog": {
+          "color": "#0a0a1a",
+          "density": 0.02
+        },
+        "ambient": "#1a1a2a"
+      },
+      "waves": 5,
+      "boss": false,
+      "music": "audio/music/level_01_ambient.ogg"
+    },
+    "level_02": {
+      "id": "level_02",
+      "name": "Corrupted Factory",
+      "terrain": {
+        "type": "procedural",
+        "config": "terrain_factory"
+      },
+      "environment": {
+        "skybox": "night_clouds",
+        "fog": {
+          "color": "#1a0a0a",
+          "density": 0.03
+        },
+        "ambient": "#2a1a1a"
+      },
+      "waves": 7,
+      "boss": false,
+      "music": "audio/music/level_02_tension.ogg"
+    },
+    "level_boss": {
+      "id": "level_boss",
+      "name": "Core Chamber",
+      "terrain": {
+        "type": "arena",
+        "config": "terrain_boss_arena"
+      },
+      "environment": {
+        "skybox": "environment_blue",
+        "fog": {
+          "color": "#0a1020",
+          "density": 0.01
+        },
+        "ambient": "#1a2030"
+      },
+      "waves": 0,
+      "boss": true,
+      "music": "audio/music/boss_battle.ogg"
+    }
+  },
+
+  "ui": {
+    "sounds": {
+      "click": "audio/ui/click.ogg",
+      "click_alt": "audio/ui/click-alt.ogg",
+      "hover": "audio/ui/hover.ogg",
+      "hover_alt": "audio/ui/hover-alt.ogg",
+      "confirm": "audio/ui/confirm.ogg",
+      "cancel": "audio/ui/cancel.ogg",
+      "toggle": "audio/ui/toggle.ogg",
+      "select": "audio/ui/select.ogg",
+      "victory": "audio/jingles/victory.ogg",
+      "defeat": "audio/jingles/defeat.ogg",
+      "level_complete": "audio/jingles/level-complete.ogg",
+      "boss_intro": "audio/jingles/boss-intro.ogg",
+      "wave_complete": "audio/jingles/wave-complete.ogg",
+      "achievement": "audio/jingles/achievement.ogg",
+      "fanfare": "audio/jingles/fanfare.ogg"
+    }
+  },
+
+  "materials": {
+    "metal": {
+      "Metal001": "materials/Metal001",
+      "Metal008": "materials/Metal008",
+      "Metal015": "materials/Metal015",
+      "Metal030": "materials/Metal030"
+    },
+    "concrete": {
+      "Concrete003": "materials/Concrete003",
+      "Concrete015": "materials/Concrete015",
+      "Concrete025": "materials/Concrete025"
+    }
+  },
+
+  "skyboxes": {
+    "night_clear": "skyboxes/EveningSkyHDRI001A_1K",
+    "night_clouds": "skyboxes/EveningSkyHDRI005A_1K",
+    "night_industrial": "skyboxes/EveningSkyHDRI010A_1K",
+    "environment_dark": "skyboxes/EveningEnvironmentHDRI001_1K",
+    "environment_blue": "skyboxes/EveningEnvironmentHDRI003_1K"
+  },
+
+  "external_sources": {
+    "kenney": {
+      "base_path": "~/assets/Kenney",
+      "license": "CC0",
+      "categories": ["Audio", "UI assets", "3D assets"]
+    },
+    "kaykit": {
+      "base_path": "~/assets/KayKit_Adventurers_1.0_EXTRA",
+      "license": "KayKit License",
+      "categories": ["Characters", "Assets"]
+    },
+    "quaternius": {
+      "base_path": "~/assets/Quaternius",
+      "license": "CC0",
+      "categories": ["Medieval", "Nature", "Characters and Animals"]
+    },
+    "ambientcg": {
+      "base_path": "~/assets/AmbientCG",
+      "license": "CC0",
+      "categories": ["HDRI", "Materials", "PBR Textures"]
+    }
+  }
+}

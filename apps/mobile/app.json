@@ -5,46 +5,28 @@
     "version": "1.0.0",
     "orientation": "landscape",
     "icon": "./assets/icon.png",
-    "scheme": "protocol-silent-night",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0a0a1a"
+      "backgroundColor": "#0a0a0f"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jbcom.protocolsilentnight",
-      "buildNumber": "1.0.0",
-      "requireFullScreen": true,
-      "config": {
-        "usesNonExemptEncryption": false
-      }
+      "bundleIdentifier": "com.jbcom.protocolsilentnight"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0a0a1a"
+        "backgroundColor": "#0a0a0f"
       },
-      "package": "com.jbcom.protocolsilentnight",
-      "versionCode": 1
+      "package": "com.jbcom.protocolsilentnight"
     },
     "plugins": [
-      "expo-router",
-      "expo-font",
-      "expo-haptics"
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "protocol-silent-night"
-      }
     }
   }
 }

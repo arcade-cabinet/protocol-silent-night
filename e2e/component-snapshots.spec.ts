@@ -6,13 +6,23 @@ import { selectCharacterAndStartMission, captureGameplaySnapshot } from './test-
  *
  * Tests individual 3D game components and their rendering
  * using Playwright's visual comparison capabilities
+ *
+ * Requires: PLAYWRIGHT_MCP=true for WebGL/canvas rendering
  */
+
+// Check if running with full MCP capabilities
+const hasMcpSupport = process.env.PLAYWRIGHT_MCP === 'true';
 
 const VISUAL_THRESHOLD = 0.3; // 30% diff tolerance for WebGL rendering variations in CI
 
 test.describe('Component Snapshots - 3D Character Rendering', () => {
   // Increase timeout for all tests in this suite due to WebGL rendering
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render Santa character model', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -49,6 +59,11 @@ test.describe('Component Snapshots - 3D Character Rendering', () => {
 
 test.describe('Component Snapshots - Terrain and Environment', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render terrain correctly', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -81,6 +96,11 @@ test.describe('Component Snapshots - Terrain and Environment', () => {
 
 test.describe('Component Snapshots - Enemy Rendering', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render enemies when spawned', async ({ page }) => {
     await captureGameplaySnapshot(page, /MECHA-SANTA/, 'enemies-spawned.png', {
       preSnapshotWait: 10000, // Extra wait for enemy spawns
@@ -111,6 +131,11 @@ test.describe('Component Snapshots - Enemy Rendering', () => {
 
 test.describe('Component Snapshots - Weapon Effects', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render Santa cannon weapon', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -165,6 +190,11 @@ test.describe('Component Snapshots - Weapon Effects', () => {
 
 test.describe('Component Snapshots - Particle Effects', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render hit particles on impact', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);
@@ -189,6 +219,11 @@ test.describe('Component Snapshots - Particle Effects', () => {
 
 test.describe('Component Snapshots - Camera System', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render correct camera perspective', async ({ page }) => {
     await captureGameplaySnapshot(page, /MECHA-SANTA/, 'camera-perspective.png');
   });
@@ -219,6 +254,11 @@ test.describe('Component Snapshots - Camera System', () => {
 
 test.describe('Component Snapshots - UI Overlays', () => {
   test.setTimeout(120000); // Increased for WebGL rendering + screenshot stabilization
+
+  test.beforeEach(async () => {
+    test.skip(!hasMcpSupport, 'Requires WebGL/MCP support');
+  });
+
   test('should render damage flash effect', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(3000);

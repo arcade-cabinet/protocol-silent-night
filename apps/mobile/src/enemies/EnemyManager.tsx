@@ -154,6 +154,15 @@ export function createEnemyManager(
    * Spawn a new enemy
    */
   const spawn = (type: 'minion' | 'boss', position: Vector3): string => {
+    // Guard: prevent spawning multiple bosses
+    if (type === 'boss' && bossId !== null) {
+      const existingBoss = enemies.get(bossId);
+      if (existingBoss?.isActive) {
+        console.warn('Boss already exists, ignoring spawn request');
+        return bossId; // Return existing boss ID instead of creating duplicate
+      }
+    }
+
     const id = generateId();
     const baseConfig = type === 'minion' ? config.minion : config.boss;
 
@@ -174,6 +183,11 @@ export function createEnemyManager(
     if (type === 'boss') {
       enemy.phase = 'chase';
       enemy.phaseTime = 0;
+
+      // Dispose old boss mesh if somehow exists (defensive cleanup)
+      if (bossMesh) {
+        bossMesh.dispose();
+      }
 
       // Create boss mesh
       bossMesh = createBossMesh(scene);

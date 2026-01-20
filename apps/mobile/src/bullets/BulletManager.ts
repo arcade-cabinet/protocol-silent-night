@@ -239,8 +239,8 @@ export function createBulletManager(
       damage,
     };
 
-    // Normalize direction and calculate velocity
-    const normalizedDir = direction.normalize();
+    // Normalize direction and calculate velocity (clone to avoid mutating input)
+    const normalizedDir = direction.clone().normalize();
     const velocity = normalizedDir.scale(bulletConfig.speed);
 
     // Create bullet instance
@@ -277,8 +277,8 @@ export function createBulletManager(
   ): string[] => {
     const ids: string[] = [];
 
-    // Normalize base direction
-    const baseDir = direction.normalize();
+    // Normalize base direction (clone to avoid mutating input)
+    const baseDir = direction.clone().normalize();
 
     // Calculate angle between each projectile
     const angleStep = spreadAngle / (count - 1);

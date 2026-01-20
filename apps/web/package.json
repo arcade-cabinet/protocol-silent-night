@@ -1,0 +1,25 @@
+{
+  "name": "@protocol-silent-night/web",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^7.0.0",
+    "@babylonjs/gui": "^7.0.0",
+    "@babylonjs/loaders": "^7.0.0",
+    "@protocol-silent-night/game-core": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.3.5"
+  }
+}

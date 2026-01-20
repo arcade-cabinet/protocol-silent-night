@@ -7,7 +7,7 @@ import { STORY_A_PROMPT, STORY_B_PROMPT, STORY_C_PROMPT } from '../prompts';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function generateArc(model: any, prompt: string, arcName: string) {
+async function generateArc(model: GoogleGenerativeAI, prompt: string, arcName: string) {
   console.log(`Generating ${arcName}...`);
   try {
     const result = await model.generateContent(prompt);

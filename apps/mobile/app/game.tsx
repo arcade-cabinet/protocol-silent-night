@@ -40,7 +40,7 @@ export default function GameScreen() {
       initializePlayer(validClassType, selectedClass.hp);
     } else {
       // Fallback to santa if somehow invalid
-      const fallbackClass = PLAYER_CLASSES['santa'];
+      const fallbackClass = PLAYER_CLASSES.santa;
       initializePlayer('santa', fallbackClass.hp);
     }
 

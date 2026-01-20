@@ -112,9 +112,9 @@ describe('Terrain Loaders', () => {
 
   it('should load terrain config', () => {
     const config = loadTerrainConfig();
-    expect(config.gridSize).toBe(80);
-    expect(config.cubeSize).toBe(1.8);
-    expect(config.noiseScale).toBe(0.1);
+    expect(config.gridSize).toBe(40);
+    expect(config.cubeSize).toBe(2.5);
+    expect(config.noiseScale).toBe(0.02);
   });
 
   it('should load obstacles', () => {

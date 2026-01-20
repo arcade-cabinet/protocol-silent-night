@@ -75,12 +75,6 @@ export interface GestureHandlerProps {
   disabled?: boolean;
 }
 
-// Spring config for smooth animations
-const _SPRING_CONFIG = {
-  damping: 20,
-  stiffness: 200,
-  mass: 0.5,
-};
 
 /**
  * GestureHandler component
@@ -124,7 +118,7 @@ export function GestureHandler({
   children,
   style,
   disabled = false,
-}: GestureHandlerProps): JSX.Element {
+}: GestureHandlerProps): React.ReactNode {
   // Track base scale for pinch
   const baseScale = useSharedValue(1);
   const currentScale = useSharedValue(1);
@@ -263,7 +257,6 @@ export function GestureHandler({
   return (
     <GestureHandlerRootView style={[styles.container, style]}>
       <GestureDetector gesture={composedGestures}>
-        {/* @ts-expect-error React 19 type compatibility with react-native-reanimated */}
         <Animated.View style={styles.content}>{children}</Animated.View>
       </GestureDetector>
     </GestureHandlerRootView>

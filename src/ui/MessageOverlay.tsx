@@ -27,7 +27,7 @@ export function MessageOverlay() {
     }
   }, [bossActive, state]);
 
-  // Show win/lose messages
+  // Show win/lose messages - clear when returning to gameplay
   useEffect(() => {
     if (state === 'WIN') {
       setMessage('✓ MISSION COMPLETE ✓');
@@ -35,8 +35,13 @@ export function MessageOverlay() {
     } else if (state === 'GAME_OVER') {
       setMessage('✗ OPERATOR DOWN ✗');
       setVisible(true);
+    } else if (state !== 'PHASE_BOSS' || !bossActive) {
+      // Clear message when returning to menu or gameplay states
+      // But don't clear if we're showing boss warning
+      setVisible(false);
+      setMessage(null);
     }
-  }, [state]);
+  }, [state, bossActive]);
 
   if (!message || !visible) return null;
 

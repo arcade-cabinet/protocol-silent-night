@@ -11,6 +11,7 @@
  * - Smooth visual feedback
  */
 
+import type React from 'react';
 import { useCallback, useRef, useState } from 'react';
 import { View, StyleSheet, PanResponder, type LayoutChangeEvent } from 'react-native';
 import Animated, {
@@ -83,7 +84,7 @@ export function VirtualJoystick({
   baseColor = 'rgba(255, 255, 255, 0.2)',
   stickColor = 'rgba(0, 255, 102, 0.8)',
   disabled = false,
-}: VirtualJoystickProps): JSX.Element {
+}: VirtualJoystickProps): React.ReactNode {
   const [isActive, setIsActive] = useState(false);
 
   // Animated values for stick position
@@ -167,19 +168,20 @@ export function VirtualJoystick({
       onStartShouldSetPanResponder: () => !disabled,
       onMoveShouldSetPanResponder: () => !disabled,
 
-      onPanResponderGrant: (_, gestureState) => {
+      onPanResponderGrant: (event) => {
         setIsActive(true);
         scale.value = withSpring(1.1, SPRING_CONFIG);
 
-        const { x, y } = calculateValues(gestureState.x0, gestureState.y0);
+        // Use nativeEvent for view-relative coordinates on initial touch
+        const { locationX, locationY } = event.nativeEvent;
+        const { x, y } = calculateValues(locationX, locationY);
         onMove(x, y);
       },
 
-      onPanResponderMove: (_, gestureState) => {
-        const { x, y } = calculateValues(
-          gestureState.moveX - baseLayout.current.x,
-          gestureState.moveY - baseLayout.current.y
-        );
+      onPanResponderMove: (event) => {
+        // Use nativeEvent for view-relative coordinates
+        const { locationX, locationY } = event.nativeEvent;
+        const { x, y } = calculateValues(locationX, locationY);
         onMove(x, y);
       },
 
@@ -247,7 +249,6 @@ export function VirtualJoystick({
       />
 
       {/* Stick */}
-      {/* @ts-expect-error React 19 type compatibility with react-native-reanimated */}
       <Animated.View
         style={[
           styles.stick,
