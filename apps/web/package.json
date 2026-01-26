@@ -8,16 +8,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@babylonjs/core": "^7.0.0",
-    "@babylonjs/gui": "^7.0.0",
-    "@babylonjs/loaders": "^7.0.0",
+    "@babylonjs/core": "^8.47.0",
+    "@babylonjs/gui": "^8.47.0",
+    "@babylonjs/loaders": "^8.47.0",
     "@protocol-silent-night/game-core": "workspace:*",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.5.0",
     "typescript": "^5.7.3",
     "vite": "^6.3.5"

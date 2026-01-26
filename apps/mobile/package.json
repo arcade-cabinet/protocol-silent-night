@@ -10,22 +10,22 @@
     "build:android": "eas build -p android"
   },
   "dependencies": {
-    "@babylonjs/core": "^7.0.0",
-    "@babylonjs/gui": "^7.0.0",
-    "@babylonjs/loaders": "^7.0.0",
+    "@babylonjs/core": "^8.47.0",
+    "@babylonjs/gui": "^8.47.0",
+    "@babylonjs/loaders": "^8.47.0",
     "@babylonjs/react-native": "^1.9.0",
     "@babylonjs/react-native-iosandroid-0-71": "^1.9.0",
     "@protocol-silent-night/game-core": "workspace:*",
-    "expo": "~52.0.0",
-    "expo-gl": "~15.0.0",
-    "expo-router": "~4.0.0",
-    "react": "^18.2.0",
-    "react-native": "0.73.6",
-    "react-native-gesture-handler": "~2.14.0",
-    "react-native-reanimated": "~3.6.0"
+    "expo": "~54.0.32",
+    "expo-gl": "~16.0.9",
+    "expo-router": "~6.0.22",
+    "react": "^19.2.3",
+    "react-native": "0.83.1",
+    "react-native-gesture-handler": "~2.30.0",
+    "react-native-reanimated": "~4.2.1"
   },
   "devDependencies": {
-    "@types/react": "^19.0.0",
+    "@types/react": "^19.2.9",
     "typescript": "^5.7.3"
   }
 }
