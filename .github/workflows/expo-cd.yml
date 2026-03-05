@@ -101,7 +101,7 @@ jobs:
         run: pnpm --filter @protocol-silent-night/mobile test --coverage
 
       - name: Upload coverage
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4
         with:
           name: coverage-mobile
           path: apps/mobile/coverage/
@@ -230,7 +230,7 @@ jobs:
 
       - name: Upload APK artifact
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4
         with:
           name: android-apk
           path: apps/mobile/protocol-silent-night.apk
@@ -386,7 +386,7 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Download APK artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v4
         with:
           name: android-apk
           path: ./release-assets
