@@ -46,7 +46,7 @@ jobs:
 
       - name: Setup pnpm
         if: steps.security.outputs.is_fork == 'false'
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
 
       - name: Setup Node.js
         if: steps.security.outputs.is_fork == 'false'

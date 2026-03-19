@@ -101,7 +101,7 @@ jobs:
           ref: ${{ steps.pr-info.outputs.head_ref }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4
 
       - name: Setup Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
@@ -156,7 +156,7 @@ jobs:
           fi
 
       - name: Upload Playwright report (Web)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report-web-${{ github.run_id }}
@@ -166,7 +166,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Playwright report (Mobile)
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report-mobile-${{ github.run_id }}
@@ -244,7 +244,7 @@ jobs:
 
       - name: Setup pnpm
         if: steps.security.outputs.is_fork == 'false'
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4
 
       - name: Setup Node.js
         if: steps.security.outputs.is_fork == 'false'
@@ -263,7 +263,7 @@ jobs:
 
       - name: Download test artifacts (Web)
         if: steps.security.outputs.is_fork == 'false'
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
         with:
           name: playwright-report-web-${{ github.run_id }}
           path: test-artifacts/web/
@@ -271,7 +271,7 @@ jobs:
 
       - name: Download test artifacts (Mobile)
         if: steps.security.outputs.is_fork == 'false'
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
         with:
           name: playwright-report-mobile-${{ github.run_id }}
           path: test-artifacts/mobile/
