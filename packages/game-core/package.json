@@ -22,8 +22,8 @@
     "@babylonjs/core": "^7.0.0",
     "@babylonjs/gui": "^7.0.0",
     "@babylonjs/loaders": "^7.0.0",
-    "zod": "^3.22.0",
-    "zustand": "^4.5.0"
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
