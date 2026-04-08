@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -q 'git commit'; then cd /Users/jbogaty/src/arcade-cabinet/protocol-silent-night && timeout 60 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode 2>&1 | sed 's/\\x1b\\[[0-9;]*m//g' | { if grep -q 'Overall Summary.*0 errors'; then echo '{\"systemMessage\":\"All tests passed\"}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests failed — fix before committing\"}'; fi; }; fi; }",
+            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -q 'git commit'; then cd /Users/jbogaty/src/arcade-cabinet/protocol-silent-night && timeout 60 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode > /tmp/ps_night_test.log 2>&1; if [ $? -eq 0 ]; then echo '{\"systemMessage\":\"All tests passed\"}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests failed — see /tmp/ps_night_test.log\"}'; fi; fi; }",
             "timeout": 90,
             "statusMessage": "Running tests before commit..."
           }
