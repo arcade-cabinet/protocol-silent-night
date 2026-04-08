@@ -33,8 +33,8 @@ func _build_stage() -> void:
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 	camera.fov = 40.0
-	camera.position = Vector3(0, 6.5, 8.5)
-	camera.look_at_from_position(camera.position, Vector3(0, 0.2, -1.2), Vector3.UP)
+	camera.position = Vector3(0, 18.0, 8.0)
+	camera.look_at_from_position(camera.position, Vector3(0, 0.0, -5.5), Vector3.UP)
 	_root_3d.add_child(camera)
 
 	var key_light := DirectionalLight3D.new()

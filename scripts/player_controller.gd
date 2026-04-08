@@ -139,7 +139,7 @@ func auto_fire(delta: float, player_state: Dictionary, player_node: Node3D, on_c
 		on_spawn_projectile.call(origin, shot_dir, false, float(player_state["class"]["damage"]) * damage_scale, int(player_state["class"]["pierce"]), float(player_state["class"]["bullet_speed"]), float(player_state["class"]["bullet_scale"]))
 
 
-func update_player_aura(delta: float, player_state: Dictionary, player_node: Node3D, enemies: Array, boss_ref: Dictionary, damage_scale: float, on_kill_enemy: Callable, on_spawn_hit_fx: Callable, boss_bar: ProgressBar) -> void:
+func update_player_aura(delta: float, player_state: Dictionary, player_node: Node3D, enemies: Array, boss_ref: Dictionary, damage_scale: float, on_kill_enemy: Callable, on_spawn_hit_fx: Callable, boss_bar: ProgressBar, on_damage_number: Callable = Callable()) -> void:
 	if int(player_state["aura_level"]) <= 0:
 		return
 	player_state["aura_timer"] += delta
@@ -153,6 +153,8 @@ func update_player_aura(delta: float, player_state: Dictionary, player_node: Nod
 		if enemy["node"].position.distance_to(player_node.position) <= aura_radius:
 			enemy["hp"] -= aura_damage
 			on_spawn_hit_fx.call(enemy["node"].position, Color("66fff4"))
+			if on_damage_number.is_valid():
+				on_damage_number.call(enemy["node"].position + Vector3(0, 1.0, 0), aura_damage, Color("66fff4"))
 			if enemy["hp"] <= 0.0:
 				on_kill_enemy.call(enemy_index)
 			else:
@@ -160,6 +162,8 @@ func update_player_aura(delta: float, player_state: Dictionary, player_node: Nod
 	if boss_ref.size() > 0 and boss_ref["node"].position.distance_to(player_node.position) <= aura_radius + 1.0:
 		boss_ref["hp"] -= aura_damage * 0.45
 		boss_bar.value = boss_ref["hp"]
+		if on_damage_number.is_valid():
+			on_damage_number.call(boss_ref["node"].position + Vector3(0, 2.0, 0), aura_damage * 0.45, Color("66fff4"))
 
 
 func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary) -> void:

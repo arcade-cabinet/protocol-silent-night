@@ -20,8 +20,11 @@ var combat := preload("res://scripts/combat_resolver.gd").new(mat_factory, pix_r
 var enemies_ai := preload("res://scripts/enemy_director.gd").new(mat_factory, pix_renderer)
 var player_ctrl := preload("res://scripts/player_controller.gd").new(mat_factory, pix_renderer)
 var obstacles_builder := preload("res://scripts/obstacle_builder.gd").new(mat_factory)
+var audio_mgr := preload("res://scripts/audio_manager.gd").new()
+var dmg_numbers := preload("res://scripts/damage_numbers.gd").new()
 var progression: RefCounted
 var game_mgr: RefCounted
+var shake_magnitude: float = 0.0
 
 var runtime_root: Node3D
 var board_root: Node3D
@@ -79,29 +82,24 @@ var test_mode: Dictionary = {}
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
+	audio_mgr.attach(runtime_root.get_node("Audio"))
+	combat.audio_mgr = audio_mgr
+	enemies_ai.audio_mgr = audio_mgr
 	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false)
 	progression = PROGRESSION_MANAGER.new(ui_mgr)
+	progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
-	ui_mgr.show_achievement("", 0.0)
 
-func configure_test_mode(options: Dictionary) -> void:
-	test_mode = options.duplicate(true)
-func start_run(class_id: String) -> void:
-	game_mgr.start_run(class_id)
-func debug_force_level_up() -> void:
-	_trigger_level_up()
-func debug_spawn_boss() -> void:
-	game_mgr.spawn_boss(1.0)
-func debug_end_run(win: bool) -> void:
-	game_mgr.end_run(win)
-func debug_zone_at(world_position: Vector3) -> String:
-	return "arena" if Vector2(world_position.x, world_position.z).length() <= float(config["arena_radius"]) else "void"
-func debug_is_blocked(world_position: Vector3, radius: float = 0.6) -> bool:
-	return not _can_occupy(world_position, radius)
-func debug_tick(delta: float) -> void:
-	_tick(delta)
+func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
+func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
+func debug_force_level_up() -> void: _trigger_level_up()
+func debug_spawn_boss() -> void: game_mgr.spawn_boss(1.0)
+func debug_end_run(win: bool) -> void: game_mgr.end_run(win)
+func debug_zone_at(wp: Vector3) -> String: return "arena" if Vector2(wp.x, wp.z).length() <= float(config["arena_radius"]) else "void"
+func debug_is_blocked(wp: Vector3, radius: float = 0.6) -> bool: return not _can_occupy(wp, radius)
+func debug_tick(delta: float) -> void: _tick(delta)
 
 func capture_screenshot(path: String) -> void:
 	await RenderingServer.frame_post_draw
@@ -122,7 +120,7 @@ func _tick(delta: float) -> void:
 		wave_clear_timer -= delta
 		if wave_clear_timer <= 0.0:
 			game_mgr.start_next_wave()
-	WORLD_BUILDER.update_camera(camera, player_node, state, config, delta)
+	shake_magnitude = WORLD_BUILDER.update_camera(camera, player_node, state, config, delta, shake_magnitude)
 
 func _unhandled_input(event: InputEvent) -> void:
 	var s := {"dash_pressed": dash_pressed, "touch_active": touch_active, "touch_origin": touch_origin, "touch_position": touch_position, "input_move": input_move}
@@ -163,7 +161,9 @@ func _apply_upgrade(upgrade_id: String) -> void:
 func _damage_player(amount: float) -> void:
 	if bool(test_mode.get("invincible", false)) or dash_timer > 0.0:
 		return
+	if audio_mgr != null: audio_mgr.play_damage()
 	player_state["hp"] = maxf(0.0, float(player_state["hp"]) - amount)
+	shake_magnitude = 0.3
 	if float(player_state["hp"]) <= 0.0:
 		game_mgr.end_run(false)
 	else:
@@ -179,6 +179,8 @@ func _kill_enemy(enemy_index: int) -> void:
 	enemy["node"].queue_free()
 	enemies.remove_at(enemy_index)
 	progression.record_kill()
+	var sm := _save_manager()
+	if sm != null and sm.has_method("record_kill"): sm.record_kill()
 
 func _spawn_hit_fx(world_position: Vector3, color: Color) -> void:
 	combat.spawn_hit_fx(fx_root, vfx, world_position, color)

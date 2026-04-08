@@ -34,3 +34,28 @@ func test_register_wave_reached_tracks_best_wave() -> void:
 
 	assert_int(int(save.state["best_wave"])).is_equal(7)
 	save.reset_state_for_tests()
+
+
+func test_achievements_increment_and_persist() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_achievements_test.json")
+	save.reset_state_for_tests()
+	save.load_state()
+
+	assert_int(save.get_achievement("total_kills")).is_equal(0)
+	save.record_kill()
+	save.record_kill()
+	save.record_kill(5)
+	assert_int(save.get_achievement("total_kills")).is_equal(7)
+
+	save.record_run_start()
+	save.record_campaign_clear()
+	assert_int(save.get_achievement("total_runs")).is_equal(1)
+	assert_int(save.get_achievement("campaign_clears")).is_equal(1)
+
+	var reloaded = auto_free(_save_script.new())
+	reloaded.set_save_path_for_tests("user://gdunit_achievements_test.json")
+	reloaded.load_state()
+	assert_int(reloaded.get_achievement("total_kills")).is_equal(7)
+
+	reloaded.reset_state_for_tests()
