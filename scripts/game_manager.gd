@@ -62,6 +62,7 @@ func start_next_wave() -> void:
 	main.ui_mgr.wave_label.text = "WAVE %d" % level
 	var banner_color := Color("ff4466") if main.current_wave.get("is_boss_wave", false) else Color("edf7ff")
 	main.ui_mgr.show_message("WAVE %d" % level, 1.8, banner_color)
+	if main.audio_mgr != null: main.audio_mgr.play_wave_banner()
 	if save_mgr != null and level == 5 and save_mgr.unlock("santa"):
 		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED")
 		main._refresh_start_screen()
@@ -73,6 +74,7 @@ func spawn_boss(hp_scale: float) -> void:
 
 func end_run(win: bool) -> void:
 	main.state = "win" if win else "game_over"
+	if main.audio_mgr != null: main.audio_mgr.play_victory() if win else main.audio_mgr.play_death()
 	var ui: RefCounted = main.ui_mgr
 	ui.end_screen.visible = true
 	ui.hud_root.visible = false

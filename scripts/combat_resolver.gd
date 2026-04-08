@@ -2,6 +2,7 @@ extends RefCounted
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
+var audio_mgr: RefCounted = null
 
 
 func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
@@ -18,15 +19,9 @@ func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vecto
 	node.material_override = materials.emissive_material(Color("ff617e") if hostile else player_color, 1.6, 0.08)
 	node.position = origin
 	projectile_root.add_child(node)
-	projectiles.append({
-		"node": node,
-		"direction": direction,
-		"hostile": hostile,
-		"damage": damage,
-		"pierce": pierce,
-		"speed": speed,
-		"life": 1.0
-	})
+	projectiles.append({"node": node, "direction": direction, "hostile": hostile, "damage": damage, "pierce": pierce, "speed": speed, "life": 1.0})
+	if audio_mgr != null and not hostile:
+		audio_mgr.play_shot("#%s" % player_color.to_html(false))
 
 
 func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_ref: Dictionary, player_node: Node3D, obstacle_colliders: Array, boss_bar: ProgressBar, boss_panel: VBoxContainer, on_damage_player: Callable, on_kill_enemy: Callable, on_boss_killed: Callable, fx_root: Node3D, vfx: Array) -> void:
@@ -48,6 +43,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 				if projectile["node"].position.distance_to(enemy["node"].position) < 0.9 * float(enemy["node"].scale.x):
 					enemy["hp"] -= float(projectile["damage"])
 					spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
+					if audio_mgr != null: audio_mgr.play_hit()
 					projectile["pierce"] -= 1
 					if enemy["hp"] <= 0.0:
 						on_kill_enemy.call(enemy_index)
@@ -83,6 +79,7 @@ func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: D
 			pickup["node"].position.y = float(pickup["base_y"]) + sin(float(pickup["time"]) * 4.0 + float(pickup["phase"])) * 0.12
 		if dist <= float(config["pickup_auto_collect_radius"]) or bool(test_mode.get("auto_collect", false)):
 			on_gain_xp.call(int(pickup["value"]))
+			if audio_mgr != null: audio_mgr.play_pickup()
 			pickup["node"].queue_free()
 			pickups.remove_at(index)
 		else:

@@ -2,6 +2,7 @@ extends RefCounted
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
+var audio_mgr: RefCounted = null
 
 
 func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
@@ -82,6 +83,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	boss_bar.max_value = new_boss["max_hp"]
 	boss_bar.value = new_boss["hp"]
 	on_show_message.call("KRAMPUS DETECTED", 2.2, Color("ff4466"))
+	if audio_mgr != null: audio_mgr.play_boss_roar()
 	return new_boss
 
 

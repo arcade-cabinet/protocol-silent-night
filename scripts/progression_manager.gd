@@ -1,6 +1,7 @@
 extends RefCounted
 
 var ui_mgr: RefCounted
+var audio_mgr: RefCounted = null
 
 var xp: int = 0
 var xp_needed: int = 5
@@ -29,6 +30,7 @@ func gain_xp(amount: int, on_level_up: Callable, on_update_ui: Callable) -> void
 
 func trigger_level_up(state_setter: Callable, upgrade_defs: Array, test_mode: Dictionary, on_apply_upgrade: Callable, on_upgrade_button_pressed: Callable) -> void:
 	state_setter.call("level_up")
+	if audio_mgr != null: audio_mgr.play_level_up()
 	xp -= xp_needed
 	level += 1
 	xp_needed = int(round(xp_needed * 1.45))

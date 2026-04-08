@@ -20,6 +20,7 @@ var combat := preload("res://scripts/combat_resolver.gd").new(mat_factory, pix_r
 var enemies_ai := preload("res://scripts/enemy_director.gd").new(mat_factory, pix_renderer)
 var player_ctrl := preload("res://scripts/player_controller.gd").new(mat_factory, pix_renderer)
 var obstacles_builder := preload("res://scripts/obstacle_builder.gd").new(mat_factory)
+var audio_mgr := preload("res://scripts/audio_manager.gd").new()
 var progression: RefCounted
 var game_mgr: RefCounted
 
@@ -79,8 +80,9 @@ var test_mode: Dictionary = {}
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
+	audio_mgr.attach(runtime_root.get_node("Audio")); combat.audio_mgr = audio_mgr; enemies_ai.audio_mgr = audio_mgr
 	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false)
-	progression = PROGRESSION_MANAGER.new(ui_mgr)
+	progression = PROGRESSION_MANAGER.new(ui_mgr); progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
@@ -163,6 +165,7 @@ func _apply_upgrade(upgrade_id: String) -> void:
 func _damage_player(amount: float) -> void:
 	if bool(test_mode.get("invincible", false)) or dash_timer > 0.0:
 		return
+	if audio_mgr != null: audio_mgr.play_damage()
 	player_state["hp"] = maxf(0.0, float(player_state["hp"]) - amount)
 	if float(player_state["hp"]) <= 0.0:
 		game_mgr.end_run(false)

@@ -65,6 +65,10 @@ static func build_world(main: Node3D) -> void:
 	runtime_root.add_child(fx_root)
 	main.fx_root = fx_root
 
+	var audio_root := Node.new()
+	audio_root.name = "Audio"
+	runtime_root.add_child(audio_root)
+
 
 static func can_occupy(world_position: Vector3, radius: float, arena_radius: float, obstacle_colliders: Array) -> bool:
 	if Vector2(world_position.x, world_position.z).length() > arena_radius - 1.2:
