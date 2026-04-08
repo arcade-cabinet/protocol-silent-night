@@ -22,6 +22,8 @@ var player_ctrl := preload("res://scripts/player_controller.gd").new(mat_factory
 var obstacles_builder := preload("res://scripts/obstacle_builder.gd").new(mat_factory)
 var audio_mgr := preload("res://scripts/audio_manager.gd").new()
 var dmg_numbers := preload("res://scripts/damage_numbers.gd").new()
+var present_animator := preload("res://scripts/present_animator.gd").new()
+var afterimages: Array = []
 var progression: RefCounted
 var game_mgr: RefCounted
 var shake_magnitude: float = 0.0

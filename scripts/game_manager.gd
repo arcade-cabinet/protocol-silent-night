@@ -138,6 +138,7 @@ func update_player(delta: float) -> void:
 		main.dash_timer = float(main.config["dash_duration"])
 		main.dash_cooldown_timer = float(main.config["dash_cooldown"])
 		main.dash_pressed = false
+		main.afterimages.append(main.present_animator.spawn_dash_afterimage(main.fx_root, main.player_node))
 	var speed: float = float(main.player_state["class"]["speed"]) * main._test_scale("player_speed_scale")
 	if main.dash_timer > 0.0:
 		main.dash_timer -= delta
@@ -145,7 +146,11 @@ func update_player(delta: float) -> void:
 	main._move_actor(main.player_node, Vector3(main.move_velocity.x, 0.0, main.move_velocity.y), speed, delta, 0.62)
 	if main.move_velocity.length() > 0.01:
 		main.player_mesh.rotation.y = atan2(main.move_velocity.x, main.move_velocity.y)
-	main.player_ctrl.auto_fire(delta, main.player_state, main.player_node, closest_target, spawn_projectile_player, main._test_scale("player_fire_scale"), main._test_scale("player_damage_scale"))
+	main.present_animator.update(delta, main.player_mesh, main.move_velocity)
+	main.present_animator.update_afterimages(main.afterimages, delta)
+	var fired: bool = main.player_ctrl.auto_fire(delta, main.player_state, main.player_node, closest_target, spawn_projectile_player, main._test_scale("player_fire_scale"), main._test_scale("player_damage_scale"))
+	if fired:
+		main.present_animator.trigger_recoil()
 	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar, Callable(self, "spawn_aura_damage_number"))
 
 func update_spawning(delta: float) -> void:
