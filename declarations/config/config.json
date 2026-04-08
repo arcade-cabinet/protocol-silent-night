@@ -1,0 +1,10 @@
+{
+  "arena_radius": 17.8,
+  "dash_duration": 0.18,
+  "dash_cooldown": 1.45,
+  "pickup_magnet_radius": 3.2,
+  "pickup_auto_collect_radius": 1.2,
+  "board_seed": 1225,
+  "boss_wave": 10,
+  "player_spawn_safe_radius": 5.5
+}

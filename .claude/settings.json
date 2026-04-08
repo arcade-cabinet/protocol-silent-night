@@ -1,14 +1,64 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(godot:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(echo:*)",
+      "Bash(perl:*)",
+      "Bash(sleep:*)",
+      "Bash(timeout:*)",
+      "Bash(file:*)",
+      "Read",
+      "Glob",
+      "Grep"
+    ]
+  },
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm biome check --write {{filepath}}"
+            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 200 ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"additionalContext\\\":\\\"WARNING: $f is $lines lines, exceeding the 200 LOC limit. Decompose into smaller scripts.\\\"},\\\"continue\\\":true}\"; fi; fi; }",
+            "timeout": 5,
+            "statusMessage": "Checking LOC limit..."
           }
-        ],
-        "matcher": "Edit|Write|MultiEdit"
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; if [[ \"$f\" == *.tscn ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_scene'; then echo '{\"systemMessage\":\"WARNING: .tscn file missing [gd_scene] header\"}'; fi; elif [[ \"$f\" == *.tres ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_resource'; then echo '{\"systemMessage\":\"WARNING: .tres file missing [gd_resource] header\"}'; fi; fi; }",
+            "timeout": 5,
+            "statusMessage": "Validating Godot resource format..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -q 'git commit'; then cd /Users/jbogaty/src/arcade-cabinet/protocol-silent-night && timeout 60 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode > /tmp/ps_night_test.log 2>&1; if [ $? -eq 0 ]; then echo '{\"systemMessage\":\"All tests passed\"}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests failed — see /tmp/ps_night_test.log\"}'; fi; fi; }",
+            "timeout": 90,
+            "statusMessage": "Running tests before commit..."
+          }
+        ]
       }
     ]
   }
