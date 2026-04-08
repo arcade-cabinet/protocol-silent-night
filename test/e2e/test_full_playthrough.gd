@@ -27,9 +27,9 @@ func _run() -> void:
 		"auto_choose_upgrade": true,
 		"manual_tick": true,
 		"wave_scale": 8.0,
-		"player_damage_scale": 3.5,
-		"player_fire_scale": 2.5,
-		"boss_hp_scale": 0.15
+		"player_damage_scale": 8.0,
+		"player_fire_scale": 3.5,
+		"boss_hp_scale": 0.08
 	})
 	_main.start_run("elf")
 
