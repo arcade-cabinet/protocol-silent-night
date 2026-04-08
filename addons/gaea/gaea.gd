@@ -10,6 +10,8 @@ var _dock: EditorDock
 var _editor_selection: EditorSelection
 var _inspector_plugin: EditorInspectorPlugin
 var _custom_project_settings: GaeaProjectSettings
+# UPSTREAM-FIX: Store as member variable to prevent GC
+var _editor_settings: GaeaEditorSettings
 
 
 func _enter_tree() -> void:
@@ -30,7 +32,8 @@ func _enter_tree() -> void:
 	_inspector_plugin = InspectorPlugin.new(_panel)
 	add_inspector_plugin(_inspector_plugin)
 
-	GaeaEditorSettings.new().add_settings()
+	_editor_settings = GaeaEditorSettings.new()
+	_editor_settings.add_settings()
 	_custom_project_settings = GaeaProjectSettings.new()
 	_custom_project_settings.add_settings()
 
@@ -113,7 +116,8 @@ func _on_file_removed(file: String) -> void:
 	if file.get_extension() not in ["tscn", "scn"]:
 		return
 
-	for edited_graph: GaeaFileList.EditedGraph in _panel.file_list.edited_graphs:
+	# UPSTREAM-FIX: Iterate over a copy to avoid modifying collection while iterating
+	for edited_graph: GaeaFileList.EditedGraph in _panel.file_list.edited_graphs.duplicate():
 		if not edited_graph.get_graph().is_built_in():
 			continue
 

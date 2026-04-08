@@ -71,9 +71,11 @@ func _on_popup_create_node_and_connect_node_request(node: GaeaGraphNode, type: G
 	_on_popup_create_node_request()
 	filter_to_connect_type(type, main_editor.dragged_from_left)
 	main_editor.created_node_connect_to = node
+	# UPSTREAM-FIX: CONNECT_ONE_SHOT must be a flag argument to connect(), not inside the lambda
 	close_requested.connect(
 		func() -> void:
-			main_editor.created_node_connect_to = null, CONNECT_ONE_SHOT
+			main_editor.created_node_connect_to = null,
+		CONNECT_ONE_SHOT
 	)
 
 

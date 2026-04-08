@@ -206,15 +206,18 @@ func _add_output_slot(for_output: StringName) -> GaeaGraphNodeOutput:
 	return node
 
 
+# UPSTREAM-FIX: Add type check before returning to ensure correct return type
 func _get_output_slot(for_output: StringName) -> GaeaGraphNodeOutput:
 	var overridden_idx: int = resource.get_overridden_output_port_idx(for_output)
 	if overridden_idx >= 0:
-		return get_child(overridden_idx)
+		var child := get_child(overridden_idx)
+		return child as GaeaGraphNodeOutput if child is GaeaGraphNodeOutput else null
 
 	var idx = resource.get_enums_count() + resource.get_arguments_list().size()
 	for output in resource.get_output_ports_list():
 		if output == for_output:
-			return get_child(idx)
+			var child := get_child(idx)
+			return child as GaeaGraphNodeOutput if child is GaeaGraphNodeOutput else null
 		if resource.get_overridden_output_port_idx(output) == -1:
 			idx += 1
 

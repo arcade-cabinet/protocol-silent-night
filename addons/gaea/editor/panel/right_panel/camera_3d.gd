@@ -25,13 +25,17 @@ var _distance: float
 
 func _ready():
 	_distance = DEFAULT_DISTANCE
+	# UPSTREAM-FIX: Guard against null _anchor_node
+	if _anchor_node == null:
+		return
 	_rotation = _anchor_node.transform.basis.get_rotation_quaternion().get_euler()
 
 
 func _process(delta: float):
+	# UPSTREAM-FIX: Changed if/if to if/elif to prevent conflicting zoom
 	if is_zoom_in:
 		_current_scroll_speed = -1 * ZOOM_SPEED
-	if is_zoom_out:
+	elif is_zoom_out:
 		_current_scroll_speed = 1 * ZOOM_SPEED
 	_process_transformation(delta)
 
@@ -63,7 +67,8 @@ func _process_transformation(delta: float):
 	_current_pan_input = Vector2.ZERO
 
 
-func input(event: InputEvent):
+# UPSTREAM-FIX: Renamed from input() to handle_input() to avoid shadowing Node._input()
+func handle_input(event: InputEvent):
 	if event is InputEventMouseMotion:
 		_process_mouse_rotation_event(event)
 	elif event is InputEventMouseButton:

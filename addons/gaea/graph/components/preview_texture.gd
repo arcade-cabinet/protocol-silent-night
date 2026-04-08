@@ -95,13 +95,15 @@ func update() -> void:
 	pouch.clear_all_cache()
 
 
+	# UPSTREAM-FIX: Early return when traverse produces no grid to prevent null deref in pixel loop
 	if not is_instance_valid(data):
 		texture = null
+		return
 
-
+	# UPSTREAM-FIX: Corrected sampling offset sign (was always positive, needs to be sim_center - res_center)
 	var sim_center: Vector3i = sim_size * 0.5
 	var res_center: Vector3i = Vector3i(resolution.x, resolution.y, 0) * 0.5
-	var sim_offset := sim_center.max(res_center) - sim_center.min(res_center)
+	var sim_offset := sim_center - res_center
 
 	var image: Image = Image.create_empty(resolution.x, resolution.y, true, Image.FORMAT_RGBA8)
 	for x: int in resolution.x:

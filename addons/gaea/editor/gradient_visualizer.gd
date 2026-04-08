@@ -16,6 +16,10 @@ func _ready() -> void:
 
 
 func update() -> void:
+	# UPSTREAM-FIX: Guard against null gradient before accessing .points
+	if not is_instance_valid(gradient):
+		return
+
 	var image: Image = Image.create_empty(SIZE.x, SIZE.y, false, Image.FORMAT_RGB8)
 	for x in roundi(float(SIZE.x) / CHECKERBOARD_SIZE.x):
 		for y in roundi(float(SIZE.y) / CHECKERBOARD_SIZE.y):

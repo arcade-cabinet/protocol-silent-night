@@ -34,7 +34,8 @@ func _on_generate_button_pressed() -> void:
 	var graph: GaeaGraph = main_editor.graph_edit.graph
 
 	var chunk_offsets: Array[Vector3] = _get_chunk_offsets(graph)
-	chunk_offsets.sort_custom(func(a: Vector3i, b: Vector3i):
+	# UPSTREAM-FIX: Sort comparator types should match array element type (Vector3, not Vector3i)
+	chunk_offsets.sort_custom(func(a: Vector3, b: Vector3):
 		return a.length_squared() < b.length_squared()
 	)
 	_chunk_generation_count = chunk_offsets.size()
@@ -96,10 +97,11 @@ func _execution_task_finished(task: GaeaTask) -> void:
 	var data: GaeaGrid = exec.results
 
 	preview_container.draw_grid(data, area.position, area, graph.preview_coordinate_format)
-	generation_in_progress = false
-	generate_button.disabled = false
 
+	# UPSTREAM-FIX: Only clear generation_in_progress when ALL chunks are done (was race condition)
 	if _chunk_generated == _chunk_generation_count:
+		generation_in_progress = false
+		generate_button.disabled = false
 		bottom_label.text = "Generated %d chunks in %d ms (%d ms / chunk)" % [
 			_chunk_generated,
 			Time.get_ticks_msec() - _generation_start_time,

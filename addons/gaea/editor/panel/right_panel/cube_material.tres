@@ -5,7 +5,7 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_ci0if")
-shader_parameter/metalic = 0.25
+shader_parameter/metallic = 0.25
 shader_parameter/roughness = 1.0
 shader_parameter/grid_scale = 1.0
 shader_parameter/grid_width = 0.0150000007125

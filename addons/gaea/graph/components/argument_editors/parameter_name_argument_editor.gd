@@ -53,12 +53,15 @@ func _on_line_edit_text_submitted(new_text: String, line_edit: LineEdit) -> void
 		line_edit.queue_free()
 		return
 
+	# UPSTREAM-FIX: Free line_edit on validation failure to prevent orphaned node
 	if not new_text.is_valid_ascii_identifier():
 		push_error("Parameter name '%s' is not a valid identifier." % new_text)
+		line_edit.queue_free()
 		return
 
 	if graph_node.graph_edit.graph.has_parameter(new_text):
 		push_error("Parameter name '%s' matches an already existing parameter." % new_text)
+		line_edit.queue_free()
 		return
 
 	_name_label.text = new_text

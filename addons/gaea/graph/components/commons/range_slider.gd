@@ -73,6 +73,8 @@ var _theme_cache := {
 	tick_icon = null,
 	middle_tick = null
 }
+# Note: _orientation is NONE by default; subclasses (e.g. GaeaHRangeSlider) must set it
+# before calling super()._init(). The base _init() exits early if NONE.
 var _orientation := Orientation.NONE
 var _drag_offset := Vector2.ZERO
 var _drag_element := Element.NONE
@@ -399,15 +401,16 @@ func _update_theme_cache() -> void:
 	_theme_cache.tick_icon = _theme_icon_get_or_fallback(&"tick", theme_type, theme_type_fallback)
 
 
+# UPSTREAM-FIX: has_theme_icon/has_theme_stylebox used `name` (node name) instead of `icon_name` parameter
 func _theme_icon_get_or_fallback(icon_name: StringName, theme_type: StringName, theme_type_fallback: StringName) -> Texture2D:
-	if has_theme_icon(name, theme_type):
+	if has_theme_icon(icon_name, theme_type):
 		return get_theme_icon(icon_name, theme_type)
 
 	return get_theme_icon(icon_name, theme_type_fallback)
 
 
 func _theme_stylebox_get_or_fallback(icon_name: StringName, theme_type: StringName, theme_type_fallback: StringName) -> StyleBox:
-	if has_theme_stylebox(name, theme_type):
+	if has_theme_stylebox(icon_name, theme_type):
 		return get_theme_stylebox(icon_name, theme_type)
 
 	return get_theme_stylebox(icon_name, theme_type_fallback)

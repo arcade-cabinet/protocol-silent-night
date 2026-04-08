@@ -71,8 +71,10 @@ var _current_z: int = 0 :
 
 func _ready() -> void:
 	_checkbox_icon = get_theme_icon(&"unchecked", &"CheckBox")
-	z_slider.value = 0
-	z_slider.value_changed.connect(func(value: float): _current_z = roundi(value))
+	# UPSTREAM-FIX: Guard against null z_slider
+	if z_slider != null:
+		z_slider.value = 0
+		z_slider.value_changed.connect(func(value: float): _current_z = roundi(value))
 	mouse_exited.connect(queue_redraw)
 
 

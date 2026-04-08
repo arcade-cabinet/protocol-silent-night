@@ -30,12 +30,15 @@ func _ready() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	camera.input(event)
+	camera.handle_input(event)
 
 
+# UPSTREAM-FIX: Free MultiMeshInstance3D children before clearing dict to prevent node leak
 func clear_grid():
 	for multi_mesh: MultiMeshInstance3D in multi_mesh_instances.values():
 		multi_mesh.multimesh.instance_count = 0
+		if multi_mesh.is_inside_tree():
+			multi_mesh.queue_free()
 	multi_mesh_instances.clear()
 
 

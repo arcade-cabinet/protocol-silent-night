@@ -2,8 +2,9 @@
 class_name GaeaVector3ArgumentEditor
 extends GaeaGraphNodeArgumentEditor
 
+# UPSTREAM-FIX: Use Variant.Type values so typeof() comparison works correctly
 const VALID_TYPES := [
-	GaeaValue.Type.VECTOR2, GaeaValue.Type.VECTOR2I, GaeaValue.Type.VECTOR3, GaeaValue.Type.VECTOR3I
+	TYPE_VECTOR2, TYPE_VECTOR2I, TYPE_VECTOR3, TYPE_VECTOR3I
 ]
 
 @onready var _x_spin_box: SpinBox = %XSpinBox
@@ -51,11 +52,12 @@ func _configure() -> void:
 		if type == GaeaValue.Type.VECTOR3 or type == GaeaValue.Type.VECTOR3I:
 			_z_spin_box.min_value = hint.get("min").z
 
+	# UPSTREAM-FIX: Fixed copy-paste bug - was assigning max hint to min_value instead of max_value
 	if hint.has("max"):
-		_x_spin_box.min_value = hint.get("max").x
-		_y_spin_box.min_value = hint.get("max").y
+		_x_spin_box.max_value = hint.get("max").x
+		_y_spin_box.max_value = hint.get("max").y
 		if type == GaeaValue.Type.VECTOR3 or type == GaeaValue.Type.VECTOR3I:
-			_z_spin_box.min_value = hint.get("max").z
+			_z_spin_box.max_value = hint.get("max").z
 
 	_x_spin_box.allow_lesser = not hint.has("min")
 	_y_spin_box.allow_lesser = not hint.has("min")
@@ -100,7 +102,8 @@ func set_arg_value(new_value: Variant) -> Error:
 
 	_x_spin_box.value = float(new_value.x)
 	_y_spin_box.value = float(new_value.y)
-	if new_value_type == GaeaValue.Type.VECTOR3 or new_value_type == GaeaValue.Type.VECTOR3I:
+	# UPSTREAM-FIX: Use Variant.Type for typeof() comparison
+	if new_value_type == TYPE_VECTOR3 or new_value_type == TYPE_VECTOR3I:
 		_z_spin_box.value = float(new_value.z)
 	else:
 		_z_spin_box.value = 0.0

@@ -1,4 +1,15 @@
 .godot/
 reports/
 .artifacts/
-*.translation
+# Godot-generated translation imports (scoped to avoid ignoring source .translation files)
+*.translation.import
+
+# Godot-specific patterns
+.mono/
+*.tmp
+*.log
+*~
+
+# OS temp files
+.DS_Store
+Thumbs.db

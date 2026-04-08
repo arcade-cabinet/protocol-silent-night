@@ -178,6 +178,9 @@ func _group_nodes_in_frame(nodes: Array[StringName]) -> void:
 			if not front_frame_tree[i] == other_frame_tree[i]:
 				front_frame_tree.resize(i)
 
+	# UPSTREAM-FIX: Guard against empty array before calling .back()
+	if front_frame_tree.is_empty():
+		return
 	var matching_parent: StringName = front_frame_tree.back()
 	var things_to_group: Array[StringName] = []
 	var parent_name: StringName
@@ -195,9 +198,9 @@ func _group_nodes_in_frame(nodes: Array[StringName]) -> void:
 	var positions: Array = things_to_group.map(func(node_name: StringName):
 		return (graph_edit.get_node(NodePath(node_name)) as GraphElement).position
 	)
+	# UPSTREAM-FIX: Move default value out of lambda, pass as second arg to reduce()
 	var frame_position: Vector2 = positions.reduce(func(a: Vector2, b: Vector2):
-		return a.min(b), positions.front()
-	)
+		return a.min(b), positions.front())
 	var new_frame_id: int = graph_edit.graph.add_frame(frame_position)
 	var new_frame: Node = graph_edit.instantiate_node(new_frame_id)
 	var new_frame_name: StringName = new_frame.name

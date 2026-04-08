@@ -67,6 +67,9 @@ func open_file(graph: GaeaGraph) -> void:
 #region Closing
 func close_file(graph: GaeaGraph) -> void:
 	var idx: int = edited_graphs.find_custom(EditedGraph.is_graph.bind(graph))
+	# UPSTREAM-FIX: Guard against find_custom returning -1 (not found)
+	if idx == -1:
+		return
 	if file_list.get_item_metadata(idx) == graph:
 		_remove(idx)
 

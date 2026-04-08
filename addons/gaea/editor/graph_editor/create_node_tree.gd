@@ -63,7 +63,8 @@ func _populate_dict_with_files(folder_path: String, dict: Dictionary) -> Diction
 	var dir := DirAccess.open(folder_path)
 	if dir == null:
 		push_error(error_string(DirAccess.get_open_error()))
-		return {}
+		# UPSTREAM-FIX: Return existing dict instead of empty {} to avoid wiping built-in nodes
+		return dict
 
 	dir.list_dir_begin()
 	var file_name := dir.get_next()

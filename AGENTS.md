@@ -16,7 +16,7 @@ This repo is in reboot mode.
 
 - `gd-plug` is initialized
 - `gdUnit4` is installed and pinned
-- `Gaea` is an accepted strategic dependency and must stay hard-pinned
+- `Gaea` is an accepted strategic dependency and must stay pinned to an exact vendored commit (no floating branches or auto-updates)
 - `LimboAI` is an intended early dependency, but is not yet integrated here
 
 ## Dependency Rules

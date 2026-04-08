@@ -4,7 +4,8 @@ shader_type spatial;
 
 // Render
 group_uniforms render;
-uniform float metalic : hint_range(0.0, 1.0, 0.001) = 0.25;
+// UPSTREAM-FIX: Fixed typo metalic -> metallic
+uniform float metallic : hint_range(0.0, 1.0, 0.001) = 0.25;
 uniform float roughness : hint_range(0.0, 1.0, 0.001) = 0.75;
 
 // Main grid
@@ -113,10 +114,13 @@ float checkered_grid(vec3 uv, float subdivide) {
 	return board;
 }
 
+// UPSTREAM-FIX: Triplanar sampling must use different UV planes for each axis
 vec4 triplanar_texture(sampler2D tex, vec3 uv, bool sub) {
 	uv = sub ? uv : uv * 0.5 + 0.5;
 
-	vec4 base_albedo = texture(tex, uv.xy);
+	vec4 albedo_x = texture(tex, uv.yz);
+	vec4 albedo_y = texture(tex, uv.xz);
+	vec4 albedo_z = texture(tex, uv.xy);
 
 	vec3 tri_normal = vec3(0.0);
 	vec2 blend_normal = abs(normalize(vertex_normal.xz));
@@ -127,9 +131,9 @@ vec4 triplanar_texture(sampler2D tex, vec3 uv, bool sub) {
 	tri_normal.xz *= (1.0 - tri_normal.y);
 
 	vec4 albedo = (
-		base_albedo * tri_normal.x +
-		base_albedo * tri_normal.y +
-		base_albedo * tri_normal.z
+		albedo_x * tri_normal.x +
+		albedo_y * tri_normal.y +
+		albedo_z * tri_normal.z
 	);
 	return albedo;
 }
@@ -185,6 +189,6 @@ void fragment() {
 	vec3 grid = mix(grid_b, grid_color.rgb, base_grid * grid_color.a);
 
 	ALBEDO = grid;
-	METALLIC = metalic;
+	METALLIC = metallic;
 	ROUGHNESS = roughness;
 }

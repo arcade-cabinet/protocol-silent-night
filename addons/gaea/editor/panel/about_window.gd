@@ -32,10 +32,18 @@ func initialize() -> void:
 		)
 
 	var contributors: Array[String]
+	# UPSTREAM-FIX: Add null check for FileAccess.open() return
 	var file := FileAccess.open(CONTRIBUTORS_LIST, FileAccess.READ)
+	if file == null:
+		push_warning("Could not open contributors list: %s" % CONTRIBUTORS_LIST)
+		return
 	while not file.eof_reached():
 		contributors.append(file.get_line())
 	contributors.sort()
+
+	# UPSTREAM-FIX: Clear existing contributor labels before adding new ones (prevents duplicates on repeated popup)
+	for child in _contributors_v_box.get_children():
+		child.queue_free()
 
 	for contributor: String in contributors:
 		if contributor.is_empty():

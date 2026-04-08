@@ -111,8 +111,12 @@ func _get_data(_output_port: StringName, graph: GaeaGraph, pouch: GaeaGeneration
 						for subgrid: GaeaValue.GridType in grids:
 							if subgrid.has(cell):
 								grid.set_cell(cell, subgrid.get_cell(cell))
+		# UPSTREAM-FIX: INTERSECTION must start from first input grid, not empty grid
 		Operation.INTERSECTION:
-			for cell: Vector3i in grids.pop_front().get_cells():
+			var first_grid: GaeaValue.GridType = grids.pop_front()
+			for cell: Vector3i in first_grid.get_cells():
+				grid.set_cell(cell, first_grid.get_cell(cell))
+			for cell: Vector3i in grid.get_cells():
 				for subgrid: GaeaValue.GridType in grids:
 					if not subgrid.has(cell):
 						grid.erase(cell)
@@ -126,13 +130,15 @@ func _get_data(_output_port: StringName, graph: GaeaGraph, pouch: GaeaGeneration
 						var cell: Vector3i = Vector3i(x, y, z)
 						if not grids.front().has(cell):
 							grid.set_cell(cell, 1.0)
+		# UPSTREAM-FIX: DIFFERENCE must start from first input grid, not empty grid
 		Operation.DIFFERENCE:
 			var grid_a: GaeaValue.GridType = grids.pop_front()
+			for cell: Vector3i in grid_a.get_cells():
+				grid.set_cell(cell, grid_a.get_cell(cell))
 			for cell: Vector3i in grid_a.get_cells():
 				for subgrid: GaeaValue.GridType in grids:
 					if subgrid.has(cell):
 						grid.erase(cell)
 						break
-					grid.set_cell(cell, grid_a.get_cell(cell))
 
 	return grid

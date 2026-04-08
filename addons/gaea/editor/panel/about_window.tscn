@@ -9,7 +9,7 @@ oversampling_override = 1.0
 title = "Thanks for using Gaea!"
 initial_position = 1
 size = Vector2i(512, 557)
-visible = true
+visible = false
 exclusive = false
 script = ExtResource("1_ls6ih")
 

@@ -342,7 +342,8 @@ func _on_node_selected_for_creation(resource: GaeaNodeResource) -> void:
 				break
 			to_port += 1
 
-		if to_port < node.resource.get_arguments_list().size():
+		# UPSTREAM-FIX: Use new_node_port_amount (already computed for correct direction) instead of always arguments_list
+		if to_port < new_node_port_amount:
 			if main_editor.dragged_from_left:
 				connection_request.emit(
 					node.name,
@@ -707,12 +708,18 @@ func _on_cut_nodes_request() -> void:
 
 
 #region Inputs and watchers
+# UPSTREAM-FIX: Cache previous label text to avoid updating RichTextLabel on every mouse motion
+var _last_bottom_note_text: String = ""
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var mouse_position = get_local_mouse_position()
 		if get_rect().has_point(mouse_position):
 			bottom_note_label.visible = true
-			bottom_note_label.text = "%s" % Vector2i(local_to_grid(mouse_position, Vector2.ZERO, false))
+			var new_text: String = "%s" % Vector2i(local_to_grid(mouse_position, Vector2.ZERO, false))
+			if new_text != _last_bottom_note_text:
+				_last_bottom_note_text = new_text
+				bottom_note_label.text = new_text
 		else:
 			bottom_note_label.visible = false
 

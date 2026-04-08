@@ -9,9 +9,10 @@ var graph_node: GaeaGraphNode
 var idx: int
 var type: GaeaValue.Type
 
+# UPSTREAM-FIX: Removed getter indirection to avoid infinite recursion
+# (get = get_toggle_preview_button would recurse when get_toggle_preview_button accesses _toggle_preview_button)
 @onready var _label: RichTextLabel = %RightLabel
-@onready var _toggle_preview_button: TextureButton = %TogglePreviewButton:
-	get = get_toggle_preview_button
+@onready var _toggle_preview_button: TextureButton = %TogglePreviewButton
 
 
 ## Sets the corresponding variables.
@@ -20,7 +21,9 @@ func initialize(
 ) -> void:
 	graph_node = for_graph_node
 	type = for_type
-	_label.text = display_name
+	# UPSTREAM-FIX: Guard against null _label before _ready() has run
+	if _label != null:
+		_label.text = display_name
 	idx = get_index()
 
 	_configure()

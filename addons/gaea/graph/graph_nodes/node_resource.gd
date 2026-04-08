@@ -376,8 +376,12 @@ func _get_enum_option_icon(_enum_idx: int, _option_value: int) -> Texture:
 
 ## Override this method to define the default value of the added enums.[br][br]
 ## Defining this method is [b]optional[/b].
+# UPSTREAM-FIX: Guard against empty dict before calling .values().front()
 func _get_enum_default_value(enum_idx: int) -> int:
-	return _get_enum_options(enum_idx).values().front()
+	var options := _get_enum_options(enum_idx)
+	if options.is_empty():
+		return 0
+	return options.values().front()
 
 
 ## Override this method to define the arguments and inputs that will be available in the node.
@@ -819,7 +823,8 @@ func _define_rng(pouch: GaeaGenerationPouch) -> void:
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.set_seed(_get_seed(pouch))
 	pouch.rng[self] = rng
-	seed(rng.seed)
+	# UPSTREAM-FIX: Removed global seed() call that mutates app-wide RNG state.
+	# Use the local rng instance via _get_rng(pouch) instead.
 #endregion
 
 

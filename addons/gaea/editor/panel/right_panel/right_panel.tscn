@@ -97,7 +97,7 @@ mouse_target = true
 transparent_bg = true
 handle_input_locally = false
 size = Vector2i(640, 325)
-render_target_update_mode = 4
+render_target_update_mode = 2
 
 [node name="DirectionalLight3D1" type="DirectionalLight3D" parent="VBoxContainer/GaeaPreviewContainer/SubViewportContainer/SubViewport"]
 transform = Transform3D(0.72537744, 0.5420911, -0.42422274, 0, 0.61628807, 0.7875208, 0.6883514, -0.57124984, 0.44704145, 0, 0, 0)

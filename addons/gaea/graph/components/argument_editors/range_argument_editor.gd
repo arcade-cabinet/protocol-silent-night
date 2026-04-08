@@ -6,7 +6,8 @@ extends GaeaGraphNodeArgumentEditor
 
 @onready var _min_spin_box: SpinBox = %MinSpinBox
 @onready var _max_spin_box: SpinBox = %MaxSpinBox
-@onready var _range_slider: Control = %RangeSlider
+# UPSTREAM-FIX: Type as GaeaRangeSlider instead of Control to access specific APIs
+@onready var _range_slider: GaeaRangeSlider = %RangeSlider
 
 
 
@@ -34,8 +35,9 @@ func _configure() -> void:
 	_min_spin_box.prefix = hint.get("prefix", "")
 	_max_spin_box.prefix = _min_spin_box.prefix
 
-	_min_spin_box.value_changed.connect(_on_spin_box_changed_value.unbind(1))
-	_max_spin_box.value_changed.connect(_on_spin_box_changed_value.unbind(1))
+	# UPSTREAM-FIX: Pass sender identity so handler knows which spin box changed
+	_min_spin_box.value_changed.connect(_on_spin_box_changed_value.bind(true).unbind(1))
+	_max_spin_box.value_changed.connect(_on_spin_box_changed_value.bind(false).unbind(1))
 
 	_configure_min_max_spin_box(allow_lesser, allow_greater)
 
@@ -58,11 +60,13 @@ func _configure_min_max_spin_box(allow_lesser: int, allow_greater: int) -> void:
 
 
 
-func _on_spin_box_changed_value() -> void:
+# UPSTREAM-FIX: Accept is_min_sender to know which spin box changed and avoid range collapse
+func _on_spin_box_changed_value(is_min_sender: bool) -> void:
 	if _min_spin_box.value > _max_spin_box.value:
-		_max_spin_box.set_value_no_signal(_min_spin_box.value)
-	elif _max_spin_box.value < _min_spin_box.value:
-		_min_spin_box.set_value_no_signal(_max_spin_box.value)
+		if is_min_sender:
+			_max_spin_box.set_value_no_signal(_min_spin_box.value)
+		else:
+			_min_spin_box.set_value_no_signal(_max_spin_box.value)
 
 	if _max_spin_box.value > _range_slider.max_value:
 		_range_slider.max_value = _max_spin_box.value

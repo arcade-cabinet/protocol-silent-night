@@ -11,7 +11,8 @@ enum Action {
 	OPEN_RECENT,
 }
 
-var _history: Array[GaeaGraph]
+# UPSTREAM-FIX: Explicitly initialize to empty array
+var _history: Array[GaeaGraph] = []
 
 @onready var file_popup: PopupMenu = $File
 @onready var recent_files: PopupMenu = $File/RecentFiles
@@ -54,10 +55,15 @@ func _on_id_pressed(id: int) -> void:
 			EditorInterface.popup_quick_open(_on_file_chosen_to_open, [&"GaeaGraph"])
 
 
+# UPSTREAM-FIX: Add null check for load() return
 func _on_file_chosen_to_open(path: String) -> void:
 	if path.is_empty():
 		return
-	open_file_selected.emit(load(path))
+	var graph := load(path)
+	if graph == null:
+		push_error("Failed to load graph at path: %s" % path)
+		return
+	open_file_selected.emit(graph)
 
 
 func _on_recent_files_id_pressed(id: int) -> void:

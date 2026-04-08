@@ -46,6 +46,13 @@ func _on_graph_changed(old_graph: GaeaGraph, generator: GaeaGenerator) -> void:
 	if not is_instance_valid(old_graph) or not is_instance_valid(generator):
 		return
 
-	var scene_path: String = generator.get_tree().edited_scene_root.scene_file_path
+	# UPSTREAM-FIX: Add null guards for the dereference chain to prevent null access
+	var tree := generator.get_tree()
+	if tree == null:
+		return
+	var scene_root := tree.edited_scene_root
+	if scene_root == null:
+		return
+	var scene_path: String = scene_root.scene_file_path
 	if old_graph.resource_path.begins_with(scene_path):
 		_panel.file_list.set_unsaved(old_graph)

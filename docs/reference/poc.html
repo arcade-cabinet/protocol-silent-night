@@ -853,7 +853,6 @@ WWWWWWW
             animate() {
                 requestAnimationFrame(() => this.animate());
                 const dt = Math.min(0.05, this.clock.getDelta());
-                const now = this.clock.getElapsedTime();
                 const camQuat = this.camera.quaternion;
 
                 // Animate Snow
