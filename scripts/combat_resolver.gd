@@ -24,7 +24,7 @@ func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vecto
 		audio_mgr.play_shot("#%s" % player_color.to_html(false))
 
 
-func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_ref: Dictionary, player_node: Node3D, obstacle_colliders: Array, boss_bar: ProgressBar, boss_panel: VBoxContainer, on_damage_player: Callable, on_kill_enemy: Callable, on_boss_killed: Callable, fx_root: Node3D, vfx: Array) -> void:
+func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_ref: Dictionary, player_node: Node3D, obstacle_colliders: Array, boss_bar: ProgressBar, boss_panel: VBoxContainer, on_damage_player: Callable, on_kill_enemy: Callable, on_boss_killed: Callable, fx_root: Node3D, vfx: Array, dmg_numbers: RefCounted = null) -> void:
 	for index in range(projectiles.size() - 1, -1, -1):
 		var projectile: Dictionary = projectiles[index]
 		projectile["life"] -= delta
@@ -44,6 +44,8 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 					enemy["hp"] -= float(projectile["damage"])
 					spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
 					if audio_mgr != null: audio_mgr.play_hit()
+					if dmg_numbers != null:
+						dmg_numbers.spawn(fx_root, enemy["node"].position + Vector3(0, 1.0, 0), float(projectile["damage"]), enemy["color"])
 					projectile["pierce"] -= 1
 					if enemy["hp"] <= 0.0:
 						on_kill_enemy.call(enemy_index)
@@ -54,6 +56,8 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 				boss_ref["hp"] -= float(projectile["damage"])
 				boss_bar.value = boss_ref["hp"]
 				spawn_hit_fx(fx_root, vfx, boss_ref["node"].position, boss_ref["color"])
+				if dmg_numbers != null:
+					dmg_numbers.spawn(fx_root, boss_ref["node"].position + Vector3(0, 2.0, 0), float(projectile["damage"]), boss_ref["color"], true)
 				projectile["pierce"] -= 1
 				if boss_ref["hp"] <= 0.0:
 					on_boss_killed.call()

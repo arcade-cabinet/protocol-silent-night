@@ -40,9 +40,10 @@ func tick_playing(delta: float) -> void:
 	update_player(delta)
 	update_spawning(delta)
 	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), spawn_projectile_hostile, main._test_scale("boss_attack_scale"))
-	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), on_boss_killed, main.fx_root, main.vfx)
+	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), on_boss_killed, main.fx_root, main.vfx, main.dmg_numbers)
 	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp)
 	main.combat.update_vfx(delta, main.vfx)
+	main.dmg_numbers.update(delta)
 	if not main.current_wave.get("is_boss_wave", false):
 		main.wave_time_remaining = maxf(0.0, main.wave_time_remaining - delta * main._test_scale("wave_scale"))
 		if main.wave_time_remaining <= 0.0 and main.state == "playing":
@@ -145,7 +146,7 @@ func update_player(delta: float) -> void:
 	if main.move_velocity.length() > 0.01:
 		main.player_mesh.rotation.y = atan2(main.move_velocity.x, main.move_velocity.y)
 	main.player_ctrl.auto_fire(delta, main.player_state, main.player_node, closest_target, spawn_projectile_player, main._test_scale("player_fire_scale"), main._test_scale("player_damage_scale"))
-	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar)
+	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar, Callable(self, "spawn_aura_damage_number"))
 
 func update_spawning(delta: float) -> void:
 	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"))
@@ -168,6 +169,9 @@ func spawn_projectile_player(origin: Vector3, direction: Vector3, hostile: bool,
 func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
 	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color("ff617e"))
 
+func spawn_aura_damage_number(world_position: Vector3, amount: float, color: Color) -> void:
+	main.dmg_numbers.spawn(main.fx_root, world_position, amount, color)
+
 func on_boss_killed() -> void:
 	main.boss_ref["node"].queue_free()
 	main.boss_ref = {}
@@ -178,6 +182,7 @@ func gain_xp(amount: int) -> void:
 	main.progression.gain_xp(amount, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
 
 func clear_runtime() -> void:
+	main.dmg_numbers.clear()
 	for array_ref in [main.enemies, main.projectiles, main.pickups, main.vfx]:
 		for entry in array_ref:
 			if entry.has("node") and entry["node"] != null:

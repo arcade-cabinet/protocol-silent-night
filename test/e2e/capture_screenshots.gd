@@ -27,9 +27,15 @@ func _run() -> void:
 	_main.configure_test_mode({
 		"invincible": true,
 		"auto_collect": true,
-		"auto_choose_upgrade": true
+		"auto_choose_upgrade": true,
+		"player_damage_scale": 0.25,
+		"player_fire_scale": 3.0
 	})
 	_main.start_run("holly_striker")
+	for _i in range(120):
+		await process_frame
+	for _j in range(8):
+		_main.dmg_numbers.spawn(_main.fx_root, Vector3(randf_range(-4.0, 4.0), 1.2, randf_range(-4.0, 4.0)), randf_range(8.0, 40.0), Color("ffd166"), _j % 3 == 0)
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/gameplay.png" % _shot_dir)

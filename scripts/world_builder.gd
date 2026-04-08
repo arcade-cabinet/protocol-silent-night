@@ -110,13 +110,16 @@ static func read_json(path: String) -> Variant:
 	return parsed
 
 
-static func update_camera(camera: Camera3D, player_node: Node3D, state: String, config: Dictionary, delta: float) -> void:
+static func update_camera(camera: Camera3D, player_node: Node3D, state: String, config: Dictionary, delta: float, shake_magnitude: float = 0.0) -> float:
 	if camera == null:
-		return
+		return 0.0
 	var target := Vector3.ZERO
 	if player_node != null and state != "menu":
 		target = player_node.position
 	var arena_radius := float(config.get("arena_radius", 18.0))
 	var target_position := target + Vector3(0, arena_radius * 1.28, arena_radius * 0.82)
+	if shake_magnitude > 0.0:
+		target_position += Vector3(randf_range(-1.0, 1.0), randf_range(-0.4, 0.4), randf_range(-1.0, 1.0)) * shake_magnitude
 	camera.position = camera.position.lerp(target_position, clampf(delta * 4.0, 0.0, 1.0))
 	camera.look_at(target + Vector3(0, 0.8, 0), Vector3.UP)
+	return maxf(0.0, shake_magnitude - delta * 2.2)
