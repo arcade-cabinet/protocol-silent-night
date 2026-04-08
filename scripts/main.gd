@@ -24,6 +24,7 @@ var audio_mgr := preload("res://scripts/audio_manager.gd").new()
 var dmg_numbers := preload("res://scripts/damage_numbers.gd").new()
 var present_animator := preload("res://scripts/present_animator.gd").new()
 var afterimages: Array = []
+var particles := preload("res://scripts/particle_effects.gd").new()
 var progression: RefCounted
 var game_mgr: RefCounted
 var shake_magnitude: float = 0.0
@@ -178,6 +179,7 @@ func _kill_enemy(enemy_index: int) -> void:
 	var enemy: Dictionary = enemies[enemy_index]
 	combat.spawn_pickup(pickup_root, pickups, enemy["node"].position, enemy["drop_xp"])
 	combat.spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
+	particles.spawn_death_burst(fx_root, enemy["node"].position, enemy["color"], float(enemy["node"].scale.x))
 	enemy["node"].queue_free()
 	enemies.remove_at(enemy_index)
 	progression.record_kill()

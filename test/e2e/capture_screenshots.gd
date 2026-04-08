@@ -36,6 +36,11 @@ func _run() -> void:
 		await process_frame
 	for _j in range(8):
 		_main.dmg_numbers.spawn(_main.fx_root, Vector3(randf_range(-4.0, 4.0), 1.2, randf_range(-4.0, 4.0)), randf_range(8.0, 40.0), Color("ffd166"), _j % 3 == 0)
+	_main.particles.spawn_death_burst(_main.fx_root, Vector3(2.2, 0.0, -1.5), Color("ff617e"), 1.2)
+	_main.particles.spawn_death_burst(_main.fx_root, Vector3(-3.0, 0.0, 1.8), Color("8cff8e"), 1.0)
+	_main.particles.spawn_muzzle_flash(_main.fx_root, Vector3(0.4, 0.9, 0.3), Vector3(1, 0, 0), Color("69d6ff"))
+	_main.particles.spawn_pickup_sparkle(_main.fx_root, Vector3(-1.5, 0.2, -2.5))
+	_main.particles.update(0.02)
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/gameplay.png" % _shot_dir)
