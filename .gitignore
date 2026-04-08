@@ -1,6 +1,7 @@
 .godot/
 reports/
 .artifacts/
+.claude/worktrees/
 # Godot-generated translation imports (scoped to avoid ignoring source .translation files)
 *.translation.import
 
@@ -13,3 +14,8 @@ reports/
 # OS temp files
 .DS_Store
 Thumbs.db
+
+# Build artifacts
+export/
+*.pck
+*.zip

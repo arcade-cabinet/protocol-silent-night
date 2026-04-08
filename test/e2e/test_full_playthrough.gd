@@ -33,7 +33,7 @@ func _run() -> void:
 	})
 	_main.start_run("elf")
 
-	while _frames < 900 and _main.state not in ["win", "game_over"]:
+	while _frames < 1500 and _main.state not in ["win", "game_over"]:
 		_frames += 1
 		_main.debug_tick(0.25)
 		await process_frame

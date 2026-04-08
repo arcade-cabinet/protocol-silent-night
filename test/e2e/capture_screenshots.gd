@@ -29,17 +29,27 @@ func _run() -> void:
 		"auto_collect": true,
 		"auto_choose_upgrade": true
 	})
-	_main.start_run("elf")
+	_main.start_run("holly_striker")
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/gameplay.png" % _shot_dir)
 
+	_main.configure_test_mode({
+		"invincible": true,
+		"auto_collect": true,
+		"auto_choose_upgrade": false
+	})
 	_main.debug_force_level_up()
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/level_up.png" % _shot_dir)
 
 	_main._apply_upgrade("damage")
+	_main.configure_test_mode({
+		"invincible": true,
+		"auto_collect": true,
+		"auto_choose_upgrade": true
+	})
 	_main.debug_spawn_boss()
 	await process_frame
 	await process_frame

@@ -34,11 +34,57 @@ func generate_board(board_seed: int, config: Dictionary) -> Dictionary:
 			"snow_cap": rng.randf() > 0.42
 		})
 
+	var obstacle_types := ["gift_stack", "bollard_cluster", "crate"]
+	var obstacles: Array = []
+	var obstacle_count := rng.randi_range(4, 8)
+	var min_obstacle_dist := 2.0
+	var obstacle_safe_margin := safe_radius + 1.5
+	for obstacle_index in range(obstacle_count):
+		var placed := false
+		for attempt in range(40):
+			var angle := rng.randf() * TAU
+			var radius := rng.randf_range(obstacle_safe_margin, arena_radius * 0.85)
+			var candidate := Vector2.RIGHT.rotated(angle) * radius
+			var too_close := false
+			for existing in obstacles:
+				if candidate.distance_to(existing["world"]) < min_obstacle_dist:
+					too_close = true
+					break
+			if not too_close:
+				obstacles.append({
+					"world": candidate,
+					"type": obstacle_types[rng.randi_range(0, obstacle_types.size() - 1)]
+				})
+				placed = true
+				break
+
+	var landmark_types := ["candy_cane_gate", "wreath_machine", "present_heap", "signal_pylon"]
+	var landmarks: Array = []
+	var landmark_count := rng.randi_range(2, 4)
+	for landmark_index in range(landmark_count):
+		var placed := false
+		for attempt in range(40):
+			var angle := rng.randf() * TAU
+			var radius := rng.randf_range(arena_radius * 0.88, arena_radius + 1.0)
+			var candidate := Vector2.RIGHT.rotated(angle) * radius
+			var too_close := false
+			for existing in landmarks:
+				if candidate.distance_to(existing["world"]) < 3.0:
+					too_close = true
+					break
+			if not too_close:
+				landmarks.append({
+					"world": candidate,
+					"type": landmark_types[rng.randi_range(0, landmark_types.size() - 1)]
+				})
+				placed = true
+				break
+
 	return {
 		"seed": board_seed,
 		"safe_radius": safe_radius,
 		"drifts": drifts,
 		"ridges": ridges,
-		"obstacles": [],
-		"landmarks": []
+		"obstacles": obstacles,
+		"landmarks": landmarks
 	}

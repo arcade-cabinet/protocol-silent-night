@@ -29,6 +29,36 @@
     "drop_xp": 2,
     "color": "#ffb14d"
   },
+  "elf": {
+    "id": "elf",
+    "name": "Rogue Cyber-Elf",
+    "max_hp": 45.0,
+    "speed": 4.8,
+    "contact_damage": 12.0,
+    "scale": 0.85,
+    "drop_xp": 3,
+    "color": "#55f7ff"
+  },
+  "santa": {
+    "id": "santa",
+    "name": "Corrupt Mecha-Santa",
+    "max_hp": 140.0,
+    "speed": 2.6,
+    "contact_damage": 22.0,
+    "scale": 1.25,
+    "drop_xp": 5,
+    "color": "#ff4466"
+  },
+  "bumble": {
+    "id": "bumble",
+    "name": "Feral Bumble",
+    "max_hp": 95.0,
+    "speed": 3.0,
+    "contact_damage": 18.0,
+    "scale": 1.35,
+    "drop_xp": 4,
+    "color": "#ffd44d"
+  },
   "boss": {
     "id": "boss",
     "name": "Krampus-Prime",
