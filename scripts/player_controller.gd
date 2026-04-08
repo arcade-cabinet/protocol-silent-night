@@ -116,13 +116,13 @@ func read_move_input(input_move: Vector2, touch_active: bool) -> Vector2:
 	return move
 
 
-func auto_fire(delta: float, player_state: Dictionary, player_node: Node3D, on_closest_target: Callable, on_spawn_projectile: Callable, fire_scale: float, damage_scale: float) -> void:
+func auto_fire(delta: float, player_state: Dictionary, player_node: Node3D, on_closest_target: Callable, on_spawn_projectile: Callable, fire_scale: float, damage_scale: float) -> bool:
 	player_state["last_shot"] += delta
 	if player_state["last_shot"] < float(player_state["class"]["fire_rate"]) / fire_scale:
-		return
+		return false
 	var target: Dictionary = on_closest_target.call()
 	if target.is_empty():
-		return
+		return false
 	player_state["last_shot"] = 0.0
 	var origin := player_node.position + Vector3(0, 0.55, 0)
 	var target_position: Vector3 = target["node"].position
@@ -137,6 +137,7 @@ func auto_fire(delta: float, player_state: Dictionary, player_node: Node3D, on_c
 		else:
 			shot_dir = dir.rotated(Vector3.UP, randf_range(-spread, spread) * 0.35)
 		on_spawn_projectile.call(origin, shot_dir, false, float(player_state["class"]["damage"]) * damage_scale, int(player_state["class"]["pierce"]), float(player_state["class"]["bullet_speed"]), float(player_state["class"]["bullet_scale"]))
+	return true
 
 
 func update_player_aura(delta: float, player_state: Dictionary, player_node: Node3D, enemies: Array, boss_ref: Dictionary, damage_scale: float, on_kill_enemy: Callable, on_spawn_hit_fx: Callable, boss_bar: ProgressBar, on_damage_number: Callable = Callable()) -> void:

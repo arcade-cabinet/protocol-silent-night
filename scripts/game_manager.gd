@@ -41,9 +41,10 @@ func tick_playing(delta: float) -> void:
 	update_spawning(delta)
 	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), spawn_projectile_hostile, main._test_scale("boss_attack_scale"))
 	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), on_boss_killed, main.fx_root, main.vfx, main.dmg_numbers)
-	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp)
+	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles)
 	main.combat.update_vfx(delta, main.vfx)
 	main.dmg_numbers.update(delta)
+	main.particles.update(delta)
 	if not main.current_wave.get("is_boss_wave", false):
 		main.wave_time_remaining = maxf(0.0, main.wave_time_remaining - delta * main._test_scale("wave_scale"))
 		if main.wave_time_remaining <= 0.0 and main.state == "playing":
@@ -138,6 +139,7 @@ func update_player(delta: float) -> void:
 		main.dash_timer = float(main.config["dash_duration"])
 		main.dash_cooldown_timer = float(main.config["dash_cooldown"])
 		main.dash_pressed = false
+		main.afterimages.append(main.present_animator.spawn_dash_afterimage(main.fx_root, main.player_node))
 	var speed: float = float(main.player_state["class"]["speed"]) * main._test_scale("player_speed_scale")
 	if main.dash_timer > 0.0:
 		main.dash_timer -= delta
@@ -145,7 +147,11 @@ func update_player(delta: float) -> void:
 	main._move_actor(main.player_node, Vector3(main.move_velocity.x, 0.0, main.move_velocity.y), speed, delta, 0.62)
 	if main.move_velocity.length() > 0.01:
 		main.player_mesh.rotation.y = atan2(main.move_velocity.x, main.move_velocity.y)
-	main.player_ctrl.auto_fire(delta, main.player_state, main.player_node, closest_target, spawn_projectile_player, main._test_scale("player_fire_scale"), main._test_scale("player_damage_scale"))
+	main.present_animator.update(delta, main.player_mesh, main.move_velocity)
+	main.present_animator.update_afterimages(main.afterimages, delta)
+	var fired: bool = main.player_ctrl.auto_fire(delta, main.player_state, main.player_node, closest_target, spawn_projectile_player, main._test_scale("player_fire_scale"), main._test_scale("player_damage_scale"))
+	if fired:
+		main.present_animator.trigger_recoil()
 	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar, Callable(self, "spawn_aura_damage_number"))
 
 func update_spawning(delta: float) -> void:
@@ -164,10 +170,10 @@ func closest_target() -> Dictionary:
 	return main.enemies_ai.closest_target(main.enemies, main.boss_ref, main.player_node, float(main.player_state["class"]["range"]))
 
 func spawn_projectile_player(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
-	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color(main.player_state["class"]["color"]))
+	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color(main.player_state["class"]["color"]), main.fx_root, main.particles)
 
 func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
-	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color("ff617e"))
+	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color("ff617e"), main.fx_root, main.particles)
 
 func spawn_aura_damage_number(world_position: Vector3, amount: float, color: Color) -> void:
 	main.dmg_numbers.spawn(main.fx_root, world_position, amount, color)
@@ -182,7 +188,7 @@ func gain_xp(amount: int) -> void:
 	main.progression.gain_xp(amount, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
 
 func clear_runtime() -> void:
-	main.dmg_numbers.clear()
+	main.dmg_numbers.clear(); main.particles.clear()
 	for array_ref in [main.enemies, main.projectiles, main.pickups, main.vfx]:
 		for entry in array_ref:
 			if entry.has("node") and entry["node"] != null:

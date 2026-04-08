@@ -10,7 +10,7 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float, player_color: Color) -> void:
+func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float, player_color: Color, fx_root: Node3D = null, particles: RefCounted = null) -> void:
 	var node := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
 	sphere.radius = scale_value
@@ -22,6 +22,8 @@ func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vecto
 	projectiles.append({"node": node, "direction": direction, "hostile": hostile, "damage": damage, "pierce": pierce, "speed": speed, "life": 1.0})
 	if audio_mgr != null and not hostile:
 		audio_mgr.play_shot("#%s" % player_color.to_html(false))
+	if particles != null and fx_root != null and not hostile:
+		particles.spawn_muzzle_flash(fx_root, origin, direction, player_color)
 
 
 func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_ref: Dictionary, player_node: Node3D, obstacle_colliders: Array, boss_bar: ProgressBar, boss_panel: VBoxContainer, on_damage_player: Callable, on_kill_enemy: Callable, on_boss_killed: Callable, fx_root: Node3D, vfx: Array, dmg_numbers: RefCounted = null) -> void:
@@ -70,7 +72,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 			projectiles[index] = projectile
 
 
-func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: Dictionary, test_mode: Dictionary, on_gain_xp: Callable) -> void:
+func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: Dictionary, test_mode: Dictionary, on_gain_xp: Callable, fx_root: Node3D = null, particles: RefCounted = null) -> void:
 	for index in range(pickups.size() - 1, -1, -1):
 		var pickup: Dictionary = pickups[index]
 		var to_player: Vector3 = player_node.position - pickup["node"].position
@@ -84,6 +86,8 @@ func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: D
 		if dist <= float(config["pickup_auto_collect_radius"]) or bool(test_mode.get("auto_collect", false)):
 			on_gain_xp.call(int(pickup["value"]))
 			if audio_mgr != null: audio_mgr.play_pickup()
+			if particles != null and fx_root != null:
+				particles.spawn_pickup_sparkle(fx_root, pickup["node"].position)
 			pickup["node"].queue_free()
 			pickups.remove_at(index)
 		else:
