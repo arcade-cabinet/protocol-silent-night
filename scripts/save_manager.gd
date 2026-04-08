@@ -6,7 +6,13 @@ const DEFAULT_STATE := {
 		"santa": false,
 		"bumble": false
 	},
-	"best_wave": 0
+	"best_wave": 0,
+	"achievements": {
+		"total_kills": 0,
+		"total_runs": 0,
+		"total_waves_cleared": 0,
+		"campaign_clears": 0
+	}
 }
 
 var save_path: String = "user://silent_night_save.json"
@@ -60,7 +66,35 @@ func unlock(class_id: String) -> bool:
 
 func register_wave_reached(wave_number: int) -> void:
 	state["best_wave"] = maxi(int(state.get("best_wave", 0)), wave_number)
+	var achievements: Dictionary = state.get("achievements", {})
+	achievements["total_waves_cleared"] = int(achievements.get("total_waves_cleared", 0)) + 1
+	state["achievements"] = achievements
 	save_state()
+
+
+func record_kill(amount: int = 1) -> void:
+	var achievements: Dictionary = state.get("achievements", {})
+	achievements["total_kills"] = int(achievements.get("total_kills", 0)) + amount
+	state["achievements"] = achievements
+	save_state()
+
+
+func record_run_start() -> void:
+	var achievements: Dictionary = state.get("achievements", {})
+	achievements["total_runs"] = int(achievements.get("total_runs", 0)) + 1
+	state["achievements"] = achievements
+	save_state()
+
+
+func record_campaign_clear() -> void:
+	var achievements: Dictionary = state.get("achievements", {})
+	achievements["campaign_clears"] = int(achievements.get("campaign_clears", 0)) + 1
+	state["achievements"] = achievements
+	save_state()
+
+
+func get_achievement(key: String) -> int:
+	return int(state.get("achievements", {}).get(key, 0))
 
 
 func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:

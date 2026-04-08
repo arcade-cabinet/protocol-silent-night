@@ -1,13 +1,14 @@
 extends RefCounted
 
 const UI_SCREENS := preload("res://scripts/ui_screens.gd")
+const THEME := preload("res://scripts/holidaypunk_theme.gd")
 
 
 static func build_start_screen(root: Control) -> Dictionary:
 	var start_screen := PanelContainer.new()
 	start_screen.name = "StartScreen"
 	start_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	start_screen.self_modulate = Color(0.02, 0.04, 0.06, 0.94)
+	start_screen.add_theme_stylebox_override("panel", THEME.make_panel_style(THEME.NEON_CYAN, Color(0.02, 0.04, 0.06, 0.94)))
 	root.add_child(start_screen)
 
 	var start_margin := MarginContainer.new()
@@ -23,17 +24,19 @@ static func build_start_screen(root: Control) -> Dictionary:
 	start_margin.add_child(start_vbox)
 
 	var title := Label.new()
-	title.text = "Protocol: Silent Night"
+	title.text = "PROTOCOL: SILENT NIGHT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 42)
-	title.modulate = Color("edf7ff")
+	title.add_theme_font_size_override("font_size", 48)
+	title.add_theme_color_override("font_color", THEME.NEON_WHITE)
+	title.add_theme_color_override("font_outline_color", THEME.NEON_CYAN)
+	title.add_theme_constant_override("outline_size", 6)
 	start_vbox.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "10 waves to salvation"
+	subtitle.text = "// ENDLESS VIGIL //"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 18)
-	subtitle.modulate = Color("69d6ff")
+	subtitle.add_theme_font_size_override("font_size", 20)
+	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	start_vbox.add_child(subtitle)
 
 	var classes_box := GridContainer.new()
@@ -100,15 +103,19 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	boss_panel.visible = false
 	root.add_child(boss_panel)
 	var boss_title := Label.new()
-	boss_title.text = "KRAMPUS-PRIME"
+	boss_title.text = "// KRAMPUS-PRIME //"
 	boss_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	boss_title.modulate = Color("ff4466")
-	boss_title.add_theme_font_size_override("font_size", 22)
+	boss_title.add_theme_color_override("font_color", THEME.NEON_RED)
+	boss_title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	boss_title.add_theme_constant_override("outline_size", 4)
+	boss_title.add_theme_font_size_override("font_size", 24)
 	boss_panel.add_child(boss_title)
 	var boss_bar := ProgressBar.new()
 	boss_bar.max_value = 100
 	boss_bar.value = 100
 	boss_bar.custom_minimum_size = Vector2(0, 22)
+	boss_bar.show_percentage = false
+	THEME.apply_to_progress_bar(boss_bar, THEME.NEON_RED)
 	boss_panel.add_child(boss_bar)
 	return {"boss_panel": boss_panel, "boss_bar": boss_bar}
 
@@ -126,8 +133,10 @@ static func build_overlays_and_controls(root: Control, on_dash_down: Callable, o
 
 
 static func _make_hud_panel(label_text: String, accent: String) -> Dictionary:
+	var accent_color := Color(accent)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(220, 92)
+	panel.add_theme_stylebox_override("panel", THEME.make_panel_style(accent_color))
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 12)
 	margin.add_theme_constant_override("margin_top", 10)
@@ -139,16 +148,21 @@ static func _make_hud_panel(label_text: String, accent: String) -> Dictionary:
 	margin.add_child(box)
 	var label := Label.new()
 	label.text = label_text
-	label.modulate = Color(accent)
+	label.add_theme_color_override("font_color", accent_color)
+	label.add_theme_font_size_override("font_size", 13)
 	box.add_child(label)
 	var value := Label.new()
 	value.text = "0"
-	value.add_theme_font_size_override("font_size", 22)
-	value.modulate = Color("edf7ff")
+	value.add_theme_font_size_override("font_size", 24)
+	value.add_theme_color_override("font_color", THEME.NEON_WHITE)
+	value.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	value.add_theme_constant_override("outline_size", 3)
 	box.add_child(value)
 	var bar := ProgressBar.new()
 	bar.max_value = 100
 	bar.value = 100
 	bar.custom_minimum_size = Vector2(0, 14)
+	bar.show_percentage = false
+	THEME.apply_to_progress_bar(bar, accent_color)
 	box.add_child(bar)
 	return {"node": panel, "label": label, "value": value, "bar": bar}

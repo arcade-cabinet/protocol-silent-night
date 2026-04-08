@@ -179,6 +179,9 @@ func _kill_enemy(enemy_index: int) -> void:
 	enemy["node"].queue_free()
 	enemies.remove_at(enemy_index)
 	progression.record_kill()
+	var save_mgr := _save_manager()
+	if save_mgr != null and save_mgr.has_method("record_kill"):
+		save_mgr.record_kill()
 
 func _spawn_hit_fx(world_position: Vector3, color: Color) -> void:
 	combat.spawn_hit_fx(fx_root, vfx, world_position, color)
