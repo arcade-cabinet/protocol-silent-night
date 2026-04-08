@@ -1,0 +1,32 @@
+[
+  {
+    "id": "damage",
+    "name": "High Caliber",
+    "description": "+25% damage"
+  },
+  {
+    "id": "fire_rate",
+    "name": "Overclock CPU",
+    "description": "+18% fire rate"
+  },
+  {
+    "id": "health",
+    "name": "Festive Plating",
+    "description": "+50 max hp and heal"
+  },
+  {
+    "id": "speed",
+    "name": "Kinetic Boots",
+    "description": "+15% move speed"
+  },
+  {
+    "id": "range",
+    "name": "Advanced Optics",
+    "description": "+20% range"
+  },
+  {
+    "id": "aura",
+    "name": "Tesla Wreath",
+    "description": "damaging holiday aura"
+  }
+]

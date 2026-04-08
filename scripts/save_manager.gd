@@ -1,0 +1,72 @@
+extends Node
+
+const DEFAULT_STATE := {
+	"unlocked": {
+		"elf": true,
+		"santa": false,
+		"bumble": false
+	},
+	"best_wave": 0
+}
+
+var save_path: String = "user://silent_night_save.json"
+var state: Dictionary = {}
+
+
+func _ready() -> void:
+	load_state()
+
+
+func set_save_path_for_tests(path: String) -> void:
+	save_path = path
+
+
+func load_state() -> Dictionary:
+	state = DEFAULT_STATE.duplicate(true)
+	if not FileAccess.file_exists(save_path):
+		return state
+	var file := FileAccess.open(save_path, FileAccess.READ)
+	if file == null:
+		return state
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if parsed is Dictionary:
+		state = _merge_dict(DEFAULT_STATE.duplicate(true), parsed)
+	return state
+
+
+func save_state() -> void:
+	var file := FileAccess.open(save_path, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(state, "\t"))
+
+
+func reset_state_for_tests() -> void:
+	state = DEFAULT_STATE.duplicate(true)
+	if FileAccess.file_exists(save_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
+
+
+func is_unlocked(class_id: String) -> bool:
+	return bool(state.get("unlocked", {}).get(class_id, false))
+
+
+func unlock(class_id: String) -> bool:
+	if is_unlocked(class_id):
+		return false
+	state["unlocked"][class_id] = true
+	save_state()
+	return true
+
+
+func register_wave_reached(wave_number: int) -> void:
+	state["best_wave"] = maxi(int(state.get("best_wave", 0)), wave_number)
+	save_state()
+
+
+func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:
+	for key in incoming.keys():
+		if incoming[key] is Dictionary and base.get(key) is Dictionary:
+			base[key] = _merge_dict(base[key], incoming[key])
+		else:
+			base[key] = incoming[key]
+	return base

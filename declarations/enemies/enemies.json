@@ -1,0 +1,42 @@
+{
+  "grunt": {
+    "id": "grunt",
+    "name": "Grinch-Bot",
+    "max_hp": 24.0,
+    "speed": 3.4,
+    "contact_damage": 9.0,
+    "scale": 0.75,
+    "drop_xp": 1,
+    "color": "#f5f7fb"
+  },
+  "rusher": {
+    "id": "rusher",
+    "name": "Reindeer-Rusher",
+    "max_hp": 16.0,
+    "speed": 5.5,
+    "contact_damage": 6.0,
+    "scale": 0.62,
+    "drop_xp": 1,
+    "color": "#9b6332"
+  },
+  "tank": {
+    "id": "tank",
+    "name": "Gingerbread Golem",
+    "max_hp": 60.0,
+    "speed": 2.0,
+    "contact_damage": 18.0,
+    "scale": 1.18,
+    "drop_xp": 2,
+    "color": "#ffb14d"
+  },
+  "boss": {
+    "id": "boss",
+    "name": "Krampus-Prime",
+    "max_hp": 1200.0,
+    "speed": 2.7,
+    "contact_damage": 20.0,
+    "scale": 1.8,
+    "drop_xp": 0,
+    "color": "#ff3a61"
+  }
+}
