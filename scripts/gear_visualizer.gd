@@ -20,12 +20,16 @@ static func attach(visual: Node3D, gear_system: RefCounted) -> void:
 	var slots: Variant = gear_system.get("equipped")
 	if not (slots is Dictionary):
 		return
+	var y_stack: float = 1.75
 	for slot in slots.keys():
-		var item: Dictionary = slots[slot]
+		var raw_item: Variant = slots[slot]
+		if not (raw_item is Dictionary):
+			continue
+		var item: Dictionary = raw_item
 		if item.is_empty():
 			continue
 		_attach_slot(visual, slot, item)
-		FLAIR_VIZ.attach_flair(visual, item.get("flair", []))
+		y_stack = FLAIR_VIZ.attach_flair(visual, item.get("flair", []), y_stack)
 
 
 static func _attach_slot(visual: Node3D, slot: String, item: Dictionary) -> void:

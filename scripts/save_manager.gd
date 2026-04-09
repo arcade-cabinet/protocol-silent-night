@@ -146,6 +146,18 @@ func set_equipped_gear(equipped: Dictionary) -> void:
 	save_state()
 
 
+func get_gear_inventory() -> Array:
+	var raw: Variant = state.get("gear_inventory", [])
+	return raw.duplicate(true) if raw is Array else []
+
+
+func add_to_gear_inventory(item: Dictionary) -> void:
+	var inv: Array = get_gear_inventory()
+	inv.append(item)
+	state["gear_inventory"] = inv
+	save_state()
+
+
 func set_preference(key: String, value) -> void:
 	var prefs: Dictionary = state.get("preferences", {})
 	prefs[key] = value

@@ -58,12 +58,14 @@ static func on_difficulty_selected(main: Node, tier: int, permadeath_flag: bool)
 
 
 static func load_equipped_gear(main: Node, sm: Node) -> void:
+	if main.gear_sys == null:
+		return
 	for slot in GearSystem.SLOTS:
 		main.gear_sys.equipped[slot] = {}
 	if sm == null:
 		return
 	var equipped: Dictionary = sm.get_equipped_gear()
-	for slot in equipped.keys():
-		var item: Variant = equipped[slot]
-		if item is Dictionary and not item.is_empty():
+	for slot in GearSystem.SLOTS:
+		var item: Variant = equipped.get(slot, {})
+		if item is Dictionary and not item.is_empty() and String(item.get("slot", slot)) == slot:
 			main.gear_sys.equip(item)

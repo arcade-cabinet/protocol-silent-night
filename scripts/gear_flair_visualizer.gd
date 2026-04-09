@@ -5,23 +5,33 @@ extends RefCounted
 ## procedural mesh composition built from primitives.
 
 
-static func attach_flair(visual: Node3D, flair_list: Array) -> void:
-	var y_stack := 1.75
+static func attach_flair(visual: Node3D, flair_list: Array, y_start: float = 1.75) -> float:
+	var y_stack: float = y_start
 	for piece in flair_list:
 		if not (piece is Dictionary):
 			continue
 		var ptype := String(piece.get("type", ""))
 		var color := Color(String(piece.get("color", "#ffffff")))
 		match ptype:
-			"orbiting_particle": _spawn_orbit(visual, int(piece.get("count", 2)), float(piece.get("radius", 0.6)), color)
-			"pulsing_glow": _spawn_aura_shell(visual, color, float(piece.get("intensity", 1.0)))
-			"frost_crystals": _spawn_frost(visual, int(piece.get("count", 3)), color)
-			"ember_glow": _spawn_ember(visual, color, float(piece.get("intensity", 1.0)))
-			"sparkle_burst": _spawn_sparkle(visual, int(piece.get("count", 4)), color)
-			"halo_ring": _spawn_halo(visual, float(piece.get("radius", 0.8)), color, y_stack)
-			"floating_icon": _spawn_floating_quad(visual, color, y_stack)
-			"dripping_icicles": _spawn_icicles(visual, int(piece.get("count", 3)), color)
-		y_stack += 0.15
+			"orbiting_particle":
+				_spawn_orbit(visual, int(piece.get("count", 2)), float(piece.get("radius", 0.6)), color)
+			"pulsing_glow":
+				_spawn_aura_shell(visual, color, float(piece.get("intensity", 1.0)))
+			"frost_crystals":
+				_spawn_frost(visual, int(piece.get("count", 3)), color)
+			"ember_glow":
+				_spawn_ember(visual, color, float(piece.get("intensity", 1.0)))
+			"sparkle_burst":
+				_spawn_sparkle(visual, int(piece.get("count", 4)), color)
+			"halo_ring":
+				_spawn_halo(visual, float(piece.get("radius", 0.8)), color, y_stack)
+				y_stack += 0.15
+			"floating_icon":
+				_spawn_floating_quad(visual, color, y_stack)
+				y_stack += 0.15
+			"dripping_icicles":
+				_spawn_icicles(visual, int(piece.get("count", 3)), color)
+	return y_stack
 
 
 static func _spawn_orbit(visual: Node3D, count: int, radius: float, color: Color) -> void:
@@ -66,8 +76,9 @@ static func _spawn_sparkle(visual: Node3D, count: int, color: Color) -> void:
 static func _spawn_halo(visual: Node3D, radius: float, color: Color, y: float) -> void:
 	var halo := MeshInstance3D.new()
 	var torus := TorusMesh.new()
-	torus.outer_radius = radius
-	torus.inner_radius = radius - 0.08
+	var safe_outer: float = maxf(0.02, radius)
+	torus.outer_radius = safe_outer
+	torus.inner_radius = maxf(0.01, safe_outer - 0.08)
 	halo.mesh = torus
 	halo.position = Vector3(0, y, 0)
 	halo.material_override = _emissive_mat(color, 2.0)

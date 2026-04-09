@@ -125,14 +125,11 @@ func _on_buy(index: int) -> void:
 	var sm: Node = main._save_manager()
 	if sm == null or not sm.spend_cookies(cost):
 		return
-	var inv: Array = sm.state.get("gear_inventory", [])
-	inv.append(item)
-	sm.state["gear_inventory"] = inv
+	sm.add_to_gear_inventory(item)
 	if main.gear_sys != null:
-		main.gear_sys.equip(item)
-		sm.set_equipped_gear(main.gear_sys.equipped)
-	else:
-		sm.save_state()
+		var result: Dictionary = main.gear_sys.equip(item)
+		if bool(result.get("ok", false)):
+			sm.set_equipped_gear(main.gear_sys.equipped)
 	market_items.remove_at(index)
 	MARKET.refresh_market(market_state, market_items, sm.get_cookies())
 

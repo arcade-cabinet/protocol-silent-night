@@ -39,7 +39,6 @@ func _run() -> void:
 	_main.start_run("holly_striker")
 	for _i in range(120):
 		await process_frame
-	print("Player mesh child count: %d" % _main.player_mesh.get_child_count())
 	for _j in range(3):
 		_main.dmg_numbers.spawn(_main.fx_root, Vector3(randf_range(-6.0, -4.0), 1.2, randf_range(-4.0, -2.0)), randf_range(8.0, 40.0), Color("ffd166"), _j % 3 == 0)
 	_main.particles.spawn_death_burst(_main.fx_root, Vector3(2.2, 0.0, -1.5), Color("ff617e"), 1.2)
