@@ -3,6 +3,17 @@ extends RefCounted
 ## Helper functions extracted from main.gd to keep it under 200 LOC.
 ## These are thin wrappers that access main's state directly.
 
+const COAL_ACTIVATOR := preload("res://scripts/coal_activator.gd")
+static var _coal_activator: RefCounted
+
+
+static func activate_coal(main: Node, idx: int) -> void:
+	if _coal_activator == null:
+		_coal_activator = COAL_ACTIVATOR.new()
+	_coal_activator.activate(main, idx)
+	if main.ui_mgr != null and not main.ui_mgr.coal_sidebar_state.is_empty():
+		main.ui_mgr.refresh_coal_sidebar(main.coal_queue)
+
 
 static func kill_enemy(main: Node, enemy_index: int) -> void:
 	var enemy: Dictionary = main.enemies[enemy_index]

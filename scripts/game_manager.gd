@@ -76,10 +76,9 @@ func start_next_wave() -> void:
 		main.audio_mgr.play_wave_banner()
 		if main.current_wave.get("is_boss_wave", false): main.audio_mgr.play_music("boss")
 	if save_mgr != null and level == 5 and save_mgr.unlock("santa"):
-		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED")
-		main._refresh_start_screen()
-	if save_mgr != null:
-		save_mgr.register_wave_reached(level)
+		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED"); main._refresh_start_screen()
+	if save_mgr != null: save_mgr.register_wave_reached(level)
+	for _i in range(2): _spawn_board_object()
 
 func spawn_boss(hp_scale: float) -> void:
 	main.boss_ref = main.enemies_ai.spawn_boss(main.actor_root, main.boss_ref, main.enemy_defs, main.config, hp_scale, main._test_scale("boss_hp_scale"), main.ui_mgr.boss_panel, main.ui_mgr.boss_bar, main.ui_mgr.show_message)

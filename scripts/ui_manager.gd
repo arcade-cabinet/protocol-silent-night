@@ -2,6 +2,7 @@ extends RefCounted
 
 const UI_BUILDER := preload("res://scripts/ui_builder.gd")
 const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
+const COAL_SIDEBAR := preload("res://scripts/coal_sidebar_ui.gd")
 
 var hud_root: Container
 var start_screen: PanelContainer
@@ -28,13 +29,14 @@ var joystick_knob: ColorRect
 var start_classes_box: Container
 var upgrade_box: HBoxContainer
 var difficulty_panel: PanelContainer
+var coal_sidebar_state: Dictionary = {}
 
 var message_timer: float = 0.0
 var achievement_timer: float = 0.0
 var root_control: Control
 
 
-func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable()) -> CanvasLayer:
+func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable(), on_coal_activate: Callable = Callable()) -> CanvasLayer:
 	var ui := CanvasLayer.new()
 	ui.name = "UI"
 	parent.add_child(ui)
@@ -84,7 +86,15 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 		var diff := DIFFICULTY_SELECT.build(root, on_difficulty_selected)
 		difficulty_panel = diff["panel"]
 
+	if on_coal_activate.is_valid():
+		coal_sidebar_state = COAL_SIDEBAR.build_sidebar(root, on_coal_activate)
+
 	return ui
+
+
+func refresh_coal_sidebar(coal_queue: Array) -> void:
+	if not coal_sidebar_state.is_empty():
+		COAL_SIDEBAR.refresh(coal_sidebar_state, coal_queue)
 
 
 func refresh_start_screen(class_defs: Dictionary, save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
@@ -148,7 +158,7 @@ func hide_joystick() -> void:
 	joystick_knob.visible = false
 
 
-func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0) -> void:
+func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0, coal_queue: Array = []) -> void:
 	if hp_bar != null:
 		hp_bar.max_value = player_state.get("max_hp", 100.0)
 		hp_bar.value = player_state.get("hp", 100.0)
@@ -163,3 +173,4 @@ func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, k
 		kills_label.text = str(kills)
 	if cookie_label != null:
 		cookie_label.text = "%d C" % cookies
+	refresh_coal_sidebar(coal_queue)

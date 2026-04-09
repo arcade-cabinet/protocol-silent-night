@@ -104,7 +104,7 @@ func _ready() -> void:
 	audio_mgr.attach(runtime_root.get_node("Audio"))
 	combat.audio_mgr = audio_mgr
 	enemies_ai.audio_mgr = audio_mgr
-	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected)
+	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
 	progression = PROGRESSION_MANAGER.new(ui_mgr)
 	progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
@@ -180,13 +180,13 @@ func _damage_player(amount: float) -> void:
 	preload("res://scripts/player_damage_handler.gd").damage_player(self, amount)
 
 func _update_ui() -> void:
-	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills, run_cookies)
+	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills, run_cookies, coal_queue)
 
 func _kill_enemy(enemy_index: int) -> void:
 	preload("res://scripts/main_helpers.gd").kill_enemy(self, enemy_index)
 
-func _spawn_hit_fx(world_position: Vector3, color: Color) -> void:
-	combat.spawn_hit_fx(fx_root, vfx, world_position, color)
+func _spawn_hit_fx(world_position: Vector3, color: Color) -> void: combat.spawn_hit_fx(fx_root, vfx, world_position, color)
+func _activate_coal(idx: int) -> void: preload("res://scripts/main_helpers.gd").activate_coal(self, idx)
 func _can_occupy(wp: Vector3, r: float) -> bool:
 	return WORLD_BUILDER.can_occupy(wp, r, float(config["arena_radius"]), obstacle_colliders)
 func _move_actor(n: Node3D, d: Vector3, s: float, dt: float, r: float) -> void:
