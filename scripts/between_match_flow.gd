@@ -8,6 +8,7 @@ const SCREENS := preload("res://scripts/between_match_screens.gd")
 const MARKET := preload("res://scripts/market_screen.gd")
 const GEAR_SYSTEM := preload("res://scripts/gear_system.gd")
 const COAL_EFFECTS := preload("res://scripts/coal_effects.gd")
+const FLAIR_CATALOG := preload("res://scripts/flair_catalog.gd")
 
 const NICE_SCROLL_COOKIES := 15
 
@@ -94,9 +95,11 @@ func open_scrolls() -> Dictionary:
 
 func _enter_market() -> void:
 	current_stage = Stage.MARKET
-	market_items = MARKET.generate_items(market_rng, archetypes, [],
+	var sm: Node = main._save_manager()
+	var unlocked_flair: Array = FLAIR_CATALOG.get_unlocked(sm)
+	market_items = MARKET.generate_items(market_rng, archetypes, unlocked_flair,
 		main.current_wave_index + 1, main.difficulty_tier)
-	var cookies: int = main._save_manager().get_cookies() if main._save_manager() != null else 0
+	var cookies: int = sm.get_cookies() if sm != null else 0
 	MARKET.refresh_market(market_state, market_items, cookies)
 	market_state["panel"].visible = true
 
