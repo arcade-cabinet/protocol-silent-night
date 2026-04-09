@@ -35,6 +35,7 @@ var progression: RefCounted
 var game_mgr: RefCounted
 var flair_animator: Node
 var shake_magnitude: float = 0.0
+var screen_shake := preload("res://scripts/screen_shake.gd").new()
 
 var runtime_root: Node3D
 var board_root: Node3D
@@ -102,7 +103,7 @@ var test_mode: Dictionary = {}
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
-	audio_mgr.attach(runtime_root.get_node("Audio"))
+	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
 	combat.audio_mgr = audio_mgr; enemies_ai.audio_mgr = audio_mgr
 	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
 	flair_animator = preload("res://scripts/flair_animator.gd").new(); runtime_root.add_child(flair_animator)
@@ -144,6 +145,7 @@ func _tick(delta: float) -> void:
 		if wave_clear_timer <= 0.0:
 			game_mgr.start_next_wave()
 	shake_magnitude = WORLD_BUILDER.update_camera(camera, player_node, state, config, delta, shake_magnitude)
+	screen_shake.update(delta, camera)
 
 func _unhandled_input(event: InputEvent) -> void: preload("res://scripts/main_helpers.gd").handle_input(self, event)
 

@@ -5,6 +5,7 @@ const PROCEDURAL_MUSIC := preload("res://scripts/procedural_music.gd")
 const DEFAULT_VOLUME_DB: float = -15.0
 const MUSIC_VOLUME_DB: float = -20.0
 const POOL_SIZE: int = 6
+const BUS_NAMES: Array = ["Music", "SFX", "Ambient", "UI"]
 
 var _host: Node = null
 var _players: Array = []
@@ -15,26 +16,62 @@ var _music_player: AudioStreamPlayer = null
 var _current_track: String = ""
 
 
-func attach(host: Node) -> void:
+func attach(host: Node, save_manager: Node = null) -> void:
 	_sfx = PROCEDURAL_SFX.new()
 	_host = host
+	_ensure_buses()
+	_apply_saved_volumes(save_manager)
 	_players.clear()
 	_next_player = 0
 	for _i in range(POOL_SIZE):
 		var player := AudioStreamPlayer.new()
 		player.volume_db = DEFAULT_VOLUME_DB
-		player.bus = "Master"
+		player.bus = "SFX"
 		host.add_child(player)
 		_players.append(player)
 	_music_player = AudioStreamPlayer.new()
 	_music_player.volume_db = MUSIC_VOLUME_DB
-	_music_player.bus = "Master"
+	_music_player.bus = "Music"
 	host.add_child(_music_player)
 	_build_cache()
 	_cache["music_menu"] = PROCEDURAL_MUSIC.make_menu_loop()
 	_cache["music_gameplay"] = PROCEDURAL_MUSIC.make_gameplay_loop()
 	_cache["music_boss"] = PROCEDURAL_MUSIC.make_boss_loop()
 	play_music("menu")
+
+
+static func _ensure_buses() -> void:
+	for bus_name in BUS_NAMES:
+		if AudioServer.get_bus_index(bus_name) >= 0:
+			continue
+		var idx: int = AudioServer.bus_count
+		AudioServer.add_bus(idx)
+		AudioServer.set_bus_name(idx, bus_name)
+		AudioServer.set_bus_send(idx, "Master")
+
+
+func _apply_saved_volumes(sm: Node) -> void:
+	if sm == null or not sm.has_method("get_preference"):
+		return
+	var all_buses: Array = BUS_NAMES.duplicate()
+	all_buses.append("Master")
+	for bus_name in all_buses:
+		var key: String = "bus_volume_%s" % String(bus_name).to_lower()
+		var db: float = float(sm.get_preference(key, 0.0))
+		var idx: int = AudioServer.get_bus_index(bus_name)
+		if idx >= 0:
+			AudioServer.set_bus_volume_db(idx, db)
+
+
+func set_bus_volume(bus_name: String, db: float) -> void:
+	var idx: int = AudioServer.get_bus_index(bus_name)
+	if idx >= 0:
+		AudioServer.set_bus_volume_db(idx, clampf(db, -60.0, 6.0))
+
+
+func get_bus_volume(bus_name: String) -> float:
+	var idx: int = AudioServer.get_bus_index(bus_name)
+	return AudioServer.get_bus_volume_db(idx) if idx >= 0 else 0.0
 
 
 func _build_cache() -> void:
