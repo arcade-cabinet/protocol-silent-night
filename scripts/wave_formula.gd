@@ -21,6 +21,7 @@ static func generate_pressure_profile(run_seed: int) -> Dictionary:
 		"burst": rng.randf_range(0.15, 0.85),
 		"siege": rng.randf_range(0.2, 0.9),
 		"boss_affinity": rng.randf_range(0.15, 0.6),
+		"scroll": rng.randf_range(0.2, 0.9),
 	}
 
 
@@ -63,6 +64,7 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 		"max_bosses": max_bosses,
 		"boss_hp_scale": 1.0 + lf * 0.06,
 		"enemy_phase_level": enemy_phase_level,
+		"scroll_pressure": ScrollFormula.compute_scroll_pressure(lf * df, float(profile["scroll"]), rng, lookback, difficulty),
 	}
 
 
