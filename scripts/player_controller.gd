@@ -12,10 +12,8 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_player(actor_root: Node3D, class_id: String, class_defs: Dictionary, present_defs: Dictionary = {}, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
-	if present_defs.has(class_id):
-		return _spawn_present_player(actor_root, class_id, present_defs[class_id], gear_system, animator)
-	return _spawn_legacy_player(actor_root, class_id, class_defs)
+func spawn_player(actor_root: Node3D, class_id: String, _class_defs: Dictionary, present_defs: Dictionary = {}, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
+	return _spawn_present_player(actor_root, class_id, present_defs.get(class_id, {}), gear_system, animator)
 
 
 func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
@@ -54,52 +52,6 @@ func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary
 		"shake": 0.0
 	}
 	return {"node": player_node, "mesh": visual, "state": player_state}
-
-
-func _spawn_legacy_player(actor_root: Node3D, class_id: String, class_defs: Dictionary) -> Dictionary:
-	var player_node := Node3D.new()
-	player_node.name = "Player"
-	actor_root.add_child(player_node)
-	var player_scale := 0.95
-	match class_id:
-		"santa":
-			player_scale = 1.2
-		"bumble":
-			player_scale = 1.4
-	var player_mesh: MeshInstance3D = pixels.make_billboard_sprite(class_id, 2.35, Color(class_defs[class_id]["color"]))
-	player_node.add_child(player_mesh)
-	player_node.position = Vector3(0, 0.12, 0)
-	player_node.scale = Vector3.ONE * player_scale
-
-	var shadow := MeshInstance3D.new()
-	var shadow_mesh := PlaneMesh.new()
-	shadow_mesh.size = Vector2(1.15, 1.15)
-	shadow.mesh = shadow_mesh
-	shadow.position = Vector3(0, -0.58, 0)
-	shadow.material_override = materials.shadow_material()
-	player_node.add_child(shadow)
-
-	var thruster_ring := MeshInstance3D.new()
-	var thruster_mesh := TorusMesh.new()
-	thruster_mesh.outer_radius = 0.32
-	thruster_mesh.inner_radius = 0.06
-	thruster_ring.mesh = thruster_mesh
-	thruster_ring.rotation_degrees = Vector3(90, 0, 0)
-	thruster_ring.position = Vector3(0, -0.12, 0)
-	thruster_ring.material_override = materials.emissive_material(Color(class_defs[class_id]["accent"]), 1.1, 0.25)
-	player_node.add_child(thruster_ring)
-
-	var player_class: Dictionary = class_defs[class_id].duplicate(true)
-	var player_state := {
-		"class": player_class,
-		"hp": float(player_class["max_hp"]),
-		"max_hp": float(player_class["max_hp"]),
-		"last_shot": 0.0,
-		"aura_level": 0,
-		"aura_timer": 0.0,
-		"shake": 0.0
-	}
-	return {"node": player_node, "mesh": player_mesh, "state": player_state}
 
 
 func read_move_input(input_move: Vector2, touch_active: bool) -> Vector2:

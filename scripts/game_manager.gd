@@ -11,7 +11,7 @@ func _init(main_node: Node) -> void:
 	wave_spawner = WAVE_SPAWNER.new(main_node)
 
 func start_run(class_id: String) -> void:
-	if not main.class_defs.has(class_id) and not main.present_defs.has(class_id):
+	if not main.present_defs.has(class_id):
 		return
 	clear_runtime()
 	main.current_class_id = class_id
@@ -80,7 +80,7 @@ func start_next_wave() -> void:
 		main.audio_mgr.play_wave_banner()
 		if main.current_wave.get("is_boss_wave", false): main.audio_mgr.play_music("boss")
 	var santa_level: int = int(main.config.get("santa_unlock_level", 5))
-	if save_mgr != null and level >= santa_level and save_mgr.unlock("santa"):
+	if save_mgr != null and level >= santa_level and save_mgr.unlock("enemy_santa"):
 		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED"); main._refresh_start_screen()
 	if save_mgr != null: save_mgr.register_wave_reached(level)
 	for _i in range(int(main.config.get("board_objects_per_level", 2))): _spawn_board_object()
@@ -96,8 +96,8 @@ func end_run(win: bool) -> void:
 	var sm: Node = main._save_manager()
 	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
 	if sm != null: sm.set_coal(main.coal_queue)
-	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
-	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
+	if win and sm != null and sm.unlock("enemy_santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
+	if win and sm != null and sm.unlock("enemy_bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		preload("res://scripts/main_helpers.gd").finalize_end_screen(main, win)
 	else: main.between_match.start_flow()

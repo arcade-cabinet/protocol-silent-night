@@ -33,13 +33,24 @@ This file is the standing record for upstream monitoring. It is not an upgrade q
 ### `LimboAI`
 
 - Upstream: `https://github.com/limbonaut/limboai`
-- Status: not yet pinned in this repo
+- Current project pin: `v1.7.0` (GDExtension, released 2026-03-01)
+- Install method: vendored binary — `addons/limboai/` extracted from `limboai+v1.7.0.gdextension-4.6.zip`
+- GDExtension manifest: `addons/limboai/bin/limboai.gdextension` (`compatibility_minimum = "4.2"`)
 - Watch for:
-- Godot 4.6 release compatibility
-- prebuilt GDExtension availability
-- behavior tree and HSM stability relevant to arcade enemy AI
+  - New GDExtension releases compatible with Godot 4.6 (check `limboai+<ver>.gdextension-4.6.zip`)
+  - Breaking changes to `BTTask`, `BehaviorTree`, `LimboHSM` API surface
+  - Any Godot 4.6.x point release that breaks GDExtension ABI compatibility
 
 ## Review Log
+
+### 2026-04-09
+
+- `LimboAI` v1.7.0 installed as a prebuilt GDExtension targeting Godot 4.6.
+  - Downloaded `limboai+v1.7.0.gdextension-4.6.zip` from GitHub releases.
+  - Extracted to `addons/limboai/` — all-platform binaries included (macOS universal framework, Linux x86_64/arm64, Windows x86_64, Android, iOS, Web).
+  - No `plugin.cfg` — it is a GDExtension, not an editor plugin; Godot loads it automatically via `addons/limboai/bin/limboai.gdextension`.
+  - Smoke test: Godot 4.6.2 headless exits 0; no LimboAI load errors in output.
+  - `plug.gd` updated with upgrade instructions and pin comment.
 
 ### 2026-04-07
 

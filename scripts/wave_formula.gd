@@ -61,6 +61,7 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 		"burst_chance": burst_chance,
 		"burst_size": burst_size,
 		"boss_pressure": boss_pressure,
+		"is_boss_wave": boss_pressure >= 0.35,
 		"max_bosses": max_bosses,
 		"boss_hp_scale": 1.0 + lf * 0.06,
 		"enemy_phase_level": enemy_phase_level,

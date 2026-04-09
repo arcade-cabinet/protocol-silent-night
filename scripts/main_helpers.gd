@@ -74,10 +74,8 @@ static func load_equipped_gear(main: Node, sm: Node) -> void:
 
 const _DEF_PAIRS: Array = [
 	["config", "res://declarations/config/config.json"],
-	["class_defs", "res://declarations/classes/classes.json"],
 	["enemy_defs", "res://declarations/enemies/enemies.json"],
 	["upgrade_defs", "res://declarations/upgrades/upgrades.json"],
-	["wave_defs", "res://declarations/waves/waves.json"],
 	["present_defs", "res://declarations/presents/presents.json"],
 ]
 

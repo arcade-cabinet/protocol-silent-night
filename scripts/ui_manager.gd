@@ -118,23 +118,11 @@ func refresh_coal_sidebar(coal_queue: Array) -> void:
 	COAL_SIDEBAR.refresh(coal_sidebar_state, coal_queue)
 
 
-func refresh_start_screen(class_defs: Dictionary, save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
+func refresh_start_screen(_class_defs: Dictionary, save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
 	for child in start_classes_box.get_children():
 		child.queue_free()
 	if not present_defs.is_empty():
 		_build_present_buttons(present_defs, save_manager, on_class_pressed)
-	else:
-		for class_id in ["elf", "santa", "bumble"]:
-			var def: Dictionary = class_defs[class_id]
-			var button := Button.new()
-			button.text = "%s\n%s" % [def["name"], def["weapon_name"]]
-			button.custom_minimum_size = Vector2(220, 180)
-			button.disabled = save_manager != null and not save_manager.is_unlocked(class_id)
-			if button.disabled:
-				button.text += "\nLOCKED"
-			button.set_meta("class_id", class_id)
-			button.pressed.connect(on_class_pressed.bind(button))
-			start_classes_box.add_child(button)
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:

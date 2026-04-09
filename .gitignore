@@ -23,8 +23,13 @@ reports/
 local.properties
 build/
 
-# Claude worktrees
+# Claude worktrees and runtime state
 .claude/worktrees/
+.claude/state/task-batch/.last-compaction
+.claude/state/task-batch/.active
+
+# Session temp files
+.remember/tmp/
 
 # Temp / OS
 *.tmp

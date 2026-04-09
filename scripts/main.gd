@@ -5,10 +5,8 @@ const GAME_MANAGER := preload("res://scripts/game_manager.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 
 var config: Dictionary = {}
-var class_defs: Dictionary = {}
 var enemy_defs: Dictionary = {}
 var upgrade_defs: Array = []
-var wave_defs: Array = []
 var present_defs: Dictionary = {}
 
 var mat_factory := preload("res://scripts/material_factory.gd").new()
@@ -161,7 +159,7 @@ func _unhandled_input(event: InputEvent) -> void: preload("res://scripts/main_he
 func _load_definitions() -> void: preload("res://scripts/main_helpers.gd").load_definitions(self)
 
 func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
-func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(class_defs, _save_manager(), _on_class_button_pressed, present_defs)
+func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen({}, _save_manager(), _on_class_button_pressed, present_defs)
 func _return_to_menu() -> void: game_mgr.return_to_menu()
 
 func _trigger_level_up() -> void: preload("res://scripts/main_helpers.gd").trigger_level_up(self)

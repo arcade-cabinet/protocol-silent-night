@@ -46,6 +46,7 @@ func _build_visual(node: Node3D, object_type: String) -> void:
 
 
 func _build_mailbox(node: Node3D) -> void:
+	node.set_meta("obj_type", "mailbox")
 	var post := MeshInstance3D.new()
 	var post_mesh := CylinderMesh.new()
 	post_mesh.top_radius = 0.1
@@ -73,6 +74,7 @@ func _build_mailbox(node: Node3D) -> void:
 
 
 func _build_gift_cache(node: Node3D) -> void:
+	node.set_meta("obj_type", "gift_cache")
 	var base := MeshInstance3D.new()
 	var base_mesh := BoxMesh.new()
 	base_mesh.size = Vector3(1.2, 1.0, 1.2)
@@ -99,6 +101,7 @@ func _build_gift_cache(node: Node3D) -> void:
 
 
 func _build_chimney_vent(node: Node3D) -> void:
+	node.set_meta("obj_type", "chimney")
 	var stack := MeshInstance3D.new()
 	var stack_mesh := CylinderMesh.new()
 	stack_mesh.top_radius = 0.3

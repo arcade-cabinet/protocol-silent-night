@@ -66,6 +66,36 @@ func test_board_query_matches_continuous_arena_boundary() -> void:
 	assert_bool(main.debug_is_blocked(Vector3(ar * 1.6 + 0.5, 0.0, 0.0))).is_true()
 
 
+func test_present_hover_updates_radar_chart_data() -> void:
+	var select_ui: GDScript = preload("res://scripts/present_select_ui.gd")
+	var radar_script: GDScript = preload("res://scripts/stat_radar_chart.gd")
+	var root_ctrl: Control = auto_free(Control.new())
+	add_child(root_ctrl)
+	var radar_canvas: Control = radar_script.build(root_ctrl)
+	# Build minimal present definitions
+	var present_defs: Dictionary = {
+		"alpha": {"name": "Alpha", "tagline": "First", "unlock": "default",
+				"bow_color": "#ff0000", "hp": 100.0, "speed": 12.0, "damage": 14.0,
+				"fire_rate": 0.22, "range": 15.0, "pierce": 1.0},
+		"beta":  {"name": "Beta",  "tagline": "Second", "unlock": "default",
+				"bow_color": "#00ff00", "hp": 150.0, "speed": 10.0, "damage": 20.0,
+				"fire_rate": 0.30, "range": 12.0, "pierce": 2.0},
+	}
+	var container: HBoxContainer = auto_free(HBoxContainer.new())
+	add_child(container)
+	select_ui.build_present_buttons(container, present_defs, null, func(_b: Button) -> void: pass, radar_canvas)
+	# Simulate hover on the second button
+	var buttons: Array[Node] = container.get_children()
+	assert_int(buttons.size()).is_equal(2)
+	var second_btn: Button = buttons[1] as Button
+	second_btn.mouse_entered.emit()
+	await get_tree().process_frame
+	# Radar canvas should now have values set for beta
+	var values: Dictionary = radar_canvas.get_meta("radar_values", {})
+	assert_bool(values.has("hp")).is_true()
+	assert_str(select_ui._current_preview_id).is_not_empty()
+
+
 func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
 	SaveManager.set_save_path_for_tests("user://component_unlocks_test.json")
 	SaveManager.reset_state_for_tests()
