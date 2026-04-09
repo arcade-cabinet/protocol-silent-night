@@ -5,6 +5,7 @@ extends RefCounted
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
 const GEAR_GEN := preload("res://scripts/gear_generator.gd")
+const PREVIEW := preload("res://scripts/market_preview.gd")
 const REROLL_COST := 10
 
 
@@ -70,18 +71,41 @@ static func refresh_market(state: Dictionary, items: Array, cookies: int) -> voi
 		child.queue_free()
 	var on_buy: Callable = state["on_buy"]
 	for i in range(items.size()):
-		var item: Dictionary = items[i]
-		var card := Button.new()
-		var cost: int = _compute_cost(int(item.get("rarity", 1)))
-		card.text = "%s\n[%d C]\n%s" % [String(item.get("name", "?")), cost, String(item.get("flavor", ""))]
-		card.custom_minimum_size = Vector2(220, 150)
-		card.clip_text = true
-		card.add_theme_font_size_override("font_size", 13)
-		var accent: Color = Color(String(item.get("color", "#ffffff")))
-		THEME.apply_to_button(card, accent)
-		card.disabled = cookies < cost
-		card.pressed.connect(on_buy.bind(i))
-		row.add_child(card)
+		row.add_child(_build_market_card(items[i], i, cookies, on_buy))
+
+
+static func _build_market_card(item: Dictionary, index: int, cookies: int, on_buy: Callable) -> Control:
+	var cost: int = _compute_cost(int(item.get("rarity", 1)))
+	var accent := Color(String(item.get("color", "#ffffff")))
+	var card_panel := PanelContainer.new()
+	card_panel.custom_minimum_size = Vector2(230, 280)
+	card_panel.add_theme_stylebox_override("panel", THEME.make_panel_style(accent, Color(0.02, 0.05, 0.03, 0.92)))
+	var card_margin := MarginContainer.new()
+	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		card_margin.add_theme_constant_override(side, 8)
+	card_panel.add_child(card_margin)
+	var card_vbox := VBoxContainer.new()
+	card_vbox.alignment = BoxContainer.ALIGNMENT_BEGIN
+	card_vbox.add_theme_constant_override("separation", 6)
+	card_margin.add_child(card_vbox)
+	card_vbox.add_child(PREVIEW.build_preview(item))
+	var name_label := Label.new()
+	name_label.text = String(item.get("name", "?"))
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.custom_minimum_size = Vector2(210, 0)
+	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.add_theme_color_override("font_color", accent)
+	card_vbox.add_child(name_label)
+	var buy_btn := Button.new()
+	buy_btn.text = "BUY · %d C" % cost
+	buy_btn.custom_minimum_size = Vector2(210, 36)
+	buy_btn.add_theme_font_size_override("font_size", 14)
+	THEME.apply_to_button(buy_btn, accent)
+	buy_btn.disabled = cookies < cost
+	buy_btn.pressed.connect(on_buy.bind(index))
+	card_vbox.add_child(buy_btn)
+	return card_panel
 
 
 static func _compute_cost(rarity: int) -> int:

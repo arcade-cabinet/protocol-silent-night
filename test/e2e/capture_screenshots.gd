@@ -117,6 +117,27 @@ func _run() -> void:
 		await process_frame
 		await process_frame
 		await _main.capture_screenshot("%s/scroll_screen.png" % _shot_dir)
+		_main.between_match.scroll_state["panel"].visible = false
+
+		# Market screen with 3D gear previews
+		var MARKET_SCREEN := load("res://scripts/market_screen.gd")
+		var demo_items := [
+			{"id": "m1", "name": "Frozen Candy Barrel", "slot": "weapon_mod", "rarity": 3,
+			 "stats": {"damage_mult": 0.12}, "flair": [{"type": "frost_crystals", "count": 3, "color": "#ccf0ff"}],
+			 "flavor": "Peppermint power", "color": "#aaddff"},
+			{"id": "m2", "name": "Gilded Jingle Bow", "slot": "bow_accessory", "rarity": 5,
+			 "stats": {"crit_chance": 0.08}, "flair": [{"type": "halo_ring", "radius": 0.8, "color": "#ffd700"}, {"type": "sparkle_burst", "count": 4, "color": "#ffd700"}],
+			 "flavor": "Rings on every shot", "color": "#ffd700"},
+			{"id": "m3", "name": "Razor Tag of Fortune", "slot": "tag_charm", "rarity": 2,
+			 "stats": {"cookie_bonus": 0.1}, "flair": [{"type": "orbiting_particle", "count": 2, "radius": 0.5, "color": "#88ddff"}],
+			 "flavor": "Lucky charm", "color": "#55ff88"},
+		]
+		MARKET_SCREEN.refresh_market(_main.between_match.market_state, demo_items, 500)
+		_main.between_match.market_state["panel"].visible = true
+		await process_frame
+		await process_frame
+		await process_frame
+		await _main.capture_screenshot("%s/market.png" % _shot_dir)
 
 	_save_manager.reset_state_for_tests()
 	quit(0)

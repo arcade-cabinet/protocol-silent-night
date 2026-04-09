@@ -93,7 +93,12 @@ func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: D
 				on_gain_xp.call(int(pickup["value"]))
 			if audio_mgr != null: audio_mgr.play_pickup()
 			if particles != null and fx_root != null:
-				particles.spawn_pickup_sparkle(fx_root, pickup["node"].position)
+				if ptype == "scroll":
+					var stype: String = String(pickup.get("scroll_type", "nice"))
+					var scroll_color := Color("#ffd700") if stype == "nice" else Color("#ff2244")
+					particles.spawn_death_burst(fx_root, pickup["node"].position, scroll_color, 0.65)
+				else:
+					particles.spawn_pickup_sparkle(fx_root, pickup["node"].position)
 			pickup["node"].queue_free()
 			pickups.remove_at(index)
 		else:
