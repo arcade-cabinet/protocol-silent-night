@@ -67,6 +67,30 @@ func test_unequip_returns_old_gear() -> void:
 	assert_dict(gs.get_equipped("tag_charm")).is_empty()
 
 
+func test_validate_flair_count_limited_by_rarity() -> void:
+	var gear := {"id": "x", "name": "X", "slot": "weapon_mod", "rarity": 1,
+		"stats": {"damage_flat": 1}, "flavor": "x",
+		"flair": [{"type": "ember_glow"}]}
+	var result := GearSystem.validate(gear)
+	assert_bool(result["valid"]).is_false()
+	assert_bool(result["errors"][0].contains("max 0 flair")).is_true()
+
+
+func test_validate_flair_accepts_valid_on_rare() -> void:
+	var gear := {"id": "x", "name": "X", "slot": "weapon_mod", "rarity": 3,
+		"stats": {"damage_flat": 5}, "flavor": "x",
+		"flair": [{"type": "frost_crystals"}, {"type": "pulsing_glow"}]}
+	assert_bool(GearSystem.validate(gear)["valid"]).is_true()
+
+
+func test_validate_rejects_unknown_flair_type() -> void:
+	var gear := {"id": "x", "name": "X", "slot": "weapon_mod", "rarity": 3,
+		"stats": {"damage_flat": 5}, "flavor": "x",
+		"flair": [{"type": "rainbow_unicorn"}]}
+	var result := GearSystem.validate(gear)
+	assert_bool(result["valid"]).is_false()
+
+
 func test_sell_value_scales_with_rarity() -> void:
 	var gs := GearSystem.new()
 	assert_int(gs.sell_value({"rarity": 1})).is_equal(5)

@@ -15,12 +15,19 @@ const VALID_STATS := [
 ]
 
 const RARITIES := {
-	1: {"name": "Common", "color": "#ffffff", "max_stats": 1, "mult_cap": 0.1},
-	2: {"name": "Uncommon", "color": "#55ff88", "max_stats": 2, "mult_cap": 0.15},
-	3: {"name": "Rare", "color": "#5588ff", "max_stats": 2, "mult_cap": 0.25},
-	4: {"name": "Epic", "color": "#bb55ff", "max_stats": 3, "mult_cap": 0.35},
-	5: {"name": "Legendary", "color": "#ffd700", "max_stats": 3, "mult_cap": 0.5},
+	1: {"name": "Common", "color": "#ffffff", "max_stats": 1, "mult_cap": 0.1, "max_flair": 0},
+	2: {"name": "Uncommon", "color": "#55ff88", "max_stats": 2, "mult_cap": 0.15, "max_flair": 1},
+	3: {"name": "Rare", "color": "#5588ff", "max_stats": 2, "mult_cap": 0.25, "max_flair": 2},
+	4: {"name": "Epic", "color": "#bb55ff", "max_stats": 3, "mult_cap": 0.35, "max_flair": 3},
+	5: {"name": "Legendary", "color": "#ffd700", "max_stats": 3, "mult_cap": 0.5, "max_flair": 4},
 }
+
+const VALID_FLAIR_TYPES := [
+	"orbiting_particle", "pulsing_glow", "trailing_sparks",
+	"wobble_animation", "color_shift", "floating_icon",
+	"smoke_trail", "frost_crystals", "ember_glow",
+	"sparkle_burst", "halo_ring", "dripping_icicles",
+]
 
 var equipped: Dictionary = {}
 
@@ -113,4 +120,11 @@ static func validate(gear_def: Dictionary) -> Dictionary:
 			errors.append("%s value %.2f exceeds rarity %d cap %.2f" % [key, float(stats[key]), rarity, mult_cap])
 	if not gear_def.has("flavor"):
 		errors.append("missing flavor text")
+	var flair: Array = gear_def.get("flair", [])
+	var max_flair := int(rarity_info.get("max_flair", 0))
+	if flair.size() > max_flair:
+		errors.append("rarity %d allows max %d flair, got %d" % [rarity, max_flair, flair.size()])
+	for piece in flair:
+		if piece is Dictionary and not piece.get("type", "") in VALID_FLAIR_TYPES:
+			errors.append("unknown flair type: %s" % piece.get("type", ""))
 	return {"valid": errors.is_empty(), "errors": errors}
