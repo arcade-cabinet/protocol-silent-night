@@ -75,7 +75,7 @@ func start_next_wave() -> void:
 	if main.audio_mgr != null:
 		main.audio_mgr.play_wave_banner()
 		if main.current_wave.get("is_boss_wave", false): main.audio_mgr.play_music("boss")
-	if save_mgr != null and level == 5 and save_mgr.unlock("santa"):
+	if save_mgr != null and level >= 5 and save_mgr.unlock("santa"):
 		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED"); main._refresh_start_screen()
 	if save_mgr != null: save_mgr.register_wave_reached(level)
 	for _i in range(2): _spawn_board_object()
@@ -87,12 +87,11 @@ func end_run(win: bool) -> void:
 	main.state = "win" if win else "game_over"
 	if main.audio_mgr != null: main.audio_mgr.play_victory() if win else main.audio_mgr.play_death()
 	var ui: RefCounted = main.ui_mgr
-	ui.hud_root.visible = false
-	ui.dash_button.visible = false
-	ui.boss_panel.visible = false
+	ui.hud_root.visible = false; ui.dash_button.visible = false; ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
 	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
 	if sm != null: sm.set_coal(main.coal_queue)
+	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
 	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		ui.end_screen.visible = true
