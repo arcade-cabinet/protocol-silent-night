@@ -41,20 +41,31 @@ func test_spawn_interval_has_minimum_floor() -> void:
 	assert_float(extreme["spawn_interval"]).is_greater_equal(0.12)
 
 
-func test_boss_wave_every_ten_levels() -> void:
-	var wave_10 := WaveFormula.generate_wave(42, 10)
-	var wave_11 := WaveFormula.generate_wave(42, 11)
-	var wave_20 := WaveFormula.generate_wave(42, 20)
-	assert_bool(wave_10["is_boss_wave"]).is_true()
-	assert_bool(wave_11["is_boss_wave"]).is_false()
-	assert_bool(wave_20["is_boss_wave"]).is_true()
+func test_boss_pressure_increases_with_level() -> void:
+	var early := WaveFormula.generate_wave(42, 2)
+	var late := WaveFormula.generate_wave(42, 20)
+	assert_float(late["boss_pressure"]).is_greater(early["boss_pressure"])
 
 
-func test_boss_wave_has_minion_pressure() -> void:
-	var boss := WaveFormula.generate_wave(42, 10)
-	assert_bool(boss["is_boss_wave"]).is_true()
-	assert_int(boss["minion_types"].size()).is_greater(0)
-	assert_float(boss["minion_interval"]).is_greater(0.0)
+func test_boss_pressure_capped_below_one() -> void:
+	var extreme := WaveFormula.generate_wave(42, 999)
+	assert_float(extreme["boss_pressure"]).is_less_equal(0.95)
+
+
+func test_countdown_timer_decreases_with_level() -> void:
+	var early := WaveFormula.generate_wave(42, 1)
+	var late := WaveFormula.generate_wave(42, 30)
+	assert_float(early["countdown"]).is_greater(late["countdown"])
+	assert_float(late["countdown"]).is_greater_equal(30.0)
+	assert_float(early["countdown"]).is_less_equal(180.0)
+
+
+func test_lookback_increases_boss_pressure() -> void:
+	var no_lookback := WaveFormula.generate_wave(42, 10, [])
+	var lookback_no_bosses := WaveFormula.generate_wave(42, 10, [
+		{"bosses_spawned": 0}, {"bosses_spawned": 0}, {"bosses_spawned": 0}
+	])
+	assert_float(lookback_no_bosses["boss_pressure"]).is_greater(no_lookback["boss_pressure"])
 
 
 func test_composition_includes_elites_at_higher_levels() -> void:
@@ -78,3 +89,4 @@ func test_level_zero_produces_valid_wave() -> void:
 	assert_float(wave["spawn_interval"]).is_greater(0.0)
 	assert_float(wave["hp_scale"]).is_greater_equal(1.0)
 	assert_int(wave["composition"].size()).is_greater(0)
+	assert_float(wave["countdown"]).is_greater(0.0)

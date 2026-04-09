@@ -24,6 +24,7 @@ func start_run(class_id: String) -> void:
 	main.dash_cooldown_timer = 0.0
 	main.move_velocity = Vector2.ZERO
 	main.boss_ref = {}
+	main.level_lookback.clear()
 	build_board()
 	spawn_player()
 	main._update_ui()
@@ -47,25 +48,27 @@ func tick_playing(delta: float) -> void:
 	main.combat.update_vfx(delta, main.vfx)
 	main.dmg_numbers.update(delta)
 	main.particles.update(delta)
-	if not main.current_wave.get("is_boss_wave", false):
-		main.wave_time_remaining = maxf(0.0, main.wave_time_remaining - delta * main._test_scale("wave_scale"))
-		if main.wave_time_remaining <= 0.0 and main.state == "playing":
-			begin_wave_clear()
-		main.ui_mgr.timer_label.text = "%.1f" % main.wave_time_remaining
-	else:
-		main.ui_mgr.timer_label.text = "BOSS"
+	main.wave_time_remaining = maxf(0.0, main.wave_time_remaining - delta * main._test_scale("wave_scale"))
+	if main.wave_time_remaining <= 0.0 and main.state == "playing":
+		begin_wave_clear()
+	main.ui_mgr.timer_label.text = "%.0f" % main.wave_time_remaining
 
 func start_next_wave() -> void:
+	var lookback_entry: Dictionary = wave_spawner.get_lookback_entry() if main.current_wave_index >= 0 else {}
+	if not lookback_entry.is_empty():
+		main.level_lookback.append(lookback_entry)
+		if main.level_lookback.size() > 10:
+			main.level_lookback.pop_front()
 	main.current_wave_index += 1
 	var level: int = main.current_wave_index + 1
-	main.current_wave = WAVE_FORMULA.generate_wave(main.run_seed, level)
+	main.current_wave = WAVE_FORMULA.generate_wave(main.run_seed, level, main.level_lookback)
+	wave_spawner.reset_for_level()
 	var save_mgr: Node = main._save_manager()
-	main.wave_time_remaining = float(main.current_wave["duration"])
+	main.wave_time_remaining = float(main.current_wave.get("countdown", 120.0))
 	main.spawn_timer = 0.0
 	main.state = "playing"
-	main.ui_mgr.wave_label.text = "WAVE %d" % level
-	var banner_color := Color("ff4466") if main.current_wave.get("is_boss_wave", false) else Color("edf7ff")
-	main.ui_mgr.show_message("WAVE %d" % level, 1.8, banner_color)
+	main.ui_mgr.wave_label.text = "LEVEL %d" % level
+	main.ui_mgr.show_message("LEVEL %d" % level, 1.8, Color("edf7ff"))
 	if main.audio_mgr != null:
 		main.audio_mgr.play_wave_banner()
 		if main.current_wave.get("is_boss_wave", false): main.audio_mgr.play_music("boss")
