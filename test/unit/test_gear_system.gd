@@ -1,6 +1,13 @@
 extends GdUnitTestSuite
 
 
+func _errors_contain(errors: Array, needle: String) -> bool:
+	for err in errors:
+		if String(err).contains(needle):
+			return true
+	return false
+
+
 func test_validate_accepts_valid_gear() -> void:
 	var gear := {
 		"id": "test_sword", "name": "Test Sword", "slot": "weapon_mod",
@@ -20,7 +27,7 @@ func test_validate_rejects_unknown_stat() -> void:
 	var gear := {"id": "x", "name": "X", "slot": "weapon_mod", "rarity": 1, "stats": {"magic_power": 5}, "flavor": "x"}
 	var result := GearSystem.validate(gear)
 	assert_bool(result["valid"]).is_false()
-	assert_bool(result["errors"][0].contains("unknown stat")).is_true()
+	assert_bool(_errors_contain(result["errors"], "unknown stat")).is_true()
 
 
 func test_validate_rejects_too_many_stats_for_rarity() -> void:
@@ -28,7 +35,7 @@ func test_validate_rejects_too_many_stats_for_rarity() -> void:
 		"stats": {"damage_flat": 1, "speed_mult": 0.05}, "flavor": "x"}
 	var result := GearSystem.validate(gear)
 	assert_bool(result["valid"]).is_false()
-	assert_bool(result["errors"][0].contains("max 1 stats")).is_true()
+	assert_bool(_errors_contain(result["errors"], "max 1 stats")).is_true()
 
 
 func test_validate_rejects_mult_exceeding_cap() -> void:
@@ -36,7 +43,7 @@ func test_validate_rejects_mult_exceeding_cap() -> void:
 		"stats": {"damage_mult": 0.5}, "flavor": "x"}
 	var result := GearSystem.validate(gear)
 	assert_bool(result["valid"]).is_false()
-	assert_bool(result["errors"][0].contains("exceeds")).is_true()
+	assert_bool(_errors_contain(result["errors"], "exceeds")).is_true()
 
 
 func test_equip_and_apply_flat_modifier() -> void:
@@ -73,7 +80,7 @@ func test_validate_flair_count_limited_by_rarity() -> void:
 		"flair": [{"type": "ember_glow"}]}
 	var result := GearSystem.validate(gear)
 	assert_bool(result["valid"]).is_false()
-	assert_bool(result["errors"][0].contains("max 0 flair")).is_true()
+	assert_bool(_errors_contain(result["errors"], "max 0 flair")).is_true()
 
 
 func test_validate_flair_accepts_valid_on_rare() -> void:
@@ -104,6 +111,22 @@ func test_apply_modifiers_to_present_class_stats() -> void:
 	assert_float(result["damage"]).is_equal(24.0)
 	assert_float(result["max_hp"]).is_equal(140.0)
 	assert_float(result["fire_rate"]).is_less(0.22)
+
+
+func test_equip_rejects_invalid_gear() -> void:
+	var gs := GearSystem.new()
+	var result := gs.equip({"id": "bad", "name": "Bad", "slot": "pants",
+		"rarity": 1, "stats": {"damage_flat": 1}, "flavor": "x"})
+	assert_bool(bool(result["ok"])).is_false()
+	assert_dict(gs.get_equipped("weapon_mod")).is_empty()
+
+
+func test_validate_rejects_non_dict_flair() -> void:
+	var gear := {"id": "x", "name": "X", "slot": "weapon_mod", "rarity": 3,
+		"stats": {"damage_flat": 5}, "flavor": "x",
+		"flair": ["not a dict"]}
+	var result := GearSystem.validate(gear)
+	assert_bool(result["valid"]).is_false()
 
 
 func test_sell_value_scales_with_rarity() -> void:

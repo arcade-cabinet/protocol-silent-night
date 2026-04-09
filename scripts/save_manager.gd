@@ -112,16 +112,29 @@ func get_cookies() -> int:
 
 
 func add_cookies(amount: int) -> void:
+	if amount <= 0:
+		return
 	state["cookies"] = get_cookies() + amount
 	save_state()
 
 
 func spend_cookies(amount: int) -> bool:
-	if get_cookies() < amount:
+	if amount <= 0 or get_cookies() < amount:
 		return false
 	state["cookies"] = get_cookies() - amount
 	save_state()
 	return true
+
+
+func set_preference(key: String, value) -> void:
+	var prefs: Dictionary = state.get("preferences", {})
+	prefs[key] = value
+	state["preferences"] = prefs
+	save_state()
+
+
+func get_preference(key: String, default_value = null) -> Variant:
+	return state.get("preferences", {}).get(key, default_value)
 
 
 func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:

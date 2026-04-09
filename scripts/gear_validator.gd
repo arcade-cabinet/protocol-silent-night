@@ -18,8 +18,8 @@ func _initialize() -> void:
 
 	var dir := DirAccess.open(GEAR_DIR)
 	if dir == null:
-		print("No gear directory at %s — nothing to validate" % GEAR_DIR)
-		quit(0)
+		push_error("Gear directory missing at %s — validation gate failed" % GEAR_DIR)
+		quit(1)
 		return
 
 	dir.list_dir_begin()
@@ -54,7 +54,12 @@ func _validate_file(path: String) -> Dictionary:
 	if parsed is Dictionary:
 		for key in parsed.keys():
 			total += 1
-			var result := GearSystem.validate(parsed[key])
+			var entry: Variant = parsed[key]
+			if not (entry is Dictionary):
+				invalid += 1
+				errors.append("%s [%s]: entry is not a Dictionary" % [path, key])
+				continue
+			var result := GearSystem.validate(entry)
 			if result["valid"]:
 				valid += 1
 			else:
@@ -64,6 +69,10 @@ func _validate_file(path: String) -> Dictionary:
 	elif parsed is Array:
 		for item in parsed:
 			total += 1
+			if not (item is Dictionary):
+				invalid += 1
+				errors.append("%s: array item is not a Dictionary" % path)
+				continue
 			var result := GearSystem.validate(item)
 			if result["valid"]:
 				valid += 1
@@ -71,4 +80,7 @@ func _validate_file(path: String) -> Dictionary:
 				invalid += 1
 				for err in result["errors"]:
 					errors.append("%s [%s]: %s" % [path, item.get("id", "?"), err])
+	else:
+		invalid += 1
+		errors.append("%s: top-level JSON is neither Dictionary nor Array" % path)
 	return {"total": total, "valid": valid, "invalid": invalid, "errors": errors}

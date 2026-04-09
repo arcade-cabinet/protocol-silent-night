@@ -38,9 +38,10 @@ func _init() -> void:
 
 
 func equip(gear_def: Dictionary) -> Dictionary:
+	var validation := validate(gear_def)
+	if not validation["valid"]:
+		return {"ok": false, "errors": validation["errors"]}
 	var slot: String = gear_def.get("slot", "")
-	if slot not in SLOTS:
-		return {"ok": false, "error": "invalid slot: %s" % slot}
 	var old: Dictionary = equipped[slot]
 	equipped[slot] = gear_def
 	return {"ok": true, "old": old}
@@ -130,6 +131,9 @@ static func validate(gear_def: Dictionary) -> Dictionary:
 	if flair.size() > max_flair:
 		errors.append("rarity %d allows max %d flair, got %d" % [rarity, max_flair, flair.size()])
 	for piece in flair:
-		if piece is Dictionary and not piece.get("type", "") in VALID_FLAIR_TYPES:
+		if not (piece is Dictionary):
+			errors.append("flair entry must be a Dictionary, got %s" % typeof(piece))
+			continue
+		if not piece.get("type", "") in VALID_FLAIR_TYPES:
 			errors.append("unknown flair type: %s" % piece.get("type", ""))
 	return {"valid": errors.is_empty(), "errors": errors}

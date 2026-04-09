@@ -45,6 +45,28 @@ func test_spend_cookies_returns_false_when_insufficient() -> void:
 	save.reset_state_for_tests()
 
 
+func test_add_cookies_rejects_negative() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_cookie_neg_add.json")
+	save.reset_state_for_tests()
+	save.load_state()
+	save.add_cookies(100)
+	save.add_cookies(-50)
+	assert_int(save.get_cookies()).is_equal(100)
+	save.reset_state_for_tests()
+
+
+func test_spend_cookies_rejects_negative() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_cookie_neg_spend.json")
+	save.reset_state_for_tests()
+	save.load_state()
+	save.add_cookies(100)
+	assert_bool(save.spend_cookies(-30)).is_false()
+	assert_int(save.get_cookies()).is_equal(100)
+	save.reset_state_for_tests()
+
+
 func test_cookies_persist_across_load() -> void:
 	var save = auto_free(_save_script.new())
 	save.set_save_path_for_tests("user://gdunit_cookie_persist.json")

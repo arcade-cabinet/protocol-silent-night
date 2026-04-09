@@ -61,18 +61,19 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 		if i == 3:
 			vbox.add_child(perma_check)
 		var btn := Button.new()
+		var tier_index := i + 1
 		var label := "%s\n%dx // %d rewraps\n%s" % [tier["name"], tier["mult"], tier["rewraps"], tier["desc"]]
 		btn.text = label
 		btn.custom_minimum_size = Vector2(280, 120)
 		btn.add_theme_font_size_override("font_size", 14)
 		THEME.apply_to_button(btn, Color(tier["color"]))
-		if i + 1 == current_tier:
+		if tier_index == current_tier:
 			btn.add_theme_stylebox_override("normal", THEME.make_hover_style(Color(tier["color"])))
 		btn.pressed.connect(func() -> void:
-			on_select.call(i + 1, perma_check.button_pressed))
+			if tier_index == 6:
+				on_select.call(tier_index, true)
+			else:
+				on_select.call(tier_index, perma_check.button_pressed))
 		grid.add_child(btn)
-		if i + 1 == 6:
-			perma_check.button_pressed = true
-			perma_check.disabled = true
 
 	return {"panel": panel, "perma_check": perma_check}
