@@ -177,13 +177,6 @@ func pbr_material(material_name: String, tint: Color) -> Material:
 	return material
 
 
-func get_zone_material(zone: String) -> Material:
-	match zone:
-		"ice": return get_material("IceFrozen")
-		"asphalt": return get_material("AsphaltWet")
-		_: return get_material("SnowPacked")
-
-
 func load_texture(path: String) -> Texture2D:
 	if texture_cache.has(path):
 		return texture_cache[path]
