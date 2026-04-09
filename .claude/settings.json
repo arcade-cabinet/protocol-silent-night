@@ -18,6 +18,8 @@
       "Bash(sleep:*)",
       "Bash(timeout:*)",
       "Bash(file:*)",
+      "Bash(python3:*)",
+      "Bash(jq:*)",
       "Read",
       "Glob",
       "Grep"
@@ -30,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 200 ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"additionalContext\\\":\\\"WARNING: $f is $lines lines, exceeding the 200 LOC limit. Decompose into smaller scripts.\\\"},\\\"continue\\\":true}\"; fi; fi; }",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 195 ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"additionalContext\\\":\\\"WARNING: $f is $lines lines (approaching 200 LOC limit). Decompose before adding more.\\\"},\\\"continue\\\":true}\"; fi; fi; }",
             "timeout": 5,
             "statusMessage": "Checking LOC limit..."
           }
@@ -39,13 +41,13 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_response.filePath // .tool_input.file_path' | { read -r f; if [[ \"$f\" == *.tscn ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_scene'; then echo '{\"systemMessage\":\"WARNING: .tscn file missing [gd_scene] header\"}'; fi; elif [[ \"$f\" == *.tres ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_resource'; then echo '{\"systemMessage\":\"WARNING: .tres file missing [gd_resource] header\"}'; fi; fi; }",
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath' | { read -r f; if [ -z \"$f\" ] || [ \"$f\" = \"null\" ]; then exit 0; fi; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 200 ]; then echo \"{\\\"systemMessage\\\":\\\"LOC VIOLATION: $f is $lines lines, exceeding the 200 LOC limit. Decompose this file before committing.\\\"}\" ; fi; elif [[ \"$f\" == *.tscn ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_scene'; then echo '{\"systemMessage\":\"WARNING: .tscn file missing [gd_scene] header\"}'; fi; elif [[ \"$f\" == *.tres ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_resource'; then echo '{\"systemMessage\":\"WARNING: .tres file missing [gd_resource] header\"}'; fi; elif [[ \"$f\" == declarations/*.json ]] || [[ \"$f\" == *declarations*/*.json ]]; then if ! python3 -c \"import json; json.load(open('$f'))\" 2>/dev/null; then echo '{\"systemMessage\":\"JSON PARSE ERROR: declarations file is not valid JSON\"}'; fi; fi; }",
             "timeout": 5,
-            "statusMessage": "Validating Godot resource format..."
+            "statusMessage": "Validating file constraints..."
           }
         ]
       },
