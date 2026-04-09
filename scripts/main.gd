@@ -71,6 +71,7 @@ var board_data: Dictionary = {}
 var obstacle_colliders: Array = []
 var current_wave: Dictionary = {}
 var run_seed: int = 0
+var level_lookback: Array = []
 var input_move := Vector2.ZERO
 var move_velocity := Vector2.ZERO
 var touch_active := false
