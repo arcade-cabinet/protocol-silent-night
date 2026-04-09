@@ -97,19 +97,53 @@ After the initial 6 phases landed, the full PRQ was closed out:
 
 ---
 
-## Truly remaining gaps (P3 nice-to-haves)
+## Phase 12: P3 Polish (all shipped)
 
-These items were intentionally scoped out of the production-polish PRQ and remain open for a future sprint:
+After Phases 7-10 closed the P1/P2 gaps, a final P3 sweep landed
+the seven nice-to-haves the audit doc had explicitly scoped out:
 
-- **Damage number stacking flourish** — the in-place accumulation works but doesn't play a distinct "stack pop" tween. A `node.scale = Vector3(1.25, 1.25, 1.25)` bounce + lerp back would sell the accumulation more.
-- **Minimap zoom** configurable from settings menu (currently fixed at 22 world units).
-- **Settings menu tabs** (Audio / Display / Gameplay) instead of the single vbox layout.
-- **Pause menu keyboard navigation** — arrow keys + Enter instead of mouse only.
-- **Radar chart axis labels** — the 6 axes currently render as a polygon with no text.
-- **Legendary coal enlarged VFX** — legendary coal could emit a 2× VFX burst on activation.
-- **Preset roster stat balancing pass** — now that silhouettes are distinct, verify `presents.json` stat sheets are balanced across archetypes.
+* **Damage number stack bounce tween** — `damage_numbers.spawn`
+  stack branch sets a 0.18s `stack_pulse` timer on the accumulated
+  entry. `update()` lerps `node.scale` from 1.25 → 1.0 over the
+  decay window, taking precedence over the crit pulse so the
+  stack-pop reads distinctly.
+* **Minimap zoom** — `minimap_widget.set_view_radius(state, r)`
+  clamped to [8, 60] world units, persisted via
+  `save_manager.set_preference("minimap_zoom", r)`. New slider in
+  settings_menu Display tab.
+* **Settings menu tabs** — `settings_menu.gd` rewritten as a
+  `TabContainer` with three pages: Audio (5 bus sliders), Display
+  (screen shake / reduced motion / minimap zoom), Gameplay
+  (permadeath default).
+* **Pause menu keyboard navigation** — `pause_menu._handle_input`
+  catches KEY_DOWN/UP/W/S to advance through buttons via
+  `grab_focus()`, KEY_ENTER triggers pressed signal. Visual highlight
+  comes for free from Godot's focus system.
+* **Radar chart axis labels** — `stat_radar_chart.AXIS_LABELS`
+  array (`["HP", "SPD", "DMG", "RATE", "RNG", "PCE"]`). `_draw`
+  uses ThemeDB.fallback_font + draw_string at axis ends.
+* **Legendary coal enlarged VFX** — `coal_vfx.RARITY_SCALE`
+  (common 1.0, rare 1.5, legendary 2.0). `particle_coal_helpers
+  .spawn_for_kind` dispatches the kind 1/2/3 times based on scale,
+  with jittered positions for the second + third bursts.
+  `coal_activator._apply` also scales screen_shake trauma by
+  rarity for synesthetic feel.
+* **Present roster stat balancing pass** — 8 presents rebalanced
+  to align stats with body shape archetype:
+  - **gift_bag** (hopper tank): candy_cannon, wassail_wraith now
+    HP >= 140, speed <= 10
+  - **stacked_duo** (tank): fruitcake_fatale brought up to match
+    jingle_tank (HP >= 200, speed <= 10)
+  - **cylinder** (balanced utility): yule_log, tinsel_rush,
+    peppermint_hex normalized
+  - Misc tweaks for cohesion
+  Each body shape now has a clear, internally-consistent archetype.
 
-Severity of all remaining items: **P3 / polish**. None block shipping.
+## Production-polish PRQ status: 26/26 tasks complete, 0 deferments
+
+All P1, P2, and P3 items from the original audit are shipped. The
+PRQ has zero open items at any priority. Future polish work would
+be a NEW PRQ with NEW scope.
 
 ---
 
