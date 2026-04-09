@@ -31,6 +31,8 @@ func start_run(class_id: String) -> void:
 	main._update_ui()
 	var ui: RefCounted = main.ui_mgr
 	ui.start_screen.visible = false
+	if ui.difficulty_panel != null:
+		ui.difficulty_panel.visible = false
 	ui.level_screen.visible = false
 	ui.end_screen.visible = false
 	ui.hud_root.visible = true
@@ -111,6 +113,8 @@ func return_to_menu() -> void:
 	ui.hud_root.visible = false
 	ui.start_screen.visible = true
 	ui.boss_panel.visible = false
+	if ui.difficulty_panel != null:
+		ui.difficulty_panel.visible = false
 	ui.hide_joystick()
 	clear_runtime()
 	main._refresh_start_screen()

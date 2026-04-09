@@ -47,6 +47,7 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 	var max_bosses: int = 1 + int(boss_pressure / 0.6)
 	var composition := _build_composition(rng, profile, level)
 	var pattern := _pick_pattern(rng, profile, level)
+	var enemy_phase_level: int = clampi(1 + int(lf * df / 8.0), 1, 5)
 	return {
 		"level": level,
 		"countdown": countdown,
@@ -61,6 +62,7 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 		"boss_pressure": boss_pressure,
 		"max_bosses": max_bosses,
 		"boss_hp_scale": 1.0 + lf * 0.06,
+		"enemy_phase_level": enemy_phase_level,
 	}
 
 

@@ -46,6 +46,8 @@ var dash_button: Button:
 	get: return ui_mgr.dash_button
 var boss_panel: VBoxContainer:
 	get: return ui_mgr.boss_panel
+var difficulty_panel: PanelContainer:
+	get: return ui_mgr.difficulty_panel
 var state: String = "menu"
 var current_class_id: String = ""
 var current_wave_index: int = -1
@@ -93,7 +95,7 @@ func _ready() -> void:
 	audio_mgr.attach(runtime_root.get_node("Audio"))
 	combat.audio_mgr = audio_mgr
 	enemies_ai.audio_mgr = audio_mgr
-	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false)
+	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected)
 	progression = PROGRESSION_MANAGER.new(ui_mgr)
 	progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
@@ -204,6 +206,19 @@ func _can_occupy(wp: Vector3, r: float) -> bool:
 	return WORLD_BUILDER.can_occupy(wp, r, float(config["arena_radius"]), obstacle_colliders)
 func _move_actor(n: Node3D, d: Vector3, s: float, dt: float, r: float) -> void:
 	WORLD_BUILDER.move_actor(n, d, s, dt, r, float(config["arena_radius"]), obstacle_colliders)
-func _on_class_button_pressed(b: Button) -> void: start_run(String(b.get_meta("class_id", "")))
+func _on_class_button_pressed(b: Button) -> void:
+	current_class_id = String(b.get_meta("class_id", ""))
+	if ui_mgr.difficulty_panel != null:
+		ui_mgr.start_screen.visible = false
+		ui_mgr.difficulty_panel.visible = true
+	else:
+		start_run(current_class_id)
+
+func _on_difficulty_selected(tier: int, permadeath_flag: bool) -> void:
+	difficulty_tier = tier
+	permadeath = permadeath_flag
+	if ui_mgr.difficulty_panel != null:
+		ui_mgr.difficulty_panel.visible = false
+	start_run(current_class_id)
 func _on_upgrade_button_pressed(b: Button) -> void: _apply_upgrade(String(b.get_meta("upgrade_id", "")))
 func _test_scale(key: String) -> float: return float(test_mode.get(key, 1.0))

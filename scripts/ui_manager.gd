@@ -1,8 +1,9 @@
 extends RefCounted
 
 const UI_BUILDER := preload("res://scripts/ui_builder.gd")
+const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
 
-var hud_root: MarginContainer
+var hud_root: Container
 var start_screen: PanelContainer
 var level_screen: PanelContainer
 var end_screen: PanelContainer
@@ -25,12 +26,13 @@ var joystick_base: ColorRect
 var joystick_knob: ColorRect
 var start_classes_box: Container
 var upgrade_box: HBoxContainer
+var difficulty_panel: PanelContainer
 
 var message_timer: float = 0.0
 var achievement_timer: float = 0.0
 
 
-func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable) -> CanvasLayer:
+func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable()) -> CanvasLayer:
 	var ui := CanvasLayer.new()
 	ui.name = "UI"
 	parent.add_child(ui)
@@ -73,6 +75,10 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	dash_button = overlays["dash_button"]
 	joystick_base = overlays["joystick_base"]
 	joystick_knob = overlays["joystick_knob"]
+
+	if on_difficulty_selected.is_valid():
+		var diff := DIFFICULTY_SELECT.build(root, on_difficulty_selected)
+		difficulty_panel = diff["panel"]
 
 	return ui
 
