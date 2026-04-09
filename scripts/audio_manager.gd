@@ -1,7 +1,9 @@
 extends RefCounted
 
 const PROCEDURAL_SFX := preload("res://scripts/procedural_sfx.gd")
+const PROCEDURAL_MUSIC := preload("res://scripts/procedural_music.gd")
 const DEFAULT_VOLUME_DB: float = -15.0
+const MUSIC_VOLUME_DB: float = -20.0
 const POOL_SIZE: int = 6
 
 var _host: Node = null
@@ -9,6 +11,8 @@ var _players: Array = []
 var _next_player: int = 0
 var _cache: Dictionary = {}
 var _sfx: RefCounted = null
+var _music_player: AudioStreamPlayer = null
+var _current_track: String = ""
 
 
 func attach(host: Node) -> void:
@@ -22,7 +26,15 @@ func attach(host: Node) -> void:
 		player.bus = "Master"
 		host.add_child(player)
 		_players.append(player)
+	_music_player = AudioStreamPlayer.new()
+	_music_player.volume_db = MUSIC_VOLUME_DB
+	_music_player.bus = "Master"
+	host.add_child(_music_player)
 	_build_cache()
+	_cache["music_menu"] = PROCEDURAL_MUSIC.make_menu_loop()
+	_cache["music_gameplay"] = PROCEDURAL_MUSIC.make_gameplay_loop()
+	_cache["music_boss"] = PROCEDURAL_MUSIC.make_boss_loop()
+	play_music("menu")
 
 
 func _build_cache() -> void:
@@ -69,6 +81,21 @@ func _play(key: String) -> void:
 	player.stream = stream
 	player.play()
 
+
+func play_music(track: String) -> void:
+	if track == _current_track:
+		return
+	_current_track = track
+	var key := "music_%s" % track
+	if _music_player == null or not _cache.has(key):
+		return
+	_music_player.stream = _cache[key]
+	_music_player.play()
+
+func stop_music() -> void:
+	_current_track = ""
+	if _music_player != null:
+		_music_player.stop()
 
 func _pitch_from_color(color_hex: String) -> float:
 	if color_hex.is_empty():

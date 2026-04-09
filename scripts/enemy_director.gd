@@ -113,16 +113,7 @@ func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_n
 		if enemy["node"].position.distance_to(player_node.position) < 0.9 + float(enemy["node"].scale.x) * 0.35:
 			on_damage_player.call(float(enemy["contact_damage"]) * delta * 2.0)
 		enemies[index] = enemy
-	if boss_ref.size() > 0:
-		var boss_dir: Vector3 = (player_node.position - boss_ref["node"].position).normalized()
-		if boss_ref["node"].position.distance_to(player_node.position) > 8.0:
-			on_move_actor.call(boss_ref["node"], boss_dir, float(boss_ref["speed"]), delta, 1.2)
-		boss_ref["ring"].rotation_degrees.y += 120.0 * delta
-		boss_ref["attack_timer"] += delta
-		if boss_ref["attack_timer"] >= 1.15 / boss_attack_scale:
-			boss_ref["attack_timer"] = 0.0
-			for shot in range(-2, 3):
-				on_spawn_projectile.call(boss_ref["node"].position + Vector3(0, 0.6, 0), boss_dir.rotated(Vector3.UP, shot * 0.12), true, 18.0, 1, 18.0, 0.35)
+	# Boss is now handled by BossPhases in game_manager
 
 
 func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, range_limit: float) -> Dictionary:
