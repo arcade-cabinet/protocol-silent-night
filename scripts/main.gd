@@ -29,6 +29,7 @@ var boss_phases := preload("res://scripts/boss_phases.gd").new()
 var board_obj_factory := preload("res://scripts/board_object_factory.gd").new(mat_factory)
 var scroll_pickup_mgr := preload("res://scripts/scroll_pickup.gd").new(mat_factory, pix_renderer)
 var board_obj_handler := preload("res://scripts/board_object_handler.gd").new(board_obj_factory, scroll_pickup_mgr)
+var between_match: RefCounted
 var progression: RefCounted
 var game_mgr: RefCounted
 var shake_magnitude: float = 0.0
@@ -106,6 +107,8 @@ func _ready() -> void:
 	progression = PROGRESSION_MANAGER.new(ui_mgr)
 	progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
+	between_match = preload("res://scripts/between_match_flow.gd").new(self)
+	between_match.build_screens(ui_mgr.root_control)
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
 

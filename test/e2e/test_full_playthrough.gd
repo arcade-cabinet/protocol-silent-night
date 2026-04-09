@@ -29,7 +29,8 @@ func _run() -> void:
 		"wave_scale": 8.0,
 		"player_damage_scale": 8.0,
 		"player_fire_scale": 3.5,
-		"boss_hp_scale": 0.08
+		"boss_hp_scale": 0.08,
+		"skip_between_match": true
 	})
 	_main.start_run("elf")
 
