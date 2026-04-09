@@ -12,20 +12,20 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_player(actor_root: Node3D, class_id: String, class_defs: Dictionary, present_defs: Dictionary = {}, gear_system: RefCounted = null) -> Dictionary:
+func spawn_player(actor_root: Node3D, class_id: String, class_defs: Dictionary, present_defs: Dictionary = {}, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
 	if present_defs.has(class_id):
-		return _spawn_present_player(actor_root, class_id, present_defs[class_id], gear_system)
+		return _spawn_present_player(actor_root, class_id, present_defs[class_id], gear_system, animator)
 	return _spawn_legacy_player(actor_root, class_id, class_defs)
 
 
-func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary, gear_system: RefCounted = null) -> Dictionary:
+func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
 	var player_node := Node3D.new()
 	player_node.name = "Player"
 	actor_root.add_child(player_node)
 	var visual: Node3D = present_factory.build_present(def)
 	visual.scale = Vector3.ONE * 1.3
 	player_node.add_child(visual)
-	preload("res://scripts/gear_visualizer.gd").attach(visual, gear_system)
+	preload("res://scripts/gear_visualizer.gd").attach(visual, gear_system, animator)
 	player_node.position = Vector3(0, 0.12, 0)
 	var player_class := {
 		"id": class_id,

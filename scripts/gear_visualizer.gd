@@ -14,7 +14,7 @@ const SLOT_OFFSETS := {
 }
 
 
-static func attach(visual: Node3D, gear_system: RefCounted) -> void:
+static func attach(visual: Node3D, gear_system: RefCounted, animator: Node = null) -> void:
 	if visual == null or gear_system == null:
 		return
 	var slots: Variant = gear_system.get("equipped")
@@ -29,7 +29,7 @@ static func attach(visual: Node3D, gear_system: RefCounted) -> void:
 		if item.is_empty():
 			continue
 		_attach_slot(visual, slot, item)
-		y_stack = FLAIR_VIZ.attach_flair(visual, item.get("flair", []), y_stack)
+		y_stack = FLAIR_VIZ.attach_flair(visual, item.get("flair", []), y_stack, animator)
 
 
 static func _attach_slot(visual: Node3D, slot: String, item: Dictionary) -> void:

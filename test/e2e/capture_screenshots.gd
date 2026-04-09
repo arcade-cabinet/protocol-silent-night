@@ -32,9 +32,9 @@ func _run() -> void:
 		"player_fire_scale": 3.0
 	})
 	_save_manager.set_equipped_gear({
-		"weapon_mod": {"id": "demo_w", "name": "Frozen Candy Cane", "slot": "weapon_mod", "rarity": 4, "stats": {"damage_mult": 0.15}, "flair": [{"type": "orbiting_particle", "count": 3, "radius": 0.6, "color": "#88ddff"}, {"type": "ember_glow", "color": "#ff6622"}], "flavor": "A peppermint barrel", "color": "#aaddff"},
-		"bow_accessory": {"id": "demo_b", "name": "Gilded Jingle Bell", "slot": "bow_accessory", "rarity": 5, "stats": {"crit_chance": 0.08}, "flair": [{"type": "halo_ring", "radius": 0.9, "color": "#ffd700"}, {"type": "sparkle_burst", "count": 4, "color": "#ffd700"}], "flavor": "Rings on every shot", "color": "#ffd700"},
-		"tag_charm": {"id": "demo_t", "name": "Lucky Star Tag", "slot": "tag_charm", "rarity": 3, "stats": {"cookie_bonus": 0.1}, "flair": [{"type": "frost_crystals", "count": 3, "color": "#ccf0ff"}], "flavor": "Shines bright", "color": "#ffffaa"},
+		"weapon_mod": {"id": "demo_w", "name": "Frozen Candy Cane", "slot": "weapon_mod", "rarity": 5, "stats": {"damage_mult": 0.15}, "flair": [{"type": "orbiting_particle", "count": 3, "radius": 0.6, "color": "#88ddff"}, {"type": "wobble_animation", "amplitude": 0.1, "rate": 4.0, "color": "#ff88aa"}, {"type": "ember_glow", "color": "#ff6622"}], "flavor": "A peppermint barrel", "color": "#aaddff"},
+		"bow_accessory": {"id": "demo_b", "name": "Gilded Jingle Bell", "slot": "bow_accessory", "rarity": 5, "stats": {"crit_chance": 0.08}, "flair": [{"type": "halo_ring", "radius": 0.9, "color": "#ffd700"}, {"type": "sparkle_burst", "count": 4, "color": "#ffd700"}, {"type": "color_shift", "hue_speed": 0.5, "saturation": 0.9, "color": "#8844ff"}], "flavor": "Rings on every shot", "color": "#ffd700"},
+		"tag_charm": {"id": "demo_t", "name": "Lucky Star Tag", "slot": "tag_charm", "rarity": 5, "stats": {"cookie_bonus": 0.1}, "flair": [{"type": "frost_crystals", "count": 3, "color": "#ccf0ff"}, {"type": "trailing_sparks", "count": 3, "color": "#ffd700"}], "flavor": "Shines bright", "color": "#ffffaa"},
 	})
 	_main.start_run("holly_striker")
 	for _i in range(120):

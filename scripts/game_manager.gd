@@ -133,12 +133,10 @@ func build_board() -> void:
 		main.obstacles_builder.make_landmark(main.board_root, landmark)
 
 func spawn_player() -> void:
-	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.class_defs, main.present_defs, main.gear_sys)
-	main.player_node = result["node"]
-	main.player_mesh = result["mesh"]
-	main.player_state = result["state"]
-	main.ui_mgr.hp_bar.max_value = main.player_state["max_hp"]
-	main.ui_mgr.xp_bar.max_value = main.progression.xp_needed
+	if main.flair_animator != null: main.flair_animator.clear()
+	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.class_defs, main.present_defs, main.gear_sys, main.flair_animator)
+	main.player_node = result["node"]; main.player_mesh = result["mesh"]; main.player_state = result["state"]
+	main.ui_mgr.hp_bar.max_value = main.player_state["max_hp"]; main.ui_mgr.xp_bar.max_value = main.progression.xp_needed
 	main._update_ui()
 
 func update_player(delta: float) -> void:

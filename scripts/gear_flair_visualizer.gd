@@ -5,7 +5,7 @@ extends RefCounted
 ## procedural mesh composition built from primitives.
 
 
-static func attach_flair(visual: Node3D, flair_list: Array, y_start: float = 1.75) -> float:
+static func attach_flair(visual: Node3D, flair_list: Array, y_start: float = 1.75, animator: Node = null) -> float:
 	var y_stack: float = y_start
 	for piece in flair_list:
 		if not (piece is Dictionary):
@@ -31,7 +31,30 @@ static func attach_flair(visual: Node3D, flair_list: Array, y_start: float = 1.7
 				y_stack += 0.15
 			"dripping_icicles":
 				_spawn_icicles(visual, int(piece.get("count", 3)), color)
+			"wobble_animation":
+				_spawn_animated_marker(visual, color, "wobble_animation", piece, animator)
+			"color_shift":
+				_spawn_animated_marker(visual, color, "color_shift", piece, animator)
+			"trailing_sparks":
+				_spawn_animated_marker(visual, color, "trailing_sparks", piece, animator)
 	return y_stack
+
+
+static func _spawn_animated_marker(visual: Node3D, color: Color, anim_type: String, params: Dictionary, animator: Node) -> void:
+	var marker := _emissive_sphere(color, 0.12, 1.6)
+	var offset := _marker_offset(anim_type)
+	marker.position = offset
+	visual.add_child(marker)
+	if animator != null and animator.has_method("register"):
+		animator.register(marker, anim_type, params)
+
+
+static func _marker_offset(anim_type: String) -> Vector3:
+	match anim_type:
+		"wobble_animation": return Vector3(0.55, 1.2, 0.0)
+		"color_shift": return Vector3(-0.55, 1.2, 0.0)
+		"trailing_sparks": return Vector3(0.0, 0.3, -0.55)
+		_: return Vector3.ZERO
 
 
 static func _spawn_orbit(visual: Node3D, count: int, radius: float, color: Color) -> void:

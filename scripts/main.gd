@@ -33,6 +33,7 @@ var board_obj_handler := preload("res://scripts/board_object_handler.gd").new(bo
 var between_match: RefCounted
 var progression: RefCounted
 var game_mgr: RefCounted
+var flair_animator: Node
 var shake_magnitude: float = 0.0
 
 var runtime_root: Node3D
@@ -102,11 +103,10 @@ func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
 	audio_mgr.attach(runtime_root.get_node("Audio"))
-	combat.audio_mgr = audio_mgr
-	enemies_ai.audio_mgr = audio_mgr
+	combat.audio_mgr = audio_mgr; enemies_ai.audio_mgr = audio_mgr
 	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
-	progression = PROGRESSION_MANAGER.new(ui_mgr)
-	progression.audio_mgr = audio_mgr
+	flair_animator = preload("res://scripts/flair_animator.gd").new(); runtime_root.add_child(flair_animator)
+	progression = PROGRESSION_MANAGER.new(ui_mgr); progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
 	between_match = preload("res://scripts/between_match_flow.gd").new(self)
 	between_match.build_screens(ui_mgr.root_control)
