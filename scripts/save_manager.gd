@@ -7,11 +7,17 @@ const DEFAULT_STATE := {
 		"bumble": false
 	},
 	"best_wave": 0,
+	"best_level": 0,
 	"achievements": {
 		"total_kills": 0,
 		"total_runs": 0,
 		"total_waves_cleared": 0,
 		"campaign_clears": 0
+	},
+	"preferences": {
+		"difficulty_tier": 1,
+		"permadeath": false,
+		"last_present": "holly_striker"
 	}
 }
 
