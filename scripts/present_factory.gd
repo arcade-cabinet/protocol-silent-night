@@ -8,6 +8,7 @@ class_name PresentFactory
 
 const WRAPPING_SHADER_PATH := "res://shaders/wrapping_paper.gdshader"
 const FACE_RENDERER := preload("res://scripts/present_face_renderer.gd")
+const BODY_FACTORY := preload("res://scripts/present_body_factory.gd")
 
 var _shader: Shader = null
 var _face_renderer := FACE_RENDERER.new()
@@ -19,38 +20,30 @@ func build_present(definition: Dictionary) -> Node3D:
 	var box_w: float = float(definition.get("box_width", 1.0))
 	var box_h: float = float(definition.get("box_height", 1.2))
 	var box_d: float = float(definition.get("box_depth", 0.9))
-	_attach_body(root, definition, box_w, box_h, box_d)
-	PresentParts.attach_bow(root, definition, box_w, box_h)
-	PresentParts.attach_arms(root, definition, box_w, box_h)
-	PresentParts.attach_legs(root, definition, box_w)
-	_attach_face(root, definition, box_h, box_d)
+	var shape: String = String(definition.get("body_shape", "box"))
+	var material: Material = _make_wrapping_material(definition)
+	var rig: Dictionary = BODY_FACTORY.build(shape, definition, box_w, box_h, box_d, material)
+	var body_node: Node3D = rig["root"]
+	body_node.name = "Body"
+	root.add_child(body_node)
+	var sockets: Dictionary = rig["sockets"]
+	var anatomy: Array = rig["anatomy"]
+	var arm_style: String = String(rig.get("arm_style", "stiff"))
+	var leg_style: String = String(rig.get("leg_style", "standard"))
+	if "arms" in anatomy:
+		PresentParts.attach_arms_at(root, definition, sockets["arm_left"], sockets["arm_right"], arm_style)
+	if "legs" in anatomy:
+		PresentParts.attach_legs_at(root, definition, sockets["leg_left"], sockets["leg_right"], leg_style)
+	if "face" in anatomy:
+		PresentParts.attach_face_at(root, definition, sockets["face"])
+	if "bow" in anatomy:
+		PresentParts.attach_bow_at(root, definition, sockets["bow"], box_w)
+	if "topper" in anatomy:
+		PresentParts.attach_topper(root, definition, sockets["topper"])
+	PresentParts.attach_accessory(root, definition, box_w, box_h, box_d)
 	PresentParts.attach_shadow(root, box_w, box_d)
+	root.set_meta("idle_style", String(rig.get("idle_style", "bounce")))
 	return root
-
-
-func _attach_body(root: Node3D, def: Dictionary,
-		w: float, h: float, d: float) -> void:
-	var mesh_inst := MeshInstance3D.new()
-	mesh_inst.name = "Body"
-	var box := BoxMesh.new()
-	box.size = Vector3(w, h, d)
-	mesh_inst.mesh = box
-	mesh_inst.position = Vector3(0, h * 0.5, 0)
-	mesh_inst.material_override = _make_wrapping_material(def)
-	root.add_child(mesh_inst)
-
-
-func _attach_face(root: Node3D, def: Dictionary, h: float, d: float) -> void:
-	var expression: String = def.get("expression", "determined")
-	var face := MeshInstance3D.new()
-	face.name = "Face"
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.7, 0.5)
-	face.mesh = quad
-	face.position = Vector3(0, h * 0.52, d * 0.5 + 0.015)
-	face.material_override = _face_renderer.face_material(expression)
-	face.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	root.add_child(face)
 
 
 func _get_shader() -> Shader:
