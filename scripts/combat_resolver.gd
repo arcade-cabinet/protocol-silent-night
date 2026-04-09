@@ -72,7 +72,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 			projectiles[index] = projectile
 
 
-func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: Dictionary, test_mode: Dictionary, on_gain_xp: Callable, fx_root: Node3D = null, particles: RefCounted = null, on_gain_cookies: Callable = Callable()) -> void:
+func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: Dictionary, test_mode: Dictionary, on_gain_xp: Callable, fx_root: Node3D = null, particles: RefCounted = null, on_gain_cookies: Callable = Callable(), on_gain_scroll: Callable = Callable()) -> void:
 	for index in range(pickups.size() - 1, -1, -1):
 		var pickup: Dictionary = pickups[index]
 		var to_player: Vector3 = player_node.position - pickup["node"].position
@@ -87,6 +87,8 @@ func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: D
 			var ptype: String = pickup.get("type", "xp")
 			if ptype == "cookie" and on_gain_cookies.is_valid():
 				on_gain_cookies.call(int(pickup["value"]))
+			elif ptype == "scroll" and on_gain_scroll.is_valid():
+				on_gain_scroll.call(String(pickup.get("scroll_type", "nice")))
 			else:
 				on_gain_xp.call(int(pickup["value"]))
 			if audio_mgr != null: audio_mgr.play_pickup()

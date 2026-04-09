@@ -47,13 +47,13 @@ func tick_playing(delta: float) -> void:
 	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), spawn_projectile_hostile, main._test_scale("boss_attack_scale"))
 	main.boss_phases.update_boss(delta, main.boss_ref, main.player_node, Callable(main, "_move_actor"), spawn_projectile_hostile, Callable(main, "_damage_player"), main.ui_mgr.show_message, Callable(self, "_boss_summon_minion"), main.fx_root, main._test_scale("boss_attack_scale"))
 	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), on_boss_killed, main.fx_root, main.vfx, main.dmg_numbers)
-	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles, gain_cookies)
+	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles, gain_cookies, gain_scroll)
 	main.combat.update_vfx(delta, main.vfx)
 	main.dmg_numbers.update(delta)
 	main.particles.update(delta)
+	main.board_obj_handler.update_board_objects(main.projectiles, main.board_objects, main.pickup_root, main.pickups, main.fx_root, main.particles)
 	main.wave_time_remaining = maxf(0.0, main.wave_time_remaining - delta * main._test_scale("wave_scale"))
-	if main.wave_time_remaining <= 0.0 and main.state == "playing":
-		begin_wave_clear()
+	if main.wave_time_remaining <= 0.0 and main.state == "playing": begin_wave_clear()
 	main.ui_mgr.timer_label.text = "%.0f" % main.wave_time_remaining
 
 func start_next_wave() -> void:
@@ -167,7 +167,9 @@ func update_player(delta: float) -> void:
 	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar, Callable(self, "spawn_aura_damage_number"))
 
 func update_spawning(delta: float) -> void:
-	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"))
+	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"), Callable(self, "_spawn_board_object"))
+func _spawn_board_object() -> void:
+	main.board_obj_handler.spawn_board_object(main)
 
 func begin_wave_clear() -> void:
 	main.state = "wave_clear"
@@ -193,6 +195,6 @@ func on_boss_killed() -> void:
 	main.ui_mgr.boss_panel.visible = false; end_run(true)
 func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
 func gain_cookies(amt: int) -> void: main.run_cookies += amt
-func _boss_summon_minion() -> void:
-	main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
+func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
+func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
 func clear_runtime() -> void: preload("res://scripts/runtime_cleaner.gd").clear(main)
