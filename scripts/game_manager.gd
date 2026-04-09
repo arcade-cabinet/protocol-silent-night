@@ -47,7 +47,7 @@ func tick_playing(delta: float) -> void:
 	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), spawn_projectile_hostile, main._test_scale("boss_attack_scale"))
 	main.boss_phases.update_boss(delta, main.boss_ref, main.player_node, Callable(main, "_move_actor"), spawn_projectile_hostile, Callable(main, "_damage_player"), main.ui_mgr.show_message, Callable(self, "_boss_summon_minion"), main.fx_root, main._test_scale("boss_attack_scale"))
 	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), on_boss_killed, main.fx_root, main.vfx, main.dmg_numbers)
-	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles)
+	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles, gain_cookies)
 	main.combat.update_vfx(delta, main.vfx)
 	main.dmg_numbers.update(delta)
 	main.particles.update(delta)
@@ -187,18 +187,12 @@ func spawn_projectile_player(origin: Vector3, direction: Vector3, hostile: bool,
 func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
 	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color("ff617e"), main.fx_root, main.particles)
 
-func spawn_aura_damage_number(wp: Vector3, amt: float, col: Color) -> void:
-	main.dmg_numbers.spawn(main.fx_root, wp, amt, col)
+func spawn_aura_damage_number(wp: Vector3, a: float, c: Color) -> void: main.dmg_numbers.spawn(main.fx_root, wp, a, c)
 func on_boss_killed() -> void:
-	main.boss_phases.clear()
-	main.boss_ref["node"].queue_free()
-	main.boss_ref = {}
-	main.ui_mgr.boss_panel.visible = false
-	end_run(true)
-func gain_xp(amount: int) -> void:
-	main.progression.gain_xp(amount, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
+	main.boss_phases.clear(); main.boss_ref["node"].queue_free(); main.boss_ref = {}
+	main.ui_mgr.boss_panel.visible = false; end_run(true)
+func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
+func gain_cookies(amt: int) -> void: main.run_cookies += amt
 func _boss_summon_minion() -> void:
-	var types := ["grunt", "rusher"]
-	main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, types[randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
-func clear_runtime() -> void:
-	preload("res://scripts/runtime_cleaner.gd").clear(main)
+	main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
+func clear_runtime() -> void: preload("res://scripts/runtime_cleaner.gd").clear(main)

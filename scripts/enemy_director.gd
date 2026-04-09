@@ -45,6 +45,7 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 		"speed": float(def["speed"]),
 		"contact_damage": float(def["contact_damage"]),
 		"drop_xp": int(def["drop_xp"]),
+		"drop_cookies": int(def.get("drop_cookies", 0)),
 		"color": Color(def["color"]),
 		"attack_timer": 0.0,
 		"behavior_timer": 0.0,

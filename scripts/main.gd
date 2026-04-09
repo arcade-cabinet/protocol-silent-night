@@ -196,6 +196,9 @@ func _update_ui() -> void:
 func _kill_enemy(enemy_index: int) -> void:
 	var enemy: Dictionary = enemies[enemy_index]
 	combat.spawn_pickup(pickup_root, pickups, enemy["node"].position, enemy["drop_xp"])
+	var cookie_val := int(enemy.get("drop_cookies", 0))
+	if cookie_val > 0:
+		combat.spawn_pickup(pickup_root, pickups, enemy["node"].position + Vector3(0.5, 0, 0.5), cookie_val, "cookie")
 	combat.spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
 	particles.spawn_death_burst(fx_root, enemy["node"].position, enemy["color"], float(enemy["node"].scale.x))
 	enemy["node"].queue_free()
