@@ -12,13 +12,13 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_player(actor_root: Node3D, class_id: String, class_defs: Dictionary, present_defs: Dictionary = {}) -> Dictionary:
+func spawn_player(actor_root: Node3D, class_id: String, class_defs: Dictionary, present_defs: Dictionary = {}, gear_system: RefCounted = null) -> Dictionary:
 	if present_defs.has(class_id):
-		return _spawn_present_player(actor_root, class_id, present_defs[class_id])
+		return _spawn_present_player(actor_root, class_id, present_defs[class_id], gear_system)
 	return _spawn_legacy_player(actor_root, class_id, class_defs)
 
 
-func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary) -> Dictionary:
+func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary, gear_system: RefCounted = null) -> Dictionary:
 	var player_node := Node3D.new()
 	player_node.name = "Player"
 	actor_root.add_child(player_node)
@@ -41,6 +41,8 @@ func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary
 		"pierce": int(def.get("pierce", 1)),
 		"color": def.get("bow_color", "#ffd700"),
 	}
+	if gear_system != null:
+		player_class = gear_system.apply_modifiers(player_class)
 	var player_state := {
 		"class": player_class,
 		"hp": float(player_class["max_hp"]),

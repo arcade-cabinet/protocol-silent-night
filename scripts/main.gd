@@ -26,6 +26,7 @@ var present_animator := preload("res://scripts/present_animator.gd").new()
 var afterimages: Array = []
 var particles := preload("res://scripts/particle_effects.gd").new()
 var boss_phases := preload("res://scripts/boss_phases.gd").new()
+var gear_sys := GearSystem.new()
 var board_obj_factory := preload("res://scripts/board_object_factory.gd").new(mat_factory)
 var scroll_pickup_mgr := preload("res://scripts/scroll_pickup.gd").new(mat_factory, pix_renderer)
 var board_obj_handler := preload("res://scripts/board_object_handler.gd").new(board_obj_factory, scroll_pickup_mgr)

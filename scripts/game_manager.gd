@@ -91,20 +91,16 @@ func end_run(win: bool) -> void:
 	ui.hud_root.visible = false
 	ui.dash_button.visible = false
 	ui.boss_panel.visible = false
-	var save_mgr: Node = main._save_manager()
-	if save_mgr != null and main.run_cookies > 0:
-		save_mgr.add_cookies(main.run_cookies)
-	if win and save_mgr != null and save_mgr.unlock("bumble"):
-		ui.show_achievement("THE BUMBLE UNLOCKED")
-		main._refresh_start_screen()
+	var sm: Node = main._save_manager()
+	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
+	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		ui.end_screen.visible = true
 		ui.end_title.text = "CAMPAIGN SECURED" if win else "OVERWHELMED"
 		ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
 		ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
 		ui.end_waves.text = "Waves cleared: %d" % max(1, main.current_wave_index + 1)
-	else:
-		main.between_match.start_flow()
+	else: main.between_match.start_flow()
 
 func return_to_menu() -> void:
 	main.state = "menu"
@@ -136,7 +132,7 @@ func build_board() -> void:
 		main.obstacles_builder.make_landmark(main.board_root, landmark)
 
 func spawn_player() -> void:
-	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.class_defs, main.present_defs)
+	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.class_defs, main.present_defs, main.gear_sys)
 	main.player_node = result["node"]
 	main.player_mesh = result["mesh"]
 	main.player_state = result["state"]
@@ -173,8 +169,7 @@ func update_player(delta: float) -> void:
 
 func update_spawning(delta: float) -> void:
 	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"), Callable(self, "_spawn_board_object"))
-func _spawn_board_object() -> void:
-	main.board_obj_handler.spawn_board_object(main)
+func _spawn_board_object() -> void: main.board_obj_handler.spawn_board_object(main)
 
 func begin_wave_clear() -> void:
 	main.state = "wave_clear"

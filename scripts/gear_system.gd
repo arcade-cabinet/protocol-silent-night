@@ -67,10 +67,10 @@ func apply_modifiers(base_stats: Dictionary) -> Dictionary:
 		var stats: Dictionary = gear.get("stats", {})
 		for key in stats.keys():
 			if key.ends_with("_flat"):
-				var base_key: String = key.trim_suffix("_flat")
+				var base_key: String = _resolve_stat_key(result, key.trim_suffix("_flat"))
 				result[base_key] = float(result.get(base_key, 0.0)) + float(stats[key])
 			elif key.ends_with("_mult"):
-				var base_key: String = key.trim_suffix("_mult")
+				var base_key: String = _resolve_stat_key(result, key.trim_suffix("_mult"))
 				if key.contains("cooldown") or key.contains("fire_rate"):
 					result[base_key] = float(result.get(base_key, 1.0)) * (1.0 - float(stats[key]))
 				else:
@@ -78,6 +78,11 @@ func apply_modifiers(base_stats: Dictionary) -> Dictionary:
 			else:
 				result[key] = float(result.get(key, 0.0)) + float(stats[key])
 	return result
+
+
+func _resolve_stat_key(stats: Dictionary, key: String) -> String:
+	if key == "hp" and stats.has("max_hp"): return "max_hp"
+	return key
 
 
 func get_all_equipped() -> Array:

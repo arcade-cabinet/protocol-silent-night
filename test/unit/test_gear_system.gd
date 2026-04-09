@@ -91,6 +91,21 @@ func test_validate_rejects_unknown_flair_type() -> void:
 	assert_bool(result["valid"]).is_false()
 
 
+func test_apply_modifiers_to_present_class_stats() -> void:
+	var gs := GearSystem.new()
+	gs.equip({"id": "a", "name": "A", "slot": "weapon_mod", "rarity": 2,
+		"stats": {"damage_flat": 10, "fire_rate_mult": 0.08}, "flavor": "x"})
+	gs.equip({"id": "b", "name": "B", "slot": "wrapping_upgrade", "rarity": 1,
+		"stats": {"hp_flat": 20}, "flavor": "x"})
+	var base_class := {
+		"damage": 14.0, "fire_rate": 0.22, "max_hp": 120.0, "speed": 12.0,
+	}
+	var result := gs.apply_modifiers(base_class)
+	assert_float(result["damage"]).is_equal(24.0)
+	assert_float(result["max_hp"]).is_equal(140.0)
+	assert_float(result["fire_rate"]).is_less(0.22)
+
+
 func test_sell_value_scales_with_rarity() -> void:
 	var gs := GearSystem.new()
 	assert_int(gs.sell_value({"rarity": 1})).is_equal(5)
