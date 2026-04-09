@@ -145,36 +145,17 @@ func _tick(delta: float) -> void:
 			game_mgr.start_next_wave()
 	shake_magnitude = WORLD_BUILDER.update_camera(camera, player_node, state, config, delta, shake_magnitude)
 
-func _unhandled_input(event: InputEvent) -> void:
-	var s := {"dash_pressed": dash_pressed, "touch_active": touch_active, "touch_origin": touch_origin, "touch_position": touch_position, "input_move": input_move}
-	player_ctrl.handle_input(event, Vector2(get_viewport().size), s)
-	dash_pressed = s.get("dash_pressed", dash_pressed)
-	touch_active = s.get("touch_active", touch_active)
-	touch_origin = s.get("touch_origin", touch_origin)
-	touch_position = s.get("touch_position", touch_position)
-	input_move = s.get("input_move", input_move)
-	if s.get("show_joystick", false): ui_mgr.show_joystick(s["joystick_base"], s["joystick_knob"])
-	if s.get("hide_joystick", false): ui_mgr.hide_joystick()
+func _unhandled_input(event: InputEvent) -> void: preload("res://scripts/main_helpers.gd").handle_input(self, event)
 
-func _load_definitions() -> void:
-	for pair in [["config", "res://declarations/config/config.json"], ["class_defs", "res://declarations/classes/classes.json"], ["enemy_defs", "res://declarations/enemies/enemies.json"], ["upgrade_defs", "res://declarations/upgrades/upgrades.json"], ["wave_defs", "res://declarations/waves/waves.json"], ["present_defs", "res://declarations/presents/presents.json"]]:
-		self.set(pair[0], WORLD_BUILDER.read_json(pair[1]))
+func _load_definitions() -> void: preload("res://scripts/main_helpers.gd").load_definitions(self)
 
 func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
 func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(class_defs, _save_manager(), _on_class_button_pressed, present_defs)
 func _return_to_menu() -> void: game_mgr.return_to_menu()
 
-func _trigger_level_up() -> void:
-	progression.trigger_level_up(func(s: String) -> void: state = s, upgrade_defs, test_mode, _apply_upgrade, _on_upgrade_button_pressed)
+func _trigger_level_up() -> void: preload("res://scripts/main_helpers.gd").trigger_level_up(self)
 
-func _apply_upgrade(upgrade_id: String) -> void:
-	progression.apply_upgrade(upgrade_id, player_state)
-	ui_mgr.level_screen.visible = false
-	if progression.xp >= progression.xp_needed:
-		_trigger_level_up()
-		return
-	state = "playing"
-	_update_ui()
+func _apply_upgrade(upgrade_id: String) -> void: preload("res://scripts/main_helpers.gd").apply_upgrade(self, upgrade_id)
 
 func _damage_player(amount: float) -> void:
 	preload("res://scripts/player_damage_handler.gd").damage_player(self, amount)

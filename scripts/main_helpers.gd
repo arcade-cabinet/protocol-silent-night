@@ -69,3 +69,45 @@ static func load_equipped_gear(main: Node, sm: Node) -> void:
 		var item: Variant = equipped.get(slot, {})
 		if item is Dictionary and not item.is_empty() and String(item.get("slot", slot)) == slot:
 			main.gear_sys.equip(item)
+
+
+const _DEF_PAIRS: Array = [
+	["config", "res://declarations/config/config.json"],
+	["class_defs", "res://declarations/classes/classes.json"],
+	["enemy_defs", "res://declarations/enemies/enemies.json"],
+	["upgrade_defs", "res://declarations/upgrades/upgrades.json"],
+	["wave_defs", "res://declarations/waves/waves.json"],
+	["present_defs", "res://declarations/presents/presents.json"],
+]
+
+
+static func load_definitions(main: Node) -> void:
+	var wb: Variant = preload("res://scripts/world_builder.gd")
+	for pair in _DEF_PAIRS:
+		main.set(pair[0], wb.read_json(pair[1]))
+
+
+static func apply_upgrade(main: Node, upgrade_id: String) -> void:
+	main.progression.apply_upgrade(upgrade_id, main.player_state)
+	main.ui_mgr.level_screen.visible = false
+	if main.progression.xp >= main.progression.xp_needed:
+		main._trigger_level_up()
+		return
+	main.state = "playing"
+	main._update_ui()
+
+
+static func handle_input(main: Node, event: InputEvent) -> void:
+	var s := {"dash_pressed": main.dash_pressed, "touch_active": main.touch_active, "touch_origin": main.touch_origin, "touch_position": main.touch_position, "input_move": main.input_move}
+	main.player_ctrl.handle_input(event, Vector2(main.get_viewport().size), s)
+	main.dash_pressed = s.get("dash_pressed", main.dash_pressed)
+	main.touch_active = s.get("touch_active", main.touch_active)
+	main.touch_origin = s.get("touch_origin", main.touch_origin)
+	main.touch_position = s.get("touch_position", main.touch_position)
+	main.input_move = s.get("input_move", main.input_move)
+	if s.get("show_joystick", false): main.ui_mgr.show_joystick(s["joystick_base"], s["joystick_knob"])
+	if s.get("hide_joystick", false): main.ui_mgr.hide_joystick()
+
+
+static func trigger_level_up(main: Node) -> void:
+	main.progression.trigger_level_up(func(st: String) -> void: main.state = st, main.upgrade_defs, main.test_mode, Callable(main, "_apply_upgrade"), Callable(main, "_on_upgrade_button_pressed"))
