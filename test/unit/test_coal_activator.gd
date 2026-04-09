@@ -10,6 +10,10 @@ class StubMain:
 	var run_cookies: int = 0
 	var player_node: Node3D
 	var ui_mgr = null
+	var particles = null
+	var fx_root: Node3D
+	var screen_shake = null
+	var audio_mgr = null
 	var update_ui_called: int = 0
 	var damaged_self: float = 0.0
 	var killed_indices: Array = []

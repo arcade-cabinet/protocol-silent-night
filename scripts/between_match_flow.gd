@@ -85,9 +85,10 @@ func open_scrolls() -> Dictionary:
 		var stype: String = String(scroll.get("scroll_type", "nice")) if scroll is Dictionary else "nice"
 		if stype == "naughty":
 			var effect_id: String = COAL_EFFECTS.roll_effect(scroll_rng)
-			main.coal_queue.append(effect_id)
+			var rarity: String = COAL_EFFECTS.roll_rarity(scroll_rng)
+			main.coal_queue.append({"effect_id": effect_id, "rarity": rarity})
 			coal_added.append(effect_id)
-			outcomes.append({"type": "naughty", "effect_id": effect_id})
+			outcomes.append({"type": "naughty", "effect_id": effect_id, "rarity": rarity})
 		else:
 			cookies_added += nice_value
 			outcomes.append({"type": "nice", "cookies": nice_value})

@@ -84,6 +84,18 @@ func _build_cache() -> void:
 	_cache["death"] = _sfx.make_chord([146.83, 155.56, 207.65], 0.9, 2.5)
 	_cache["victory"] = _sfx.make_chord([523.25, 659.25, 783.99, 1046.50], 1.1, 1.8)
 	_cache["menu_click"] = _sfx.make_tone(660.0, 0.05, 30.0)
+	_cache["coal_spray"] = _sfx.make_noise_burst(0.28, 5.0, 0.45)
+	_cache["coal_hurl"] = _sfx.make_whip(0.3)
+	_cache["coal_poison"] = _sfx.make_bubble(0.6)
+	_cache["coal_embers"] = _sfx.make_crackle(0.55)
+	_cache["coal_backfire"] = _sfx.make_sweep(420.0, 80.0, 0.45, 5.0)
+	_cache["coal_fortune"] = _sfx.make_chime_arp([659.25, 783.99, 987.77, 1318.51], 0.6)
+
+
+func play_coal(kind: String) -> void:
+	var key: String = "coal_%s" % kind
+	if _cache.has(key):
+		_play(key)
 
 
 func play_shot(color_hex: String = "#ffffff") -> void:

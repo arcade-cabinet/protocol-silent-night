@@ -103,6 +103,10 @@ func spawn_pickup_sparkle(root: Node3D, position: Vector3) -> void:
 		_track(node, rise, SPARKLE_LIFE, particle_scale, -2.2)
 
 
+func spawn_coal_effect(root: Node3D, pos: Vector3, kind: String, color_override: Color = Color(0, 0, 0, 0)) -> void:
+	preload("res://scripts/particle_coal_helpers.gd").spawn_for_kind(self, root, pos, kind, color_override)
+
+
 func update(delta: float) -> void:
 	for index in range(_entries.size() - 1, -1, -1):
 		var entry: Dictionary = _entries[index]
