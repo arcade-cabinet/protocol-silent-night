@@ -13,6 +13,8 @@ static func build(root: Control, on_resume: Callable, on_restart: Callable, on_s
 	panel.custom_minimum_size = Vector2(320, 400)
 	panel.position = Vector2(-160, -200)
 	panel.process_mode = Node.PROCESS_MODE_ALWAYS
+	panel.set_meta("focused_index", 0)
+	panel.gui_input.connect(func(event: InputEvent) -> void: _handle_input(panel, event))
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.03, 0.04, 0.07, 0.97)
 	style.border_color = Color("#ffd700")
@@ -41,12 +43,14 @@ static func build(root: Control, on_resume: Callable, on_restart: Callable, on_s
 	title.add_theme_color_override("font_color", Color("#ffd700"))
 	vbox.add_child(title)
 
-	_add_button(vbox, "RESUME", on_resume)
-	_add_button(vbox, "RESTART", on_restart)
-	_add_button(vbox, "SETTINGS", on_settings)
-	_add_button(vbox, "QUIT", on_quit)
-
-	return {"panel": panel}
+	var buttons: Array = [
+		_add_button(vbox, "RESUME", on_resume),
+		_add_button(vbox, "RESTART", on_restart),
+		_add_button(vbox, "SETTINGS", on_settings),
+		_add_button(vbox, "QUIT", on_quit),
+	]
+	panel.set_meta("buttons", buttons)
+	return {"panel": panel, "buttons": buttons}
 
 
 static func _add_button(parent: Container, text: String, callback: Callable) -> Button:
@@ -63,10 +67,36 @@ static func _add_button(parent: Container, text: String, callback: Callable) -> 
 static func show(state: Dictionary) -> void:
 	if state.is_empty():
 		return
-	(state["panel"] as PanelContainer).visible = true
+	var panel: PanelContainer = state["panel"]
+	panel.visible = true
+	var buttons: Array = state.get("buttons", [])
+	if buttons.size() > 0:
+		panel.set_meta("focused_index", 0)
+		(buttons[0] as Button).grab_focus()
 
 
 static func hide(state: Dictionary) -> void:
 	if state.is_empty():
 		return
 	(state["panel"] as PanelContainer).visible = false
+
+
+static func _handle_input(panel: PanelContainer, event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed:
+		return
+	var buttons: Array = panel.get_meta("buttons", [])
+	if buttons.is_empty():
+		return
+	var idx: int = int(panel.get_meta("focused_index", 0))
+	match event.physical_keycode:
+		KEY_DOWN, KEY_S:
+			idx = (idx + 1) % buttons.size()
+		KEY_UP, KEY_W:
+			idx = (idx - 1 + buttons.size()) % buttons.size()
+		KEY_ENTER:
+			(buttons[idx] as Button).pressed.emit()
+			return
+		_:
+			return
+	panel.set_meta("focused_index", idx)
+	(buttons[idx] as Button).grab_focus()

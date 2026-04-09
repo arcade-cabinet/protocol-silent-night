@@ -27,6 +27,7 @@ func spawn(root: Node3D, world_position: Vector3, amount: float, color: Color, i
 			var new_amount: float = float(existing.get("accumulated", 0.0)) + amount
 			existing["accumulated"] = new_amount
 			existing["life"] = LIFE
+			existing["stack_pulse"] = 0.18
 			var lbl: Label3D = existing["node"]
 			if lbl != null and is_instance_valid(lbl):
 				lbl.text = str(int(round(new_amount)))
@@ -83,7 +84,13 @@ func update(delta: float) -> void:
 			alpha = clampf(life / FADE_START, 0.0, 1.0)
 		var base_color: Color = entry["base_color"]
 		node.modulate = Color(base_color.r, base_color.g, base_color.b, alpha)
-		if bool(entry["is_crit"]) and elapsed < CRIT_PULSE_TIME:
+		var stack_pulse: float = float(entry.get("stack_pulse", 0.0))
+		if stack_pulse > 0.0:
+			stack_pulse = maxf(0.0, stack_pulse - delta)
+			entry["stack_pulse"] = stack_pulse
+			var stack_t: float = 1.0 - (stack_pulse / 0.18)
+			node.scale = Vector3.ONE * lerpf(1.25, 1.0, stack_t)
+		elif bool(entry["is_crit"]) and elapsed < CRIT_PULSE_TIME:
 			var pulse_t := elapsed / CRIT_PULSE_TIME
 			var scale_factor := lerpf(CRIT_PULSE_SCALE, 1.0, pulse_t)
 			node.scale = Vector3.ONE * scale_factor

@@ -23,7 +23,7 @@ func activate(main: Node, idx: int) -> void:
 	var descriptor: Dictionary = COAL_EFFECTS.apply_effect(effect_id, rng, rarity)
 	if not bool(descriptor.get("ok", false)):
 		return
-	if not _apply(main, descriptor, effect_id):
+	if not _apply(main, descriptor, effect_id, rarity):
 		return
 	main.coal_queue.remove_at(idx)
 	if main.ui_mgr != null:
@@ -32,7 +32,7 @@ func activate(main: Node, idx: int) -> void:
 		main.audio_mgr.play_coal(effect_id)
 
 
-func _apply(main: Node, d: Dictionary, effect_id: String) -> bool:
+func _apply(main: Node, d: Dictionary, effect_id: String, rarity: String = "common") -> bool:
 	var kind := String(d.get("kind", ""))
 	var ok: bool = false
 	match kind:
@@ -52,10 +52,10 @@ func _apply(main: Node, d: Dictionary, effect_id: String) -> bool:
 			main._update_ui()
 			ok = true
 	if ok and main.player_node != null and main.particles != null and main.fx_root != null:
-		COAL_VFX.spawn_for_effect(main.particles, main.fx_root, main.player_node.position, effect_id, Color(0, 0, 0, 0))
+		COAL_VFX.spawn_for_effect(main.particles, main.fx_root, main.player_node.position, effect_id, Color(0, 0, 0, 0), rarity)
 	if ok and main.screen_shake != null:
 		var trauma_amounts: Dictionary = {"backfire": 0.9, "hurl": 0.6, "spray": 0.4, "embers": 0.25, "poison": 0.15, "fortune": 0.1}
-		main.screen_shake.add_trauma(float(trauma_amounts.get(effect_id, 0.3)))
+		main.screen_shake.add_trauma(float(trauma_amounts.get(effect_id, 0.3)) * COAL_VFX.rarity_scale(rarity))
 	return ok
 
 

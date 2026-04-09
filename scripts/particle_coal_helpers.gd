@@ -82,10 +82,21 @@ static func spawn_sparkle_rain(particles: RefCounted, root: Node3D, pos: Vector3
 		particles._track(node, Vector3(0, -2.5, 0), 1.1, 0.22, -3.0)
 
 
-static func spawn_for_kind(particles: RefCounted, root: Node3D, pos: Vector3, kind: String, color_override: Color = Color(0, 0, 0, 0)) -> void:
+static func spawn_for_kind(particles: RefCounted, root: Node3D, pos: Vector3, kind: String, color_override: Color = Color(0, 0, 0, 0), scale: float = 1.0) -> void:
 	var color: Color = color_override
 	if color.a <= 0.0:
 		color = Color(String(_KIND_COLORS.get(kind, "#ffffff")))
+	# Stamp the requested kind multiple times for rarity > 1 to keep helper
+	# implementations simple. Scale 2.0 → fire twice; 1.5 → fire once + a
+	# half-strength repeat by jittering position.
+	_dispatch(particles, root, pos, kind, color)
+	if scale >= 1.4:
+		_dispatch(particles, root, pos + Vector3(0.3, 0.0, -0.2), kind, color)
+	if scale >= 1.9:
+		_dispatch(particles, root, pos + Vector3(-0.3, 0.1, 0.2), kind, color)
+
+
+static func _dispatch(particles: RefCounted, root: Node3D, pos: Vector3, kind: String, color: Color) -> void:
 	match kind:
 		"spray": spawn_ring(particles, root, pos, color)
 		"hurl": spawn_streak(particles, root, pos, color)

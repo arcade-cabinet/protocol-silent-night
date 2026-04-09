@@ -5,7 +5,7 @@ extends RefCounted
 ## Control._draw primitives only (no textures).
 
 const SIZE: Vector2 = Vector2(140, 140)
-const VIEW_RADIUS: float = 22.0  # world units visible radius
+const DEFAULT_VIEW_RADIUS: float = 22.0  # world units visible radius (overridable per-canvas)
 
 
 static func build(root: Control) -> Dictionary:
@@ -30,11 +30,23 @@ static func build(root: Control) -> Dictionary:
 	panel.add_theme_stylebox_override("panel", style)
 	var canvas := Control.new()
 	canvas.custom_minimum_size = SIZE
-	canvas.set_meta("minimap_state", {"enemies": [], "pickups": [], "boss": null, "player_pos": Vector2.ZERO})
+	canvas.set_meta("minimap_state", {"enemies": [], "pickups": [], "boss": null, "player_pos": Vector2.ZERO, "view_radius": DEFAULT_VIEW_RADIUS})
 	canvas.draw.connect(func() -> void: _draw(canvas))
 	panel.add_child(canvas)
 	root.add_child(panel)
 	return {"panel": panel, "canvas": canvas}
+
+
+static func set_view_radius(state: Dictionary, radius: float) -> void:
+	if state.is_empty():
+		return
+	var canvas: Control = state["canvas"]
+	if canvas == null:
+		return
+	var data: Dictionary = canvas.get_meta("minimap_state", {})
+	data["view_radius"] = clampf(radius, 8.0, 60.0)
+	canvas.set_meta("minimap_state", data)
+	canvas.queue_redraw()
 
 
 static func refresh(state: Dictionary, player_pos: Vector2, enemies: Array, pickups: Array, boss: Variant) -> void:
@@ -43,7 +55,9 @@ static func refresh(state: Dictionary, player_pos: Vector2, enemies: Array, pick
 	var canvas: Control = state["canvas"]
 	if canvas == null:
 		return
-	var data: Dictionary = {"player_pos": player_pos, "enemies": [], "pickups": [], "boss": null}
+	var prev: Dictionary = canvas.get_meta("minimap_state", {})
+	var view_r: float = float(prev.get("view_radius", DEFAULT_VIEW_RADIUS))
+	var data: Dictionary = {"player_pos": player_pos, "enemies": [], "pickups": [], "boss": null, "view_radius": view_r}
 	for e in enemies:
 		if e is Dictionary and e.has("node") and is_instance_valid(e["node"]):
 			var ep: Vector3 = e["node"].position
@@ -65,24 +79,25 @@ static func _draw(canvas: Control) -> void:
 	var data: Dictionary = canvas.get_meta("minimap_state")
 	var center: Vector2 = SIZE * 0.5
 	var ppos: Vector2 = data.get("player_pos", Vector2.ZERO)
+	var view_r: float = float(data.get("view_radius", DEFAULT_VIEW_RADIUS))
 	canvas.draw_circle(center, 4.5, Color("#ffffff"))
 	for ep in data.get("enemies", []):
-		var p: Vector2 = _world_to_map(ep, ppos, center)
+		var p: Vector2 = _world_to_map(ep, ppos, center, view_r)
 		if (p - center).length() <= SIZE.x * 0.48:
 			canvas.draw_circle(p, 2.8, Color("#ff617e"))
 	for entry in data.get("pickups", []):
-		var pp: Vector2 = _world_to_map(entry["pos"], ppos, center)
+		var pp: Vector2 = _world_to_map(entry["pos"], ppos, center, view_r)
 		if (pp - center).length() > SIZE.x * 0.48:
 			continue
 		var col: Color = Color("#ffd700") if String(entry.get("type", "xp")) == "cookie" else Color("#55ff88")
 		canvas.draw_circle(pp, 2.0, col)
 	if data.get("boss") != null:
-		var bp: Vector2 = _world_to_map(data["boss"], ppos, center)
+		var bp: Vector2 = _world_to_map(data["boss"], ppos, center, view_r)
 		if (bp - center).length() <= SIZE.x * 0.48:
 			canvas.draw_circle(bp, 5.5, Color("#ff2244"))
 
 
-static func _world_to_map(world_pos: Vector2, player_pos: Vector2, center: Vector2) -> Vector2:
+static func _world_to_map(world_pos: Vector2, player_pos: Vector2, center: Vector2, view_radius: float) -> Vector2:
 	var delta: Vector2 = world_pos - player_pos
-	var scale: float = (SIZE.x * 0.46) / VIEW_RADIUS
+	var scale: float = (SIZE.x * 0.46) / view_radius
 	return center + delta * scale
