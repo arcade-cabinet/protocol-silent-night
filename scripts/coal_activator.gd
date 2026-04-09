@@ -21,26 +21,32 @@ func activate(main: Node, idx: int) -> void:
 	var descriptor: Dictionary = COAL_EFFECTS.apply_effect(effect_id, rng)
 	if not bool(descriptor.get("ok", false)):
 		return
+	if not _apply(main, descriptor):
+		return
 	main.coal_queue.remove_at(idx)
-	_apply(main, descriptor)
 	if main.ui_mgr != null:
 		main.ui_mgr.show_message(String(descriptor.get("message", "COAL!")), 1.4, Color(String(descriptor.get("color", "#ffffff"))))
 
 
-func _apply(main: Node, d: Dictionary) -> void:
+func _apply(main: Node, d: Dictionary) -> bool:
 	var kind := String(d.get("kind", ""))
 	match kind:
 		"aoe_damage", "explosion", "aura":
 			_damage_enemies_in_radius(main, float(d.get("damage", 0.0)), float(d.get("radius", 3.0)))
 			if kind == "explosion":
 				main._damage_player(float(d.get("self_damage", 0.0)))
+			return true
 		"single_target":
 			_damage_closest(main, float(d.get("damage", 0.0)))
+			return true
 		"self_damage":
 			main._damage_player(float(d.get("damage", 0.0)))
+			return true
 		"cookie_bonus":
 			main.run_cookies += int(d.get("cookies", 0))
 			main._update_ui()
+			return true
+	return false
 
 
 func _damage_enemies_in_radius(main: Node, dmg: float, radius: float) -> void:
