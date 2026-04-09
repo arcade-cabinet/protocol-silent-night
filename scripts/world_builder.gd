@@ -21,10 +21,10 @@ static func build_world(main: Node3D) -> void:
 
 	var camera := Camera3D.new()
 	camera.name = "GameCamera"
-	camera.projection = Camera3D.PROJECTION_PERSPECTIVE
-	camera.fov = 55.0
-	camera.position = Vector3(0, 23.0, 14.5)
-	camera.look_at_from_position(camera.position, Vector3.ZERO, Vector3.UP)
+	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.size = 42.0
+	camera.position = Vector3(0, 30.0, 0.01)
+	camera.rotation_degrees = Vector3(-90, 0, 0)
 	main.add_child(camera)
 	main.camera = camera
 
@@ -71,7 +71,9 @@ static func build_world(main: Node3D) -> void:
 
 
 static func can_occupy(world_position: Vector3, radius: float, arena_radius: float, obstacle_colliders: Array) -> bool:
-	if Vector2(world_position.x, world_position.z).length() > arena_radius - 1.2:
+	var half_w := arena_radius * 1.6 - 1.2
+	var half_h := arena_radius - 1.2
+	if absf(world_position.x) > half_w - radius or absf(world_position.z) > half_h - radius:
 		return false
 	var world_flat := Vector2(world_position.x, world_position.z)
 	for collider in obstacle_colliders:
@@ -110,16 +112,15 @@ static func read_json(path: String) -> Variant:
 	return parsed
 
 
-static func update_camera(camera: Camera3D, player_node: Node3D, state: String, config: Dictionary, delta: float, shake_magnitude: float = 0.0) -> float:
+static func update_camera(camera: Camera3D, player_node: Node3D, state: String, _config: Dictionary, delta: float, shake_magnitude: float = 0.0) -> float:
 	if camera == null:
 		return 0.0
 	var target := Vector3.ZERO
 	if player_node != null and state != "menu":
 		target = player_node.position
-	var arena_radius := float(config.get("arena_radius", 18.0))
-	var target_position := target + Vector3(0, arena_radius * 1.28, arena_radius * 0.82)
+	var target_position := Vector3(target.x, 30.0, target.z + 0.01)
 	if shake_magnitude > 0.0:
-		target_position += Vector3(randf_range(-1.0, 1.0), randf_range(-0.4, 0.4), randf_range(-1.0, 1.0)) * shake_magnitude
-	camera.position = camera.position.lerp(target_position, clampf(delta * 4.0, 0.0, 1.0))
-	camera.look_at(target + Vector3(0, 0.8, 0), Vector3.UP)
+		target_position.x += randf_range(-1.0, 1.0) * shake_magnitude
+		target_position.z += randf_range(-1.0, 1.0) * shake_magnitude
+	camera.position = camera.position.lerp(target_position, clampf(delta * 5.0, 0.0, 1.0))
 	return maxf(0.0, shake_magnitude - delta * 2.2)

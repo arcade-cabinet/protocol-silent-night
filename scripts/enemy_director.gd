@@ -27,9 +27,13 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
 	actor_root.add_child(enemy_node)
-	var angle := randf() * TAU
-	var radius := float(config["arena_radius"]) - 1.5
-	enemy_node.position = Vector3(cos(angle) * radius, 0.58, sin(angle) * radius)
+	var ar := float(config["arena_radius"])
+	var half_w := ar * 1.6 - 2.0
+	var half_h := ar - 2.0
+	var side := randi() % 4
+	var spawn_x := randf_range(-half_w, half_w) if side < 2 else (half_w if side == 2 else -half_w)
+	var spawn_z := (half_h if side == 0 else -half_h) if side < 2 else randf_range(-half_h, half_h)
+	enemy_node.position = Vector3(spawn_x, 0.58, spawn_z)
 	var scale_value := float(def["scale"])
 	enemy_node.scale = Vector3.ONE * scale_value
 	_uid_counter += 1
@@ -73,7 +77,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	ring.position = Vector3(0, 1.3, 0)
 	ring.material_override = materials.emissive_material(Color("ffe07a"), 2.0, 0.2)
 	boss_node.add_child(ring)
-	boss_node.position = Vector3(0, 0.18, -float(config["arena_radius"]) + 2.5)
+	boss_node.position = Vector3(0, 0.18, -(float(config["arena_radius"]) - 3.0))
 	actor_root.add_child(boss_node)
 	var new_boss := {
 		"id": "boss",

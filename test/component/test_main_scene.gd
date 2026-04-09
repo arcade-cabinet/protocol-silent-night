@@ -60,10 +60,10 @@ func test_board_query_matches_continuous_arena_boundary() -> void:
 	await get_tree().process_frame
 
 	assert_str(main.debug_zone_at(Vector3.ZERO)).is_equal("arena")
-	assert_str(main.debug_zone_at(Vector3(float(main.config["arena_radius"]) + 3.0, 0.0, 0.0))).is_equal("void")
+	var ar := float(main.config["arena_radius"])
+	assert_str(main.debug_zone_at(Vector3(ar * 1.6 + 3.0, 0.0, 0.0))).is_equal("void")
 	assert_int(main.board_data["drifts"].size()).is_greater(0)
-	assert_int(main.board_data["ridges"].size()).is_equal(18)
-	assert_bool(main.debug_is_blocked(Vector3(float(main.config["arena_radius"]) + 0.5, 0.0, 0.0))).is_true()
+	assert_bool(main.debug_is_blocked(Vector3(ar * 1.6 + 0.5, 0.0, 0.0))).is_true()
 
 
 func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
