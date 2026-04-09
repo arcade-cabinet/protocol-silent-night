@@ -25,6 +25,7 @@ func start_run(class_id: String) -> void:
 	main.move_velocity = Vector2.ZERO
 	main.boss_ref = {}
 	main.level_lookback.clear()
+	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	build_board()
 	spawn_player()
 	main._update_ui()
@@ -61,7 +62,7 @@ func start_next_wave() -> void:
 			main.level_lookback.pop_front()
 	main.current_wave_index += 1
 	var level: int = main.current_wave_index + 1
-	main.current_wave = WAVE_FORMULA.generate_wave(main.run_seed, level, main.level_lookback)
+	main.current_wave = WAVE_FORMULA.generate_wave(main.run_seed, level, main.level_lookback, main.difficulty_tier)
 	wave_spawner.reset_for_level()
 	var save_mgr: Node = main._save_manager()
 	main.wave_time_remaining = float(main.current_wave.get("countdown", 120.0))
