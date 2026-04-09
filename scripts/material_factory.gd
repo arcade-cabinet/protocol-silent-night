@@ -29,16 +29,16 @@ void vertex() {
 }
 
 void fragment() {
-	float radial = length(world_pos.xz);
-	if (radial > arena_radius) {
-		discard;
-	}
-	float gx = smoothstep(0.95, 1.0, fract((world_pos.x + arena_radius) * grid_scale));
-	float gz = smoothstep(0.95, 1.0, fract((world_pos.z + arena_radius) * grid_scale));
+	float half_w = arena_radius * 1.6;
+	float half_h = arena_radius;
+	float gx = smoothstep(0.95, 1.0, fract((world_pos.x + half_w) * grid_scale));
+	float gz = smoothstep(0.95, 1.0, fract((world_pos.z + half_h) * grid_scale));
 	vec3 color = base_color.rgb;
 	color -= grid_color.rgb * (gx + gz) * grid_strength;
-	float edge = smoothstep(arena_radius - 1.8, arena_radius, radial);
-	color = mix(color, vec3(0.25, 0.37, 0.49), edge * 0.45);
+	float edge_x = smoothstep(half_w - 1.5, half_w, abs(world_pos.x));
+	float edge_z = smoothstep(half_h - 1.5, half_h, abs(world_pos.z));
+	float edge = max(edge_x, edge_z);
+	color = mix(color, vec3(0.18, 0.28, 0.4), edge * 0.55);
 	ALBEDO = color;
 	ROUGHNESS = 0.88;
 	SPECULAR = 0.12;

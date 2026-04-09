@@ -101,7 +101,9 @@ func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
 func debug_force_level_up() -> void: _trigger_level_up()
 func debug_spawn_boss() -> void: game_mgr.spawn_boss(1.0)
 func debug_end_run(win: bool) -> void: game_mgr.end_run(win)
-func debug_zone_at(wp: Vector3) -> String: return "arena" if Vector2(wp.x, wp.z).length() <= float(config["arena_radius"]) else "void"
+func debug_zone_at(wp: Vector3) -> String:
+	var ar := float(config["arena_radius"])
+	return "arena" if absf(wp.x) <= ar * 1.6 and absf(wp.z) <= ar else "void"
 func debug_is_blocked(wp: Vector3, radius: float = 0.6) -> bool: return not _can_occupy(wp, radius)
 func debug_tick(delta: float) -> void: _tick(delta)
 
