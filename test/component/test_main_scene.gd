@@ -74,6 +74,7 @@ func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)
 	await get_tree().process_frame
+	main.configure_test_mode({"skip_between_match": true})
 	main.start_run("elf")
 	await get_tree().process_frame
 	main.debug_end_run(true)

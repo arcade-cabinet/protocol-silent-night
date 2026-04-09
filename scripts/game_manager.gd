@@ -25,11 +25,14 @@ func start_run(class_id: String) -> void:
 	main.move_velocity = Vector2.ZERO
 	main.boss_ref = {}
 	main.level_lookback.clear()
+	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	build_board()
 	spawn_player()
 	main._update_ui()
 	var ui: RefCounted = main.ui_mgr
 	ui.start_screen.visible = false
+	if ui.difficulty_panel != null:
+		ui.difficulty_panel.visible = false
 	ui.level_screen.visible = false
 	ui.end_screen.visible = false
 	ui.hud_root.visible = true
@@ -44,13 +47,13 @@ func tick_playing(delta: float) -> void:
 	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), spawn_projectile_hostile, main._test_scale("boss_attack_scale"))
 	main.boss_phases.update_boss(delta, main.boss_ref, main.player_node, Callable(main, "_move_actor"), spawn_projectile_hostile, Callable(main, "_damage_player"), main.ui_mgr.show_message, Callable(self, "_boss_summon_minion"), main.fx_root, main._test_scale("boss_attack_scale"))
 	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), on_boss_killed, main.fx_root, main.vfx, main.dmg_numbers)
-	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles)
+	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles, gain_cookies, gain_scroll)
 	main.combat.update_vfx(delta, main.vfx)
 	main.dmg_numbers.update(delta)
 	main.particles.update(delta)
+	main.board_obj_handler.update_board_objects(main.projectiles, main.board_objects, main.pickup_root, main.pickups, main.fx_root, main.particles)
 	main.wave_time_remaining = maxf(0.0, main.wave_time_remaining - delta * main._test_scale("wave_scale"))
-	if main.wave_time_remaining <= 0.0 and main.state == "playing":
-		begin_wave_clear()
+	if main.wave_time_remaining <= 0.0 and main.state == "playing": begin_wave_clear()
 	main.ui_mgr.timer_label.text = "%.0f" % main.wave_time_remaining
 
 func start_next_wave() -> void:
@@ -61,7 +64,7 @@ func start_next_wave() -> void:
 			main.level_lookback.pop_front()
 	main.current_wave_index += 1
 	var level: int = main.current_wave_index + 1
-	main.current_wave = WAVE_FORMULA.generate_wave(main.run_seed, level, main.level_lookback)
+	main.current_wave = WAVE_FORMULA.generate_wave(main.run_seed, level, main.level_lookback, main.difficulty_tier)
 	wave_spawner.reset_for_level()
 	var save_mgr: Node = main._save_manager()
 	main.wave_time_remaining = float(main.current_wave.get("countdown", 120.0))
@@ -85,18 +88,19 @@ func end_run(win: bool) -> void:
 	main.state = "win" if win else "game_over"
 	if main.audio_mgr != null: main.audio_mgr.play_victory() if win else main.audio_mgr.play_death()
 	var ui: RefCounted = main.ui_mgr
-	ui.end_screen.visible = true
 	ui.hud_root.visible = false
 	ui.dash_button.visible = false
 	ui.boss_panel.visible = false
-	var save_mgr: Node = main._save_manager()
-	if win and save_mgr != null and save_mgr.unlock("bumble"):
-		ui.show_achievement("THE BUMBLE UNLOCKED")
-		main._refresh_start_screen()
-	ui.end_title.text = "CAMPAIGN SECURED" if win else "OVERWHELMED"
-	ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
-	ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
-	ui.end_waves.text = "Waves cleared: %d" % max(1, main.current_wave_index + 1)
+	var sm: Node = main._save_manager()
+	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
+	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
+	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
+		ui.end_screen.visible = true
+		ui.end_title.text = "CAMPAIGN SECURED" if win else "OVERWHELMED"
+		ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
+		ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
+		ui.end_waves.text = "Waves cleared: %d" % max(1, main.current_wave_index + 1)
+	else: main.between_match.start_flow()
 
 func return_to_menu() -> void:
 	main.state = "menu"
@@ -110,6 +114,8 @@ func return_to_menu() -> void:
 	ui.hud_root.visible = false
 	ui.start_screen.visible = true
 	ui.boss_panel.visible = false
+	if ui.difficulty_panel != null:
+		ui.difficulty_panel.visible = false
 	ui.hide_joystick()
 	clear_runtime()
 	main._refresh_start_screen()
@@ -126,7 +132,7 @@ func build_board() -> void:
 		main.obstacles_builder.make_landmark(main.board_root, landmark)
 
 func spawn_player() -> void:
-	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.class_defs, main.present_defs)
+	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.class_defs, main.present_defs, main.gear_sys)
 	main.player_node = result["node"]
 	main.player_mesh = result["mesh"]
 	main.player_state = result["state"]
@@ -162,7 +168,8 @@ func update_player(delta: float) -> void:
 	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar, Callable(self, "spawn_aura_damage_number"))
 
 func update_spawning(delta: float) -> void:
-	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"))
+	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"), Callable(self, "_spawn_board_object"))
+func _spawn_board_object() -> void: main.board_obj_handler.spawn_board_object(main)
 
 func begin_wave_clear() -> void:
 	main.state = "wave_clear"
@@ -182,18 +189,12 @@ func spawn_projectile_player(origin: Vector3, direction: Vector3, hostile: bool,
 func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
 	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color("ff617e"), main.fx_root, main.particles)
 
-func spawn_aura_damage_number(wp: Vector3, amt: float, col: Color) -> void:
-	main.dmg_numbers.spawn(main.fx_root, wp, amt, col)
+func spawn_aura_damage_number(wp: Vector3, a: float, c: Color) -> void: main.dmg_numbers.spawn(main.fx_root, wp, a, c)
 func on_boss_killed() -> void:
-	main.boss_phases.clear()
-	main.boss_ref["node"].queue_free()
-	main.boss_ref = {}
-	main.ui_mgr.boss_panel.visible = false
-	end_run(true)
-func gain_xp(amount: int) -> void:
-	main.progression.gain_xp(amount, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
-func _boss_summon_minion() -> void:
-	var types := ["grunt", "rusher"]
-	main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, types[randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
-func clear_runtime() -> void:
-	preload("res://scripts/runtime_cleaner.gd").clear(main)
+	main.boss_phases.clear(); main.boss_ref["node"].queue_free(); main.boss_ref = {}
+	main.ui_mgr.boss_panel.visible = false; end_run(true)
+func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
+func gain_cookies(amt: int) -> void: main.run_cookies += amt
+func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
+func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
+func clear_runtime() -> void: preload("res://scripts/runtime_cleaner.gd").clear(main)

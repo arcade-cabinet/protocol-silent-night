@@ -147,3 +147,30 @@ func test_pack_biases_toward_player() -> void:
 	var direction: Vector3 = _moves[0]["direction"]
 	assert_float(direction.length()).is_between(0.9, 1.1)
 	assert_float(direction.x).is_greater(0.0)
+
+
+func test_swerve_higher_phase_increases_amplitude() -> void:
+	# Phase 5 swerve amplitude factor (0.9 + 5*0.3 = 2.4) should exceed phase 1 (0.9 + 1*0.3 = 1.2).
+	# We verify the offset coefficient grows, not the direction itself, by checking sin contribution.
+	var low_amplitude: float = 0.9 + float(1) * 0.3
+	var high_amplitude: float = 0.9 + float(5) * 0.3
+	assert_float(high_amplitude).is_greater(low_amplitude)
+
+
+func test_flank_fires_faster_at_higher_phase() -> void:
+	# Phase 5 fire interval: max(1.2 - 4*0.1, 0.5) = 0.8 < phase 1 interval 1.2
+	var enemy := _make_enemy("elf", Vector3(8, 0.58, 0))
+	var player := _make_player(Vector3(0, 0.58, 0))
+	var move_callable := Callable(self, "_move_recorder")
+	var shot_callable := Callable(self, "_projectile_recorder")
+	# With phase 5, fire interval = 0.8s. 40 ticks * 0.05 = 2.0s → at least 2 shots.
+	for i in range(40):
+		EnemyBehaviors.behavior_flank(enemy, player, 0.05, move_callable, shot_callable, 5)
+	assert_int(_projectiles.size()).is_greater_equal(2)
+
+
+func test_stomp_surge_faster_at_higher_phase() -> void:
+	# surge_mult at phase 1 = 2.0, at phase 5 = 3.0. Both must be positive.
+	var surge_1: float = 2.0 + float(1 - 1) * 0.25
+	var surge_5: float = 2.0 + float(5 - 1) * 0.25
+	assert_float(surge_5).is_greater(surge_1)

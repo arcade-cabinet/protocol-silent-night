@@ -72,7 +72,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 			projectiles[index] = projectile
 
 
-func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: Dictionary, test_mode: Dictionary, on_gain_xp: Callable, fx_root: Node3D = null, particles: RefCounted = null) -> void:
+func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: Dictionary, test_mode: Dictionary, on_gain_xp: Callable, fx_root: Node3D = null, particles: RefCounted = null, on_gain_cookies: Callable = Callable(), on_gain_scroll: Callable = Callable()) -> void:
 	for index in range(pickups.size() - 1, -1, -1):
 		var pickup: Dictionary = pickups[index]
 		var to_player: Vector3 = player_node.position - pickup["node"].position
@@ -84,7 +84,13 @@ func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: D
 		else:
 			pickup["node"].position.y = float(pickup["base_y"]) + sin(float(pickup["time"]) * 4.0 + float(pickup["phase"])) * 0.12
 		if dist <= float(config["pickup_auto_collect_radius"]) or bool(test_mode.get("auto_collect", false)):
-			on_gain_xp.call(int(pickup["value"]))
+			var ptype: String = pickup.get("type", "xp")
+			if ptype == "cookie" and on_gain_cookies.is_valid():
+				on_gain_cookies.call(int(pickup["value"]))
+			elif ptype == "scroll" and on_gain_scroll.is_valid():
+				on_gain_scroll.call(String(pickup.get("scroll_type", "nice")))
+			else:
+				on_gain_xp.call(int(pickup["value"]))
 			if audio_mgr != null: audio_mgr.play_pickup()
 			if particles != null and fx_root != null:
 				particles.spawn_pickup_sparkle(fx_root, pickup["node"].position)
@@ -106,18 +112,17 @@ func update_vfx(delta: float, vfx: Array) -> void:
 			vfx[index] = fx
 
 
-func spawn_pickup(pickup_root: Node3D, pickups: Array, world_position: Vector3, value: int) -> void:
+func spawn_pickup(pickup_root: Node3D, pickups: Array, world_position: Vector3, value: int, pickup_type: String = "xp") -> void:
 	var node := Node3D.new()
-	var sprite: MeshInstance3D = pixels.make_billboard_sprite("xp", 1.25, Color("8cff8e"))
+	var art_id := "cookie" if pickup_type == "cookie" else "xp"
+	var color := Color("ffd700") if pickup_type == "cookie" else Color("8cff8e")
+	var sprite: MeshInstance3D = pixels.make_billboard_sprite(art_id, 1.25, color)
 	node.add_child(sprite)
 	node.position = world_position + Vector3(0, 0.18, 0)
 	pickup_root.add_child(node)
 	pickups.append({
-		"node": node,
-		"value": value,
-		"base_y": node.position.y,
-		"phase": randf() * TAU,
-		"time": 0.0
+		"node": node, "value": value, "base_y": node.position.y,
+		"phase": randf() * TAU, "time": 0.0, "type": pickup_type
 	})
 
 

@@ -21,31 +21,34 @@ static func generate_pressure_profile(run_seed: int) -> Dictionary:
 		"burst": rng.randf_range(0.15, 0.85),
 		"siege": rng.randf_range(0.2, 0.9),
 		"boss_affinity": rng.randf_range(0.15, 0.6),
+		"scroll": rng.randf_range(0.2, 0.9),
 	}
 
 
-static func generate_wave(run_seed: int, level: int, lookback: Array = []) -> Dictionary:
+static func generate_wave(run_seed: int, level: int, lookback: Array = [], difficulty: int = 1) -> Dictionary:
 	var profile := generate_pressure_profile(run_seed)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = run_seed + level * 7919
-	var lf := float(level)
+	var lf := float(maxi(level, 0))
+	var df := float(clampi(difficulty, 1, 6))
 	var p_swarm := float(profile["swarm"])
 	var p_speed := float(profile["speed"])
 	var p_siege := float(profile["siege"])
 	var p_burst := float(profile["burst"])
 	var p_boss := float(profile["boss_affinity"])
-	var base_spawn_interval: float = 1.3 / (1.0 + lf * 0.06 * (1.0 + p_swarm * 0.7))
+	var base_spawn_interval: float = 1.3 / (1.0 + lf * 0.06 * df * (1.0 + p_swarm * 0.7))
 	var spawn_interval: float = maxf(base_spawn_interval, 0.12)
-	var speed_mult: float = 1.0 + lf * 0.035 * (1.0 + p_speed * 0.6)
-	var hp_scale: float = 1.0 + (lf * 0.12) * pow(lf, 0.35) * (1.0 + p_siege * 0.3)
-	var damage_scale: float = 1.0 + lf * 0.08 * (1.0 + p_siege * 0.4)
-	var burst_chance: float = clampf(p_burst * lf * 0.04, 0.0, 0.55)
-	var burst_size: int = 3 + int(lf * 0.3 * p_burst)
-	var countdown: float = clampf(120.0 - lf * 2.5 + rng.randf_range(-10.0, 10.0), 30.0, 180.0)
-	var boss_pressure: float = _compute_boss_pressure(lf, p_boss, rng, lookback)
+	var speed_mult: float = 1.0 + lf * 0.035 * df * (1.0 + p_speed * 0.6)
+	var hp_scale: float = 1.0 + (lf * 0.12) * pow(lf, 0.35) * df * (1.0 + p_siege * 0.3)
+	var damage_scale: float = 1.0 + lf * 0.08 * df * (1.0 + p_siege * 0.4)
+	var burst_chance: float = clampf(p_burst * lf * 0.04 * df, 0.0, 0.55)
+	var burst_size: int = 3 + int(lf * 0.3 * p_burst * df)
+	var countdown: float = clampf(120.0 - lf * 2.5 * df + rng.randf_range(-10.0, 10.0), 30.0, 180.0)
+	var boss_pressure: float = _compute_boss_pressure(lf * df, p_boss, rng, lookback)
 	var max_bosses: int = 1 + int(boss_pressure / 0.6)
 	var composition := _build_composition(rng, profile, level)
 	var pattern := _pick_pattern(rng, profile, level)
+	var enemy_phase_level: int = clampi(1 + int(lf * df / 8.0), 1, 5)
 	return {
 		"level": level,
 		"countdown": countdown,
@@ -60,6 +63,8 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = []) -> Di
 		"boss_pressure": boss_pressure,
 		"max_bosses": max_bosses,
 		"boss_hp_scale": 1.0 + lf * 0.06,
+		"enemy_phase_level": enemy_phase_level,
+		"scroll_pressure": ScrollFormula.compute_scroll_pressure(lf * df, float(profile["scroll"]), rng, lookback, difficulty),
 	}
 
 

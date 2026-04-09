@@ -7,12 +7,22 @@ const DEFAULT_STATE := {
 		"bumble": false
 	},
 	"best_wave": 0,
+	"best_level": 0,
 	"achievements": {
 		"total_kills": 0,
 		"total_runs": 0,
 		"total_waves_cleared": 0,
 		"campaign_clears": 0
-	}
+	},
+	"preferences": {
+		"difficulty_tier": 1,
+		"permadeath": false,
+		"last_present": "holly_striker"
+	},
+	"cookies": 0,
+	"coal": [],
+	"gear_inventory": [],
+	"equipped_gear": {}
 }
 
 var save_path: String = "user://silent_night_save.json"
@@ -95,6 +105,36 @@ func record_campaign_clear() -> void:
 
 func get_achievement(key: String) -> int:
 	return int(state.get("achievements", {}).get(key, 0))
+
+
+func get_cookies() -> int:
+	return int(state.get("cookies", 0))
+
+
+func add_cookies(amount: int) -> void:
+	if amount <= 0:
+		return
+	state["cookies"] = get_cookies() + amount
+	save_state()
+
+
+func spend_cookies(amount: int) -> bool:
+	if amount <= 0 or get_cookies() < amount:
+		return false
+	state["cookies"] = get_cookies() - amount
+	save_state()
+	return true
+
+
+func set_preference(key: String, value) -> void:
+	var prefs: Dictionary = state.get("preferences", {})
+	prefs[key] = value
+	state["preferences"] = prefs
+	save_state()
+
+
+func get_preference(key: String, default_value = null) -> Variant:
+	return state.get("preferences", {}).get(key, default_value)
 
 
 func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:

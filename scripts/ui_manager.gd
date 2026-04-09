@@ -1,8 +1,9 @@
 extends RefCounted
 
 const UI_BUILDER := preload("res://scripts/ui_builder.gd")
+const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
 
-var hud_root: MarginContainer
+var hud_root: Container
 var start_screen: PanelContainer
 var level_screen: PanelContainer
 var end_screen: PanelContainer
@@ -25,12 +26,14 @@ var joystick_base: ColorRect
 var joystick_knob: ColorRect
 var start_classes_box: Container
 var upgrade_box: HBoxContainer
+var difficulty_panel: PanelContainer
 
 var message_timer: float = 0.0
 var achievement_timer: float = 0.0
+var root_control: Control
 
 
-func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable) -> CanvasLayer:
+func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable()) -> CanvasLayer:
 	var ui := CanvasLayer.new()
 	ui.name = "UI"
 	parent.add_child(ui)
@@ -38,6 +41,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	root.name = "Root"
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ui.add_child(root)
+	root_control = root
 
 	var start := UI_BUILDER.build_start_screen(root)
 	start_screen = start["screen"]
@@ -74,6 +78,10 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	joystick_base = overlays["joystick_base"]
 	joystick_knob = overlays["joystick_knob"]
 
+	if on_difficulty_selected.is_valid():
+		var diff := DIFFICULTY_SELECT.build(root, on_difficulty_selected)
+		difficulty_panel = diff["panel"]
+
 	return ui
 
 
@@ -97,49 +105,7 @@ func refresh_start_screen(class_defs: Dictionary, save_manager: Node, on_class_p
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:
-	var best_wave := 0
-	if save_manager != null:
-		best_wave = int(save_manager.state.get("best_wave", 0))
-	var theme_script := load("res://scripts/holidaypunk_theme.gd")
-	for present_id in present_defs.keys():
-		var def: Dictionary = present_defs[present_id]
-		var button := Button.new()
-		var unlocked := _is_present_unlocked(def, best_wave, save_manager)
-		var label: String = "%s\n%s" % [def.get("name", present_id), def.get("tagline", "")]
-		if not unlocked:
-			label += "\n[%s]" % _unlock_label(def.get("unlock", ""))
-		button.text = label
-		button.custom_minimum_size = Vector2(210, 130)
-		button.clip_text = true
-		button.disabled = not unlocked
-		button.add_theme_font_size_override("font_size", 12)
-		var accent_hex: String = def.get("bow_color", "#55f7ff")
-		theme_script.apply_to_button(button, Color(accent_hex))
-		button.set_meta("class_id", present_id)
-		button.pressed.connect(on_class_pressed.bind(button))
-		start_classes_box.add_child(button)
-
-
-func _is_present_unlocked(def: Dictionary, best_wave: int, save_manager: Node = null) -> bool:
-	var req: String = def.get("unlock", "default")
-	if req == "default":
-		return true
-	if req.begins_with("reach_wave_"):
-		return best_wave >= int(req.trim_prefix("reach_wave_"))
-	if req.begins_with("kill_"):
-		if save_manager == null:
-			return false
-		var target := int(req.trim_prefix("kill_").trim_suffix("_enemies"))
-		return save_manager.get_achievement("total_kills") >= target
-	return false
-
-
-func _unlock_label(req: String) -> String:
-	if req.begins_with("reach_wave_"):
-		return "Reach wave %s" % req.trim_prefix("reach_wave_")
-	if req.begins_with("kill_"):
-		return "Kill %s enemies" % req.trim_prefix("kill_").trim_suffix("_enemies")
-	return req
+	preload("res://scripts/present_select_ui.gd").build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed)
 
 
 func show_message(text: String, duration: float, color: Color = Color.WHITE) -> void:

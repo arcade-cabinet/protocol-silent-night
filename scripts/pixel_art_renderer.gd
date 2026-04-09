@@ -98,6 +98,15 @@ WRRWRRW
 WWWWWWW
 WRRWRRW
 WWWWWWW
+""",
+	"cookie": """
+..CCC..
+.CCCCC.
+CC.C.CC
+CCCCCCC
+CC.C.CC
+.CCCCC.
+..CCC..
 """
 }
 

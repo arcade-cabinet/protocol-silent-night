@@ -90,3 +90,22 @@ func test_level_zero_produces_valid_wave() -> void:
 	assert_float(wave["hp_scale"]).is_greater_equal(1.0)
 	assert_int(wave["composition"].size()).is_greater(0)
 	assert_float(wave["countdown"]).is_greater(0.0)
+
+
+func test_enemy_phase_level_present_in_wave() -> void:
+	var wave := WaveFormula.generate_wave(42, 5)
+	assert_bool(wave.has("enemy_phase_level")).is_true()
+	assert_int(wave["enemy_phase_level"]).is_between(1, 5)
+
+
+func test_enemy_phase_level_increases_with_level_and_difficulty() -> void:
+	var early := WaveFormula.generate_wave(42, 4, [], 1)
+	var late := WaveFormula.generate_wave(42, 40, [], 1)
+	assert_int(late["enemy_phase_level"]).is_greater(early["enemy_phase_level"])
+
+
+func test_enemy_phase_level_clamped_1_to_5() -> void:
+	var low := WaveFormula.generate_wave(1, 0)
+	var extreme := WaveFormula.generate_wave(1, 999, [], 5)
+	assert_int(low["enemy_phase_level"]).is_equal(1)
+	assert_int(extreme["enemy_phase_level"]).is_equal(5)

@@ -13,7 +13,7 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary) -> void:
+func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1) -> void:
 	var def: Dictionary = enemy_defs[enemy_type]
 	var enemy_node := Node3D.new()
 	enemy_node.name = "Enemy_%s" % enemy_type
@@ -45,11 +45,13 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 		"speed": float(def["speed"]),
 		"contact_damage": float(def["contact_damage"]),
 		"drop_xp": int(def["drop_xp"]),
+		"drop_cookies": int(def.get("drop_cookies", 0)),
 		"color": Color(def["color"]),
 		"attack_timer": 0.0,
 		"behavior_timer": 0.0,
 		"behavior_state": "chase",
-		"enemy_uid": _uid_counter
+		"enemy_uid": _uid_counter,
+		"phase_level": phase_level,
 	})
 
 
@@ -101,17 +103,18 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_node: Node3D, on_move_actor: Callable, on_damage_player: Callable, on_spawn_projectile: Callable, boss_attack_scale: float) -> void:
 	for index in range(enemies.size() - 1, -1, -1):
 		var enemy: Dictionary = enemies[index]
+		var pl: int = int(enemy.get("phase_level", 1))
 		match String(enemy.get("id", "grunt")):
 			"rusher":
-				EnemyBehaviors.behavior_swerve(enemy, player_node, delta, on_move_actor)
+				EnemyBehaviors.behavior_swerve(enemy, player_node, delta, on_move_actor, pl)
 			"tank":
-				EnemyBehaviors.behavior_stomp(enemy, player_node, delta, on_move_actor)
+				EnemyBehaviors.behavior_stomp(enemy, player_node, delta, on_move_actor, pl)
 			"elf":
-				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile)
+				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl)
 			"santa":
-				EnemyBehaviors.behavior_ranged(enemy, player_node, delta, on_move_actor, on_spawn_projectile)
+				EnemyBehaviors.behavior_ranged(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl)
 			"bumble":
-				EnemyBehaviors.behavior_pack(enemy, enemies, player_node, delta, on_move_actor)
+				EnemyBehaviors.behavior_pack(enemy, enemies, player_node, delta, on_move_actor, pl)
 			_:
 				EnemyBehaviors.behavior_chase(enemy, player_node, delta, on_move_actor)
 		if enemy["node"].position.distance_to(player_node.position) < 0.9 + float(enemy["node"].scale.x) * 0.35:

@@ -26,6 +26,11 @@ var present_animator := preload("res://scripts/present_animator.gd").new()
 var afterimages: Array = []
 var particles := preload("res://scripts/particle_effects.gd").new()
 var boss_phases := preload("res://scripts/boss_phases.gd").new()
+var gear_sys := GearSystem.new()
+var board_obj_factory := preload("res://scripts/board_object_factory.gd").new(mat_factory)
+var scroll_pickup_mgr := preload("res://scripts/scroll_pickup.gd").new(mat_factory, pix_renderer)
+var board_obj_handler := preload("res://scripts/board_object_handler.gd").new(board_obj_factory, scroll_pickup_mgr)
+var between_match: RefCounted
 var progression: RefCounted
 var game_mgr: RefCounted
 var shake_magnitude: float = 0.0
@@ -46,6 +51,8 @@ var dash_button: Button:
 	get: return ui_mgr.dash_button
 var boss_panel: VBoxContainer:
 	get: return ui_mgr.boss_panel
+var difficulty_panel: PanelContainer:
+	get: return ui_mgr.difficulty_panel
 var state: String = "menu"
 var current_class_id: String = ""
 var current_wave_index: int = -1
@@ -72,6 +79,13 @@ var obstacle_colliders: Array = []
 var current_wave: Dictionary = {}
 var run_seed: int = 0
 var level_lookback: Array = []
+var difficulty_tier: int = 1
+var permadeath: bool = false
+var rewraps: int = 5
+var run_cookies: int = 0
+var run_scrolls: Array = []
+var coal_queue: Array = []
+var board_objects: Array = []
 var input_move := Vector2.ZERO
 var move_velocity := Vector2.ZERO
 var touch_active := false
@@ -90,10 +104,12 @@ func _ready() -> void:
 	audio_mgr.attach(runtime_root.get_node("Audio"))
 	combat.audio_mgr = audio_mgr
 	enemies_ai.audio_mgr = audio_mgr
-	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false)
+	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected)
 	progression = PROGRESSION_MANAGER.new(ui_mgr)
 	progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
+	between_match = preload("res://scripts/between_match_flow.gd").new(self)
+	between_match.build_screens(ui_mgr.root_control)
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
 
@@ -137,21 +153,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	touch_origin = s.get("touch_origin", touch_origin)
 	touch_position = s.get("touch_position", touch_position)
 	input_move = s.get("input_move", input_move)
-	if s.get("show_joystick", false):
-		ui_mgr.show_joystick(s["joystick_base"], s["joystick_knob"])
-	if s.get("hide_joystick", false):
-		ui_mgr.hide_joystick()
+	if s.get("show_joystick", false): ui_mgr.show_joystick(s["joystick_base"], s["joystick_knob"])
+	if s.get("hide_joystick", false): ui_mgr.hide_joystick()
 
 func _load_definitions() -> void:
 	for pair in [["config", "res://declarations/config/config.json"], ["class_defs", "res://declarations/classes/classes.json"], ["enemy_defs", "res://declarations/enemies/enemies.json"], ["upgrade_defs", "res://declarations/upgrades/upgrades.json"], ["wave_defs", "res://declarations/waves/waves.json"], ["present_defs", "res://declarations/presents/presents.json"]]:
 		self.set(pair[0], WORLD_BUILDER.read_json(pair[1]))
 
-func _save_manager() -> Node:
-	return get_node_or_null("/root/SaveManager")
-func _refresh_start_screen() -> void:
-	ui_mgr.refresh_start_screen(class_defs, _save_manager(), _on_class_button_pressed, present_defs)
-func _return_to_menu() -> void:
-	game_mgr.return_to_menu()
+func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
+func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(class_defs, _save_manager(), _on_class_button_pressed, present_defs)
+func _return_to_menu() -> void: game_mgr.return_to_menu()
 
 func _trigger_level_up() -> void:
 	progression.trigger_level_up(func(s: String) -> void: state = s, upgrade_defs, test_mode, _apply_upgrade, _on_upgrade_button_pressed)
@@ -166,29 +177,13 @@ func _apply_upgrade(upgrade_id: String) -> void:
 	_update_ui()
 
 func _damage_player(amount: float) -> void:
-	if bool(test_mode.get("invincible", false)) or dash_timer > 0.0:
-		return
-	if audio_mgr != null: audio_mgr.play_damage()
-	player_state["hp"] = maxf(0.0, float(player_state["hp"]) - amount)
-	shake_magnitude = 0.3
-	if float(player_state["hp"]) <= 0.0:
-		game_mgr.end_run(false)
-	else:
-		_update_ui()
+	preload("res://scripts/player_damage_handler.gd").damage_player(self, amount)
 
 func _update_ui() -> void:
 	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills)
 
 func _kill_enemy(enemy_index: int) -> void:
-	var enemy: Dictionary = enemies[enemy_index]
-	combat.spawn_pickup(pickup_root, pickups, enemy["node"].position, enemy["drop_xp"])
-	combat.spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
-	particles.spawn_death_burst(fx_root, enemy["node"].position, enemy["color"], float(enemy["node"].scale.x))
-	enemy["node"].queue_free()
-	enemies.remove_at(enemy_index)
-	progression.record_kill()
-	var sm := _save_manager()
-	if sm != null and sm.has_method("record_kill"): sm.record_kill()
+	preload("res://scripts/main_helpers.gd").kill_enemy(self, enemy_index)
 
 func _spawn_hit_fx(world_position: Vector3, color: Color) -> void:
 	combat.spawn_hit_fx(fx_root, vfx, world_position, color)
@@ -196,6 +191,10 @@ func _can_occupy(wp: Vector3, r: float) -> bool:
 	return WORLD_BUILDER.can_occupy(wp, r, float(config["arena_radius"]), obstacle_colliders)
 func _move_actor(n: Node3D, d: Vector3, s: float, dt: float, r: float) -> void:
 	WORLD_BUILDER.move_actor(n, d, s, dt, r, float(config["arena_radius"]), obstacle_colliders)
-func _on_class_button_pressed(b: Button) -> void: start_run(String(b.get_meta("class_id", "")))
+func _on_class_button_pressed(b: Button) -> void:
+	preload("res://scripts/main_helpers.gd").on_class_button_pressed(self, b)
+
+func _on_difficulty_selected(tier: int, permadeath_flag: bool) -> void:
+	preload("res://scripts/main_helpers.gd").on_difficulty_selected(self, tier, permadeath_flag)
 func _on_upgrade_button_pressed(b: Button) -> void: _apply_upgrade(String(b.get_meta("upgrade_id", "")))
 func _test_scale(key: String) -> float: return float(test_mode.get(key, 1.0))

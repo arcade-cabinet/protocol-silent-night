@@ -58,38 +58,67 @@ static func build_start_screen(root: Control) -> Dictionary:
 
 
 static func build_hud(root: Control) -> Dictionary:
-	var hud_root := MarginContainer.new()
+	var hud_root := VBoxContainer.new()
 	hud_root.name = "HudMargin"
-	hud_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	hud_root.add_theme_constant_override("margin_left", 18)
-	hud_root.add_theme_constant_override("margin_top", 18)
-	hud_root.add_theme_constant_override("margin_right", 18)
-	hud_root.add_theme_constant_override("margin_bottom", 18)
+	hud_root.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	hud_root.add_theme_constant_override("separation", 2)
 	hud_root.visible = false
 	root.add_child(hud_root)
-
-	var hud_grid := GridContainer.new()
-	hud_grid.columns = 4
-	hud_grid.add_theme_constant_override("h_separation", 14)
-	hud_grid.add_theme_constant_override("v_separation", 14)
-	hud_root.add_child(hud_grid)
-
-	var xp_panel := _make_hud_panel("LEVEL 1", "69d6ff")
-	hud_grid.add_child(xp_panel["node"])
-	var hp_panel := _make_hud_panel("INTEGRITY", "ff617e")
-	hud_grid.add_child(hp_panel["node"])
-	var timer_panel := _make_hud_panel("WAVE 1/10", "ffe07a")
-	timer_panel["value"].add_theme_font_size_override("font_size", 28)
-	hud_grid.add_child(timer_panel["node"])
-	var kills_panel := _make_hud_panel("PURGED", "ffd85a")
-	hud_grid.add_child(kills_panel["node"])
-
+	var top_bar := HBoxContainer.new()
+	top_bar.add_theme_constant_override("separation", 8)
+	hud_root.add_child(top_bar)
+	var hp_bar := ProgressBar.new()
+	hp_bar.max_value = 100
+	hp_bar.value = 100
+	hp_bar.custom_minimum_size = Vector2(300, 18)
+	hp_bar.show_percentage = false
+	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	THEME.apply_to_progress_bar(hp_bar, Color("ff617e"))
+	top_bar.add_child(hp_bar)
+	var hp_label := Label.new()
+	hp_label.text = "100/100"
+	hp_label.add_theme_font_size_override("font_size", 14)
+	hp_label.add_theme_color_override("font_color", Color("ff617e"))
+	top_bar.add_child(hp_label)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_bar.add_child(spacer)
+	var wave_label := Label.new()
+	wave_label.text = "LEVEL 1"
+	wave_label.add_theme_font_size_override("font_size", 16)
+	wave_label.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	top_bar.add_child(wave_label)
+	var timer_label := Label.new()
+	timer_label.text = "120"
+	timer_label.add_theme_font_size_override("font_size", 22)
+	timer_label.add_theme_color_override("font_color", THEME.NEON_WHITE)
+	top_bar.add_child(timer_label)
+	var spacer2 := Control.new()
+	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_bar.add_child(spacer2)
+	var kills_label := Label.new()
+	kills_label.text = "0"
+	kills_label.add_theme_font_size_override("font_size", 14)
+	kills_label.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	top_bar.add_child(kills_label)
+	var level_label := Label.new()
+	level_label.text = "LV 1"
+	level_label.add_theme_font_size_override("font_size", 14)
+	level_label.add_theme_color_override("font_color", THEME.NEON_CYAN)
+	top_bar.add_child(level_label)
+	var xp_bar := ProgressBar.new()
+	xp_bar.max_value = 5
+	xp_bar.value = 0
+	xp_bar.custom_minimum_size = Vector2(0, 8)
+	xp_bar.show_percentage = false
+	THEME.apply_to_progress_bar(xp_bar, Color("69d6ff"))
+	hud_root.add_child(xp_bar)
 	return {
 		"hud_root": hud_root,
-		"level_label": xp_panel["label"], "xp_bar": xp_panel["bar"],
-		"hp_bar": hp_panel["bar"], "hp_label": hp_panel["value"],
-		"wave_label": timer_panel["label"], "timer_label": timer_panel["value"],
-		"kills_label": kills_panel["value"]
+		"level_label": level_label, "xp_bar": xp_bar,
+		"hp_bar": hp_bar, "hp_label": hp_label,
+		"wave_label": wave_label, "timer_label": timer_label,
+		"kills_label": kills_label
 	}
 
 
