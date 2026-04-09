@@ -20,12 +20,12 @@ func start_run(class_id: String) -> void:
 	if main.run_seed == 0:
 		main.run_seed = int(Time.get_ticks_msec())
 	main.progression.reset()
-	main.dash_timer = 0.0
-	main.dash_cooldown_timer = 0.0
-	main.move_velocity = Vector2.ZERO
+	main.dash_timer = 0.0; main.dash_cooldown_timer = 0.0; main.move_velocity = Vector2.ZERO
 	main.boss_ref = {}
 	main.level_lookback.clear()
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
+	var start_sm: Node = main._save_manager()
+	main.coal_queue = start_sm.get_coal() if start_sm != null else []
 	build_board()
 	spawn_player()
 	main._update_ui()
@@ -92,6 +92,7 @@ func end_run(win: bool) -> void:
 	ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
 	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
+	if sm != null: sm.set_coal(main.coal_queue)
 	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		ui.end_screen.visible = true

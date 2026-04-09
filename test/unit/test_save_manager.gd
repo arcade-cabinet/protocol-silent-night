@@ -59,3 +59,24 @@ func test_achievements_increment_and_persist() -> void:
 	assert_int(reloaded.get_achievement("total_kills")).is_equal(7)
 
 	reloaded.reset_state_for_tests()
+
+
+func test_coal_queue_persists_across_reload() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_coal_test.json")
+	save.reset_state_for_tests()
+	save.load_state()
+
+	assert_array(save.get_coal()).is_empty()
+	save.set_coal(["fortune", "spray", "hurl"])
+
+	var reloaded = auto_free(_save_script.new())
+	reloaded.set_save_path_for_tests("user://gdunit_coal_test.json")
+	reloaded.load_state()
+	var loaded: Array = reloaded.get_coal()
+	assert_int(loaded.size()).is_equal(3)
+	assert_str(String(loaded[0])).is_equal("fortune")
+
+	reloaded.set_coal([])
+	assert_array(reloaded.get_coal()).is_empty()
+	reloaded.reset_state_for_tests()

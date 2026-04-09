@@ -7,6 +7,9 @@ extends RefCounted
 const SCREENS := preload("res://scripts/between_match_screens.gd")
 const MARKET := preload("res://scripts/market_screen.gd")
 const GEAR_SYSTEM := preload("res://scripts/gear_system.gd")
+const COAL_EFFECTS := preload("res://scripts/coal_effects.gd")
+
+const NICE_SCROLL_COOKIES := 15
 
 enum Stage { NONE, RESULTS, SCROLLS, MARKET, DONE }
 
@@ -17,6 +20,7 @@ var scroll_state: Dictionary = {}
 var market_state: Dictionary = {}
 var market_items: Array = []
 var market_rng := RandomNumberGenerator.new()
+var scroll_rng := RandomNumberGenerator.new()
 var archetypes: Dictionary = {}
 
 
@@ -24,6 +28,7 @@ func _init(main_node: Node) -> void:
 	main = main_node
 	_load_archetypes()
 	market_rng.seed = int(Time.get_ticks_usec())
+	scroll_rng.seed = int(Time.get_ticks_usec()) ^ 0x5C2011
 
 
 func _load_archetypes() -> void:
@@ -62,8 +67,29 @@ func _on_results_continue() -> void:
 
 
 func _on_scroll_continue() -> void:
+	open_scrolls()
 	scroll_state["panel"].visible = false
 	_enter_market()
+
+
+func open_scrolls() -> Dictionary:
+	var coal_added: Array = []
+	var cookies_added: int = 0
+	for scroll in main.run_scrolls:
+		var stype: String = String(scroll.get("scroll_type", "nice")) if scroll is Dictionary else "nice"
+		if stype == "naughty":
+			var effect_id: String = COAL_EFFECTS.roll_effect(scroll_rng)
+			main.coal_queue.append(effect_id)
+			coal_added.append(effect_id)
+		else:
+			cookies_added += NICE_SCROLL_COOKIES
+	main.run_scrolls.clear()
+	var sm: Node = main._save_manager()
+	if sm != null:
+		sm.set_coal(main.coal_queue)
+		if cookies_added > 0:
+			sm.add_cookies(cookies_added)
+	return {"coal_added": coal_added, "cookies_added": cookies_added}
 
 
 func _enter_market() -> void:

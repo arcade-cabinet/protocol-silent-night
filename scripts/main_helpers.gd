@@ -11,6 +11,9 @@ static func activate_coal(main: Node, idx: int) -> void:
 	if _coal_activator == null:
 		_coal_activator = COAL_ACTIVATOR.new()
 	_coal_activator.activate(main, idx)
+	var sm: Node = main._save_manager()
+	if sm != null:
+		sm.set_coal(main.coal_queue)
 	if main.ui_mgr != null and not main.ui_mgr.coal_sidebar_state.is_empty():
 		main.ui_mgr.refresh_coal_sidebar(main.coal_queue)
 

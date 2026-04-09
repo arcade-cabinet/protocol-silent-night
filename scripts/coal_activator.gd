@@ -10,7 +10,7 @@ var rng := RandomNumberGenerator.new()
 
 
 func _init() -> void:
-	rng.seed = int(Time.get_ticks_usec()) ^ 0xC0AL
+	rng.seed = int(Time.get_ticks_usec()) ^ 0xC0A1
 
 
 func activate(main: Node, idx: int) -> void:

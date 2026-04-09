@@ -126,6 +126,16 @@ func spend_cookies(amount: int) -> bool:
 	return true
 
 
+func get_coal() -> Array:
+	var raw: Variant = state.get("coal", [])
+	return raw.duplicate() if raw is Array else []
+
+
+func set_coal(queue: Array) -> void:
+	state["coal"] = queue.duplicate()
+	save_state()
+
+
 func set_preference(key: String, value) -> void:
 	var prefs: Dictionary = state.get("preferences", {})
 	prefs[key] = value
