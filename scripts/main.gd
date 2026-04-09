@@ -72,6 +72,9 @@ var obstacle_colliders: Array = []
 var current_wave: Dictionary = {}
 var run_seed: int = 0
 var level_lookback: Array = []
+var difficulty_tier: int = 1
+var permadeath: bool = false
+var rewraps: int = 5
 var input_move := Vector2.ZERO
 var move_velocity := Vector2.ZERO
 var touch_active := false
@@ -166,13 +169,18 @@ func _apply_upgrade(upgrade_id: String) -> void:
 	_update_ui()
 
 func _damage_player(amount: float) -> void:
-	if bool(test_mode.get("invincible", false)) or dash_timer > 0.0:
-		return
+	if bool(test_mode.get("invincible", false)) or dash_timer > 0.0: return
 	if audio_mgr != null: audio_mgr.play_damage()
 	player_state["hp"] = maxf(0.0, float(player_state["hp"]) - amount)
 	shake_magnitude = 0.3
 	if float(player_state["hp"]) <= 0.0:
-		game_mgr.end_run(false)
+		if not permadeath and rewraps > 0:
+			rewraps -= 1
+			player_state["hp"] = float(player_state["max_hp"]) * 0.5
+			ui_mgr.show_message("REWRAPPED! (%d left)" % rewraps, 1.5, Color("ffd700"))
+			_update_ui()
+		else:
+			game_mgr.end_run(false)
 	else:
 		_update_ui()
 

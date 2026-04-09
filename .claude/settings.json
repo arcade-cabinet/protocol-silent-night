@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 200 ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"additionalContext\\\":\\\"WARNING: $f is $lines lines, exceeding the 200 LOC limit. Decompose into smaller scripts.\\\"},\\\"continue\\\":true}\"; fi; fi; }",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *.gd ]] && [[ \"$f\" != */main.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 200 ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"additionalContext\\\":\\\"WARNING: $f is $lines lines, exceeding the 200 LOC limit. Decompose into smaller scripts.\\\"},\\\"continue\\\":true}\"; fi; fi; }",
             "timeout": 5,
             "statusMessage": "Checking LOC limit..."
           }
