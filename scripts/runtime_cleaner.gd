@@ -13,6 +13,13 @@ static func clear(main: Node) -> void:
 		array_ref.clear()
 	main.obstacle_colliders.clear()
 	main.boss_ref = {}
+	main.run_cookies = 0
+	main.run_scrolls.clear()
+	main.coal_queue.clear()
+	for obj in main.board_objects:
+		if obj.has("node") and obj["node"] != null:
+			obj["node"].queue_free()
+	main.board_objects.clear()
 	for child in main.board_root.get_children():
 		child.queue_free()
 	for child in main.actor_root.get_children():

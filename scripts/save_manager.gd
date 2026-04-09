@@ -18,7 +18,11 @@ const DEFAULT_STATE := {
 		"difficulty_tier": 1,
 		"permadeath": false,
 		"last_present": "holly_striker"
-	}
+	},
+	"cookies": 0,
+	"coal": [],
+	"gear_inventory": [],
+	"equipped_gear": {}
 }
 
 var save_path: String = "user://silent_night_save.json"
@@ -101,6 +105,23 @@ func record_campaign_clear() -> void:
 
 func get_achievement(key: String) -> int:
 	return int(state.get("achievements", {}).get(key, 0))
+
+
+func get_cookies() -> int:
+	return int(state.get("cookies", 0))
+
+
+func add_cookies(amount: int) -> void:
+	state["cookies"] = get_cookies() + amount
+	save_state()
+
+
+func spend_cookies(amount: int) -> bool:
+	if get_cookies() < amount:
+		return false
+	state["cookies"] = get_cookies() - amount
+	save_state()
+	return true
 
 
 func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:
