@@ -25,6 +25,7 @@ var dmg_numbers := preload("res://scripts/damage_numbers.gd").new()
 var present_animator := preload("res://scripts/present_animator.gd").new()
 var afterimages: Array = []
 var particles := preload("res://scripts/particle_effects.gd").new()
+var boss_phases := preload("res://scripts/boss_phases.gd").new()
 var progression: RefCounted
 var game_mgr: RefCounted
 var shake_magnitude: float = 0.0
@@ -188,13 +189,10 @@ func _kill_enemy(enemy_index: int) -> void:
 
 func _spawn_hit_fx(world_position: Vector3, color: Color) -> void:
 	combat.spawn_hit_fx(fx_root, vfx, world_position, color)
-func _can_occupy(world_position: Vector3, radius: float) -> bool:
-	return WORLD_BUILDER.can_occupy(world_position, radius, float(config["arena_radius"]), obstacle_colliders)
-func _move_actor(node: Node3D, direction: Vector3, speed: float, delta: float, radius: float) -> void:
-	WORLD_BUILDER.move_actor(node, direction, speed, delta, radius, float(config["arena_radius"]), obstacle_colliders)
-func _on_class_button_pressed(button: Button) -> void:
-	start_run(String(button.get_meta("class_id", "")))
-func _on_upgrade_button_pressed(button: Button) -> void:
-	_apply_upgrade(String(button.get_meta("upgrade_id", "")))
-func _test_scale(key: String) -> float:
-	return float(test_mode.get(key, 1.0))
+func _can_occupy(wp: Vector3, r: float) -> bool:
+	return WORLD_BUILDER.can_occupy(wp, r, float(config["arena_radius"]), obstacle_colliders)
+func _move_actor(n: Node3D, d: Vector3, s: float, dt: float, r: float) -> void:
+	WORLD_BUILDER.move_actor(n, d, s, dt, r, float(config["arena_radius"]), obstacle_colliders)
+func _on_class_button_pressed(b: Button) -> void: start_run(String(b.get_meta("class_id", "")))
+func _on_upgrade_button_pressed(b: Button) -> void: _apply_upgrade(String(b.get_meta("upgrade_id", "")))
+func _test_scale(key: String) -> float: return float(test_mode.get(key, 1.0))
