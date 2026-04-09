@@ -180,7 +180,7 @@ func _damage_player(amount: float) -> void:
 	preload("res://scripts/player_damage_handler.gd").damage_player(self, amount)
 
 func _update_ui() -> void:
-	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills)
+	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills, run_cookies)
 
 func _kill_enemy(enemy_index: int) -> void:
 	preload("res://scripts/main_helpers.gd").kill_enemy(self, enemy_index)

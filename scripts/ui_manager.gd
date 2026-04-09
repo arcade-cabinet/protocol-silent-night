@@ -18,6 +18,7 @@ var level_label: Label
 var timer_label: Label
 var wave_label: Label
 var kills_label: Label
+var cookie_label: Label
 var end_title: Label
 var end_message: Label
 var end_waves: Label
@@ -56,6 +57,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	wave_label = hud["wave_label"]
 	timer_label = hud["timer_label"]
 	kills_label = hud["kills_label"]
+	cookie_label = hud["cookie_label"]
 
 	var boss := UI_BUILDER.build_boss_panel(root)
 	boss_panel = boss["boss_panel"]
@@ -146,7 +148,7 @@ func hide_joystick() -> void:
 	joystick_knob.visible = false
 
 
-func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int) -> void:
+func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0) -> void:
 	if hp_bar != null:
 		hp_bar.max_value = player_state.get("max_hp", 100.0)
 		hp_bar.value = player_state.get("hp", 100.0)
@@ -159,3 +161,5 @@ func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, k
 		level_label.text = "LEVEL %d" % level
 	if kills_label != null:
 		kills_label.text = str(kills)
+	if cookie_label != null:
+		cookie_label.text = "%d C" % cookies
