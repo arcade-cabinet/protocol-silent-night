@@ -12,7 +12,7 @@ func test_scene_starts_run_and_hides_menu() -> void:
 		"invincible": true,
 		"auto_collect": true
 	})
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 
 	assert_str(main.state).is_equal("playing")
@@ -25,7 +25,7 @@ func test_level_up_overlay_and_upgrade_application() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)
 	await get_tree().process_frame
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 
 	var before_damage: float = float(main.player_state["class"]["damage"])
@@ -43,7 +43,7 @@ func test_boss_panel_shows_when_boss_spawns() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)
 	await get_tree().process_frame
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 	main.debug_spawn_boss()
 	await get_tree().process_frame
@@ -56,7 +56,7 @@ func test_board_query_matches_continuous_arena_boundary() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)
 	await get_tree().process_frame
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 
 	assert_str(main.debug_zone_at(Vector3.ZERO)).is_equal("arena")
@@ -105,7 +105,7 @@ func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
 	add_child(main)
 	await get_tree().process_frame
 	main.configure_test_mode({"skip_between_match": true})
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 	main.debug_end_run(true)
 	await get_tree().process_frame
