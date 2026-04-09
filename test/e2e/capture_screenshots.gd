@@ -100,6 +100,25 @@ func _run() -> void:
 	await process_frame
 	await _main.capture_screenshot("%s/defeat.png" % _shot_dir)
 
+	# Scroll-opening screen with pre-filled results
+	_main.run_scrolls = [
+		{"scroll_type": "nice"},
+		{"scroll_type": "nice"},
+		{"scroll_type": "naughty"},
+		{"scroll_type": "nice"},
+		{"scroll_type": "naughty"},
+		{"scroll_type": "naughty"},
+		{"scroll_type": "nice"},
+	]
+	if _main.between_match != null:
+		var summary: Dictionary = _main.between_match.open_scrolls()
+		_main.between_match.scroll_state["panel"].visible = true
+		load("res://scripts/between_match_screens.gd").populate_scroll_grid(
+			_main.between_match.scroll_state, summary.get("outcomes", []))
+		await process_frame
+		await process_frame
+		await _main.capture_screenshot("%s/scroll_screen.png" % _shot_dir)
+
 	_save_manager.reset_state_for_tests()
 	quit(0)
 

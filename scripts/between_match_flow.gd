@@ -66,11 +66,12 @@ func start_flow() -> void:
 func _on_results_continue() -> void:
 	results_state["panel"].visible = false
 	current_stage = Stage.SCROLLS
+	var summary: Dictionary = open_scrolls()
+	SCREENS.populate_scroll_grid(scroll_state, summary.get("outcomes", []))
 	scroll_state["panel"].visible = true
 
 
 func _on_scroll_continue() -> void:
-	open_scrolls()
 	scroll_state["panel"].visible = false
 	_enter_market()
 
@@ -79,21 +80,24 @@ func open_scrolls() -> Dictionary:
 	var coal_added: Array = []
 	var cookies_added: int = 0
 	var nice_value: int = _nice_scroll_cookies()
+	var outcomes: Array = []
 	for scroll in main.run_scrolls:
 		var stype: String = String(scroll.get("scroll_type", "nice")) if scroll is Dictionary else "nice"
 		if stype == "naughty":
 			var effect_id: String = COAL_EFFECTS.roll_effect(scroll_rng)
 			main.coal_queue.append(effect_id)
 			coal_added.append(effect_id)
+			outcomes.append({"type": "naughty", "effect_id": effect_id})
 		else:
 			cookies_added += nice_value
+			outcomes.append({"type": "nice", "cookies": nice_value})
 	main.run_scrolls.clear()
 	var sm: Node = main._save_manager()
 	if sm != null:
 		sm.set_coal(main.coal_queue)
 		if cookies_added > 0:
 			sm.add_cookies(cookies_added)
-	return {"coal_added": coal_added, "cookies_added": cookies_added}
+	return {"coal_added": coal_added, "cookies_added": cookies_added, "outcomes": outcomes}
 
 
 func _enter_market() -> void:

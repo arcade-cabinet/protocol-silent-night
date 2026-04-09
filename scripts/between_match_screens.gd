@@ -99,3 +99,61 @@ static func build_scroll_screen(root: Control, on_continue: Callable) -> Diction
 	continue_btn.pressed.connect(on_continue)
 	vbox.add_child(continue_btn)
 	return {"panel": panel, "grid": scroll_grid}
+
+
+static func populate_scroll_grid(state: Dictionary, outcomes: Array) -> void:
+	var grid: GridContainer = state["grid"]
+	for child in grid.get_children():
+		child.queue_free()
+	if outcomes.is_empty():
+		var empty := Label.new()
+		empty.text = "// EMPTY MAILBAG //"
+		empty.add_theme_font_size_override("font_size", 20)
+		empty.add_theme_color_override("font_color", THEME.NEON_WHITE)
+		grid.add_child(empty)
+		return
+	var display_count: int = mini(outcomes.size(), 20)
+	for i in range(display_count):
+		grid.add_child(_build_scroll_card(outcomes[i]))
+	if outcomes.size() > display_count:
+		var overflow := Label.new()
+		overflow.text = "+%d more" % (outcomes.size() - display_count)
+		overflow.add_theme_font_size_override("font_size", 16)
+		overflow.add_theme_color_override("font_color", THEME.NEON_GOLD)
+		grid.add_child(overflow)
+
+
+static func _build_scroll_card(outcome: Dictionary) -> Control:
+	var is_nice: bool = String(outcome.get("type", "nice")) == "nice"
+	var accent := Color("#ffd700") if is_nice else Color("#ff2244")
+	var bg := Color(0.1, 0.08, 0.04, 0.9) if is_nice else Color(0.12, 0.04, 0.04, 0.9)
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(140, 120)
+	card.add_theme_stylebox_override("panel", THEME.make_panel_style(accent, bg))
+	var card_margin := MarginContainer.new()
+	for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		card_margin.add_theme_constant_override(side, 10)
+	card.add_child(card_margin)
+	var card_vbox := VBoxContainer.new()
+	card_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	card_vbox.add_theme_constant_override("separation", 6)
+	card_margin.add_child(card_vbox)
+	var header := Label.new()
+	header.text = "NICE" if is_nice else "NAUGHTY"
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.add_theme_font_size_override("font_size", 16)
+	header.add_theme_color_override("font_color", accent)
+	card_vbox.add_child(header)
+	var body := Label.new()
+	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.custom_minimum_size = Vector2(120, 0)
+	body.add_theme_font_size_override("font_size", 14)
+	body.add_theme_color_override("font_color", THEME.NEON_WHITE)
+	if is_nice:
+		body.text = "+%d C" % int(outcome.get("cookies", 0))
+	else:
+		body.text = "COAL:\n%s" % String(outcome.get("effect_id", "")).to_upper()
+	card_vbox.add_child(body)
+	return card
+

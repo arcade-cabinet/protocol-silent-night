@@ -3,6 +3,7 @@ extends GdUnitTestSuite
 const MARKET := preload("res://scripts/market_screen.gd")
 const FLOW := preload("res://scripts/between_match_flow.gd")
 const SAVE := preload("res://scripts/save_manager.gd")
+const SCREENS := preload("res://scripts/between_match_screens.gd")
 
 
 class StubMain:
@@ -117,3 +118,57 @@ func test_open_scrolls_appends_to_existing_coal() -> void:
 	var flow := FLOW.new(m)
 	flow.open_scrolls()
 	assert_int(m.coal_queue.size()).is_equal(2)
+
+
+func test_open_scrolls_returns_per_scroll_outcomes() -> void:
+	var m := _make_stub_main()
+	m.run_scrolls = [
+		{"scroll_type": "nice"},
+		{"scroll_type": "naughty"},
+		{"scroll_type": "nice"},
+	]
+	var flow := FLOW.new(m)
+	var summary: Dictionary = flow.open_scrolls()
+	var outcomes: Array = summary["outcomes"]
+	assert_int(outcomes.size()).is_equal(3)
+	assert_str(String(outcomes[0]["type"])).is_equal("nice")
+	assert_int(int(outcomes[0].get("cookies", 0))).is_equal(15)
+	assert_str(String(outcomes[1]["type"])).is_equal("naughty")
+	assert_str(String(outcomes[1].get("effect_id", ""))).is_not_empty()
+
+
+func test_populate_scroll_grid_builds_one_card_per_outcome() -> void:
+	var root: Control = auto_free(Control.new())
+	add_child(root)
+	var state: Dictionary = SCREENS.build_scroll_screen(root, func() -> void: pass)
+	var outcomes := [
+		{"type": "nice", "cookies": 15},
+		{"type": "naughty", "effect_id": "fortune"},
+		{"type": "nice", "cookies": 15},
+	]
+	SCREENS.populate_scroll_grid(state, outcomes)
+	var grid: GridContainer = state["grid"]
+	assert_int(grid.get_child_count()).is_equal(3)
+
+
+func test_populate_scroll_grid_empty_shows_empty_label() -> void:
+	var root: Control = auto_free(Control.new())
+	add_child(root)
+	var state: Dictionary = SCREENS.build_scroll_screen(root, func() -> void: pass)
+	SCREENS.populate_scroll_grid(state, [])
+	var grid: GridContainer = state["grid"]
+	assert_int(grid.get_child_count()).is_equal(1)
+	var child: Node = grid.get_child(0)
+	assert_bool(child is Label).is_true()
+
+
+func test_populate_scroll_grid_caps_at_twenty_plus_overflow() -> void:
+	var root: Control = auto_free(Control.new())
+	add_child(root)
+	var state: Dictionary = SCREENS.build_scroll_screen(root, func() -> void: pass)
+	var outcomes: Array = []
+	for i in range(25):
+		outcomes.append({"type": "nice", "cookies": 15})
+	SCREENS.populate_scroll_grid(state, outcomes)
+	var grid: GridContainer = state["grid"]
+	assert_int(grid.get_child_count()).is_equal(21)
