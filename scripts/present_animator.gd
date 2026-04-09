@@ -8,6 +8,11 @@ var time: float = 0.0
 var recoil_timer: float = 0.0
 var recoil_intensity: float = 0.0
 var base_y: float = 0.12
+var reduced_motion: bool = false
+
+
+func configure(reduced: bool) -> void:
+	reduced_motion = reduced
 
 
 func update(delta: float, visual: Node3D, velocity: Vector2) -> void:
@@ -17,7 +22,8 @@ func update(delta: float, visual: Node3D, velocity: Vector2) -> void:
 	var speed := velocity.length()
 	var moving: float = clampf(speed * 0.4, 0.0, 1.0)
 	var style: String = String(visual.get_meta("idle_style", "bounce")) if visual.has_meta("idle_style") else "bounce"
-	var idle_offset: Vector3 = _idle_for_style(style, time, 1.0 - moving)
+	var idle_weight: float = (1.0 - moving) * (0.25 if reduced_motion else 1.0)
+	var idle_offset: Vector3 = _idle_for_style(style, time, idle_weight)
 	var walk_bob := sin(time * 10.0) * 0.04 * moving
 	var wobble_z := sin(time * 10.0) * 0.08 * clampf(speed * 0.3, 0.0, 1.0)
 	visual.position.x = idle_offset.x

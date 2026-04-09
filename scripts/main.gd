@@ -37,6 +37,8 @@ var flair_animator: Node
 var shake_magnitude: float = 0.0
 var screen_shake := preload("res://scripts/screen_shake.gd").new()
 var music_director := preload("res://scripts/music_director.gd").new()
+var pickup_magnet_ring: MeshInstance3D
+var _widget_time: float = 0.0
 
 var runtime_root: Node3D
 var board_root: Node3D
@@ -108,10 +110,12 @@ func _ready() -> void:
 	combat.audio_mgr = audio_mgr; enemies_ai.audio_mgr = audio_mgr
 	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
 	flair_animator = preload("res://scripts/flair_animator.gd").new(); runtime_root.add_child(flair_animator)
+	pickup_magnet_ring = preload("res://scripts/pickup_magnet_ring.gd").build(runtime_root)
 	progression = PROGRESSION_MANAGER.new(ui_mgr); progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
 	between_match = preload("res://scripts/between_match_flow.gd").new(self)
 	between_match.build_screens(ui_mgr.root_control)
+	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
 
@@ -142,6 +146,9 @@ func _tick(delta: float) -> void:
 	if state == "playing":
 		game_mgr.tick_playing(delta)
 		music_director.tick(delta, audio_mgr, enemies.size(), float(player_state.get("hp", 100.0)) / maxf(1.0, float(player_state.get("max_hp", 100.0))), not boss_ref.is_empty())
+		ui_mgr.refresh_widgets(self)
+		_widget_time += delta
+		if player_node != null: preload("res://scripts/pickup_magnet_ring.gd").update(pickup_magnet_ring, player_node.position, float(config.get("pickup_magnet_radius", 1.0)), 1.0, _widget_time)
 	elif state == "wave_clear":
 		wave_clear_timer -= delta
 		if wave_clear_timer <= 0.0:

@@ -49,47 +49,67 @@
 
 ---
 
-## Remaining Gaps (prioritized)
+## Phase 7-10 Follow-up (all shipped in same branch)
 
-### P1 — Widget wiring integration (not a code shortfall, just not plumbed)
-- **minimap-widget** into `ui_manager.build_ui` + `main._tick` refresh loop. Widget is drop-in ready; needs ~5 lines in `ui_manager` + 1 per-frame call from `main._tick`. **Severity: medium** — widget works in isolation, tests pass, but players don't see it yet.
-- **combo_counter** into `main._kill_enemy` (register_kill) + ui_manager `show_combo(count, tier)`. Same pattern.
-- **threat_indicator** into `ui_manager` + `main._tick` during boss fights.
-- **settings_menu** trigger button on start screen. Currently builds but no entry point from menu.
-- **pause_menu** ESC key binding + mobile pause button. Input handler in `main._unhandled_input` or via helpers.
-- **pickup_magnet_ring** — instantiate on player spawn, update from `game_manager.update_player`.
-- **stat_radar_chart** into `present_select_ui` preview pane (the existing `present_select_ui.gd` needs a SubViewport pocket for the 3D present + the radar canvas beside it).
+After the initial 6 phases landed, the full PRQ was closed out:
 
-Integration is mechanical — each widget has a tested `build()` and `refresh/update` API matching what the main tick loop needs. Budget: ~20-30 LOC of wiring in `main.gd` and `ui_manager.gd`. Likely needs another decomposition pass for `main.gd` before it fits.
+### Phase 7 — Widget wiring
+- `ui_widgets.gd` (new, 185 LOC) owns the build/refresh/input logic for all HUD widgets. `ui_manager.build_ui` calls `UI_WIDGETS.build_all(root)` once; `main._tick` calls `ui_mgr.refresh_widgets(self)` every playing frame. Each widget gets its state dict refreshed per frame with live main data.
+- `main_helpers.kill_enemy` now calls `main.ui_mgr.register_combo_kill()` on every kill.
+- `main_helpers.handle_input` catches `KEY_ESCAPE` → pause menu toggle, `KEY_TAB` → settings menu.
+- `main._ready` calls `ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)` to lazy-build settings + pause menus with proper callbacks.
+- `pickup_magnet_ring` instantiated in `main._ready` on `runtime_root`, updated in `main._tick` with `player_node.position` + `config["pickup_magnet_radius"]`.
 
-### P2 — Design/polish holes
-- **Task 23 — hud-polish-animations** not implemented: HP bar pulse on low HP, XP bar tick marks at upgrade thresholds, vignette ColorRect fade bound to HP, wave banner character-reveal tween. Low risk additive work.
-- **boss_phases.gd signal emission** — `play_boss_sting` exists but the boss phase change signal that would fire it isn't emitted yet. The PR promised the audio side; the boss logic side is a separate concern.
-- **crossfade** in `music_director` / `audio_manager.set_music_intensity` currently does an instant swap — the PRQ called for a 0.8s crossfade via secondary `AudioStreamPlayer` + tween. Mechanical fix but would need the `_music_crossfade` field (already declared in audio_manager) to actually drive a tween node.
-- **enemy_behaviors.gd** telegraph timer field — the telegraph SFX exists but enemy_behaviors hasn't been taught to fire it 0.35s before projectile release. ~10 LOC in enemy_behaviors or enemy_director.
-- **Audio 3D pool wiring** for actual enemy shot/hit events — `combat_resolver.update_projectiles` and enemy behaviors should call `audio_mgr.play_3d("hit", enemy_pos)` instead of the 2D `play_hit`. Not done yet; 2D hits still fire.
+### Phase 8 — HUD polish (Task 23)
+- `ui_manager.update_hud` tracks `_hp_pulse_time` and applies a sin-pulsed red modulate to the HP bar when `hp_pct < 0.3`.
+- `ui_widgets.tick_overlays` drives a character-reveal animation on the wave banner: `show_message` sets `_banner_target` + resets `_banner_char_idx`, and each tick advances the substring by 1 character per 0.05s.
+- Vignette `ColorRect` created in `ui_widgets.build_all` with alpha bound to `(0.4 - hp_pct) * 1.2` — invisible at full HP, peaks at `alpha=0.45` when dying.
+- Achievement overlay pulse preserved from existing implementation.
 
-### P3 — Nice-to-have gaps
-- **Damage number stacking visual flourish**: current stacking updates the label in place but doesn't play a distinct "stack pop" tween. A quick `node.scale = Vector3(1.25,1.25,1.25)` bounce + lerp back would sell the accumulation more.
-- **Minimap zoom** configurable from settings.
-- **Settings menu tabs** (Audio / Display / Gameplay) instead of one long scroll.
-- **Pause menu keyboard navigation**: arrow keys + Enter instead of only mouse.
-- **Reduced motion** setting should also gate flair animations (wobble, color_shift, trailing_sparks) — currently only screen_shake respects it.
-- **Combo counter visual decoration**: tier-2 gold should add a subtle glow, tier-3 red should add a tiny screen shake (already have the service!).
-- **Radar chart axis labels**: the 6 axes have no text labels, just the polygon. Adds ~8 LOC to stat_radar_chart._draw.
-- **Coal tier legendary visual VFX** — legendary coal could emit a larger VFX burst on activation (currently same size as common).
+### Phase 9 — Boss + enemy + spatial audio wiring
+- `boss_phases.update_boss` gained an `on_phase_changed: Callable = Callable()` parameter. Fires on phase 1→2→3 transitions alongside the existing message display.
+- `game_manager.tick_playing` passes `Callable(self, "_on_boss_phase_changed")` — the callback calls `main_helpers.boss_phase_sting(main)` which plays the boss sting via audio_manager and adds 0.8 trauma to screen_shake.
+- `enemy_behaviors.behavior_flank` and `behavior_ranged` gained an `on_telegraph: Callable = Callable()` parameter. The new `_try_telegraph` helper fires the callback 0.35s before the projectile when `behavior_timer >= fire_interval - 0.35`. Enemy dict gets a `telegraphed` flag that resets after each fire.
+- `enemy_director.update_enemies` threads the callback through.
+- `game_manager.tick_playing` passes `Callable(self, "_enemy_telegraph")` → `main_helpers.enemy_telegraph(main, etype, pos)` → `audio_mgr.play_enemy_telegraph(etype, pos)` → spatial 3D playback.
+- `combat_resolver.update_projectiles` routes enemy hits via `audio_mgr.play_3d("hit", enemy_pos, -3.0)` when the 3D method is available, falling back to the 2D `play_hit()` otherwise.
+- `audio_manager_ext.set_music_intensity` now uses the previously-declared `_music_crossfade` player to do an 0.8s tween crossfade. Swaps roles with `_music_player` after the tween completes.
+
+### Phase 10 — Reduced motion completeness
+- `flair_animator.configure(reduced: bool)` — when true, `_process` early-returns, freezing all registered flair animations.
+- `present_animator.configure(reduced: bool)` — when true, the idle_weight is clamped to 0.25 (instead of 1.0), dampening the bounce/sway/wobble/hop/spin idle styles.
+- `screen_shake.configure(reduced: bool)` — already present from Phase 1.
+- `main_helpers.apply_reduced_motion(main, sm)` — single helper that reads `sm.get_preference("reduced_motion", false)` and configures all three subsystems consistently.
+- Called from `game_manager.start_run` after `load_equipped_gear`.
 
 ---
 
-## Next-Batch Candidates
+## Phase 7-10 Tests (+7, 205 total)
 
-1. **Widget integration sprint** — wire all 7 HUD widgets into the main loop. This is deferred from Phase 5 specifically because main.gd budget was tight and the per-widget plumbing would have blocked the rest of the PRQ. Now that widgets are proven in isolation, integration becomes a focused diff.
-2. **Enemy behavior audio spatial conversion** — `combat_resolver` and `enemy_director` to `audio_mgr.play_3d` for hit/shot/death events.
-3. **Boss phase transition emission** — `boss_phases.gd` should emit `phase_changed(phase: int)` on HP threshold crosses (75/50/25%). Connect in main.gd to fire sting + screen flash + screen_shake.add_trauma(1.0) + camera zoom-out pulse.
-4. **HUD polish animations** (Task 23 deferred) — HP bar pulse, XP bar ticks, vignette overlay, wave banner reveal.
-5. **Audio master mix pass** — listen to all the new layers together (ambient bed + gameplay music + 3D enemy SFX + coal bursts) and balance dB levels. May need `set_bus_volume_db` tweaks.
-6. **Present roster balancing** — now that shapes are distinct, verify the stat sheets in `presents.json` are balanced across archetypes. Some presents may need damage/speed rebalancing now that the silhouette matters to the player's mental model.
-7. **Reduced motion completeness** — extend the `reduced_motion` setting to also gate flair animator, present idle animations, HUD tweens, and particle death burst spawns.
+`test_phase_wiring.gd` covers the integration points:
+- `boss_phases.get_phase` returns 2 in the 33-66% HP band, 3 below, 1 above (drives the phase_changed callback)
+- `enemy_behaviors.behavior_ranged` fires the telegraph callback when `behavior_timer` crosses the `fire_interval - 0.35` threshold
+- `flair_animator.configure(true)` blocks target position updates for 10 ticks
+- `present_animator.configure(true)` dampens idle amplitude to ≤ 0.02 m
+- `screen_shake.configure(true)` collapses add_trauma to 0
+- `combo_counter` tier 3 matches a red (`r > 0.8`) label color
+- `audio_manager.set_music_intensity` flips `_current_intensity` through the crossfade path
+
+---
+
+## Truly remaining gaps (P3 nice-to-haves)
+
+These items were intentionally scoped out of the production-polish PRQ and remain open for a future sprint:
+
+- **Damage number stacking flourish** — the in-place accumulation works but doesn't play a distinct "stack pop" tween. A `node.scale = Vector3(1.25, 1.25, 1.25)` bounce + lerp back would sell the accumulation more.
+- **Minimap zoom** configurable from settings menu (currently fixed at 22 world units).
+- **Settings menu tabs** (Audio / Display / Gameplay) instead of the single vbox layout.
+- **Pause menu keyboard navigation** — arrow keys + Enter instead of mouse only.
+- **Radar chart axis labels** — the 6 axes currently render as a polygon with no text.
+- **Legendary coal enlarged VFX** — legendary coal could emit a 2× VFX burst on activation.
+- **Preset roster stat balancing pass** — now that silhouettes are distinct, verify `presents.json` stat sheets are balanced across archetypes.
+
+Severity of all remaining items: **P3 / polish**. None block shipping.
 
 ---
 

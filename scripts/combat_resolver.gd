@@ -45,7 +45,9 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 				if projectile["node"].position.distance_to(enemy["node"].position) < 0.9 * float(enemy["node"].scale.x):
 					enemy["hp"] -= float(projectile["damage"])
 					spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
-					if audio_mgr != null: audio_mgr.play_hit()
+					if audio_mgr != null:
+						if audio_mgr.has_method("play_3d"): audio_mgr.play_3d("hit", enemy["node"].position, -3.0)
+						else: audio_mgr.play_hit()
 					if dmg_numbers != null:
 						dmg_numbers.spawn(fx_root, enemy["node"].position + Vector3(0, 1.0, 0), float(projectile["damage"]), enemy["color"])
 					projectile["pierce"] -= 1

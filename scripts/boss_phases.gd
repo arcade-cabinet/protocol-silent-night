@@ -25,12 +25,15 @@ static func get_phase(boss_ref: Dictionary) -> int:
 func update_boss(delta: float, boss_ref: Dictionary, player_node: Node3D,
 		on_move: Callable, on_projectile: Callable, on_damage_player: Callable,
 		on_show_message: Callable, on_spawn_enemy: Callable,
-		fx_root: Node3D, boss_attack_scale: float) -> void:
+		fx_root: Node3D, boss_attack_scale: float,
+		on_phase_changed: Callable = Callable()) -> void:
 	if boss_ref.is_empty():
 		return
 	var phase := get_phase(boss_ref)
 	if phase != current_phase:
 		_on_phase_change(phase, boss_ref, on_show_message)
+		if on_phase_changed.is_valid():
+			on_phase_changed.call(phase)
 		current_phase = phase
 	var boss_dir: Vector3 = (player_node.position - boss_ref["node"].position).normalized()
 	if boss_ref["node"].position.distance_to(player_node.position) > 6.0 + float(phase) * 1.0:

@@ -9,10 +9,15 @@ const SPARK_LIFE := 0.45
 
 var _entries: Array = []
 var _spark_rng := RandomNumberGenerator.new()
+var reduced_motion: bool = false
 
 
 func _ready() -> void:
 	_spark_rng.seed = int(Time.get_ticks_usec())
+
+
+func configure(reduced: bool) -> void:
+	reduced_motion = reduced
 
 
 func register(target: Node3D, anim_type: String, params: Dictionary) -> void:
@@ -33,6 +38,8 @@ func clear() -> void:
 
 
 func _process(delta: float) -> void:
+	if reduced_motion:
+		return
 	for i in range(_entries.size() - 1, -1, -1):
 		var entry: Dictionary = _entries[i]
 		var target_raw: Variant = entry.get("target")

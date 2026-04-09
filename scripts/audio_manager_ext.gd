@@ -37,8 +37,23 @@ static func set_music_intensity(mgr: RefCounted, level: String) -> void:
 	var key: String = "music_%s" % level
 	if not mgr._cache.has(key) or mgr._music_player == null:
 		return
-	mgr._music_player.stream = mgr._cache[key]
-	mgr._music_player.play()
+	if mgr._music_crossfade == null:
+		mgr._music_player.stream = mgr._cache[key]
+		mgr._music_player.play()
+		return
+	# Swap roles: incoming track on crossfade player, tween volumes.
+	mgr._music_crossfade.stream = mgr._cache[key]
+	mgr._music_crossfade.volume_db = -60.0
+	mgr._music_crossfade.play()
+	var tween: Tween = mgr._music_player.create_tween().set_parallel(true)
+	tween.tween_property(mgr._music_player, "volume_db", -60.0, 0.8)
+	tween.tween_property(mgr._music_crossfade, "volume_db", -20.0, 0.8)
+	tween.chain().tween_callback(func() -> void:
+		mgr._music_player.stop()
+		var tmp: AudioStreamPlayer = mgr._music_player
+		mgr._music_player = mgr._music_crossfade
+		mgr._music_crossfade = tmp
+	)
 
 
 static func seed_extended_cache(mgr: RefCounted) -> void:
