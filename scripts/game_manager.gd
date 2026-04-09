@@ -39,7 +39,9 @@ func start_run(class_id: String) -> void:
 	ui.hud_root.visible = true
 	ui.dash_button.visible = true
 	main.ui_mgr.dash_button.disabled = false
-	if main.audio_mgr != null: main.audio_mgr.play_music("gameplay")
+	if main.audio_mgr != null:
+		main.audio_mgr.play_music("gameplay"); main.audio_mgr.play_ambient()
+	if main.music_director != null: main.music_director.reset()
 	start_next_wave()
 
 func tick_playing(delta: float) -> void:
@@ -87,7 +89,10 @@ func spawn_boss(hp_scale: float) -> void:
 
 func end_run(win: bool) -> void:
 	main.state = "win" if win else "game_over"
-	if main.audio_mgr != null: main.audio_mgr.play_victory() if win else main.audio_mgr.play_death()
+	if main.audio_mgr != null:
+		if win: main.audio_mgr.play_victory()
+		else: main.audio_mgr.play_death()
+		main.audio_mgr.stop_ambient()
 	var ui: RefCounted = main.ui_mgr
 	ui.hud_root.visible = false; ui.dash_button.visible = false; ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
@@ -96,11 +101,7 @@ func end_run(win: bool) -> void:
 	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
 	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
-		ui.end_screen.visible = true
-		ui.end_title.text = "CAMPAIGN SECURED" if win else "OVERWHELMED"
-		ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
-		ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
-		ui.end_waves.text = "Waves cleared: %d" % max(1, main.current_wave_index + 1)
+		preload("res://scripts/main_helpers.gd").finalize_end_screen(main, win)
 	else: main.between_match.start_flow()
 
 func return_to_menu() -> void:
@@ -171,8 +172,7 @@ func update_spawning(delta: float) -> void:
 func _spawn_board_object() -> void: main.board_obj_handler.spawn_board_object(main)
 
 func begin_wave_clear() -> void:
-	main.state = "wave_clear"
-	main.wave_clear_timer = 2.0
+	main.state = "wave_clear"; main.wave_clear_timer = 2.0
 	main.ui_mgr.show_message("WAVE CLEARED", 1.6, Color("69d6ff"))
 	for enemy in main.enemies:
 		main.combat.spawn_pickup(main.pickup_root, main.pickups, enemy["node"].position, enemy["drop_xp"])

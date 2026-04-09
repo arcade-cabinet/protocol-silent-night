@@ -2,8 +2,10 @@ extends RefCounted
 
 const PROCEDURAL_SFX := preload("res://scripts/procedural_sfx.gd")
 const PROCEDURAL_MUSIC := preload("res://scripts/procedural_music.gd")
+const AUDIO_3D_POOL := preload("res://scripts/audio_3d_pool.gd")
 const DEFAULT_VOLUME_DB: float = -15.0
 const MUSIC_VOLUME_DB: float = -20.0
+const AMBIENT_VOLUME_DB: float = -24.0
 const POOL_SIZE: int = 6
 const BUS_NAMES: Array = ["Music", "SFX", "Ambient", "UI"]
 
@@ -13,7 +15,11 @@ var _next_player: int = 0
 var _cache: Dictionary = {}
 var _sfx: RefCounted = null
 var _music_player: AudioStreamPlayer = null
+var _music_crossfade: AudioStreamPlayer = null
+var _ambient_player: AudioStreamPlayer = null
+var _pool_3d: RefCounted = null
 var _current_track: String = ""
+var _current_intensity: String = ""
 
 
 func attach(host: Node, save_manager: Node = null) -> void:
@@ -33,11 +39,30 @@ func attach(host: Node, save_manager: Node = null) -> void:
 	_music_player.volume_db = MUSIC_VOLUME_DB
 	_music_player.bus = "Music"
 	host.add_child(_music_player)
+	_music_crossfade = AudioStreamPlayer.new()
+	_music_crossfade.volume_db = -60.0
+	_music_crossfade.bus = "Music"
+	host.add_child(_music_crossfade)
+	_ambient_player = AudioStreamPlayer.new()
+	_ambient_player.volume_db = AMBIENT_VOLUME_DB
+	_ambient_player.bus = "Ambient"
+	host.add_child(_ambient_player)
+	_pool_3d = AUDIO_3D_POOL.new()
+	_pool_3d.attach(host)
 	_build_cache()
 	_cache["music_menu"] = PROCEDURAL_MUSIC.make_menu_loop()
 	_cache["music_gameplay"] = PROCEDURAL_MUSIC.make_gameplay_loop()
 	_cache["music_boss"] = PROCEDURAL_MUSIC.make_boss_loop()
+	preload("res://scripts/audio_manager_ext.gd").seed_extended_cache(self)
 	play_music("menu")
+
+
+func play_3d(key: String, world_pos: Vector3, volume_db: float = 0.0) -> void: preload("res://scripts/audio_manager_ext.gd").play_3d(self, key, world_pos, volume_db)
+func play_enemy_telegraph(enemy_type: String, world_pos: Vector3) -> void: preload("res://scripts/audio_manager_ext.gd").play_enemy_telegraph(self, enemy_type, world_pos)
+func play_boss_sting() -> void: if _cache.has("boss_sting"): _play("boss_sting")
+func play_ambient() -> void: preload("res://scripts/audio_manager_ext.gd").play_ambient(self)
+func stop_ambient() -> void: preload("res://scripts/audio_manager_ext.gd").stop_ambient(self)
+func set_music_intensity(level: String) -> void: preload("res://scripts/audio_manager_ext.gd").set_music_intensity(self, level)
 
 
 static func _ensure_buses() -> void:

@@ -111,3 +111,12 @@ static func handle_input(main: Node, event: InputEvent) -> void:
 
 static func trigger_level_up(main: Node) -> void:
 	main.progression.trigger_level_up(func(st: String) -> void: main.state = st, main.upgrade_defs, main.test_mode, Callable(main, "_apply_upgrade"), Callable(main, "_on_upgrade_button_pressed"))
+
+
+static func finalize_end_screen(main: Node, win: bool) -> void:
+	var ui: RefCounted = main.ui_mgr
+	ui.end_screen.visible = true
+	ui.end_title.text = "CAMPAIGN SECURED" if win else "OVERWHELMED"
+	ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
+	ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
+	ui.end_waves.text = "Waves cleared: %d" % maxi(1, main.current_wave_index + 1)

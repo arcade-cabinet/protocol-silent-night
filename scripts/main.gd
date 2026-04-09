@@ -36,6 +36,7 @@ var game_mgr: RefCounted
 var flair_animator: Node
 var shake_magnitude: float = 0.0
 var screen_shake := preload("res://scripts/screen_shake.gd").new()
+var music_director := preload("res://scripts/music_director.gd").new()
 
 var runtime_root: Node3D
 var board_root: Node3D
@@ -140,6 +141,7 @@ func _tick(delta: float) -> void:
 	ui_mgr.update_transient_overlays(delta)
 	if state == "playing":
 		game_mgr.tick_playing(delta)
+		music_director.tick(delta, audio_mgr, enemies.size(), float(player_state.get("hp", 100.0)) / maxf(1.0, float(player_state.get("max_hp", 100.0))), not boss_ref.is_empty())
 	elif state == "wave_clear":
 		wave_clear_timer -= delta
 		if wave_clear_timer <= 0.0:
