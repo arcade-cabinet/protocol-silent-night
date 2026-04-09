@@ -26,6 +26,7 @@ func start_run(class_id: String) -> void:
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	var start_sm: Node = main._save_manager()
 	main.coal_queue = start_sm.get_coal() if start_sm != null else []
+	preload("res://scripts/main_helpers.gd").load_equipped_gear(main, start_sm)
 	build_board()
 	spawn_player()
 	main._update_ui()

@@ -80,3 +80,25 @@ func test_coal_queue_persists_across_reload() -> void:
 	reloaded.set_coal([])
 	assert_array(reloaded.get_coal()).is_empty()
 	reloaded.reset_state_for_tests()
+
+
+func test_equipped_gear_persists_across_reload() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_gear_persist_test.json")
+	save.reset_state_for_tests()
+	save.load_state()
+
+	assert_dict(save.get_equipped_gear()).is_empty()
+	save.set_equipped_gear({
+		"weapon_mod": {"id": "w1", "name": "Test", "slot": "weapon_mod", "rarity": 2, "stats": {"damage_mult": 0.07}, "flair": [], "flavor": "t"},
+		"tag_charm": {},
+	})
+
+	var reloaded = auto_free(_save_script.new())
+	reloaded.set_save_path_for_tests("user://gdunit_gear_persist_test.json")
+	reloaded.load_state()
+	var loaded: Dictionary = reloaded.get_equipped_gear()
+	assert_bool(loaded.has("weapon_mod")).is_true()
+	var weapon: Dictionary = loaded["weapon_mod"]
+	assert_str(String(weapon.get("name", ""))).is_equal("Test")
+	reloaded.reset_state_for_tests()

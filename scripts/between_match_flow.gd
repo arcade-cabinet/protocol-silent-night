@@ -124,7 +124,11 @@ func _on_buy(index: int) -> void:
 	var inv: Array = sm.state.get("gear_inventory", [])
 	inv.append(item)
 	sm.state["gear_inventory"] = inv
-	sm.save_state()
+	if main.gear_sys != null:
+		main.gear_sys.equip(item)
+		sm.set_equipped_gear(main.gear_sys.equipped)
+	else:
+		sm.save_state()
 	market_items.remove_at(index)
 	MARKET.refresh_market(market_state, market_items, sm.get_cookies())
 

@@ -55,3 +55,15 @@ static func on_difficulty_selected(main: Node, tier: int, permadeath_flag: bool)
 		sm.set_preference("difficulty_tier", main.difficulty_tier)
 		sm.set_preference("permadeath", main.permadeath)
 	main.start_run(main.current_class_id)
+
+
+static func load_equipped_gear(main: Node, sm: Node) -> void:
+	for slot in GearSystem.SLOTS:
+		main.gear_sys.equipped[slot] = {}
+	if sm == null:
+		return
+	var equipped: Dictionary = sm.get_equipped_gear()
+	for slot in equipped.keys():
+		var item: Variant = equipped[slot]
+		if item is Dictionary and not item.is_empty():
+			main.gear_sys.equip(item)
