@@ -30,6 +30,7 @@ var start_classes_box: Container
 var upgrade_box: HBoxContainer
 var difficulty_panel: PanelContainer
 var coal_sidebar_state: Dictionary = {}
+var _last_coal_signature: String = ""
 
 var message_timer: float = 0.0
 var achievement_timer: float = 0.0
@@ -93,8 +94,13 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 
 
 func refresh_coal_sidebar(coal_queue: Array) -> void:
-	if not coal_sidebar_state.is_empty():
-		COAL_SIDEBAR.refresh(coal_sidebar_state, coal_queue)
+	if coal_sidebar_state.is_empty():
+		return
+	var signature: String = ",".join(coal_queue.map(func(e): return str(e)))
+	if signature == _last_coal_signature:
+		return
+	_last_coal_signature = signature
+	COAL_SIDEBAR.refresh(coal_sidebar_state, coal_queue)
 
 
 func refresh_start_screen(class_defs: Dictionary, save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:

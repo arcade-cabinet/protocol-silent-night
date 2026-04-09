@@ -18,10 +18,10 @@ func activate(main: Node, idx: int) -> void:
 		return
 	var entry = main.coal_queue[idx]
 	var effect_id := String(entry) if not (entry is Dictionary) else String(entry.get("effect_id", ""))
-	main.coal_queue.remove_at(idx)
 	var descriptor: Dictionary = COAL_EFFECTS.apply_effect(effect_id, rng)
 	if not bool(descriptor.get("ok", false)):
 		return
+	main.coal_queue.remove_at(idx)
 	_apply(main, descriptor)
 	if main.ui_mgr != null:
 		main.ui_mgr.show_message(String(descriptor.get("message", "COAL!")), 1.4, Color(String(descriptor.get("color", "#ffffff"))))

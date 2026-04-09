@@ -1,68 +1,40 @@
 extends RefCounted
 
 ## Catalog of flair pieces with achievement-driven unlock criteria.
-## Pure data + a single get_unlocked() lookup against save_manager state.
-## Each entry maps a flair type (must match GearSystem.VALID_FLAIR_TYPES)
-## to an achievement key + threshold and the parameters the visual layer
-## interprets when rendering the piece on a gear item.
+## Behavior-only: content lives in declarations/gear/flair_catalog.json
+## and is loaded on first access. Each entry maps a flair type (must match
+## GearSystem.VALID_FLAIR_TYPES) to an achievement key + threshold and the
+## parameters the visual layer interprets when rendering the piece.
 
-const PIECES := [
-	{
-		"type": "orbiting_particle", "achievement": "total_kills", "threshold": 0,
-		"params": {"count": 2, "radius": 0.6, "speed": 1.5, "color": "#88ddff"},
-	},
-	{
-		"type": "pulsing_glow", "achievement": "total_kills", "threshold": 50,
-		"params": {"intensity": 1.2, "rate": 2.0, "color": "#ffd700"},
-	},
-	{
-		"type": "trailing_sparks", "achievement": "total_kills", "threshold": 250,
-		"params": {"count": 4, "color": "#ff8822"},
-	},
-	{
-		"type": "wobble_animation", "achievement": "total_runs", "threshold": 5,
-		"params": {"amplitude": 0.05, "rate": 3.0},
-	},
-	{
-		"type": "color_shift", "achievement": "total_runs", "threshold": 10,
-		"params": {"hue_speed": 0.3, "saturation": 0.8},
-	},
-	{
-		"type": "floating_icon", "achievement": "total_waves_cleared", "threshold": 25,
-		"params": {"icon": "star", "color": "#ffffaa"},
-	},
-	{
-		"type": "smoke_trail", "achievement": "total_waves_cleared", "threshold": 100,
-		"params": {"density": 0.4, "color": "#666666"},
-	},
-	{
-		"type": "frost_crystals", "achievement": "campaign_clears", "threshold": 1,
-		"params": {"count": 3, "size": 0.15, "color": "#ccf0ff"},
-	},
-	{
-		"type": "ember_glow", "achievement": "campaign_clears", "threshold": 1,
-		"params": {"intensity": 1.4, "color": "#ff6622"},
-	},
-	{
-		"type": "sparkle_burst", "achievement": "campaign_clears", "threshold": 3,
-		"params": {"count": 8, "color": "#ffd700"},
-	},
-	{
-		"type": "halo_ring", "achievement": "campaign_clears", "threshold": 5,
-		"params": {"radius": 0.8, "thickness": 0.1, "color": "#ffffff"},
-	},
-	{
-		"type": "dripping_icicles", "achievement": "campaign_clears", "threshold": 10,
-		"params": {"count": 5, "length": 0.3, "color": "#ddffff"},
-	},
-]
+const CATALOG_PATH := "res://declarations/gear/flair_catalog.json"
+
+static var _pieces_cache: Array = []
+static var _cache_loaded: bool = false
+
+
+static func _load_pieces() -> Array:
+	if _cache_loaded:
+		return _pieces_cache
+	_cache_loaded = true
+	var file := FileAccess.open(CATALOG_PATH, FileAccess.READ)
+	if file == null:
+		return _pieces_cache
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if parsed is Dictionary and parsed.get("pieces") is Array:
+		_pieces_cache = parsed["pieces"]
+	return _pieces_cache
+
+
+static func all_pieces() -> Array:
+	return _load_pieces()
 
 
 static func get_unlocked(save_manager: Node) -> Array:
+	var pieces: Array = _load_pieces()
 	if save_manager == null:
 		return _baseline_pool()
 	var unlocked: Array = []
-	for piece in PIECES:
+	for piece in pieces:
 		var key: String = String(piece.get("achievement", ""))
 		var threshold: int = int(piece.get("threshold", 0))
 		var current: int = save_manager.get_achievement(key) if save_manager.has_method("get_achievement") else 0
@@ -73,7 +45,7 @@ static func get_unlocked(save_manager: Node) -> Array:
 
 static func _baseline_pool() -> Array:
 	var baseline: Array = []
-	for piece in PIECES:
+	for piece in _load_pieces():
 		if int(piece.get("threshold", 0)) == 0:
 			baseline.append({"type": piece["type"]}.merged(piece.get("params", {})))
 	return baseline

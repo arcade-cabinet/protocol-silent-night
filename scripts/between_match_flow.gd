@@ -10,7 +10,9 @@ const GEAR_SYSTEM := preload("res://scripts/gear_system.gd")
 const COAL_EFFECTS := preload("res://scripts/coal_effects.gd")
 const FLAIR_CATALOG := preload("res://scripts/flair_catalog.gd")
 
-const NICE_SCROLL_COOKIES := 15
+# Default reward if declarations/config/config.json is missing the key.
+# Live value is read from main.config["nice_scroll_cookies"] at run time.
+const DEFAULT_NICE_SCROLL_COOKIES := 15
 
 enum Stage { NONE, RESULTS, SCROLLS, MARKET, DONE }
 
@@ -76,6 +78,7 @@ func _on_scroll_continue() -> void:
 func open_scrolls() -> Dictionary:
 	var coal_added: Array = []
 	var cookies_added: int = 0
+	var nice_value: int = _nice_scroll_cookies()
 	for scroll in main.run_scrolls:
 		var stype: String = String(scroll.get("scroll_type", "nice")) if scroll is Dictionary else "nice"
 		if stype == "naughty":
@@ -83,7 +86,7 @@ func open_scrolls() -> Dictionary:
 			main.coal_queue.append(effect_id)
 			coal_added.append(effect_id)
 		else:
-			cookies_added += NICE_SCROLL_COOKIES
+			cookies_added += nice_value
 	main.run_scrolls.clear()
 	var sm: Node = main._save_manager()
 	if sm != null:
@@ -130,3 +133,10 @@ func _on_market_continue() -> void:
 	market_state["panel"].visible = false
 	current_stage = Stage.DONE
 	main.game_mgr.return_to_menu()
+
+
+func _nice_scroll_cookies() -> int:
+	var cfg: Variant = main.get("config") if main != null else null
+	if cfg is Dictionary:
+		return int(cfg.get("nice_scroll_cookies", DEFAULT_NICE_SCROLL_COOKIES))
+	return DEFAULT_NICE_SCROLL_COOKIES
