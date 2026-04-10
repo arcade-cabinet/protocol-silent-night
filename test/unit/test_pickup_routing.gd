@@ -120,7 +120,8 @@ func test_boss_on_kill_not_called_twice_when_two_projectiles_hit_same_frame() ->
 	add_child(boss_node)
 	var boss_ref: Dictionary = {"node": boss_node, "hp": 50.0, "max_hp": 100.0, "color": Color.RED}
 	var boss_bar: ProgressBar = auto_free(ProgressBar.new())
-	boss_bar.max_value = 100.0; boss_bar.value = 50.0
+	boss_bar.max_value = 100.0
+	boss_bar.value = 50.0
 	add_child(boss_bar)
 	var boss_panel: VBoxContainer = auto_free(VBoxContainer.new())
 	add_child(boss_panel)
