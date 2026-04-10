@@ -19,8 +19,7 @@ func start_run(class_id: String) -> void:
 	main.current_class_id = class_id
 	main.state = "playing"
 	main.current_wave_index = -1
-	if main.run_seed == 0:
-		main.run_seed = int(Time.get_ticks_msec())
+	main.run_seed = int(Time.get_ticks_msec()) ^ int(Time.get_unix_time_from_system())
 	main.progression.reset()
 	main.dash_timer = 0.0; main.dash_cooldown_timer = 0.0; main.move_velocity = Vector2.ZERO
 	main.boss_ref = {}
@@ -156,7 +155,7 @@ func update_player(delta: float) -> void:
 	var fired: bool = main.player_ctrl.auto_fire(delta, main.player_state, main.player_node, closest_target, spawn_projectile_player, main._test_scale("player_fire_scale"), main._test_scale("player_damage_scale"))
 	if fired:
 		main.present_animator.trigger_recoil()
-	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar, Callable(self, "spawn_aura_damage_number"))
+	main.player_ctrl.update_player_aura(delta, main.player_state, main.player_node, main.enemies, main.boss_ref, main._test_scale("player_damage_scale"), Callable(main, "_kill_enemy"), Callable(main, "_spawn_hit_fx"), main.ui_mgr.boss_bar, Callable(self, "spawn_aura_damage_number"), Callable(self, "on_boss_killed"))
 
 func update_spawning(delta: float) -> void:
 	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"), Callable(self, "_spawn_board_object"))
