@@ -19,3 +19,12 @@ func _plugging() -> void:
 		"commit": "4065f0fecf24c6b293d440bc6008d97139a0c5d8",
 		"include": ["addons/gaea/"]
 	})
+
+	# LimboAI provides behavior trees and hierarchical state machines for enemy AI.
+	# Installed as a vendored GDExtension (not via gd-plug) because gd-plug cannot
+	# fetch prebuilt binary releases — the .gdextension zip was downloaded directly
+	# from the limbonaut/limboai GitHub release and extracted to addons/limboai/.
+	# Pin: v1.7.0 (Godot 4.6 GDExtension, released 2026-03-01)
+	# To upgrade: download limboai+<version>.gdextension-4.6.zip from
+	#   https://github.com/limbonaut/limboai/releases
+	# and replace addons/limboai/ entirely. Read DEPENDENCY_POLICY.md first.

@@ -2,12 +2,26 @@ extends RefCounted
 
 ## Builds present character select button cards.
 ## Extracted from ui_manager.gd for LOC compliance.
+## Hover-driven radar chart updates via stat_radar_chart.gd API.
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
+const RADAR := preload("res://scripts/stat_radar_chart.gd")
+const PREVIEW_VP := preload("res://scripts/present_preview_viewport.gd")
+
+## Tracks the present ID currently previewed (for testability).
+static var _current_preview_id: String = ""
+static var _preview_viewport: SubViewport = null
+
+
+static func init_preview(parent: Control) -> void:
+	if _preview_viewport != null:
+		return
+	_preview_viewport = PREVIEW_VP.build(parent)
 
 
 static func build_present_buttons(classes_box: Container, present_defs: Dictionary,
-		save_manager: Node, on_class_pressed: Callable) -> void:
+		save_manager: Node, on_class_pressed: Callable,
+		radar_canvas: Control = null) -> void:
 	var best_wave := 0
 	if save_manager != null:
 		best_wave = int(save_manager.state.get("best_wave", 0))
@@ -27,6 +41,14 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 		THEME.apply_to_button(button, Color(accent_hex))
 		button.set_meta("class_id", present_id)
 		button.pressed.connect(on_class_pressed.bind(button))
+		if radar_canvas != null:
+			var captured_id: String = present_id
+			var captured_def: Dictionary = def
+			var captured_canvas: Control = radar_canvas
+			button.mouse_entered.connect(
+				func() -> void:
+					_update_preview(captured_id, captured_def, captured_canvas)
+			)
 		classes_box.add_child(button)
 
 
@@ -50,3 +72,11 @@ static func unlock_label(req: String) -> String:
 	if req.begins_with("kill_"):
 		return "Kill %s enemies" % req.trim_prefix("kill_").trim_suffix("_enemies")
 	return req
+
+
+## Updates the radar chart, 3D viewport preview, and records the hovered present ID.
+static func _update_preview(present_id: String, def: Dictionary,
+		radar_canvas: Control) -> void:
+	_current_preview_id = present_id
+	RADAR.update(radar_canvas, def)
+	PREVIEW_VP.update_present(_preview_viewport, def)

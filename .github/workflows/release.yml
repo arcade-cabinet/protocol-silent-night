@@ -1,0 +1,115 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-android-release:
+    name: Build Android Release APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          lfs: true  # GLB and audio assets tracked via Git LFS
+
+      - name: Setup Java 17
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+
+      - name: Install Android build tools
+        run: |
+          sdkmanager "build-tools;34.0.0" "platforms;android-34" "platform-tools"
+          sdkmanager --licenses <<< "y" || true
+
+      - name: Setup Godot (with export templates)
+        uses: chickensoft-games/setup-godot@f166999204a4f2722c6fe042fbaa3b3ea0d9c789 # v2
+        with:
+          version: ${{ vars.GODOT_VERSION || '4.6.2' }}
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import project resources
+        run: godot --headless --path . --import --quit-after 60 || true
+
+      - name: Generate debug keystore (fallback — no production keystore yet)
+        run: |
+          mkdir -p android
+          keytool -genkeypair \
+            -keystore android/debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Configure Godot Android SDK path
+        run: |
+          mkdir -p ~/.config/godot
+          cat >> ~/.config/godot/editor_settings-4.tres << 'EOF'
+          [gd_resource type="EditorSettings"]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
+          EOF
+
+      - name: Export Android APK
+        run: |
+          mkdir -p export/android
+          APK_NAME="protocol-silent-night-${RELEASE_TAG}.apk"
+          godot --headless --path . \
+            --export-debug "Android Debug" \
+            "export/android/${APK_NAME}"
+          echo "APK_PATH=export/android/${APK_NAME}" >> "$GITHUB_ENV"
+
+      - name: Upload APK to release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        with:
+          files: ${{ env.APK_PATH }}
+
+  build-html5-release:
+    name: Build HTML5 Release Export
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          lfs: true  # GLB and audio assets tracked via Git LFS
+
+      - name: Setup Godot (with export templates)
+        uses: chickensoft-games/setup-godot@f166999204a4f2722c6fe042fbaa3b3ea0d9c789 # v2
+        with:
+          version: ${{ vars.GODOT_VERSION || '4.6.2' }}
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import project resources
+        run: godot --headless --path . --import --quit-after 60 || true
+
+      - name: Export HTML5
+        run: |
+          mkdir -p export/html5
+          godot --headless --path . \
+            --export-release "HTML5" \
+            export/html5/index.html
+          ZIP_NAME="protocol-silent-night-${RELEASE_TAG}-web.zip"
+          cd export && zip -r "../${ZIP_NAME}" html5/
+          echo "ZIP_PATH=${ZIP_NAME}" >> "$GITHUB_ENV"
+
+      - name: Upload web export to release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        with:
+          files: ${{ env.ZIP_PATH }}

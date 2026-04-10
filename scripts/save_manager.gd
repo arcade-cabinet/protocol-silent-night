@@ -126,6 +126,38 @@ func spend_cookies(amount: int) -> bool:
 	return true
 
 
+func get_coal() -> Array:
+	var raw: Variant = state.get("coal", [])
+	return raw.duplicate() if raw is Array else []
+
+
+func set_coal(queue: Array) -> void:
+	state["coal"] = queue.duplicate()
+	save_state()
+
+
+func get_equipped_gear() -> Dictionary:
+	var raw: Variant = state.get("equipped_gear", {})
+	return raw.duplicate(true) if raw is Dictionary else {}
+
+
+func set_equipped_gear(equipped: Dictionary) -> void:
+	state["equipped_gear"] = equipped.duplicate(true)
+	save_state()
+
+
+func get_gear_inventory() -> Array:
+	var raw: Variant = state.get("gear_inventory", [])
+	return raw.duplicate(true) if raw is Array else []
+
+
+func add_to_gear_inventory(item: Dictionary) -> void:
+	var inv: Array = get_gear_inventory()
+	inv.append(item)
+	state["gear_inventory"] = inv
+	save_state()
+
+
 func set_preference(key: String, value) -> void:
 	var prefs: Dictionary = state.get("preferences", {})
 	prefs[key] = value

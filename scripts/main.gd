@@ -3,12 +3,15 @@ extends Node3D
 const PROGRESSION_MANAGER := preload("res://scripts/progression_manager.gd")
 const GAME_MANAGER := preload("res://scripts/game_manager.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
+const MAIN_HELPERS := preload("res://scripts/main_helpers.gd")
+const PLAYER_DAMAGE_HANDLER := preload("res://scripts/player_damage_handler.gd")
+const PICKUP_MAGNET_RING := preload("res://scripts/pickup_magnet_ring.gd")
+const FLAIR_ANIMATOR_SCR := preload("res://scripts/flair_animator.gd")
+const BETWEEN_MATCH_FLOW := preload("res://scripts/between_match_flow.gd")
 
 var config: Dictionary = {}
-var class_defs: Dictionary = {}
 var enemy_defs: Dictionary = {}
 var upgrade_defs: Array = []
-var wave_defs: Array = []
 var present_defs: Dictionary = {}
 
 var mat_factory := preload("res://scripts/material_factory.gd").new()
@@ -33,7 +36,12 @@ var board_obj_handler := preload("res://scripts/board_object_handler.gd").new(bo
 var between_match: RefCounted
 var progression: RefCounted
 var game_mgr: RefCounted
+var flair_animator: Node
 var shake_magnitude: float = 0.0
+var screen_shake := preload("res://scripts/screen_shake.gd").new()
+var music_director := preload("res://scripts/music_director.gd").new()
+var pickup_magnet_ring: MeshInstance3D
+var _widget_time: float = 0.0
 
 var runtime_root: Node3D
 var board_root: Node3D
@@ -101,17 +109,19 @@ var test_mode: Dictionary = {}
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
-	audio_mgr.attach(runtime_root.get_node("Audio"))
-	combat.audio_mgr = audio_mgr
-	enemies_ai.audio_mgr = audio_mgr
-	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected)
-	progression = PROGRESSION_MANAGER.new(ui_mgr)
-	progression.audio_mgr = audio_mgr
+	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
+	combat.audio_mgr = audio_mgr; enemies_ai.audio_mgr = audio_mgr
+	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
+	flair_animator = FLAIR_ANIMATOR_SCR.new(); runtime_root.add_child(flair_animator)
+	pickup_magnet_ring = PICKUP_MAGNET_RING.build(runtime_root)
+	progression = PROGRESSION_MANAGER.new(ui_mgr); progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
-	between_match = preload("res://scripts/between_match_flow.gd").new(self)
+	between_match = BETWEEN_MATCH_FLOW.new(self)
 	between_match.build_screens(ui_mgr.root_control)
+	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
+	MAIN_HELPERS.apply_reduced_motion(self, _save_manager())
 
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
@@ -139,62 +149,48 @@ func _tick(delta: float) -> void:
 	ui_mgr.update_transient_overlays(delta)
 	if state == "playing":
 		game_mgr.tick_playing(delta)
+		music_director.tick(delta, audio_mgr, enemies.size(), float(player_state.get("hp", 100.0)) / maxf(1.0, float(player_state.get("max_hp", 100.0))), not boss_ref.is_empty())
+		ui_mgr.refresh_widgets(self)
+		_widget_time += delta
+		if player_node != null: PICKUP_MAGNET_RING.update(pickup_magnet_ring, player_node.position, float(config.get("pickup_magnet_radius", 1.0)), 1.0, _widget_time)
 	elif state == "wave_clear":
 		wave_clear_timer -= delta
 		if wave_clear_timer <= 0.0:
 			game_mgr.start_next_wave()
 	shake_magnitude = WORLD_BUILDER.update_camera(camera, player_node, state, config, delta, shake_magnitude)
+	screen_shake.update(delta, camera)
 
-func _unhandled_input(event: InputEvent) -> void:
-	var s := {"dash_pressed": dash_pressed, "touch_active": touch_active, "touch_origin": touch_origin, "touch_position": touch_position, "input_move": input_move}
-	player_ctrl.handle_input(event, Vector2(get_viewport().size), s)
-	dash_pressed = s.get("dash_pressed", dash_pressed)
-	touch_active = s.get("touch_active", touch_active)
-	touch_origin = s.get("touch_origin", touch_origin)
-	touch_position = s.get("touch_position", touch_position)
-	input_move = s.get("input_move", input_move)
-	if s.get("show_joystick", false): ui_mgr.show_joystick(s["joystick_base"], s["joystick_knob"])
-	if s.get("hide_joystick", false): ui_mgr.hide_joystick()
+func _unhandled_input(event: InputEvent) -> void: MAIN_HELPERS.handle_input(self, event)
 
-func _load_definitions() -> void:
-	for pair in [["config", "res://declarations/config/config.json"], ["class_defs", "res://declarations/classes/classes.json"], ["enemy_defs", "res://declarations/enemies/enemies.json"], ["upgrade_defs", "res://declarations/upgrades/upgrades.json"], ["wave_defs", "res://declarations/waves/waves.json"], ["present_defs", "res://declarations/presents/presents.json"]]:
-		self.set(pair[0], WORLD_BUILDER.read_json(pair[1]))
+func _load_definitions() -> void: MAIN_HELPERS.load_definitions(self)
 
 func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
-func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(class_defs, _save_manager(), _on_class_button_pressed, present_defs)
+func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(), _on_class_button_pressed, present_defs)
 func _return_to_menu() -> void: game_mgr.return_to_menu()
 
-func _trigger_level_up() -> void:
-	progression.trigger_level_up(func(s: String) -> void: state = s, upgrade_defs, test_mode, _apply_upgrade, _on_upgrade_button_pressed)
+func _trigger_level_up() -> void: MAIN_HELPERS.trigger_level_up(self)
 
-func _apply_upgrade(upgrade_id: String) -> void:
-	progression.apply_upgrade(upgrade_id, player_state)
-	ui_mgr.level_screen.visible = false
-	if progression.xp >= progression.xp_needed:
-		_trigger_level_up()
-		return
-	state = "playing"
-	_update_ui()
+func _apply_upgrade(upgrade_id: String) -> void: MAIN_HELPERS.apply_upgrade(self, upgrade_id)
 
 func _damage_player(amount: float) -> void:
-	preload("res://scripts/player_damage_handler.gd").damage_player(self, amount)
+	PLAYER_DAMAGE_HANDLER.damage_player(self, amount)
 
 func _update_ui() -> void:
-	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills)
+	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills, run_cookies, coal_queue)
 
 func _kill_enemy(enemy_index: int) -> void:
-	preload("res://scripts/main_helpers.gd").kill_enemy(self, enemy_index)
+	MAIN_HELPERS.kill_enemy(self, enemy_index)
 
-func _spawn_hit_fx(world_position: Vector3, color: Color) -> void:
-	combat.spawn_hit_fx(fx_root, vfx, world_position, color)
+func _spawn_hit_fx(world_position: Vector3, color: Color) -> void: combat.spawn_hit_fx(fx_root, vfx, world_position, color)
+func _activate_coal(idx: int) -> void: MAIN_HELPERS.activate_coal(self, idx)
 func _can_occupy(wp: Vector3, r: float) -> bool:
 	return WORLD_BUILDER.can_occupy(wp, r, float(config["arena_radius"]), obstacle_colliders)
 func _move_actor(n: Node3D, d: Vector3, s: float, dt: float, r: float) -> void:
 	WORLD_BUILDER.move_actor(n, d, s, dt, r, float(config["arena_radius"]), obstacle_colliders)
 func _on_class_button_pressed(b: Button) -> void:
-	preload("res://scripts/main_helpers.gd").on_class_button_pressed(self, b)
+	MAIN_HELPERS.on_class_button_pressed(self, b)
 
 func _on_difficulty_selected(tier: int, permadeath_flag: bool) -> void:
-	preload("res://scripts/main_helpers.gd").on_difficulty_selected(self, tier, permadeath_flag)
+	MAIN_HELPERS.on_difficulty_selected(self, tier, permadeath_flag)
 func _on_upgrade_button_pressed(b: Button) -> void: _apply_upgrade(String(b.get_meta("upgrade_id", "")))
 func _test_scale(key: String) -> float: return float(test_mode.get(key, 1.0))

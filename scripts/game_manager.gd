@@ -2,6 +2,8 @@ extends RefCounted
 
 const WAVE_FORMULA := preload("res://scripts/wave_formula.gd")
 const WAVE_SPAWNER := preload("res://scripts/wave_spawner.gd")
+const MAIN_HELPERS := preload("res://scripts/main_helpers.gd")
+const RUNTIME_CLEANER := preload("res://scripts/runtime_cleaner.gd")
 
 var main: Node
 var wave_spawner: RefCounted
@@ -11,7 +13,7 @@ func _init(main_node: Node) -> void:
 	wave_spawner = WAVE_SPAWNER.new(main_node)
 
 func start_run(class_id: String) -> void:
-	if not main.class_defs.has(class_id) and not main.present_defs.has(class_id):
+	if not main.present_defs.has(class_id):
 		return
 	clear_runtime()
 	main.current_class_id = class_id
@@ -20,32 +22,25 @@ func start_run(class_id: String) -> void:
 	if main.run_seed == 0:
 		main.run_seed = int(Time.get_ticks_msec())
 	main.progression.reset()
-	main.dash_timer = 0.0
-	main.dash_cooldown_timer = 0.0
-	main.move_velocity = Vector2.ZERO
+	main.dash_timer = 0.0; main.dash_cooldown_timer = 0.0; main.move_velocity = Vector2.ZERO
 	main.boss_ref = {}
 	main.level_lookback.clear()
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
+	var start_sm: Node = main._save_manager()
+	main.coal_queue = start_sm.get_coal() if start_sm != null else []
+	MAIN_HELPERS.load_equipped_gear(main, start_sm)
+	MAIN_HELPERS.apply_reduced_motion(main, start_sm)
 	build_board()
 	spawn_player()
 	main._update_ui()
-	var ui: RefCounted = main.ui_mgr
-	ui.start_screen.visible = false
-	if ui.difficulty_panel != null:
-		ui.difficulty_panel.visible = false
-	ui.level_screen.visible = false
-	ui.end_screen.visible = false
-	ui.hud_root.visible = true
-	ui.dash_button.visible = true
-	main.ui_mgr.dash_button.disabled = false
-	if main.audio_mgr != null: main.audio_mgr.play_music("gameplay")
+	MAIN_HELPERS.show_gameplay_ui(main)
 	start_next_wave()
 
 func tick_playing(delta: float) -> void:
 	update_player(delta)
 	update_spawning(delta)
-	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), spawn_projectile_hostile, main._test_scale("boss_attack_scale"))
-	main.boss_phases.update_boss(delta, main.boss_ref, main.player_node, Callable(main, "_move_actor"), spawn_projectile_hostile, Callable(main, "_damage_player"), main.ui_mgr.show_message, Callable(self, "_boss_summon_minion"), main.fx_root, main._test_scale("boss_attack_scale"))
+	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), spawn_projectile_hostile, main._test_scale("boss_attack_scale"), Callable(self, "_enemy_telegraph"))
+	main.boss_phases.update_boss(delta, main.boss_ref, main.player_node, Callable(main, "_move_actor"), spawn_projectile_hostile, Callable(main, "_damage_player"), main.ui_mgr.show_message, Callable(self, "_boss_summon_minion"), main.fx_root, main._test_scale("boss_attack_scale"), Callable(self, "_on_boss_phase_changed"))
 	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), on_boss_killed, main.fx_root, main.vfx, main.dmg_numbers)
 	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, gain_xp, main.fx_root, main.particles, gain_cookies, gain_scroll)
 	main.combat.update_vfx(delta, main.vfx)
@@ -75,31 +70,27 @@ func start_next_wave() -> void:
 	if main.audio_mgr != null:
 		main.audio_mgr.play_wave_banner()
 		if main.current_wave.get("is_boss_wave", false): main.audio_mgr.play_music("boss")
-	if save_mgr != null and level == 5 and save_mgr.unlock("santa"):
-		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED")
-		main._refresh_start_screen()
-	if save_mgr != null:
-		save_mgr.register_wave_reached(level)
+	var santa_level: int = int(main.config.get("santa_unlock_level", 5))
+	if save_mgr != null and level >= santa_level and save_mgr.unlock("santa"):
+		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED"); main._refresh_start_screen()
+	if save_mgr != null: save_mgr.register_wave_reached(level)
+	for _i in range(int(main.config.get("board_objects_per_level", 2))): _spawn_board_object()
 
 func spawn_boss(hp_scale: float) -> void:
 	main.boss_ref = main.enemies_ai.spawn_boss(main.actor_root, main.boss_ref, main.enemy_defs, main.config, hp_scale, main._test_scale("boss_hp_scale"), main.ui_mgr.boss_panel, main.ui_mgr.boss_bar, main.ui_mgr.show_message)
 
 func end_run(win: bool) -> void:
 	main.state = "win" if win else "game_over"
-	if main.audio_mgr != null: main.audio_mgr.play_victory() if win else main.audio_mgr.play_death()
+	MAIN_HELPERS.end_run_audio(main, win)
 	var ui: RefCounted = main.ui_mgr
-	ui.hud_root.visible = false
-	ui.dash_button.visible = false
-	ui.boss_panel.visible = false
+	ui.hud_root.visible = false; ui.dash_button.visible = false; ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
 	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
+	if sm != null: sm.set_coal(main.coal_queue)
+	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
 	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
-		ui.end_screen.visible = true
-		ui.end_title.text = "CAMPAIGN SECURED" if win else "OVERWHELMED"
-		ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
-		ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
-		ui.end_waves.text = "Waves cleared: %d" % max(1, main.current_wave_index + 1)
+		MAIN_HELPERS.finalize_end_screen(main, win)
 	else: main.between_match.start_flow()
 
 func return_to_menu() -> void:
@@ -132,12 +123,10 @@ func build_board() -> void:
 		main.obstacles_builder.make_landmark(main.board_root, landmark)
 
 func spawn_player() -> void:
-	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.class_defs, main.present_defs, main.gear_sys)
-	main.player_node = result["node"]
-	main.player_mesh = result["mesh"]
-	main.player_state = result["state"]
-	main.ui_mgr.hp_bar.max_value = main.player_state["max_hp"]
-	main.ui_mgr.xp_bar.max_value = main.progression.xp_needed
+	if main.flair_animator != null: main.flair_animator.clear()
+	var result: Dictionary = main.player_ctrl.spawn_player(main.actor_root, main.current_class_id, main.present_defs, main.gear_sys, main.flair_animator)
+	main.player_node = result["node"]; main.player_mesh = result["mesh"]; main.player_state = result["state"]
+	main.ui_mgr.hp_bar.max_value = main.player_state["max_hp"]; main.ui_mgr.xp_bar.max_value = main.progression.xp_needed
 	main._update_ui()
 
 func update_player(delta: float) -> void:
@@ -172,8 +161,7 @@ func update_spawning(delta: float) -> void:
 func _spawn_board_object() -> void: main.board_obj_handler.spawn_board_object(main)
 
 func begin_wave_clear() -> void:
-	main.state = "wave_clear"
-	main.wave_clear_timer = 2.0
+	main.state = "wave_clear"; main.wave_clear_timer = 2.0
 	main.ui_mgr.show_message("WAVE CLEARED", 1.6, Color("69d6ff"))
 	for enemy in main.enemies:
 		main.combat.spawn_pickup(main.pickup_root, main.pickups, enemy["node"].position, enemy["drop_xp"])
@@ -197,4 +185,6 @@ func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_t
 func gain_cookies(amt: int) -> void: main.run_cookies += amt
 func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
 func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
-func clear_runtime() -> void: preload("res://scripts/runtime_cleaner.gd").clear(main)
+func _on_boss_phase_changed(_phase: int) -> void: MAIN_HELPERS.boss_phase_sting(main)
+func _enemy_telegraph(etype: String, pos: Vector3) -> void: MAIN_HELPERS.enemy_telegraph(main, etype, pos)
+func clear_runtime() -> void: RUNTIME_CLEANER.clear(main)

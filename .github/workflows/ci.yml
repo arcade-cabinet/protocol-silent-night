@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: Godot Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          lfs: true  # GLB and audio assets tracked via Git LFS
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@f166999204a4f2722c6fe042fbaa3b3ea0d9c789 # v2
+        with:
+          version: ${{ vars.GODOT_VERSION || '4.6.2' }}
+          use-dotnet: false
+          include-templates: false
+
+      - name: Import project resources
+        run: godot --headless --path . --import --quit-after 60 || true
+
+      - name: Run unit + component tests
+        run: |
+          godot --headless --path . \
+            -s addons/gdUnit4/bin/GdUnitCmdTool.gd \
+            --add "res://test/unit/" \
+            --add "res://test/component/" \
+            --ignoreHeadlessMode \
+            --continue
+        timeout-minutes: 10
+
+      - name: LOC compliance check
+        run: |
+          fail=0
+          for f in scripts/*.gd; do
+            [ -f "$f" ] || continue
+            count=$(wc -l < "$f")
+            if [ "$count" -gt 200 ]; then
+              echo "VIOLATION: $f ($count lines)"
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] && echo "LOC check passed" || exit 1
+
+      - name: Validate declaration JSON
+        run: |
+          find declarations -name "*.json" | while read -r f; do
+            python3 -c "import json; json.load(open('$f'))" \
+              || { echo "INVALID JSON: $f"; exit 1; }
+          done
+          echo "All declaration JSON valid"
+
+  smoke:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          lfs: true  # GLB and audio assets tracked via Git LFS
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@f166999204a4f2722c6fe042fbaa3b3ea0d9c789 # v2
+        with:
+          version: ${{ vars.GODOT_VERSION || '4.6.2' }}
+          use-dotnet: false
+          include-templates: false
+
+      - name: Import project resources
+        run: godot --headless --path . --import --quit-after 60 || true
+
+      - name: Smoke test
+        run: timeout 10 godot --headless --path . --quit-after 5 && echo "SMOKE OK"

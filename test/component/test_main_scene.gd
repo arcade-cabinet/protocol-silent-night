@@ -12,7 +12,7 @@ func test_scene_starts_run_and_hides_menu() -> void:
 		"invincible": true,
 		"auto_collect": true
 	})
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 
 	assert_str(main.state).is_equal("playing")
@@ -25,7 +25,7 @@ func test_level_up_overlay_and_upgrade_application() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)
 	await get_tree().process_frame
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 
 	var before_damage: float = float(main.player_state["class"]["damage"])
@@ -43,7 +43,7 @@ func test_boss_panel_shows_when_boss_spawns() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)
 	await get_tree().process_frame
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 	main.debug_spawn_boss()
 	await get_tree().process_frame
@@ -56,7 +56,7 @@ func test_board_query_matches_continuous_arena_boundary() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)
 	await get_tree().process_frame
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 
 	assert_str(main.debug_zone_at(Vector3.ZERO)).is_equal("arena")
@@ -64,6 +64,36 @@ func test_board_query_matches_continuous_arena_boundary() -> void:
 	assert_str(main.debug_zone_at(Vector3(ar * 1.6 + 3.0, 0.0, 0.0))).is_equal("void")
 	assert_int(main.board_data["drifts"].size()).is_greater(0)
 	assert_bool(main.debug_is_blocked(Vector3(ar * 1.6 + 0.5, 0.0, 0.0))).is_true()
+
+
+func test_present_hover_updates_radar_chart_data() -> void:
+	var select_ui: GDScript = preload("res://scripts/present_select_ui.gd")
+	var radar_script: GDScript = preload("res://scripts/stat_radar_chart.gd")
+	var root_ctrl: Control = auto_free(Control.new())
+	add_child(root_ctrl)
+	var radar_canvas: Control = radar_script.build(root_ctrl)
+	# Build minimal present definitions
+	var present_defs: Dictionary = {
+		"alpha": {"name": "Alpha", "tagline": "First", "unlock": "default",
+				"bow_color": "#ff0000", "hp": 100.0, "speed": 12.0, "damage": 14.0,
+				"fire_rate": 0.22, "range": 15.0, "pierce": 1.0},
+		"beta":  {"name": "Beta",  "tagline": "Second", "unlock": "default",
+				"bow_color": "#00ff00", "hp": 150.0, "speed": 10.0, "damage": 20.0,
+				"fire_rate": 0.30, "range": 12.0, "pierce": 2.0},
+	}
+	var container: HBoxContainer = auto_free(HBoxContainer.new())
+	add_child(container)
+	select_ui.build_present_buttons(container, present_defs, null, func(_b: Button) -> void: pass, radar_canvas)
+	# Simulate hover on the second button
+	var buttons: Array[Node] = container.get_children()
+	assert_int(buttons.size()).is_equal(2)
+	var second_btn: Button = buttons[1] as Button
+	second_btn.mouse_entered.emit()
+	await get_tree().process_frame
+	# Radar canvas should now have values set for beta
+	var values: Dictionary = radar_canvas.get_meta("radar_values", {})
+	assert_bool(values.has("hp")).is_true()
+	assert_str(select_ui._current_preview_id).is_not_empty()
 
 
 func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
@@ -75,7 +105,7 @@ func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
 	add_child(main)
 	await get_tree().process_frame
 	main.configure_test_mode({"skip_between_match": true})
-	main.start_run("elf")
+	main.start_run("holly_striker")
 	await get_tree().process_frame
 	main.debug_end_run(true)
 	await get_tree().process_frame

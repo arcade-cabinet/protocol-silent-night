@@ -3,11 +3,12 @@ render_mode blend_mix, cull_back, depth_draw_opaque;
 
 // Wrapping paper factory shader.
 // One shader, infinite looks via uniforms.
-// pattern_type: 0=solid, 1=stripes, 2=polka dots, 3=plaid, 4=stars, 5=snowflakes
+// pattern_type: 0=solid, 1=stripes, 2=polka dots, 3=plaid, 4=stars,
+//               5=snowflakes, 6=diagonal stripes, 7=checker
 
 uniform vec4 base_color : source_color = vec4(0.84, 0.21, 0.35, 1.0);
 uniform vec4 pattern_color : source_color = vec4(1.0, 0.84, 0.0, 1.0);
-uniform int pattern_type : hint_range(0, 5) = 1;
+uniform int pattern_type : hint_range(0, 7) = 1;
 uniform float pattern_scale : hint_range(1.0, 20.0) = 4.0;
 uniform float metallic : hint_range(0.0, 1.0) = 0.15;
 uniform float roughness : hint_range(0.0, 1.0) = 0.55;
@@ -46,6 +47,15 @@ float snowflake_pattern(vec2 uv, float scale) {
 	return max(core, max(spokes, tips));
 }
 
+float diagonal_pattern(vec2 uv, float scale) {
+	return step(0.5, fract((uv.x + uv.y) * scale));
+}
+
+float checker_pattern(vec2 uv, float scale) {
+	vec2 cell = floor(uv * scale);
+	return mod(cell.x + cell.y, 2.0);
+}
+
 void fragment() {
 	vec2 uv = UV;
 	float pattern = 0.0;
@@ -60,6 +70,10 @@ void fragment() {
 		pattern = star_pattern(uv, pattern_scale);
 	} else if (pattern_type == 5) {
 		pattern = snowflake_pattern(uv, pattern_scale);
+	} else if (pattern_type == 6) {
+		pattern = diagonal_pattern(uv, pattern_scale);
+	} else if (pattern_type == 7) {
+		pattern = checker_pattern(uv, pattern_scale);
 	}
 
 	vec3 color = mix(base_color.rgb, pattern_color.rgb, pattern);

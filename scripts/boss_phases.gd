@@ -1,14 +1,17 @@
 extends RefCounted
 class_name BossPhases
 
-## 3-phase Krampus-Prime boss fight.
-## Phase 1 (100%→66% HP): Fan shots every 1.15s.
-## Phase 2 (66%→33% HP): + ground AOE telegraph + pulse damage.
-## Phase 3 (33%→0% HP): + minion burst summons every 5s.
+## 3-phase Krampus-Prime boss fight (BT HSM pattern).
+## Phase 1 (100%→66% HP): Circle-strafe + ranged fan at 0.9s.
+## Phase 2 (66%→33% HP): Circle-strafe + charge every 4s + AOE telegraph.
+## Phase 3 (33%→0% HP): Charge every 2.5s + multi-shot at 0.8s + minion summon every 6s.
+
+const BossBTHelpers := preload("res://scripts/boss_bt_helpers.gd")
 
 var phase_timer: float = 0.0
 var aoe_timer: float = 0.0
 var summon_timer: float = 0.0
+var multi_shot_timer: float = 0.0
 var current_phase: int = 1
 var aoe_telegraphs: Array = []
 
@@ -25,26 +28,48 @@ static func get_phase(boss_ref: Dictionary) -> int:
 func update_boss(delta: float, boss_ref: Dictionary, player_node: Node3D,
 		on_move: Callable, on_projectile: Callable, on_damage_player: Callable,
 		on_show_message: Callable, on_spawn_enemy: Callable,
-		fx_root: Node3D, boss_attack_scale: float) -> void:
+		fx_root: Node3D, boss_attack_scale: float,
+		on_phase_changed: Callable = Callable()) -> void:
 	if boss_ref.is_empty():
 		return
 	var phase := get_phase(boss_ref)
 	if phase != current_phase:
 		_on_phase_change(phase, boss_ref, on_show_message)
+		if on_phase_changed.is_valid():
+			on_phase_changed.call(phase)
 		current_phase = phase
-	var boss_dir: Vector3 = (player_node.position - boss_ref["node"].position).normalized()
-	if boss_ref["node"].position.distance_to(player_node.position) > 6.0 + float(phase) * 1.0:
-		on_move.call(boss_ref["node"], boss_dir, float(boss_ref["speed"]) * (1.0 + (phase - 1) * 0.15), delta, 1.2)
+	var boss_node: Node3D = boss_ref["node"]
+	var boss_pos: Vector3 = boss_node.position
+	var to_player: Vector3 = player_node.position - boss_pos
+	to_player.y = 0.0
+	var boss_dir: Vector3 = to_player.normalized() if to_player.length_squared() > 0.0001 else Vector3.FORWARD
+	# Phase-specific movement
+	var base_speed: float = float(boss_ref["speed"])
+	if phase >= 2:
+		BossBTHelpers.charge_tick(boss_ref, delta, 4.0 if phase == 2 else 2.5)
+		BossBTHelpers.update_charge_phase(boss_ref, delta)
+	if phase >= 2 and BossBTHelpers.is_charging(boss_ref):
+		on_move.call(boss_node, boss_dir, base_speed * BossBTHelpers.CHARGE_SPEED_MULT, delta, 1.2)
+	else:
+		var strafe_dir := BossBTHelpers.circle_strafe_dir(boss_pos, player_node.position)
+		on_move.call(boss_node, strafe_dir, base_speed * (1.0 + (phase - 1) * 0.12), delta, 1.2)
 	boss_ref["ring"].rotation_degrees.y += (80.0 + phase * 40.0) * delta
+	# Ranged attack
 	boss_ref["attack_timer"] += delta
-	var fire_interval := 1.15 / boss_attack_scale / (1.0 + (phase - 1) * 0.2)
+	var fire_interval := (0.9 if phase == 1 else 1.2) / boss_attack_scale
 	if boss_ref["attack_timer"] >= fire_interval:
 		boss_ref["attack_timer"] = 0.0
 		var spread := 2 + phase
 		for shot in range(-spread, spread + 1):
-			on_projectile.call(boss_ref["node"].position + Vector3(0, 0.6, 0),
+			on_projectile.call(boss_pos + Vector3(0, 0.6, 0),
 				boss_dir.rotated(Vector3.UP, shot * 0.1), true, 18.0 + phase * 4.0, 1, 18.0, 0.35)
-	if boss_ref["node"].position.distance_to(player_node.position) < 1.65:
+	# Phase 3 multi-shot burst
+	if phase >= 3:
+		multi_shot_timer += delta
+		if multi_shot_timer >= 0.8 / boss_attack_scale:
+			multi_shot_timer = 0.0
+			BossBTHelpers.multi_shot(boss_pos, boss_dir, on_projectile, 14.0, 20.0)
+	if boss_pos.distance_to(player_node.position) < 1.65:
 		on_damage_player.call(float(boss_ref["contact_damage"]) * delta * (1.0 + phase * 0.3))
 	if phase >= 2:
 		_update_aoe(delta, boss_ref, player_node, on_damage_player, fx_root)
@@ -77,10 +102,10 @@ func _update_aoe(delta: float, boss_ref: Dictionary, player_node: Node3D,
 
 func _update_summons(delta: float, _boss_ref: Dictionary, on_spawn_enemy: Callable) -> void:
 	summon_timer += delta
-	if summon_timer < 5.0:
+	if summon_timer < 6.0:
 		return
 	summon_timer = 0.0
-	for _i in range(3):
+	for _i in range(2):
 		on_spawn_enemy.call()
 
 
@@ -129,4 +154,5 @@ func clear() -> void:
 	current_phase = 1
 	aoe_timer = 0.0
 	summon_timer = 0.0
+	multi_shot_timer = 0.0
 	phase_timer = 0.0

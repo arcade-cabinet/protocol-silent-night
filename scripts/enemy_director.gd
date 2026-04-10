@@ -100,19 +100,21 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	return new_boss
 
 
-func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_node: Node3D, on_move_actor: Callable, on_damage_player: Callable, on_spawn_projectile: Callable, boss_attack_scale: float) -> void:
+func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_node: Node3D, on_move_actor: Callable, on_damage_player: Callable, on_spawn_projectile: Callable, boss_attack_scale: float, on_telegraph: Callable = Callable()) -> void:
 	for index in range(enemies.size() - 1, -1, -1):
 		var enemy: Dictionary = enemies[index]
 		var pl: int = int(enemy.get("phase_level", 1))
 		match String(enemy.get("id", "grunt")):
+			"grunt":
+				EnemyBehaviors.behavior_grunt_bt(enemy, player_node.position, delta, on_move_actor)
 			"rusher":
-				EnemyBehaviors.behavior_swerve(enemy, player_node, delta, on_move_actor, pl)
+				EnemyBehaviors.behavior_rusher_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
 			"tank":
-				EnemyBehaviors.behavior_stomp(enemy, player_node, delta, on_move_actor, pl)
+				EnemyBehaviors.behavior_tank_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
 			"elf":
-				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl)
+				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl, on_telegraph)
 			"santa":
-				EnemyBehaviors.behavior_ranged(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl)
+				EnemyBehaviors.behavior_ranged(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl, on_telegraph)
 			"bumble":
 				EnemyBehaviors.behavior_pack(enemy, enemies, player_node, delta, on_move_actor, pl)
 			_:

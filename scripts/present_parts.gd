@@ -1,16 +1,26 @@
 extends RefCounted
 class_name PresentParts
 
-## Assembles body parts (bow, arms, legs, shadow) for a present character.
+## Assembles body parts for a present character: bow, arms, legs,
+## face socket, shadow, topper, accessory. Socket-aware: each attach
+## takes an explicit world-space position from the body rig so
+## alternate body shapes (gift_bag, stacked_duo, cylinder) anchor
+## anatomy in the right place instead of against fixed box dimensions.
 
-static func attach_bow(root: Node3D, def: Dictionary, w: float, h: float) -> void:
+const FACE_RENDERER := preload("res://scripts/present_face_renderer.gd")
+const TOPPER_MESHES := preload("res://scripts/present_topper_meshes.gd")
+const ACCESSORY_MESHES := preload("res://scripts/present_accessory_meshes.gd")
+static var _face_renderer: RefCounted
+
+
+static func attach_bow_at(root: Node3D, def: Dictionary, pos: Vector3, width: float) -> void:
 	var bow_color := Color(def.get("bow_color", "#ffd700"))
 	var bow := Node3D.new()
 	bow.name = "Bow"
-	bow.position = Vector3(0, h + 0.08, 0)
-	var ribbon_h := _box(Vector3(w * 0.85, 0.06, 0.12), _emissive(bow_color, 1.3))
+	bow.position = pos
+	var ribbon_h := _box(Vector3(width * 0.85, 0.06, 0.12), _emissive(bow_color, 1.3))
 	bow.add_child(ribbon_h)
-	var ribbon_v := _box(Vector3(0.12, 0.06, w * 0.75), _emissive(bow_color, 1.3))
+	var ribbon_v := _box(Vector3(0.12, 0.06, width * 0.75), _emissive(bow_color, 1.3))
 	bow.add_child(ribbon_v)
 	for side in [-1.0, 1.0]:
 		var loop := MeshInstance3D.new()
@@ -25,36 +35,82 @@ static func attach_bow(root: Node3D, def: Dictionary, w: float, h: float) -> voi
 	root.add_child(bow)
 
 
-static func attach_arms(root: Node3D, def: Dictionary, w: float, h: float) -> void:
+static func attach_arms_at(root: Node3D, def: Dictionary, left_pos: Vector3, right_pos: Vector3, style: String = "stiff") -> void:
 	var arm_color := Color(def.get("arm_color", "#ffffff"))
-	var length := float(def.get("arm_length", 0.5))
-	var thick := float(def.get("arm_thickness", 0.08))
-	for side in [-1.0, 1.0]:
-		var arm := _cyl(thick * 0.8, thick, length, _flat(arm_color))
-		arm.rotation_degrees = Vector3(0, 0, side * 75)
-		arm.position = Vector3(side * (w * 0.5 + length * 0.35), h * 0.45, 0)
+	var length: float = float(def.get("arm_length", 0.5))
+	var thick: float = float(def.get("arm_thickness", 0.08))
+	var positions: Array = [left_pos, right_pos]
+	for i in range(2):
+		var sign_x: float = -1.0 if i == 0 else 1.0
+		var arm: MeshInstance3D = _cyl(thick * 0.8, thick, length, _flat(arm_color))
+		if style == "wavy":
+			arm.rotation_degrees = Vector3(0, 0, sign_x * 45)
+			var wav_offset: Vector3 = positions[i] + Vector3(sign_x * 0.05, 0.02, 0)
+			arm.position = wav_offset
+		else:
+			arm.rotation_degrees = Vector3(0, 0, sign_x * 75)
+			arm.position = positions[i]
 		root.add_child(arm)
 		var hand := MeshInstance3D.new()
 		var sphere := SphereMesh.new()
 		sphere.radius = thick * 1.4
 		sphere.height = thick * 2.8
 		hand.mesh = sphere
-		hand.position = Vector3(side * (w * 0.5 + length * 0.7), h * 0.35, 0)
+		hand.position = positions[i] + Vector3(sign_x * (length * 0.25), -length * 0.1, 0)
 		hand.material_override = _flat(arm_color)
 		root.add_child(hand)
 
 
-static func attach_legs(root: Node3D, def: Dictionary, w: float) -> void:
+static func attach_legs_at(root: Node3D, def: Dictionary, left_pos: Vector3, right_pos: Vector3, style: String = "standard") -> void:
+	if style == "none":
+		return
 	var leg_color := Color(def.get("leg_color", "#333333"))
-	var length := float(def.get("leg_length", 0.35))
-	var thick := float(def.get("leg_thickness", 0.1))
-	for side in [-1.0, 1.0]:
-		var leg := _cyl(thick, thick * 1.2, length, _flat(leg_color))
-		leg.position = Vector3(side * w * 0.22, -length * 0.4, 0)
+	var length: float = float(def.get("leg_length", 0.35))
+	if style == "short":
+		length *= 0.6
+	var thick: float = float(def.get("leg_thickness", 0.1))
+	var positions: Array = [left_pos, right_pos]
+	for i in range(2):
+		var sign_x: float = -1.0 if i == 0 else 1.0
+		var leg: MeshInstance3D = _cyl(thick, thick * 1.2, length, _flat(leg_color))
+		leg.position = positions[i] + Vector3(0, -length * 0.4, 0)
 		root.add_child(leg)
-		var foot := _box(Vector3(thick * 2.2, 0.08, thick * 3.0), _flat(leg_color))
-		foot.position = Vector3(side * w * 0.22, -length * 0.82, thick * 0.5)
+		var foot: MeshInstance3D = _box(Vector3(thick * 2.2, 0.08, thick * 3.0), _flat(leg_color))
+		foot.position = positions[i] + Vector3(0, -length * 0.82, thick * 0.5)
 		root.add_child(foot)
+
+
+static func attach_face_at(root: Node3D, def: Dictionary, pos: Vector3) -> void:
+	if _face_renderer == null:
+		_face_renderer = FACE_RENDERER.new()
+	var expression: String = def.get("expression", "determined")
+	var face := MeshInstance3D.new()
+	face.name = "Face"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.7, 0.5)
+	face.mesh = quad
+	face.position = pos
+	face.material_override = _face_renderer.face_material(expression)
+	face.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(face)
+
+
+static func attach_topper(root: Node3D, def: Dictionary, topper_pos: Vector3) -> void:
+	var kind: String = String(def.get("topper", "none"))
+	if kind == "none":
+		return
+	var tint := Color(String(def.get("bow_color", "#ffd700")))
+	var topper: Node3D = TOPPER_MESHES.build(kind, tint)
+	topper.position = topper_pos
+	root.add_child(topper)
+
+
+static func attach_accessory(root: Node3D, def: Dictionary, w: float, h: float, d: float) -> void:
+	var kind: String = String(def.get("accessory", "none"))
+	if kind == "none":
+		return
+	var node: Node3D = ACCESSORY_MESHES.build(kind, def, w, h, d)
+	root.add_child(node)
 
 
 static func attach_shadow(root: Node3D, w: float, d: float) -> void:

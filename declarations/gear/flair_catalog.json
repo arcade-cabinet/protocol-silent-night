@@ -1,0 +1,76 @@
+{
+  "pieces": [
+    {
+      "type": "orbiting_particle",
+      "achievement": "total_kills",
+      "threshold": 0,
+      "params": {"count": 2, "radius": 0.6, "speed": 1.5, "color": "#88ddff"}
+    },
+    {
+      "type": "wobble_animation",
+      "achievement": "total_kills",
+      "threshold": 0,
+      "params": {"amplitude": 0.05, "rate": 3.0}
+    },
+    {
+      "type": "trailing_sparks",
+      "achievement": "total_kills",
+      "threshold": 0,
+      "params": {"count": 4, "color": "#ff8822"}
+    },
+    {
+      "type": "pulsing_glow",
+      "achievement": "total_kills",
+      "threshold": 50,
+      "params": {"intensity": 1.2, "rate": 2.0, "color": "#ffd700"}
+    },
+    {
+      "type": "color_shift",
+      "achievement": "total_runs",
+      "threshold": 10,
+      "params": {"hue_speed": 0.3, "saturation": 0.8}
+    },
+    {
+      "type": "floating_icon",
+      "achievement": "total_waves_cleared",
+      "threshold": 25,
+      "params": {"icon": "star", "color": "#ffffaa"}
+    },
+    {
+      "type": "smoke_trail",
+      "achievement": "total_waves_cleared",
+      "threshold": 100,
+      "params": {"density": 0.4, "color": "#666666"}
+    },
+    {
+      "type": "frost_crystals",
+      "achievement": "campaign_clears",
+      "threshold": 1,
+      "params": {"count": 3, "size": 0.15, "color": "#ccf0ff"}
+    },
+    {
+      "type": "ember_glow",
+      "achievement": "campaign_clears",
+      "threshold": 1,
+      "params": {"intensity": 1.4, "color": "#ff6622"}
+    },
+    {
+      "type": "sparkle_burst",
+      "achievement": "campaign_clears",
+      "threshold": 3,
+      "params": {"count": 8, "color": "#ffd700"}
+    },
+    {
+      "type": "halo_ring",
+      "achievement": "campaign_clears",
+      "threshold": 5,
+      "params": {"radius": 0.8, "thickness": 0.1, "color": "#ffffff"}
+    },
+    {
+      "type": "dripping_icicles",
+      "achievement": "campaign_clears",
+      "threshold": 10,
+      "params": {"count": 5, "length": 0.3, "color": "#ddffff"}
+    }
+  ]
+}
