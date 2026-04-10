@@ -17,7 +17,7 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 
 const MAX_ENEMY_CAP := 48  # Mobile performance ceiling
 
-func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1) -> void:
+func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1, speed_mult: float = 1.0) -> void:
 	if enemies.size() >= MAX_ENEMY_CAP:
 		return
 	var def: Dictionary = enemy_defs[enemy_type]
@@ -49,7 +49,7 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 		"node": enemy_node,
 		"hp": float(def["max_hp"]) * hp_scale,
 		"max_hp": float(def["max_hp"]) * hp_scale,
-		"speed": float(def["speed"]),
+		"speed": float(def["speed"]) * speed_mult,
 		"contact_damage": float(def["contact_damage"]),
 		"drop_xp": int(def["drop_xp"]),
 		"drop_cookies": int(def.get("drop_cookies", 0)),

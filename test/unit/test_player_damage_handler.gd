@@ -75,3 +75,14 @@ func test_damage_ignored_during_dash_iframes() -> void:
 	m.dash_timer = 0.5
 	HANDLER.damage_player(m, 50.0)
 	assert_float(float(m.player_state["hp"])).is_equal(100.0)
+
+
+func test_on_boss_killed_is_noop_when_state_not_playing() -> void:
+	# Regression: player dies (state→game_over) and a projectile kills the boss
+	# in the same frame — on_boss_killed must not call end_run a second time.
+	var stub: StubMain = auto_free(StubMain.new())
+	stub.state = "game_over"
+	add_child(stub)
+	var gm := preload("res://scripts/game_manager.gd").new(stub)
+	gm.on_boss_killed()
+	assert_str(stub.state).is_equal("game_over")

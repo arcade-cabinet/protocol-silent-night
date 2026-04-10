@@ -174,3 +174,21 @@ func test_stomp_surge_faster_at_higher_phase() -> void:
 	var surge_1: float = 2.0 + float(1 - 1) * 0.25
 	var surge_5: float = 2.0 + float(5 - 1) * 0.25
 	assert_float(surge_5).is_greater(surge_1)
+
+
+func test_spawn_enemy_propagates_phase_level_and_speed_mult() -> void:
+	# Regression: wave_spawner was not passing enemy_phase_level/speed_mult to
+	# spawn_enemy — enemies always spawned at phase_level=1 with base speed.
+	var mat := preload("res://scripts/material_factory.gd").new()
+	var pix := preload("res://scripts/pixel_art_renderer.gd").new()
+	var director := preload("res://scripts/enemy_director.gd").new(mat, pix)
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	var f := FileAccess.open("res://declarations/enemies/enemies.json", FileAccess.READ)
+	var defs: Dictionary = JSON.parse_string(f.get_as_text())
+	var cfg: Dictionary = {"arena_radius": 18.0}
+	var enemies: Array = []
+	var base_speed: float = float(defs["grunt"]["speed"])
+	director.spawn_enemy(root, enemies, "grunt", 1.0, defs, cfg, 3, 2.0)
+	assert_int(int(enemies[0]["phase_level"])).is_equal(3)
+	assert_float(float(enemies[0]["speed"])).is_equal_approx(base_speed * 2.0, 0.001)
