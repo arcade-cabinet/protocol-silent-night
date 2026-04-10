@@ -188,12 +188,12 @@ func get_preference(key: String, default_value = null) -> Variant:
 	return state.get("preferences", {}).get(key, default_value)
 
 
-func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:
+func _merge_dict(base: Dictionary, incoming: Dictionary, top_level: bool = true) -> Dictionary:
 	for key in incoming.keys():
-		if not base.has(key):
-			continue  # Reject unknown keys — prevents arbitrary injection from tampered saves.
+		if top_level and not base.has(key):
+			continue  # Top-level only: reject schema-unknown keys from tampered saves.
 		if incoming[key] is Dictionary and base.get(key) is Dictionary:
-			base[key] = _merge_dict(base[key], incoming[key])
+			base[key] = _merge_dict(base[key], incoming[key], false)
 		else:
 			base[key] = incoming[key]
 	return base

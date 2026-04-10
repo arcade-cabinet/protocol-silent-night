@@ -1,28 +1,10 @@
 # Protocol: Silent Night — Godot 4.6 Holidaypunk Roguelike Arena
 
-## SELF-DIRECTED STARTUP — DO THIS FIRST, ALWAYS
+## Project State
 
-There are no sessions. Work is continuous. On every startup, before anything else:
+**Active plan:** `.claude/plans/game-completion.prq.md` — P1+P2+P3 complete, PR #153 awaiting merge.
 
-```bash
-git log --oneline -5          # where am I in history?
-git status --short            # any uncommitted work?
-cat .claude/plans/game-completion.prq.md   # what plan is active?
-# Check batch state if it exists:
-ls .claude/state/task-batch/ 2>/dev/null
-```
-
-Then determine the next task from the active plan and **start it immediately**. Do not wait for user instruction. Idle = failure of setup. If blocked: launch background specialist agents and continue other work.
-
-**Current active plan:** `.claude/plans/game-completion.prq.md`
-- All P1 tasks complete (BT state machines, dead code, boss waves, zones, LimboAI)
-- P2: `e2e-full-flow` complete — 243/243 tests pass, E2E via gdUnit4, screenshots captured
-- P3: all documentation tasks complete
-- Integration branch `integration/production-polish` open as PR #153 — awaiting CI + squash merge
-- `waves-json-retirement`: complete (waves.json deleted, wave_formula.gd is sole source)
-
-**Unlock keys match save_manager schema:** `"santa"` and `"bumble"` (not `"enemy_santa"`/`"enemy_bumble"`).
-**Component tests use `"holly_striker"`** as the test present ID (not `"elf"` — classes.json deleted).
+**Key identifiers:** Unlock keys = `"santa"`, `"bumble"` (not `"enemy_*"`). Test present ID = `"holly_striker"` (not `"elf"`).
 
 ## READ THIS FIRST
 
