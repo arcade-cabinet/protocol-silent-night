@@ -44,10 +44,14 @@ static func end_run(main: Node, win: bool) -> void:
 		sm.set_coal(main.coal_queue)
 	if win and sm != null:
 		sm.record_campaign_clear()
+	var unlocked_any := false
 	if win and sm != null and sm.unlock("santa"):
 		ui.show_achievement("MECHA-SANTA UNLOCKED")
+		unlocked_any = true
 	if win and sm != null and sm.unlock("bumble"):
 		ui.show_achievement("THE BUMBLE UNLOCKED")
+		unlocked_any = true
+	if unlocked_any:
 		main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		helpers.finalize_end_screen(main, win)

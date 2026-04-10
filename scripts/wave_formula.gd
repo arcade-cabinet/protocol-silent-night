@@ -44,7 +44,9 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 	var burst_chance: float = clampf(p_burst * lf * 0.04 * df, 0.0, 0.55)
 	var burst_size: int = 3 + int(lf * 0.3 * p_burst * df)
 	var countdown: float = clampf(120.0 - lf * 2.5 * df + rng.randf_range(-10.0, 10.0), 30.0, 180.0)
-	var boss_pressure: float = _compute_boss_pressure(lf * df, p_boss, rng, lookback)
+	# Scale boss pressure superlinearly with level, with guaranteed spikes at 5 and 10.
+	var spike: float = 0.45 if level == 5 else (0.8 if level >= 10 else 0.0)
+	var boss_pressure: float = clampf(_compute_boss_pressure(lf * df, p_boss, rng, lookback) + spike, 0.0, 1.0)
 	var max_bosses: int = 1 + int(boss_pressure / 0.6)
 	var composition := _build_composition(rng, profile, level)
 	var pattern := _pick_pattern(rng, profile, level)
@@ -54,14 +56,14 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 		"countdown": countdown,
 		"spawn_interval": spawn_interval,
 		"speed_mult": speed_mult,
-		"hp_scale": hp_scale,
 		"damage_scale": damage_scale,
+		"hp_scale": hp_scale,
 		"composition": composition,
 		"pattern": pattern,
 		"burst_chance": burst_chance,
 		"burst_size": burst_size,
 		"boss_pressure": boss_pressure,
-		"is_boss_wave": level == 5 or level >= 10 or boss_pressure >= 0.35,
+		"is_boss_wave": boss_pressure >= 0.35,
 		"max_bosses": max_bosses,
 		"boss_hp_scale": 1.0 + lf * 0.06,
 		"enemy_phase_level": enemy_phase_level,

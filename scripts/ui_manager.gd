@@ -30,11 +30,13 @@ var pause_button: Button
 var joystick_base: ColorRect
 var joystick_knob: ColorRect
 var start_classes_box: Container
+var radar_canvas: Control
 var upgrade_box: HBoxContainer
 var difficulty_panel: PanelContainer
 var coal_sidebar_state: Dictionary = {}
 var _last_coal_signature: String = ""
 var widgets: Dictionary = {}
+var audio_mgr: RefCounted
 var _hp_pulse_time: float = 0.0
 var _banner_target: String = ""
 var _banner_char_idx: int = 0
@@ -58,6 +60,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	var start := UI_BUILDER.build_start_screen(root)
 	start_screen = start["screen"]
 	start_classes_box = start["classes_box"]
+	radar_canvas = start["radar_canvas"]
 
 	var hud := UI_BUILDER.build_hud(root)
 	hud_root = hud["hud_root"]
@@ -109,7 +112,9 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 
 func refresh_widgets(main: Node) -> void: UI_WIDGETS.refresh(widgets, main)
 func register_combo_kill() -> void: UI_WIDGETS.register_kill(widgets)
-func ensure_menus(audio_mgr: RefCounted, sm: Node, on_restart: Callable, on_quit: Callable) -> void: UI_WIDGETS.ensure_menus(widgets, root_control, audio_mgr, sm, on_restart, on_quit)
+func ensure_menus(p_audio_mgr: RefCounted, sm: Node, on_restart: Callable, on_quit: Callable) -> void:
+	audio_mgr = p_audio_mgr
+	UI_WIDGETS.ensure_menus(widgets, root_control, p_audio_mgr, sm, on_restart, on_quit)
 func open_settings() -> void: UI_WIDGETS.open_settings(widgets)
 func toggle_pause(tree: SceneTree) -> void: UI_WIDGETS.toggle_pause(widgets, tree)
 
