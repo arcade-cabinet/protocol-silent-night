@@ -114,8 +114,10 @@ func _update_telegraphs(delta: float, _fx_root: Node3D, player_node: Node3D) -> 
 		var t: Dictionary = aoe_telegraphs[i]
 		t["life"] -= delta
 		if t["life"] <= 0.0:
+			var p_pos := player_node.position
+			var t_pos: Vector3 = t["position"]
 			var in_aoe := is_instance_valid(player_node) and \
-				player_node.position.distance_to(t["position"]) <= float(t["radius"])
+				Vector2(p_pos.x, p_pos.z).distance_to(Vector2(t_pos.x, t_pos.z)) <= float(t["radius"])
 			if in_aoe:
 				t["on_damage"].call(float(t["damage"]))
 			t["node"].queue_free()

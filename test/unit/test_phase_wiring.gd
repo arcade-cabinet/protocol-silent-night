@@ -102,7 +102,11 @@ func test_aoe_telegraph_damage_fires_when_player_inside_radius() -> void:
 	var on_dmg := func(a: float) -> void: damage[0] += a
 	bp._update_aoe(4.0, {}, player, on_dmg, fx)  # delta > 3.5 triggers spawn
 	player.position = Vector3(1.0, 0.0, 0.0)   # still within 3.5 radius
-	bp._update_telegraphs(1.0, fx, player)       # life=0.8, delta=1.0 → expires
+	# Advance until all telegraphs expire — resilient to lifetime rebalancing
+	for _i in range(200):
+		if bp.aoe_telegraphs.is_empty():
+			break
+		bp._update_telegraphs(0.05, fx, player)
 	assert_float(damage[0]).is_equal(25.0)
 
 
@@ -116,7 +120,10 @@ func test_aoe_telegraph_no_damage_when_player_dodged() -> void:
 	var on_dmg := func(a: float) -> void: damage[0] += a
 	bp._update_aoe(4.0, {}, player, on_dmg, fx)
 	player.position = Vector3(10.0, 0.0, 0.0)  # moved outside 3.5 radius
-	bp._update_telegraphs(1.0, fx, player)
+	for _i in range(200):
+		if bp.aoe_telegraphs.is_empty():
+			break
+		bp._update_telegraphs(0.05, fx, player)
 	assert_float(damage[0]).is_equal(0.0)
 
 
