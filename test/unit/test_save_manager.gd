@@ -102,3 +102,52 @@ func test_equipped_gear_persists_across_reload() -> void:
 	var weapon: Dictionary = loaded["weapon_mod"]
 	assert_str(String(weapon.get("name", ""))).is_equal("Test")
 	reloaded.reset_state_for_tests()
+
+
+func test_register_level_reached_tracks_best_level() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_best_level_test.json")
+	save.reset_state_for_tests()
+	save.load_state()
+
+	assert_int(int(save.state.get("best_level", 0))).is_equal(0)
+	save.register_level_reached(5)
+	save.register_level_reached(3)
+	save.register_level_reached(12)
+	save.register_level_reached(9)
+	assert_int(int(save.state["best_level"])).is_equal(12)
+
+	var reloaded = auto_free(_save_script.new())
+	reloaded.set_save_path_for_tests("user://gdunit_best_level_test.json")
+	reloaded.load_state()
+	assert_int(int(reloaded.state["best_level"])).is_equal(12)
+	reloaded.reset_state_for_tests()
+
+
+func test_merge_dict_rejects_unknown_top_level_keys() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_merge_injection_test.json")
+	save.reset_state_for_tests()
+
+	# Simulate a tampered save with an injected top-level key.
+	var tampered_json := JSON.stringify({
+		"unlocked": {"elf": true, "santa": true},
+		"best_wave": 7,
+		"best_level": 3,
+		"injected_root_key": "malicious_value",
+		"achievements": {"total_kills": 1, "total_runs": 1, "total_waves_cleared": 1, "campaign_clears": 0},
+		"preferences": {"difficulty_tier": 1, "permadeath": false, "last_present": "holly_striker"},
+		"cookies": 0,
+		"coal": [],
+		"gear_inventory": [],
+		"equipped_gear": {},
+	})
+	var file := FileAccess.open(save.save_path, FileAccess.WRITE)
+	file.store_string(tampered_json)
+	file = null
+
+	save.load_state()
+	assert_bool(save.state.has("injected_root_key")).is_false()
+	assert_bool(save.is_unlocked("santa")).is_true()
+	assert_int(int(save.state["best_wave"])).is_equal(7)
+	save.reset_state_for_tests()
