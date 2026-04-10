@@ -59,20 +59,22 @@ func apply_upgrade(upgrade_id: String, player_state: Dictionary) -> void:
 	var cls: Dictionary = player_state["class"]
 	match upgrade_id:
 		"damage":
-			# Cap at 5 stacks (3.05x base) — pressure valve, not godmode.
+			# Diminishing returns after 5 stacks — no hard cap, death still wins.
 			var damage_stacks: int = int(player_state.get("damage_stacks", 0))
-			if damage_stacks < 5:
-				cls["damage"] = float(cls["damage"]) * 1.25
-				player_state["damage_stacks"] = damage_stacks + 1
+			var mult := 1.25 if damage_stacks < 5 else 1.10
+			cls["damage"] = float(cls["damage"]) * mult
+			player_state["damage_stacks"] = damage_stacks + 1
 		"fire_rate":
-			# Cap at 5 stacks — fire interval floor ~0.45× base.
+			# Diminishing returns after 5 stacks — interval floor approaches but never 0.
 			var fr_stacks: int = int(player_state.get("fire_rate_stacks", 0))
-			if fr_stacks < 5:
-				cls["fire_rate"] = float(cls["fire_rate"]) * 0.82
-				player_state["fire_rate_stacks"] = fr_stacks + 1
+			var mult := 0.82 if fr_stacks < 5 else 0.92
+			cls["fire_rate"] = float(cls["fire_rate"]) * mult
+			player_state["fire_rate_stacks"] = fr_stacks + 1
 		"health":
-			player_state["max_hp"] += 50.0
-			player_state["hp"] = minf(player_state["max_hp"], float(player_state["hp"]) + 50.0)
+			# Multiplicative so health stays relevant against scaling enemy damage.
+			var increase := maxf(25.0, float(player_state["max_hp"]) * 0.25)
+			player_state["max_hp"] = float(player_state["max_hp"]) + increase
+			player_state["hp"] = minf(player_state["max_hp"], float(player_state["hp"]) + increase)
 		"speed":
 			cls["speed"] = float(cls["speed"]) * 1.15
 		"range":

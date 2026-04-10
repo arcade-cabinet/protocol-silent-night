@@ -38,6 +38,50 @@ func _record_telegraph(enemy_id: String, position: Vector3) -> void:
 	_telegraphs.append({"id": enemy_id, "pos": position})
 
 
+# --- Phase-level scaling ---
+
+func test_grunt_phase2_aggro_reaches_player_at_13() -> void:
+	var enemy := _make_enemy("grunt", Vector3(0, 0, 0))
+	# Phase 1 aggro = 12.0, phase 2 aggro = 14.0 — player at 13 should only chase at phase 2
+	var player_pos := Vector3(13.0, 0.0, 0.0)
+	assert_str(EnemyBTStates.grunt_tick(enemy, player_pos, 0.05, 1)).is_equal("wander")
+	assert_str(EnemyBTStates.grunt_tick(enemy, player_pos, 0.05, 2)).is_equal("chase")
+
+
+func test_rusher_phase2_shorter_cooldown() -> void:
+	var enemy := _make_enemy("rusher", Vector3(0, 0, 0))
+	# Put into cooldown state
+	enemy["behavior_state"] = "cooldown"
+	enemy["behavior_timer"] = 0.0
+	# Phase 1 cooldown = 0.9s; phase 2 cooldown = 0.75s. Tick 0.8s: should exit at phase 2 but not phase 1.
+	EnemyBTStates.rusher_tick(enemy, Vector3(10.0, 0.0, 0.0), 0.8, Callable(), 2)
+	assert_str(String(enemy["behavior_state"])).is_equal("idle")
+
+
+func test_rusher_phase1_cooldown_not_expired_at_0_8s() -> void:
+	var enemy := _make_enemy("rusher", Vector3(0, 0, 0))
+	enemy["behavior_state"] = "cooldown"
+	enemy["behavior_timer"] = 0.0
+	EnemyBTStates.rusher_tick(enemy, Vector3(10.0, 0.0, 0.0), 0.8, Callable(), 1)
+	assert_str(String(enemy["behavior_state"])).is_equal("cooldown")
+
+
+func test_tank_phase2_slam_mult_higher() -> void:
+	var enemy := _make_enemy("tank", Vector3(0, 0, 0))
+	enemy["behavior_state"] = "slam"
+	EnemyBTStates.tank_tick(enemy, Vector3(4.0, 0.0, 0.0), 0.05, Callable(), 2)
+	# Phase 2: 1.8 + 0.3 = 2.1
+	assert_float(float(enemy.get("slam_damage_mult", 0.0))).is_equal_approx(2.1, 0.01)
+
+
+func test_tank_phase3_prep_duration_shorter() -> void:
+	var enemy := _make_enemy("tank", Vector3(0, 0, 0))
+	enemy["behavior_state"] = "prep_slam"
+	# Phase 3 prep = max(0.5 - 0.16, 0.2) = 0.34s. Tick 0.35s should transition to slam.
+	var state := EnemyBTStates.tank_tick(enemy, Vector3(3.0, 0.0, 0.0), 0.35, Callable(), 3)
+	assert_str(state).is_equal("slam")
+
+
 # --- Grunt ---
 
 func test_grunt_enters_chase_when_player_close() -> void:
@@ -183,6 +227,24 @@ func test_krampus_circle_strafe_dir_has_tangential_component() -> void:
 	assert_float(dir.length()).is_between(0.99, 1.01)
 	# At exactly orbit radius, radial_bias = 0 → direction is pure tangent (z-axis)
 	assert_float(absf(dir.z)).is_greater(0.5)
+
+
+func test_spawn_enemy_applies_speed_mult() -> void:
+	# Verify speed_mult from wave params is baked into the spawned enemy dict.
+	var mat := preload("res://scripts/material_factory.gd").new()
+	var pix := preload("res://scripts/pixel_art_renderer.gd").new()
+	var director := preload("res://scripts/enemy_director.gd").new(mat, pix)
+	var config := {"arena_radius": 12.0}
+	var enemy_defs := preload("res://scripts/enemy_director.gd").new(mat, pix)
+	# Use grunt def directly from declarations
+	var defs := {"grunt": {"max_hp": 24.0, "speed": 3.4, "contact_damage": 9.0, "scale": 0.75, "drop_xp": 1, "drop_cookies": 0, "color": "#ffffff"}}
+	var root := auto_free(Node3D.new())
+	add_child(root)
+	var enemies: Array = []
+	director.spawn_enemy(root, enemies, "grunt", 1.0, defs, config, 1, 2.0, 1.5)
+	assert_int(enemies.size()).is_equal(1)
+	assert_float(float(enemies[0]["speed"])).is_equal_approx(3.4 * 2.0, 0.01)
+	assert_float(float(enemies[0]["contact_damage"])).is_equal_approx(9.0 * 1.5, 0.01)
 
 
 func test_krampus_charge_tick_fires_after_interval() -> void:

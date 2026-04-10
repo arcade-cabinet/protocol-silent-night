@@ -53,7 +53,8 @@ func update_boss(delta: float, boss_ref: Dictionary, player_node: Node3D,
 	else:
 		var strafe_dir := BossBTHelpers.circle_strafe_dir(boss_pos, player_node.position)
 		on_move.call(boss_node, strafe_dir, base_speed * (1.0 + (phase - 1) * 0.12), delta, 1.2)
-	boss_ref["ring"].rotation_degrees.y += (80.0 + phase * 40.0) * delta
+	if boss_ref.has("ring") and is_instance_valid(boss_ref["ring"]):
+		boss_ref["ring"].rotation_degrees.y += (80.0 + phase * 40.0) * delta
 	# Ranged attack
 	boss_ref["attack_timer"] += delta
 	var fire_interval := (0.9 if phase == 1 else 1.2) / boss_attack_scale
@@ -75,7 +76,7 @@ func update_boss(delta: float, boss_ref: Dictionary, player_node: Node3D,
 		_update_aoe(delta, boss_ref, player_node, on_damage_player, fx_root)
 	if phase >= 3:
 		_update_summons(delta, boss_ref, on_spawn_enemy)
-	_update_telegraphs(delta, fx_root)
+	_update_telegraphs(delta, fx_root, player_node)
 
 
 func _on_phase_change(new_phase: int, boss_ref: Dictionary, on_msg: Callable) -> void:
@@ -109,12 +110,17 @@ func _update_summons(delta: float, _boss_ref: Dictionary, on_spawn_enemy: Callab
 		on_spawn_enemy.call()
 
 
-func _update_telegraphs(delta: float, _fx_root: Node3D) -> void:
+func _update_telegraphs(delta: float, _fx_root: Node3D, player_node: Node3D) -> void:
 	for i in range(aoe_telegraphs.size() - 1, -1, -1):
 		var t: Dictionary = aoe_telegraphs[i]
 		t["life"] -= delta
 		if t["life"] <= 0.0:
-			t["on_damage"].call(float(t["damage"]))
+			var p_pos := player_node.position
+			var t_pos: Vector3 = t["position"]
+			var in_aoe := is_instance_valid(player_node) and \
+				Vector2(p_pos.x, p_pos.z).distance_to(Vector2(t_pos.x, t_pos.z)) <= float(t["radius"])
+			if in_aoe:
+				t["on_damage"].call(float(t["damage"]))
 			t["node"].queue_free()
 			aoe_telegraphs.remove_at(i)
 		else:

@@ -41,7 +41,8 @@ static func build_start_screen(root: Control) -> Dictionary:
 
 	var classes_box := GridContainer.new()
 	classes_box.name = "ClassCards"
-	classes_box.columns = 5
+	var screen_w := DisplayServer.screen_get_size().x
+	classes_box.columns = 5 if screen_w >= 800 else 3
 	classes_box.add_theme_constant_override("h_separation", 14)
 	classes_box.add_theme_constant_override("v_separation", 14)
 	start_vbox.add_child(classes_box)
@@ -50,7 +51,7 @@ static func build_start_screen(root: Control) -> Dictionary:
 	instruction.text = "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
 	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	instruction.custom_minimum_size = Vector2(740, 0)
+	# No minimum width — must reflow on portrait screens.
 	instruction.modulate = Color("dceefb")
 	start_vbox.add_child(instruction)
 
@@ -70,7 +71,7 @@ static func build_hud(root: Control) -> Dictionary:
 	var hp_bar := ProgressBar.new()
 	hp_bar.max_value = 100
 	hp_bar.value = 100
-	hp_bar.custom_minimum_size = Vector2(300, 18)
+	hp_bar.custom_minimum_size = Vector2(80, 18)
 	hp_bar.show_percentage = false
 	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	THEME.apply_to_progress_bar(hp_bar, Color("ff617e"))
@@ -132,8 +133,9 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	boss_panel.name = "BossPanel"
 	boss_panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	boss_panel.offset_top = 110
-	boss_panel.offset_left = 260
-	boss_panel.offset_right = -260
+	# Use small margins so the bar remains visible on portrait screens.
+	boss_panel.offset_left = 24
+	boss_panel.offset_right = -24
 	boss_panel.visible = false
 	root.add_child(boss_panel)
 	var boss_title := Label.new()

@@ -150,4 +150,5 @@ func _fade_to_pool(node: MeshInstance3D) -> void:
 		node.visible = false
 		node.scale = Vector3.ONE
 		if _spark_pool.size() < SPARK_POOL_CAP:
-			_spark_pool.append(node))
+			_spark_pool.append(node)
+	)

@@ -16,13 +16,14 @@ const TANK_STAGGER_DURATION := 0.8
 const TANK_SLAM_DAMAGE_MULT := 1.8
 
 
-static func grunt_tick(enemy: Dictionary, player_pos: Vector3, _delta: float) -> String:
+static func grunt_tick(enemy: Dictionary, player_pos: Vector3, _delta: float, phase_level: int = 1) -> String:
 	var pos: Vector3 = enemy["node"].position
 	var flat_player := Vector3(player_pos.x, pos.y, player_pos.z)
 	var dist: float = pos.distance_to(flat_player)
+	var aggro_r: float = GRUNT_AGGRO_RADIUS + float(phase_level - 1) * 2.0
 	if dist <= GRUNT_CONTACT_RADIUS:
 		enemy["behavior_state"] = "contact"
-	elif dist <= GRUNT_AGGRO_RADIUS:
+	elif dist <= aggro_r:
 		enemy["behavior_state"] = "chase"
 	else:
 		enemy["behavior_state"] = "wander"
@@ -35,15 +36,17 @@ static func grunt_wander_direction(enemy: Dictionary, delta: float) -> Vector3:
 	return Vector3(sin(phase), 0.0, cos(phase)).normalized()
 
 
-static func rusher_tick(enemy: Dictionary, player_pos: Vector3, delta: float, on_telegraph: Callable) -> String:
+static func rusher_tick(enemy: Dictionary, player_pos: Vector3, delta: float, on_telegraph: Callable, phase_level: int = 1) -> String:
 	enemy["behavior_timer"] = float(enemy.get("behavior_timer", 0.0)) + delta
 	var pos: Vector3 = enemy["node"].position
 	var flat_player := Vector3(player_pos.x, pos.y, player_pos.z)
 	var dist: float = pos.distance_to(flat_player)
 	var state := String(enemy.get("behavior_state", "idle"))
+	var burst_range: float = RUSHER_BURST_RANGE + float(phase_level - 1) * 2.0
+	var cooldown_dur: float = maxf(RUSHER_COOLDOWN_DURATION - float(phase_level - 1) * 0.15, 0.3)
 	match state:
 		"idle":
-			if dist <= RUSHER_BURST_RANGE:
+			if dist <= burst_range:
 				enemy["behavior_state"] = "burst"
 				enemy["behavior_timer"] = 0.0
 				if on_telegraph.is_valid():
@@ -53,18 +56,20 @@ static func rusher_tick(enemy: Dictionary, player_pos: Vector3, delta: float, on
 				enemy["behavior_state"] = "cooldown"
 				enemy["behavior_timer"] = 0.0
 		"cooldown":
-			if float(enemy["behavior_timer"]) >= RUSHER_COOLDOWN_DURATION:
+			if float(enemy["behavior_timer"]) >= cooldown_dur:
 				enemy["behavior_state"] = "idle"
 				enemy["behavior_timer"] = 0.0
 	return String(enemy["behavior_state"])
 
 
-static func tank_tick(enemy: Dictionary, player_pos: Vector3, delta: float, on_telegraph: Callable) -> String:
+static func tank_tick(enemy: Dictionary, player_pos: Vector3, delta: float, on_telegraph: Callable, phase_level: int = 1) -> String:
 	enemy["behavior_timer"] = float(enemy.get("behavior_timer", 0.0)) + delta
 	var pos: Vector3 = enemy["node"].position
 	var flat_player := Vector3(player_pos.x, pos.y, player_pos.z)
 	var dist: float = pos.distance_to(flat_player)
 	var state := String(enemy.get("behavior_state", "advance"))
+	var prep_dur: float = maxf(TANK_PREP_DURATION - float(phase_level - 1) * 0.08, 0.2)
+	var slam_mult: float = TANK_SLAM_DAMAGE_MULT + float(phase_level - 1) * 0.3
 	if state != "slam":
 		enemy["slam_damage_mult"] = 1.0
 	match state:
@@ -73,13 +78,13 @@ static func tank_tick(enemy: Dictionary, player_pos: Vector3, delta: float, on_t
 				enemy["behavior_state"] = "prep_slam"
 				enemy["behavior_timer"] = 0.0
 		"prep_slam":
-			if float(enemy["behavior_timer"]) >= TANK_PREP_DURATION:
+			if float(enemy["behavior_timer"]) >= prep_dur:
 				if on_telegraph.is_valid():
 					on_telegraph.call(String(enemy.get("id", "tank")), pos)
 				enemy["behavior_state"] = "slam"
 				enemy["behavior_timer"] = 0.0
 		"slam":
-			enemy["slam_damage_mult"] = TANK_SLAM_DAMAGE_MULT
+			enemy["slam_damage_mult"] = slam_mult
 			if float(enemy["behavior_timer"]) >= TANK_SLAM_DURATION:
 				enemy["behavior_state"] = "stagger"
 				enemy["behavior_timer"] = 0.0
