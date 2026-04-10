@@ -70,14 +70,14 @@ func test_combo_tier_colors_distinct() -> void:
 
 func test_threat_indicator_hidden_when_boss_close() -> void:
 	var state: Dictionary = THREAT.build(_make_control())
-	THREAT.update(state, Vector3.ZERO, Vector3.ZERO, Vector2(800, 600), "red")
+	THREAT.update(state, Vector3.ZERO, Vector3.ZERO, "red")
 	var data: Dictionary = (state["canvas"] as Control).get_meta("indicator_state")
 	assert_bool(bool(data["visible"])).is_false()
 
 
 func test_threat_indicator_visible_when_boss_far() -> void:
 	var state: Dictionary = THREAT.build(_make_control())
-	THREAT.update(state, Vector3(30, 0, 30), Vector3.ZERO, Vector2(800, 600), "red")
+	THREAT.update(state, Vector3(30, 0, 30), Vector3.ZERO, "red")
 	var data: Dictionary = (state["canvas"] as Control).get_meta("indicator_state")
 	assert_bool(bool(data["visible"])).is_true()
 
