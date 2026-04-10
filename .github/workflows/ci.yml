@@ -7,8 +7,10 @@ jobs:
   test:
     name: Godot Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout
+      - uses: actions/checkout@v4
         with:
           lfs: true  # GLB and audio assets tracked via Git LFS
 
@@ -56,8 +58,10 @@ jobs:
   smoke:
     name: Smoke Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout
+      - uses: actions/checkout@v4
         with:
           lfs: true  # GLB and audio assets tracked via Git LFS
 
