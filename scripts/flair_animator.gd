@@ -68,15 +68,22 @@ func _tick_color_shift(entry: Dictionary) -> void:
 	var mesh_inst := entry["target"] as MeshInstance3D
 	if mesh_inst == null:
 		return
-	var std := mesh_inst.material_override as StandardMaterial3D
+	# Duplicate on first use so we never mutate a shared material instance.
+	var std: StandardMaterial3D = entry.get("_mat")
 	if std == null:
-		return
+		var orig := mesh_inst.material_override as StandardMaterial3D
+		if orig == null:
+			return
+		std = orig.duplicate() as StandardMaterial3D
+		mesh_inst.material_override = std
+		entry["_mat"] = std
 	var params: Dictionary = entry["params"]
 	var hue_speed: float = float(params.get("hue_speed", 0.3))
 	var saturation: float = float(params.get("saturation", 0.8))
 	var t: float = fmod(float(entry["time"]) * hue_speed, 1.0)
 	var shifted := Color.from_hsv(t, saturation, 1.0)
 	std.albedo_color = shifted
+	std.emission_enabled = true
 	std.emission = shifted
 
 
@@ -87,27 +94,34 @@ func _tick_trailing_sparks(entry: Dictionary, delta: float) -> void:
 	entry["spark_accumulator"] = float(entry["spark_accumulator"]) + delta
 	if float(entry["spark_accumulator"]) < 0.15:
 		return
-	entry["spark_accumulator"] = 0.0
+	# Subtract threshold to preserve fractional remainder instead of hard-zeroing.
+	entry["spark_accumulator"] = float(entry["spark_accumulator"]) - 0.15
 	var params: Dictionary = entry["params"]
 	var count: int = int(params.get("count", 1))
 	var color := Color(String(params.get("color", "#ff8822")))
 	var parent: Node = target.get_parent()
 	if parent == null:
 		return
+	# Lazy-init shared mesh + material once per entry to avoid per-spawn GC churn.
+	var shared_sphere: SphereMesh = entry.get("_spark_mesh")
+	var shared_mat: StandardMaterial3D = entry.get("_spark_mat")
+	if shared_sphere == null:
+		shared_sphere = SphereMesh.new()
+		shared_sphere.radius = 0.05
+		shared_sphere.height = 0.1
+		entry["_spark_mesh"] = shared_sphere
+		shared_mat = StandardMaterial3D.new()
+		shared_mat.albedo_color = color
+		shared_mat.emission_enabled = true
+		shared_mat.emission = color
+		shared_mat.emission_energy_multiplier = 2.0
+		entry["_spark_mat"] = shared_mat
 	for i in range(count):
 		var spark := MeshInstance3D.new()
-		var sphere := SphereMesh.new()
-		sphere.radius = 0.05
-		sphere.height = 0.1
-		spark.mesh = sphere
+		spark.mesh = shared_sphere
 		spark.position = target.position + Vector3(
 			_spark_rng.randf_range(-0.2, 0.2), 0.3, _spark_rng.randf_range(-0.2, 0.2))
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = color
-		mat.emission_enabled = true
-		mat.emission = color
-		mat.emission_energy_multiplier = 2.0
-		spark.material_override = mat
+		spark.material_override = shared_mat
 		parent.add_child(spark)
 		_fade_out(spark, SPARK_LIFE)
 
@@ -115,4 +129,4 @@ func _tick_trailing_sparks(entry: Dictionary, delta: float) -> void:
 func _fade_out(node: Node3D, duration: float) -> void:
 	var tween := node.create_tween()
 	tween.tween_property(node, "scale", Vector3.ZERO, duration)
-	tween.tween_callback(node.queue_free)
+	tween.tween_callback(func() -> void: if is_instance_valid(node): node.queue_free())
