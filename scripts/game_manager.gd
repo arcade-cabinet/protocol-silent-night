@@ -185,7 +185,7 @@ func on_boss_killed() -> void:
 func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
 func gain_cookies(amt: int) -> void: main.run_cookies += amt
 func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
-func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
+func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config, int(main.current_wave.get("enemy_phase_level", 1)), float(main.current_wave.get("speed_mult", 1.0)), float(main.current_wave.get("damage_scale", 1.0)))
 func _on_boss_phase_changed(_phase: int) -> void: MAIN_HELPERS.boss_phase_sting(main)
 func _enemy_telegraph(etype: String, pos: Vector3) -> void: MAIN_HELPERS.enemy_telegraph(main, etype, pos)
 func clear_runtime() -> void: RUNTIME_CLEANER.clear(main)

@@ -185,6 +185,24 @@ func test_krampus_circle_strafe_dir_has_tangential_component() -> void:
 	assert_float(absf(dir.z)).is_greater(0.5)
 
 
+func test_spawn_enemy_applies_speed_mult() -> void:
+	# Verify speed_mult from wave params is baked into the spawned enemy dict.
+	var mat := preload("res://scripts/material_factory.gd").new()
+	var pix := preload("res://scripts/pixel_art_renderer.gd").new()
+	var director := preload("res://scripts/enemy_director.gd").new(mat, pix)
+	var config := {"arena_radius": 12.0}
+	var enemy_defs := preload("res://scripts/enemy_director.gd").new(mat, pix)
+	# Use grunt def directly from declarations
+	var defs := {"grunt": {"max_hp": 24.0, "speed": 3.4, "contact_damage": 9.0, "scale": 0.75, "drop_xp": 1, "drop_cookies": 0, "color": "#ffffff"}}
+	var root := auto_free(Node3D.new())
+	add_child(root)
+	var enemies: Array = []
+	director.spawn_enemy(root, enemies, "grunt", 1.0, defs, config, 1, 2.0, 1.5)
+	assert_int(enemies.size()).is_equal(1)
+	assert_float(float(enemies[0]["speed"])).is_equal_approx(3.4 * 2.0, 0.01)
+	assert_float(float(enemies[0]["contact_damage"])).is_equal_approx(9.0 * 1.5, 0.01)
+
+
 func test_krampus_charge_tick_fires_after_interval() -> void:
 	var boss_ref: Dictionary = {}
 	var interval := 2.0
