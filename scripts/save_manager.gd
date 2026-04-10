@@ -128,7 +128,14 @@ func spend_cookies(amount: int) -> bool:
 
 func get_coal() -> Array:
 	var raw: Variant = state.get("coal", [])
-	return raw.duplicate() if raw is Array else []
+	if not raw is Array:
+		return []
+	# Filter to only valid entries (String or Dictionary) to prevent crashes from tampered saves.
+	var result: Array = []
+	for item in raw:
+		if item is String or item is Dictionary:
+			result.append(item)
+	return result
 
 
 func set_coal(queue: Array) -> void:
@@ -148,7 +155,14 @@ func set_equipped_gear(equipped: Dictionary) -> void:
 
 func get_gear_inventory() -> Array:
 	var raw: Variant = state.get("gear_inventory", [])
-	return raw.duplicate(true) if raw is Array else []
+	if not raw is Array:
+		return []
+	# Filter to only Dictionary entries; tampered saves with wrong types crash gear_system.
+	var result: Array = []
+	for item in raw:
+		if item is Dictionary and item.has("id") and item.has("slot"):
+			result.append(item)
+	return result
 
 
 func add_to_gear_inventory(item: Dictionary) -> void:
