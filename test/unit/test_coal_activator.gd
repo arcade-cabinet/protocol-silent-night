@@ -106,3 +106,26 @@ func test_string_entry_supported_for_queue() -> void:
 	act.activate(m, 0)
 	assert_int(m.coal_queue.size()).is_equal(1)
 	assert_str(String(m.coal_queue[0])).is_equal("spray")
+
+
+func test_aoe_surviving_enemy_hp_persists_in_array() -> void:
+	# Regression: enemies with hp > 0 after AOE must have mutation written back
+	# to main.enemies[i] so subsequent frames see the reduced HP.
+	var m := _make_main_with_player()
+	m.coal_queue = ["spray"]
+	m.enemies = [_make_enemy(Vector3(1.0, 0.0, 0.0), 1000.0)]
+	var act: RefCounted = ACTIVATOR.new()
+	act.activate(m, 0)
+	assert_float(float(m.enemies[0]["hp"])).is_less(1000.0)
+	assert_int(m.killed_indices.size()).is_equal(0)
+
+
+func test_single_target_surviving_enemy_hp_persists_in_array() -> void:
+	# Regression: _damage_closest must write back surviving enemy hp.
+	var m := _make_main_with_player()
+	m.coal_queue = ["hurl"]
+	m.enemies = [_make_enemy(Vector3(2.0, 0.0, 0.0), 1000.0)]
+	var act: RefCounted = ACTIVATOR.new()
+	act.activate(m, 0)
+	assert_float(float(m.enemies[0]["hp"])).is_less(1000.0)
+	assert_int(m.killed_indices.size()).is_equal(0)

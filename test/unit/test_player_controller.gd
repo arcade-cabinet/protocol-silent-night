@@ -125,3 +125,26 @@ func test_read_move_input_applies_dead_zone_to_still_stick() -> void:
 	var move: Vector2 = ctrl.read_move_input(Vector2.ZERO, false)
 	# Keyboard is not pressed in headless; joy axes return 0.0 — result is zero.
 	assert_float(move.length()).is_less_equal(0.15)
+
+
+func test_update_player_aura_calls_on_boss_killed_when_boss_dies() -> void:
+	# Regression: aura hitting boss to 0 HP must call on_boss_killed.
+	# aura_damage = 7.0 * aura_level=1 * damage_scale=1.0 = 7.0
+	# boss receives 7.0 * 0.45 = 3.15 — boss_ref.hp=1.0 drops to ≤0.
+	var ctrl: RefCounted = _make_ctrl()
+	var player_node: Node3D = auto_free(Node3D.new())
+	player_node.position = Vector3.ZERO
+	add_child(player_node)
+	var boss_node: Node3D = auto_free(Node3D.new())
+	boss_node.position = Vector3(0.5, 0.0, 0.0)
+	add_child(boss_node)
+	var boss_bar: ProgressBar = auto_free(ProgressBar.new())
+	add_child(boss_bar)
+	boss_bar.max_value = 100.0; boss_bar.value = 1.0
+	var boss_ref: Dictionary = {"node": boss_node, "hp": 1.0}
+	var player_state: Dictionary = {"aura_level": 1, "aura_timer": 0.55}
+	var killed: Array = [false]
+	var on_boss_killed := func() -> void: killed[0] = true
+	ctrl.update_player_aura(0.016, player_state, player_node, [], boss_ref, 1.0,
+		Callable(), Callable(), boss_bar, Callable(), on_boss_killed)
+	assert_bool(killed[0]).is_true()

@@ -70,6 +70,8 @@ func _damage_enemies_in_radius(main: Node, dmg: float, radius: float) -> void:
 			enemy["hp"] = float(enemy.get("hp", 0.0)) - dmg
 			if float(enemy["hp"]) <= 0.0:
 				main._kill_enemy(i)
+			else:
+				main.enemies[i] = enemy
 
 
 func _damage_closest(main: Node, dmg: float) -> void:
@@ -88,3 +90,5 @@ func _damage_closest(main: Node, dmg: float) -> void:
 		enemy["hp"] = float(enemy.get("hp", 0.0)) - dmg
 		if float(enemy["hp"]) <= 0.0:
 			main._kill_enemy(best_idx)
+		else:
+			main.enemies[best_idx] = enemy
