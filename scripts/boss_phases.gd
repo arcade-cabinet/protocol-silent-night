@@ -75,7 +75,7 @@ func update_boss(delta: float, boss_ref: Dictionary, player_node: Node3D,
 		_update_aoe(delta, boss_ref, player_node, on_damage_player, fx_root)
 	if phase >= 3:
 		_update_summons(delta, boss_ref, on_spawn_enemy)
-	_update_telegraphs(delta, fx_root)
+	_update_telegraphs(delta, fx_root, player_node)
 
 
 func _on_phase_change(new_phase: int, boss_ref: Dictionary, on_msg: Callable) -> void:
@@ -109,12 +109,15 @@ func _update_summons(delta: float, _boss_ref: Dictionary, on_spawn_enemy: Callab
 		on_spawn_enemy.call()
 
 
-func _update_telegraphs(delta: float, _fx_root: Node3D) -> void:
+func _update_telegraphs(delta: float, _fx_root: Node3D, player_node: Node3D) -> void:
 	for i in range(aoe_telegraphs.size() - 1, -1, -1):
 		var t: Dictionary = aoe_telegraphs[i]
 		t["life"] -= delta
 		if t["life"] <= 0.0:
-			t["on_damage"].call(float(t["damage"]))
+			var in_aoe := is_instance_valid(player_node) and \
+				player_node.position.distance_to(t["position"]) <= float(t["radius"])
+			if in_aoe:
+				t["on_damage"].call(float(t["damage"]))
 			t["node"].queue_free()
 			aoe_telegraphs.remove_at(i)
 		else:
