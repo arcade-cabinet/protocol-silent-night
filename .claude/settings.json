@@ -37,6 +37,17 @@
             "statusMessage": "Checking LOC limit..."
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -qE 'git commit'; then cd /Users/jbogaty/src/arcade-cabinet/protocol-silent-night && timeout 90 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode > /tmp/ps_night_test.log 2>&1; if [ $? -eq 0 ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"All tests passed.\"},\"continue\":true}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests FAILED — fix before committing. See /tmp/ps_night_test.log\"}'; fi; fi; }",
+            "timeout": 100,
+            "statusMessage": "Running test gate before commit..."
+          }
+        ]
       }
     ],
     "PreCompact": [
@@ -60,17 +71,6 @@
             "command": "jq -r '.tool_input.file_path // .tool_response.filePath' | { read -r f; if [ -z \"$f\" ] || [ \"$f\" = \"null\" ]; then exit 0; fi; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 200 ]; then echo \"{\\\"systemMessage\\\":\\\"LOC VIOLATION: $f is $lines lines, exceeding the 200 LOC limit. Decompose this file before committing.\\\"}\" ; fi; elif [[ \"$f\" == *.tscn ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_scene'; then echo '{\"systemMessage\":\"WARNING: .tscn file missing [gd_scene] header\"}'; fi; elif [[ \"$f\" == *.tres ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_resource'; then echo '{\"systemMessage\":\"WARNING: .tres file missing [gd_resource] header\"}'; fi; elif [[ \"$f\" == declarations/*.json ]] || [[ \"$f\" == *declarations*/*.json ]]; then if ! python3 -c \"import json; json.load(open('$f'))\" 2>/dev/null; then echo '{\"systemMessage\":\"JSON PARSE ERROR: declarations file is not valid JSON\"}'; fi; fi; }",
             "timeout": 5,
             "statusMessage": "Validating file constraints..."
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -q 'git commit'; then cd /Users/jbogaty/src/arcade-cabinet/protocol-silent-night && timeout 60 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode > /tmp/ps_night_test.log 2>&1; if [ $? -eq 0 ]; then echo '{\"systemMessage\":\"All tests passed\"}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests failed — see /tmp/ps_night_test.log\"}'; fi; fi; }",
-            "timeout": 90,
-            "statusMessage": "Running tests before commit..."
           }
         ]
       }

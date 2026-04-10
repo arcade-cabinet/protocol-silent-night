@@ -1,5 +1,27 @@
 # Protocol: Silent Night — Godot 4.6 Holidaypunk Roguelike Arena
 
+## SELF-DIRECTED STARTUP — DO THIS FIRST, ALWAYS
+
+There are no sessions. Work is continuous. On every startup, before anything else:
+
+```bash
+git log --oneline -5          # where am I in history?
+git status --short            # any uncommitted work?
+cat .claude/plans/game-completion.prq.md   # what plan is active?
+# Check batch state if it exists:
+ls .claude/state/task-batch/ 2>/dev/null
+```
+
+Then determine the next task from the active plan and **start it immediately**. Do not wait for user instruction. Idle = failure of setup. If blocked: launch background specialist agents and continue other work.
+
+**Current active plan:** `.claude/plans/game-completion.prq.md`
+- P1 remaining: `grunt-behavior-tree`, `rusher-behavior-tree`, `tank-behavior-tree`, `krampus-prime-behavior-tree`
+- P2 remaining: `e2e-full-flow`, `waves-json-retirement`
+- P3 remaining: 4 documentation tasks
+
+**Unlock keys match save_manager schema:** `"santa"` and `"bumble"` (not `"enemy_santa"`/`"enemy_bumble"`).
+**Component tests use `"holly_striker"`** as the test present ID (not `"elf"` — classes.json deleted).
+
 ## READ THIS FIRST
 
 **Design docs live in `docs/`.** Before writing ANY gameplay code, read the relevant doc:
