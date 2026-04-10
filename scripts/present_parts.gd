@@ -8,6 +8,8 @@ class_name PresentParts
 ## anatomy in the right place instead of against fixed box dimensions.
 
 const FACE_RENDERER := preload("res://scripts/present_face_renderer.gd")
+const TOPPER_MESHES := preload("res://scripts/present_topper_meshes.gd")
+const ACCESSORY_MESHES := preload("res://scripts/present_accessory_meshes.gd")
 static var _face_renderer: RefCounted
 
 
@@ -98,7 +100,7 @@ static func attach_topper(root: Node3D, def: Dictionary, topper_pos: Vector3) ->
 	if kind == "none":
 		return
 	var tint := Color(String(def.get("bow_color", "#ffd700")))
-	var topper: Node3D = preload("res://scripts/present_topper_meshes.gd").build(kind, tint)
+	var topper: Node3D = TOPPER_MESHES.build(kind, tint)
 	topper.position = topper_pos
 	root.add_child(topper)
 
@@ -107,7 +109,7 @@ static func attach_accessory(root: Node3D, def: Dictionary, w: float, h: float, 
 	var kind: String = String(def.get("accessory", "none"))
 	if kind == "none":
 		return
-	var node: Node3D = preload("res://scripts/present_accessory_meshes.gd").build(kind, def, w, h, d)
+	var node: Node3D = ACCESSORY_MESHES.build(kind, def, w, h, d)
 	root.add_child(node)
 
 
