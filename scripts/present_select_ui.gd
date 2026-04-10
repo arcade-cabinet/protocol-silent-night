@@ -50,6 +50,17 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 					_update_preview(captured_id, captured_def, captured_canvas)
 			)
 		classes_box.add_child(button)
+	# Pre-select the last-used present so gamepad/keyboard nav starts there.
+	var last_id: String = ""
+	if save_manager != null:
+		last_id = String(save_manager.get_preference("last_present", ""))
+	if not last_id.is_empty():
+		for child in classes_box.get_children():
+			if child is Button and String(child.get_meta("class_id", "")) == last_id and not child.disabled:
+				child.grab_focus()
+				if radar_canvas != null:
+					_update_preview(last_id, present_defs.get(last_id, {}), radar_canvas)
+				break
 
 
 static func is_present_unlocked(def: Dictionary, best_wave: int, save_manager: Node = null) -> bool:

@@ -44,6 +44,9 @@ static func on_class_button_pressed(main: Node, button: Button) -> void:
 		main.ui_mgr.start_screen.visible = false
 		main.ui_mgr.difficulty_panel.visible = true
 	else:
+		var sm: Node = main._save_manager()
+		if sm != null:
+			sm.set_preference("last_present", main.current_class_id)
 		main.start_run(main.current_class_id)
 
 
@@ -56,6 +59,7 @@ static func on_difficulty_selected(main: Node, tier: int, permadeath_flag: bool)
 	if sm != null:
 		sm.set_preference("difficulty_tier", main.difficulty_tier)
 		sm.set_preference("permadeath", main.permadeath)
+		sm.set_preference("last_present", main.current_class_id)
 	main.start_run(main.current_class_id)
 
 
