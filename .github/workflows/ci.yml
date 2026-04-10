@@ -31,7 +31,7 @@ jobs:
             --add "res://test/unit/" \
             --add "res://test/component/" \
             --ignoreHeadlessMode \
-            --continue-on-failure
+            --continue
         timeout-minutes: 10
 
       - name: LOC compliance check
