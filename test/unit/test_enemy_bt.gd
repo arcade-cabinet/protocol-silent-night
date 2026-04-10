@@ -117,6 +117,19 @@ func test_tank_enters_prep_slam_when_close() -> void:
 	assert_str(state).is_equal("prep_slam")
 
 
+func test_tank_telegraph_fires_on_prep_slam_expiry() -> void:
+	var enemy := _make_enemy("tank", Vector3(0, 0, 0))
+	enemy["behavior_state"] = "prep_slam"
+	var player_pos := Vector3(3.0, 0.0, 0.0)
+	var telegraphs: Array = []
+	var tcb := func(id: String, pos: Vector3) -> void: telegraphs.append(id)
+	# Advance past TANK_PREP_DURATION (0.5s)
+	var state := EnemyBTStates.tank_tick(enemy, player_pos, 0.6, Callable(tcb, "call"))
+	assert_str(state).is_equal("slam")
+	assert_int(telegraphs.size()).is_equal(1)
+	assert_str(telegraphs[0]).is_equal("tank")
+
+
 # --- Krampus HSM ---
 
 func test_krampus_hsm_phase_dispatch() -> void:
