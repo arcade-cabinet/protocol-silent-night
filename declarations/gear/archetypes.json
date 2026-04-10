@@ -1,35 +1,110 @@
 {
   "weapon_mod": [
-    {"name": "Candy Cane Barrel", "flavor": "Peppermint-powered precision"},
-    {"name": "Snowball Launcher", "flavor": "Compact ice delivery"},
-    {"name": "Jingle Bell Cannon", "flavor": "Rings every shot"},
-    {"name": "Sugar Plum Splitter", "flavor": "Sweet scatter rounds"},
-    {"name": "Gingerbread Rifle", "flavor": "Baked to fire"},
-    {"name": "Eggnog Mortar", "flavor": "Creamy boom"},
-    {"name": "Fruitcake Fang", "flavor": "Dense and deadly"}
+    {
+      "name": "Candy Cane Barrel",
+      "flavor": "Peppermint-powered precision"
+    },
+    {
+      "name": "Snowball Launcher",
+      "flavor": "Compact ice delivery"
+    },
+    {
+      "name": "Jingle Bell Cannon",
+      "flavor": "Rings every shot"
+    },
+    {
+      "name": "Sugar Plum Splitter",
+      "flavor": "Sweet scatter rounds"
+    },
+    {
+      "name": "Gingerbread Rifle",
+      "flavor": "Baked to fire"
+    },
+    {
+      "name": "Eggnog Mortar",
+      "flavor": "Creamy boom"
+    },
+    {
+      "name": "Fruitcake Fang",
+      "flavor": "Dense and deadly"
+    }
   ],
   "wrapping_upgrade": [
-    {"name": "Reinforced Paper", "flavor": "Thick and durable"},
-    {"name": "Frost-Laminated Foil", "flavor": "Cold protection"},
-    {"name": "Holly Layer", "flavor": "Nature's armor"},
-    {"name": "Tinsel Mesh", "flavor": "Shimmering ward"},
-    {"name": "Velvet Wrap", "flavor": "Plush defense"},
-    {"name": "Candy Shell", "flavor": "Sweet hide"}
+    {
+      "name": "Reinforced Paper",
+      "flavor": "Thick and durable"
+    },
+    {
+      "name": "Frost-Laminated Foil",
+      "flavor": "Cold protection"
+    },
+    {
+      "name": "Holly Layer",
+      "flavor": "Nature's armor"
+    },
+    {
+      "name": "Tinsel Mesh",
+      "flavor": "Shimmering ward"
+    },
+    {
+      "name": "Velvet Wrap",
+      "flavor": "Plush defense"
+    },
+    {
+      "name": "Candy Shell",
+      "flavor": "Sweet hide"
+    }
   ],
   "bow_accessory": [
-    {"name": "Jingle Bell", "flavor": "Rings on hit"},
-    {"name": "Mistletoe Sprig", "flavor": "Lucky charm"},
-    {"name": "Silver Star", "flavor": "Guiding light"},
-    {"name": "Tiny Ornament", "flavor": "Decorative boost"},
-    {"name": "Peppermint Pin", "flavor": "Sharp edge"},
-    {"name": "Sugar Crystal", "flavor": "Refracts attacks"}
+    {
+      "name": "Jingle Bell",
+      "flavor": "Rings on hit"
+    },
+    {
+      "name": "Mistletoe Sprig",
+      "flavor": "Lucky charm"
+    },
+    {
+      "name": "Silver Star",
+      "flavor": "Guiding light"
+    },
+    {
+      "name": "Tiny Ornament",
+      "flavor": "Decorative boost"
+    },
+    {
+      "name": "Peppermint Pin",
+      "flavor": "Sharp edge"
+    },
+    {
+      "name": "Sugar Crystal",
+      "flavor": "Refracts attacks"
+    }
   ],
   "tag_charm": [
-    {"name": "Lucky Star", "flavor": "Shines bright"},
-    {"name": "Name Tag of Fortune", "flavor": "To: You, From: Luck"},
-    {"name": "Gift Receipt", "flavor": "Valid forever"},
-    {"name": "Hand-Written Note", "flavor": "With love"},
-    {"name": "Wish List Scrap", "flavor": "Dreams written"},
-    {"name": "Return Address", "flavor": "Senders blessing"}
+    {
+      "name": "Lucky Star",
+      "flavor": "Shines bright"
+    },
+    {
+      "name": "Name Tag of Fortune",
+      "flavor": "To: You, From: Luck"
+    },
+    {
+      "name": "Gift Receipt",
+      "flavor": "Non-refundable. Non-negotiable."
+    },
+    {
+      "name": "Hand-Written Note",
+      "flavor": "Threats in festive ink."
+    },
+    {
+      "name": "Wish List Scrap",
+      "flavor": "Santa knows. Santa remembers."
+    },
+    {
+      "name": "Return Address",
+      "flavor": "Senders blessing"
+    }
   ]
 }
