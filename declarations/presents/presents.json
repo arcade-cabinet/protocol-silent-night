@@ -37,7 +37,7 @@
   "frostbite": {
     "id": "frostbite",
     "name": "Frostbite",
-    "tagline": "Cold precision",
+    "tagline": "Precision carved from a dead winter.",
     "base_color": "#1a6699",
     "pattern_color": "#e8f4ff",
     "pattern_type": 5,
@@ -72,7 +72,7 @@
   "tangerine_terror": {
     "id": "tangerine_terror",
     "name": "Tangerine Terror",
-    "tagline": "Citrus strike",
+    "tagline": "Wrapped in spite, zested to kill.",
     "base_color": "#ff7722",
     "pattern_color": "#ffcc44",
     "pattern_type": 2,
@@ -457,7 +457,7 @@
   "garland_guardian": {
     "id": "garland_guardian",
     "name": "Garland Guardian",
-    "tagline": "Woven protection",
+    "tagline": "Strung up. Strung out. Strung tight.",
     "base_color": "#1a6622",
     "pattern_color": "#ffdd44",
     "pattern_type": 4,
