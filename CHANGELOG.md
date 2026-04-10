@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Post-batch polish (codex/production-polish → integration/production-polish)
+
+- **Tests — save_manager coverage**: `test_register_level_reached_tracks_best_level` (verifies `maxi` monotonic guard + disk persistence) and `test_merge_dict_rejects_unknown_top_level_keys` (tampered save with injected root key is silently dropped) added to `test_save_manager.gd`
+- **Tests — board_builder coverage**: New `test/unit/test_board_builder.gd` (5 tests) — foundation adds 6 nodes (outer field + arena surface + 4 border walls); drifts adds 1 node per drift entry; empty board adds nothing; outer ridge adds exactly 24 chunks (4 segments × 6 steps); ridge is seeded-deterministic
+- **Security — save injection guard**: `_merge_dict` `top_level` allowlist blocks schema-unknown root keys from tampered save files while leaving nested gear slot keys unrestricted
+- **Accessibility — coal button HIG**: Coal sidebar buttons `custom_minimum_size` raised from `40px` to `60×48px` (meets 44pt iOS HIG and 48dp Material minimum)
+- **Accessibility — reduced_motion**: `particle_effects.gd` wired into `apply_reduced_motion` pipeline (`configure(reduced)` + `spawn_death_burst` gated); pause button shown/hidden correctly in `show_gameplay_ui`
+- **Performance — spark pool**: `flair_animator.gd` pools `MeshInstance3D` sparks (cap 32) with `reparent(parent, false)` for cross-parent reuse; eliminates per-spark allocation on every player movement frame
+- **Performance — shadow mesh dedup**: `enemy_director.gd` lazy-inits one `PlaneMesh` per type (enemy + boss); was allocating a new mesh per spawn (up to 49 allocations per wave)
+- **Balance — XP curve cap**: `progression_manager.gd` caps `xp_needed` at 500; prevents `1.45^N` XP wall from stalling upgrade flow at late levels
+- **Persistence — level tracking**: `save_manager.gd:register_level_reached` + `game_manager.gd` call site; `best_level` now persists across sessions alongside `best_wave`
+- **Release — APK artifact**: `release.yml` changed from `--export-debug` to `--export-release` for production-optimized APK builds
+
 ### Integration audit — 8-specialist pass (integration/production-polish)
 
 - **Balance — speed scaling**: `speed_mult` now superlinear via `pow(lf/10+1, 1.3)` — enemies outrun the player at level 20+ as intended ("death is the game")
