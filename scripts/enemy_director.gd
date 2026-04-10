@@ -17,8 +17,11 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 
 const MAX_ENEMY_CAP := 48  # Mobile performance ceiling
 
-func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1) -> void:
+func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1, override_position: Vector3 = Vector3.INF) -> void:
 	if enemies.size() >= MAX_ENEMY_CAP:
+		return
+	if not enemy_defs.has(enemy_type):
+		push_error("spawn_enemy: unknown type '%s'" % enemy_type)
 		return
 	var def: Dictionary = enemy_defs[enemy_type]
 	var enemy_node := Node3D.new()
@@ -34,13 +37,16 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
 	actor_root.add_child(enemy_node)
-	var ar := float(config["arena_radius"])
-	var half_w := ar * 1.6 - 2.0
-	var half_h := ar - 2.0
-	var side := randi() % 4
-	var spawn_x := randf_range(-half_w, half_w) if side < 2 else (half_w if side == 2 else -half_w)
-	var spawn_z := (half_h if side == 0 else -half_h) if side < 2 else randf_range(-half_h, half_h)
-	enemy_node.position = Vector3(spawn_x, 0.58, spawn_z)
+	if override_position != Vector3.INF:
+		enemy_node.position = override_position
+	else:
+		var ar := float(config["arena_radius"])
+		var half_w := ar * 1.6 - 2.0
+		var half_h := ar - 2.0
+		var side := randi() % 4
+		var spawn_x := randf_range(-half_w, half_w) if side < 2 else (half_w if side == 2 else -half_w)
+		var spawn_z := (half_h if side == 0 else -half_h) if side < 2 else randf_range(-half_h, half_h)
+		enemy_node.position = Vector3(spawn_x, 0.58, spawn_z)
 	var scale_value := float(def["scale"])
 	enemy_node.scale = Vector3.ONE * scale_value
 	_uid_counter += 1
