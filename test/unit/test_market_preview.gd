@@ -71,6 +71,20 @@ func test_market_card_has_preview_name_and_buy_button() -> void:
 	assert_int(row.get_child_count()).is_equal(1)
 	var card: Control = row.get_child(0) as Control
 	assert_object(card).is_not_null()
+	# Walk card's descendant tree for a Label containing the item name and a Button.
+	var found_name := false
+	var found_button := false
+	var stack: Array = [card]
+	while stack.size() > 0:
+		var node: Node = stack.pop_back()
+		if node is Label and (node as Label).text.contains("weapon_mod"):
+			found_name = true
+		if node is Button:
+			found_button = true
+		for child in node.get_children():
+			stack.append(child)
+	assert_bool(found_name).is_true()
+	assert_bool(found_button).is_true()
 
 
 func test_preview_with_empty_flair_still_succeeds() -> void:

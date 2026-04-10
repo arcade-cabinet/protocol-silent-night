@@ -1,8 +1,9 @@
 extends RefCounted
 
 ## Renders flair pieces attached to equipped gear items.
-## Each flair type from GearSystem.VALID_FLAIR_TYPES maps to a small
-## procedural mesh composition built from primitives.
+## Handles: orbiting_particle, pulsing_glow, frost_crystals, ember_glow,
+## sparkle_burst, halo_ring, floating_icon, dripping_icicles,
+## wobble_animation, color_shift, trailing_sparks. Unknown types are ignored.
 
 
 static func attach_flair(visual: Node3D, flair_list: Array, y_start: float = 1.75, animator: Node = null) -> float:

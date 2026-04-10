@@ -6,6 +6,7 @@ extends Node
 ## every frame. Entries whose targets have been freed are pruned.
 
 const SPARK_LIFE := 0.45
+const SPARK_INTERVAL := 0.15
 
 var _entries: Array = []
 var _spark_rng := RandomNumberGenerator.new()
@@ -92,10 +93,10 @@ func _tick_trailing_sparks(entry: Dictionary, delta: float) -> void:
 	if target == null:
 		return
 	entry["spark_accumulator"] = float(entry["spark_accumulator"]) + delta
-	if float(entry["spark_accumulator"]) < 0.15:
+	if float(entry["spark_accumulator"]) < SPARK_INTERVAL:
 		return
 	# Subtract threshold to preserve fractional remainder instead of hard-zeroing.
-	entry["spark_accumulator"] = float(entry["spark_accumulator"]) - 0.15
+	entry["spark_accumulator"] = float(entry["spark_accumulator"]) - SPARK_INTERVAL
 	var params: Dictionary = entry["params"]
 	var count: int = int(params.get("count", 1))
 	var color := Color(String(params.get("color", "#ff8822")))

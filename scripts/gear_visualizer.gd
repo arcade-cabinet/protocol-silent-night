@@ -1,8 +1,9 @@
 extends RefCounted
 
 ## Attaches visual representations of equipped gear + flair to a present
-## visual root. Pure compositional: walks gear_system.get_all_equipped()
-## and builds meshes per slot + per flair piece. Called once at spawn.
+## visual root. Pure compositional: reads gear_system.equipped (via
+## gear_system.get("equipped")) and builds meshes per slot + per flair
+## piece. Called once at spawn.
 
 const FLAIR_VIZ := preload("res://scripts/gear_flair_visualizer.gd")
 

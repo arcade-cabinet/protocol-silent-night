@@ -120,7 +120,7 @@ func _run() -> void:
 		_main.between_match.scroll_state["panel"].visible = false
 
 		# Market screen with 3D gear previews
-		var MARKET_SCREEN := load("res://scripts/market_screen.gd")
+		var market_screen := load("res://scripts/market_screen.gd")
 		var demo_items := [
 			{"id": "m1", "name": "Frozen Candy Barrel", "slot": "weapon_mod", "rarity": 3,
 			 "stats": {"damage_mult": 0.12}, "flair": [{"type": "frost_crystals", "count": 3, "color": "#ccf0ff"}],
@@ -132,7 +132,7 @@ func _run() -> void:
 			 "stats": {"cookie_bonus": 0.1}, "flair": [{"type": "orbiting_particle", "count": 2, "radius": 0.5, "color": "#88ddff"}],
 			 "flavor": "Lucky charm", "color": "#55ff88"},
 		]
-		MARKET_SCREEN.refresh_market(_main.between_match.market_state, demo_items, 500)
+		market_screen.refresh_market(_main.between_match.market_state, demo_items, 500)
 		_main.between_match.market_state["panel"].visible = true
 		await process_frame
 		await process_frame
