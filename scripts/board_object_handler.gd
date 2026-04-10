@@ -39,6 +39,8 @@ func update_board_objects(projectiles: Array, board_objects: Array,
 				if int(proj["pierce"]) <= 0:
 					proj["node"].queue_free()
 					projectiles.remove_at(proj_idx)
+				else:
+					projectiles[proj_idx] = proj
 				break
 		var hp_bar: MeshInstance3D = obj.get("hp_bar") as MeshInstance3D
 		if hp_bar != null and hp_bar.is_inside_tree():
