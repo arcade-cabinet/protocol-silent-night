@@ -35,13 +35,19 @@ void fragment() {
 	float gz = smoothstep(0.95, 1.0, fract((world_pos.z + half_h) * grid_scale));
 	vec3 color = base_color.rgb;
 	color -= grid_color.rgb * (gx + gz) * grid_strength;
+	// Radial zone tinting: snow (inner) → ice (mid) → asphalt (outer perimeter)
+	float r = length(world_pos.xz) / arena_radius;
+	float ice_t = smoothstep(0.32, 0.60, r);
+	float asphalt_t = smoothstep(0.68, 0.88, r);
+	color = mix(color, vec3(0.68, 0.90, 0.98), ice_t * 0.22);
+	color = mix(color, vec3(0.16, 0.22, 0.28), asphalt_t * 0.38);
 	float edge_x = smoothstep(half_w - 1.5, half_w, abs(world_pos.x));
 	float edge_z = smoothstep(half_h - 1.5, half_h, abs(world_pos.z));
 	float edge = max(edge_x, edge_z);
 	color = mix(color, vec3(0.18, 0.28, 0.4), edge * 0.55);
 	ALBEDO = color;
-	ROUGHNESS = 0.88;
-	SPECULAR = 0.12;
+	ROUGHNESS = mix(0.88, mix(0.18, 0.72, asphalt_t), ice_t * 0.6);
+	SPECULAR = mix(0.12, 0.45, ice_t * (1.0 - asphalt_t));
 	EMISSION = color * 0.05;
 }
 """
