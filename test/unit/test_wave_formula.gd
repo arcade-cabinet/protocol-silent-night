@@ -139,3 +139,17 @@ func test_max_bosses_scales_with_boss_pressure() -> void:
 	var low := WaveFormula.generate_wave(42, 1)
 	var high := WaveFormula.generate_wave(42, 30)
 	assert_int(int(high["max_bosses"])).is_greater_equal(int(low["max_bosses"]))
+
+
+func test_burst_chance_and_size_present_in_wave() -> void:
+	var wave := WaveFormula.generate_wave(42, 10)
+	assert_bool(wave.has("burst_chance")).is_true()
+	assert_bool(wave.has("burst_size")).is_true()
+	assert_float(float(wave["burst_chance"])).is_between(0.0, 0.55)
+	assert_int(int(wave["burst_size"])).is_greater_equal(3)
+
+
+func test_burst_chance_grows_with_level() -> void:
+	var early := WaveFormula.generate_wave(42, 1)
+	var late := WaveFormula.generate_wave(42, 30)
+	assert_float(float(late["burst_chance"])).is_greater(float(early["burst_chance"]))
