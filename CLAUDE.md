@@ -15,9 +15,10 @@ ls .claude/state/task-batch/ 2>/dev/null
 Then determine the next task from the active plan and **start it immediately**. Do not wait for user instruction. Idle = failure of setup. If blocked: launch background specialist agents and continue other work.
 
 **Current active plan:** `.claude/plans/game-completion.prq.md`
-- P1 remaining: `grunt-behavior-tree`, `rusher-behavior-tree`, `tank-behavior-tree`, `krampus-prime-behavior-tree`
-- P2 remaining: `e2e-full-flow`, `waves-json-retirement`
-- P3 remaining: 4 documentation tasks
+- All P1 tasks complete (BT state machines, dead code, boss waves, zones, LimboAI)
+- P2 remaining: `e2e-full-flow`
+- P3 remaining: all documentation tasks complete
+- `waves-json-retirement`: complete (waves.json deleted, wave_formula.gd is sole source)
 
 **Unlock keys match save_manager schema:** `"santa"` and `"bumble"` (not `"enemy_santa"`/`"enemy_bumble"`).
 **Component tests use `"holly_striker"`** as the test present ID (not `"elf"` — classes.json deleted).
@@ -59,10 +60,11 @@ addons/
   gdUnit4/                 # Test framework (pinned v6.1.2)
 declarations/
   config/config.json       # Arena parameters, timing, physics
-  classes/classes.json      # Present character roster (25-50 variants)
+  presents/presents.json   # Present character roster (25-50 variants — sole playable roster)
   enemies/enemies.json     # Enemy definitions (grunt, rusher, tank, boss, elf, santa, bumble)
   upgrades/upgrades.json   # Upgrade card pool
-  waves/waves.json         # Base wave parameters (formula inputs, not hardcoded content)
+  gear/                    # Gear slot definitions
+  # NOTE: classes.json and waves.json deleted — both retired
 scenes/
   main.tscn                # Root scene
   arena/                   # Arena sub-scenes (future decomposition)
