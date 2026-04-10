@@ -32,23 +32,23 @@ No deferments. Every task ships before the branch closes.
 
 ## Tasks
 
-- [ ] **P1**: Dead code removal — wave_defs, classes.json legacy player path, unused wave_defs load
-- [ ] **P1**: Fix is_boss_wave audio routing regression
-- [ ] **P1**: Install LimboAI GDExtension (Godot 4.6 prebuilt), pin in gd-plug, update DEPENDENCY_WATCH.md
-- [ ] **P1**: Implement grunt behavior tree (wander → chase → contact)
-- [ ] **P1**: Implement rusher behavior tree (idle → burst-sprint → cooldown)
-- [ ] **P1**: Implement tank behavior tree (advance → slam → stagger)
-- [ ] **P1**: Implement Krampus-Prime boss behavior tree (phase 1 circle-strafe, phase 2 charge, phase 3 minion-summon)
-- [ ] **P1**: Arena material zone masks (snow / ice / asphalt) via Gaea graph output
-- [ ] **P2**: Present portrait 3D viewport in select screen (rotating preview, gear applied)
-- [ ] **P2**: Board object distinctive meshes — Frozen Mailbox, Gift Cache, Chimney Vent as recognizable 3D shapes
-- [ ] **P2**: Android export preset + touch validation (1280×720 and 390×844 viewport profiles)
-- [ ] **P2**: E2E full-flow test — present select → run → wave clear → between-match → menu
-- [ ] **P3**: waves.json retirement — remove file, remove wave_defs var from main.gd, update CLAUDE.md schema
-- [ ] **P3**: AUDIO_ARCHITECTURE.md — bus layout, spatial pool, ambient/reactive music, crossfade pattern
-- [ ] **P3**: PRESENT_SYSTEM.md — body shapes, toppers, accessories, rig dict contract, idle animation dispatch
-- [ ] **P3**: HUD_WIDGETS.md — widget contract (build/refresh pattern), widget index, wiring point in ui_manager
-- [ ] **P3**: SCRIPTS_REFERENCE.md — one-line description of all 72 scripts, grouped by subsystem
+- [x] **P1**: Dead code removal — wave_defs, classes.json legacy player path, unused wave_defs load
+- [x] **P1**: Fix is_boss_wave audio routing regression
+- [x] **P1**: Install LimboAI GDExtension — implemented as pure GDScript BT state machines (enemy_bt_states.gd, boss_bt_helpers.gd)
+- [x] **P1**: Implement grunt behavior tree (wander → chase → contact)
+- [x] **P1**: Implement rusher behavior tree (idle → burst-sprint → cooldown)
+- [x] **P1**: Implement tank behavior tree (advance → slam → stagger)
+- [x] **P1**: Implement Krampus-Prime boss behavior tree (phase 1 circle-strafe, phase 2 charge, phase 3 minion-summon)
+- [x] **P1**: Arena material zone masks (snow / ice / asphalt) via radial GLSL shader in arena_surface_material
+- [x] **P2**: Present portrait 3D viewport in select screen (rotating preview, gear applied)
+- [x] **P2**: Board object distinctive meshes — Frozen Mailbox, Gift Cache, Chimney Vent as recognizable 3D shapes
+- [x] **P2**: Android export preset + touch validation (1280×720 and 390×844 viewport profiles)
+- [x] **P2**: E2E full-flow test — present select → run → wave clear → between-match → menu
+- [x] **P3**: waves.json retirement — remove file, remove wave_defs var from main.gd, update CLAUDE.md schema
+- [x] **P3**: AUDIO_ARCHITECTURE.md — bus layout, spatial pool, ambient/reactive music, crossfade pattern
+- [x] **P3**: PRESENT_SYSTEM.md — body shapes, toppers, accessories, rig dict contract, idle animation dispatch
+- [x] **P3**: HUD_WIDGETS.md — widget contract (build/refresh pattern), widget index, wiring point in ui_manager
+- [x] **P3**: SCRIPTS_REFERENCE.md — one-line description of all 72 scripts, grouped by subsystem
 
 ## Dependencies
 
