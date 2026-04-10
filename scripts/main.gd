@@ -97,14 +97,9 @@ var coal_queue: Array = []
 var board_objects: Array = []
 var input_move := Vector2.ZERO
 var move_velocity := Vector2.ZERO
-var touch_active := false
-var touch_origin := Vector2.ZERO
-var touch_position := Vector2.ZERO
-var dash_pressed := false
-var dash_timer: float = 0.0
-var dash_cooldown_timer: float = 0.0
-var wave_clear_timer: float = 0.0
-var test_mode: Dictionary = {}
+var touch_active := false; var touch_origin := Vector2.ZERO; var touch_position := Vector2.ZERO
+var dash_pressed := false; var dash_timer := 0.0; var dash_cooldown_timer := 0.0
+var wave_clear_timer := 0.0; var test_mode := {}
 
 
 func _ready() -> void:
@@ -131,10 +126,21 @@ func _init_services() -> void:
 	between_match.build_screens(ui_mgr.root_control)
 	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
 
+const DEBUG_HELPERS := preload("res://scripts/debug_helpers.gd")
+
+
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
 
 
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
+
+
+func debug_force_level_up() -> void: DEBUG_HELPERS.force_level_up(self)
+func debug_spawn_boss() -> void: DEBUG_HELPERS.spawn_boss(self)
+func debug_end_run(win: bool) -> void: DEBUG_HELPERS.end_run(self, win)
+func debug_zone_at(wp: Vector3) -> String: return "arena" if absf(wp.x) <= float(config["arena_radius"]) * 1.6 and absf(wp.z) <= float(config["arena_radius"]) else "void"
+func debug_is_blocked(wp: Vector3, r: float = 0.6) -> bool: return not _can_occupy(wp, r)
+func debug_tick(delta: float) -> void: _tick(delta)
 
 
 func _process(delta: float) -> void:

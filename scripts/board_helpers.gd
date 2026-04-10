@@ -4,6 +4,9 @@ extends RefCounted
 
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 
+const EVENT_HELPERS := preload("res://scripts/game_event_helpers.gd")
+
+
 static func build_board(main: Node) -> void:
 	main.obstacle_colliders.clear()
 	main.board_data = main.board_generator.generate_board(int(main.config.get("board_seed", 1225)) + main.progression.level, main.config)
@@ -31,5 +34,5 @@ static func return_to_menu(main: Node) -> void:
 	if ui.difficulty_panel != null:
 		ui.difficulty_panel.visible = false
 	ui.hide_joystick()
-	main.game_mgr.clear_runtime()
+	EVENT_HELPERS.clear_runtime(main)
 	main._refresh_start_screen()
