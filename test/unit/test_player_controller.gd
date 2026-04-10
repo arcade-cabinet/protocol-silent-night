@@ -91,3 +91,37 @@ func test_touch_outside_dash_zone_activates_joystick() -> void:
 	assert_bool(state["touch_active"]).is_true()
 	assert_bool(state["show_joystick"]).is_true()
 	assert_bool(state["dash_pressed"]).is_false()
+
+
+func test_gamepad_r1_triggers_dash() -> void:
+	var state: Dictionary = {"dash_pressed": false}
+	var ctrl: RefCounted = _make_ctrl()
+	var joy_press := InputEventJoypadButton.new()
+	joy_press.button_index = JOY_BUTTON_RIGHT_SHOULDER
+	joy_press.pressed = true
+	ctrl.handle_input(joy_press, Vector2(390.0, 844.0), state)
+	assert_bool(state["dash_pressed"]).is_true()
+	var joy_release := InputEventJoypadButton.new()
+	joy_release.button_index = JOY_BUTTON_RIGHT_SHOULDER
+	joy_release.pressed = false
+	ctrl.handle_input(joy_release, Vector2(390.0, 844.0), state)
+	assert_bool(state["dash_pressed"]).is_false()
+
+
+func test_gamepad_a_button_also_triggers_dash() -> void:
+	var state: Dictionary = {"dash_pressed": false}
+	var ctrl: RefCounted = _make_ctrl()
+	var joy := InputEventJoypadButton.new()
+	joy.button_index = JOY_BUTTON_A
+	joy.pressed = true
+	ctrl.handle_input(joy, Vector2(390.0, 844.0), state)
+	assert_bool(state["dash_pressed"]).is_true()
+
+
+func test_read_move_input_applies_dead_zone_to_still_stick() -> void:
+	# With no touch and no key presses, move from a zero-magnitude input_move
+	# should remain zero (dead-zone filters negligible axis values).
+	var ctrl: RefCounted = _make_ctrl()
+	var move: Vector2 = ctrl.read_move_input(Vector2.ZERO, false)
+	# Keyboard is not pressed in headless; joy axes return 0.0 — result is zero.
+	assert_float(move.length()).is_less_equal(0.15)

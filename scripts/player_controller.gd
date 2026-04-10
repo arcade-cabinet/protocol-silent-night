@@ -67,6 +67,15 @@ func read_move_input(input_move: Vector2, touch_active: bool) -> Vector2:
 			move.y -= 1.0
 		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
 			move.y += 1.0
+		# Gamepad: left stick with 0.15 dead-zone, D-pad as fallback.
+		var joy_x := Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
+		var joy_y := Input.get_joy_axis(0, JOY_AXIS_LEFT_Y)
+		if absf(joy_x) > 0.15 or absf(joy_y) > 0.15:
+			move += Vector2(joy_x, joy_y)
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_LEFT): move.x -= 1.0
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_RIGHT): move.x += 1.0
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_UP): move.y -= 1.0
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_DOWN): move.y += 1.0
 	if move.length() > 1.0:
 		move = move.normalized()
 	return move
@@ -126,6 +135,10 @@ func update_player_aura(delta: float, player_state: Dictionary, player_node: Nod
 func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary) -> void:
 	if event is InputEventKey and event.physical_keycode == KEY_SHIFT:
 		state["dash_pressed"] = event.pressed
+	if event is InputEventJoypadButton:
+		var joy := event as InputEventJoypadButton
+		if joy.button_index == JOY_BUTTON_RIGHT_SHOULDER or joy.button_index == JOY_BUTTON_A:
+			state["dash_pressed"] = joy.pressed
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.position.x > viewport_size.x * 0.7 and touch.position.y > viewport_size.y * 0.65:
