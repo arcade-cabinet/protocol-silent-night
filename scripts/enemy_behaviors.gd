@@ -168,6 +168,16 @@ static func behavior_rusher_bt(enemy: Dictionary, player_pos: Vector3, delta: fl
 			pass  # no movement during cooldown
 
 
+## Krampus HSM BT dispatch — returns the active behavior label for the given phase.
+## The phase sub-trees are implemented in boss_phases.gd + boss_bt_helpers.gd.
+## Called via game_manager → boss_phases.update_boss; this function is the BT wiring marker.
+static func behavior_krampus_hsm(phase: int) -> String:
+	match phase:
+		1: return "circle_strafe"
+		2: return "charge_ranged"
+		_: return "rapid_charge_multishot"
+
+
 static func behavior_tank_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, on_telegraph: Callable = Callable()) -> void:
 	var state := EnemyBTStates.tank_tick(enemy, player_pos, delta, on_telegraph)
 	var enode: Node3D = enemy["node"]

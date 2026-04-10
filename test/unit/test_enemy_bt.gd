@@ -1,8 +1,10 @@
 extends GdUnitTestSuite
-# Unit tests for grunt/rusher/tank BT state machines.
+# Unit tests for grunt/rusher/tank BT state machines and Krampus HSM helpers.
 # All tick functions are pure RefCounted — no scene tree needed.
 
 const EnemyBTStates := preload("res://scripts/enemy_bt_states.gd")
+const EnemyBehaviors := preload("res://scripts/enemy_behaviors.gd")
+const BossBTHelpers := preload("res://scripts/boss_bt_helpers.gd")
 
 
 var _telegraphs: Array = []
@@ -113,3 +115,36 @@ func test_tank_enters_prep_slam_when_close() -> void:
 	var player_pos := Vector3(3.0, 0.0, 0.0)
 	var state := EnemyBTStates.tank_tick(enemy, player_pos, 0.05, Callable())
 	assert_str(state).is_equal("prep_slam")
+
+
+# --- Krampus HSM ---
+
+func test_krampus_hsm_phase_dispatch() -> void:
+	assert_str(EnemyBehaviors.behavior_krampus_hsm(1)).is_equal("circle_strafe")
+	assert_str(EnemyBehaviors.behavior_krampus_hsm(2)).is_equal("charge_ranged")
+	assert_str(EnemyBehaviors.behavior_krampus_hsm(3)).is_equal("rapid_charge_multishot")
+
+
+func test_krampus_circle_strafe_dir_has_tangential_component() -> void:
+	# Boss at origin, player at (10, 0, 0) — ORBIT_RADIUS distance
+	# Direction should be roughly perpendicular (tangential) to the radial
+	var dir := BossBTHelpers.circle_strafe_dir(Vector3.ZERO, Vector3(10.0, 0.0, 0.0))
+	assert_float(dir.length()).is_between(0.99, 1.01)
+	# At exactly orbit radius, radial_bias = 0 → direction is pure tangent (z-axis)
+	assert_float(absf(dir.z)).is_greater(0.5)
+
+
+func test_krampus_charge_tick_fires_after_interval() -> void:
+	var boss_ref: Dictionary = {}
+	var interval := 2.0
+	var triggered := false
+	# Advance in small steps until charge triggers
+	for _i in range(200):
+		if BossBTHelpers.charge_tick(boss_ref, 0.016, interval):
+			triggered = true
+			break
+	assert_bool(triggered).is_true()
+	assert_bool(BossBTHelpers.is_charging(boss_ref)).is_true()
+	# After CHARGE_DURATION ticks, should no longer be charging
+	BossBTHelpers.update_charge_phase(boss_ref, BossBTHelpers.CHARGE_DURATION + 0.01)
+	assert_bool(BossBTHelpers.is_charging(boss_ref)).is_false()
