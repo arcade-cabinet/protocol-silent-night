@@ -31,18 +31,7 @@ func start_run(class_id: String) -> void:
 	build_board()
 	spawn_player()
 	main._update_ui()
-	var ui: RefCounted = main.ui_mgr
-	ui.start_screen.visible = false
-	if ui.difficulty_panel != null:
-		ui.difficulty_panel.visible = false
-	ui.level_screen.visible = false
-	ui.end_screen.visible = false
-	ui.hud_root.visible = true
-	ui.dash_button.visible = true
-	main.ui_mgr.dash_button.disabled = false
-	if main.audio_mgr != null:
-		main.audio_mgr.play_music("gameplay"); main.audio_mgr.play_ambient()
-	if main.music_director != null: main.music_director.reset()
+	preload("res://scripts/main_helpers.gd").show_gameplay_ui(main)
 	start_next_wave()
 
 func tick_playing(delta: float) -> void:

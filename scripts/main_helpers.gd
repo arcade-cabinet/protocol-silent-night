@@ -140,6 +140,21 @@ static func apply_reduced_motion(main: Node, sm: Node) -> void:
 	if main.present_animator != null and main.present_animator.has_method("configure"): main.present_animator.configure(reduced)
 
 
+static func show_gameplay_ui(main: Node) -> void:
+	var ui: RefCounted = main.ui_mgr
+	ui.start_screen.visible = false
+	if ui.difficulty_panel != null:
+		ui.difficulty_panel.visible = false
+	ui.level_screen.visible = false
+	ui.end_screen.visible = false
+	ui.hud_root.visible = true
+	ui.dash_button.visible = true
+	main.ui_mgr.dash_button.disabled = false
+	if main.audio_mgr != null:
+		main.audio_mgr.play_music("gameplay"); main.audio_mgr.play_ambient()
+	if main.music_director != null: main.music_director.reset()
+
+
 static func finalize_end_screen(main: Node, win: bool) -> void:
 	var ui: RefCounted = main.ui_mgr
 	ui.end_screen.visible = true
