@@ -3,7 +3,7 @@
 **Batch:** `codex/production-polish`
 **Completed:** 2026-04-09
 **Baseline:** PR #151 (141 unit/component tests)
-**Final:** 198 unit/component tests, all passing
+**Final:** 243 unit/component tests, all passing
 
 ## Shipped (26 of 26 PRQ tasks)
 
@@ -12,7 +12,7 @@
 
 ### Phase 1: Foundation services
 - **Task 8 — audio-bus-architecture**: `audio_manager._ensure_buses()` creates Master / Music / SFX / Ambient / UI busses at runtime via `AudioServer.add_bus`. Sidesteps headless audio driver instability. Bus volumes persist via `save_manager.set_preference("bus_volume_<bus>", db)`.
-- **Task 21 — screen-shake-service**: `screen_shake.gd` trauma model (exponential decay rate 1.8/s, squared offset mapping via Jonathan Cooper's GDC pattern). `reduced_motion` toggle collapses all trauma to zero. Wired into `main._tick` with per-frame `update(delta, camera)`.
+- **Task 21 — screen-shake-service**: `screen_shake.gd` trauma model (linear decay rate 1.8/s, squared offset mapping via Jonathan Cooper's GDC pattern). `reduced_motion` toggle collapses all trauma to zero. Wired into `main._tick` with per-frame `update(delta, camera)`.
 
 ### Phase 2: Coal Pillar
 - **Task 1 — coal-vfx-worldspace**: `coal_vfx.gd` + `particle_coal_helpers.gd` dispatch 6 distinctive particle compositions per effect kind (spray/hurl/poison/embers/backfire/fortune). Wired into `coal_activator._apply`.
@@ -84,7 +84,7 @@ After the initial 6 phases landed, the full PRQ was closed out:
 
 ---
 
-## Phase 7-10 Tests (+7, 205 total)
+## Phase 7-10 Tests (+7, continuing toward 243 total)
 
 `test_phase_wiring.gd` covers the integration points:
 - `boss_phases.get_phase` returns 2 in the 33-66% HP band, 3 below, 1 above (drives the phase_changed callback)
@@ -151,8 +151,8 @@ be a NEW PRQ with NEW scope.
 
 | Category | Before | After | Delta |
 |---|---|---|---|
-| Unit/component tests | 141 | 198 | **+57** |
-| Test suites | 19 | 28 | **+9** |
+| Unit/component tests | 141 | 243 | **+102** |
+| Test suites | 19 | 33 | **+14** |
 | `.gd` files in scripts/ | 56 | 72 | **+16** |
 | New modules | — | audio_3d_pool, audio_manager_ext, music_director, screen_shake, coal_vfx, particle_coal_helpers, present_body_factory, present_topper_meshes, present_accessory_meshes, minimap_widget, combo_counter, threat_indicator, pickup_magnet_ring, settings_menu, pause_menu, stat_radar_chart | 16 |
 | Max LOC per file | 200 (enforced) | 200 (enforced) | 0 |

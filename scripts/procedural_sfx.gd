@@ -62,8 +62,9 @@ func make_noise_burst(duration: float, decay: float = 10.0, cutoff: float = 1.0)
 		var t := float(i) / float(SAMPLE_RATE)
 		var envelope := exp(-t * decay)
 		var wave := rng.randf_range(-1.0, 1.0)
-		if cutoff < 1.0:
-			prev = prev * (1.0 - cutoff) + wave * cutoff
+		var safe_cutoff: float = clampf(cutoff, 0.0, 1.0)
+		if safe_cutoff < 1.0:
+			prev = prev * (1.0 - safe_cutoff) + wave * safe_cutoff
 			wave = prev
 		var sample := int(wave * envelope * float(MAX_AMPLITUDE))
 		_write_int16(data, i * 2, sample)

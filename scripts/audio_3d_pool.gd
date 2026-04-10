@@ -2,7 +2,7 @@ extends RefCounted
 
 ## Pool of AudioStreamPlayer3D instances for spatial sound effects.
 ## Routes through the "SFX" bus set up by audio_manager._ensure_buses.
-## Linear falloff, unit_size = 1.0m, max_distance = 35m — tuned for
+## Inverse-distance falloff, unit_size = 1.0m, max_distance = 35m — tuned for
 ## the arena scale.
 
 const POOL_SIZE: int = 16

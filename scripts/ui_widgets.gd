@@ -70,6 +70,7 @@ static func _refresh_threat(state: Dictionary, main: Node) -> void:
 		return
 	var boss_node: Node3D = main.boss_ref.get("node")
 	if boss_node == null or not is_instance_valid(boss_node):
+		THREAT.update(state["threat"], null, null, Vector2(800, 600), "red")
 		return
 	var tier: String = "gold" if float(main.boss_ref.get("hp", 1.0)) < float(main.boss_ref.get("max_hp", 1.0)) * 0.3 else "red"
 	THREAT.update(state["threat"], boss_node.position, main.player_node.position, Vector2(800, 600), tier)

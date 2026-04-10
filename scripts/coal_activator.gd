@@ -1,8 +1,9 @@
 extends RefCounted
 
 ## Resolves a coal effect descriptor against live game state.
-## Coal_queue entries are effect_id strings; activation rolls the descriptor
-## via CoalEffects.apply_effect and applies it to enemies / player / cookies.
+## Coal_queue entries are effect_id strings or Dictionaries with
+## {effect_id, rarity} keys; activation rolls the descriptor via
+## CoalEffects.apply_effect and applies it to enemies / player / cookies.
 
 const COAL_EFFECTS := preload("res://scripts/coal_effects.gd")
 const COAL_VFX := preload("res://scripts/coal_vfx.gd")

@@ -44,7 +44,7 @@ static func attach_arms_at(root: Node3D, def: Dictionary, left_pos: Vector3, rig
 		var sign_x: float = -1.0 if i == 0 else 1.0
 		var arm: MeshInstance3D = _cyl(thick * 0.8, thick, length, _flat(arm_color))
 		if style == "wavy":
-			arm.rotation_degrees = Vector3(0, 0, sign_x * 55 + sign_x * 20)
+			arm.rotation_degrees = Vector3(0, 0, sign_x * 45)
 			var wav_offset: Vector3 = positions[i] + Vector3(sign_x * 0.05, 0.02, 0)
 			arm.position = wav_offset
 		else:

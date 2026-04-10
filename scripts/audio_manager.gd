@@ -83,7 +83,7 @@ func _apply_saved_volumes(sm: Node) -> void:
 	all_buses.append("Master")
 	for bus_name in all_buses:
 		var key: String = "bus_volume_%s" % String(bus_name).to_lower()
-		var db: float = float(sm.get_preference(key, 0.0))
+		var db: float = clampf(float(sm.get_preference(key, 0.0)), -60.0, 6.0)
 		var idx: int = AudioServer.get_bus_index(bus_name)
 		if idx >= 0:
 			AudioServer.set_bus_volume_db(idx, db)

@@ -34,7 +34,8 @@ static func refresh(state: Dictionary, coal_queue: Array) -> void:
 		if entry is Dictionary:
 			rarity = String(entry.get("rarity", "common"))
 		var button := Button.new()
-		button.text = "COAL" if rarity == "common" else rarity.to_upper()[0] + "OAL"
+		var prefix: String = "" if rarity == "common" else rarity.substr(0, 1).to_upper() + "-"
+		button.text = prefix + "COAL"
 		button.custom_minimum_size = Vector2(56, 40)
 		button.add_theme_font_size_override("font_size", 11)
 		var rarity_c: Color = COAL_EFFECTS.rarity_color(rarity)
@@ -42,12 +43,11 @@ static func refresh(state: Dictionary, coal_queue: Array) -> void:
 		button.modulate = Color(1.0, 1.0, 1.0, 1.0)
 		button.pressed.connect(on_activate.bind(i))
 		sidebar.add_child(button)
-		_start_idle_pulse(button, rarity_c)
+		_start_idle_pulse(button)
 
 
-static func _start_idle_pulse(button: Button, tint: Color) -> void:
-	var tree: SceneTree = button.get_tree() if button.is_inside_tree() else null
-	if tree == null:
+static func _start_idle_pulse(button: Button) -> void:
+	if not button.is_inside_tree():
 		return
 	var tween := button.create_tween()
 	tween.set_loops()

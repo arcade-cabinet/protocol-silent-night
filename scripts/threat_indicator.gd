@@ -1,8 +1,8 @@
 extends RefCounted
 
 ## Off-screen arrow indicator for the boss/Krampus. When the boss
-## exists and is outside the camera frustum, renders a triangle
-## arrow rotating around the screen center at a fixed radius.
+## exists beyond a 10-unit world-space radius from the player,
+## renders a triangle arrow at a fixed screen-space radius.
 
 const INDICATOR_RADIUS: float = 180.0
 const TRIANGLE_SIZE: float = 16.0

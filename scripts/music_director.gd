@@ -6,8 +6,7 @@ extends RefCounted
 ## audio_manager.set_music_intensity to swap layers.
 ##
 ## Layers: calm (< 10 enemies, HP > 70%) / gameplay (default) /
-## pressure (10-25 enemies, HP 30-70%) / panic (> 25 OR HP < 30%) /
-## boss (boss active, overrides everything).
+## panic (> 25 enemies OR HP < 30%) / boss (boss active, overrides everything).
 
 const COOLDOWN: float = 0.9
 

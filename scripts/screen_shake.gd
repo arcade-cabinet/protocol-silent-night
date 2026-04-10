@@ -1,10 +1,10 @@
 extends RefCounted
 
 ## Trauma-based screen shake service. Callers push trauma via
-## add_trauma(amount). update(delta, camera) decays it exponentially
-## and applies an offset to camera.h_offset / v_offset. Shared across
-## coal activation, player damage, boss phase transitions, and any
-## other impact event.
+## add_trauma(amount). update(delta, camera) decays it linearly
+## and applies a random offset to camera.h_offset / v_offset. Shared
+## across coal activation, player damage, boss phase transitions, and
+## any other impact event.
 ##
 ## Respects the "reduced_motion" save preference — when enabled, all
 ## trauma events collapse to zero.
@@ -12,7 +12,6 @@ extends RefCounted
 const MAX_TRAUMA: float = 1.0
 const DECAY_RATE: float = 1.8
 const MAX_OFFSET: float = 0.35
-const MAX_ROTATION: float = 0.08
 
 var trauma: float = 0.0
 var reduced_motion: bool = false

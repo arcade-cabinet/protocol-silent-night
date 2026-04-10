@@ -1,9 +1,8 @@
 extends RefCounted
 
-## Pause overlay: Resume / Restart / Settings / Quit. Sets the scene
-## tree to paused via get_tree().paused and uses
-## process_mode = PROCESS_MODE_ALWAYS on the panel so buttons still
-## receive input while paused.
+## Pause overlay: Resume / Restart / Settings / Quit. Panel visibility
+## only — callers are responsible for setting get_tree().paused.
+## process_mode = PROCESS_MODE_ALWAYS ensures buttons respond while paused.
 
 
 static func build(root: Control, on_resume: Callable, on_restart: Callable, on_settings: Callable, on_quit: Callable) -> Dictionary:
