@@ -3,6 +3,7 @@ extends RefCounted
 const PROCEDURAL_SFX := preload("res://scripts/procedural_sfx.gd")
 const PROCEDURAL_MUSIC := preload("res://scripts/procedural_music.gd")
 const AUDIO_3D_POOL := preload("res://scripts/audio_3d_pool.gd")
+const AUDIO_EXT := preload("res://scripts/audio_manager_ext.gd")
 const DEFAULT_VOLUME_DB: float = -15.0
 const MUSIC_VOLUME_DB: float = -20.0
 const AMBIENT_VOLUME_DB: float = -24.0
@@ -53,16 +54,16 @@ func attach(host: Node, save_manager: Node = null) -> void:
 	_cache["music_menu"] = PROCEDURAL_MUSIC.make_menu_loop()
 	_cache["music_gameplay"] = PROCEDURAL_MUSIC.make_gameplay_loop()
 	_cache["music_boss"] = PROCEDURAL_MUSIC.make_boss_loop()
-	preload("res://scripts/audio_manager_ext.gd").seed_extended_cache(self)
+	AUDIO_EXT.seed_extended_cache(self)
 	play_music("menu")
 
 
-func play_3d(key: String, world_pos: Vector3, volume_db: float = 0.0) -> void: preload("res://scripts/audio_manager_ext.gd").play_3d(self, key, world_pos, volume_db)
-func play_enemy_telegraph(enemy_type: String, world_pos: Vector3) -> void: preload("res://scripts/audio_manager_ext.gd").play_enemy_telegraph(self, enemy_type, world_pos)
+func play_3d(key: String, world_pos: Vector3, volume_db: float = 0.0) -> void: AUDIO_EXT.play_3d(self, key, world_pos, volume_db)
+func play_enemy_telegraph(enemy_type: String, world_pos: Vector3) -> void: AUDIO_EXT.play_enemy_telegraph(self, enemy_type, world_pos)
 func play_boss_sting() -> void: if _cache.has("boss_sting"): _play("boss_sting")
-func play_ambient() -> void: preload("res://scripts/audio_manager_ext.gd").play_ambient(self)
-func stop_ambient() -> void: preload("res://scripts/audio_manager_ext.gd").stop_ambient(self)
-func set_music_intensity(level: String) -> void: preload("res://scripts/audio_manager_ext.gd").set_music_intensity(self, level)
+func play_ambient() -> void: AUDIO_EXT.play_ambient(self)
+func stop_ambient() -> void: AUDIO_EXT.stop_ambient(self)
+func set_music_intensity(level: String) -> void: AUDIO_EXT.set_music_intensity(self, level)
 
 
 static func _ensure_buses() -> void:

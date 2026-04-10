@@ -2,6 +2,8 @@ extends RefCounted
 
 const WAVE_FORMULA := preload("res://scripts/wave_formula.gd")
 const WAVE_SPAWNER := preload("res://scripts/wave_spawner.gd")
+const MAIN_HELPERS := preload("res://scripts/main_helpers.gd")
+const RUNTIME_CLEANER := preload("res://scripts/runtime_cleaner.gd")
 
 var main: Node
 var wave_spawner: RefCounted
@@ -26,12 +28,12 @@ func start_run(class_id: String) -> void:
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	var start_sm: Node = main._save_manager()
 	main.coal_queue = start_sm.get_coal() if start_sm != null else []
-	preload("res://scripts/main_helpers.gd").load_equipped_gear(main, start_sm)
-	preload("res://scripts/main_helpers.gd").apply_reduced_motion(main, start_sm)
+	MAIN_HELPERS.load_equipped_gear(main, start_sm)
+	MAIN_HELPERS.apply_reduced_motion(main, start_sm)
 	build_board()
 	spawn_player()
 	main._update_ui()
-	preload("res://scripts/main_helpers.gd").show_gameplay_ui(main)
+	MAIN_HELPERS.show_gameplay_ui(main)
 	start_next_wave()
 
 func tick_playing(delta: float) -> void:
@@ -79,7 +81,7 @@ func spawn_boss(hp_scale: float) -> void:
 
 func end_run(win: bool) -> void:
 	main.state = "win" if win else "game_over"
-	preload("res://scripts/main_helpers.gd").end_run_audio(main, win)
+	MAIN_HELPERS.end_run_audio(main, win)
 	var ui: RefCounted = main.ui_mgr
 	ui.hud_root.visible = false; ui.dash_button.visible = false; ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
@@ -88,7 +90,7 @@ func end_run(win: bool) -> void:
 	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
 	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
-		preload("res://scripts/main_helpers.gd").finalize_end_screen(main, win)
+		MAIN_HELPERS.finalize_end_screen(main, win)
 	else: main.between_match.start_flow()
 
 func return_to_menu() -> void:
@@ -183,6 +185,6 @@ func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_t
 func gain_cookies(amt: int) -> void: main.run_cookies += amt
 func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
 func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
-func _on_boss_phase_changed(_phase: int) -> void: preload("res://scripts/main_helpers.gd").boss_phase_sting(main)
-func _enemy_telegraph(etype: String, pos: Vector3) -> void: preload("res://scripts/main_helpers.gd").enemy_telegraph(main, etype, pos)
-func clear_runtime() -> void: preload("res://scripts/runtime_cleaner.gd").clear(main)
+func _on_boss_phase_changed(_phase: int) -> void: MAIN_HELPERS.boss_phase_sting(main)
+func _enemy_telegraph(etype: String, pos: Vector3) -> void: MAIN_HELPERS.enemy_telegraph(main, etype, pos)
+func clear_runtime() -> void: RUNTIME_CLEANER.clear(main)

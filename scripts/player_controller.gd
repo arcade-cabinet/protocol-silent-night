@@ -1,6 +1,7 @@
 extends RefCounted
 
 const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
+const GEAR_VISUALIZER := preload("res://scripts/gear_visualizer.gd")
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
@@ -23,7 +24,7 @@ func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary
 	var visual: Node3D = present_factory.build_present(def)
 	visual.scale = Vector3.ONE * 1.3
 	player_node.add_child(visual)
-	preload("res://scripts/gear_visualizer.gd").attach(visual, gear_system, animator)
+	GEAR_VISUALIZER.attach(visual, gear_system, animator)
 	player_node.position = Vector3(0, 0.12, 0)
 	var player_class := {
 		"id": class_id,

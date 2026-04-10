@@ -4,6 +4,7 @@ extends RefCounted
 ## These are thin wrappers that access main's state directly.
 
 const COAL_ACTIVATOR := preload("res://scripts/coal_activator.gd")
+const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 static var _coal_activator: RefCounted
 
 
@@ -81,7 +82,7 @@ const _DEF_PAIRS: Array = [
 
 
 static func load_definitions(main: Node) -> void:
-	var wb: Variant = preload("res://scripts/world_builder.gd")
+	var wb: Variant = WORLD_BUILDER
 	for pair in _DEF_PAIRS:
 		main.set(pair[0], wb.read_json(pair[1]))
 

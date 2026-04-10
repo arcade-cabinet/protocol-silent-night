@@ -5,6 +5,8 @@ extends RefCounted
 ## manager stays under the 200 LOC hook budget. Static methods that
 ## take the manager as first arg and mutate its members.
 
+const PROCEDURAL_MUSIC := preload("res://scripts/procedural_music.gd")
+
 
 static func play_3d(mgr: RefCounted, key: String, world_pos: Vector3, volume_db: float = 0.0) -> void:
 	if mgr._pool_3d == null or not mgr._cache.has(key):
@@ -58,7 +60,7 @@ static func set_music_intensity(mgr: RefCounted, level: String) -> void:
 
 static func seed_extended_cache(mgr: RefCounted) -> void:
 	var sfx: RefCounted = mgr._sfx
-	var music: Variant = preload("res://scripts/procedural_music.gd")
+	var music: Variant = PROCEDURAL_MUSIC
 	mgr._cache["music_calm"] = music.make_calm_loop()
 	mgr._cache["music_panic"] = music.make_panic_loop()
 	mgr._cache["ambient_bed"] = music.make_ambient_bed(20.0)

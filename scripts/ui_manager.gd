@@ -4,6 +4,7 @@ const UI_BUILDER := preload("res://scripts/ui_builder.gd")
 const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
 const COAL_SIDEBAR := preload("res://scripts/coal_sidebar_ui.gd")
 const UI_WIDGETS := preload("res://scripts/ui_widgets.gd")
+const PRESENT_SELECT := preload("res://scripts/present_select_ui.gd")
 
 var hud_root: Container
 var start_screen: PanelContainer
@@ -97,7 +98,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 		coal_sidebar_state = COAL_SIDEBAR.build_sidebar(root, on_coal_activate)
 
 	widgets = UI_WIDGETS.build_all(root)
-	preload("res://scripts/present_select_ui.gd").init_preview(root)
+	PRESENT_SELECT.init_preview(root)
 
 	return ui
 
@@ -127,7 +128,7 @@ func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, presen
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:
-	preload("res://scripts/present_select_ui.gd").build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed)
+	PRESENT_SELECT.build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed)
 
 
 func show_message(text: String, duration: float, color: Color = Color.WHITE) -> void:

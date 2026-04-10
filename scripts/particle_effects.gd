@@ -1,5 +1,7 @@
 extends RefCounted
 
+const COAL_HELPERS := preload("res://scripts/particle_coal_helpers.gd")
+
 # Procedural mesh-based particle system. Safe in headless mode.
 # Each entry: { node, velocity, life, max_life, start_scale, gravity, rise }
 
@@ -104,7 +106,7 @@ func spawn_pickup_sparkle(root: Node3D, position: Vector3) -> void:
 
 
 func spawn_coal_effect(root: Node3D, pos: Vector3, kind: String, color_override: Color = Color(0, 0, 0, 0)) -> void:
-	preload("res://scripts/particle_coal_helpers.gd").spawn_for_kind(self, root, pos, kind, color_override)
+	COAL_HELPERS.spawn_for_kind(self, root, pos, kind, color_override)
 
 
 func update(delta: float) -> void:
