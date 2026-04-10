@@ -7,6 +7,8 @@ const REWRAP_IFRAMES: float = 1.2
 
 
 static func damage_player(main: Node, amount: float) -> void:
+	if main.state != "playing":
+		return
 	if bool(main.test_mode.get("invincible", false)) or main.dash_timer > 0.0:
 		return
 	if main.audio_mgr != null:
