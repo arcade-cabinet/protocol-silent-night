@@ -8,6 +8,8 @@ jobs:
   build-android-release:
     name: Build Android Release APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       RELEASE_TAG: ${{ github.ref_name }}
     steps:
@@ -78,6 +80,8 @@ jobs:
   build-html5-release:
     name: Build HTML5 Release Export
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       RELEASE_TAG: ${{ github.ref_name }}
     steps:
