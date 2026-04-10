@@ -16,8 +16,9 @@ Then determine the next task from the active plan and **start it immediately**. 
 
 **Current active plan:** `.claude/plans/game-completion.prq.md`
 - All P1 tasks complete (BT state machines, dead code, boss waves, zones, LimboAI)
-- P2 remaining: `e2e-full-flow`
-- P3 remaining: all documentation tasks complete
+- P2: `e2e-full-flow` complete — 243/243 tests pass, E2E via gdUnit4, screenshots captured
+- P3: all documentation tasks complete
+- Integration branch `integration/production-polish` open as PR #153 — awaiting CI + squash merge
 - `waves-json-retirement`: complete (waves.json deleted, wave_formula.gd is sole source)
 
 **Unlock keys match save_manager schema:** `"santa"` and `"bumble"` (not `"enemy_santa"`/`"enemy_bumble"`).
@@ -145,15 +146,16 @@ Enemies include both the original types AND the former playable characters:
 # Smoke test
 godot --headless --path . --quit-after 1
 
-# Unit + component tests
+# Unit + component + e2e tests (243 tests total)
 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd \
-  --add "res://test/unit/" --add "res://test/component/" --ignoreHeadlessMode
+  --add "res://test/unit/" --add "res://test/component/" --add "res://test/e2e/" \
+  --ignoreHeadlessMode
 
-# E2E full playthrough
-godot --headless --path . -s res://test/e2e/test_full_playthrough.gd
-
-# Screenshot capture (windowed)
+# Screenshot capture (windowed — requires display, not headless)
 godot --path . -s res://test/e2e/capture_screenshots.gd
+# Screenshots land in .artifacts/screenshots/
+
+# NOTE: E2E tests run via gdUnit4 (not -s) — autoloads require full project boot
 ```
 
 Tests must pass before commit (hook-enforced).
