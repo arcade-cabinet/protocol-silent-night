@@ -1,5 +1,7 @@
 extends RefCounted
 
+const COAL_HELPERS := preload("res://scripts/particle_coal_helpers.gd")
+
 # Procedural mesh-based particle system. Safe in headless mode.
 # Each entry: { node, velocity, life, max_life, start_scale, gravity, rise }
 
@@ -9,7 +11,13 @@ const SPARKLE_LIFE := 0.70
 
 var _entries: Array = []
 var _sphere_cache: SphereMesh = null
+var _mat_cache: Dictionary = {}
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var reduced_motion: bool = false
+
+
+func configure(reduced: bool) -> void:
+	reduced_motion = reduced
 
 
 func _init() -> void:
@@ -27,6 +35,9 @@ func _sphere() -> SphereMesh:
 
 
 func _make_particle_material(color: Color, energy: float = 2.0) -> StandardMaterial3D:
+	var key: String = "%s_%.1f" % [color.to_html(false), energy]
+	if _mat_cache.has(key):
+		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -35,6 +46,7 @@ func _make_particle_material(color: Color, energy: float = 2.0) -> StandardMater
 	mat.emission = color
 	mat.emission_energy_multiplier = energy
 	mat.no_depth_test = false
+	_mat_cache[key] = mat
 	return mat
 
 
@@ -76,7 +88,7 @@ func spawn_muzzle_flash(root: Node3D, position: Vector3, direction: Vector3, col
 
 
 func spawn_death_burst(root: Node3D, position: Vector3, color: Color, size: float = 1.0) -> void:
-	if root == null:
+	if root == null or reduced_motion:
 		return
 	var count := 12
 	for index in range(count):
@@ -101,6 +113,10 @@ func spawn_pickup_sparkle(root: Node3D, position: Vector3) -> void:
 		var particle_scale := _rng.randf_range(0.18, 0.32)
 		var node := _spawn_node(root, position + offset + Vector3(0, 0.4, 0), Color("fff6c2"), particle_scale, 3.0)
 		_track(node, rise, SPARKLE_LIFE, particle_scale, -2.2)
+
+
+func spawn_coal_effect(root: Node3D, pos: Vector3, kind: String, color_override: Color = Color(0, 0, 0, 0)) -> void:
+	COAL_HELPERS.spawn_for_kind(self, root, pos, kind, color_override)
 
 
 func update(delta: float) -> void:

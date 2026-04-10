@@ -101,6 +101,11 @@ static func build_hud(root: Control) -> Dictionary:
 	kills_label.add_theme_font_size_override("font_size", 14)
 	kills_label.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	top_bar.add_child(kills_label)
+	var cookie_label := Label.new()
+	cookie_label.text = "0 C"
+	cookie_label.add_theme_font_size_override("font_size", 14)
+	cookie_label.add_theme_color_override("font_color", Color("ffd700"))
+	top_bar.add_child(cookie_label)
 	var level_label := Label.new()
 	level_label.text = "LV 1"
 	level_label.add_theme_font_size_override("font_size", 14)
@@ -118,7 +123,7 @@ static func build_hud(root: Control) -> Dictionary:
 		"level_label": level_label, "xp_bar": xp_bar,
 		"hp_bar": hp_bar, "hp_label": hp_label,
 		"wave_label": wave_label, "timer_label": timer_label,
-		"kills_label": kills_label
+		"kills_label": kills_label, "cookie_label": cookie_label
 	}
 
 
@@ -161,37 +166,3 @@ static func build_overlays_and_controls(root: Control, on_dash_down: Callable, o
 	return UI_SCREENS.build_overlays_and_controls(root, on_dash_down, on_dash_up)
 
 
-static func _make_hud_panel(label_text: String, accent: String) -> Dictionary:
-	var accent_color := Color(accent)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(220, 92)
-	panel.add_theme_stylebox_override("panel", THEME.make_panel_style(accent_color))
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 12)
-	margin.add_theme_constant_override("margin_top", 10)
-	margin.add_theme_constant_override("margin_right", 12)
-	margin.add_theme_constant_override("margin_bottom", 10)
-	panel.add_child(margin)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	margin.add_child(box)
-	var label := Label.new()
-	label.text = label_text
-	label.add_theme_color_override("font_color", accent_color)
-	label.add_theme_font_size_override("font_size", 13)
-	box.add_child(label)
-	var value := Label.new()
-	value.text = "0"
-	value.add_theme_font_size_override("font_size", 24)
-	value.add_theme_color_override("font_color", THEME.NEON_WHITE)
-	value.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	value.add_theme_constant_override("outline_size", 3)
-	box.add_child(value)
-	var bar := ProgressBar.new()
-	bar.max_value = 100
-	bar.value = 100
-	bar.custom_minimum_size = Vector2(0, 14)
-	bar.show_percentage = false
-	THEME.apply_to_progress_bar(bar, accent_color)
-	box.add_child(bar)
-	return {"node": panel, "label": label, "value": value, "bar": bar}

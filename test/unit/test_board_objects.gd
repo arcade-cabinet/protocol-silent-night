@@ -59,6 +59,71 @@ func test_scroll_nice_naughty_ratio() -> void:
 	assert_int(nice).is_greater(naughty)
 
 
+func test_board_object_types_have_obj_type_meta() -> void:
+	var factory: RefCounted = _make_factory()
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	# Force-spawn one of each type using deterministic seeds
+	var type_meta_found: Dictionary = {}
+	for seed_val in range(200):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_val
+		var objects: Array = []
+		var obj: Dictionary = factory.spawn_board_object(root, objects, 18.0, rng)
+		var meta: String = obj["node"].get_meta("obj_type", "")
+		if meta != "":
+			type_meta_found[meta] = true
+		if type_meta_found.size() == 3:
+			break
+	assert_bool(type_meta_found.has("mailbox")).is_true()
+	assert_bool(type_meta_found.has("gift_cache")).is_true()
+	assert_bool(type_meta_found.has("chimney")).is_true()
+
+
+func test_board_object_has_mesh_instance_child() -> void:
+	var factory: RefCounted = _make_factory()
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	for seed_val in range(10):
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_val
+		var objects: Array = []
+		var obj: Dictionary = factory.spawn_board_object(root, objects, 18.0, rng)
+		var node: Node3D = obj["node"]
+		var has_mesh := false
+		for child in node.get_children():
+			if child is MeshInstance3D:
+				has_mesh = true
+				break
+		assert_bool(has_mesh).is_true()
+
+
+func test_each_board_object_type_meta_direct() -> void:
+	var factory: RefCounted = _make_factory()
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	for pair: Array in [
+			["frozen_mailbox", "mailbox"],
+			["gift_cache", "gift_cache"],
+			["chimney_vent", "chimney"]]:
+		var node: Node3D = auto_free(Node3D.new())
+		add_child(node)
+		factory._build_visual(node, pair[0])
+		assert_str(node.get_meta("obj_type", "")).is_equal(pair[1])
+
+
+func test_board_objects_have_health_bar() -> void:
+	var factory: RefCounted = _make_factory()
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	var objects: Array = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 42
+	var obj: Dictionary = factory.spawn_board_object(root, objects, 18.0, rng)
+	assert_bool(obj.has("hp_bar")).is_true()
+	assert_object(obj["hp_bar"]).is_not_null()
+
+
 func test_board_object_takes_damage_and_drops_scroll() -> void:
 	var factory: RefCounted = _make_factory()
 	var mat: RefCounted = _material_factory_script.new()

@@ -1,6 +1,7 @@
 extends RefCounted
 
 const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
+const GEAR_VISUALIZER := preload("res://scripts/gear_visualizer.gd")
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
@@ -12,19 +13,20 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_player(actor_root: Node3D, class_id: String, class_defs: Dictionary, present_defs: Dictionary = {}, gear_system: RefCounted = null) -> Dictionary:
-	if present_defs.has(class_id):
-		return _spawn_present_player(actor_root, class_id, present_defs[class_id], gear_system)
-	return _spawn_legacy_player(actor_root, class_id, class_defs)
+func spawn_player(actor_root: Node3D, class_id: String, present_defs: Dictionary = {}, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
+	if not present_defs.has(class_id):
+		push_error("spawn_player: class_id '%s' not found in present_defs" % class_id)
+	return _spawn_present_player(actor_root, class_id, present_defs.get(class_id, {}), gear_system, animator)
 
 
-func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary, gear_system: RefCounted = null) -> Dictionary:
+func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
 	var player_node := Node3D.new()
 	player_node.name = "Player"
 	actor_root.add_child(player_node)
 	var visual: Node3D = present_factory.build_present(def)
 	visual.scale = Vector3.ONE * 1.3
 	player_node.add_child(visual)
+	GEAR_VISUALIZER.attach(visual, gear_system, animator)
 	player_node.position = Vector3(0, 0.12, 0)
 	var player_class := {
 		"id": class_id,
@@ -55,52 +57,6 @@ func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary
 	return {"node": player_node, "mesh": visual, "state": player_state}
 
 
-func _spawn_legacy_player(actor_root: Node3D, class_id: String, class_defs: Dictionary) -> Dictionary:
-	var player_node := Node3D.new()
-	player_node.name = "Player"
-	actor_root.add_child(player_node)
-	var player_scale := 0.95
-	match class_id:
-		"santa":
-			player_scale = 1.2
-		"bumble":
-			player_scale = 1.4
-	var player_mesh: MeshInstance3D = pixels.make_billboard_sprite(class_id, 2.35, Color(class_defs[class_id]["color"]))
-	player_node.add_child(player_mesh)
-	player_node.position = Vector3(0, 0.12, 0)
-	player_node.scale = Vector3.ONE * player_scale
-
-	var shadow := MeshInstance3D.new()
-	var shadow_mesh := PlaneMesh.new()
-	shadow_mesh.size = Vector2(1.15, 1.15)
-	shadow.mesh = shadow_mesh
-	shadow.position = Vector3(0, -0.58, 0)
-	shadow.material_override = materials.shadow_material()
-	player_node.add_child(shadow)
-
-	var thruster_ring := MeshInstance3D.new()
-	var thruster_mesh := TorusMesh.new()
-	thruster_mesh.outer_radius = 0.32
-	thruster_mesh.inner_radius = 0.06
-	thruster_ring.mesh = thruster_mesh
-	thruster_ring.rotation_degrees = Vector3(90, 0, 0)
-	thruster_ring.position = Vector3(0, -0.12, 0)
-	thruster_ring.material_override = materials.emissive_material(Color(class_defs[class_id]["accent"]), 1.1, 0.25)
-	player_node.add_child(thruster_ring)
-
-	var player_class: Dictionary = class_defs[class_id].duplicate(true)
-	var player_state := {
-		"class": player_class,
-		"hp": float(player_class["max_hp"]),
-		"max_hp": float(player_class["max_hp"]),
-		"last_shot": 0.0,
-		"aura_level": 0,
-		"aura_timer": 0.0,
-		"shake": 0.0
-	}
-	return {"node": player_node, "mesh": player_mesh, "state": player_state}
-
-
 func read_move_input(input_move: Vector2, touch_active: bool) -> Vector2:
 	var move := input_move
 	if not touch_active:
@@ -113,6 +69,15 @@ func read_move_input(input_move: Vector2, touch_active: bool) -> Vector2:
 			move.y -= 1.0
 		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
 			move.y += 1.0
+		# Gamepad: left stick with 0.15 dead-zone, D-pad as fallback.
+		var joy_x := Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
+		var joy_y := Input.get_joy_axis(0, JOY_AXIS_LEFT_Y)
+		if absf(joy_x) > 0.15 or absf(joy_y) > 0.15:
+			move += Vector2(joy_x, joy_y)
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_LEFT): move.x -= 1.0
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_RIGHT): move.x += 1.0
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_UP): move.y -= 1.0
+		if Input.is_joy_button_pressed(0, JOY_BUTTON_DPAD_DOWN): move.y += 1.0
 	if move.length() > 1.0:
 		move = move.normalized()
 	return move
@@ -172,6 +137,10 @@ func update_player_aura(delta: float, player_state: Dictionary, player_node: Nod
 func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary) -> void:
 	if event is InputEventKey and event.physical_keycode == KEY_SHIFT:
 		state["dash_pressed"] = event.pressed
+	if event is InputEventJoypadButton:
+		var joy := event as InputEventJoypadButton
+		if joy.button_index == JOY_BUTTON_RIGHT_SHOULDER or joy.button_index == JOY_BUTTON_A:
+			state["dash_pressed"] = joy.pressed
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.position.x > viewport_size.x * 0.7 and touch.position.y > viewport_size.y * 0.65:

@@ -1,21 +1,43 @@
+# Godot editor cache (generated, never commit)
 .godot/
-reports/
-.artifacts/
-.claude/worktrees/
-# Godot-generated translation imports (scoped to avoid ignoring source .translation files)
+
+# Godot import metadata (generated per-environment)
 *.translation.import
 
-# Godot-specific patterns
+# Godot mono/C# (not used, but guard anyway)
 .mono/
-*.tmp
-*.log
-*~
 
-# OS temp files
-.DS_Store
-Thumbs.db
-
-# Build artifacts
+# Build artifacts — committed source (export_presets.cfg) is fine
 export/
 *.pck
 *.zip
+*.apk
+*.aab
+
+# Test/CI reports
+reports/
+
+# Intermediate build artifacts
+.artifacts/
+.gradle/
+local.properties
+build/
+
+# Claude worktrees and runtime state
+.claude/worktrees/
+.claude/state/task-batch/.last-compaction
+.claude/state/task-batch/.active
+
+# Session temp files
+.remember/tmp/
+
+# Temp / OS
+*.tmp
+*.log
+*~
+.DS_Store
+Thumbs.db
+
+# Editor swap files
+*.swp
+*.swo

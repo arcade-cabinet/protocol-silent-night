@@ -1,0 +1,18 @@
+{
+  "release-type": "simple",
+  "bump-minor-pre-major": true,
+  "packages": {
+    ".": {}
+  },
+  "changelog-sections": [
+    {"type": "feat", "section": "Features"},
+    {"type": "fix", "section": "Bug Fixes"},
+    {"type": "refactor", "section": "Refactoring"},
+    {"type": "perf", "section": "Performance"},
+    {"type": "docs", "section": "Documentation"},
+    {"type": "chore", "section": "Chores", "hidden": true}
+  ],
+  "changelog-path": "CHANGELOG.md",
+  "tag-separator": "-",
+  "include-component-in-tag": false
+}

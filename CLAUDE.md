@@ -1,5 +1,11 @@
 # Protocol: Silent Night — Godot 4.6 Holidaypunk Roguelike Arena
 
+## Project State
+
+**Active plan:** `.claude/plans/game-completion.prq.md` — P1+P2+P3 complete, PR #153 awaiting merge.
+
+**Key identifiers:** Unlock keys = `"santa"`, `"bumble"` (not `"enemy_*"`). Test present ID = `"holly_striker"` (not `"elf"`).
+
 ## READ THIS FIRST
 
 **Design docs live in `docs/`.** Before writing ANY gameplay code, read the relevant doc:
@@ -37,10 +43,11 @@ addons/
   gdUnit4/                 # Test framework (pinned v6.1.2)
 declarations/
   config/config.json       # Arena parameters, timing, physics
-  classes/classes.json      # Present character roster (25-50 variants)
+  presents/presents.json   # Present character roster (25-50 variants — sole playable roster)
   enemies/enemies.json     # Enemy definitions (grunt, rusher, tank, boss, elf, santa, bumble)
   upgrades/upgrades.json   # Upgrade card pool
-  waves/waves.json         # Base wave parameters (formula inputs, not hardcoded content)
+  gear/                    # Gear slot definitions
+  # NOTE: classes.json and waves.json deleted — both retired
 scenes/
   main.tscn                # Root scene
   arena/                   # Arena sub-scenes (future decomposition)
@@ -121,15 +128,16 @@ Enemies include both the original types AND the former playable characters:
 # Smoke test
 godot --headless --path . --quit-after 1
 
-# Unit + component tests
+# Unit + component + e2e tests (243 tests total)
 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd \
-  --add "res://test/unit/" --add "res://test/component/" --ignoreHeadlessMode
+  --add "res://test/unit/" --add "res://test/component/" --add "res://test/e2e/" \
+  --ignoreHeadlessMode
 
-# E2E full playthrough
-godot --headless --path . -s res://test/e2e/test_full_playthrough.gd
-
-# Screenshot capture (windowed)
+# Screenshot capture (windowed — requires display, not headless)
 godot --path . -s res://test/e2e/capture_screenshots.gd
+# Screenshots land in .artifacts/screenshots/
+
+# NOTE: E2E tests run via gdUnit4 (not -s) — autoloads require full project boot
 ```
 
 Tests must pass before commit (hook-enforced).

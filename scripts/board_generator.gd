@@ -86,5 +86,5 @@ func generate_board(board_seed: int, config: Dictionary) -> Dictionary:
 		"drifts": drifts,
 		"ridges": ridges,
 		"obstacles": obstacles,
-		"landmarks": landmarks
+		"landmarks": landmarks,
 	}

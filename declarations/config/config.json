@@ -6,5 +6,8 @@
   "pickup_auto_collect_radius": 1.2,
   "board_seed": 1225,
   "boss_wave": 10,
-  "player_spawn_safe_radius": 5.5
+  "player_spawn_safe_radius": 5.5,
+  "nice_scroll_cookies": 15,
+  "santa_unlock_level": 5,
+  "board_objects_per_level": 2
 }

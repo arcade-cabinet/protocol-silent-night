@@ -8,6 +8,11 @@ var time: float = 0.0
 var recoil_timer: float = 0.0
 var recoil_intensity: float = 0.0
 var base_y: float = 0.12
+var reduced_motion: bool = false
+
+
+func configure(reduced: bool) -> void:
+	reduced_motion = reduced
 
 
 func update(delta: float, visual: Node3D, velocity: Vector2) -> void:
@@ -15,18 +20,46 @@ func update(delta: float, visual: Node3D, velocity: Vector2) -> void:
 		return
 	time += delta
 	var speed := velocity.length()
-	var bob := sin(time * 3.2) * 0.06
-	var walk_bob := sin(time * 10.0) * 0.04 * clampf(speed * 0.4, 0.0, 1.0)
-	var y_offset := bob + walk_bob
+	var moving: float = clampf(speed * 0.4, 0.0, 1.0)
+	var style: String = String(visual.get_meta("idle_style", "bounce")) if visual.has_meta("idle_style") else "bounce"
+	var idle_weight: float = (1.0 - moving) * (0.25 if reduced_motion else 1.0)
+	var idle_offset: Vector3 = _idle_for_style(style, time, idle_weight)
+	var walk_bob := sin(time * 10.0) * 0.04 * moving
 	var wobble_z := sin(time * 10.0) * 0.08 * clampf(speed * 0.3, 0.0, 1.0)
-	visual.position.y = y_offset
-	visual.rotation.z = wobble_z
+	visual.position.x = idle_offset.x
+	visual.position.y = base_y + idle_offset.y + walk_bob
+	visual.position.z = idle_offset.z
+	if style == "spin":
+		visual.rotation.y = fmod(time * 2.0, TAU)
+	else:
+		visual.rotation.z = idle_offset.x * 0.5 + wobble_z
 	if recoil_timer > 0.0:
 		recoil_timer -= delta
 		var pulse := sin(recoil_timer / 0.08 * PI) * recoil_intensity
 		visual.scale = Vector3.ONE * (1.0 + pulse)
 	else:
 		visual.scale = Vector3.ONE
+
+
+static func _idle_for_style(style: String, t: float, idle_weight: float) -> Vector3:
+	var w: float = clampf(idle_weight, 0.0, 1.0)
+	match style:
+		"hop":
+			var phase: float = fmod(t * 2.2, 1.0)
+			var hop_y: float = maxf(0.0, sin(phase * PI)) * 0.18 * w
+			return Vector3(0.0, hop_y, 0.0)
+		"wobble":
+			var wx: float = sin(t * 2.4) * 0.03 * w
+			var wy: float = cos(t * 1.8) * 0.025 * w
+			return Vector3(wx, wy + sin(t * 3.0) * 0.04 * w, 0.0)
+		"sway":
+			var sx: float = sin(t * 1.6) * 0.05 * w
+			var sy: float = sin(t * 2.0) * 0.03 * w
+			return Vector3(sx, sy, 0.0)
+		"spin":
+			return Vector3(0.0, sin(t * 2.5) * 0.03 * w, 0.0)
+		_:
+			return Vector3(0.0, sin(t * 3.2) * 0.06 * w, 0.0)
 
 
 func trigger_recoil(intensity: float = 0.08) -> void:

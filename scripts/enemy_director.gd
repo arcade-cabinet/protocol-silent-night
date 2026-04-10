@@ -6,6 +6,8 @@ var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
 var audio_mgr: RefCounted = null
 var _uid_counter: int = 0
+var _enemy_shadow_mesh: PlaneMesh = null
+var _boss_shadow_mesh: PlaneMesh = null
 
 
 func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
@@ -13,16 +15,21 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
+const MAX_ENEMY_CAP := 48  # Mobile performance ceiling
+
 func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1) -> void:
+	if enemies.size() >= MAX_ENEMY_CAP:
+		return
 	var def: Dictionary = enemy_defs[enemy_type]
 	var enemy_node := Node3D.new()
 	enemy_node.name = "Enemy_%s" % enemy_type
 	var mesh_instance: MeshInstance3D = pixels.make_billboard_sprite(enemy_type, 2.0, Color(def["color"]))
 	enemy_node.add_child(mesh_instance)
+	if _enemy_shadow_mesh == null:
+		_enemy_shadow_mesh = PlaneMesh.new()
+		_enemy_shadow_mesh.size = Vector2(1.1, 1.1)
 	var shadow := MeshInstance3D.new()
-	var shadow_mesh := PlaneMesh.new()
-	shadow_mesh.size = Vector2(1.1, 1.1)
-	shadow.mesh = shadow_mesh
+	shadow.mesh = _enemy_shadow_mesh
 	shadow.position = Vector3(0, -0.56, 0)
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
@@ -63,10 +70,11 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	boss_node.name = "Boss"
 	var body: MeshInstance3D = pixels.make_billboard_sprite("boss", 4.4, Color(def["color"]))
 	boss_node.add_child(body)
+	if _boss_shadow_mesh == null:
+		_boss_shadow_mesh = PlaneMesh.new()
+		_boss_shadow_mesh.size = Vector2(2.9, 2.9)
 	var shadow := MeshInstance3D.new()
-	var shadow_mesh := PlaneMesh.new()
-	shadow_mesh.size = Vector2(2.9, 2.9)
-	shadow.mesh = shadow_mesh
+	shadow.mesh = _boss_shadow_mesh
 	shadow.position = Vector3(0, -0.92, 0)
 	shadow.material_override = materials.shadow_material()
 	boss_node.add_child(shadow)
@@ -100,19 +108,21 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	return new_boss
 
 
-func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_node: Node3D, on_move_actor: Callable, on_damage_player: Callable, on_spawn_projectile: Callable, boss_attack_scale: float) -> void:
+func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_node: Node3D, on_move_actor: Callable, on_damage_player: Callable, on_spawn_projectile: Callable, boss_attack_scale: float, on_telegraph: Callable = Callable()) -> void:
 	for index in range(enemies.size() - 1, -1, -1):
 		var enemy: Dictionary = enemies[index]
 		var pl: int = int(enemy.get("phase_level", 1))
 		match String(enemy.get("id", "grunt")):
+			"grunt":
+				EnemyBehaviors.behavior_grunt_bt(enemy, player_node.position, delta, on_move_actor)
 			"rusher":
-				EnemyBehaviors.behavior_swerve(enemy, player_node, delta, on_move_actor, pl)
+				EnemyBehaviors.behavior_rusher_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
 			"tank":
-				EnemyBehaviors.behavior_stomp(enemy, player_node, delta, on_move_actor, pl)
+				EnemyBehaviors.behavior_tank_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
 			"elf":
-				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl)
+				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl, on_telegraph)
 			"santa":
-				EnemyBehaviors.behavior_ranged(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl)
+				EnemyBehaviors.behavior_ranged(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl, on_telegraph)
 			"bumble":
 				EnemyBehaviors.behavior_pack(enemy, enemies, player_node, delta, on_move_actor, pl)
 			_:

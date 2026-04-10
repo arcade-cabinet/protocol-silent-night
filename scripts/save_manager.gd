@@ -74,6 +74,11 @@ func unlock(class_id: String) -> bool:
 	return true
 
 
+func register_level_reached(level_number: int) -> void:
+	state["best_level"] = maxi(int(state.get("best_level", 0)), level_number)
+	save_state()
+
+
 func register_wave_reached(wave_number: int) -> void:
 	state["best_wave"] = maxi(int(state.get("best_wave", 0)), wave_number)
 	var achievements: Dictionary = state.get("achievements", {})
@@ -126,6 +131,52 @@ func spend_cookies(amount: int) -> bool:
 	return true
 
 
+func get_coal() -> Array:
+	var raw: Variant = state.get("coal", [])
+	if not raw is Array:
+		return []
+	# Filter to only valid entries (String or Dictionary) to prevent crashes from tampered saves.
+	var result: Array = []
+	for item in raw:
+		if item is String or item is Dictionary:
+			result.append(item)
+	return result
+
+
+func set_coal(queue: Array) -> void:
+	state["coal"] = queue.duplicate()
+	save_state()
+
+
+func get_equipped_gear() -> Dictionary:
+	var raw: Variant = state.get("equipped_gear", {})
+	return raw.duplicate(true) if raw is Dictionary else {}
+
+
+func set_equipped_gear(equipped: Dictionary) -> void:
+	state["equipped_gear"] = equipped.duplicate(true)
+	save_state()
+
+
+func get_gear_inventory() -> Array:
+	var raw: Variant = state.get("gear_inventory", [])
+	if not raw is Array:
+		return []
+	# Filter to only Dictionary entries; tampered saves with wrong types crash gear_system.
+	var result: Array = []
+	for item in raw:
+		if item is Dictionary and item.has("id") and item.has("slot"):
+			result.append(item)
+	return result
+
+
+func add_to_gear_inventory(item: Dictionary) -> void:
+	var inv: Array = get_gear_inventory()
+	inv.append(item)
+	state["gear_inventory"] = inv
+	save_state()
+
+
 func set_preference(key: String, value) -> void:
 	var prefs: Dictionary = state.get("preferences", {})
 	prefs[key] = value
@@ -137,10 +188,12 @@ func get_preference(key: String, default_value = null) -> Variant:
 	return state.get("preferences", {}).get(key, default_value)
 
 
-func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:
+func _merge_dict(base: Dictionary, incoming: Dictionary, top_level: bool = true) -> Dictionary:
 	for key in incoming.keys():
+		if top_level and not base.has(key):
+			continue  # Top-level only: reject schema-unknown keys from tampered saves.
 		if incoming[key] is Dictionary and base.get(key) is Dictionary:
-			base[key] = _merge_dict(base[key], incoming[key])
+			base[key] = _merge_dict(base[key], incoming[key], false)
 		else:
 			base[key] = incoming[key]
 	return base

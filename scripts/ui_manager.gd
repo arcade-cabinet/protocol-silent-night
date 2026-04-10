@@ -2,6 +2,9 @@ extends RefCounted
 
 const UI_BUILDER := preload("res://scripts/ui_builder.gd")
 const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
+const COAL_SIDEBAR := preload("res://scripts/coal_sidebar_ui.gd")
+const UI_WIDGETS := preload("res://scripts/ui_widgets.gd")
+const PRESENT_SELECT := preload("res://scripts/present_select_ui.gd")
 
 var hud_root: Container
 var start_screen: PanelContainer
@@ -18,22 +21,31 @@ var level_label: Label
 var timer_label: Label
 var wave_label: Label
 var kills_label: Label
+var cookie_label: Label
 var end_title: Label
 var end_message: Label
 var end_waves: Label
 var dash_button: Button
+var pause_button: Button
 var joystick_base: ColorRect
 var joystick_knob: ColorRect
 var start_classes_box: Container
 var upgrade_box: HBoxContainer
 var difficulty_panel: PanelContainer
+var coal_sidebar_state: Dictionary = {}
+var _last_coal_signature: String = ""
+var widgets: Dictionary = {}
+var _hp_pulse_time: float = 0.0
+var _banner_target: String = ""
+var _banner_char_idx: int = 0
+var _banner_timer: float = 0.0
 
 var message_timer: float = 0.0
 var achievement_timer: float = 0.0
 var root_control: Control
 
 
-func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable()) -> CanvasLayer:
+func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable(), on_coal_activate: Callable = Callable()) -> CanvasLayer:
 	var ui := CanvasLayer.new()
 	ui.name = "UI"
 	parent.add_child(ui)
@@ -56,6 +68,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	wave_label = hud["wave_label"]
 	timer_label = hud["timer_label"]
 	kills_label = hud["kills_label"]
+	cookie_label = hud["cookie_label"]
 
 	var boss := UI_BUILDER.build_boss_panel(root)
 	boss_panel = boss["boss_panel"]
@@ -77,39 +90,56 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	dash_button = overlays["dash_button"]
 	joystick_base = overlays["joystick_base"]
 	joystick_knob = overlays["joystick_knob"]
+	pause_button = overlays["pause_button"]
+	if pause_button != null:
+		pause_button.pressed.connect(func() -> void: toggle_pause(parent.get_tree()))
 
 	if on_difficulty_selected.is_valid():
 		var diff := DIFFICULTY_SELECT.build(root, on_difficulty_selected)
 		difficulty_panel = diff["panel"]
 
+	if on_coal_activate.is_valid():
+		coal_sidebar_state = COAL_SIDEBAR.build_sidebar(root, on_coal_activate)
+
+	widgets = UI_WIDGETS.build_all(root)
+	PRESENT_SELECT.init_preview(root)
+
 	return ui
 
 
-func refresh_start_screen(class_defs: Dictionary, save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
+func refresh_widgets(main: Node) -> void: UI_WIDGETS.refresh(widgets, main)
+func register_combo_kill() -> void: UI_WIDGETS.register_kill(widgets)
+func ensure_menus(audio_mgr: RefCounted, sm: Node, on_restart: Callable, on_quit: Callable) -> void: UI_WIDGETS.ensure_menus(widgets, root_control, audio_mgr, sm, on_restart, on_quit)
+func open_settings() -> void: UI_WIDGETS.open_settings(widgets)
+func toggle_pause(tree: SceneTree) -> void: UI_WIDGETS.toggle_pause(widgets, tree)
+
+
+func refresh_coal_sidebar(coal_queue: Array) -> void:
+	if coal_sidebar_state.is_empty():
+		return
+	var signature: String = ",".join(coal_queue.map(func(e): return str(e)))
+	if signature == _last_coal_signature:
+		return
+	_last_coal_signature = signature
+	COAL_SIDEBAR.refresh(coal_sidebar_state, coal_queue)
+
+
+func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
 	for child in start_classes_box.get_children():
 		child.queue_free()
 	if not present_defs.is_empty():
 		_build_present_buttons(present_defs, save_manager, on_class_pressed)
-	else:
-		for class_id in ["elf", "santa", "bumble"]:
-			var def: Dictionary = class_defs[class_id]
-			var button := Button.new()
-			button.text = "%s\n%s" % [def["name"], def["weapon_name"]]
-			button.custom_minimum_size = Vector2(220, 180)
-			button.disabled = save_manager != null and not save_manager.is_unlocked(class_id)
-			if button.disabled:
-				button.text += "\nLOCKED"
-			button.set_meta("class_id", class_id)
-			button.pressed.connect(on_class_pressed.bind(button))
-			start_classes_box.add_child(button)
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:
-	preload("res://scripts/present_select_ui.gd").build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed)
+	PRESENT_SELECT.build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed)
 
 
 func show_message(text: String, duration: float, color: Color = Color.WHITE) -> void:
-	message_overlay.text = text
+	_banner_target = text
+	_banner_char_idx = 0
+	_banner_timer = 0.0
+	message_overlay.text = ""
 	message_overlay.modulate = color
 	message_timer = duration
 
@@ -120,18 +150,7 @@ func show_achievement(text: String, duration: float = 3.0) -> void:
 
 
 func update_transient_overlays(delta: float) -> void:
-	if message_timer > 0.0:
-		message_timer -= delta
-		message_overlay.visible = true
-		message_overlay.modulate.a = clampf(message_timer / 0.3 if message_timer < 0.3 else 1.0, 0.0, 1.0)
-	else:
-		message_overlay.visible = false
-	if achievement_timer > 0.0:
-		achievement_timer -= delta
-		achievement_overlay.visible = true
-		achievement_overlay.modulate.a = clampf(achievement_timer / 0.3 if achievement_timer < 0.3 else 1.0, 0.0, 1.0)
-	else:
-		achievement_overlay.visible = false
+	UI_WIDGETS.tick_overlays(self, delta)
 
 
 func show_joystick(base_pos: Vector2, knob_pos: Vector2) -> void:
@@ -146,16 +165,15 @@ func hide_joystick() -> void:
 	joystick_knob.visible = false
 
 
-func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int) -> void:
+func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0, coal_queue: Array = []) -> void:
 	if hp_bar != null:
 		hp_bar.max_value = player_state.get("max_hp", 100.0)
 		hp_bar.value = player_state.get("hp", 100.0)
 	if hp_label != null:
 		hp_label.text = "%d / %d" % [int(round(player_state.get("hp", 100.0))), int(round(player_state.get("max_hp", 100.0)))]
 	if xp_bar != null:
-		xp_bar.max_value = xp_needed
-		xp_bar.value = xp
-	if level_label != null:
-		level_label.text = "LEVEL %d" % level
-	if kills_label != null:
-		kills_label.text = str(kills)
+		xp_bar.max_value = xp_needed; xp_bar.value = xp
+	if level_label != null: level_label.text = "LEVEL %d" % level
+	if kills_label != null: kills_label.text = str(kills)
+	if cookie_label != null: cookie_label.text = "%d C" % cookies
+	refresh_coal_sidebar(coal_queue)
