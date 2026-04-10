@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Features
-- LimboAI enemy behavior trees (grunt/rusher/tank/Krampus HSM) — see game-completion.prq.md
-- Arena material zones: snow (center), ice (mid-ring), asphalt (perimeter)
-- Present portrait 3D viewport in select screen
-- Board object distinctive meshes (Frozen Mailbox, Gift Cache, Chimney Vent)
-- Android export preset + debug APK CI pipeline
+### Game-Completion Batch (PR #152)
+
+- **Enemy AI — BT state machines**: Pure GDScript BT state machines (`enemy_bt_states.gd`, `boss_bt_helpers.gd`) with no external dependency. Grunt: wander (>12u) → chase → contact. Rusher: idle → burst-sprint (2.5× speed, 0.6s) → cooldown (0.9s) with telegraph. Tank: advance → prep_slam (0.5s telegraph) → slam (1.8× dmg, 1.5u radius) → stagger (0.8s). Krampus HSM: phase 1 circle-strafe at 10u orbit + fan shots (0.9s); phase 2 charge every 4s + ranged (1.2s); phase 3 charge every 2.5s + multi-shot (3 proj, ±10°, 0.8s) + 2 minions every 6s.
+- **Arena zone tinting**: Radial GLSL shader blend in arena floor — snow (white/pale blue, inner 32%), ice (cyan gloss, 32–68%), asphalt (dark industrial, 68–88%), with edge darkening. Roughness and specular track zone transitions.
+- **Present portrait viewport**: `SubViewport` 3D panel on select screen renders a rotating present preview (45°/s Y spin via `auto_rotate.gd`) on button hover. `present_preview_viewport.gd` handles headless no-op. Radar chart and viewport both update on hover.
+- **Board object visuals**: Frozen Mailbox (upright 0.4×0.8×0.4 box + mouth slot + frost sphere); Gift Cache (low wide 1.0×0.35×1.0 + ribbon cross, two gold strips); Chimney Vent (0.45r cylinder + CPUParticles3D smoke emitter + ember glow). All three get billboard health bars (QuadMesh, unshaded, `BILLBOARD_ENABLED`); handler updates scale.x on damage.
+- **Android export**: `export_presets.cfg` with arm64-v8a, landscape locked, min SDK 28 / target SDK 34. `project.godot` gets `window/handheld/orientation=0`. Touch input tests verify drag→move and dash zone on 390×844 viewport.
+- **E2E full-flow**: `test_full_session_flow.gd` — 2 waves + wave_clear drain + win + bumble unlock + menu return, headless, <15s.
+- **Dead code removal**: `classes.json` and `waves.json` deleted; `_class_defs` parameter removed from `spawn_player` + `refresh_start_screen`; `_spawn_legacy_player` removed; `wave_formula.gd` is sole wave content source.
+- **Architecture docs**: `AUDIO_ARCHITECTURE.md` (146 lines), `PRESENT_SYSTEM.md` (164 lines), `HUD_WIDGETS.md` (219 lines), `SCRIPTS_REFERENCE.md` (158 lines).
+- **Tests**: +27 unit/component tests (198→225), all passing. Zero LOC violations.
 
 ## [0.1.0] — Godot Reboot (2026-04-09)
 
