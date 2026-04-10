@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### CI/Security Hardening (post-batch, codex/production-polish)
+
+- **GitHub Actions SHA pinning**: All action refs pinned to full commit SHAs across ci/cd/release/release-please workflows (addresses SonarCloud hotspot S6720 — mutable version tags)
+- **Job-level permissions**: Write permissions moved from workflow level to individual job level in all four workflows (SonarCloud quality gate fix)
+- **gdUnit4 flag fix**: CI test command corrected to `--continue` (was `--continue-on-failure` which is unrecognized in v6.1.2; caused CI exit 100)
+- **preload() hoisting**: All `preload()` calls inside function bodies hoisted to file-level `const` declarations across 8 scripts (main, game_manager, audio_manager, ui_manager, particle_effects, player_controller, main_helpers, audio_manager_ext) — eliminates per-call script re-parsing overhead
+- **Stale PR cleanup**: Closed #146 (superseded by stack), #112 and npm dependabot PRs #130-#132/#135/#139 (referenced files no longer in repo)
+
 ### Game-Completion Batch (PR #152)
 
 - **Enemy AI — BT state machines**: Pure GDScript BT state machines (`enemy_bt_states.gd`, `boss_bt_helpers.gd`) with no external dependency. Grunt: wander (>12u) → chase → contact. Rusher: idle → burst-sprint (2.5× speed, 0.6s) → cooldown (0.9s) with telegraph. Tank: advance → prep_slam (0.5s telegraph) → slam (1.8× dmg, 1.5u radius) → stagger (0.8s). Krampus HSM: phase 1 circle-strafe at 10u orbit + fan shots (0.9s); phase 2 charge every 4s + ranged (1.2s); phase 3 charge every 2.5s + multi-shot (3 proj, ±10°, 0.8s) + 2 minions every 6s.
