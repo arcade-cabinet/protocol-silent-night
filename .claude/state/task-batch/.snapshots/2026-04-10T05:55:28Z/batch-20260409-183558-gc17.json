@@ -1,0 +1,29 @@
+{
+  "batch_id": "batch-20260409-183558-gc17",
+  "input_path": ".claude/plans/game-completion.prq.md",
+  "started_at": "2026-04-09T23:35:58Z",
+  "last_updated_at": "2026-04-09T23:35:58Z",
+  "current_task_id": "dead-code-removal",
+  "completed": [],
+  "pending": [
+    {"id":"dead-code-removal","priority":"P1","deps":[]},
+    {"id":"fix-is-boss-wave","priority":"P1","deps":[]},
+    {"id":"limboai-install","priority":"P1","deps":[]},
+    {"id":"arena-material-zones","priority":"P1","deps":[]},
+    {"id":"grunt-behavior-tree","priority":"P1","deps":["limboai-install"]},
+    {"id":"rusher-behavior-tree","priority":"P1","deps":["limboai-install"]},
+    {"id":"tank-behavior-tree","priority":"P1","deps":["limboai-install"]},
+    {"id":"krampus-prime-behavior-tree","priority":"P1","deps":["limboai-install","grunt-behavior-tree"]},
+    {"id":"present-portrait-viewport","priority":"P2","deps":[]},
+    {"id":"board-object-visuals","priority":"P2","deps":[]},
+    {"id":"android-export-config","priority":"P2","deps":[]},
+    {"id":"e2e-full-flow","priority":"P2","deps":["present-portrait-viewport"]},
+    {"id":"waves-json-retirement","priority":"P3","deps":["dead-code-removal"]},
+    {"id":"docs-audio-architecture","priority":"P3","deps":[]},
+    {"id":"docs-present-system","priority":"P3","deps":[]},
+    {"id":"docs-hud-widgets","priority":"P3","deps":[]},
+    {"id":"docs-scripts-reference","priority":"P3","deps":[]}
+  ],
+  "failed": [],
+  "config": {"stop_on_failure": false, "max_retries": 3}
+}

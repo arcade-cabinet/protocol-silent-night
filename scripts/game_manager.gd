@@ -26,6 +26,7 @@ func start_run(class_id: String) -> void:
 	main.level_lookback.clear()
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	var start_sm: Node = main._save_manager()
+	if start_sm != null: start_sm.record_run_start()
 	main.coal_queue = start_sm.get_coal() if start_sm != null else []
 	MAIN_HELPERS.load_equipped_gear(main, start_sm)
 	MAIN_HELPERS.apply_reduced_motion(main, start_sm)
@@ -88,6 +89,7 @@ func end_run(win: bool) -> void:
 	var sm: Node = main._save_manager()
 	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
 	if sm != null: sm.set_coal(main.coal_queue)
+	if win and sm != null: sm.record_campaign_clear()
 	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
 	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
@@ -140,8 +142,9 @@ func update_player(delta: float) -> void:
 		main.ui_mgr.dash_button.disabled = main.dash_cooldown_timer > 0.0
 	if main.dash_pressed and main.dash_cooldown_timer <= 0.0:
 		main.dash_timer = float(main.config["dash_duration"])
-		main.dash_cooldown_timer = float(main.config["dash_cooldown"])
+		main.dash_cooldown_timer = float(main.config["dash_cooldown"]) * float(main.player_state["class"].get("dash_cooldown", 1.0))
 		main.dash_pressed = false
+		if main.audio_mgr != null: main.audio_mgr.play_dash()
 		main.afterimages.append(main.present_animator.spawn_dash_afterimage(main.fx_root, main.player_node))
 	var speed: float = float(main.player_state["class"]["speed"]) * main._test_scale("player_speed_scale")
 	if main.dash_timer > 0.0:
@@ -173,19 +176,33 @@ func closest_target() -> Dictionary:
 	return main.enemies_ai.closest_target(main.enemies, main.boss_ref, main.player_node, float(main.player_state["class"]["range"]))
 
 func spawn_projectile_player(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
-	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color(main.player_state["class"]["color"]), main.fx_root, main.particles)
+	var crit_chance := float(main.player_state["class"].get("crit_chance", 0.0))
+	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color(main.player_state["class"]["color"]), main.fx_root, main.particles, crit_chance)
 
 func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
 	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color("ff617e"), main.fx_root, main.particles)
 
 func spawn_aura_damage_number(wp: Vector3, a: float, c: Color) -> void: main.dmg_numbers.spawn(main.fx_root, wp, a, c)
 func on_boss_killed() -> void:
+	if main.state != "playing":
+		return
 	main.boss_phases.clear(); main.boss_ref["node"].queue_free(); main.boss_ref = {}
 	main.ui_mgr.boss_panel.visible = false; end_run(true)
-func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
-func gain_cookies(amt: int) -> void: main.run_cookies += amt
+func gain_xp(amt: int) -> void:
+	# Scale XP by wave so levelling keeps pace with escalating enemy HP, then apply gear bonus.
+	var wave_mult := 1.0 + float(maxi(0, main.current_wave_index)) * 0.08
+	var bonus := float(main.player_state["class"].get("xp_bonus", 0.0))
+	main.progression.gain_xp(int(roundi(float(amt) * wave_mult * (1.0 + bonus))), Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
+func gain_cookies(amt: int) -> void:
+	var bonus := float(main.player_state["class"].get("cookie_bonus", 0.0))
+	main.run_cookies += int(roundi(float(amt) * (1.0 + bonus)))
 func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
-func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
+func _boss_summon_minion() -> void:
+	var minion_type: String = ["grunt", "rusher"][randi() % 2]
+	main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, minion_type,
+		float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config,
+		int(main.current_wave.get("enemy_phase_level", 1)),
+		float(main.current_wave.get("speed_mult", 1.0)), float(main.current_wave.get("damage_scale", 1.0)))
 func _on_boss_phase_changed(_phase: int) -> void: MAIN_HELPERS.boss_phase_sting(main)
 func _enemy_telegraph(etype: String, pos: Vector3) -> void: MAIN_HELPERS.enemy_telegraph(main, etype, pos)
 func clear_runtime() -> void: RUNTIME_CLEANER.clear(main)

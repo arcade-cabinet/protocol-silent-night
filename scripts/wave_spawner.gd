@@ -2,25 +2,31 @@ extends RefCounted
 
 ## Per-frame spawn logic using boss pressure accumulator.
 ## Krampus appears within normal waves via probability rolls.
+## Consumes burst_chance, burst_size, and pattern from wave dict
+## so wave formula variety is visually expressed.
 
 var main: Node
 var boss_rng := RandomNumberGenerator.new()
 var scroll_rng := RandomNumberGenerator.new()
+var _spawn_rng := RandomNumberGenerator.new()
 var bosses_spawned_this_level: int = 0
 var scrolls_dropped_this_level: int = 0
 var elapsed: float = 0.0
+var _spiral_angle: float = 0.0
 
 
 func _init(main_node: Node) -> void:
 	main = main_node
 	boss_rng.seed = int(Time.get_ticks_usec())
 	scroll_rng.seed = int(Time.get_ticks_usec()) + 31337
+	_spawn_rng.seed = int(Time.get_ticks_usec()) + 99991
 
 
 func reset_for_level() -> void:
 	bosses_spawned_this_level = 0
 	scrolls_dropped_this_level = 0
 	elapsed = 0.0
+	_spiral_angle = 0.0
 
 
 func update_spawning(delta: float, spawn_boss_callable: Callable, spawn_board_object_callable: Callable = Callable()) -> void:
@@ -36,9 +42,38 @@ func update_spawning(delta: float, spawn_boss_callable: Callable, spawn_board_ob
 	var composition: Array = wave.get("composition", ["grunt"])
 	if composition.is_empty():
 		return
-	var enemy_type: String = composition[randi() % composition.size()]
-	main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, enemy_type,
-		float(wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
+	var burst_chance: float = float(wave.get("burst_chance", 0.0))
+	var burst_size: int = maxi(1, int(wave.get("burst_size", 1)))
+	var count: int = burst_size if _spawn_rng.randf() < burst_chance else 1
+	var pattern: String = String(wave.get("pattern", "scatter"))
+	var ar: float = float(main.config["arena_radius"])
+	for i in range(count):
+		var enemy_type: String = composition[_spawn_rng.randi() % composition.size()]
+		var pos := _pattern_position(pattern, i, count, ar)
+		main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, enemy_type,
+			float(wave.get("hp_scale", 1.0)), main.enemy_defs, main.config,
+			int(wave.get("enemy_phase_level", 1)),
+			float(wave.get("speed_mult", 1.0)), float(wave.get("damage_scale", 1.0)), pos)
+
+
+func _pattern_position(pattern: String, index: int, total: int, ar: float) -> Vector3:
+	var spawn_r := ar * 1.6
+	var angle: float
+	match pattern:
+		"ring":
+			angle = (TAU / float(maxi(total, 1))) * index
+		"wedge":
+			var spread := PI / 2.5
+			var t := float(index) / float(maxi(total - 1, 1))
+			angle = (-spread / 2.0) + spread * t + _spawn_rng.randf_range(-0.08, 0.08)
+		"flanking":
+			angle = (PI / 2.0 if index % 2 == 0 else -PI / 2.0) + _spawn_rng.randf_range(-0.4, 0.4)
+		"spiral":
+			_spiral_angle += PI * 0.618034  # golden angle
+			angle = _spiral_angle
+		_:  # scatter
+			angle = _spawn_rng.randf_range(0.0, TAU)
+	return Vector3(cos(angle) * spawn_r, 0.58, sin(angle) * spawn_r)
 
 
 func _try_boss_spawn(wave: Dictionary, spawn_boss_callable: Callable) -> void:
