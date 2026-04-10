@@ -180,6 +180,8 @@ func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool
 
 func spawn_aura_damage_number(wp: Vector3, a: float, c: Color) -> void: main.dmg_numbers.spawn(main.fx_root, wp, a, c)
 func on_boss_killed() -> void:
+	if main.state != "playing":
+		return
 	main.boss_phases.clear(); main.boss_ref["node"].queue_free(); main.boss_ref = {}
 	main.ui_mgr.boss_panel.visible = false; end_run(true)
 func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
