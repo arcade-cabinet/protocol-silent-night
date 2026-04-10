@@ -139,6 +139,7 @@ static func apply_reduced_motion(main: Node, sm: Node) -> void:
 	if main.screen_shake != null: main.screen_shake.configure(reduced)
 	if main.flair_animator != null and main.flair_animator.has_method("configure"): main.flair_animator.configure(reduced)
 	if main.present_animator != null and main.present_animator.has_method("configure"): main.present_animator.configure(reduced)
+	if main.particles != null: main.particles.configure(reduced)
 
 
 static func show_gameplay_ui(main: Node) -> void:
@@ -150,6 +151,7 @@ static func show_gameplay_ui(main: Node) -> void:
 	ui.end_screen.visible = false
 	ui.hud_root.visible = true
 	ui.dash_button.visible = true
+	if ui.pause_button != null: ui.pause_button.visible = true
 	main.ui_mgr.dash_button.disabled = false
 	if main.audio_mgr != null:
 		main.audio_mgr.play_music("gameplay"); main.audio_mgr.play_ambient()

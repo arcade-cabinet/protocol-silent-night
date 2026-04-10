@@ -26,6 +26,7 @@ var end_title: Label
 var end_message: Label
 var end_waves: Label
 var dash_button: Button
+var pause_button: Button
 var joystick_base: ColorRect
 var joystick_knob: ColorRect
 var start_classes_box: Container
@@ -89,6 +90,9 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	dash_button = overlays["dash_button"]
 	joystick_base = overlays["joystick_base"]
 	joystick_knob = overlays["joystick_knob"]
+	pause_button = overlays["pause_button"]
+	if pause_button != null:
+		pause_button.pressed.connect(func() -> void: toggle_pause(parent.get_tree()))
 
 	if on_difficulty_selected.is_valid():
 		var diff := DIFFICULTY_SELECT.build(root, on_difficulty_selected)

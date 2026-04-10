@@ -13,6 +13,11 @@ var _entries: Array = []
 var _sphere_cache: SphereMesh = null
 var _mat_cache: Dictionary = {}
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var reduced_motion: bool = false
+
+
+func configure(reduced: bool) -> void:
+	reduced_motion = reduced
 
 
 func _init() -> void:
@@ -83,7 +88,7 @@ func spawn_muzzle_flash(root: Node3D, position: Vector3, direction: Vector3, col
 
 
 func spawn_death_burst(root: Node3D, position: Vector3, color: Color, size: float = 1.0) -> void:
-	if root == null:
+	if root == null or reduced_motion:
 		return
 	var count := 12
 	for index in range(count):

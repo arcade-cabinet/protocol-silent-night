@@ -33,7 +33,8 @@ func trigger_level_up(state_setter: Callable, upgrade_defs: Array, test_mode: Di
 	if audio_mgr != null: audio_mgr.play_level_up()
 	xp -= xp_needed
 	level += 1
-	xp_needed = int(round(xp_needed * 1.45))
+	# Cap prevents XP wall that stops upgrades coming at late levels.
+	xp_needed = mini(int(round(xp_needed * 1.45)), 500)
 	ui_mgr.xp_bar.max_value = xp_needed
 	ui_mgr.level_label.text = "LEVEL %d" % level
 	ui_mgr.level_screen.visible = true

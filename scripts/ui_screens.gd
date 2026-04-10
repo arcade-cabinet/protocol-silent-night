@@ -132,10 +132,23 @@ static func build_overlays_and_controls(root: Control, on_dash_down: Callable, o
 	joystick_knob.custom_minimum_size = Vector2(42, 42)
 	root.add_child(joystick_knob)
 
+	var pause_button := Button.new()
+	pause_button.name = "PauseButton"
+	pause_button.text = "II"
+	pause_button.visible = false
+	pause_button.custom_minimum_size = Vector2(48, 48)
+	pause_button.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	pause_button.offset_left = 12
+	pause_button.offset_top = 12
+	pause_button.offset_right = 60
+	pause_button.offset_bottom = 60
+	root.add_child(pause_button)
+
 	return {
 		"message_overlay": message_overlay,
 		"achievement_overlay": achievement_overlay,
 		"dash_button": dash_button,
 		"joystick_base": joystick_base,
-		"joystick_knob": joystick_knob
+		"joystick_knob": joystick_knob,
+		"pause_button": pause_button,
 	}

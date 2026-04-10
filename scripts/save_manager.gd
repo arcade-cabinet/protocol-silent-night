@@ -74,6 +74,11 @@ func unlock(class_id: String) -> bool:
 	return true
 
 
+func register_level_reached(level_number: int) -> void:
+	state["best_level"] = maxi(int(state.get("best_level", 0)), level_number)
+	save_state()
+
+
 func register_wave_reached(wave_number: int) -> void:
 	state["best_wave"] = maxi(int(state.get("best_wave", 0)), wave_number)
 	var achievements: Dictionary = state.get("achievements", {})
@@ -185,6 +190,8 @@ func get_preference(key: String, default_value = null) -> Variant:
 
 func _merge_dict(base: Dictionary, incoming: Dictionary) -> Dictionary:
 	for key in incoming.keys():
+		if not base.has(key):
+			continue  # Reject unknown keys — prevents arbitrary injection from tampered saves.
 		if incoming[key] is Dictionary and base.get(key) is Dictionary:
 			base[key] = _merge_dict(base[key], incoming[key])
 		else:

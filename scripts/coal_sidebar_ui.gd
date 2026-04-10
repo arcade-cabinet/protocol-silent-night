@@ -36,7 +36,7 @@ static func refresh(state: Dictionary, coal_queue: Array) -> void:
 		var button := Button.new()
 		var prefix: String = "" if rarity == "common" else rarity.substr(0, 1).to_upper() + "-"
 		button.text = prefix + "COAL"
-		button.custom_minimum_size = Vector2(56, 40)
+		button.custom_minimum_size = Vector2(60, 48)
 		button.add_theme_font_size_override("font_size", 11)
 		var rarity_c: Color = COAL_EFFECTS.rarity_color(rarity)
 		THEME.apply_to_button(button, rarity_c)
