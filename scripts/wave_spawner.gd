@@ -38,7 +38,8 @@ func update_spawning(delta: float, spawn_boss_callable: Callable, spawn_board_ob
 		return
 	var enemy_type: String = composition[randi() % composition.size()]
 	main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, enemy_type,
-		float(wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
+		float(wave.get("hp_scale", 1.0)), main.enemy_defs, main.config,
+		int(wave.get("enemy_phase_level", 1)), float(wave.get("speed_mult", 1.0)))
 
 
 func _try_boss_spawn(wave: Dictionary, spawn_boss_callable: Callable) -> void:

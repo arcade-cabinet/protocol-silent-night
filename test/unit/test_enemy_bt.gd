@@ -167,8 +167,7 @@ func test_tank_slam_mult_cleared_in_stagger_state() -> void:
 	# causing 1.8× contact damage to persist indefinitely after each slam.
 	var enemy := _make_enemy("tank", Vector3(0, 0, 0))
 	enemy["behavior_state"] = "slam"
-	# Tick 1: timer at SLAM_DURATION → transitions to stagger, mult still 1.8 (slam frame)
-	enemy["behavior_timer"] = EnemyBTStates.TANK_SLAM_DURATION
+	enemy["behavior_timer"] = EnemyBTStates.TANK_SLAM_DURATION  # transitions to stagger
 	EnemyBTStates.tank_tick(enemy, Vector3(4.0, 0.0, 0.0), 0.01, Callable())
 	assert_str(String(enemy["behavior_state"])).is_equal("stagger")
 	# Tick 2: first stagger tick — mult must be reset to 1.0
