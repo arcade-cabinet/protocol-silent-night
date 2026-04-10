@@ -3,6 +3,8 @@ extends RefCounted
 # movement via `on_move_actor` or projectiles via `on_spawn_projectile`.
 # Keep this file focused and under the 200 LOC project limit.
 
+const EnemyBTStates := preload("res://scripts/enemy_bt_states.gd")
+
 
 static func contact_radius(enemy: Dictionary) -> float:
 	return 0.52 + float(enemy["node"].scale.x) * 0.3
@@ -133,3 +135,52 @@ static func behavior_pack(enemy: Dictionary, enemies: Array, player_node: Node3D
 		return
 	var direction: Vector3 = (to_player.normalized() + to_pack * 0.4).normalized()
 	on_move_actor.call(enemy["node"], direction, float(enemy["speed"]), delta, contact_radius(enemy))
+
+
+static func behavior_grunt_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable) -> void:
+	var state := EnemyBTStates.grunt_tick(enemy, player_pos, delta)
+	var enode: Node3D = enemy["node"]
+	match state:
+		"wander":
+			var dir: Vector3 = EnemyBTStates.grunt_wander_direction(enemy, delta)
+			on_move_actor.call(enode, dir, float(enemy["speed"]) * 0.5, delta, contact_radius(enemy))
+		"chase":
+			var to_p: Vector3 = Vector3(player_pos.x, enode.position.y, player_pos.z) - enode.position
+			if to_p.length_squared() > 0.0001:
+				on_move_actor.call(enode, to_p.normalized(), float(enemy["speed"]), delta, contact_radius(enemy))
+		"contact":
+			pass  # combat resolver handles contact damage
+
+
+static func behavior_rusher_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, on_telegraph: Callable = Callable()) -> void:
+	var state := EnemyBTStates.rusher_tick(enemy, player_pos, delta, on_telegraph)
+	var enode: Node3D = enemy["node"]
+	var to_p: Vector3 = Vector3(player_pos.x, enode.position.y, player_pos.z) - enode.position
+	if to_p.length_squared() <= 0.0001:
+		return
+	var dir: Vector3 = to_p.normalized()
+	match state:
+		"idle":
+			on_move_actor.call(enode, dir, float(enemy["speed"]), delta, contact_radius(enemy))
+		"burst":
+			on_move_actor.call(enode, dir, float(enemy["speed"]) * EnemyBTStates.RUSHER_BURST_SPEED_MULT, delta, contact_radius(enemy))
+		"cooldown":
+			pass  # no movement during cooldown
+
+
+static func behavior_tank_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, on_telegraph: Callable = Callable()) -> void:
+	var state := EnemyBTStates.tank_tick(enemy, player_pos, delta, on_telegraph)
+	var enode: Node3D = enemy["node"]
+	var to_p: Vector3 = Vector3(player_pos.x, enode.position.y, player_pos.z) - enode.position
+	if to_p.length_squared() <= 0.0001:
+		return
+	var dir: Vector3 = to_p.normalized()
+	match state:
+		"advance":
+			on_move_actor.call(enode, dir, float(enemy["speed"]) * 0.7, delta, contact_radius(enemy))
+		"prep_slam":
+			on_move_actor.call(enode, dir, float(enemy["speed"]) * 0.3, delta, contact_radius(enemy))
+		"slam":
+			on_move_actor.call(enode, dir, float(enemy["speed"]) * 2.0, delta, contact_radius(enemy))
+		"stagger":
+			pass  # no movement during stagger

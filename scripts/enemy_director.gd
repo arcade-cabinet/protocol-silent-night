@@ -105,10 +105,12 @@ func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_n
 		var enemy: Dictionary = enemies[index]
 		var pl: int = int(enemy.get("phase_level", 1))
 		match String(enemy.get("id", "grunt")):
+			"grunt":
+				EnemyBehaviors.behavior_grunt_bt(enemy, player_node.position, delta, on_move_actor)
 			"rusher":
-				EnemyBehaviors.behavior_swerve(enemy, player_node, delta, on_move_actor, pl)
+				EnemyBehaviors.behavior_rusher_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
 			"tank":
-				EnemyBehaviors.behavior_stomp(enemy, player_node, delta, on_move_actor, pl)
+				EnemyBehaviors.behavior_tank_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
 			"elf":
 				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl, on_telegraph)
 			"santa":
