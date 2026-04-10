@@ -169,32 +169,3 @@ static func finalize_end_screen(main: Node, win: bool) -> void:
 	ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
 	ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
 	ui.end_waves.text = "Waves cleared: %d" % maxi(1, main.current_wave_index + 1)
-
-static func build_board(main: Node) -> void:
-	main.obstacle_colliders.clear()
-	main.board_data = main.board_generator.generate_board(int(main.config.get("board_seed", 1225)) + main.progression.level, main.config)
-	main.board_builder.build_board_foundation(main.board_root, float(main.config.get("arena_radius", 18.0)))
-	main.board_builder.build_snow_drifts(main.board_root, main.board_data)
-	main.board_builder.build_outer_ridge(main.board_root, main.board_data)
-	for obstacle in main.board_data.get("obstacles", []):
-		main.obstacles_builder.make_obstacle(main.board_root, obstacle, main.obstacle_colliders)
-	for landmark in main.board_data.get("landmarks", []):
-		main.obstacles_builder.make_landmark(main.board_root, landmark)
-
-static func return_to_menu(main: Node) -> void:
-	main.state = "menu"
-	main.move_velocity = Vector2.ZERO
-	main.input_move = Vector2.ZERO
-	main.touch_active = false
-	var ui: RefCounted = main.ui_mgr
-	ui.end_screen.visible = false
-	ui.level_screen.visible = false
-	ui.dash_button.visible = false
-	ui.hud_root.visible = false
-	ui.start_screen.visible = true
-	ui.boss_panel.visible = false
-	if ui.difficulty_panel != null:
-		ui.difficulty_panel.visible = false
-	ui.hide_joystick()
-	main.game_mgr.clear_runtime()
-	main._refresh_start_screen()

@@ -4,6 +4,7 @@ const PROGRESSION_MANAGER := preload("res://scripts/progression_manager.gd")
 const GAME_MANAGER := preload("res://scripts/game_manager.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 const MAIN_HELPERS := preload("res://scripts/main_helpers.gd")
+const BOARD_HELPERS := preload("res://scripts/board_helpers.gd")
 const PLAYER_DAMAGE_HANDLER := preload("res://scripts/player_damage_handler.gd")
 const PICKUP_MAGNET_RING := preload("res://scripts/pickup_magnet_ring.gd")
 const FLAIR_ANIMATOR_SCR := preload("res://scripts/flair_animator.gd")
@@ -109,19 +110,26 @@ var test_mode: Dictionary = {}
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
+	_init_services()
+	_refresh_start_screen()
+	ui_mgr.show_message("", 0.0)
+	MAIN_HELPERS.apply_reduced_motion(self, _save_manager())
+
+
+func _init_services() -> void:
 	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
-	combat.audio_mgr = audio_mgr; enemies_ai.audio_mgr = audio_mgr
+	combat.audio_mgr = audio_mgr
+	enemies_ai.audio_mgr = audio_mgr
 	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
-	flair_animator = FLAIR_ANIMATOR_SCR.new(); runtime_root.add_child(flair_animator)
+	flair_animator = FLAIR_ANIMATOR_SCR.new()
+	runtime_root.add_child(flair_animator)
 	pickup_magnet_ring = PICKUP_MAGNET_RING.build(runtime_root)
-	progression = PROGRESSION_MANAGER.new(ui_mgr); progression.audio_mgr = audio_mgr
+	progression = PROGRESSION_MANAGER.new(ui_mgr)
+	progression.audio_mgr = audio_mgr
 	game_mgr = GAME_MANAGER.new(self)
 	between_match = BETWEEN_MATCH_FLOW.new(self)
 	between_match.build_screens(ui_mgr.root_control)
 	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
-	_refresh_start_screen()
-	ui_mgr.show_message("", 0.0)
-	MAIN_HELPERS.apply_reduced_motion(self, _save_manager())
 
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
@@ -166,7 +174,7 @@ func _load_definitions() -> void: MAIN_HELPERS.load_definitions(self)
 
 func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
 func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(), _on_class_button_pressed, present_defs)
-func _return_to_menu() -> void: MAIN_HELPERS.return_to_menu(self)
+func _return_to_menu() -> void: BOARD_HELPERS.return_to_menu(self)
 
 func _trigger_level_up() -> void: MAIN_HELPERS.trigger_level_up(self)
 

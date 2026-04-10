@@ -17,7 +17,7 @@ const DEFAULT_STATE := {
 	"preferences": {
 		"difficulty_tier": 1,
 		"permadeath": false,
-		"last_present": "holly_striker"
+		"last_present": "elf"
 	},
 	"cookies": 0,
 	"coal": [],

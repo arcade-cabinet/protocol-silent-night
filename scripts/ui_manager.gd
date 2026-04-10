@@ -132,7 +132,7 @@ func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, presen
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:
-	PRESENT_SELECT.build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed)
+	PRESENT_SELECT.build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed, radar_canvas, audio_mgr)
 
 
 func show_message(text: String, duration: float, color: Color = Color.WHITE) -> void:
@@ -172,8 +172,12 @@ func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, k
 	if hp_label != null:
 		hp_label.text = "%d / %d" % [int(round(player_state.get("hp", 100.0))), int(round(player_state.get("max_hp", 100.0)))]
 	if xp_bar != null:
-		xp_bar.max_value = xp_needed; xp_bar.value = xp
-	if level_label != null: level_label.text = "LEVEL %d" % level
-	if kills_label != null: kills_label.text = str(kills)
-	if cookie_label != null: cookie_label.text = "%d C" % cookies
+		xp_bar.max_value = xp_needed
+		xp_bar.value = xp
+	if level_label != null:
+		level_label.text = "LEVEL %d" % level
+	if kills_label != null:
+		kills_label.text = str(kills)
+	if cookie_label != null:
+		cookie_label.text = "%d C" % cookies
 	refresh_coal_sidebar(coal_queue)
