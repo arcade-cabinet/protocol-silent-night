@@ -117,6 +117,11 @@ func _build_cache() -> void:
 	_cache["coal_embers"] = _sfx.make_crackle(0.55)
 	_cache["coal_backfire"] = _sfx.make_sweep(420.0, 80.0, 0.45, 5.0)
 	_cache["coal_fortune"] = _sfx.make_chime_arp([659.25, 783.99, 987.77, 1318.51], 0.6)
+	# Rewrap: rising sweep (low dread → high relief) to distinguish from plain damage.
+	_cache["rewrap"] = _sfx.make_sweep(180.0, 1320.0, 0.55, 8.0)
+
+
+func play_rewrap() -> void: _play("rewrap")
 
 
 func play_coal(kind: String) -> void:
