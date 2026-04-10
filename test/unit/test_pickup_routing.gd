@@ -97,6 +97,43 @@ func test_xp_pickup_routes_to_on_gain_xp() -> void:
 	assert_int(_cookies_gained).is_equal(0)
 
 
+func test_boss_on_kill_not_called_twice_when_two_projectiles_hit_same_frame() -> void:
+	# Regression: without hp > 0.0 guard, two simultaneous projectiles could both
+	# decrement boss hp to <=0 and fire on_boss_killed twice in one update_projectiles call.
+	var combat: RefCounted = _make_combat()
+	var proj_root: Node3D = auto_free(Node3D.new())
+	add_child(proj_root)
+	var fx_root: Node3D = auto_free(Node3D.new())
+	add_child(fx_root)
+	var pn1: MeshInstance3D = MeshInstance3D.new()
+	pn1.position = Vector3.ZERO
+	proj_root.add_child(pn1)
+	var pn2: MeshInstance3D = MeshInstance3D.new()
+	pn2.position = Vector3.ZERO
+	proj_root.add_child(pn2)
+	var projectiles: Array = [
+		{"node": pn1, "direction": Vector3.ZERO, "hostile": false, "damage": 100.0, "pierce": 1, "speed": 0.0, "life": 1.0},
+		{"node": pn2, "direction": Vector3.ZERO, "hostile": false, "damage": 100.0, "pierce": 1, "speed": 0.0, "life": 1.0},
+	]
+	var boss_node: Node3D = auto_free(Node3D.new())
+	boss_node.position = Vector3.ZERO
+	add_child(boss_node)
+	var boss_ref: Dictionary = {"node": boss_node, "hp": 50.0, "max_hp": 100.0, "color": Color.RED}
+	var boss_bar: ProgressBar = auto_free(ProgressBar.new())
+	boss_bar.max_value = 100.0; boss_bar.value = 50.0
+	add_child(boss_bar)
+	var boss_panel: VBoxContainer = auto_free(VBoxContainer.new())
+	add_child(boss_panel)
+	var player: Node3D = auto_free(Node3D.new())
+	player.position = Vector3(100.0, 0.0, 100.0)
+	add_child(player)
+	var kill_count: Array = [0]  # Array used as mutable ref across lambda boundary
+	var on_killed := func() -> void: kill_count[0] += 1
+	combat.update_projectiles(0.016, projectiles, [], boss_ref, player, [],
+		boss_bar, boss_panel, Callable(), Callable(), on_killed, fx_root, [])
+	assert_int(kill_count[0]).is_equal(1)
+
+
 func test_scroll_pickup_hovers_before_magnet_range() -> void:
 	_reset()
 	var combat: RefCounted = _make_combat()
