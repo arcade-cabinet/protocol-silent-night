@@ -9,6 +9,7 @@ const MUSIC_VOLUME_DB: float = -20.0
 const AMBIENT_VOLUME_DB: float = -24.0
 const POOL_SIZE: int = 6
 const BUS_NAMES: Array = ["Music", "SFX", "Ambient", "UI"]
+const MAX_SHOT_CACHE: int = 32
 
 var _host: Node = null
 var _players: Array = []
@@ -128,8 +129,15 @@ func play_shot(color_hex: String = "#ffffff") -> void:
 	var pitch := _pitch_from_color(color_hex)
 	var key := "shot_%d" % int(pitch * 100.0)
 	if not _cache.has(key):
+		_trim_shot_cache()
 		_cache[key] = _sfx.make_sweep(880.0 * pitch, 180.0 * pitch, 0.14, 16.0)
 	_play(key)
+
+
+func _trim_shot_cache() -> void:
+	var shot_keys: Array = _cache.keys().filter(func(k: String) -> bool: return k.begins_with("shot_"))
+	if shot_keys.size() >= MAX_SHOT_CACHE:
+		_cache.erase(shot_keys[0])
 
 
 func play_hit() -> void: _play("hit")

@@ -90,3 +90,16 @@ func test_procedural_music_ambient_returns_stream() -> void:
 	var stream: AudioStreamWAV = PROCEDURAL_MUSIC.make_ambient_bed(3.0)
 	assert_object(stream).is_not_null()
 	assert_int(stream.data.size()).is_greater(0)
+
+
+func test_play_shot_cache_bounded_at_max() -> void:
+	var mgr: RefCounted = _attached_mgr()
+	# Drive 50 distinct hues through play_shot; cache must not exceed MAX_SHOT_CACHE.
+	for i in range(50):
+		var color := Color.from_hsv(float(i) / 50.0, 0.8, 0.9)
+		mgr.play_shot(color.to_html(false))
+	var shot_count: int = 0
+	for k: String in mgr._cache.keys():
+		if k.begins_with("shot_"):
+			shot_count += 1
+	assert_int(shot_count).is_less_equal(mgr.MAX_SHOT_CACHE)
