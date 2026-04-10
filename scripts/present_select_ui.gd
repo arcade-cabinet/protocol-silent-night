@@ -6,9 +6,17 @@ extends RefCounted
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
 const RADAR := preload("res://scripts/stat_radar_chart.gd")
+const PREVIEW_VP := preload("res://scripts/present_preview_viewport.gd")
 
 ## Tracks the present ID currently previewed (for testability).
 static var _current_preview_id: String = ""
+static var _preview_viewport: SubViewport = null
+
+
+static func init_preview(parent: Control) -> void:
+	if _preview_viewport != null:
+		return
+	_preview_viewport = PREVIEW_VP.build(parent)
 
 
 static func build_present_buttons(classes_box: Container, present_defs: Dictionary,
@@ -66,8 +74,9 @@ static func unlock_label(req: String) -> String:
 	return req
 
 
-## Updates the radar chart and records the hovered present ID.
+## Updates the radar chart, 3D viewport preview, and records the hovered present ID.
 static func _update_preview(present_id: String, def: Dictionary,
 		radar_canvas: Control) -> void:
 	_current_preview_id = present_id
 	RADAR.update(radar_canvas, def)
+	PREVIEW_VP.update_present(_preview_viewport, def)

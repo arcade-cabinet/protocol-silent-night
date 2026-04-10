@@ -97,6 +97,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 		coal_sidebar_state = COAL_SIDEBAR.build_sidebar(root, on_coal_activate)
 
 	widgets = UI_WIDGETS.build_all(root)
+	preload("res://scripts/present_select_ui.gd").init_preview(root)
 
 	return ui
 
