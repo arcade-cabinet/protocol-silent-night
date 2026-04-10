@@ -128,7 +128,8 @@ func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_n
 			_:
 				EnemyBehaviors.behavior_chase(enemy, player_node, delta, on_move_actor)
 		if enemy["node"].position.distance_to(player_node.position) < 0.9 + float(enemy["node"].scale.x) * 0.35:
-			on_damage_player.call(float(enemy["contact_damage"]) * delta * 2.0)
+			var slam_mult: float = float(enemy.get("slam_damage_mult", 1.0))
+			on_damage_player.call(float(enemy["contact_damage"]) * delta * 2.0 * slam_mult)
 		enemies[index] = enemy
 	# Boss is now handled by BossPhases in game_manager
 
