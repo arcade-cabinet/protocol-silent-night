@@ -26,6 +26,7 @@ func start_run(class_id: String) -> void:
 	main.level_lookback.clear()
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	var start_sm: Node = main._save_manager()
+	if start_sm != null: start_sm.record_run_start()
 	main.coal_queue = start_sm.get_coal() if start_sm != null else []
 	MAIN_HELPERS.load_equipped_gear(main, start_sm)
 	MAIN_HELPERS.apply_reduced_motion(main, start_sm)
@@ -88,6 +89,7 @@ func end_run(win: bool) -> void:
 	var sm: Node = main._save_manager()
 	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
 	if sm != null: sm.set_coal(main.coal_queue)
+	if win and sm != null: sm.record_campaign_clear()
 	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
 	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
