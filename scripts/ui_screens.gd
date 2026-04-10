@@ -84,22 +84,27 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 static func build_overlays_and_controls(root: Control, on_dash_down: Callable, on_dash_up: Callable) -> Dictionary:
 	var message_overlay := Label.new()
 	message_overlay.name = "MessageOverlay"
-	message_overlay.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	# Full-width anchor so text never clips on portrait screens.
+	message_overlay.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	message_overlay.offset_top = 160
-	message_overlay.offset_left = -260
-	message_overlay.offset_right = 260
+	message_overlay.offset_bottom = 240
+	message_overlay.offset_left = 24
+	message_overlay.offset_right = -24
 	message_overlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	message_overlay.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_overlay.add_theme_font_size_override("font_size", 32)
 	message_overlay.modulate = Color("edf7ff")
 	root.add_child(message_overlay)
 
 	var achievement_overlay := Label.new()
 	achievement_overlay.name = "AchievementOverlay"
-	achievement_overlay.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	achievement_overlay.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	achievement_overlay.offset_top = 56
-	achievement_overlay.offset_left = -340
-	achievement_overlay.offset_right = 340
+	achievement_overlay.offset_bottom = 110
+	achievement_overlay.offset_left = 24
+	achievement_overlay.offset_right = -24
 	achievement_overlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	achievement_overlay.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	achievement_overlay.add_theme_font_size_override("font_size", 20)
 	achievement_overlay.modulate = Color("ffe680")
 	root.add_child(achievement_overlay)
