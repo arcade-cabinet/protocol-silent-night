@@ -132,22 +132,10 @@ func _init_services() -> void:
 	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
 
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
-func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
-func debug_force_level_up() -> void: _trigger_level_up()
-func debug_spawn_boss() -> void: game_mgr.spawn_boss(1.0)
-func debug_end_run(win: bool) -> void: game_mgr.end_run(win)
-func debug_zone_at(wp: Vector3) -> String:
-	var ar := float(config["arena_radius"])
-	return "arena" if absf(wp.x) <= ar * 1.6 and absf(wp.z) <= ar else "void"
-func debug_is_blocked(wp: Vector3, radius: float = 0.6) -> bool: return not _can_occupy(wp, radius)
-func debug_tick(delta: float) -> void: _tick(delta)
 
-func capture_screenshot(path: String) -> void:
-	await RenderingServer.frame_post_draw
-	var image := get_viewport().get_texture().get_image()
-	var absolute_path := ProjectSettings.globalize_path(path)
-	DirAccess.make_dir_recursive_absolute(absolute_path.get_base_dir())
-	image.save_png(absolute_path)
+
+func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
+
 
 func _process(delta: float) -> void:
 	if not bool(test_mode.get("manual_tick", false)):
