@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -qE 'git commit'; then cd /Users/jbogaty/src/arcade-cabinet/protocol-silent-night && timeout 90 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode > /tmp/ps_night_test.log 2>&1; if [ $? -eq 0 ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"All tests passed.\"},\"continue\":true}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests FAILED — fix before committing. See /tmp/ps_night_test.log\"}'; fi; fi; }",
+            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -qE 'git commit'; then PROJ=$(git rev-parse --show-toplevel 2>/dev/null) && cd \"$PROJ\" && timeout 90 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode > /tmp/ps_night_test.log 2>&1; if [ $? -eq 0 ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"All tests passed.\"},\"continue\":true}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests FAILED — fix before committing. See /tmp/ps_night_test.log\"}'; fi; fi; }",
             "timeout": 100,
             "statusMessage": "Running test gate before commit..."
           }

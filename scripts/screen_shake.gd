@@ -17,6 +17,7 @@ var trauma: float = 0.0
 var reduced_motion: bool = false
 var _rng := RandomNumberGenerator.new()
 var _base_offset := Vector2.ZERO
+var _base_captured: bool = false
 
 
 func _init() -> void:
@@ -38,6 +39,9 @@ func add_trauma(amount: float) -> void:
 func update(delta: float, camera: Camera3D) -> void:
 	if camera == null:
 		return
+	if not _base_captured:
+		_base_offset = Vector2(camera.h_offset, camera.v_offset)
+		_base_captured = true
 	if trauma <= 0.0:
 		camera.h_offset = _base_offset.x
 		camera.v_offset = _base_offset.y

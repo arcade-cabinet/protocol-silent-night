@@ -53,6 +53,7 @@ static func _start_idle_pulse(button: Button) -> void:
 	tween.set_loops()
 	tween.tween_property(button, "modulate", Color(1.15, 1.15, 1.15, 1.0), 0.55)
 	tween.tween_property(button, "modulate", Color(0.85, 0.85, 0.85, 1.0), 0.55)
+	button.set_meta("idle_tween", tween)
 
 
 static func animate_consume(button: Button, on_done: Callable = Callable()) -> void:
@@ -60,6 +61,9 @@ static func animate_consume(button: Button, on_done: Callable = Callable()) -> v
 		if on_done.is_valid():
 			on_done.call()
 		return
+	var idle: Tween = button.get_meta("idle_tween", null) as Tween
+	if idle != null:
+		idle.kill()
 	button.disabled = true
 	var tween := button.create_tween().set_parallel(true)
 	tween.tween_property(button, "scale", Vector2(1.4, 1.4), 0.12)

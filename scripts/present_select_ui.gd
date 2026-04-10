@@ -14,7 +14,7 @@ static var _preview_viewport: SubViewport = null
 
 
 static func init_preview(parent: Control) -> void:
-	if _preview_viewport != null:
+	if _preview_viewport != null and is_instance_valid(_preview_viewport):
 		return
 	_preview_viewport = PREVIEW_VP.build(parent)
 
@@ -90,4 +90,6 @@ static func _update_preview(present_id: String, def: Dictionary,
 		radar_canvas: Control) -> void:
 	_current_preview_id = present_id
 	RADAR.update(radar_canvas, def)
+	if _preview_viewport == null or not is_instance_valid(_preview_viewport):
+		return
 	PREVIEW_VP.update_present(_preview_viewport, def)

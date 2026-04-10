@@ -27,6 +27,7 @@ static func build(parent: Control) -> SubViewport:
 	var vp := SubViewport.new()
 	vp.name = "PresentPreview"
 	vp.size = Vector2i(200, 200)
+	vp.own_world_3d = true
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	vp.transparent_bg = true
 	container.add_child(vp)

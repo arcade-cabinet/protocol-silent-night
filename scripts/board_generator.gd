@@ -80,7 +80,6 @@ func generate_board(board_seed: int, config: Dictionary) -> Dictionary:
 				placed = true
 				break
 
-	var zone_mask := _build_zone_mask(rng, arena_radius)
 	return {
 		"seed": board_seed,
 		"safe_radius": safe_radius,
@@ -88,20 +87,4 @@ func generate_board(board_seed: int, config: Dictionary) -> Dictionary:
 		"ridges": ridges,
 		"obstacles": obstacles,
 		"landmarks": landmarks,
-		"zone_mask": zone_mask,
 	}
-
-
-# Returns Array of {world: Vector2, zone: String} — zones are "snow", "ice", "asphalt"
-static func _build_zone_mask(rng: RandomNumberGenerator, arena_radius: float) -> Array:
-	var zones := ["snow", "ice", "asphalt"]
-	var result: Array = []
-	var sector_count := 3
-	for i in range(sector_count):
-		result.append({
-			"zone": zones[rng.randi_range(0, zones.size() - 1)],
-			"angle_start": TAU * float(i) / float(sector_count),
-			"angle_end": TAU * float(i + 1) / float(sector_count),
-			"radius": arena_radius,
-		})
-	return result

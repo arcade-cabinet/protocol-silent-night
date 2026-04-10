@@ -42,7 +42,7 @@ func update_board_objects(projectiles: Array, board_objects: Array,
 				break
 		var hp_bar: MeshInstance3D = obj.get("hp_bar") as MeshInstance3D
 		if hp_bar != null and hp_bar.is_inside_tree():
-			hp_bar.scale.x = float(obj["hp"]) / maxf(1.0, float(obj["max_hp"]))
+			hp_bar.scale.x = clampf(float(obj["hp"]) / maxf(1.0, float(obj["max_hp"])), 0.0, 1.0)
 		if float(obj.get("hp", 0.0)) <= 0.0:
 			if particles != null and fx_root != null:
 				particles.spawn_death_burst(fx_root, obj["node"].position, Color("ffd700"), 1.2)

@@ -66,14 +66,14 @@ static func _refresh_minimap(state: Dictionary, main: Node) -> void:
 
 static func _refresh_threat(state: Dictionary, main: Node) -> void:
 	if main.boss_ref.is_empty() or main.player_node == null:
-		THREAT.update(state["threat"], null, null, Vector2(800, 600), "red")
+		THREAT.update(state["threat"], null, null, "red")
 		return
 	var boss_node: Node3D = main.boss_ref.get("node")
 	if boss_node == null or not is_instance_valid(boss_node):
-		THREAT.update(state["threat"], null, null, Vector2(800, 600), "red")
+		THREAT.update(state["threat"], null, null, "red")
 		return
 	var tier: String = "gold" if float(main.boss_ref.get("hp", 1.0)) < float(main.boss_ref.get("max_hp", 1.0)) * 0.3 else "red"
-	THREAT.update(state["threat"], boss_node.position, main.player_node.position, Vector2(800, 600), tier)
+	THREAT.update(state["threat"], boss_node.position, main.player_node.position, tier)
 
 
 static func _refresh_combo(state: Dictionary, main: Node) -> void:
@@ -135,6 +135,15 @@ static func toggle_pause(state: Dictionary, tree: SceneTree) -> void:
 
 
 static func tick_overlays(mgr: Object, delta: float) -> void:
+	if mgr.hp_bar != null:
+		var hp_pct: float = mgr.hp_bar.value / maxf(1.0, mgr.hp_bar.max_value)
+		if hp_pct < 0.3:
+			mgr._hp_pulse_time += delta
+			var pulse: float = 0.85 + (sin(mgr._hp_pulse_time * 6.0) + 1.0) * 0.15
+			mgr.hp_bar.modulate = Color(1.0, pulse * 0.5, pulse * 0.5, 1.0)
+		else:
+			mgr.hp_bar.modulate = Color.WHITE
+			mgr._hp_pulse_time = 0.0
 	if mgr.message_timer > 0.0:
 		mgr.message_timer -= delta
 		mgr.message_overlay.visible = true

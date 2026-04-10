@@ -26,6 +26,7 @@ func spawn(root: Node3D, world_position: Vector3, amount: float, color: Color, i
 				continue
 			var new_amount: float = float(existing.get("accumulated", 0.0)) + amount
 			existing["accumulated"] = new_amount
+			existing["is_crit"] = is_crit or bool(existing.get("is_crit", false))
 			existing["life"] = LIFE
 			existing["stack_pulse"] = 0.18
 			var lbl: Label3D = existing["node"]

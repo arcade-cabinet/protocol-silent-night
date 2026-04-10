@@ -15,6 +15,8 @@ var _next: int = 0
 
 
 func attach(host: Node) -> void:
+	if host == null:
+		return
 	_host = host
 	_players.clear()
 	_next = 0

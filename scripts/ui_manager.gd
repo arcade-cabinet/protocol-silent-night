@@ -169,14 +169,6 @@ func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, k
 	if hp_bar != null:
 		hp_bar.max_value = player_state.get("max_hp", 100.0)
 		hp_bar.value = player_state.get("hp", 100.0)
-		var hp_pct: float = float(player_state.get("hp", 100.0)) / maxf(1.0, float(player_state.get("max_hp", 100.0)))
-		if hp_pct < 0.3:
-			_hp_pulse_time += 0.033
-			var pulse: float = 0.85 + (sin(_hp_pulse_time * 6.0) + 1.0) * 0.15
-			hp_bar.modulate = Color(1.0, pulse * 0.5, pulse * 0.5, 1.0)
-		else:
-			hp_bar.modulate = Color.WHITE
-			_hp_pulse_time = 0.0
 	if hp_label != null:
 		hp_label.text = "%d / %d" % [int(round(player_state.get("hp", 100.0))), int(round(player_state.get("max_hp", 100.0)))]
 	if xp_bar != null:

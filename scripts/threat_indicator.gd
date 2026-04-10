@@ -19,7 +19,7 @@ static func build(root: Control) -> Dictionary:
 	return {"canvas": canvas}
 
 
-static func update(state: Dictionary, boss_world: Variant, player_world: Variant, viewport_size: Vector2, tier: String = "red") -> void:
+static func update(state: Dictionary, boss_world: Variant, player_world: Variant, tier: String = "red") -> void:
 	if state.is_empty():
 		return
 	var canvas: Control = state["canvas"]

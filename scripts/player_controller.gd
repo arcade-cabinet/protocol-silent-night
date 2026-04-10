@@ -14,6 +14,8 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 
 
 func spawn_player(actor_root: Node3D, class_id: String, present_defs: Dictionary = {}, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
+	if not present_defs.has(class_id):
+		push_error("spawn_player: class_id '%s' not found in present_defs" % class_id)
 	return _spawn_present_player(actor_root, class_id, present_defs.get(class_id, {}), gear_system, animator)
 
 
