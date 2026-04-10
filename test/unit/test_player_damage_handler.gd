@@ -30,7 +30,7 @@ class StubMain:
 	var game_mgr: StubGameMgr
 
 	func setup(hp: float) -> void:
-		player_state = {"hp": hp, "max_hp": hp}
+		player_state = {"hp": hp, "max_hp": hp, "class": {"contact_damage_reduction": 0.0}}
 		ui_mgr = StubUI.new()
 		add_child(ui_mgr)
 		game_mgr = StubGameMgr.new()

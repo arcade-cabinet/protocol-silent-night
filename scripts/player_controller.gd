@@ -42,6 +42,10 @@ func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary
 		"spread": float(def.get("spread", 0.06)),
 		"pierce": int(def.get("pierce", 1)),
 		"color": def.get("bow_color", "#ffd700"),
+		"dash_cooldown": 1.0,  # multiplier — gear can reduce via dash_cooldown_mult
+		"contact_damage_reduction": 0.0,
+		"xp_bonus": 0.0,
+		"cookie_bonus": 0.0,
 	}
 	if gear_system != null:
 		player_class = gear_system.apply_modifiers(player_class)

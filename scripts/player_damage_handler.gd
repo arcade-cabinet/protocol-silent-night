@@ -13,7 +13,8 @@ static func damage_player(main: Node, amount: float) -> void:
 		return
 	if main.audio_mgr != null:
 		main.audio_mgr.play_damage()
-	main.player_state["hp"] = maxf(0.0, float(main.player_state["hp"]) - amount)
+	var reduction := clampf(float(main.player_state["class"].get("contact_damage_reduction", 0.0)), 0.0, 0.9)
+	main.player_state["hp"] = maxf(0.0, float(main.player_state["hp"]) - amount * (1.0 - reduction))
 	main.shake_magnitude = 0.3
 	if float(main.player_state["hp"]) <= 0.0:
 		if not main.permadeath and main.rewraps > 0:
