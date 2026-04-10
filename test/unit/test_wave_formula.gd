@@ -121,3 +121,21 @@ func test_enemy_phase_level_clamped_1_to_5() -> void:
 	var extreme := WaveFormula.generate_wave(1, 999, [], 5)
 	assert_int(low["enemy_phase_level"]).is_equal(1)
 	assert_int(extreme["enemy_phase_level"]).is_equal(5)
+
+
+func test_scroll_pressure_present_in_wave() -> void:
+	var wave := WaveFormula.generate_wave(42, 5)
+	assert_bool(wave.has("scroll_pressure")).is_true()
+	assert_float(float(wave["scroll_pressure"])).is_between(0.0, 1.0)
+
+
+func test_scroll_pressure_increases_with_level() -> void:
+	var early := WaveFormula.generate_wave(42, 1)
+	var late := WaveFormula.generate_wave(42, 20)
+	assert_float(float(late["scroll_pressure"])).is_greater_equal(float(early["scroll_pressure"]))
+
+
+func test_max_bosses_scales_with_boss_pressure() -> void:
+	var low := WaveFormula.generate_wave(42, 1)
+	var high := WaveFormula.generate_wave(42, 30)
+	assert_int(int(high["max_bosses"])).is_greater_equal(int(low["max_bosses"]))
