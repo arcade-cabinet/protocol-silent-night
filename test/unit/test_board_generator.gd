@@ -66,3 +66,12 @@ func test_obstacles_respect_safe_radius() -> void:
 		for j in range(i + 1, obstacles.size()):
 			var dist: float = (obstacles[i]["world"] as Vector2).distance_to(obstacles[j]["world"] as Vector2)
 			assert_float(dist).is_greater_equal(2.0)
+
+
+func test_generate_board_has_no_zone_mask_key() -> void:
+	var generator = _generator_script.new()
+	var board: Dictionary = generator.generate_board(42, {"arena_radius": 18.0})
+	# zone_mask was dead code (shader handles radial zones); removed in review pass
+	assert_bool(board.has("zone_mask")).is_false()
+	assert_bool(board.has("drifts")).is_true()
+	assert_bool(board.has("ridges")).is_true()
