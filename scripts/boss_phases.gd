@@ -53,7 +53,8 @@ func update_boss(delta: float, boss_ref: Dictionary, player_node: Node3D,
 	else:
 		var strafe_dir := BossBTHelpers.circle_strafe_dir(boss_pos, player_node.position)
 		on_move.call(boss_node, strafe_dir, base_speed * (1.0 + (phase - 1) * 0.12), delta, 1.2)
-	boss_ref["ring"].rotation_degrees.y += (80.0 + phase * 40.0) * delta
+	if boss_ref.has("ring") and is_instance_valid(boss_ref["ring"]):
+		boss_ref["ring"].rotation_degrees.y += (80.0 + phase * 40.0) * delta
 	# Ranged attack
 	boss_ref["attack_timer"] += delta
 	var fire_interval := (0.9 if phase == 1 else 1.2) / boss_attack_scale

@@ -20,6 +20,9 @@ const MAX_ENEMY_CAP := 48  # Mobile performance ceiling
 func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1) -> void:
 	if enemies.size() >= MAX_ENEMY_CAP:
 		return
+	if not enemy_defs.has(enemy_type):
+		push_error("spawn_enemy: unknown type '%s'" % enemy_type)
+		return
 	var def: Dictionary = enemy_defs[enemy_type]
 	var enemy_node := Node3D.new()
 	enemy_node.name = "Enemy_%s" % enemy_type
