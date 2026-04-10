@@ -98,6 +98,32 @@ func test_board_object_has_mesh_instance_child() -> void:
 		assert_bool(has_mesh).is_true()
 
 
+func test_each_board_object_type_meta_direct() -> void:
+	var factory: RefCounted = _make_factory()
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	for pair: Array in [
+			["frozen_mailbox", "mailbox"],
+			["gift_cache", "gift_cache"],
+			["chimney_vent", "chimney"]]:
+		var node: Node3D = auto_free(Node3D.new())
+		add_child(node)
+		factory._build_visual(node, pair[0])
+		assert_str(node.get_meta("obj_type", "")).is_equal(pair[1])
+
+
+func test_board_objects_have_health_bar() -> void:
+	var factory: RefCounted = _make_factory()
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	var objects: Array = []
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 42
+	var obj: Dictionary = factory.spawn_board_object(root, objects, 18.0, rng)
+	assert_bool(obj.has("hp_bar")).is_true()
+	assert_object(obj["hp_bar"]).is_not_null()
+
+
 func test_board_object_takes_damage_and_drops_scroll() -> void:
 	var factory: RefCounted = _make_factory()
 	var mat: RefCounted = _material_factory_script.new()
