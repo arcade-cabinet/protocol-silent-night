@@ -24,7 +24,7 @@ static func build_results_screen(root: Control, on_continue: Callable) -> Dictio
 	vbox.add_theme_constant_override("separation", 14)
 	margin.add_child(vbox)
 	var title := Label.new()
-	title.text = "RUN COMPLETE"
+	title.text = "PACKAGE SURVIVED"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 42)
 	title.add_theme_color_override("font_color", THEME.NEON_GOLD)
@@ -57,10 +57,10 @@ static func build_results_screen(root: Control, on_continue: Callable) -> Dictio
 
 
 static func update_results(state: Dictionary, data: Dictionary) -> void:
-	state["level_label"].text = "Level Reached: %d" % int(data.get("level", 0))
+	state["level_label"].text = "Depth Survived: %d" % int(data.get("level", 0))
 	state["kills_label"].text = "Enemies Purged: %d" % int(data.get("kills", 0))
 	state["cookies_label"].text = "Cookies Earned: %d" % int(data.get("cookies", 0))
-	state["scrolls_label"].text = "Scrolls Collected: %d" % int(data.get("scrolls", 0))
+	state["scrolls_label"].text = "Scrolls Cracked: %d" % int(data.get("scrolls", 0))
 
 
 static func build_scroll_screen(root: Control, on_continue: Callable) -> Dictionary:
@@ -117,7 +117,7 @@ static func populate_scroll_grid(state: Dictionary, outcomes: Array) -> void:
 		grid.add_child(_build_scroll_card(outcomes[i]))
 	if outcomes.size() > display_count:
 		var overflow := Label.new()
-		overflow.text = "+%d more" % (outcomes.size() - display_count)
+		overflow.text = "+%d still wrapped" % (outcomes.size() - display_count)
 		overflow.add_theme_font_size_override("font_size", 16)
 		overflow.add_theme_color_override("font_color", THEME.NEON_GOLD)
 		grid.add_child(overflow)
