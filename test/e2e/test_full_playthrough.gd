@@ -32,7 +32,7 @@ func _run() -> void:
 		"boss_hp_scale": 0.08,
 		"skip_between_match": true
 	})
-	_main.start_run("elf")
+	_main.start_run("holly_striker")
 
 	while _frames < 1500 and _main.state not in ["win", "game_over"]:
 		_frames += 1
