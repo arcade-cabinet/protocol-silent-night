@@ -22,8 +22,10 @@ All scripts live in `scripts/`. Max 200 LOC per file (hook-enforced). Grouped by
 | `wave_formula.gd` | PRNG-seeded wave generation algorithm; derives spawn rate, composition, HP scale, speed multiplier, pattern type, burst chance, and boss threshold from `(run_seed, level)` with a pressure accumulator and no hardcoded wave tables |
 | `wave_spawner.gd` | Per-frame spawn execution; rolls boss pressure accumulator each frame for Krampus appearance probability within normal waves; tracks bosses and scrolls dropped per level |
 | `enemy_director.gd` | Spawns and manages enemy lifecycle; builds 3D enemy nodes from definitions; delegates per-enemy behavior to `enemy_behaviors.gd`; takes `MaterialFactory` and `PixelArtRenderer` at init |
-| `enemy_behaviors.gd` | Per-enemy behavior helpers (chase, strafe, flanking, burst, etc.); pure static functions that mutate enemy state and issue move/projectile callbacks |
-| `boss_phases.gd` | 3-phase Krampus-Prime fight: Phase 1 fan shots (1.15 s), Phase 2 adds ground AOE telegraph + pulse damage, Phase 3 adds minion burst summons every 5 s |
+| `enemy_behaviors.gd` | Per-enemy behavior helpers; BT wrappers for grunt/rusher/tank/Krampus delegating to `enemy_bt_states.gd`; pure static functions that mutate enemy state |
+| `enemy_bt_states.gd` | Pure static BT tick functions — `grunt_tick`, `rusher_tick`, `tank_tick` with telegraph callbacks and state constants (TANK_SLAM_DAMAGE_MULT, etc.) |
+| `boss_phases.gd` | 3-phase Krampus-Prime fight wired to `BossBTHelpers`: Phase 1 circle-strafe, Phase 2 charge + ranged, Phase 3 rapid-charge + multi-shot + minions |
+| `boss_bt_helpers.gd` | Pure static helpers for Krampus HSM: `circle_strafe_dir`, `charge_tick`, `update_charge_phase`, `is_charging`, `multi_shot` (3 proj ±10°) |
 
 ---
 
@@ -63,7 +65,9 @@ All scripts live in `scripts/`. Max 200 LOC per file (hook-enforced). Grouped by
 | `present_animator.gd` | Procedural animation: idle bob/hop/wobble/sway/spin dispatched by `idle_style` meta, walk bob, fire recoil pulse, dash afterimage cloning |
 | `present_spawner.gd` | Builds game-ready player nodes from a definition; loads definition JSON, delegates to `PresentFactory`, returns a Node3D for the actor tree |
 | `present_face_renderer.gd` | Generates procedural face textures for 5 expressions (determined/angry/cheerful/stoic/manic); caches per expression |
-| `present_select_ui.gd` | Builds present character select button cards; hover-driven stat radar chart updates via `stat_radar_chart.gd` |
+| `present_select_ui.gd` | Builds present character select button cards; hover-driven stat radar chart + 3D viewport preview via `present_preview_viewport.gd` |
+| `present_preview_viewport.gd` | Static builder for a `SubViewport` 3D present preview panel; headless no-op; `update_present(vp, def)` clears and rebuilds the rotating present mesh |
+| `auto_rotate.gd` | Minimal `Node3D` extension: rotates parent 45°/s on Y axis each `_process` frame; attach as child to any mesh for a continuous spin |
 
 ---
 
