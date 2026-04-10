@@ -28,13 +28,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path' | { read -r f; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 195 ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PreToolUse\\\",\\\"additionalContext\\\":\\\"WARNING: $f is $lines lines (approaching 200 LOC limit). Decompose before adding more.\\\"},\\\"continue\\\":true}\"; fi; fi; }",
-            "timeout": 5,
-            "statusMessage": "Checking LOC limit..."
+            "command": "bash ~/.claude/hooks/pre-edit-gate.sh"
           }
         ]
       },
@@ -43,9 +41,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command' | { read -r cmd; if echo \"$cmd\" | grep -qE 'git commit'; then PROJ=$(git rev-parse --show-toplevel 2>/dev/null) && cd \"$PROJ\" && timeout 90 godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode > /tmp/ps_night_test.log 2>&1; if [ $? -eq 0 ]; then echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"All tests passed.\"},\"continue\":true}'; else echo '{\"decision\":\"block\",\"reason\":\"Tests FAILED — fix before committing. See /tmp/ps_night_test.log\"}'; fi; fi; }",
-            "timeout": 100,
-            "statusMessage": "Running test gate before commit..."
+            "command": "bash ~/.claude/hooks/pre-commit-gate.sh",
+            "timeout": 120
           }
         ]
       }
@@ -56,21 +53,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/jbogaty/src/arcade-cabinet/protocol-silent-night/.claude/hooks/task-batch-flush.sh",
-            "timeout": 5
+            "command": "bash ~/.claude/hooks/pre-compact.sh",
+            "timeout": 10
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // .tool_response.filePath' | { read -r f; if [ -z \"$f\" ] || [ \"$f\" = \"null\" ]; then exit 0; fi; if [[ \"$f\" == *.gd ]] && [ -f \"$f\" ]; then lines=$(wc -l < \"$f\"); if [ \"$lines\" -gt 200 ]; then echo \"{\\\"systemMessage\\\":\\\"LOC VIOLATION: $f is $lines lines, exceeding the 200 LOC limit. Decompose this file before committing.\\\"}\" ; fi; elif [[ \"$f\" == *.tscn ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_scene'; then echo '{\"systemMessage\":\"WARNING: .tscn file missing [gd_scene] header\"}'; fi; elif [[ \"$f\" == *.tres ]] && [ -f \"$f\" ]; then if ! head -1 \"$f\" | grep -q 'gd_resource'; then echo '{\"systemMessage\":\"WARNING: .tres file missing [gd_resource] header\"}'; fi; elif [[ \"$f\" == declarations/*.json ]] || [[ \"$f\" == *declarations*/*.json ]]; then if ! python3 -c \"import json; json.load(open('$f'))\" 2>/dev/null; then echo '{\"systemMessage\":\"JSON PARSE ERROR: declarations file is not valid JSON\"}'; fi; fi; }",
-            "timeout": 5,
-            "statusMessage": "Validating file constraints..."
+            "command": "bash ~/.claude/hooks/post-edit-checks.sh",
+            "timeout": 30
           }
         ]
       }
