@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **gdUnit4 flag fix**: CI test command corrected to `--continue` (was `--continue-on-failure` which is unrecognized in v6.1.2; caused CI exit 100)
 - **preload() hoisting**: All `preload()` calls inside function bodies hoisted to file-level `const` declarations across 8 scripts (main, game_manager, audio_manager, ui_manager, particle_effects, player_controller, main_helpers, audio_manager_ext) — eliminates per-call script re-parsing overhead
 - **Stale PR cleanup**: Closed #146 (superseded by stack), #112 and npm dependabot PRs #130-#132/#135/#139 (referenced files no longer in repo)
+- **Reviewer bug fixes** (post-CI batch, addressing PR #148-#152 review comments):
+  - `flair_animator.gd`: duplicate shared material before mutating in `_tick_color_shift`; set `emission_enabled = true` before writing emission color; preserve fractional spark accumulator remainder; lazy-init shared SphereMesh+material per entry instead of per-spawn; guard tween callback with `is_instance_valid`; extract `SPARK_INTERVAL` const
+  - `coal_sidebar_ui.gd`: fix "ROAL"/"LOAL" label bug → "R-COAL"/"L-COAL"; remove unused `tint` param from `_start_idle_pulse`
+  - `audio_manager.gd`: clamp restored bus volumes to `[-60, 6]` dB matching `set_bus_volume` guard
+  - `procedural_sfx.gd`: clamp `cutoff` to `[0, 1]` in `make_noise_burst` to prevent IIR coefficient inversion
+  - `ui_widgets.gd`: clear threat indicator when stale boss node is freed instead of silently returning
+  - `present_parts.gd`: fix wavy arm angle (`sign_x*75` same as default) → `sign_x*45`
+  - `main.gd`: call `apply_reduced_motion` at `_ready` so `reduced_motion` preference is respected before first run
+  - `screen_shake.gd`: fix "exponential" → "linear" in docstring; remove dead `MAX_ROTATION` constant
+  - `gear_visualizer.gd`, `gear_flair_visualizer.gd`: fix docstrings to match implementation
+  - `music_director.gd`, `threat_indicator.gd`, `audio_3d_pool.gd`, `pause_menu.gd`, `coal_activator.gd`: comment accuracy fixes
+  - `test_market_preview.gd`: add name-label and button descendant assertions to formerly shallow test
+  - Untrack `.remember/tmp/save-session.pid` (gitignore already covered it)
 
 ### Game-Completion Batch (PR #152)
 
@@ -25,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **E2E full-flow**: `test_full_session_flow.gd` — 2 waves + wave_clear drain + win + bumble unlock + menu return, headless, <15s.
 - **Dead code removal**: `classes.json` and `waves.json` deleted; `_class_defs` parameter removed from `spawn_player` + `refresh_start_screen`; `_spawn_legacy_player` removed; `wave_formula.gd` is sole wave content source.
 - **Architecture docs**: `AUDIO_ARCHITECTURE.md` (146 lines), `PRESENT_SYSTEM.md` (164 lines), `HUD_WIDGETS.md` (219 lines), `SCRIPTS_REFERENCE.md` (158 lines).
-- **Tests**: +27 unit/component tests (198→225), all passing. Zero LOC violations.
+- **Tests**: +45 unit/component tests (198→243), all passing. Zero LOC violations.
 
 ## [0.1.0] — Godot Reboot (2026-04-09)
 
