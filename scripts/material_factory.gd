@@ -1,7 +1,6 @@
 extends RefCounted
 
-const MATERIAL_ROOT := "/Volumes/home/assets/2DPhotorealistic/MATERIAL/1K-JPG"
-const DECAL_ROOT := "/Volumes/home/assets/2DPhotorealistic/DECAL/1K-JPG"
+const _PBR := preload("res://scripts/material_factory_pbr.gd")
 
 var material_cache: Dictionary = {}
 var texture_cache: Dictionary = {}
@@ -95,14 +94,21 @@ void fragment() {
 
 
 func flat_material(color: Color) -> StandardMaterial3D:
+	var key := "flat:%s" % color.to_html(false)
+	if material_cache.has(key):
+		return material_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	mat.metallic = 0.08
 	mat.roughness = 0.42
+	material_cache[key] = mat
 	return mat
 
 
 func emissive_material(color: Color, energy: float = 1.4, roughness: float = 0.22) -> StandardMaterial3D:
+	var key := "emissive:%s_%.2f_%.2f" % [color.to_html(false), energy, roughness]
+	if material_cache.has(key):
+		return material_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = color
 	mat.metallic = 0.05
@@ -110,6 +116,7 @@ func emissive_material(color: Color, energy: float = 1.4, roughness: float = 0.2
 	mat.emission_enabled = true
 	mat.emission = color
 	mat.emission_energy_multiplier = energy
+	material_cache[key] = mat
 	return mat
 
 
@@ -142,55 +149,12 @@ func material_for_zone(zone: String) -> Material:
 
 
 func decal_material(material_name: String) -> Material:
-	var key := "decal:%s" % material_name
-	if material_cache.has(key):
-		return material_cache[key]
-	var material := StandardMaterial3D.new()
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
-	material.albedo_texture = load_texture("%s/%s/%s_1K-JPG_Color.jpg" % [DECAL_ROOT, material_name, material_name])
-	material.albedo_color = Color(1, 1, 1, 0.82)
-	material.roughness = 0.55
-	material.emission_enabled = true
-	material.emission = Color("ffd56d")
-	material.emission_energy_multiplier = 0.3
-	material_cache[key] = material
-	return material
+	return _PBR.decal_material(material_name, material_cache, texture_cache)
 
 
 func pbr_material(material_name: String, tint: Color) -> Material:
-	if material_cache.has(material_name):
-		return material_cache[material_name]
-	var base_path := "%s/%s" % [MATERIAL_ROOT, material_name]
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = load_texture("%s/%s_1K-JPG_Color.jpg" % [base_path, material_name])
-	material.normal_enabled = true
-	material.normal_texture = load_texture("%s/%s_1K-JPG_NormalGL.jpg" % [base_path, material_name])
-	material.roughness_texture = load_texture("%s/%s_1K-JPG_Roughness.jpg" % [base_path, material_name])
-	material.albedo_color = tint
-	material.uv1_scale = Vector3(1.18, 1.18, 1.0)
-	material.metallic = 0.04
-	if material_name.begins_with("Ice"):
-		material.roughness = 0.08
-		material.emission_enabled = true
-		material.emission = Color("b9efff")
-		material.emission_energy_multiplier = 0.22
-	elif material_name.begins_with("Snow"):
-		material.roughness = 0.92
-	else:
-		material.roughness = 0.48
-	material_cache[material_name] = material
-	return material
+	return _PBR.pbr_material(material_name, tint, material_cache, texture_cache)
 
 
 func load_texture(path: String) -> Texture2D:
-	if texture_cache.has(path):
-		return texture_cache[path]
-	if not FileAccess.file_exists(path):
-		return null
-	var image := Image.load_from_file(path)
-	if image == null or image.is_empty():
-		return null
-	var texture := ImageTexture.create_from_image(image)
-	texture_cache[path] = texture
-	return texture
+	return _PBR.load_texture(path, texture_cache)
