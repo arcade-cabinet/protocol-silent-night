@@ -65,6 +65,8 @@ static func tank_tick(enemy: Dictionary, player_pos: Vector3, delta: float, on_t
 	var flat_player := Vector3(player_pos.x, pos.y, player_pos.z)
 	var dist: float = pos.distance_to(flat_player)
 	var state := String(enemy.get("behavior_state", "advance"))
+	if state != "slam":
+		enemy["slam_damage_mult"] = 1.0
 	match state:
 		"advance":
 			if dist <= TANK_PREP_RANGE:

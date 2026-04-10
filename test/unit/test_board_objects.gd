@@ -124,6 +124,32 @@ func test_board_objects_have_health_bar() -> void:
 	assert_object(obj["hp_bar"]).is_not_null()
 
 
+func test_projectile_pierce_written_back_after_hitting_board_object() -> void:
+	# Regression: board_object_handler was decrementing projectile pierce but not
+	# writing the dict back — surviving projectiles kept their original pierce count.
+	var factory: RefCounted = _make_factory()
+	var mat: RefCounted = _material_factory_script.new()
+	var pix: RefCounted = _pixel_renderer_script.new()
+	var scroll: RefCounted = _scroll_pickup_script.new(mat, pix)
+	var handler: RefCounted = _handler_script.new(factory, scroll)
+	var root: Node3D = auto_free(Node3D.new())
+	add_child(root)
+	var obj_node: Node3D = auto_free(Node3D.new())
+	obj_node.position = Vector3.ZERO
+	add_child(obj_node)
+	var proj_node: MeshInstance3D = auto_free(MeshInstance3D.new())
+	proj_node.position = Vector3(0.5, 0.0, 0.0)  # within 1.2 hit radius
+	add_child(proj_node)
+	var board_objects: Array = [{"node": obj_node, "hp": 100.0, "max_hp": 100.0}]
+	var proj: Dictionary = {"node": proj_node, "hostile": false, "damage": 10.0, "pierce": 2}
+	var projectiles: Array = [proj]
+	var pickup_root: Node3D = auto_free(Node3D.new())
+	add_child(pickup_root)
+	handler.update_board_objects(projectiles, board_objects, pickup_root, [])
+	assert_int(projectiles.size()).is_equal(1)           # projectile survives (pierce=2→1)
+	assert_int(int(projectiles[0]["pierce"])).is_equal(1) # pierce decremented and written back
+
+
 func test_board_object_takes_damage_and_drops_scroll() -> void:
 	var factory: RefCounted = _make_factory()
 	var mat: RefCounted = _material_factory_script.new()
