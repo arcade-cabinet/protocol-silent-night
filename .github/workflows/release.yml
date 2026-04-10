@@ -67,8 +67,10 @@ jobs:
         run: |
           mkdir -p export/android
           APK_NAME="protocol-silent-night-${RELEASE_TAG}.apk"
+          # Uses release export template (stripped/optimized) with debug signing
+          # until a production keystore is configured in export_presets.cfg.
           godot --headless --path . \
-            --export-debug "Android Debug" \
+            --export-release "Android Debug" \
             "export/android/${APK_NAME}"
           echo "APK_PATH=export/android/${APK_NAME}" >> "$GITHUB_ENV"
 

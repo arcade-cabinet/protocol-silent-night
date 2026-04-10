@@ -7,8 +7,10 @@ extends Node
 
 const SPARK_LIFE := 0.45
 const SPARK_INTERVAL := 0.15
+const SPARK_POOL_CAP := 32
 
 var _entries: Array = []
+var _spark_pool: Array = []
 var _spark_rng := RandomNumberGenerator.new()
 var reduced_motion: bool = false
 
@@ -36,6 +38,7 @@ func register(target: Node3D, anim_type: String, params: Dictionary) -> void:
 
 func clear() -> void:
 	_entries.clear()
+	_spark_pool.clear()
 
 
 func _process(delta: float) -> void:
@@ -118,16 +121,33 @@ func _tick_trailing_sparks(entry: Dictionary, delta: float) -> void:
 		shared_mat.emission_energy_multiplier = 2.0
 		entry["_spark_mat"] = shared_mat
 	for i in range(count):
-		var spark := MeshInstance3D.new()
+		var spark: MeshInstance3D
+		while not _spark_pool.is_empty():
+			var candidate: Variant = _spark_pool.pop_back()
+			if is_instance_valid(candidate):
+				spark = candidate as MeshInstance3D
+				break
+		if spark == null:
+			spark = MeshInstance3D.new()
+			parent.add_child(spark)
+		elif spark.get_parent() != parent:
+			spark.reparent(parent, false)
+		spark.visible = true
+		spark.scale = Vector3.ONE
 		spark.mesh = shared_sphere
+		spark.material_override = shared_mat
 		spark.position = target.position + Vector3(
 			_spark_rng.randf_range(-0.2, 0.2), 0.3, _spark_rng.randf_range(-0.2, 0.2))
-		spark.material_override = shared_mat
-		parent.add_child(spark)
-		_fade_out(spark, SPARK_LIFE)
+		_fade_to_pool(spark)
 
 
-func _fade_out(node: Node3D, duration: float) -> void:
+func _fade_to_pool(node: MeshInstance3D) -> void:
 	var tween := node.create_tween()
-	tween.tween_property(node, "scale", Vector3.ZERO, duration)
-	tween.tween_callback(func() -> void: if is_instance_valid(node): node.queue_free())
+	tween.tween_property(node, "scale", Vector3.ZERO, SPARK_LIFE)
+	tween.tween_callback(func() -> void:
+		if not is_instance_valid(node):
+			return
+		node.visible = false
+		node.scale = Vector3.ONE
+		if _spark_pool.size() < SPARK_POOL_CAP:
+			_spark_pool.append(node))
