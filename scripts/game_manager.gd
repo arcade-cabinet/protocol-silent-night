@@ -182,7 +182,10 @@ func spawn_aura_damage_number(wp: Vector3, a: float, c: Color) -> void: main.dmg
 func on_boss_killed() -> void:
 	main.boss_phases.clear(); main.boss_ref["node"].queue_free(); main.boss_ref = {}
 	main.ui_mgr.boss_panel.visible = false; end_run(true)
-func gain_xp(amt: int) -> void: main.progression.gain_xp(amt, Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
+func gain_xp(amt: int) -> void:
+	# Scale XP by wave so levelling keeps pace with escalating enemy HP.
+	var wave_mult := 1.0 + float(maxi(0, main.current_wave_index)) * 0.08
+	main.progression.gain_xp(int(roundi(float(amt) * wave_mult)), Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
 func gain_cookies(amt: int) -> void: main.run_cookies += amt
 func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
 func _boss_summon_minion() -> void: main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, ["grunt", "rusher"][randi() % 2], float(main.current_wave.get("hp_scale", 1.0)), main.enemy_defs, main.config)
