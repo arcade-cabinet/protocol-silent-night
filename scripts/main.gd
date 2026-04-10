@@ -121,6 +121,7 @@ func _ready() -> void:
 	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
+	MAIN_HELPERS.apply_reduced_motion(self, _save_manager())
 
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)

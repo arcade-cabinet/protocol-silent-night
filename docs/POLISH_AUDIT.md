@@ -41,7 +41,7 @@
 - **Task 14 — damage-number-polish**: target-id stacking within 0.4s window, tiered font sizes (< 20 / 20-50 / 50+ / crit+high), crit bounce.
 - **Task 15 — settings-menu**: 5 bus volume sliders + screen shake / reduced motion toggles, persisted via save_manager.
 - **Task 16 — pause-menu**: Resume / Restart / Settings / Quit with `PROCESS_MODE_ALWAYS`.
-- **Task 22 — present-select-visual-upgrade**: `stat_radar_chart.gd` (6-axis polygon radar). Preview viewport integration deferred (see Remaining).
+- **Task 22 — present-select-visual-upgrade**: `stat_radar_chart.gd` (6-axis polygon radar). Preview viewport shipped in Phase 12 (P3).
 - **Task 24 — pickup-attraction-ring**: torus mesh with additive gold/cyan material, pulses with time.
 
 ### Phase 6: Documentation (this file)
@@ -80,7 +80,7 @@ After the initial 6 phases landed, the full PRQ was closed out:
 - `present_animator.configure(reduced: bool)` — when true, the idle_weight is clamped to 0.25 (instead of 1.0), dampening the bounce/sway/wobble/hop/spin idle styles.
 - `screen_shake.configure(reduced: bool)` — already present from Phase 1.
 - `main_helpers.apply_reduced_motion(main, sm)` — single helper that reads `sm.get_preference("reduced_motion", false)` and configures all three subsystems consistently.
-- Called from `game_manager.start_run` after `load_equipped_gear`.
+- Called from `main._ready` (at startup) and `game_manager.start_run` (on each run) to ensure preferences are applied before any gameplay event can fire.
 
 ---
 
