@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Integration audit — 8-specialist pass (integration/production-polish)
+
+- **Balance — speed scaling**: `speed_mult` now superlinear via `pow(lf/10+1, 1.3)` — enemies outrun the player at level 20+ as intended ("death is the game")
+- **Balance — boss XP**: Krampus-Prime `drop_xp` 0→25; killing the boss now meaningfully accelerates progression
+- **Balance — upgrade cap**: `damage` and `fire_rate` stacks capped at 5 each (was uncapped — 1.25^∞ violated "pressure valve not godmode" intent)
+- **Performance — particle materials**: `particle_effects.gd` now caches `StandardMaterial3D` by `(color, energy)` key; eliminates per-particle allocation (13 per death burst)
+- **Performance — enemy cap**: `enemy_director.gd` guards `spawn_enemy` with `MAX_ENEMY_CAP=48` to bound mobile frame budget
+- **Code — board ridge stub**: `board_builder.gd:build_outer_ridge` implemented (was bare `pass`) — ice-chunk protrusions along arena perimeter
+- **Visual — preview camera**: `present_preview_viewport.gd` uses `look_at_from_position()` to avoid "not in tree" crash on menu load
+- **Visual — victory screen**: "Cookies Earned: 0 C" trailing-C abbreviation removed
+- **Tone — upgrade names**: `High Caliber`→`Powder-Keg Payload`, `Overclock CPU`→`Workshop Overdrive`, `Kinetic Boots`→`Sleigh-Runner Soles`, `Advanced Optics`→`Tinsel-Scope`
+- **Tone — tag charms**: "Valid forever"/"With love"/"Dreams written" flavor replaced with menacing copy matching holidaypunk identity
+- **CI — Android on PRs**: `build-android-debug` job added to `ci.yml` — APK built and uploaded on every pull request (was only on push to main)
+- **CI — LOC check**: Glob changed from `scripts/*.gd` to `find scripts scenes -name "*.gd"` — recursive, covers all subdirs
+- **CI — gdUnit4 exit code**: Removed `--continue` flag — non-zero exit now fails the step; e2e suite added to CI run
+- **Tests — 243/243**: Fixed `test_enemy_bt.gd` `Callable(lambda,"call")` parse error (13 tests were silently skipped); added `.uid` files for 6 newly discovered scripts; `test_full_session_flow.gd` now runs via gdUnit4 (not `-s`)
+
 ### CI/Security Hardening (post-batch, codex/production-polish)
 
 - **GitHub Actions SHA pinning**: All action refs pinned to full commit SHAs across ci/cd/release/release-please workflows (addresses SonarCloud hotspot S6720 — mutable version tags)
