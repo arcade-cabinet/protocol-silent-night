@@ -166,7 +166,7 @@ func _load_definitions() -> void: MAIN_HELPERS.load_definitions(self)
 
 func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
 func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(), _on_class_button_pressed, present_defs)
-func _return_to_menu() -> void: game_mgr.return_to_menu()
+func _return_to_menu() -> void: MAIN_HELPERS.return_to_menu(self)
 
 func _trigger_level_up() -> void: MAIN_HELPERS.trigger_level_up(self)
 

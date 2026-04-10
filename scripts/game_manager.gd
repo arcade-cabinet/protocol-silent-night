@@ -30,7 +30,7 @@ func start_run(class_id: String) -> void:
 	main.coal_queue = start_sm.get_coal() if start_sm != null else []
 	MAIN_HELPERS.load_equipped_gear(main, start_sm)
 	MAIN_HELPERS.apply_reduced_motion(main, start_sm)
-	build_board()
+	MAIN_HELPERS.build_board(main)
 	spawn_player()
 	main._update_ui()
 	MAIN_HELPERS.show_gameplay_ui(main)
@@ -95,35 +95,6 @@ func end_run(win: bool) -> void:
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		MAIN_HELPERS.finalize_end_screen(main, win)
 	else: main.between_match.start_flow()
-
-func return_to_menu() -> void:
-	main.state = "menu"
-	main.move_velocity = Vector2.ZERO
-	main.input_move = Vector2.ZERO
-	main.touch_active = false
-	var ui: RefCounted = main.ui_mgr
-	ui.end_screen.visible = false
-	ui.level_screen.visible = false
-	ui.dash_button.visible = false
-	ui.hud_root.visible = false
-	ui.start_screen.visible = true
-	ui.boss_panel.visible = false
-	if ui.difficulty_panel != null:
-		ui.difficulty_panel.visible = false
-	ui.hide_joystick()
-	clear_runtime()
-	main._refresh_start_screen()
-
-func build_board() -> void:
-	main.obstacle_colliders.clear()
-	main.board_data = main.board_generator.generate_board(int(main.config.get("board_seed", 1225)) + main.progression.level, main.config)
-	main.board_builder.build_board_foundation(main.board_root, float(main.config.get("arena_radius", 18.0)))
-	main.board_builder.build_snow_drifts(main.board_root, main.board_data)
-	main.board_builder.build_outer_ridge(main.board_root, main.board_data)
-	for obstacle in main.board_data.get("obstacles", []):
-		main.obstacles_builder.make_obstacle(main.board_root, obstacle, main.obstacle_colliders)
-	for landmark in main.board_data.get("landmarks", []):
-		main.obstacles_builder.make_landmark(main.board_root, landmark)
 
 func spawn_player() -> void:
 	if main.flair_animator != null: main.flair_animator.clear()
