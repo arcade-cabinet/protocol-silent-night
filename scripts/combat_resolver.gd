@@ -60,11 +60,13 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 						break
 			var boss_alive: bool = boss_ref.size() > 0 and float(boss_ref.get("hp", 0.0)) > 0.0
 			if not remove and boss_alive and projectile["node"].position.distance_to(boss_ref["node"].position) < 1.8:
-				boss_ref["hp"] -= float(projectile["damage"])
+				var is_crit: bool = randf() < float(projectile.get("crit_chance", 0.0))
+				var hit_damage := float(projectile["damage"]) * (2.0 if is_crit else 1.0)
+				boss_ref["hp"] -= hit_damage
 				boss_bar.value = boss_ref["hp"]
 				spawn_hit_fx(fx_root, vfx, boss_ref["node"].position, boss_ref["color"])
 				if dmg_numbers != null:
-					dmg_numbers.spawn(fx_root, boss_ref["node"].position + Vector3(0, 2.0, 0), float(projectile["damage"]), boss_ref["color"], true)
+					dmg_numbers.spawn(fx_root, boss_ref["node"].position + Vector3(0, 2.0, 0), hit_damage, boss_ref["color"], is_crit)
 				projectile["pierce"] -= 1
 				if boss_ref["hp"] <= 0.0:
 					on_boss_killed.call()

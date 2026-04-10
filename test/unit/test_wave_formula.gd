@@ -179,4 +179,3 @@ func test_damage_scale_scales_with_difficulty() -> void:
 	var easy := WaveFormula.generate_wave(42, 10, [], 1)
 	var hard := WaveFormula.generate_wave(42, 10, [], 6)
 	assert_float(float(hard["damage_scale"])).is_greater(float(easy["damage_scale"]))
->>>>>>> codex/feat-enemy-speed-damage-scaling

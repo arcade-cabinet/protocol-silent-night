@@ -48,7 +48,7 @@ func update_spawning(delta: float, spawn_boss_callable: Callable, spawn_board_ob
 	var pattern: String = String(wave.get("pattern", "scatter"))
 	var ar: float = float(main.config["arena_radius"])
 	for i in range(count):
-		var enemy_type: String = composition[randi() % composition.size()]
+		var enemy_type: String = composition[_spawn_rng.randi() % composition.size()]
 		var pos := _pattern_position(pattern, i, count, ar)
 		main.enemies_ai.spawn_enemy(main.actor_root, main.enemies, enemy_type,
 			float(wave.get("hp_scale", 1.0)), main.enemy_defs, main.config,

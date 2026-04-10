@@ -238,7 +238,7 @@ func test_spawn_enemy_applies_speed_mult() -> void:
 	var enemy_defs := preload("res://scripts/enemy_director.gd").new(mat, pix)
 	# Use grunt def directly from declarations
 	var defs := {"grunt": {"max_hp": 24.0, "speed": 3.4, "contact_damage": 9.0, "scale": 0.75, "drop_xp": 1, "drop_cookies": 0, "color": "#ffffff"}}
-	var root := auto_free(Node3D.new())
+	var root: Node3D = auto_free(Node3D.new())
 	add_child(root)
 	var enemies: Array = []
 	director.spawn_enemy(root, enemies, "grunt", 1.0, defs, config, 1, 2.0, 1.5)
