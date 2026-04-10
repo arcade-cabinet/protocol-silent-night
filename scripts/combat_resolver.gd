@@ -56,7 +56,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 					if projectile["pierce"] <= 0:
 						remove = true
 						break
-			if not remove and boss_ref.size() > 0 and projectile["node"].position.distance_to(boss_ref["node"].position) < 1.8:
+			if not remove and boss_ref.size() > 0 and float(boss_ref.get("hp", 0.0)) > 0.0 and projectile["node"].position.distance_to(boss_ref["node"].position) < 1.8:
 				boss_ref["hp"] -= float(projectile["damage"])
 				boss_bar.value = boss_ref["hp"]
 				spawn_hit_fx(fx_root, vfx, boss_ref["node"].position, boss_ref["color"])

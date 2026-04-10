@@ -138,6 +138,30 @@ func test_krampus_hsm_phase_dispatch() -> void:
 	assert_str(EnemyBehaviors.behavior_krampus_hsm(3)).is_equal("rapid_charge_multishot")
 
 
+func test_tank_slam_mult_applied_in_contact_damage() -> void:
+	# Regression: slam_damage_mult was set by tank_tick but never read in enemy_director.
+	# Verify the 1.8× multiplier reaches the on_damage_player callback.
+	var mat := preload("res://scripts/material_factory.gd").new()
+	var pix := preload("res://scripts/pixel_art_renderer.gd").new()
+	var director := preload("res://scripts/enemy_director.gd").new(mat, pix)
+	var tank := _make_enemy("tank", Vector3(0.5, 0.0, 0.0))
+	tank["contact_damage"] = 10.0
+	tank["behavior_state"] = "slam"
+	# Start timer at TANK_SLAM_DURATION so this tick sets slam_damage_mult then transitions
+	# to stagger (no on_move_actor call needed — stagger has no movement).
+	tank["behavior_timer"] = EnemyBTStates.TANK_SLAM_DURATION
+	var player: Node3D = auto_free(Node3D.new())
+	player.position = Vector3.ZERO
+	add_child(player)
+	var damage_received: Array = [0.0]
+	var on_damage := func(amt: float) -> void: damage_received[0] += amt
+	var enemies: Array = [tank]
+	var delta := 0.1
+	director.update_enemies(delta, enemies, {}, player, Callable(), on_damage, Callable(), 1.0)
+	# With slam_damage_mult=1.8: 10.0 * 0.1 * 2.0 * 1.8 = 3.6
+	assert_float(damage_received[0]).is_equal_approx(3.6, 0.05)
+
+
 func test_krampus_circle_strafe_dir_has_tangential_component() -> void:
 	# Boss at origin, player at (10, 0, 0) — ORBIT_RADIUS distance
 	# Direction should be roughly perpendicular (tangential) to the radial
