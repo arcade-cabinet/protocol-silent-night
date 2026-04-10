@@ -1,13 +1,13 @@
 [
   {
     "id": "damage",
-    "name": "High Caliber",
-    "description": "+25% damage"
+    "name": "Powder-Keg Payload",
+    "description": "Volatile compound rounds. +25% damage."
   },
   {
     "id": "fire_rate",
-    "name": "Overclock CPU",
-    "description": "+18% fire rate"
+    "name": "Workshop Overdrive",
+    "description": "North Pole industrial-grade rate boost. +18% fire rate."
   },
   {
     "id": "health",
@@ -16,13 +16,13 @@
   },
   {
     "id": "speed",
-    "name": "Kinetic Boots",
-    "description": "+15% move speed"
+    "name": "Sleigh-Runner Soles",
+    "description": "Fitted for speed on any terrain. +15% move speed."
   },
   {
     "id": "range",
-    "name": "Advanced Optics",
-    "description": "+20% range"
+    "name": "Tinsel-Scope",
+    "description": "Coated in festive wire, sees farther. +20% range."
   },
   {
     "id": "aura",

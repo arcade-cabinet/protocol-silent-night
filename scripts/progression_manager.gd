@@ -58,9 +58,17 @@ func apply_upgrade(upgrade_id: String, player_state: Dictionary) -> void:
 	var cls: Dictionary = player_state["class"]
 	match upgrade_id:
 		"damage":
-			cls["damage"] = float(cls["damage"]) * 1.25
+			# Cap at 5 stacks (3.05x base) — pressure valve, not godmode.
+			var damage_stacks: int = int(player_state.get("damage_stacks", 0))
+			if damage_stacks < 5:
+				cls["damage"] = float(cls["damage"]) * 1.25
+				player_state["damage_stacks"] = damage_stacks + 1
 		"fire_rate":
-			cls["fire_rate"] = float(cls["fire_rate"]) * 0.82
+			# Cap at 5 stacks — fire interval floor ~0.45× base.
+			var fr_stacks: int = int(player_state.get("fire_rate_stacks", 0))
+			if fr_stacks < 5:
+				cls["fire_rate"] = float(cls["fire_rate"]) * 0.82
+				player_state["fire_rate_stacks"] = fr_stacks + 1
 		"health":
 			player_state["max_hp"] += 50.0
 			player_state["hp"] = minf(player_state["max_hp"], float(player_state["hp"]) + 50.0)

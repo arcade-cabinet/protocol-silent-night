@@ -46,8 +46,36 @@ func build_snow_drifts(board_root: Node3D, board_data: Dictionary) -> void:
 		board_root.add_child(node)
 
 
-func build_outer_ridge(_board_root: Node3D, _board_data: Dictionary) -> void:
-	pass
+func build_outer_ridge(board_root: Node3D, _board_data: Dictionary) -> void:
+	# Ice-chunk protrusions along the arena perimeter for visual containment.
+	var arena_radius: float = 8.0
+	var half_w := arena_radius * 1.6
+	var half_h := arena_radius
+	var ice_color := Color("88ccee")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 42
+	var perimeter: Array = [
+		[Vector2(-half_w, -half_h), Vector2(half_w, -half_h)],
+		[Vector2(-half_w, half_h), Vector2(half_w, half_h)],
+		[Vector2(-half_w, -half_h), Vector2(-half_w, half_h)],
+		[Vector2(half_w, -half_h), Vector2(half_w, half_h)],
+	]
+	for seg in perimeter:
+		var a: Vector2 = seg[0]; var b: Vector2 = seg[1]
+		var steps: int = 6
+		for i in range(steps):
+			var t: float = (float(i) + 0.5) / float(steps)
+			var p := a.lerp(b, t)
+			var chunk := MeshInstance3D.new()
+			var box := BoxMesh.new()
+			var w: float = rng.randf_range(0.3, 0.7)
+			var h: float = rng.randf_range(0.2, 0.55)
+			box.size = Vector3(w, h, w * 0.9)
+			chunk.mesh = box
+			chunk.position = Vector3(p.x, h * 0.5, p.y)
+			chunk.rotation_degrees.y = rng.randf_range(-30.0, 30.0)
+			chunk.material_override = materials.flat_material(ice_color)
+			board_root.add_child(chunk)
 
 
 func _build_border(root: Node3D, half_w: float, half_h: float) -> void:

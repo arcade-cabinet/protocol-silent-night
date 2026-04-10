@@ -72,7 +72,7 @@
     "speed": 2.7,
     "contact_damage": 20.0,
     "scale": 1.8,
-    "drop_xp": 0,
+    "drop_xp": 25,
     "drop_cookies": 25,
     "color": "#ff3a61"
   }

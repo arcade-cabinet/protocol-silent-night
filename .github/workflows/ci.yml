@@ -24,27 +24,27 @@ jobs:
       - name: Import project resources
         run: godot --headless --path . --import --quit-after 60 || true
 
-      - name: Run unit + component tests
+      - name: Run unit + component + e2e tests
         run: |
           godot --headless --path . \
             -s addons/gdUnit4/bin/GdUnitCmdTool.gd \
             --add "res://test/unit/" \
             --add "res://test/component/" \
-            --ignoreHeadlessMode \
-            --continue
+            --add "res://test/e2e/" \
+            --ignoreHeadlessMode
         timeout-minutes: 10
 
       - name: LOC compliance check
         run: |
           fail=0
-          for f in scripts/*.gd; do
+          while IFS= read -r f; do
             [ -f "$f" ] || continue
             count=$(wc -l < "$f")
             if [ "$count" -gt 200 ]; then
               echo "VIOLATION: $f ($count lines)"
               fail=1
             fi
-          done
+          done < <(find scripts scenes -name "*.gd" 2>/dev/null)
           [ "$fail" -eq 0 ] && echo "LOC check passed" || exit 1
 
       - name: Validate declaration JSON

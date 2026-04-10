@@ -31,8 +31,7 @@ static func build(parent: Control) -> SubViewport:
 	vp.transparent_bg = true
 	container.add_child(vp)
 	var cam := Camera3D.new()
-	cam.position = Vector3(0.0, 1.5, 3.0)
-	cam.look_at(Vector3(0.0, 0.5, 0.0), Vector3.UP)
+	cam.look_at_from_position(Vector3(0.0, 1.5, 3.0), Vector3(0.0, 0.5, 0.0), Vector3.UP)
 	vp.add_child(cam)
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-45.0, 30.0, 0.0)

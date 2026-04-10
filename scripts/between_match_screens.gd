@@ -59,7 +59,7 @@ static func build_results_screen(root: Control, on_continue: Callable) -> Dictio
 static func update_results(state: Dictionary, data: Dictionary) -> void:
 	state["level_label"].text = "Level Reached: %d" % int(data.get("level", 0))
 	state["kills_label"].text = "Enemies Purged: %d" % int(data.get("kills", 0))
-	state["cookies_label"].text = "Cookies Earned: %d C" % int(data.get("cookies", 0))
+	state["cookies_label"].text = "Cookies Earned: %d" % int(data.get("cookies", 0))
 	state["scrolls_label"].text = "Scrolls Collected: %d" % int(data.get("scrolls", 0))
 
 

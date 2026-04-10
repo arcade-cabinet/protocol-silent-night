@@ -124,7 +124,7 @@ func test_tank_telegraph_fires_on_prep_slam_expiry() -> void:
 	var telegraphs: Array = []
 	var tcb := func(id: String, pos: Vector3) -> void: telegraphs.append(id)
 	# Advance past TANK_PREP_DURATION (0.5s)
-	var state := EnemyBTStates.tank_tick(enemy, player_pos, 0.6, Callable(tcb, "call"))
+	var state := EnemyBTStates.tank_tick(enemy, player_pos, 0.6, tcb)
 	assert_str(state).is_equal("slam")
 	assert_int(telegraphs.size()).is_equal(1)
 	assert_str(telegraphs[0]).is_equal("tank")

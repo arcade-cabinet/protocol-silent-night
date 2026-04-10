@@ -11,6 +11,7 @@ const SPARKLE_LIFE := 0.70
 
 var _entries: Array = []
 var _sphere_cache: SphereMesh = null
+var _mat_cache: Dictionary = {}
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
@@ -29,6 +30,9 @@ func _sphere() -> SphereMesh:
 
 
 func _make_particle_material(color: Color, energy: float = 2.0) -> StandardMaterial3D:
+	var key: String = "%s_%.1f" % [color.to_html(false), energy]
+	if _mat_cache.has(key):
+		return _mat_cache[key]
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -37,6 +41,7 @@ func _make_particle_material(color: Color, energy: float = 2.0) -> StandardMater
 	mat.emission = color
 	mat.emission_energy_multiplier = energy
 	mat.no_depth_test = false
+	_mat_cache[key] = mat
 	return mat
 
 
