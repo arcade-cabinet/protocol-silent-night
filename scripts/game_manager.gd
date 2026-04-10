@@ -173,7 +173,8 @@ func closest_target() -> Dictionary:
 	return main.enemies_ai.closest_target(main.enemies, main.boss_ref, main.player_node, float(main.player_state["class"]["range"]))
 
 func spawn_projectile_player(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
-	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color(main.player_state["class"]["color"]), main.fx_root, main.particles)
+	var crit_chance := float(main.player_state["class"].get("crit_chance", 0.0))
+	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color(main.player_state["class"]["color"]), main.fx_root, main.particles, crit_chance)
 
 func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
 	main.combat.spawn_projectile(main.projectile_root, main.projectiles, origin, direction, hostile, damage, pierce, speed, scale_value, Color("ff617e"), main.fx_root, main.particles)

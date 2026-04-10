@@ -10,7 +10,7 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float, player_color: Color, fx_root: Node3D = null, particles: RefCounted = null) -> void:
+func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float, player_color: Color, fx_root: Node3D = null, particles: RefCounted = null, crit_chance: float = 0.0) -> void:
 	var node := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
 	sphere.radius = scale_value
@@ -19,7 +19,7 @@ func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vecto
 	node.material_override = materials.emissive_material(Color("ff617e") if hostile else player_color, 1.6, 0.08)
 	node.position = origin
 	projectile_root.add_child(node)
-	projectiles.append({"node": node, "direction": direction, "hostile": hostile, "damage": damage, "pierce": pierce, "speed": speed, "life": 1.0})
+	projectiles.append({"node": node, "direction": direction, "hostile": hostile, "damage": damage, "pierce": pierce, "speed": speed, "life": 1.0, "crit_chance": crit_chance})
 	if audio_mgr != null and not hostile:
 		audio_mgr.play_shot("#%s" % player_color.to_html(false))
 	if particles != null and fx_root != null and not hostile:
@@ -43,13 +43,15 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 			for enemy_index in range(enemies.size() - 1, -1, -1):
 				var enemy: Dictionary = enemies[enemy_index]
 				if projectile["node"].position.distance_to(enemy["node"].position) < 0.9 * float(enemy["node"].scale.x):
-					enemy["hp"] -= float(projectile["damage"])
+					var is_crit: bool = randf() < float(projectile.get("crit_chance", 0.0))
+					var hit_damage: float = float(projectile["damage"]) * (2.0 if is_crit else 1.0)
+					enemy["hp"] -= hit_damage
 					spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
 					if audio_mgr != null:
 						if audio_mgr.has_method("play_3d"): audio_mgr.play_3d("hit", enemy["node"].position, -3.0)
 						else: audio_mgr.play_hit()
 					if dmg_numbers != null:
-						dmg_numbers.spawn(fx_root, enemy["node"].position + Vector3(0, 1.0, 0), float(projectile["damage"]), enemy["color"])
+						dmg_numbers.spawn(fx_root, enemy["node"].position + Vector3(0, 1.0, 0), hit_damage, enemy["color"], is_crit)
 					projectile["pierce"] -= 1
 					if enemy["hp"] <= 0.0:
 						on_kill_enemy.call(enemy_index)
