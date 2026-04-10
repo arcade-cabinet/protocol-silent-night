@@ -118,7 +118,7 @@ func refresh_coal_sidebar(coal_queue: Array) -> void:
 	COAL_SIDEBAR.refresh(coal_sidebar_state, coal_queue)
 
 
-func refresh_start_screen(_class_defs: Dictionary, save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
+func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
 	for child in start_classes_box.get_children():
 		child.queue_free()
 	if not present_defs.is_empty():

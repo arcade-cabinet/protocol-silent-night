@@ -12,7 +12,7 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	pixels = pixel_renderer
 
 
-func spawn_player(actor_root: Node3D, class_id: String, _class_defs: Dictionary, present_defs: Dictionary = {}, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
+func spawn_player(actor_root: Node3D, class_id: String, present_defs: Dictionary = {}, gear_system: RefCounted = null, animator: Node = null) -> Dictionary:
 	return _spawn_present_player(actor_root, class_id, present_defs.get(class_id, {}), gear_system, animator)
 
 
