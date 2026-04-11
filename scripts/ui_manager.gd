@@ -147,6 +147,8 @@ func _on_back_to_title_pressed() -> void:
 func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
 	title_screen.visible = true
 	start_screen.visible = false
+	if select_button != null:
+		select_button.disabled = true
 	if difficulty_panel != null:
 		difficulty_panel.visible = false
 	for child in start_classes_box.get_children():
