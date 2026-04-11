@@ -39,7 +39,7 @@ jobs:
           include-templates: true
 
       - name: Import project resources
-        run: godot --headless --path . --import --quit-after 60 || true
+        run: godot --headless --path . --import --quit-after 180
 
       - name: Generate debug keystore (fallback — no production keystore yet)
         run: |
@@ -99,11 +99,12 @@ jobs:
           include-templates: true
 
       - name: Import project resources
-        run: godot --headless --path . --import --quit-after 60 || true
+        run: godot --headless --path . --import --quit-after 180
 
       - name: Export HTML5
         run: |
           mkdir -p export/html5
+          curl -L -o export/html5/coi-serviceworker.js https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.js
           godot --headless --path . \
             --export-release "HTML5" \
             export/html5/index.html
