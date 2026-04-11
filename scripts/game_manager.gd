@@ -87,11 +87,15 @@ func end_run(win: bool) -> void:
 	var ui: RefCounted = main.ui_mgr
 	ui.hud_root.visible = false; ui.dash_button.visible = false; ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
-	if sm != null and main.run_cookies > 0: sm.add_cookies(main.run_cookies)
-	if sm != null: sm.set_coal(main.coal_queue)
-	if win and sm != null: sm.record_campaign_clear()
-	if win and sm != null and sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
-	if win and sm != null and sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
+	if sm != null:
+		sm.suspend_autosave()
+		if main.run_cookies > 0: sm.add_cookies(main.run_cookies)
+		sm.set_coal(main.coal_queue)
+		if win:
+			sm.record_campaign_clear()
+			if sm.unlock("santa"): ui.show_achievement("MECHA-SANTA UNLOCKED")
+			if sm.unlock("bumble"): ui.show_achievement("THE BUMBLE UNLOCKED"); main._refresh_start_screen()
+		sm.resume_autosave()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		MAIN_HELPERS.finalize_end_screen(main, win)
 	else: main.between_match.start_flow()

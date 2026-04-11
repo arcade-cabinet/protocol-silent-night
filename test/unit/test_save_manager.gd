@@ -153,15 +153,20 @@ func test_merge_dict_rejects_unknown_top_level_keys() -> void:
 	save.reset_state_for_tests()
 
 func test_record_run_start_increments() -> void:
-	var sm = preload("res://scripts/save_manager.gd").new()
-	sm.set_save_path_for_tests("user://test_save_manager.json")
+	var sm = auto_free(preload("res://scripts/save_manager.gd").new())
+	var path = "user://test_save_manager_%d.json" % Time.get_ticks_usec()
+	sm.set_save_path_for_tests(path)
 	sm.reset_state_for_tests()
 	sm.record_run_start()
 	assert_int(sm.get_achievement("total_runs")).is_equal(1)
+	DirAccess.remove_absolute(path)
 
 func test_record_campaign_clear_increments() -> void:
-	var sm = preload("res://scripts/save_manager.gd").new()
-	sm.set_save_path_for_tests("user://test_save_manager.json")
+	var sm = auto_free(preload("res://scripts/save_manager.gd").new())
+	var path = "user://test_save_manager_%d.json" % Time.get_ticks_usec()
+	sm.set_save_path_for_tests(path)
 	sm.reset_state_for_tests()
 	sm.record_campaign_clear()
 	assert_int(sm.get_achievement("campaign_clears")).is_equal(1)
+	DirAccess.remove_absolute(path)
+	DirAccess.remove_absolute(path)
