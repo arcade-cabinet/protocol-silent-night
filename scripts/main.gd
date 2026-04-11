@@ -83,7 +83,7 @@ var enemies: Array = []
 var projectiles: Array = []
 var pickups: Array = []
 var vfx: Array = []
-var board_data: Dictionary = {}
+var board_data: BoardLayout
 var obstacle_colliders: Array = []
 var current_wave: Dictionary = {}
 var run_seed: int = 0
@@ -138,6 +138,7 @@ func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
 func debug_force_level_up() -> void: DEBUG_HELPERS.force_level_up(self)
 func debug_spawn_boss() -> void: DEBUG_HELPERS.spawn_boss(self)
 func debug_end_run(win: bool) -> void: DEBUG_HELPERS.end_run(self, win)
+func capture_screenshot(path: String) -> void: await DEBUG_HELPERS.capture_screenshot(self, path)
 func debug_zone_at(wp: Vector3) -> String: return "arena" if absf(wp.x) <= float(config["arena_radius"]) * 1.6 and absf(wp.z) <= float(config["arena_radius"]) else "void"
 func debug_is_blocked(wp: Vector3, r: float = 0.6) -> bool: return not _can_occupy(wp, r)
 func debug_tick(delta: float) -> void: _tick(delta)

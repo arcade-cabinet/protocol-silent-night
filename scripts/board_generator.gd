@@ -1,14 +1,19 @@
 extends RefCounted
 class_name BoardGenerator
 
+## Logic for procedural arena generation.
+## Returns a BoardLayout resource containing drift, ridge,
+## obstacle, and landmark data.
 
-func generate_board(board_seed: int, config: Dictionary) -> Dictionary:
+func generate_board(board_seed: int, config: Dictionary) -> BoardLayout:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = board_seed
 	var arena_radius := float(config.get("arena_radius", 18.0))
 	var safe_radius := float(config.get("player_spawn_safe_radius", 5.0))
-	var drifts: Array = []
-	var ridges: Array = []
+	var drifts: Array[Dictionary] = []
+	var ridges: Array[Dictionary] = []
+	var obstacles: Array[Dictionary] = []
+	var landmarks: Array[Dictionary] = []
 
 	var drift_count := 5 + rng.randi_range(0, 3)
 	for drift_index in range(drift_count):
@@ -35,7 +40,6 @@ func generate_board(board_seed: int, config: Dictionary) -> Dictionary:
 		})
 
 	var obstacle_types := ["gift_stack", "bollard_cluster", "crate"]
-	var obstacles: Array = []
 	var obstacle_count := rng.randi_range(4, 8)
 	var min_obstacle_dist := 2.0
 	var obstacle_safe_margin := safe_radius + 1.5
@@ -52,39 +56,44 @@ func generate_board(board_seed: int, config: Dictionary) -> Dictionary:
 					break
 			if not too_close:
 				obstacles.append({
+					"type": obstacle_types[rng.randi() % obstacle_types.size()],
 					"world": candidate,
-					"type": obstacle_types[rng.randi_range(0, obstacle_types.size() - 1)]
+					"rotation": rng.randf() * TAU,
+					"scale": rng.randf_range(0.9, 1.3)
 				})
 				placed = true
 				break
 
-	var landmark_types := ["candy_cane_gate", "wreath_machine", "present_heap", "signal_pylon"]
-	var landmarks: Array = []
-	var landmark_count := rng.randi_range(2, 4)
+	var landmark_types := ["statue", "fountain", "pine_cluster"]
+	var landmark_count := rng.randi_range(1, 2)
 	for landmark_index in range(landmark_count):
 		var placed := false
-		for attempt in range(40):
+		for attempt in range(50):
 			var angle := rng.randf() * TAU
-			var radius := rng.randf_range(arena_radius * 0.88, arena_radius + 1.0)
+			var radius := rng.randf_range(arena_radius * 0.35, arena_radius * 0.7)
 			var candidate := Vector2.RIGHT.rotated(angle) * radius
 			var too_close := false
+			for existing in obstacles:
+				if candidate.distance_to(existing["world"]) < 4.0:
+					too_close = true
+					break
 			for existing in landmarks:
-				if candidate.distance_to(existing["world"]) < 3.0:
+				if candidate.distance_to(existing["world"]) < 6.0:
 					too_close = true
 					break
 			if not too_close:
 				landmarks.append({
+					"type": landmark_types[rng.randi() % landmark_types.size()],
 					"world": candidate,
-					"type": landmark_types[rng.randi_range(0, landmark_types.size() - 1)]
+					"rotation": rng.randf() * TAU,
+					"scale": rng.randf_range(1.1, 1.5)
 				})
 				placed = true
 				break
 
-	return {
-		"seed": board_seed,
-		"safe_radius": safe_radius,
-		"drifts": drifts,
-		"ridges": ridges,
-		"obstacles": obstacles,
-		"landmarks": landmarks,
-	}
+	var layout := BoardLayout.new()
+	layout.drifts = drifts
+	layout.ridges = ridges
+	layout.obstacles = obstacles
+	layout.landmarks = landmarks
+	return layout

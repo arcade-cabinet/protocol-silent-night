@@ -9,8 +9,9 @@ static func begin_wave_clear(main: Node) -> void:
 	main.wave_clear_timer = 2.0
 	main.ui_mgr.show_message("WAVE CLEARED", 1.6, Color("69d6ff"))
 	for enemy in main.enemies:
-		main.combat.spawn_pickup(main.pickup_root, main.pickups, enemy["node"].position, enemy["drop_xp"])
-		enemy["node"].queue_free()
+		if is_instance_valid(enemy.get("node")):
+			main.combat.spawn_pickup(main.pickup_root, main.pickups, enemy["node"].position, enemy["drop_xp"])
+			enemy["node"].queue_free()
 	main.enemies.clear()
 
 
@@ -18,7 +19,8 @@ static func on_boss_killed(main: Node) -> void:
 	if main.state != "playing":
 		return
 	main.boss_phases.clear()
-	main.boss_ref["node"].queue_free()
+	if is_instance_valid(main.boss_ref.get("node")):
+		main.boss_ref["node"].queue_free()
 	main.boss_ref = {}
 	main.ui_mgr.boss_panel.visible = false
 	if main.current_wave_index + 1 >= 10:
@@ -61,12 +63,14 @@ static func end_run(main: Node, win: bool) -> void:
 
 static func gain_xp(main: Node, amt: int) -> void:
 	var wave_mult := 1.0 + float(maxi(0, main.current_wave_index)) * 0.08
-	var bonus := float(main.player_state["class"].get("xp_bonus", 0.0))
+	var cls: ClassResource = main.player_state.get("class")
+	var bonus := cls.xp_bonus if cls != null else 0.0
 	main.progression.gain_xp(int(roundi(float(amt) * wave_mult * (1.0 + bonus))), Callable(main, "_trigger_level_up"), Callable(main, "_update_ui"))
 
 
 static func gain_cookies(main: Node, amt: int) -> void:
-	var bonus := float(main.player_state["class"].get("cookie_bonus", 0.0))
+	var cls: ClassResource = main.player_state.get("class")
+	var bonus := cls.cookie_bonus if cls != null else 0.0
 	main.run_cookies += int(roundi(float(amt) * (1.0 + bonus)))
 
 

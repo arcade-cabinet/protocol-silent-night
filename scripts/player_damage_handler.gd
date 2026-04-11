@@ -11,7 +11,8 @@ static func damage_player(main: Node, amount: float) -> void:
 		return
 	if bool(main.test_mode.get("invincible", false)) or main.dash_timer > 0.0:
 		return
-	var reduction := clampf(float(main.player_state["class"].get("contact_damage_reduction", 0.0)), 0.0, 0.9)
+	var cls: ClassResource = main.player_state["class"]
+	var reduction := clampf(cls.contact_damage_reduction, 0.0, 0.9)
 	main.player_state["hp"] = maxf(0.0, float(main.player_state["hp"]) - amount * (1.0 - reduction))
 	if float(main.player_state["hp"]) <= 0.0:
 		if not main.permadeath and main.rewraps > 0:

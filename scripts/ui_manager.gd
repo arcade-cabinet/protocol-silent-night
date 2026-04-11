@@ -137,7 +137,7 @@ func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, presen
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:
-	PRESENT_SELECT.build_present_buttons(start_classes_box, present_defs, save_manager, on_class_pressed, radar_canvas, audio_mgr)
+	PRESENT_SELECT.build_present_buttons(self.start_classes_box, present_defs, save_manager, on_class_pressed, self.radar_canvas, self.audio_mgr)
 
 
 func show_message(text: String, duration: float, color: Color = Color.WHITE) -> void:

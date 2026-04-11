@@ -10,12 +10,13 @@ const EVENT_HELPERS := preload("res://scripts/game_event_helpers.gd")
 static func build_board(main: Node) -> void:
 	main.obstacle_colliders.clear()
 	main.board_data = main.board_generator.generate_board(int(main.config.get("board_seed", 1225)) + main.progression.level, main.config)
+	var layout: BoardLayout = main.board_data
 	main.board_builder.build_board_foundation(main.board_root, float(main.config.get("arena_radius", 18.0)))
-	main.board_builder.build_snow_drifts(main.board_root, main.board_data)
-	main.board_builder.build_outer_ridge(main.board_root, main.board_data)
-	for obstacle in main.board_data.get("obstacles", []):
+	main.board_builder.build_snow_drifts(main.board_root, layout)
+	main.board_builder.build_outer_ridge(main.board_root, layout)
+	for obstacle in layout.obstacles:
 		main.obstacles_builder.make_obstacle(main.board_root, obstacle, main.obstacle_colliders)
-	for landmark in main.board_data.get("landmarks", []):
+	for landmark in layout.landmarks:
 		main.obstacles_builder.make_landmark(main.board_root, landmark)
 
 
@@ -24,6 +25,7 @@ static func return_to_menu(main: Node) -> void:
 	main.move_velocity = Vector2.ZERO
 	main.input_move = Vector2.ZERO
 	main.touch_active = false
+	main.dash_pressed = false
 	var ui: RefCounted = main.ui_mgr
 	ui.end_screen.visible = false
 	ui.level_screen.visible = false
