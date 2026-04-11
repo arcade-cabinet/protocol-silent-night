@@ -1,6 +1,8 @@
 extends RefCounted
 
 const EnemyBehaviors := preload("res://scripts/enemy_behaviors.gd")
+const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
+var present_factory: RefCounted = PRESENT_FACTORY.new()
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
@@ -17,30 +19,45 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 
 const MAX_ENEMY_CAP := 48  # Mobile performance ceiling
 
-func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1) -> void:
+func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1, speed_mult: float = 1.0, damage_mult: float = 1.0, override_position: Vector3 = Vector3.INF) -> void:
 	if enemies.size() >= MAX_ENEMY_CAP:
+		return
+	if not enemy_defs.has(enemy_type):
+		push_error("spawn_enemy: unknown type '%s'" % enemy_type)
 		return
 	var def: Dictionary = enemy_defs[enemy_type]
 	var enemy_node := Node3D.new()
 	enemy_node.name = "Enemy_%s" % enemy_type
-	var mesh_instance: MeshInstance3D = pixels.make_billboard_sprite(enemy_type, 2.0, Color(def["color"]))
-	enemy_node.add_child(mesh_instance)
+	var is_present: bool = def.get("render_as", "") == "present"
+	var visual_root: Node3D
+	
+	if is_present:
+		visual_root = present_factory.build_present(def)
+		enemy_node.add_child(visual_root)
+	else:
+		var mesh_instance: MeshInstance3D = pixels.make_billboard_sprite(enemy_type, 2.0, Color(def["color"]))
+		visual_root = mesh_instance
+		enemy_node.add_child(mesh_instance)
+
 	if _enemy_shadow_mesh == null:
 		_enemy_shadow_mesh = PlaneMesh.new()
 		_enemy_shadow_mesh.size = Vector2(1.1, 1.1)
 	var shadow := MeshInstance3D.new()
 	shadow.mesh = _enemy_shadow_mesh
-	shadow.position = Vector3(0, -0.56, 0)
+	shadow.position = Vector3(0, 0.02, 0)
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
 	actor_root.add_child(enemy_node)
-	var ar := float(config["arena_radius"])
-	var half_w := ar * 1.6 - 2.0
-	var half_h := ar - 2.0
-	var side := randi() % 4
-	var spawn_x := randf_range(-half_w, half_w) if side < 2 else (half_w if side == 2 else -half_w)
-	var spawn_z := (half_h if side == 0 else -half_h) if side < 2 else randf_range(-half_h, half_h)
-	enemy_node.position = Vector3(spawn_x, 0.58, spawn_z)
+	if override_position != Vector3.INF:
+		enemy_node.position = override_position
+	else:
+		var ar := float(config["arena_radius"])
+		var half_w := ar * 1.6 - 2.0
+		var half_h := ar - 2.0
+		var side := randi() % 4
+		var spawn_x := randf_range(-half_w, half_w) if side < 2 else (half_w if side == 2 else -half_w)
+		var spawn_z := (half_h if side == 0 else -half_h) if side < 2 else randf_range(-half_h, half_h)
+		enemy_node.position = Vector3(spawn_x, 0.58, spawn_z)
 	var scale_value := float(def["scale"])
 	enemy_node.scale = Vector3.ONE * scale_value
 	_uid_counter += 1
@@ -49,8 +66,8 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 		"node": enemy_node,
 		"hp": float(def["max_hp"]) * hp_scale,
 		"max_hp": float(def["max_hp"]) * hp_scale,
-		"speed": float(def["speed"]),
-		"contact_damage": float(def["contact_damage"]),
+		"speed": float(def["speed"]) * speed_mult,
+		"contact_damage": float(def["contact_damage"]) * damage_mult,
 		"drop_xp": int(def["drop_xp"]),
 		"drop_cookies": int(def.get("drop_cookies", 0)),
 		"color": Color(def["color"]),
@@ -68,7 +85,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	var def: Dictionary = enemy_defs["boss"]
 	var boss_node := Node3D.new()
 	boss_node.name = "Boss"
-	var body: MeshInstance3D = pixels.make_billboard_sprite("boss", 4.4, Color(def["color"]))
+	var body: Node3D = _load_model("boss")
 	boss_node.add_child(body)
 	if _boss_shadow_mesh == null:
 		_boss_shadow_mesh = PlaneMesh.new()
@@ -114,11 +131,11 @@ func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_n
 		var pl: int = int(enemy.get("phase_level", 1))
 		match String(enemy.get("id", "grunt")):
 			"grunt":
-				EnemyBehaviors.behavior_grunt_bt(enemy, player_node.position, delta, on_move_actor)
+				EnemyBehaviors.behavior_grunt_bt(enemy, player_node.position, delta, on_move_actor, pl)
 			"rusher":
-				EnemyBehaviors.behavior_rusher_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
+				EnemyBehaviors.behavior_rusher_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph, pl)
 			"tank":
-				EnemyBehaviors.behavior_tank_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph)
+				EnemyBehaviors.behavior_tank_bt(enemy, player_node.position, delta, on_move_actor, on_telegraph, pl)
 			"elf":
 				EnemyBehaviors.behavior_flank(enemy, player_node, delta, on_move_actor, on_spawn_projectile, pl, on_telegraph)
 			"santa":
@@ -147,3 +164,18 @@ func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, r
 		if boss_distance < range_limit + 4.0 and boss_distance < best_distance:
 			best = boss_ref
 	return best
+
+func _load_model(enemy_type: String) -> Node3D:
+	var path := ""
+	match enemy_type:
+		"elf": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
+		"santa": path = "res://assets/characters/yuletide/animations/dodge_and_counter.glb" # Placeholder for santa
+		"bumble": path = "res://assets/characters/bumble/animations/basic_jump.glb"
+		"boss": path = "res://assets/characters/krampus/animations/combat_stance.glb"
+		"grunt", "rusher", "tank": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
+		_: path = "res://assets/characters/yuletide/animations/basic_jump.glb"
+	
+	var res = load(path)
+	if res == null: return Node3D.new()
+	var scene: Node3D = res.instantiate()
+	return scene

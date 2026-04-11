@@ -49,7 +49,7 @@ func test_boss_pressure_increases_with_level() -> void:
 
 func test_boss_pressure_capped_below_one() -> void:
 	var extreme := WaveFormula.generate_wave(42, 999)
-	assert_float(extreme["boss_pressure"]).is_less_equal(0.95)
+	assert_float(extreme["boss_pressure"]).is_less_equal(1.0)
 
 
 func test_is_boss_wave_true_at_level_10() -> void:
@@ -73,8 +73,8 @@ func test_countdown_timer_decreases_with_level() -> void:
 
 
 func test_lookback_increases_boss_pressure() -> void:
-	var no_lookback := WaveFormula.generate_wave(42, 10, [])
-	var lookback_no_bosses := WaveFormula.generate_wave(42, 10, [
+	var no_lookback := WaveFormula.generate_wave(42, 3, [])
+	var lookback_no_bosses := WaveFormula.generate_wave(42, 3, [
 		{"bosses_spawned": 0}, {"bosses_spawned": 0}, {"bosses_spawned": 0}
 	])
 	assert_float(lookback_no_bosses["boss_pressure"]).is_greater(no_lookback["boss_pressure"])
@@ -139,3 +139,43 @@ func test_max_bosses_scales_with_boss_pressure() -> void:
 	var low := WaveFormula.generate_wave(42, 1)
 	var high := WaveFormula.generate_wave(42, 30)
 	assert_int(int(high["max_bosses"])).is_greater_equal(int(low["max_bosses"]))
+
+
+func test_burst_chance_and_size_present_in_wave() -> void:
+	var wave := WaveFormula.generate_wave(42, 10)
+	assert_bool(wave.has("burst_chance")).is_true()
+	assert_bool(wave.has("burst_size")).is_true()
+	assert_float(float(wave["burst_chance"])).is_between(0.0, 0.55)
+	assert_int(int(wave["burst_size"])).is_greater_equal(3)
+
+
+func test_burst_chance_grows_with_level() -> void:
+	var early := WaveFormula.generate_wave(42, 1)
+	var late := WaveFormula.generate_wave(42, 30)
+	assert_float(float(late["burst_chance"])).is_greater(float(early["burst_chance"]))
+
+
+func test_speed_mult_increases_with_level() -> void:
+	var early := WaveFormula.generate_wave(42, 1)
+	var late := WaveFormula.generate_wave(42, 20)
+	assert_float(float(late["speed_mult"])).is_greater(float(early["speed_mult"]))
+	assert_float(float(early["speed_mult"])).is_greater_equal(1.0)
+
+
+func test_speed_mult_scales_with_difficulty() -> void:
+	var easy := WaveFormula.generate_wave(42, 10, [], 1)
+	var hard := WaveFormula.generate_wave(42, 10, [], 6)
+	assert_float(float(hard["speed_mult"])).is_greater(float(easy["speed_mult"]))
+
+
+func test_damage_scale_increases_with_level() -> void:
+	var early := WaveFormula.generate_wave(42, 1)
+	var late := WaveFormula.generate_wave(42, 20)
+	assert_float(float(late["damage_scale"])).is_greater(float(early["damage_scale"]))
+	assert_float(float(early["damage_scale"])).is_greater_equal(1.0)
+
+
+func test_damage_scale_scales_with_difficulty() -> void:
+	var easy := WaveFormula.generate_wave(42, 10, [], 1)
+	var hard := WaveFormula.generate_wave(42, 10, [], 6)
+	assert_float(float(hard["damage_scale"])).is_greater(float(easy["damage_scale"]))

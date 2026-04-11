@@ -1,0 +1,1 @@
+{"steps": ["godot --headless --path . -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add 'res://test/unit/' --add 'res://test/component/' --ignoreHeadlessMode"]}

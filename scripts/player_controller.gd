@@ -42,15 +42,21 @@ func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary
 		"spread": float(def.get("spread", 0.06)),
 		"pierce": int(def.get("pierce", 1)),
 		"color": def.get("bow_color", "#ffd700"),
+		"dash_cooldown": 1.0,
+		"contact_damage_reduction": 0.0,
+		"xp_bonus": 0.0,
+		"cookie_bonus": 0.0,
+		"crit_chance": 0.0,
 	}
 	if gear_system != null:
 		player_class = gear_system.apply_modifiers(player_class)
+
+	var player_class_res := ClassResource.from_dict(class_id, player_class)
 	var player_state := {
-		"class": player_class,
-		"hp": float(player_class["max_hp"]),
-		"max_hp": float(player_class["max_hp"]),
+		"class": player_class_res,
+		"hp": player_class_res.max_hp,
+		"max_hp": player_class_res.max_hp,
 		"last_shot": 0.0,
-		"aura_level": 0,
 		"aura_timer": 0.0,
 		"shake": 0.0
 	}
@@ -85,56 +91,59 @@ func read_move_input(input_move: Vector2, touch_active: bool) -> Vector2:
 
 func auto_fire(delta: float, player_state: Dictionary, player_node: Node3D, on_closest_target: Callable, on_spawn_projectile: Callable, fire_scale: float, damage_scale: float) -> bool:
 	player_state["last_shot"] += delta
-	if player_state["last_shot"] < float(player_state["class"]["fire_rate"]) / fire_scale:
+	var cls: ClassResource = player_state["class"]
+	if player_state["last_shot"] < cls.fire_rate / fire_scale:
 		return false
 	var target: Dictionary = on_closest_target.call()
 	if target.is_empty():
 		return false
+
 	player_state["last_shot"] = 0.0
-	var origin := player_node.position + Vector3(0, 0.55, 0)
-	var target_position: Vector3 = target["node"].position
-	var dir := (target_position - origin).normalized()
-	var shot_count := int(player_state["class"]["shot_count"])
-	var spread := float(player_state["class"]["spread"])
+	var target_node: Node3D = target["node"]
+	var dir := (target_node.global_position - player_node.global_position).normalized()
+	var shot_count: int = cls.shot_count
+	var spread: float = cls.spread
 	for shot_index in range(shot_count):
 		var shot_dir := dir
 		if shot_count > 1:
-			var normalized_index := float(shot_index) - float(shot_count - 1) * 0.5
-			shot_dir = dir.rotated(Vector3.UP, normalized_index * spread)
-		else:
 			shot_dir = dir.rotated(Vector3.UP, randf_range(-spread, spread) * 0.35)
-		on_spawn_projectile.call(origin, shot_dir, false, float(player_state["class"]["damage"]) * damage_scale, int(player_state["class"]["pierce"]), float(player_state["class"]["bullet_speed"]), float(player_state["class"]["bullet_scale"]))
+		on_spawn_projectile.call(player_node.global_position + Vector3(0, 0.4, 0), shot_dir, cls.bullet_speed, cls.damage * damage_scale, cls.bullet_scale, cls.pierce, cls.range_val, Color(cls.color))
 	return true
 
 
-func update_player_aura(delta: float, player_state: Dictionary, player_node: Node3D, enemies: Array, boss_ref: Dictionary, damage_scale: float, on_kill_enemy: Callable, on_spawn_hit_fx: Callable, boss_bar: ProgressBar, on_damage_number: Callable = Callable(), on_boss_killed: Callable = Callable()) -> void:
-	if int(player_state["aura_level"]) <= 0:
-		return
+func update_player_aura(delta: float, player_state: Dictionary, player_node: Node3D, enemies: Array, boss_ref: Dictionary, damage_scale: float, on_kill_enemy: Callable, on_spawn_hit_fx: Callable, boss_bar: ProgressBar, on_spawn_damage_number: Callable, on_boss_killed: Callable) -> void:
 	player_state["aura_timer"] += delta
-	if player_state["aura_timer"] < 0.55:
+	if player_state["aura_timer"] < 0.25:
 		return
 	player_state["aura_timer"] = 0.0
-	var aura_radius := 2.8 + float(player_state["aura_level"]) * 0.65
-	var aura_damage := 7.0 * float(player_state["aura_level"]) * damage_scale
+	
+	var cls: ClassResource = player_state["class"]
+	var aura_range := 3.5
+	var aura_damage := cls.damage * 0.4 * damage_scale
+	
 	for enemy_index in range(enemies.size() - 1, -1, -1):
 		var enemy: Dictionary = enemies[enemy_index]
-		if enemy["node"].position.distance_to(player_node.position) <= aura_radius:
+		if not is_instance_valid(enemy.get("node")):
+			enemies.remove_at(enemy_index)
+			continue
+		var dist := player_node.global_position.distance_to(enemy["node"].global_position)
+		if dist <= aura_range:
+			if on_spawn_hit_fx.is_valid(): on_spawn_hit_fx.call(enemy["node"].global_position, Color.WHITE)
+			if on_spawn_damage_number.is_valid(): on_spawn_damage_number.call(enemy["node"], aura_damage)
 			enemy["hp"] -= aura_damage
-			on_spawn_hit_fx.call(enemy["node"].position, Color("66fff4"))
-			if on_damage_number.is_valid():
-				on_damage_number.call(enemy["node"].position + Vector3(0, 1.0, 0), aura_damage, Color("66fff4"))
-			if enemy["hp"] <= 0.0:
+			if enemy["hp"] <= 0 and on_kill_enemy.is_valid():
 				on_kill_enemy.call(enemy_index)
-			else:
-				enemies[enemy_index] = enemy
-	if boss_ref.size() > 0 and float(boss_ref.get("hp", 0.0)) > 0.0 and boss_ref["node"].position.distance_to(player_node.position) <= aura_radius + 1.0:
-		boss_ref["hp"] -= aura_damage * 0.45
-		boss_bar.value = boss_ref["hp"]
-		if on_damage_number.is_valid():
-			on_damage_number.call(boss_ref["node"].position + Vector3(0, 2.0, 0), aura_damage * 0.45, Color("66fff4"))
-		if float(boss_ref["hp"]) <= 0.0 and on_boss_killed.is_valid():
-			on_boss_killed.call()
-
+	
+	if not boss_ref.is_empty() and is_instance_valid(boss_ref.get("node")):
+		var dist := player_node.global_position.distance_to(boss_ref["node"].global_position)
+		if dist <= aura_range:
+			if on_spawn_hit_fx.is_valid(): on_spawn_hit_fx.call(boss_ref["node"].global_position, Color.WHITE)
+			if on_spawn_damage_number.is_valid(): on_spawn_damage_number.call(boss_ref["node"], aura_damage)
+			boss_ref["hp"] -= aura_damage
+			if boss_bar != null:
+				boss_bar.value = boss_ref["hp"]
+			if boss_ref["hp"] <= 0 and on_boss_killed.is_valid():
+				on_boss_killed.call()
 
 func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary) -> void:
 	if event is InputEventKey and event.physical_keycode == KEY_SHIFT:

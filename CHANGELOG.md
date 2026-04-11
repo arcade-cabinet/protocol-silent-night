@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.1.0...v0.2.0) (2026-04-10)
+
+
+### Features
+
+* **1.0:** Complete BabylonJS implementation and CI/CD for release ([a795a5c](https://github.com/arcade-cabinet/protocol-silent-night/commit/a795a5c6fa81f6613b5e54aee23c808b4ae37b3c))
+* add @strata/capacitor-plugin for standardized storage and input ([#18](https://github.com/arcade-cabinet/protocol-silent-night/issues/18)) ([2c1eedf](https://github.com/arcade-cabinet/protocol-silent-night/commit/2c1eedf1f117a157c77c6feac0799240e1b73020))
+* Add mission briefing screen and character model enhancements ([#19](https://github.com/arcade-cabinet/protocol-silent-night/issues/19)) ([25d39c5](https://github.com/arcade-cabinet/protocol-silent-night/commit/25d39c5b09b35af1377562b057f900a740aff86e))
+* add uv support, all actions pinned to SHAs ([6da9d9b](https://github.com/arcade-cabinet/protocol-silent-night/commit/6da9d9bb008e702167f1930df253fff0fdf98103))
+* boss phases + procedural music loops ([#143](https://github.com/arcade-cabinet/protocol-silent-night/issues/143)) ([99991ef](https://github.com/arcade-cabinet/protocol-silent-night/commit/99991ef5924d754eb9cac40d4441cd02db26d8cf))
+* boss pressure accumulator + countdown timer (replaces fixed boss waves) ([#145](https://github.com/arcade-cabinet/protocol-silent-night/issues/145)) ([58cbc02](https://github.com/arcade-cabinet/protocol-silent-night/commit/58cbc022151fb1b65f05b96c43f3430d308b4c44))
+* **combat:** final polish and macro/meso fixes ([#179](https://github.com/arcade-cabinet/protocol-silent-night/issues/179)) ([058ac14](https://github.com/arcade-cabinet/protocol-silent-night/commit/058ac141c5261d9b0818fefe60639f034b6b6b75))
+* complete Phase 3 content scaling and fix security tests ([#60](https://github.com/arcade-cabinet/protocol-silent-night/issues/60)) ([a3dc71a](https://github.com/arcade-cabinet/protocol-silent-night/commit/a3dc71a20fd11082dc17c80ea3aaea06c787252d))
+* gameplay juice — enemy behaviors, particles, present animation ([#142](https://github.com/arcade-cabinet/protocol-silent-night/issues/142)) ([d906650](https://github.com/arcade-cabinet/protocol-silent-night/commit/d906650950121b409e8c7f737b174522f66281a3))
+* production-polish batch — enemy AI, balance, perf, android, CI, security ([fa189e1](https://github.com/arcade-cabinet/protocol-silent-night/commit/fa189e10815795e550fdb43df4d7612c1f792077))
+* roster expansion + audio + damage numbers + HUD polish ([#141](https://github.com/arcade-cabinet/protocol-silent-night/issues/141)) ([58f64d2](https://github.com/arcade-cabinet/protocol-silent-night/commit/58f64d2e52585cb52a954b774c4bd63792477466))
+* **security:** implement checksum verification for local storage ([#42](https://github.com/arcade-cabinet/protocol-silent-night/issues/42)) ([3b2c328](https://github.com/arcade-cabinet/protocol-silent-night/commit/3b2c3284ad95747b8efc3eff1286837de5235d77))
+* switch to orthographic rectangular arena (Brotato-style) ([#144](https://github.com/arcade-cabinet/protocol-silent-night/issues/144)) ([e6bf8b0](https://github.com/arcade-cabinet/protocol-silent-night/commit/e6bf8b02bc494002e94eab0e3c5bad409ec69f74))
+* **ui:** add ARIA attributes to HUD progress bars ([#39](https://github.com/arcade-cabinet/protocol-silent-night/issues/39)) ([3f90283](https://github.com/arcade-cabinet/protocol-silent-night/commit/3f902832d2301d323949bff08b3fe4c565ca83b7))
+* unified [@cascade](https://github.com/cascade) trigger with pinned action SHAs ([71d5ab3](https://github.com/arcade-cabinet/protocol-silent-night/commit/71d5ab3649e1e7665742519a87f94118f40e8231))
+* v2 gameplay systems — difficulty, save, UI rethink ([#147](https://github.com/arcade-cabinet/protocol-silent-night/issues/147)) ([b18677c](https://github.com/arcade-cabinet/protocol-silent-night/commit/b18677cc5bafdfec796b6abc0c2aa211f8c62935))
+
+
+### Bug Fixes
+
+* add checkout for Jules/Cursor delegation ([abb5d1e](https://github.com/arcade-cabinet/protocol-silent-night/commit/abb5d1e8861b9441b44c0574f06b920ba0f4290d))
+* allow /jules and /cursor on PRs ([db8198f](https://github.com/arcade-cabinet/protocol-silent-night/commit/db8198f1bf6aac22905f4d8729d30206b66e5b14))
+* allow all bots to trigger Claude ([816fb72](https://github.com/arcade-cabinet/protocol-silent-night/commit/816fb72a776e8789d24cc89624fb7021e97c2ab5))
+* **combat:** prevent double end_run when multiple hits kill player in same tick ([#162](https://github.com/arcade-cabinet/protocol-silent-night/issues/162)) ([acbad12](https://github.com/arcade-cabinet/protocol-silent-night/commit/acbad12b6b96978d2d574018f6347230c06482f7))
+* Correct LevelUpScreen display logic and add tests ([#37](https://github.com/arcade-cabinet/protocol-silent-night/issues/37)) ([c44f8b3](https://github.com/arcade-cabinet/protocol-silent-night/commit/c44f8b33657ff78fc7ce715340a6e40646a4962e))
+* **enemy:** apply tank slam_damage_mult in contact damage (was always 1.0×) ([#159](https://github.com/arcade-cabinet/protocol-silent-night/issues/159)) ([1a4e022](https://github.com/arcade-cabinet/protocol-silent-night/commit/1a4e0224307470bc59cd92ad217501c762ddfbc8))
+* explicitly disable frozen-lockfile ([a95afcb](https://github.com/arcade-cabinet/protocol-silent-night/commit/a95afcb7ff1b31a23ecc1907770b67dc0ed94a5a))
+* **gameplay:** tank slam_damage_mult persists post-slam + board obj pierce write-back ([#163](https://github.com/arcade-cabinet/protocol-silent-night/issues/163)) ([f9b9c92](https://github.com/arcade-cabinet/protocol-silent-night/commit/f9b9c9290edbd5a8977c3355e780a5a12a653e87))
+* **gameplay:** three silent logic bugs found in review ([#161](https://github.com/arcade-cabinet/protocol-silent-night/issues/161)) ([cf6d17a](https://github.com/arcade-cabinet/protocol-silent-night/commit/cf6d17a9cc5d0dcd9661af5650a4db212786d040))
+* remove --if-present from npm scripts ([fca518f](https://github.com/arcade-cabinet/protocol-silent-night/commit/fca518f5ab296230e1d92cee8e56cee866c3397a))
+* Resolve WebGL shader uniform overflow and optimize terrain rendering ([#52](https://github.com/arcade-cabinet/protocol-silent-night/issues/52)) ([d36e6bc](https://github.com/arcade-cabinet/protocol-silent-night/commit/d36e6bcf5a2e2b877cdea6fd20e4c878b5986fa2))
+* **test:** update THREAT.update() calls to drop removed viewport_size param ([#157](https://github.com/arcade-cabinet/protocol-silent-night/issues/157)) ([7a6a4a4](https://github.com/arcade-cabinet/protocol-silent-night/commit/7a6a4a48d938e16c2afef221134fdbe9f38da26b))
+* **ui,tests:** Fix accessibility and test failures ([a9fd1fe](https://github.com/arcade-cabinet/protocol-silent-night/commit/a9fd1fee64c3cc5d880d9366f0cc9faee8dda49f))
+* update ecosystem-connector for AI automation ([175447a](https://github.com/arcade-cabinet/protocol-silent-night/commit/175447a5676650f88cbd42cc0111041d68ba0795))
+* use --no-frozen-lockfile for PRs ([1a7e925](https://github.com/arcade-cabinet/protocol-silent-night/commit/1a7e925bcfaa7b46b449a024b97de9d59e1c3c63))
+* use flexible pnpm install for PRs ([5e3e6c3](https://github.com/arcade-cabinet/protocol-silent-night/commit/5e3e6c3bc52baecc2140cb76a54187fb56250e0c))
+* use pnpm instead of npm for CI ([063c1fe](https://github.com/arcade-cabinet/protocol-silent-night/commit/063c1fe29f27f793b923fa702ff5889271006e18))
+* use valid sunAngle (0-180) for ProceduralSky ([f913475](https://github.com/arcade-cabinet/protocol-silent-night/commit/f913475899a851d0e4e6b89f257ccd9dbb87c36b))
+
 ## [Unreleased]
 
 ### Post-batch polish (codex/production-polish → integration/production-polish)

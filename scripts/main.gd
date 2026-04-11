@@ -4,6 +4,7 @@ const PROGRESSION_MANAGER := preload("res://scripts/progression_manager.gd")
 const GAME_MANAGER := preload("res://scripts/game_manager.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 const MAIN_HELPERS := preload("res://scripts/main_helpers.gd")
+const BOARD_HELPERS := preload("res://scripts/board_helpers.gd")
 const PLAYER_DAMAGE_HANDLER := preload("res://scripts/player_damage_handler.gd")
 const PICKUP_MAGNET_RING := preload("res://scripts/pickup_magnet_ring.gd")
 const FLAIR_ANIMATOR_SCR := preload("res://scripts/flair_animator.gd")
@@ -51,6 +52,8 @@ var pickup_root: Node3D
 var fx_root: Node3D
 var camera: Camera3D
 
+var title_screen: PanelContainer:
+	get: return ui_mgr.title_screen
 var start_screen: PanelContainer:
 	get: return ui_mgr.start_screen
 var level_screen: PanelContainer:
@@ -82,7 +85,7 @@ var enemies: Array = []
 var projectiles: Array = []
 var pickups: Array = []
 var vfx: Array = []
-var board_data: Dictionary = {}
+var board_data: BoardLayout
 var obstacle_colliders: Array = []
 var current_wave: Dictionary = {}
 var run_seed: int = 0
@@ -96,50 +99,52 @@ var coal_queue: Array = []
 var board_objects: Array = []
 var input_move := Vector2.ZERO
 var move_velocity := Vector2.ZERO
-var touch_active := false
-var touch_origin := Vector2.ZERO
-var touch_position := Vector2.ZERO
-var dash_pressed := false
-var dash_timer: float = 0.0
-var dash_cooldown_timer: float = 0.0
-var wave_clear_timer: float = 0.0
-var test_mode: Dictionary = {}
+var touch_active := false; var touch_origin := Vector2.ZERO; var touch_position := Vector2.ZERO
+var dash_pressed := false; var dash_timer := 0.0; var dash_cooldown_timer := 0.0
+var wave_clear_timer := 0.0; var test_mode := {}
 
 
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
-	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
-	combat.audio_mgr = audio_mgr; enemies_ai.audio_mgr = audio_mgr
-	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
-	flair_animator = FLAIR_ANIMATOR_SCR.new(); runtime_root.add_child(flair_animator)
-	pickup_magnet_ring = PICKUP_MAGNET_RING.build(runtime_root)
-	progression = PROGRESSION_MANAGER.new(ui_mgr); progression.audio_mgr = audio_mgr
-	game_mgr = GAME_MANAGER.new(self)
-	between_match = BETWEEN_MATCH_FLOW.new(self)
-	between_match.build_screens(ui_mgr.root_control)
-	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
+	_init_services()
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
 	MAIN_HELPERS.apply_reduced_motion(self, _save_manager())
 
+
+func _init_services() -> void:
+	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
+	combat.audio_mgr = audio_mgr
+	enemies_ai.audio_mgr = audio_mgr
+	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
+	flair_animator = FLAIR_ANIMATOR_SCR.new()
+	runtime_root.add_child(flair_animator)
+	pickup_magnet_ring = PICKUP_MAGNET_RING.build(runtime_root)
+	progression = PROGRESSION_MANAGER.new(ui_mgr)
+	progression.audio_mgr = audio_mgr
+	game_mgr = GAME_MANAGER.new(self)
+	between_match = BETWEEN_MATCH_FLOW.new(self)
+	between_match.build_screens(ui_mgr.root_control)
+	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
+
+const DEBUG_HELPERS := preload("res://scripts/debug_helpers.gd")
+
+
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
+
+
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
-func debug_force_level_up() -> void: _trigger_level_up()
-func debug_spawn_boss() -> void: game_mgr.spawn_boss(1.0)
-func debug_end_run(win: bool) -> void: game_mgr.end_run(win)
-func debug_zone_at(wp: Vector3) -> String:
-	var ar := float(config["arena_radius"])
-	return "arena" if absf(wp.x) <= ar * 1.6 and absf(wp.z) <= ar else "void"
-func debug_is_blocked(wp: Vector3, radius: float = 0.6) -> bool: return not _can_occupy(wp, radius)
+
+
+func debug_force_level_up() -> void: DEBUG_HELPERS.force_level_up(self)
+func debug_spawn_boss() -> void: DEBUG_HELPERS.spawn_boss(self)
+func debug_end_run(win: bool) -> void: DEBUG_HELPERS.end_run(self, win)
+func capture_screenshot(path: String) -> void: await DEBUG_HELPERS.capture_screenshot(self, path)
+func debug_zone_at(wp: Vector3) -> String: return "arena" if absf(wp.x) <= float(config["arena_radius"]) * 1.6 and absf(wp.z) <= float(config["arena_radius"]) else "void"
+func debug_is_blocked(wp: Vector3, r: float = 0.6) -> bool: return not _can_occupy(wp, r)
 func debug_tick(delta: float) -> void: _tick(delta)
 
-func capture_screenshot(path: String) -> void:
-	await RenderingServer.frame_post_draw
-	var image := get_viewport().get_texture().get_image()
-	var absolute_path := ProjectSettings.globalize_path(path)
-	DirAccess.make_dir_recursive_absolute(absolute_path.get_base_dir())
-	image.save_png(absolute_path)
 
 func _process(delta: float) -> void:
 	if not bool(test_mode.get("manual_tick", false)):
@@ -166,7 +171,7 @@ func _load_definitions() -> void: MAIN_HELPERS.load_definitions(self)
 
 func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
 func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(), _on_class_button_pressed, present_defs)
-func _return_to_menu() -> void: game_mgr.return_to_menu()
+func _return_to_menu() -> void: BOARD_HELPERS.return_to_menu(self)
 
 func _trigger_level_up() -> void: MAIN_HELPERS.trigger_level_up(self)
 

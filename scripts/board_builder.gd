@@ -19,19 +19,18 @@ func build_board_foundation(board_root: Node3D, arena_radius: float) -> void:
 	outer_field.position = Vector3(0, -0.02, 0)
 	outer_field.material_override = materials.flat_material(Color("0a1420"))
 	board_root.add_child(outer_field)
-	var arena_surface := MeshInstance3D.new()
+	
+	var arena := MeshInstance3D.new()
 	var arena_mesh := PlaneMesh.new()
 	arena_mesh.size = Vector2(half_w * 2.0, half_h * 2.0)
-	arena_surface.mesh = arena_mesh
-	arena_surface.position = Vector3(0, 0.03, 0)
-	arena_surface.material_override = materials.arena_surface_material(arena_radius)
-	board_root.add_child(arena_surface)
-	_build_border(board_root, half_w, half_h)
+	arena.mesh = arena_mesh
+	arena.material_override = materials.flat_material(Color("162435"))
+	board_root.add_child(arena)
 
 
-func build_snow_drifts(board_root: Node3D, board_data: Dictionary) -> void:
+func build_snow_drifts(board_root: Node3D, board_data: BoardLayout) -> void:
 	var snow_material: Material = materials.material_for_zone("snow")
-	for drift in board_data.get("drifts", []):
+	for drift in board_data.drifts:
 		var node := MeshInstance3D.new()
 		var mesh := CylinderMesh.new()
 		var radius := float(drift.get("radius", 1.8))
@@ -46,9 +45,9 @@ func build_snow_drifts(board_root: Node3D, board_data: Dictionary) -> void:
 		board_root.add_child(node)
 
 
-func build_outer_ridge(board_root: Node3D, _board_data: Dictionary) -> void:
+func build_outer_ridge(board_root: Node3D, _board_data: BoardLayout) -> void:
 	# Ice-chunk protrusions along the arena perimeter for visual containment.
-	var arena_radius: float = 8.0
+	var arena_radius: float = 18.0 # Should probably come from config but keeping consistent with prev
 	var half_w := arena_radius * 1.6
 	var half_h := arena_radius
 	var ice_color := Color("88ccee")
@@ -58,39 +57,21 @@ func build_outer_ridge(board_root: Node3D, _board_data: Dictionary) -> void:
 		[Vector2(-half_w, -half_h), Vector2(half_w, -half_h)],
 		[Vector2(-half_w, half_h), Vector2(half_w, half_h)],
 		[Vector2(-half_w, -half_h), Vector2(-half_w, half_h)],
-		[Vector2(half_w, -half_h), Vector2(half_w, half_h)],
+		[Vector2(half_w, -half_h), Vector2(half_w, half_h)]
 	]
-	for seg in perimeter:
-		var a: Vector2 = seg[0]; var b: Vector2 = seg[1]
-		var steps: int = 6
+	for segment in perimeter:
+		var start: Vector2 = segment[0]
+		var end: Vector2 = segment[1]
+		var dist := start.distance_to(end)
+		var steps := int(dist / 2.5)
 		for i in range(steps):
-			var t: float = (float(i) + 0.5) / float(steps)
-			var p := a.lerp(b, t)
-			var chunk := MeshInstance3D.new()
-			var box := BoxMesh.new()
-			var w: float = rng.randf_range(0.3, 0.7)
-			var h: float = rng.randf_range(0.2, 0.55)
-			box.size = Vector3(w, h, w * 0.9)
-			chunk.mesh = box
-			chunk.position = Vector3(p.x, h * 0.5, p.y)
-			chunk.rotation_degrees.y = rng.randf_range(-30.0, 30.0)
-			chunk.material_override = materials.flat_material(ice_color)
-			board_root.add_child(chunk)
-
-
-func _build_border(root: Node3D, half_w: float, half_h: float) -> void:
-	var border_color := Color("1a2a3a")
-	var border_thickness := 0.8
-	for data in [
-		[Vector3(0, 0.2, -half_h - border_thickness * 0.5), Vector3(half_w * 2.0 + border_thickness * 2.0, 0.5, border_thickness)],
-		[Vector3(0, 0.2, half_h + border_thickness * 0.5), Vector3(half_w * 2.0 + border_thickness * 2.0, 0.5, border_thickness)],
-		[Vector3(-half_w - border_thickness * 0.5, 0.2, 0), Vector3(border_thickness, 0.5, half_h * 2.0)],
-		[Vector3(half_w + border_thickness * 0.5, 0.2, 0), Vector3(border_thickness, 0.5, half_h * 2.0)],
-	]:
-		var wall := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = data[1]
-		wall.mesh = box
-		wall.position = data[0]
-		wall.material_override = materials.flat_material(border_color)
-		root.add_child(wall)
+			var t := float(i) / float(steps)
+			var pos := start.lerp(end, t)
+			var node := MeshInstance3D.new()
+			var mesh := BoxMesh.new()
+			mesh.size = Vector3(rng.randf_range(1.5, 3.5), rng.randf_range(0.8, 4.0), rng.randf_range(1.5, 3.5))
+			node.mesh = mesh
+			node.position = Vector3(pos.x, mesh.size.y * 0.4, pos.y)
+			node.rotation = Vector3(rng.randf() * 0.2, rng.randf() * TAU, rng.randf() * 0.2)
+			node.material_override = materials.flat_material(ice_color.lerp(Color.WHITE, rng.randf() * 0.3))
+			board_root.add_child(node)

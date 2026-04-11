@@ -137,8 +137,8 @@ static func behavior_pack(enemy: Dictionary, enemies: Array, player_node: Node3D
 	on_move_actor.call(enemy["node"], direction, float(enemy["speed"]), delta, contact_radius(enemy))
 
 
-static func behavior_grunt_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable) -> void:
-	var state := EnemyBTStates.grunt_tick(enemy, player_pos, delta)
+static func behavior_grunt_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, phase_level: int = 1) -> void:
+	var state := EnemyBTStates.grunt_tick(enemy, player_pos, delta, phase_level)
 	var enode: Node3D = enemy["node"]
 	match state:
 		"wander":
@@ -152,8 +152,8 @@ static func behavior_grunt_bt(enemy: Dictionary, player_pos: Vector3, delta: flo
 			pass  # combat resolver handles contact damage
 
 
-static func behavior_rusher_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, on_telegraph: Callable = Callable()) -> void:
-	var state := EnemyBTStates.rusher_tick(enemy, player_pos, delta, on_telegraph)
+static func behavior_rusher_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, on_telegraph: Callable = Callable(), phase_level: int = 1) -> void:
+	var state := EnemyBTStates.rusher_tick(enemy, player_pos, delta, on_telegraph, phase_level)
 	var enode: Node3D = enemy["node"]
 	var to_p: Vector3 = Vector3(player_pos.x, enode.position.y, player_pos.z) - enode.position
 	if to_p.length_squared() <= 0.0001:
@@ -178,8 +178,8 @@ static func behavior_krampus_hsm(phase: int) -> String:
 		_: return "rapid_charge_multishot"
 
 
-static func behavior_tank_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, on_telegraph: Callable = Callable()) -> void:
-	var state := EnemyBTStates.tank_tick(enemy, player_pos, delta, on_telegraph)
+static func behavior_tank_bt(enemy: Dictionary, player_pos: Vector3, delta: float, on_move_actor: Callable, on_telegraph: Callable = Callable(), phase_level: int = 1) -> void:
+	var state := EnemyBTStates.tank_tick(enemy, player_pos, delta, on_telegraph, phase_level)
 	var enode: Node3D = enemy["node"]
 	var to_p: Vector3 = Vector3(player_pos.x, enode.position.y, player_pos.z) - enode.position
 	if to_p.length_squared() <= 0.0001:

@@ -22,7 +22,7 @@ jobs:
           include-templates: false
 
       - name: Import project resources
-        run: godot --headless --path . --import --quit-after 60 || true
+        run: godot --headless --path . --import --quit-after 180
 
       - name: Run unit + component + e2e tests
         run: |
@@ -87,7 +87,7 @@ jobs:
           include-templates: true
 
       - name: Import project resources
-        run: godot --headless --path . --import --quit-after 60 || true
+        run: godot --headless --path . --import --quit-after 180
 
       - name: Generate debug keystore
         run: |
@@ -139,7 +139,7 @@ jobs:
           include-templates: false
 
       - name: Import project resources
-        run: godot --headless --path . --import --quit-after 60 || true
+        run: godot --headless --path . --import --quit-after 180
 
       - name: Smoke test
         run: timeout 10 godot --headless --path . --quit-after 5 && echo "SMOKE OK"

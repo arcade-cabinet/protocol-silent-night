@@ -40,6 +40,17 @@ static func kill_enemy(main: Node, enemy_index: int) -> void:
 
 static func on_class_button_pressed(main: Node, button: Button) -> void:
 	main.current_class_id = String(button.get_meta("class_id", ""))
+	var ui: RefCounted = main.ui_mgr
+	if ui.select_button != null:
+		ui.select_button.disabled = false
+		# Remove all existing pressed connections to avoid multiple calls
+		var connections = ui.select_button.pressed.get_connections()
+		for c in connections:
+			ui.select_button.pressed.disconnect(c.callable)
+		ui.select_button.pressed.connect(func() -> void: on_character_selected(main))
+
+
+static func on_character_selected(main: Node) -> void:
 	if main.ui_mgr.difficulty_panel != null:
 		main.ui_mgr.start_screen.visible = false
 		main.ui_mgr.difficulty_panel.visible = true

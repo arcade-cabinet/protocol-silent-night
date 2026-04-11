@@ -169,4 +169,3 @@ func test_record_campaign_clear_increments() -> void:
 	sm.record_campaign_clear()
 	assert_int(sm.get_achievement("campaign_clears")).is_equal(1)
 	DirAccess.remove_absolute(path)
-	DirAccess.remove_absolute(path)
