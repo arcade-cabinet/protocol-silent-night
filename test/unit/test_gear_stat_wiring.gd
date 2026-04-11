@@ -42,15 +42,16 @@ class StubMain:
 	var progression: StubProgression
 
 	func setup(xp_bonus: float = 0.0, cookie_bonus: float = 0.0, hp: float = 100.0) -> void:
+		var cls := ClassResource.new()
+		cls.xp_bonus = xp_bonus
+		cls.cookie_bonus = cookie_bonus
+		cls.contact_damage_reduction = 0.0
+		cls.dash_cooldown = 1.0
+		
 		player_state = {
 			"hp": hp,
 			"max_hp": hp,
-			"class": {
-				"xp_bonus": xp_bonus,
-				"cookie_bonus": cookie_bonus,
-				"contact_damage_reduction": 0.0,
-				"dash_cooldown": 1.0,
-			},
+			"class": cls,
 		}
 		ui_mgr = StubUI.new()
 		add_child(ui_mgr)
@@ -92,14 +93,6 @@ func test_gain_xp_100pct_bonus_doubles_xp() -> void:
 	assert_int(m.progression.last_xp_received).is_equal(16)
 
 
-func test_gain_xp_zero_bonus_class_key_missing() -> void:
-	var m := _make_main()
-	m.player_state["class"].erase("xp_bonus")
-	var gm := GameManager.new(m)
-	gm.gain_xp(7)
-	assert_int(m.progression.last_xp_received).is_equal(7)
-
-
 # --- cookie_bonus ---
 
 func test_gain_cookies_no_bonus_adds_amount() -> void:
@@ -124,31 +117,19 @@ func test_gain_cookies_50pct_bonus_rounds_correctly() -> void:
 	assert_int(m.run_cookies).is_equal(5)
 
 
-func test_gain_cookies_zero_bonus_key_missing() -> void:
-	var m := _make_main()
-	m.player_state["class"].erase("cookie_bonus")
-	var gm := GameManager.new(m)
-	gm.gain_cookies(6)
-	assert_int(m.run_cookies).is_equal(6)
-
-
 # --- contact_damage_reduction (regression via DamageHandler) ---
 
 func test_damage_reduction_25pct_reduces_incoming_damage() -> void:
-	var m: StubMain = auto_free(StubMain.new())
-	m.setup(0.0, 0.0, 100.0)
-	m.player_state["class"]["contact_damage_reduction"] = 0.25
-	add_child(m)
+	var m := _make_main(0.0, 0.0, 100.0)
+	m.player_state["class"].contact_damage_reduction = 0.25
 	DamageHandler.damage_player(m, 20.0)
 	# 20 * (1 - 0.25) = 15 → hp = 85
 	assert_float(float(m.player_state["hp"])).is_equal_approx(85.0, 0.01)
 
 
 func test_damage_reduction_capped_at_90pct() -> void:
-	var m: StubMain = auto_free(StubMain.new())
-	m.setup(0.0, 0.0, 100.0)
-	m.player_state["class"]["contact_damage_reduction"] = 2.0  # exceeds cap
-	add_child(m)
+	var m := _make_main(0.0, 0.0, 100.0)
+	m.player_state["class"].contact_damage_reduction = 2.0  # exceeds cap
 	DamageHandler.damage_player(m, 100.0)
 	# Reduction capped at 0.9 → 100 * 0.1 = 10 damage → hp = 90
 	assert_float(float(m.player_state["hp"])).is_equal_approx(90.0, 0.01)

@@ -56,19 +56,19 @@ func trigger_level_up(state_setter: Callable, upgrade_defs: Array, test_mode: Di
 
 
 func apply_upgrade(upgrade_id: String, player_state: Dictionary) -> void:
-	var cls: Dictionary = player_state["class"]
+	var cls: ClassResource = player_state["class"]
 	match upgrade_id:
 		"damage":
 			# Diminishing returns after 5 stacks — no hard cap, death still wins.
 			var damage_stacks: int = int(player_state.get("damage_stacks", 0))
 			var mult := 1.25 if damage_stacks < 5 else 1.10
-			cls["damage"] = float(cls["damage"]) * mult
+			cls.damage *= mult
 			player_state["damage_stacks"] = damage_stacks + 1
 		"fire_rate":
 			# Diminishing returns after 5 stacks — interval floor approaches but never 0.
 			var fr_stacks: int = int(player_state.get("fire_rate_stacks", 0))
 			var mult := 0.82 if fr_stacks < 5 else 0.92
-			cls["fire_rate"] = float(cls["fire_rate"]) * mult
+			cls.fire_rate *= mult
 			player_state["fire_rate_stacks"] = fr_stacks + 1
 		"health":
 			# Multiplicative so health stays relevant against scaling enemy damage.
@@ -76,9 +76,9 @@ func apply_upgrade(upgrade_id: String, player_state: Dictionary) -> void:
 			player_state["max_hp"] = float(player_state["max_hp"]) + increase
 			player_state["hp"] = minf(player_state["max_hp"], float(player_state["hp"]) + increase)
 		"speed":
-			cls["speed"] = float(cls["speed"]) * 1.15
+			cls.speed *= 1.15
 		"range":
-			cls["range"] = float(cls["range"]) * 1.2
+			cls.range_val *= 1.2
 		"aura":
 			player_state["aura_level"] = int(player_state["aura_level"]) + 1
 

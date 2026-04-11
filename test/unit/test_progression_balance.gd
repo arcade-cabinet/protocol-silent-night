@@ -9,13 +9,13 @@ const PROG := preload("res://scripts/progression_manager.gd")
 
 
 func _make_player_state(base_damage: float = 10.0, max_hp: float = 100.0) -> Dictionary:
+	var cls := ClassResource.new()
+	cls.damage = base_damage
+	cls.fire_rate = 1.0
+	cls.speed = 3.5
+	cls.range_val = 12.0
 	return {
-		"class": {
-			"damage": base_damage,
-			"fire_rate": 1.0,
-			"speed": 3.5,
-			"range": 12.0,
-		},
+		"class": cls,
 		"hp": max_hp,
 		"max_hp": max_hp,
 		"aura_level": 0,
@@ -30,7 +30,7 @@ func test_damage_first_5_stacks_use_125_multiplier() -> void:
 	for i in range(5):
 		prog.apply_upgrade("damage", state)
 	var expected := 10.0 * pow(1.25, 5)
-	assert_float(state["class"]["damage"]).is_equal_approx(expected, 0.01)
+	assert_float(state["class"].damage).is_equal_approx(expected, 0.01)
 	assert_int(state.get("damage_stacks", 0)).is_equal(5)
 
 
@@ -39,9 +39,9 @@ func test_damage_6th_stack_uses_110_multiplier() -> void:
 	var state := _make_player_state(10.0)
 	for i in range(5):
 		prog.apply_upgrade("damage", state)
-	var before_sixth := float(state["class"]["damage"])
+	var before_sixth := float(state["class"].damage)
 	prog.apply_upgrade("damage", state)
-	assert_float(state["class"]["damage"]).is_equal_approx(before_sixth * 1.10, 0.01)
+	assert_float(state["class"].damage).is_equal_approx(before_sixth * 1.10, 0.01)
 	assert_int(state.get("damage_stacks", 0)).is_equal(6)
 
 
@@ -51,7 +51,7 @@ func test_damage_no_hard_cap_allows_10_stacks() -> void:
 	for i in range(10):
 		prog.apply_upgrade("damage", state)
 	assert_int(state.get("damage_stacks", 0)).is_equal(10)
-	assert_float(state["class"]["damage"]).is_greater(10.0)
+	assert_float(state["class"].damage).is_greater(10.0)
 
 
 # --- Fire rate diminishing returns ---
@@ -62,7 +62,7 @@ func test_fire_rate_first_5_stacks_use_082_multiplier() -> void:
 	for i in range(5):
 		prog.apply_upgrade("fire_rate", state)
 	var expected := 1.0 * pow(0.82, 5)
-	assert_float(state["class"]["fire_rate"]).is_equal_approx(expected, 0.001)
+	assert_float(state["class"].fire_rate).is_equal_approx(expected, 0.001)
 
 
 func test_fire_rate_6th_stack_uses_092_multiplier() -> void:
@@ -70,9 +70,9 @@ func test_fire_rate_6th_stack_uses_092_multiplier() -> void:
 	var state := _make_player_state()
 	for i in range(5):
 		prog.apply_upgrade("fire_rate", state)
-	var before_sixth := float(state["class"]["fire_rate"])
+	var before_sixth := float(state["class"].fire_rate)
 	prog.apply_upgrade("fire_rate", state)
-	assert_float(state["class"]["fire_rate"]).is_equal_approx(before_sixth * 0.92, 0.001)
+	assert_float(state["class"].fire_rate).is_equal_approx(before_sixth * 0.92, 0.001)
 
 
 func test_fire_rate_no_hard_cap_allows_10_stacks() -> void:
@@ -82,8 +82,8 @@ func test_fire_rate_no_hard_cap_allows_10_stacks() -> void:
 		prog.apply_upgrade("fire_rate", state)
 	assert_int(state.get("fire_rate_stacks", 0)).is_equal(10)
 	# Interval should be well below base but > 0
-	assert_float(state["class"]["fire_rate"]).is_greater(0.0)
-	assert_float(state["class"]["fire_rate"]).is_less(1.0)
+	assert_float(state["class"].fire_rate).is_greater(0.0)
+	assert_float(state["class"].fire_rate).is_less(1.0)
 
 
 # --- Multiplicative health ---

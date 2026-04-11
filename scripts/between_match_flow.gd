@@ -138,7 +138,7 @@ func _on_buy(index: int) -> void:
 func _on_market_continue() -> void:
 	market_state["panel"].visible = false
 	current_stage = Stage.DONE
-	main.game_mgr.return_to_menu()
+	main._return_to_menu()
 
 
 func _nice_scroll_cookies() -> int:

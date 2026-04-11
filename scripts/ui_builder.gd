@@ -4,6 +4,9 @@ const UI_SCREENS := preload("res://scripts/ui_screens.gd")
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
 
 
+const RADAR_CHART := preload("res://scripts/stat_radar_chart.gd")
+
+
 static func build_start_screen(root: Control) -> Dictionary:
 	var start_screen := PanelContainer.new()
 	start_screen.name = "StartScreen"
@@ -39,23 +42,29 @@ static func build_start_screen(root: Control) -> Dictionary:
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	start_vbox.add_child(subtitle)
 
+	var mid_row := HBoxContainer.new()
+	mid_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	mid_row.add_theme_constant_override("separation", 40)
+	start_vbox.add_child(mid_row)
+
 	var classes_box := GridContainer.new()
 	classes_box.name = "ClassCards"
 	var screen_w := DisplayServer.screen_get_size().x
-	classes_box.columns = 5 if screen_w >= 800 else 3
+	classes_box.columns = 3 if screen_w >= 800 else 2
 	classes_box.add_theme_constant_override("h_separation", 14)
 	classes_box.add_theme_constant_override("v_separation", 14)
-	start_vbox.add_child(classes_box)
+	mid_row.add_child(classes_box)
+
+	var radar_canvas := RADAR_CHART.build(mid_row, Vector2(220, 220))
 
 	var instruction := Label.new()
 	instruction.text = "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
 	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	# No minimum width — must reflow on portrait screens.
 	instruction.modulate = Color("dceefb")
 	start_vbox.add_child(instruction)
 
-	return {"screen": start_screen, "classes_box": classes_box}
+	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": radar_canvas}
 
 
 static func build_hud(root: Control) -> Dictionary:

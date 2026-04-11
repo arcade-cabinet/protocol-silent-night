@@ -44,7 +44,7 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 	var burst_chance: float = clampf(p_burst * lf * 0.04 * df, 0.0, 0.55)
 	var burst_size: int = 3 + int(lf * 0.3 * p_burst * df)
 	var countdown: float = clampf(120.0 - lf * 2.5 * df + rng.randf_range(-10.0, 10.0), 30.0, 180.0)
-	var boss_pressure: float = _compute_boss_pressure(lf * df, p_boss, rng, lookback)
+	var boss_pressure: float = clampf(_compute_boss_pressure(lf, df, p_boss, rng, lookback), 0.0, 1.0)
 	var max_bosses: int = 1 + int(boss_pressure / 0.6)
 	var composition := _build_composition(rng, profile, level)
 	var pattern := _pick_pattern(rng, profile, level)
@@ -54,8 +54,8 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 		"countdown": countdown,
 		"spawn_interval": spawn_interval,
 		"speed_mult": speed_mult,
-		"hp_scale": hp_scale,
 		"damage_scale": damage_scale,
+		"hp_scale": hp_scale,
 		"composition": composition,
 		"pattern": pattern,
 		"burst_chance": burst_chance,
@@ -69,19 +69,20 @@ static func generate_wave(run_seed: int, level: int, lookback: Array = [], diffi
 	}
 
 
-static func _compute_boss_pressure(lf: float, p_boss: float,
+static func _compute_boss_pressure(lf: float, df: float, p_boss: float,
 		rng: RandomNumberGenerator, lookback: Array) -> float:
-	var base: float = lf * 0.02 * (1.0 + p_boss * 0.8)
-	var growth: float = pow(lf * 0.08, 1.4) * p_boss
+	var total_f := lf * df
+	var base: float = total_f * 0.04 * (1.0 + p_boss * 0.8)
+	var growth: float = pow(total_f * 0.12, 1.6) * (0.2 + p_boss * 0.8)
 	var lookback_bonus := 0.0
 	for prev in lookback:
 		var prev_bosses := int(prev.get("bosses_spawned", 0))
 		if prev_bosses == 0:
-			lookback_bonus += 0.04
+			lookback_bonus += 0.06
 		else:
-			lookback_bonus -= 0.02
+			lookback_bonus -= 0.03
 	var noise: float = rng.randf_range(-0.05, 0.08)
-	return clampf(base + growth + lookback_bonus + noise, 0.0, 0.95)
+	return clampf(base + growth + lookback_bonus + noise, 0.0, 1.0)
 
 
 static func roll_boss_spawn(boss_pressure: float, elapsed: float,

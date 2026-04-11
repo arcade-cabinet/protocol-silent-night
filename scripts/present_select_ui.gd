@@ -21,7 +21,7 @@ static func init_preview(parent: Control) -> void:
 
 static func build_present_buttons(classes_box: Container, present_defs: Dictionary,
 		save_manager: Node, on_class_pressed: Callable,
-		radar_canvas: Control = null) -> void:
+		radar_canvas: Control = null, audio_mgr: RefCounted = null) -> void:
 	var best_wave := 0
 	if save_manager != null:
 		best_wave = int(save_manager.state.get("best_wave", 0))
@@ -40,7 +40,13 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 		var accent_hex: String = def.get("bow_color", "#55f7ff")
 		THEME.apply_to_button(button, Color(accent_hex))
 		button.set_meta("class_id", present_id)
-		button.pressed.connect(on_class_pressed.bind(button))
+		button.pressed.connect(
+			func() -> void:
+				if audio_mgr != null: audio_mgr.play_menu_click()
+				on_class_pressed.call(button)
+		)
+		if audio_mgr != null:
+			button.mouse_entered.connect(func() -> void: audio_mgr.play_menu_click())
 		if radar_canvas != null:
 			var captured_id: String = present_id
 			var captured_def: Dictionary = def
@@ -64,6 +70,9 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 
 
 static func is_present_unlocked(def: Dictionary, best_wave: int, save_manager: Node = null) -> bool:
+	var id: String = def.get("id", "")
+	if save_manager != null and save_manager.is_unlocked(id):
+		return true
 	var req: String = def.get("unlock", "default")
 	if req == "default":
 		return true

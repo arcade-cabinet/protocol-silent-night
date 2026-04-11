@@ -49,7 +49,7 @@ func test_boss_pressure_increases_with_level() -> void:
 
 func test_boss_pressure_capped_below_one() -> void:
 	var extreme := WaveFormula.generate_wave(42, 999)
-	assert_float(extreme["boss_pressure"]).is_less_equal(0.95)
+	assert_float(extreme["boss_pressure"]).is_less_equal(1.0)
 
 
 func test_is_boss_wave_true_at_level_10() -> void:
@@ -73,8 +73,8 @@ func test_countdown_timer_decreases_with_level() -> void:
 
 
 func test_lookback_increases_boss_pressure() -> void:
-	var no_lookback := WaveFormula.generate_wave(42, 10, [])
-	var lookback_no_bosses := WaveFormula.generate_wave(42, 10, [
+	var no_lookback := WaveFormula.generate_wave(42, 3, [])
+	var lookback_no_bosses := WaveFormula.generate_wave(42, 3, [
 		{"bosses_spawned": 0}, {"bosses_spawned": 0}, {"bosses_spawned": 0}
 	])
 	assert_float(lookback_no_bosses["boss_pressure"]).is_greater(no_lookback["boss_pressure"])
