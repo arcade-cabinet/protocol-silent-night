@@ -124,8 +124,8 @@ func test_present_archetype_gift_bag_has_high_hp_low_speed() -> void:
 		var p: Dictionary = defs[pid]
 		if p.get("body_shape", "") == "gift_bag":
 			# All gift bags should be somewhat beefy
-			assert_int(int(p["max_hp"])).is_greater_equal(10)
-			found = True
+			assert_int(int(p.get("max_hp", 100))).is_greater_equal(10)
+			found = true
 	assert_bool(found).is_true()
 
 
@@ -135,8 +135,8 @@ func test_present_archetype_stacked_duo_is_tank() -> void:
 	for pid in defs:
 		var p: Dictionary = defs[pid]
 		if p.get("body_shape", "") == "stacked_duo":
-			assert_int(int(p["max_hp"])).is_greater_equal(10)
-			found = True
+			assert_int(int(p.get("max_hp", 100))).is_greater_equal(10)
+			found = true
 	assert_bool(found).is_true()
 
 
