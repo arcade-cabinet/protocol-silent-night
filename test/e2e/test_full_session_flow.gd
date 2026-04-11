@@ -68,7 +68,7 @@ func test_full_session_flow() -> void:
 	main._return_to_menu()
 	await get_tree().process_frame
 	assert_str(main.state).is_equal("menu")
-	assert_bool(main.start_screen.visible).is_true()
+	assert_bool(main.title_screen.visible).is_true()
 	assert_bool(main.dash_button.visible).is_false()
 	assert_bool(SaveManager.is_unlocked("bumble")).is_true()
 

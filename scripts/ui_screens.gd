@@ -1,5 +1,105 @@
 extends RefCounted
 
+const THEME := preload("res://scripts/holidaypunk_theme.gd")
+
+
+static func build_hud(root: Control) -> Dictionary:
+	var hud_root := VBoxContainer.new()
+	hud_root.name = "HudMargin"
+	hud_root.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	hud_root.add_theme_constant_override("separation", 2)
+	hud_root.visible = false
+	root.add_child(hud_root)
+	var top_bar := HBoxContainer.new()
+	top_bar.add_theme_constant_override("separation", 8)
+	hud_root.add_child(top_bar)
+	var hp_bar := ProgressBar.new()
+	hp_bar.max_value = 100
+	hp_bar.value = 100
+	hp_bar.custom_minimum_size = Vector2(80, 18)
+	hp_bar.show_percentage = false
+	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	THEME.apply_to_progress_bar(hp_bar, Color("ff617e"))
+	top_bar.add_child(hp_bar)
+	var hp_label := Label.new()
+	hp_label.text = "100/100"
+	hp_label.add_theme_font_size_override("font_size", 14)
+	hp_label.add_theme_color_override("font_color", Color("ff617e"))
+	top_bar.add_child(hp_label)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_bar.add_child(spacer)
+	var wave_label := Label.new()
+	wave_label.text = "LEVEL 1"
+	wave_label.add_theme_font_size_override("font_size", 16)
+	wave_label.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	top_bar.add_child(wave_label)
+	var timer_label := Label.new()
+	timer_label.text = "120"
+	timer_label.add_theme_font_size_override("font_size", 22)
+	timer_label.add_theme_color_override("font_color", THEME.NEON_WHITE)
+	top_bar.add_child(timer_label)
+	var spacer2 := Control.new()
+	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_bar.add_child(spacer2)
+	var kills_label := Label.new()
+	kills_label.text = "0"
+	kills_label.add_theme_font_size_override("font_size", 14)
+	kills_label.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	top_bar.add_child(kills_label)
+	var cookie_label := Label.new()
+	cookie_label.text = "0 C"
+	cookie_label.add_theme_font_size_override("font_size", 14)
+	cookie_label.add_theme_color_override("font_color", Color("ffd700"))
+	top_bar.add_child(cookie_label)
+	var level_label := Label.new()
+	level_label.text = "LV 1"
+	level_label.add_theme_font_size_override("font_size", 14)
+	level_label.add_theme_color_override("font_color", THEME.NEON_CYAN)
+	top_bar.add_child(level_label)
+	var xp_bar := ProgressBar.new()
+	xp_bar.max_value = 5
+	xp_bar.value = 0
+	xp_bar.custom_minimum_size = Vector2(0, 8)
+	xp_bar.show_percentage = false
+	THEME.apply_to_progress_bar(xp_bar, Color("69d6ff"))
+	hud_root.add_child(xp_bar)
+	return {
+		"hud_root": hud_root,
+		"level_label": level_label, "xp_bar": xp_bar,
+		"hp_bar": hp_bar, "hp_label": hp_label,
+		"wave_label": wave_label, "timer_label": timer_label,
+		"kills_label": kills_label, "cookie_label": cookie_label
+	}
+
+
+static func build_boss_panel(root: Control) -> Dictionary:
+	var boss_panel := VBoxContainer.new()
+	boss_panel.name = "BossPanel"
+	boss_panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	boss_panel.offset_top = 110
+	# Use small margins so the bar remains visible on portrait screens.
+	boss_panel.offset_left = 24
+	boss_panel.offset_right = -24
+	boss_panel.visible = false
+	root.add_child(boss_panel)
+	var boss_title := Label.new()
+	boss_title.text = "// KRAMPUS-PRIME //"
+	boss_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_title.add_theme_color_override("font_color", THEME.NEON_RED)
+	boss_title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	boss_title.add_theme_constant_override("outline_size", 4)
+	boss_title.add_theme_font_size_override("font_size", 24)
+	boss_panel.add_child(boss_title)
+	var boss_bar := ProgressBar.new()
+	boss_bar.max_value = 100
+	boss_bar.value = 100
+	boss_bar.custom_minimum_size = Vector2(0, 22)
+	boss_bar.show_percentage = false
+	THEME.apply_to_progress_bar(boss_bar, THEME.NEON_RED)
+	boss_panel.add_child(boss_bar)
+	return {"boss_panel": boss_panel, "boss_bar": boss_bar}
+
 
 static func build_level_screen(root: Control) -> Dictionary:
 	var level_screen := PanelContainer.new()
@@ -38,122 +138,3 @@ static func build_level_screen(root: Control) -> Dictionary:
 	return {"level_screen": level_screen, "upgrade_box": upgrade_box}
 
 
-static func build_end_screen(root: Control, on_menu_return: Callable) -> Dictionary:
-	var end_screen := PanelContainer.new()
-	end_screen.name = "EndScreen"
-	end_screen.visible = false
-	end_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	end_screen.self_modulate = Color(0.02, 0.04, 0.06, 0.94)
-	root.add_child(end_screen)
-
-	var end_margin := MarginContainer.new()
-	end_margin.add_theme_constant_override("margin_left", 80)
-	end_margin.add_theme_constant_override("margin_top", 80)
-	end_margin.add_theme_constant_override("margin_right", 80)
-	end_margin.add_theme_constant_override("margin_bottom", 80)
-	end_screen.add_child(end_margin)
-
-	var end_vbox := VBoxContainer.new()
-	end_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	end_vbox.add_theme_constant_override("separation", 16)
-	end_margin.add_child(end_vbox)
-
-	var end_title := Label.new()
-	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	end_title.add_theme_font_size_override("font_size", 42)
-	end_vbox.add_child(end_title)
-
-	var end_message := Label.new()
-	end_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	end_message.add_theme_font_size_override("font_size", 20)
-	end_vbox.add_child(end_message)
-
-	var end_waves := Label.new()
-	end_waves.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	end_waves.add_theme_font_size_override("font_size", 18)
-	end_vbox.add_child(end_waves)
-
-	var restart := Button.new()
-	restart.text = "Main Menu"
-	restart.pressed.connect(on_menu_return)
-	end_vbox.add_child(restart)
-
-	return {"end_screen": end_screen, "end_title": end_title, "end_message": end_message, "end_waves": end_waves}
-
-
-static func build_overlays_and_controls(root: Control, on_dash_down: Callable, on_dash_up: Callable) -> Dictionary:
-	var message_overlay := Label.new()
-	message_overlay.name = "MessageOverlay"
-	# Full-width anchor so text never clips on portrait screens.
-	message_overlay.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	message_overlay.offset_top = 160
-	message_overlay.offset_bottom = 240
-	message_overlay.offset_left = 24
-	message_overlay.offset_right = -24
-	message_overlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	message_overlay.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	message_overlay.add_theme_font_size_override("font_size", 32)
-	message_overlay.modulate = Color("edf7ff")
-	root.add_child(message_overlay)
-
-	var achievement_overlay := Label.new()
-	achievement_overlay.name = "AchievementOverlay"
-	achievement_overlay.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	achievement_overlay.offset_top = 56
-	achievement_overlay.offset_bottom = 110
-	achievement_overlay.offset_left = 24
-	achievement_overlay.offset_right = -24
-	achievement_overlay.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	achievement_overlay.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	achievement_overlay.add_theme_font_size_override("font_size", 20)
-	achievement_overlay.modulate = Color("ffe680")
-	root.add_child(achievement_overlay)
-
-	var dash_button := Button.new()
-	dash_button.name = "DashButton"
-	dash_button.text = "DASH"
-	dash_button.visible = false
-	dash_button.custom_minimum_size = Vector2(108, 108)
-	dash_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	dash_button.offset_left = -140
-	dash_button.offset_top = -140
-	dash_button.offset_right = -22
-	dash_button.offset_bottom = -22
-	dash_button.button_down.connect(on_dash_down)
-	dash_button.button_up.connect(on_dash_up)
-	root.add_child(dash_button)
-
-	var joystick_base := ColorRect.new()
-	joystick_base.name = "JoystickBase"
-	joystick_base.visible = false
-	joystick_base.color = Color(1, 1, 1, 0.15)
-	joystick_base.custom_minimum_size = Vector2(92, 92)
-	root.add_child(joystick_base)
-
-	var joystick_knob := ColorRect.new()
-	joystick_knob.name = "JoystickKnob"
-	joystick_knob.visible = false
-	joystick_knob.color = Color(0.92, 0.97, 1.0, 0.9)
-	joystick_knob.custom_minimum_size = Vector2(42, 42)
-	root.add_child(joystick_knob)
-
-	var pause_button := Button.new()
-	pause_button.name = "PauseButton"
-	pause_button.text = "II"
-	pause_button.visible = false
-	pause_button.custom_minimum_size = Vector2(48, 48)
-	pause_button.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	pause_button.offset_left = 12
-	pause_button.offset_top = 12
-	pause_button.offset_right = 60
-	pause_button.offset_bottom = 60
-	root.add_child(pause_button)
-
-	return {
-		"message_overlay": message_overlay,
-		"achievement_overlay": achievement_overlay,
-		"dash_button": dash_button,
-		"joystick_base": joystick_base,
-		"joystick_knob": joystick_knob,
-		"pause_button": pause_button,
-	}

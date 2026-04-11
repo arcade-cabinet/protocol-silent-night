@@ -162,3 +162,20 @@ static func tick_overlays(mgr: Object, delta: float) -> void:
 		mgr.achievement_overlay.modulate.a = clampf(mgr.achievement_timer / 0.3 if mgr.achievement_timer < 0.3 else 1.0, 0.0, 1.0)
 	else:
 		mgr.achievement_overlay.visible = false
+
+
+static func update_hud(ui: RefCounted, player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0, coal_queue: Array = []) -> void:
+	if ui.hp_bar != null:
+		ui.hp_bar.max_value = player_state.get("max_hp", 100.0)
+		ui.hp_bar.value = player_state.get("hp", 100.0)
+	if ui.hp_label != null:
+		ui.hp_label.text = "%d / %d" % [int(round(player_state.get("hp", 100.0))), int(round(player_state.get("max_hp", 100.0)))]
+	if ui.xp_bar != null:
+		ui.xp_bar.max_value = xp_needed
+		ui.xp_bar.value = xp
+	if ui.level_label != null:
+		ui.level_label.text = "LEVEL %d" % level
+	if ui.kills_label != null:
+		ui.kills_label.text = str(kills)
+	if ui.cookie_label != null:
+		ui.cookie_label.text = "%d C" % cookies
