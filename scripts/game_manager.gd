@@ -19,6 +19,9 @@ func _init(main_node: Node) -> void:
 func start_run(class_id: String) -> void:
 	if not main.present_defs.has(class_id):
 		return
+	var start_sm: Node = main._save_manager()
+	if start_sm != null:
+		start_sm.record_run_start()
 	EVENT_HELPERS.clear_runtime(main)
 	main.current_class_id = class_id
 	main.state = "playing"

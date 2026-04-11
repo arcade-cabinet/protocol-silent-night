@@ -27,6 +27,7 @@ const DEFAULT_STATE := {
 
 var save_path: String = "user://silent_night_save.json"
 var state: Dictionary = {}
+var _autosave_enabled: bool = true
 
 
 func _ready() -> void:
@@ -51,6 +52,7 @@ func load_state() -> Dictionary:
 
 
 func save_state() -> void:
+	if not _autosave_enabled: return
 	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(state, "\t"))
@@ -197,3 +199,10 @@ func _merge_dict(base: Dictionary, incoming: Dictionary, top_level: bool = true)
 		else:
 			base[key] = incoming[key]
 	return base
+
+func suspend_autosave() -> void:
+	_autosave_enabled = false
+
+func resume_autosave() -> void:
+	_autosave_enabled = true
+	save_state()

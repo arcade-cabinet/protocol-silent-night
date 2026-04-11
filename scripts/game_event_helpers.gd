@@ -40,21 +40,23 @@ static func end_run(main: Node, win: bool) -> void:
 	ui.dash_button.visible = false
 	ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
-	if sm != null and main.run_cookies > 0:
-		sm.add_cookies(main.run_cookies)
 	if sm != null:
+		sm.suspend_autosave()
+		if main.run_cookies > 0:
+			sm.add_cookies(main.run_cookies)
 		sm.set_coal(main.coal_queue)
-	if win and sm != null:
-		sm.record_campaign_clear()
-	var unlocked_any := false
-	if win and sm != null and sm.unlock("santa"):
-		ui.show_achievement("MECHA-SANTA UNLOCKED")
-		unlocked_any = true
-	if win and sm != null and sm.unlock("bumble"):
-		ui.show_achievement("THE BUMBLE UNLOCKED")
-		unlocked_any = true
-	if unlocked_any:
-		main._refresh_start_screen()
+		var unlocked_any := false
+		if win:
+			sm.record_campaign_clear()
+			if sm.unlock("santa"):
+				ui.show_achievement("MECHA-SANTA UNLOCKED")
+				unlocked_any = true
+			if sm.unlock("bumble"):
+				ui.show_achievement("THE BUMBLE UNLOCKED")
+				unlocked_any = true
+		sm.resume_autosave()
+		if unlocked_any:
+			main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		helpers.finalize_end_screen(main, win)
 	else:
