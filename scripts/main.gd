@@ -52,6 +52,8 @@ var pickup_root: Node3D
 var fx_root: Node3D
 var camera: Camera3D
 
+var title_screen: PanelContainer:
+	get: return ui_mgr.title_screen
 var start_screen: PanelContainer:
 	get: return ui_mgr.start_screen
 var level_screen: PanelContainer:

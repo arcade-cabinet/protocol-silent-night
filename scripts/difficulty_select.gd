@@ -76,4 +76,21 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 				on_select.call(tier_index, perma_check.button_pressed))
 		grid.add_child(btn)
 
+
+	var back_btn := Button.new()
+	back_btn.text = "< BACK"
+	back_btn.custom_minimum_size = Vector2(160, 50)
+	back_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	back_btn.add_theme_font_size_override("font_size", 18)
+	THEME.apply_to_button(back_btn, THEME.NEON_CYAN)
+	back_btn.pressed.connect(func() -> void:
+		panel.visible = false
+		var root_node = panel.get_parent()
+		for child in root_node.get_children():
+			if child.name == "StartScreen":
+				child.visible = true
+	)
+	vbox.add_child(back_btn)
+
 	return {"panel": panel, "perma_check": perma_check}
+

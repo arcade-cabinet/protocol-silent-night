@@ -40,17 +40,24 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 		var accent_hex: String = def.get("bow_color", "#55f7ff")
 		THEME.apply_to_button(button, Color(accent_hex))
 		button.set_meta("class_id", present_id)
+		var captured_id: String = present_id
+		var captured_def: Dictionary = def
+		var captured_canvas: Control = radar_canvas
 		button.pressed.connect(
 			func() -> void:
 				if audio_mgr != null: audio_mgr.play_menu_click()
+				if captured_canvas != null: _update_preview(captured_id, captured_def, captured_canvas)
+				for child in classes_box.get_children():
+					if child is Button:
+						child.remove_theme_stylebox_override("normal")
+						THEME.apply_to_button(child, Color(child.get_meta("accent_hex", "#55f7ff")))
+				button.add_theme_stylebox_override("normal", THEME.make_panel_style(Color(accent_hex), Color(0.1, 0.1, 0.1, 0.9)))
 				on_class_pressed.call(button)
 		)
+		button.set_meta("accent_hex", accent_hex)
 		if audio_mgr != null:
 			button.mouse_entered.connect(func() -> void: audio_mgr.play_menu_click())
 		if radar_canvas != null:
-			var captured_id: String = present_id
-			var captured_def: Dictionary = def
-			var captured_canvas: Control = radar_canvas
 			button.mouse_entered.connect(
 				func() -> void:
 					_update_preview(captured_id, captured_def, captured_canvas)

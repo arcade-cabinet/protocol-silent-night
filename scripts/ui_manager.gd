@@ -6,6 +6,7 @@ const COAL_SIDEBAR := preload("res://scripts/coal_sidebar_ui.gd")
 const UI_WIDGETS := preload("res://scripts/ui_widgets.gd")
 const PRESENT_SELECT := preload("res://scripts/present_select_ui.gd")
 
+var title_screen: PanelContainer
 var hud_root: Container
 var start_screen: PanelContainer
 var level_screen: PanelContainer
@@ -30,6 +31,7 @@ var pause_button: Button
 var joystick_base: ColorRect
 var joystick_knob: ColorRect
 var start_classes_box: Container
+var select_button: Button
 var radar_canvas: Control
 var upgrade_box: HBoxContainer
 var difficulty_panel: PanelContainer
@@ -57,10 +59,14 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	ui.add_child(root)
 	root_control = root
 
-	var start := UI_BUILDER.build_start_screen(root)
+	var title := UI_BUILDER.build_title_screen(root, _on_play_pressed)
+	title_screen = title["screen"]
+
+	var start := UI_BUILDER.build_start_screen(root, _on_back_to_title_pressed)
 	start_screen = start["screen"]
 	start_classes_box = start["classes_box"]
 	radar_canvas = start["radar_canvas"]
+	select_button = start["select_btn"]
 
 	var hud := UI_BUILDER.build_hud(root)
 	hud_root = hud["hud_root"]
@@ -129,11 +135,25 @@ func refresh_coal_sidebar(coal_queue: Array) -> void:
 	COAL_SIDEBAR.refresh(coal_sidebar_state, coal_queue)
 
 
+
+func _on_play_pressed() -> void:
+	title_screen.visible = false
+	start_screen.visible = true
+
+func _on_back_to_title_pressed() -> void:
+	start_screen.visible = false
+	title_screen.visible = true
+
 func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
+	title_screen.visible = true
+	start_screen.visible = false
+	if difficulty_panel != null:
+		difficulty_panel.visible = false
 	for child in start_classes_box.get_children():
 		child.queue_free()
 	if not present_defs.is_empty():
 		_build_present_buttons(present_defs, save_manager, on_class_pressed)
+
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:
@@ -171,18 +191,6 @@ func hide_joystick() -> void:
 
 
 func update_hud(player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0, coal_queue: Array = []) -> void:
-	if hp_bar != null:
-		hp_bar.max_value = player_state.get("max_hp", 100.0)
-		hp_bar.value = player_state.get("hp", 100.0)
-	if hp_label != null:
-		hp_label.text = "%d / %d" % [int(round(player_state.get("hp", 100.0))), int(round(player_state.get("max_hp", 100.0)))]
-	if xp_bar != null:
-		xp_bar.max_value = xp_needed
-		xp_bar.value = xp
-	if level_label != null:
-		level_label.text = "LEVEL %d" % level
-	if kills_label != null:
-		kills_label.text = str(kills)
-	if cookie_label != null:
-		cookie_label.text = "%d C" % cookies
+	UI_WIDGETS.update_hud(self, player_state, xp_needed, xp, level, kills, cookies)
+
 	refresh_coal_sidebar(coal_queue)

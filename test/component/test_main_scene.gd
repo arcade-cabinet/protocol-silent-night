@@ -115,6 +115,6 @@ func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
 	main._return_to_menu()
 	await get_tree().process_frame
 	assert_str(main.state).is_equal("menu")
-	assert_bool(main.start_screen.visible).is_true()
+	assert_bool(main.title_screen.visible).is_true()
 	assert_bool(main.dash_button.visible).is_false()
 	SaveManager.reset_state_for_tests()
