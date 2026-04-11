@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.2.0...v0.3.0) (2026-04-11)
+
+
+### Features
+
+* **alignment:** full production polish, consolidated docs, and expanded roster ([#189](https://github.com/arcade-cabinet/protocol-silent-night/issues/189)) ([34f1575](https://github.com/arcade-cabinet/protocol-silent-night/commit/34f15754ea6c682616070284ee17edc05cea25e9))
+* **polish:** align MVP characters, decompose god classes, and refine climax loop ([#180](https://github.com/arcade-cabinet/protocol-silent-night/issues/180)) ([b2597d0](https://github.com/arcade-cabinet/protocol-silent-night/commit/b2597d01a3686e24b42d9d356e5e389afc0ff405))
+* **ui:** implement Brotato-style menu flow and remove legacy characters from roster ([#183](https://github.com/arcade-cabinet/protocol-silent-night/issues/183)) ([87a3a56](https://github.com/arcade-cabinet/protocol-silent-night/commit/87a3a56f90fb02b1ddc7691acea788ccb0599f61))
+
+
+### Bug Fixes
+
+* **enemies:** transition legacy playables to procedural enemy factory ([#185](https://github.com/arcade-cabinet/protocol-silent-night/issues/185)) ([9dae20f](https://github.com/arcade-cabinet/protocol-silent-night/commit/9dae20fc57b69b086272fe84bcc71df33eea16d3))
+* **export:** enable GDExtension support, add project icon, and fix GH Pages COOP/COEP ([#182](https://github.com/arcade-cabinet/protocol-silent-night/issues/182)) ([04dd5d1](https://github.com/arcade-cabinet/protocol-silent-night/commit/04dd5d153e6e512f9acc660df13ca49026ba2868))
+* **save:** record run stats correctly at start and end ([#178](https://github.com/arcade-cabinet/protocol-silent-night/issues/178)) ([85478e0](https://github.com/arcade-cabinet/protocol-silent-night/commit/85478e022be0e145c9449591c7b6e93b20231a86))
+* **ui:** reset character select button state when returning to title screen ([#187](https://github.com/arcade-cabinet/protocol-silent-night/issues/187)) ([320273c](https://github.com/arcade-cabinet/protocol-silent-night/commit/320273c4c93ca989cab283d9335db1a6a895385d))
+
 ## [0.2.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.1.0...v0.2.0) (2026-04-10)
 
 
