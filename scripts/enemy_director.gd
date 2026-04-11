@@ -1,6 +1,8 @@
 extends RefCounted
 
 const EnemyBehaviors := preload("res://scripts/enemy_behaviors.gd")
+const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
+var present_factory: RefCounted = PRESENT_FACTORY.new()
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
@@ -26,14 +28,23 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 	var def: Dictionary = enemy_defs[enemy_type]
 	var enemy_node := Node3D.new()
 	enemy_node.name = "Enemy_%s" % enemy_type
-	var mesh_instance: MeshInstance3D = pixels.make_billboard_sprite(enemy_type, 2.0, Color(def["color"]))
-	enemy_node.add_child(mesh_instance)
+	var is_present: bool = def.get("render_as", "") == "present"
+	var visual_root: Node3D
+	
+	if is_present:
+		visual_root = present_factory.build_present(def)
+		enemy_node.add_child(visual_root)
+	else:
+		var mesh_instance: MeshInstance3D = pixels.make_billboard_sprite(enemy_type, 2.0, Color(def["color"]))
+		visual_root = mesh_instance
+		enemy_node.add_child(mesh_instance)
+
 	if _enemy_shadow_mesh == null:
 		_enemy_shadow_mesh = PlaneMesh.new()
 		_enemy_shadow_mesh.size = Vector2(1.1, 1.1)
 	var shadow := MeshInstance3D.new()
 	shadow.mesh = _enemy_shadow_mesh
-	shadow.position = Vector3(0, -0.56, 0)
+	shadow.position = Vector3(0, 0.05 if is_present else -0.56, 0)
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
 	actor_root.add_child(enemy_node)

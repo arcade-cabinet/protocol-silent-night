@@ -128,19 +128,52 @@ func update_player_aura(delta: float, player_state: Dictionary, player_node: Nod
 			continue
 		var dist := player_node.global_position.distance_to(enemy["node"].global_position)
 		if dist <= aura_range:
-			on_spawn_hit_fx.call(enemy["node"].global_position, Color.WHITE)
-			on_spawn_damage_number.call(enemy["node"], aura_damage)
+			if on_spawn_hit_fx.is_valid(): on_spawn_hit_fx.call(enemy["node"].global_position, Color.WHITE)
+			if on_spawn_damage_number.is_valid(): on_spawn_damage_number.call(enemy["node"], aura_damage)
 			enemy["hp"] -= aura_damage
-			if enemy["hp"] <= 0:
+			if enemy["hp"] <= 0 and on_kill_enemy.is_valid():
 				on_kill_enemy.call(enemy_index)
 	
 	if not boss_ref.is_empty() and is_instance_valid(boss_ref.get("node")):
 		var dist := player_node.global_position.distance_to(boss_ref["node"].global_position)
 		if dist <= aura_range:
-			on_spawn_hit_fx.call(boss_ref["node"].global_position, Color.WHITE)
-			on_spawn_damage_number.call(boss_ref["node"], aura_damage)
+			if on_spawn_hit_fx.is_valid(): on_spawn_hit_fx.call(boss_ref["node"].global_position, Color.WHITE)
+			if on_spawn_damage_number.is_valid(): on_spawn_damage_number.call(boss_ref["node"], aura_damage)
 			boss_ref["hp"] -= aura_damage
 			if boss_bar != null:
 				boss_bar.value = boss_ref["hp"]
-			if boss_ref["hp"] <= 0:
+			if boss_ref["hp"] <= 0 and on_boss_killed.is_valid():
 				on_boss_killed.call()
+
+func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary) -> void:
+	if event is InputEventKey and event.physical_keycode == KEY_SHIFT:
+		state["dash_pressed"] = event.pressed
+	if event is InputEventJoypadButton:
+		var joy := event as InputEventJoypadButton
+		if joy.button_index == JOY_BUTTON_RIGHT_SHOULDER or joy.button_index == JOY_BUTTON_A:
+			state["dash_pressed"] = joy.pressed
+	if event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		if touch.position.x > viewport_size.x * 0.7 and touch.position.y > viewport_size.y * 0.65:
+			state["dash_pressed"] = touch.pressed
+			return
+		state["touch_active"] = touch.pressed
+		if touch.pressed:
+			state["touch_origin"] = touch.position
+			state["touch_position"] = touch.position
+			state["joystick_base"] = touch.position
+			state["joystick_knob"] = touch.position
+			state["show_joystick"] = true
+		else:
+			state["input_move"] = Vector2.ZERO
+			state["hide_joystick"] = true
+	if event is InputEventScreenDrag and bool(state.get("touch_active", false)):
+		var drag := event as InputEventScreenDrag
+		state["touch_position"] = drag.position
+		var origin: Vector2 = state["touch_origin"]
+		var delta_vec: Vector2 = drag.position - origin
+		var move: Vector2 = delta_vec.limit_length(72.0) / 72.0
+		state["input_move"] = move
+		state["joystick_base"] = origin
+		state["joystick_knob"] = origin + move * 52.0
+		state["show_joystick"] = true

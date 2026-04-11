@@ -142,7 +142,9 @@ func test_update_player_aura_calls_on_boss_killed_when_boss_dies() -> void:
 	add_child(boss_bar)
 	boss_bar.max_value = 100.0; boss_bar.value = 1.0
 	var boss_ref: Dictionary = {"node": boss_node, "hp": 1.0}
-	var player_state: Dictionary = {"aura_level": 1, "aura_timer": 0.55}
+	var cls := ClassResource.new()
+	cls.damage = 10.0
+	var player_state: Dictionary = {"aura_level": 1, "aura_timer": 0.55, "class": cls}
 	var killed: Array = [false]
 	var on_boss_killed := func() -> void: killed[0] = true
 	ctrl.update_player_aura(0.016, player_state, player_node, [], boss_ref, 1.0,
