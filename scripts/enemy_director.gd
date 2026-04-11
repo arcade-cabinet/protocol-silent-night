@@ -44,7 +44,7 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 		_enemy_shadow_mesh.size = Vector2(1.1, 1.1)
 	var shadow := MeshInstance3D.new()
 	shadow.mesh = _enemy_shadow_mesh
-	shadow.position = Vector3(0, 0.05 if is_present else -0.56, 0)
+	shadow.position = Vector3(0, 0.02, 0)
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
 	actor_root.add_child(enemy_node)
@@ -85,7 +85,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	var def: Dictionary = enemy_defs["boss"]
 	var boss_node := Node3D.new()
 	boss_node.name = "Boss"
-	var body: MeshInstance3D = pixels.make_billboard_sprite("boss", 4.4, Color(def["color"]))
+	var body: Node3D = _load_model("boss")
 	boss_node.add_child(body)
 	if _boss_shadow_mesh == null:
 		_boss_shadow_mesh = PlaneMesh.new()
@@ -164,3 +164,18 @@ func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, r
 		if boss_distance < range_limit + 4.0 and boss_distance < best_distance:
 			best = boss_ref
 	return best
+
+func _load_model(enemy_type: String) -> Node3D:
+	var path := ""
+	match enemy_type:
+		"elf": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
+		"santa": path = "res://assets/characters/yuletide/animations/dodge_and_counter.glb" # Placeholder for santa
+		"bumble": path = "res://assets/characters/bumble/animations/basic_jump.glb"
+		"boss": path = "res://assets/characters/krampus/animations/combat_stance.glb"
+		"grunt", "rusher", "tank": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
+		_: path = "res://assets/characters/yuletide/animations/basic_jump.glb"
+	
+	var res = load(path)
+	if res == null: return Node3D.new()
+	var scene: Node3D = res.instantiate()
+	return scene

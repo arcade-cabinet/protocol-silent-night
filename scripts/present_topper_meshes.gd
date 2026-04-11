@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## Builds procedural topper meshes for presents. 8 kinds:
-## none / santa_hat / antlers / star / halo / candy_cane / bow_giant / ornament.
+## none / santa_hat / antlers / star / halo / candy_cane / bow_giant / ornament / tree.
 ## All rendered from Godot primitives + emissive StandardMaterial3D —
 ## zero texture imports, holidaypunk-safe.
 
@@ -18,6 +18,7 @@ static func build(kind: String, color: Color = Color("#ffffff")) -> Node3D:
 		"candy_cane": _candy_cane(root, color)
 		"bow_giant": _bow_giant(root, color)
 		"ornament": _ornament(root, color)
+		"tree": _tree(root, color)
 	return root
 
 
@@ -160,3 +161,20 @@ static func _emissive_mat(color: Color, energy: float) -> StandardMaterial3D:
 	mat.emission = color
 	mat.emission_energy_multiplier = energy
 	return mat
+
+static func _tree(root: Node3D, color: Color) -> void:
+	var dark_green := Color("#1a4421")
+	var trunk_brown := Color("#4d2d18")
+	
+	var trunk := _cyl_mesh(0.06, 0.08, 0.15, trunk_brown)
+	trunk.position = Vector3(0, 0.07, 0)
+	root.add_child(trunk)
+	
+	for i in range(3):
+		var layer := _cyl_mesh(0.0, 0.4 - i * 0.1, 0.25, dark_green)
+		layer.position = Vector3(0, 0.2 + i * 0.15, 0)
+		root.add_child(layer)
+	
+	var star := _sphere_mesh(0.06, Color("#ffd700"), true, 1.5)
+	star.position = Vector3(0, 0.6, 0)
+	root.add_child(star)
