@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.4.0...v0.5.0) (2026-04-12)
+
+
+### Features
+
+* **visuals:** add weather director for viewport-filling holidaypunk wonderland ([#198](https://github.com/arcade-cabinet/protocol-silent-night/issues/198)) ([e3497a3](https://github.com/arcade-cabinet/protocol-silent-night/commit/e3497a35d8090203238577e6f93d4c8abd02944b))
+
 ## [0.4.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.3.0...v0.4.0) (2026-04-12)
 
 
