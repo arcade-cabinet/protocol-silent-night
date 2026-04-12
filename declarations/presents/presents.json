@@ -29,7 +29,8 @@
     "pierce": 2,
     "topper": "bow_giant",
     "body_shape": "gift_bag",
-    "accessory": "ribbon_tail"
+    "accessory": "ribbon_tail",
+    "unlock": "default"
   },
   "p_01": {
     "id": "p_01",
@@ -61,7 +62,8 @@
     "pierce": 1,
     "topper": "star",
     "body_shape": "gift_bag",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "default"
   },
   "p_02": {
     "id": "p_02",
@@ -93,7 +95,8 @@
     "pierce": 3,
     "topper": "tree",
     "body_shape": "gift_bag",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "default"
   },
   "p_03": {
     "id": "p_03",
@@ -125,7 +128,8 @@
     "pierce": 3,
     "topper": "santa_hat",
     "body_shape": "tall_rect",
-    "accessory": "holly_clasp"
+    "accessory": "holly_clasp",
+    "unlock": "default"
   },
   "p_04": {
     "id": "p_04",
@@ -157,7 +161,8 @@
     "pierce": 3,
     "topper": "star",
     "body_shape": "cube",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "reach_wave_9"
   },
   "p_05": {
     "id": "p_05",
@@ -189,7 +194,8 @@
     "pierce": 3,
     "topper": "none",
     "body_shape": "wide_box",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "reach_wave_9"
   },
   "p_06": {
     "id": "p_06",
@@ -221,7 +227,8 @@
     "pierce": 1,
     "topper": "santa_hat",
     "body_shape": "sphere",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "reach_wave_3"
   },
   "p_07": {
     "id": "p_07",
@@ -253,7 +260,8 @@
     "pierce": 2,
     "topper": "halo",
     "body_shape": "sphere",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "reach_wave_9"
   },
   "p_08": {
     "id": "p_08",
@@ -285,7 +293,8 @@
     "pierce": 3,
     "topper": "ornament",
     "body_shape": "wide_box",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "reach_wave_6"
   },
   "p_09": {
     "id": "p_09",
@@ -317,7 +326,8 @@
     "pierce": 3,
     "topper": "antlers",
     "body_shape": "cube",
-    "accessory": "holly_clasp"
+    "accessory": "holly_clasp",
+    "unlock": "reach_wave_1"
   },
   "p_10": {
     "id": "p_10",
@@ -349,7 +359,8 @@
     "pierce": 2,
     "topper": "tree",
     "body_shape": "stacked_duo",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "reach_wave_2"
   },
   "p_11": {
     "id": "p_11",
@@ -381,7 +392,8 @@
     "pierce": 2,
     "topper": "tree",
     "body_shape": "cube",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "reach_wave_7"
   },
   "p_12": {
     "id": "p_12",
@@ -413,7 +425,8 @@
     "pierce": 1,
     "topper": "ornament",
     "body_shape": "stacked_duo",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "reach_wave_5"
   },
   "p_13": {
     "id": "p_13",
@@ -445,7 +458,8 @@
     "pierce": 1,
     "topper": "antlers",
     "body_shape": "sphere",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "reach_wave_4"
   },
   "p_14": {
     "id": "p_14",
@@ -477,7 +491,8 @@
     "pierce": 2,
     "topper": "ornament",
     "body_shape": "sphere",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "reach_wave_2"
   },
   "p_15": {
     "id": "p_15",
@@ -509,7 +524,8 @@
     "pierce": 2,
     "topper": "star",
     "body_shape": "sphere",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "kill_50_enemies"
   },
   "p_16": {
     "id": "p_16",
@@ -541,7 +557,8 @@
     "pierce": 1,
     "topper": "candy_cane",
     "body_shape": "gift_bag",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "kill_50_enemies"
   },
   "p_17": {
     "id": "p_17",
@@ -573,7 +590,8 @@
     "pierce": 3,
     "topper": "none",
     "body_shape": "gift_bag",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "kill_50_enemies"
   },
   "p_18": {
     "id": "p_18",
@@ -605,7 +623,8 @@
     "pierce": 3,
     "topper": "bow_giant",
     "body_shape": "cylinder",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "kill_100_enemies"
   },
   "p_19": {
     "id": "p_19",
@@ -637,7 +656,8 @@
     "pierce": 3,
     "topper": "santa_hat",
     "body_shape": "tall_rect",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "kill_50_enemies"
   },
   "p_20": {
     "id": "p_20",
@@ -669,7 +689,8 @@
     "pierce": 3,
     "topper": "bow_giant",
     "body_shape": "wide_box",
-    "accessory": "holly_clasp"
+    "accessory": "holly_clasp",
+    "unlock": "kill_50_enemies"
   },
   "p_21": {
     "id": "p_21",
@@ -701,7 +722,8 @@
     "pierce": 1,
     "topper": "halo",
     "body_shape": "stacked_duo",
-    "accessory": "ribbon_tail"
+    "accessory": "ribbon_tail",
+    "unlock": "kill_500_enemies"
   },
   "p_22": {
     "id": "p_22",
@@ -733,7 +755,8 @@
     "pierce": 2,
     "topper": "halo",
     "body_shape": "gift_bag",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "kill_50_enemies"
   },
   "p_23": {
     "id": "p_23",
@@ -765,7 +788,8 @@
     "pierce": 1,
     "topper": "star",
     "body_shape": "wide_box",
-    "accessory": "ribbon_tail"
+    "accessory": "ribbon_tail",
+    "unlock": "kill_200_enemies"
   },
   "p_24": {
     "id": "p_24",
@@ -797,7 +821,8 @@
     "pierce": 2,
     "topper": "antlers",
     "body_shape": "wide_box",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "kill_200_enemies"
   },
   "p_25": {
     "id": "p_25",
@@ -829,7 +854,8 @@
     "pierce": 3,
     "topper": "ornament",
     "body_shape": "cylinder",
-    "accessory": "holly_clasp"
+    "accessory": "holly_clasp",
+    "unlock": "kill_100_enemies"
   },
   "p_26": {
     "id": "p_26",
@@ -861,7 +887,8 @@
     "pierce": 2,
     "topper": "star",
     "body_shape": "sphere",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "kill_50_enemies"
   },
   "p_27": {
     "id": "p_27",
@@ -893,7 +920,8 @@
     "pierce": 1,
     "topper": "candy_cane",
     "body_shape": "gift_bag",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "kill_300_enemies"
   },
   "p_28": {
     "id": "p_28",
@@ -925,7 +953,8 @@
     "pierce": 1,
     "topper": "none",
     "body_shape": "gift_bag",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "kill_200_enemies"
   },
   "p_29": {
     "id": "p_29",
@@ -957,7 +986,8 @@
     "pierce": 1,
     "topper": "candy_cane",
     "body_shape": "cube",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "kill_300_enemies"
   },
   "p_30": {
     "id": "p_30",
@@ -989,7 +1019,8 @@
     "pierce": 1,
     "topper": "bow_giant",
     "body_shape": "cylinder",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "reach_wave_17"
   },
   "p_31": {
     "id": "p_31",
@@ -1021,7 +1052,8 @@
     "pierce": 3,
     "topper": "santa_hat",
     "body_shape": "cylinder",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "reach_wave_22"
   },
   "p_32": {
     "id": "p_32",
@@ -1053,7 +1085,8 @@
     "pierce": 1,
     "topper": "none",
     "body_shape": "wide_box",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "reach_wave_13"
   },
   "p_33": {
     "id": "p_33",
@@ -1085,7 +1118,8 @@
     "pierce": 3,
     "topper": "halo",
     "body_shape": "stacked_duo",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "reach_wave_21"
   },
   "p_34": {
     "id": "p_34",
@@ -1117,7 +1151,8 @@
     "pierce": 1,
     "topper": "none",
     "body_shape": "wide_box",
-    "accessory": "ribbon_tail"
+    "accessory": "ribbon_tail",
+    "unlock": "reach_wave_16"
   },
   "p_35": {
     "id": "p_35",
@@ -1149,7 +1184,8 @@
     "pierce": 2,
     "topper": "halo",
     "body_shape": "gift_bag",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "reach_wave_12"
   },
   "p_36": {
     "id": "p_36",
@@ -1181,7 +1217,8 @@
     "pierce": 2,
     "topper": "ornament",
     "body_shape": "gift_bag",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "reach_wave_14"
   },
   "p_37": {
     "id": "p_37",
@@ -1213,7 +1250,8 @@
     "pierce": 2,
     "topper": "star",
     "body_shape": "tall_rect",
-    "accessory": "holly_clasp"
+    "accessory": "holly_clasp",
+    "unlock": "reach_wave_24"
   },
   "p_38": {
     "id": "p_38",
@@ -1245,7 +1283,8 @@
     "pierce": 2,
     "topper": "halo",
     "body_shape": "stacked_duo",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "reach_wave_12"
   },
   "p_39": {
     "id": "p_39",
@@ -1277,7 +1316,8 @@
     "pierce": 3,
     "topper": "candy_cane",
     "body_shape": "cube",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "reach_wave_15"
   },
   "p_40": {
     "id": "p_40",
@@ -1309,7 +1349,8 @@
     "pierce": 1,
     "topper": "star",
     "body_shape": "gift_bag",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "reach_wave_14"
   },
   "p_41": {
     "id": "p_41",
@@ -1341,7 +1382,8 @@
     "pierce": 1,
     "topper": "ornament",
     "body_shape": "wide_box",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "reach_wave_11"
   },
   "p_42": {
     "id": "p_42",
@@ -1373,7 +1415,8 @@
     "pierce": 1,
     "topper": "candy_cane",
     "body_shape": "tall_rect",
-    "accessory": "holly_clasp"
+    "accessory": "holly_clasp",
+    "unlock": "reach_wave_22"
   },
   "p_43": {
     "id": "p_43",
@@ -1405,7 +1448,8 @@
     "pierce": 1,
     "topper": "santa_hat",
     "body_shape": "stacked_duo",
-    "accessory": "bells"
+    "accessory": "bells",
+    "unlock": "reach_wave_15"
   },
   "p_44": {
     "id": "p_44",
@@ -1437,7 +1481,8 @@
     "pierce": 2,
     "topper": "candy_cane",
     "body_shape": "sphere",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "reach_wave_11"
   },
   "p_45": {
     "id": "p_45",
@@ -1469,7 +1514,8 @@
     "pierce": 1,
     "topper": "star",
     "body_shape": "cylinder",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "kill_3000_enemies"
   },
   "p_46": {
     "id": "p_46",
@@ -1501,7 +1547,8 @@
     "pierce": 1,
     "topper": "star",
     "body_shape": "gift_bag",
-    "accessory": "none"
+    "accessory": "none",
+    "unlock": "kill_3000_enemies"
   },
   "p_47": {
     "id": "p_47",
@@ -1533,7 +1580,8 @@
     "pierce": 3,
     "topper": "ornament",
     "body_shape": "wide_box",
-    "accessory": "scarf"
+    "accessory": "scarf",
+    "unlock": "kill_3000_enemies"
   },
   "p_48": {
     "id": "p_48",
@@ -1565,7 +1613,8 @@
     "pierce": 2,
     "topper": "santa_hat",
     "body_shape": "gift_bag",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "kill_5000_enemies"
   },
   "p_49": {
     "id": "p_49",
@@ -1597,6 +1646,7 @@
     "pierce": 1,
     "topper": "antlers",
     "body_shape": "wide_box",
-    "accessory": "tags"
+    "accessory": "tags",
+    "unlock": "kill_2000_enemies"
   }
 }
