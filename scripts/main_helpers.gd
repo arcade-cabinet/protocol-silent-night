@@ -40,9 +40,11 @@ static func kill_enemy(main: Node, enemy_index: int) -> void:
 
 static func on_class_button_pressed(main: Node, button: Button) -> void:
 	main.current_class_id = String(button.get_meta("class_id", ""))
+	var is_unlocked: bool = button.get_meta("unlocked", false)
 	var ui: RefCounted = main.ui_mgr
 	if ui.select_button != null:
-		ui.select_button.disabled = false
+		ui.select_button.disabled = not is_unlocked
+		ui.select_button.text = "SELECT" if is_unlocked else "LOCKED"
 		# Remove all existing pressed connections to avoid multiple calls
 		var connections = ui.select_button.pressed.get_connections()
 		for c in connections:

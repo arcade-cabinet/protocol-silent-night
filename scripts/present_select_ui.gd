@@ -29,17 +29,19 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 		var def: Dictionary = present_defs[present_id]
 		var button := Button.new()
 		var unlocked := is_present_unlocked(def, best_wave, save_manager)
-		var label: String = "%s\n%s" % [def.get("name", present_id), def.get("tagline", "")]
-		if not unlocked:
-			label += "\n[%s]" % unlock_label(def.get("unlock", ""))
+		var label: String = "%s\n\n" % def.get("name", present_id)
+		if unlocked:
+			label += def.get("tagline", "")
+		else:
+			label += "[ LOCKED ]\n%s" % unlock_label(def.get("unlock", ""))
 		button.text = label
-		button.custom_minimum_size = Vector2(210, 130)
+		button.custom_minimum_size = Vector2(240, 320)
 		button.clip_text = true
-		button.disabled = not unlocked
-		button.add_theme_font_size_override("font_size", 12)
-		var accent_hex: String = def.get("bow_color", "#55f7ff")
+		button.add_theme_font_size_override("font_size", 14)
+		var accent_hex: String = def.get("bow_color", "#55f7ff") if unlocked else "#404040"
 		THEME.apply_to_button(button, Color(accent_hex))
 		button.set_meta("class_id", present_id)
+		button.set_meta("unlocked", unlocked)
 		var captured_id: String = present_id
 		var captured_def: Dictionary = def
 		var captured_canvas: Control = radar_canvas
@@ -67,13 +69,24 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 	var last_id: String = ""
 	if save_manager != null:
 		last_id = String(save_manager.get_preference("last_present", ""))
+	
+	var selected_node = null
 	if not last_id.is_empty():
 		for child in classes_box.get_children():
-			if child is Button and String(child.get_meta("class_id", "")) == last_id and not child.disabled:
-				child.grab_focus()
-				if radar_canvas != null:
-					_update_preview(last_id, present_defs.get(last_id, {}), radar_canvas)
+			if child is Button and String(child.get_meta("class_id", "")) == last_id and child.get_meta("unlocked", false):
+				selected_node = child
 				break
+	if selected_node == null:
+		for child in classes_box.get_children():
+			if child is Button and child.get_meta("unlocked", false):
+				selected_node = child
+				break
+	
+	if selected_node != null:
+		selected_node.grab_focus()
+		if radar_canvas != null:
+			var sid: String = selected_node.get_meta("class_id", "")
+			_update_preview(sid, present_defs.get(sid, {}), radar_canvas)
 
 
 static func is_present_unlocked(def: Dictionary, best_wave: int, save_manager: Node = null) -> bool:
