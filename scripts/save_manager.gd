@@ -83,39 +83,29 @@ func register_level_reached(level_number: int) -> void:
 
 func register_wave_reached(wave_number: int) -> void:
 	state["best_wave"] = maxi(int(state.get("best_wave", 0)), wave_number)
-	var achievements: Dictionary = state.get("achievements", {})
-	achievements["total_waves_cleared"] = int(achievements.get("total_waves_cleared", 0)) + 1
-	state["achievements"] = achievements
+	_inc_a("total_waves_cleared")
+
+
+func _inc_a(k: String, amt: int = 1) -> void:
+	var a: Dictionary = state.get("achievements", {})
+	a[k] = int(a.get(k, 0)) + amt
+	state["achievements"] = a
 	save_state()
 
 
-func record_kill(amount: int = 1) -> void:
-	var achievements: Dictionary = state.get("achievements", {})
-	achievements["total_kills"] = int(achievements.get("total_kills", 0)) + amount
-	state["achievements"] = achievements
-	save_state()
+func record_kill(amount: int = 1) -> void: _inc_a("total_kills", amount)
 
 
-func record_run_start() -> void:
-	var achievements: Dictionary = state.get("achievements", {})
-	achievements["total_runs"] = int(achievements.get("total_runs", 0)) + 1
-	state["achievements"] = achievements
-	save_state()
+func record_run_start() -> void: _inc_a("total_runs")
 
 
-func record_campaign_clear() -> void:
-	var achievements: Dictionary = state.get("achievements", {})
-	achievements["campaign_clears"] = int(achievements.get("campaign_clears", 0)) + 1
-	state["achievements"] = achievements
-	save_state()
+func record_campaign_clear() -> void: _inc_a("campaign_clears")
 
 
-func get_achievement(key: String) -> int:
-	return int(state.get("achievements", {}).get(key, 0))
+func get_achievement(key: String) -> int: return int(state.get("achievements", {}).get(key, 0))
 
 
-func get_cookies() -> int:
-	return int(state.get("cookies", 0))
+func get_cookies() -> int: return int(state.get("cookies", 0))
 
 
 func add_cookies(amount: int) -> void:
@@ -186,8 +176,7 @@ func set_preference(key: String, value) -> void:
 	save_state()
 
 
-func get_preference(key: String, default_value = null) -> Variant:
-	return state.get("preferences", {}).get(key, default_value)
+func get_preference(key: String, default_value = null) -> Variant: return state.get("preferences", {}).get(key, default_value)
 
 
 func _merge_dict(base: Dictionary, incoming: Dictionary, top_level: bool = true) -> Dictionary:

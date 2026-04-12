@@ -177,8 +177,7 @@ func _trigger_level_up() -> void: MAIN_HELPERS.trigger_level_up(self)
 
 func _apply_upgrade(upgrade_id: String) -> void: MAIN_HELPERS.apply_upgrade(self, upgrade_id)
 
-func _damage_player(amount: float) -> void:
-	PLAYER_DAMAGE_HANDLER.damage_player(self, amount)
+func _damage_player(amount: float) -> void: PLAYER_DAMAGE_HANDLER.damage_player(self, amount)
 
 func _update_ui() -> void:
 	ui_mgr.update_hud(player_state, progression.xp_needed, progression.xp, progression.level, progression.kills, run_cookies, coal_queue)
