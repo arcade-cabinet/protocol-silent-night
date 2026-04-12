@@ -27,6 +27,7 @@ var obstacles_builder := preload("res://scripts/obstacle_builder.gd").new(mat_fa
 var audio_mgr := preload("res://scripts/audio_manager.gd").new()
 var dmg_numbers := preload("res://scripts/damage_numbers.gd").new()
 var present_animator := preload("res://scripts/present_animator.gd").new()
+var weather_director: RefCounted
 var afterimages: Array = []
 var particles := preload("res://scripts/particle_effects.gd").new()
 var boss_phases := preload("res://scripts/boss_phases.gd").new()
@@ -107,6 +108,7 @@ var wave_clear_timer := 0.0; var test_mode := {}
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
+	weather_director = preload("res://scripts/weather_director.gd").new(self)
 	_init_services()
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
@@ -164,6 +166,7 @@ func _tick(delta: float) -> void:
 			game_mgr.start_next_wave()
 	shake_magnitude = WORLD_BUILDER.update_camera(camera, player_node, state, config, delta, shake_magnitude)
 	screen_shake.update(delta, camera)
+	if weather_director != null: weather_director.tick(delta)
 
 func _unhandled_input(event: InputEvent) -> void: MAIN_HELPERS.handle_input(self, event)
 

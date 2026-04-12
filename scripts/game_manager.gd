@@ -73,6 +73,7 @@ func start_next_wave() -> void:
 			main.level_lookback.pop_front()
 	main.current_wave_index += 1
 	var level: int = main.current_wave_index + 1
+	if main.weather_director != null: main.weather_director.set_intensity(level, 10, main.difficulty_tier)
 	main.current_wave = WAVE_FORMULA.generate_wave(main.run_seed, level, main.level_lookback, main.difficulty_tier)
 	wave_spawner.reset_for_level()
 	var save_mgr: Node = main._save_manager()
