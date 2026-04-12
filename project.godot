@@ -24,7 +24,9 @@ SaveManager="*res://scripts/save_manager.gd"
 window/size/viewport_width=1440
 window/size/viewport_height=900
 window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
+window/stretch/aspect="keep_width"
+window/stretch/scale=1.0
+window/handheld/orientation=0
 window/handheld/orientation=0
 
 [editor]
@@ -44,3 +46,8 @@ common/physics_interpolation=true
 textures/vram_compression/import_etc2_astc=true
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=1
 environment/defaults/default_clear_color=Color(0.04, 0.07, 0.1, 1)
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+pointing/emulate_mouse_from_touch=true

@@ -45,7 +45,7 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 	vbox.add_child(title)
 
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 1 if root.get_viewport_rect().size.x < 800 else 3
 	grid.add_theme_constant_override("h_separation", 16)
 	grid.add_theme_constant_override("v_separation", 12)
 	vbox.add_child(grid)
@@ -64,7 +64,7 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 		var tier_index := i + 1
 		var label := "%s\n%dx // %d rewraps\n%s" % [tier["name"], tier["mult"], tier["rewraps"], tier["desc"]]
 		btn.text = label
-		btn.custom_minimum_size = Vector2(280, 120)
+		btn.custom_minimum_size = Vector2(320, 80) if root.get_viewport_rect().size.x < 800 else Vector2(280, 120)
 		btn.add_theme_font_size_override("font_size", 14)
 		THEME.apply_to_button(btn, Color(tier["color"]))
 		if tier_index == current_tier:

@@ -16,9 +16,10 @@ static func build_title_screen(root: Control, on_play: Callable) -> Dictionary:
 	root.add_child(screen)
 
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 60)
+	var is_mobile := root.get_viewport_rect().size.x < 800
+	margin.add_theme_constant_override("margin_left", 20 if is_mobile else 60)
 	margin.add_theme_constant_override("margin_top", 100)
-	margin.add_theme_constant_override("margin_right", 60)
+	margin.add_theme_constant_override("margin_right", 20 if is_mobile else 60)
 	margin.add_theme_constant_override("margin_bottom", 100)
 	screen.add_child(margin)
 
@@ -30,7 +31,7 @@ static func build_title_screen(root: Control, on_play: Callable) -> Dictionary:
 	var title := Label.new()
 	title.text = "PROTOCOL: SILENT NIGHT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 64)
+	title.add_theme_font_size_override("font_size", 32 if is_mobile else 64)
 	title.add_theme_color_override("font_color", THEME.NEON_WHITE)
 	title.add_theme_color_override("font_outline_color", THEME.NEON_CYAN)
 	title.add_theme_constant_override("outline_size", 8)
@@ -39,15 +40,15 @@ static func build_title_screen(root: Control, on_play: Callable) -> Dictionary:
 	var subtitle := Label.new()
 	subtitle.text = "// ENDLESS VIGIL //"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 24)
+	subtitle.add_theme_font_size_override("font_size", 16 if is_mobile else 24)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	vbox.add_child(subtitle)
 
 	var play_btn := Button.new()
 	play_btn.text = "PLAY"
-	play_btn.custom_minimum_size = Vector2(240, 80)
+	play_btn.custom_minimum_size = Vector2(180, 60) if is_mobile else Vector2(240, 80)
 	play_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	play_btn.add_theme_font_size_override("font_size", 28)
+	play_btn.add_theme_font_size_override("font_size", 20 if is_mobile else 28)
 	THEME.apply_to_button(play_btn, THEME.NEON_CYAN)
 	play_btn.pressed.connect(on_play)
 	vbox.add_child(play_btn)
@@ -56,6 +57,7 @@ static func build_title_screen(root: Control, on_play: Callable) -> Dictionary:
 
 
 static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
+	var is_mobile := root.get_viewport_rect().size.x < 800
 	var start_screen := PanelContainer.new()
 	start_screen.name = "StartScreen"
 	start_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -63,10 +65,10 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	root.add_child(start_screen)
 
 	var start_margin := MarginContainer.new()
-	start_margin.add_theme_constant_override("margin_left", 60)
-	start_margin.add_theme_constant_override("margin_top", 48)
-	start_margin.add_theme_constant_override("margin_right", 60)
-	start_margin.add_theme_constant_override("margin_bottom", 48)
+	start_margin.add_theme_constant_override("margin_left", 20 if is_mobile else 60)
+	start_margin.add_theme_constant_override("margin_top", 24 if is_mobile else 48)
+	start_margin.add_theme_constant_override("margin_right", 20 if is_mobile else 60)
+	start_margin.add_theme_constant_override("margin_bottom", 24 if is_mobile else 48)
 	start_screen.add_child(start_margin)
 
 	var start_vbox := VBoxContainer.new()
@@ -77,7 +79,7 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	var title := Label.new()
 	title.text = "PROTOCOL: SILENT NIGHT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 48)
+	title.add_theme_font_size_override("font_size", 24 if is_mobile else 48)
 	title.add_theme_color_override("font_color", THEME.NEON_WHITE)
 	title.add_theme_color_override("font_outline_color", THEME.NEON_CYAN)
 	title.add_theme_constant_override("outline_size", 6)
@@ -86,24 +88,29 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	var subtitle := Label.new()
 	subtitle.text = "// ENDLESS VIGIL //"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 20)
+	subtitle.add_theme_font_size_override("font_size", 14 if is_mobile else 20)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	start_vbox.add_child(subtitle)
 
 
-	var mid_row := HBoxContainer.new()
+	var screen_w := root.get_viewport_rect().size.x
+	var mid_row: BoxContainer
+	if is_mobile:
+		mid_row = VBoxContainer.new()
+	else:
+		mid_row = HBoxContainer.new()
 	mid_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	mid_row.add_theme_constant_override("separation", 40)
+	mid_row.add_theme_constant_override("separation", 20 if is_mobile else 40)
 	start_vbox.add_child(mid_row)
 
 	var scroll_container := ScrollContainer.new()
-	scroll_container.custom_minimum_size = Vector2(800, 400) if DisplayServer.screen_get_size().x >= 800 else Vector2(300, 300)
+	scroll_container.custom_minimum_size = Vector2(320, 260) if is_mobile else Vector2(800, 400)
 	mid_row.add_child(scroll_container)
 
 	var classes_box := GridContainer.new()
 	classes_box.name = "ClassCards"
-	var screen_w := DisplayServer.screen_get_size().x
-	classes_box.columns = 4 if screen_w >= 800 else 2
+	classes_box.columns = 2 if is_mobile else 4
+
 	classes_box.add_theme_constant_override("h_separation", 14)
 	classes_box.add_theme_constant_override("v_separation", 14)
 	scroll_container.add_child(classes_box)
@@ -126,7 +133,7 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 
 
 	var instruction := Label.new()
-	instruction.text = "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
+	instruction.text = "Drag to move, tap DASH. Desktop: WASD + Shift" if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
 	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	instruction.modulate = Color("dceefb")
