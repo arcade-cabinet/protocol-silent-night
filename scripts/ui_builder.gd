@@ -104,15 +104,14 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	start_vbox.add_child(mid_row)
 
 	var scroll_container := ScrollContainer.new()
-	scroll_container.custom_minimum_size = Vector2(320, 260) if is_mobile else Vector2(800, 400)
+	scroll_container.custom_minimum_size = Vector2(root.get_viewport_rect().size.x * 0.9, 260) if is_mobile else Vector2(800, 400)
+	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	mid_row.add_child(scroll_container)
 
-	var classes_box := GridContainer.new()
+	var classes_box := HBoxContainer.new()
 	classes_box.name = "ClassCards"
-	classes_box.columns = 2 if is_mobile else 4
-
-	classes_box.add_theme_constant_override("h_separation", 14)
-	classes_box.add_theme_constant_override("v_separation", 14)
+	classes_box.add_theme_constant_override("separation", 20)
 	scroll_container.add_child(classes_box)
 
 	var details_vbox := VBoxContainer.new()
