@@ -29,6 +29,7 @@ static func build_world(main: Node3D) -> void:
 	main.camera = camera
 
 	var directional_light := DirectionalLight3D.new()
+	directional_light.name = "DirLight"
 	directional_light.light_color = Color("d6ecff")
 	directional_light.light_energy = 1.25
 	directional_light.shadow_enabled = true

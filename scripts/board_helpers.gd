@@ -22,6 +22,7 @@ static func build_board(main: Node) -> void:
 
 static func return_to_menu(main: Node) -> void:
 	main.state = "menu"
+	if main.weather_director != null: main.weather_director.set_intensity(0, 10, 1)
 	main.move_velocity = Vector2.ZERO
 	main.input_move = Vector2.ZERO
 	main.touch_active = false
