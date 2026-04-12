@@ -86,10 +86,7 @@ func start_next_wave() -> void:
 		main.audio_mgr.play_wave_banner()
 		if main.current_wave.get("is_boss_wave", false):
 			main.audio_mgr.play_music("boss")
-	var santa_level: int = int(main.config.get("santa_unlock_level", 5))
-	if save_mgr != null and level >= santa_level and save_mgr.unlock("santa"):
-		main.ui_mgr.show_achievement("MECHA-SANTA UNLOCKED")
-		main._refresh_start_screen()
+
 	if save_mgr != null:
 		save_mgr.register_wave_reached(level)
 		save_mgr.register_level_reached(level)

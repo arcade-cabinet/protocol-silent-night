@@ -53,9 +53,11 @@ func test_boss_pressure_capped_below_one() -> void:
 
 
 func test_is_boss_wave_true_at_level_10() -> void:
-	# Level 10 always exceeds the 0.35 boss_pressure threshold
 	var wave := WaveFormula.generate_wave(42, 10)
 	assert_bool(bool(wave["is_boss_wave"])).is_true()
+
+	var wave20 := WaveFormula.generate_wave(42, 20)
+	assert_bool(bool(wave20["is_boss_wave"])).is_true()
 
 
 func test_is_boss_wave_false_at_level_1() -> void:

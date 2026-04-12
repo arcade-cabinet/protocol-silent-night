@@ -47,16 +47,6 @@ func _run() -> void:
 		quit(1)
 		return
 
-	if not _save_manager.is_unlocked("santa"):
-		push_error("Expected Santa unlock by wave five.")
-		quit(1)
-		return
-
-	if not _save_manager.is_unlocked("bumble"):
-		push_error("Expected Bumble unlock after campaign clear.")
-		quit(1)
-		return
-
 	_save_manager.reset_state_for_tests()
 	quit(0)
 

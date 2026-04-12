@@ -56,10 +56,22 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 	perma_check.add_theme_font_size_override("font_size", 18)
 	perma_check.add_theme_color_override("font_color", THEME.NEON_RED)
 
+	var endless_check := CheckButton.new()
+	endless_check.text = "ENDLESS MODE (NO BOSS CAP)"
+	endless_check.button_pressed = false
+	endless_check.add_theme_font_size_override("font_size", 18)
+	endless_check.add_theme_color_override("font_color", THEME.NEON_GOLD)
+
+	var toggles := HBoxContainer.new()
+	toggles.alignment = BoxContainer.ALIGNMENT_CENTER
+	toggles.add_theme_constant_override("separation", 40)
+	toggles.add_child(perma_check)
+	toggles.add_child(endless_check)
+
 	for i in range(TIERS.size()):
 		var tier: Dictionary = TIERS[i]
 		if i == 3:
-			vbox.add_child(perma_check)
+			vbox.add_child(toggles)
 		var btn := Button.new()
 		var tier_index := i + 1
 		var label := "%s\n%dx // %d rewraps\n%s" % [tier["name"], tier["mult"], tier["rewraps"], tier["desc"]]
@@ -71,9 +83,9 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 			btn.add_theme_stylebox_override("normal", THEME.make_hover_style(Color(tier["color"])))
 		btn.pressed.connect(func() -> void:
 			if tier_index == 6:
-				on_select.call(tier_index, true)
+				on_select.call(tier_index, true, endless_check.button_pressed)
 			else:
-				on_select.call(tier_index, perma_check.button_pressed))
+				on_select.call(tier_index, perma_check.button_pressed, endless_check.button_pressed))
 		grid.add_child(btn)
 
 

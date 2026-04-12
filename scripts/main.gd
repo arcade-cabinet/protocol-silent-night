@@ -176,7 +176,9 @@ func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
 func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(), _on_class_button_pressed, present_defs)
 func _return_to_menu() -> void: BOARD_HELPERS.return_to_menu(self)
 
-func _trigger_level_up() -> void: MAIN_HELPERS.trigger_level_up(self)
+func _trigger_level_up() -> void:
+	if player_node != null: particles.spawn_level_up_burst(fx_root, player_node.position)
+	MAIN_HELPERS.trigger_level_up(self)
 
 func _apply_upgrade(upgrade_id: String) -> void: MAIN_HELPERS.apply_upgrade(self, upgrade_id)
 
@@ -197,7 +199,7 @@ func _move_actor(n: Node3D, d: Vector3, s: float, dt: float, r: float) -> void:
 func _on_class_button_pressed(b: Button) -> void:
 	MAIN_HELPERS.on_class_button_pressed(self, b)
 
-func _on_difficulty_selected(tier: int, permadeath_flag: bool) -> void:
-	MAIN_HELPERS.on_difficulty_selected(self, tier, permadeath_flag)
+func _on_difficulty_selected(tier: int, permadeath_flag: bool, endless_flag: bool = false) -> void:
+	MAIN_HELPERS.on_difficulty_selected(self, tier, permadeath_flag, endless_flag)
 func _on_upgrade_button_pressed(b: Button) -> void: _apply_upgrade(String(b.get_meta("upgrade_id", "")))
 func _test_scale(key: String) -> float: return float(test_mode.get(key, 1.0))

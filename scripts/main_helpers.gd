@@ -63,7 +63,8 @@ static func on_character_selected(main: Node) -> void:
 		main.start_run(main.current_class_id)
 
 
-static func on_difficulty_selected(main: Node, tier: int, permadeath_flag: bool) -> void:
+static func on_difficulty_selected(main: Node, tier: int, permadeath_flag: bool, endless_flag: bool = false) -> void:
+	main.endless_mode = endless_flag
 	main.difficulty_tier = clampi(tier, 1, 6)
 	main.permadeath = permadeath_flag
 	if main.ui_mgr.difficulty_panel != null:

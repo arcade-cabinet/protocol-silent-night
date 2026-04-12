@@ -157,3 +157,20 @@ func clear() -> void:
 
 func active_count() -> int:
 	return _entries.size()
+
+func spawn_level_up_burst(root: Node3D, pos: Vector3) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(Time.get_ticks_usec())
+	
+	for i in range(25):
+		var angle := rng.randf() * TAU
+		var radius := rng.randf_range(1.5, 3.5)
+		var h := rng.randf_range(0.0, 4.0)
+		var offset := Vector3(cos(angle) * radius, h, sin(angle) * radius)
+		
+		var speed := rng.randf_range(4.0, 8.0)
+		var v := Vector3(0, speed, 0) + offset.normalized() * speed * 0.2
+		
+		var p := _spawn_node(root, pos + offset * 0.2, Color("#ffd700"), rng.randf_range(0.8, 1.6), 3.0)
+		_track(p, v, rng.randf_range(1.0, 2.5), p.scale.x, -5.0)
+

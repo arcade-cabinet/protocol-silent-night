@@ -66,9 +66,12 @@ func _init(main: Node3D) -> void:
 
 
 func set_intensity(wave: int, max_waves: int, difficulty: int) -> void:
-	# Wave 0 (menu) to Wave 10 (boss). Scales intensity from 0.0 to 1.0, influenced by difficulty.
-	_intensity = clampf(float(wave) / float(maxi(max_waves, 1)), 0.0, 1.0)
-	var diff_mult := 1.0 + float(difficulty - 1) * 0.1 # Difficulty 6 makes things 50% more intense visually
+	# Modulo 10 for endless cycles, scaling up each loop
+	var cycle: int = wave / 10
+	var local_wave: int = wave % 10 if wave % 10 != 0 else 10
+	if wave == 0: local_wave = 0; cycle = 0
+	_intensity = clampf(float(local_wave) / float(maxi(max_waves, 1)), 0.0, 1.0)
+	var diff_mult := 1.0 + float(difficulty - 1) * 0.1 + float(cycle) * 0.25 # Endless cycles increase intensity exponentially
 	
 	var boss_color := Color("4a1219")
 	var boss_ambient := Color("85363e")
