@@ -23,7 +23,14 @@ static func on_boss_killed(main: Node) -> void:
 		main.boss_ref["node"].queue_free()
 	main.boss_ref = {}
 	main.ui_mgr.boss_panel.visible = false
-	if main.current_wave_index + 1 >= 10:
+	var is_campaign_clear: bool = (main.current_wave_index + 1) >= 10
+	if is_campaign_clear and main.endless_mode:
+		# Massive bonus for clearing a boss in endless mode
+		gain_xp(main, 500)
+		gain_cookies(main, 100)
+		main.ui_mgr.show_message("BOSS DEFEATED. SURVIVAL CONTINUES.", 3.0, Color("ffd700"))
+		begin_wave_clear(main)
+	elif is_campaign_clear:
 		main.game_mgr.end_run(true)
 	else:
 		begin_wave_clear(main)
@@ -45,18 +52,9 @@ static func end_run(main: Node, win: bool) -> void:
 		if main.run_cookies > 0:
 			sm.add_cookies(main.run_cookies)
 		sm.set_coal(main.coal_queue)
-		var unlocked_any := false
 		if win:
 			sm.record_campaign_clear()
-			if sm.unlock("santa"):
-				ui.show_achievement("MECHA-SANTA UNLOCKED")
-				unlocked_any = true
-			if sm.unlock("bumble"):
-				ui.show_achievement("THE BUMBLE UNLOCKED")
-				unlocked_any = true
 		sm.resume_autosave()
-		if unlocked_any:
-			main._refresh_start_screen()
 	if bool(main.test_mode.get("skip_between_match", false)) or main.between_match == null:
 		helpers.finalize_end_screen(main, win)
 	else:

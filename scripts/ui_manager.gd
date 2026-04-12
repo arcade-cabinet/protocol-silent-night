@@ -1,12 +1,15 @@
 extends RefCounted
 
 const UI_BUILDER := preload("res://scripts/ui_builder.gd")
+const UI_MENUS := preload("res://scripts/ui_menus.gd")
 const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
 const COAL_SIDEBAR := preload("res://scripts/coal_sidebar_ui.gd")
 const UI_WIDGETS := preload("res://scripts/ui_widgets.gd")
 const PRESENT_SELECT := preload("res://scripts/present_select_ui.gd")
 
 var title_screen: PanelContainer
+var progress_screen: PanelContainer
+var progress_grid: GridContainer
 var hud_root: Container
 var start_screen: PanelContainer
 var level_screen: PanelContainer
@@ -15,21 +18,11 @@ var message_overlay: Label
 var achievement_overlay: Label
 var boss_panel: VBoxContainer
 var boss_bar: ProgressBar
-var hp_bar: ProgressBar
-var xp_bar: ProgressBar
-var hp_label: Label
-var level_label: Label
-var timer_label: Label
-var wave_label: Label
-var kills_label: Label
-var cookie_label: Label
-var end_title: Label
-var end_message: Label
-var end_waves: Label
-var dash_button: Button
-var pause_button: Button
-var joystick_base: ColorRect
-var joystick_knob: ColorRect
+var hp_bar: ProgressBar; var xp_bar: ProgressBar
+var hp_label: Label; var level_label: Label; var timer_label: Label; var wave_label: Label; var kills_label: Label; var cookie_label: Label
+var end_title: Label; var end_message: Label; var end_waves: Label
+var dash_button: Button; var pause_button: Button
+var joystick_base: ColorRect; var joystick_knob: ColorRect
 var start_classes_box: Container
 var select_button: Button
 var radar_canvas: Control
@@ -59,10 +52,14 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	ui.add_child(root)
 	root_control = root
 
-	var title := UI_BUILDER.build_title_screen(root, _on_play_pressed)
+	var title := UI_MENUS.build_title_screen(root, _on_play_pressed, _on_progress_pressed)
 	title_screen = title["screen"]
 
-	var start := UI_BUILDER.build_start_screen(root, _on_back_to_title_pressed)
+	var prog := preload("res://scripts/ui_progress.gd").build_progress_screen(root, _on_back_from_progress)
+	progress_screen = prog["panel"]
+	progress_grid = prog["grid"]
+
+	var start := UI_MENUS.build_start_screen(root, _on_back_to_title_pressed)
 	start_screen = start["screen"]
 	start_classes_box = start["classes_box"]
 	radar_canvas = start["radar_canvas"]
@@ -136,13 +133,14 @@ func refresh_coal_sidebar(coal_queue: Array) -> void:
 
 
 
-func _on_play_pressed() -> void:
-	title_screen.visible = false
-	start_screen.visible = true
+func _on_progress_pressed() -> void:
+	title_screen.visible = false; progress_screen.visible = true
+	var sm: Node = root_control.get_node_or_null("/root/SaveManager")
+	if sm != null: preload("res://scripts/ui_progress.gd").populate_progress(progress_grid, {"total_runs": sm.get_achievement("total_runs"), "campaign_clears": sm.get_achievement("campaign_clears"), "total_kills": sm.get_achievement("total_kills"), "best_wave": int(sm.state.get("best_wave", 0)), "best_level": int(sm.state.get("best_level", 0)), "unlocked_count": sm.state.get("unlocked", {}).size()})
 
-func _on_back_to_title_pressed() -> void:
-	start_screen.visible = false
-	title_screen.visible = true
+func _on_back_from_progress() -> void: progress_screen.visible = false; title_screen.visible = true
+func _on_play_pressed() -> void: title_screen.visible = false; start_screen.visible = true
+func _on_back_to_title_pressed() -> void: start_screen.visible = false; title_screen.visible = true
 
 func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
 	title_screen.visible = true

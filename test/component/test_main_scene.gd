@@ -111,7 +111,6 @@ func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
 	await get_tree().process_frame
 
 	assert_str(main.state).is_equal("win")
-	assert_bool(SaveManager.is_unlocked("bumble")).is_true()
 	main._return_to_menu()
 	await get_tree().process_frame
 	assert_str(main.state).is_equal("menu")

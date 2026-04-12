@@ -57,6 +57,7 @@ func _spawn_present_player(actor_root: Node3D, class_id: String, def: Dictionary
 		"hp": player_class_res.max_hp,
 		"max_hp": player_class_res.max_hp,
 		"last_shot": 0.0,
+		"aura_level": 0,
 		"aura_timer": 0.0,
 		"shake": 0.0
 	}
@@ -107,7 +108,7 @@ func auto_fire(delta: float, player_state: Dictionary, player_node: Node3D, on_c
 		var shot_dir := dir
 		if shot_count > 1:
 			shot_dir = dir.rotated(Vector3.UP, randf_range(-spread, spread) * 0.35)
-		on_spawn_projectile.call(player_node.global_position + Vector3(0, 0.4, 0), shot_dir, cls.bullet_speed, cls.damage * damage_scale, cls.bullet_scale, cls.pierce, cls.range_val, Color(cls.color))
+		on_spawn_projectile.call(player_node.global_position + Vector3(0, 0.4, 0), shot_dir, false, cls.damage * damage_scale, cls.pierce, cls.bullet_speed, cls.bullet_scale)
 	return true
 
 
