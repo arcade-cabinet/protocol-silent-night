@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.3.0...v0.4.0) (2026-04-12)
+
+
+### Features
+
+* **ui:** responsive swipeable character carousel and locked states ([#195](https://github.com/arcade-cabinet/protocol-silent-night/issues/195)) ([1ef42f4](https://github.com/arcade-cabinet/protocol-silent-night/commit/1ef42f45879af1b6c61e82134b7a804b4b0712c8))
+
+
+### Bug Fixes
+
+* **ci:** compress lines to resolve LOC violations ([#197](https://github.com/arcade-cabinet/protocol-silent-night/issues/197)) ([4d4343b](https://github.com/arcade-cabinet/protocol-silent-night/commit/4d4343b2ee0e882e42ee3853ac7c8c8f8736ebce))
+* **tests:** resolve test regressions from refactoring ([#190](https://github.com/arcade-cabinet/protocol-silent-night/issues/190)) ([f6ffeb8](https://github.com/arcade-cabinet/protocol-silent-night/commit/f6ffeb8a5099efdb2c8875bfd88bfe5ea13f6b6e))
+* **ui:** responsive viewport scaling and mobile touch emulation ([#193](https://github.com/arcade-cabinet/protocol-silent-night/issues/193)) ([57a85aa](https://github.com/arcade-cabinet/protocol-silent-night/commit/57a85aa7aac20fa68b8a927048b8c87e42d1eafa))
+
 ## [0.3.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.2.0...v0.3.0) (2026-04-11)
 
 
