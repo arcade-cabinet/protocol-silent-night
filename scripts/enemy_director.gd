@@ -10,17 +10,18 @@ var audio_mgr: RefCounted = null
 var _uid_counter: int = 0
 var _enemy_shadow_mesh: PlaneMesh = null
 var _boss_shadow_mesh: PlaneMesh = null
+var enemy_cap: int = 48
 
 
 func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	materials = material_factory
 	pixels = pixel_renderer
 
-
-const MAX_ENEMY_CAP := 48  # Mobile performance ceiling
+func configure_quality(profile: Dictionary) -> void:
+	enemy_cap = int(profile.get("enemy_cap", 48))
 
 func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1, speed_mult: float = 1.0, damage_mult: float = 1.0, override_position: Vector3 = Vector3.INF) -> void:
-	if enemies.size() >= MAX_ENEMY_CAP:
+	if enemies.size() >= enemy_cap:
 		return
 	if not enemy_defs.has(enemy_type):
 		push_error("spawn_enemy: unknown type '%s'" % enemy_type)

@@ -10,6 +10,8 @@
   The touch dash zone now uses the same safe-area-aware footprint as the visible dash button instead of a giant hardcoded bottom-right percentage block.
 - **Portrait visual capture lane**
   `test/e2e/capture_mobile_screenshots.gd` now captures `menu_mobile`, `gameplay_mobile`, `level_up_mobile`, `boss_mobile`, and `victory_mobile`.
+- **Runtime quality tiers**
+  Display preferences now drive live quality tiers for particles, damage-number density, enemy cap, screen shake, and minimap zoom instead of assuming one desktop budget.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -33,8 +35,6 @@
 
 ### Performance
 
-- **No device-tier quality scaling**
-  There is still no runtime quality tiering for particles, shadow quality, material complexity, or damage-number density by device class.
 - **No mobile frame budget instrumentation**
   Enemy cap exists, but there is no tracked GPU/CPU budget or frame-time telemetry on actual Android hardware.
 - **PBR fallback is still opportunistic**
@@ -52,5 +52,5 @@
 ## Highest-Value Next Moves
 
 1. Add a mobile-only composition pass for present select and level-up so those screens stop relying on scroll as the safety valve.
-2. Add runtime quality tiers tied to device class and expose them in settings.
+2. Add frame-budget instrumentation and expose the active quality tier in a player-readable way during real mobile sessions.
 3. Run `capture_mobile_screenshots.gd` as part of the visual verification ritual and commit the resulting reference set.

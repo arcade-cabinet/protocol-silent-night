@@ -4,6 +4,7 @@ extends RefCounted
 ## These are thin wrappers that access main's state directly.
 
 const COAL_ACTIVATOR := preload("res://scripts/coal_activator.gd")
+const RUNTIME_QUALITY := preload("res://scripts/runtime_quality.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 static var _coal_activator: RefCounted
 
@@ -151,13 +152,7 @@ static func end_run_audio(main: Node, win: bool) -> void:
 
 
 static func apply_reduced_motion(main: Node, sm: Node) -> void:
-	var reduced: bool = false
-	if sm != null and sm.has_method("get_preference"):
-		reduced = bool(sm.get_preference("reduced_motion", false))
-	if main.screen_shake != null: main.screen_shake.configure(reduced)
-	if main.flair_animator != null and main.flair_animator.has_method("configure"): main.flair_animator.configure(reduced)
-	if main.present_animator != null and main.present_animator.has_method("configure"): main.present_animator.configure(reduced)
-	if main.particles != null: main.particles.configure(reduced)
+	RUNTIME_QUALITY.apply_to_main(main, sm)
 
 
 static func show_gameplay_ui(main: Node) -> void:

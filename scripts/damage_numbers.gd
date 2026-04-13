@@ -10,10 +10,19 @@ const CRIT_PULSE_SCALE := 1.35
 const STACK_WINDOW := 0.4
 
 var _entries: Array = []
+var _max_entries: int = 24
+var _min_display_amount: float = 0.0
+
+
+func configure_quality(profile: Dictionary) -> void:
+	_max_entries = int(profile.get("damage_number_limit", 24))
+	_min_display_amount = float(profile.get("damage_number_floor", 0.0))
 
 
 func spawn(root: Node3D, world_position: Vector3, amount: float, color: Color, is_crit: bool = false, target_id: int = -1) -> void:
 	if root == null:
+		return
+	if not is_crit and amount < _min_display_amount:
 		return
 	# Stacking: if a recent entry targets the same id and is within the stack
 	# window, add to its accumulated value and bounce its scale.
@@ -36,6 +45,8 @@ func spawn(root: Node3D, world_position: Vector3, amount: float, color: Color, i
 				lbl.scale = Vector3.ONE * 1.25
 			_entries[i] = existing
 			return
+	if _entries.size() >= _max_entries:
+		return
 	var label := Label3D.new()
 	label.text = str(int(round(amount)))
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
