@@ -41,14 +41,17 @@ func test_settings_menu_quality_selector_persists_choice() -> void:
 	var save: SaveDouble = auto_free(SaveDouble.new())
 	var state: Dictionary = SETTINGS.build(root, null, save, Callable())
 	var option: OptionButton = state["quality_option"]
+	var quality_note: Label = state["quality_note"]
 	var low_idx: int = -1
 	for idx in range(option.item_count):
 		if String(option.get_item_metadata(idx)) == "low":
 			low_idx = idx
 			break
 	assert_int(low_idx).is_greater_equal(0)
+	assert_str(quality_note.text).contains("Auto resolved")
 	option.item_selected.emit(low_idx)
 	assert_str(String(save.get_preference("quality_profile", ""))).is_equal("low")
+	assert_str(quality_note.text).contains("Active quality")
 
 
 func test_particle_quality_caps_level_up_burst_density() -> void:

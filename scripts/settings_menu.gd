@@ -8,8 +8,6 @@ extends RefCounted
 const BUS_KEYS: Array = ["Master", "Music", "SFX", "Ambient", "UI"]
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 const RUNTIME_QUALITY := preload("res://scripts/runtime_quality.gd")
-
-
 static func build(root: Control, audio_mgr: RefCounted, save_manager: Node, on_close: Callable) -> Dictionary:
 	var size := VIEWPORT_PROFILE.center_panel_size(root.get_viewport_rect().size, Vector2(520.0, 540.0), Vector2(320.0, 360.0))
 	var panel := PanelContainer.new()
@@ -52,9 +50,7 @@ static func build(root: Control, audio_mgr: RefCounted, save_manager: Node, on_c
 		if on_close.is_valid(): on_close.call()
 	)
 	vbox.add_child(close)
-	return {"panel": panel, "sliders": sliders, "shake_cb": display_state["shake_cb"], "motion_cb": display_state["motion_cb"], "minimap_slider": display_state["minimap_slider"], "quality_option": display_state["quality_option"]}
-
-
+	return {"panel": panel, "sliders": sliders, "shake_cb": display_state["shake_cb"], "motion_cb": display_state["motion_cb"], "minimap_slider": display_state["minimap_slider"], "quality_option": display_state["quality_option"], "quality_note": display_state["quality_note"]}
 static func _build_audio_tab(tabs: TabContainer, audio_mgr: RefCounted, sm: Node) -> Dictionary:
 	var page := VBoxContainer.new()
 	page.name = "Audio"
@@ -64,15 +60,21 @@ static func _build_audio_tab(tabs: TabContainer, audio_mgr: RefCounted, sm: Node
 	for bus_name in BUS_KEYS:
 		sliders[bus_name] = _add_slider_row(page, bus_name, audio_mgr, sm)
 	return sliders
-
-
 static func _build_display_tab(tabs: TabContainer, root: Control, sm: Node) -> Dictionary:
 	var page := VBoxContainer.new()
 	page.name = "Display"
 	page.add_theme_constant_override("separation", 12)
 	tabs.add_child(page)
 	var quality := _add_quality_row(page, root, sm)
-	var apply_live := func() -> void: _apply_live_display_settings(root, sm)
+	var quality_note := Label.new()
+	quality_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	quality_note.add_theme_font_size_override("font_size", 12)
+	quality_note.modulate = Color(0.7, 0.85, 1.0, 0.85)
+	page.add_child(quality_note)
+	quality.item_selected.connect(func(_idx: int) -> void: quality_note.text = _quality_note_text(root, sm))
+	var apply_live := func() -> void:
+		_apply_live_display_settings(root, sm)
+		quality_note.text = _quality_note_text(root, sm)
 	var shake := _add_toggle(page, "Screen Shake", sm, "screen_shake", true, apply_live)
 	var motion := _add_toggle(page, "Reduced Motion", sm, "reduced_motion", false, apply_live)
 	var minimap_row := HBoxContainer.new()
@@ -94,9 +96,8 @@ static func _build_display_tab(tabs: TabContainer, root: Control, sm: Node) -> D
 	)
 	minimap_row.add_child(slider)
 	page.add_child(minimap_row)
-	return {"shake_cb": shake, "motion_cb": motion, "minimap_slider": slider, "quality_option": quality}
-
-
+	quality_note.text = _quality_note_text(root, sm)
+	return {"shake_cb": shake, "motion_cb": motion, "minimap_slider": slider, "quality_option": quality, "quality_note": quality_note}
 static func _build_gameplay_tab(tabs: TabContainer, sm: Node) -> void:
 	var page := VBoxContainer.new()
 	page.name = "Gameplay"
@@ -108,8 +109,6 @@ static func _build_gameplay_tab(tabs: TabContainer, sm: Node) -> void:
 	note.add_theme_font_size_override("font_size", 13)
 	note.modulate = Color(0.7, 0.85, 1.0, 0.85)
 	page.add_child(note)
-
-
 static func _add_slider_row(parent: Container, bus_name: String, audio_mgr: RefCounted, sm: Node) -> HSlider:
 	var row := HBoxContainer.new()
 	var label := Label.new()
@@ -130,8 +129,6 @@ static func _add_slider_row(parent: Container, bus_name: String, audio_mgr: RefC
 	row.add_child(slider)
 	parent.add_child(row)
 	return slider
-
-
 static func _add_quality_row(parent: Container, root: Control, sm: Node) -> OptionButton:
 	var row := HBoxContainer.new()
 	var label := Label.new()
@@ -159,8 +156,6 @@ static func _add_quality_row(parent: Container, root: Control, sm: Node) -> Opti
 	row.add_child(option)
 	parent.add_child(row)
 	return option
-
-
 static func _add_toggle(parent: Container, text: String, sm: Node, key: String, default: bool, on_changed: Callable = Callable()) -> CheckBox:
 	var cb := CheckBox.new()
 	cb.text = text
@@ -171,8 +166,6 @@ static func _add_toggle(parent: Container, text: String, sm: Node, key: String, 
 	)
 	parent.add_child(cb)
 	return cb
-
-
 static func _apply_live_display_settings(root: Control, sm: Node) -> void:
 	if root == null or root.get_tree() == null:
 		return
@@ -180,7 +173,12 @@ static func _apply_live_display_settings(root: Control, sm: Node) -> void:
 	if scene != null and scene.has_method("_save_manager"):
 		RUNTIME_QUALITY.apply_to_main(scene, sm)
 
-
+static func _quality_note_text(root: Control, sm: Node) -> String:
+	var viewport_size := root.get_viewport_rect().size if root != null else Vector2(1280.0, 720.0)
+	var selected := String(sm.get_preference("quality_profile", "auto")) if sm != null and sm.has_method("get_preference") else "auto"
+	var profile: Dictionary = RUNTIME_QUALITY.resolve(selected, viewport_size)
+	var lead := "Auto resolved" if selected == "auto" else "Active quality"
+	return "%s: %s · %d foes · %d FX" % [lead, String(profile["label"]), int(profile["enemy_cap"]), int(profile["particle_entry_cap"])]
 static func show(state: Dictionary) -> void:
 	if state.is_empty():
 		return
