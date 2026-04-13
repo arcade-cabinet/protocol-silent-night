@@ -1,5 +1,7 @@
 extends RefCounted
 
+const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
+
 var ui_mgr: RefCounted
 var audio_mgr: RefCounted = null
 
@@ -44,10 +46,14 @@ func trigger_level_up(state_setter: Callable, upgrade_defs: Array, test_mode: Di
 	var choices := upgrade_defs.duplicate(true)
 	choices.shuffle()
 	choices = choices.slice(0, 3)
+	var layout := VIEWPORT_PROFILE.for_viewport(ui_mgr.root_control.get_viewport_rect().size)
+	var is_mobile := bool(layout["is_mobile"])
+	var card_width := maxf(220.0, float(layout["safe_rect"].size.x) - float(layout["edge_pad"]) * 2.0)
 	for choice in choices:
 		var button := Button.new()
 		button.text = "%s\n%s" % [choice["name"], choice["description"]]
-		button.custom_minimum_size = Vector2(220, 160)
+		button.custom_minimum_size = Vector2(card_width, 112.0) if is_mobile else Vector2(220, 160)
+		button.add_theme_font_size_override("font_size", 16 if is_mobile else 18)
 		button.set_meta("upgrade_id", choice["id"])
 		button.pressed.connect(on_upgrade_button_pressed.bind(button))
 		ui_mgr.upgrade_box.add_child(button)

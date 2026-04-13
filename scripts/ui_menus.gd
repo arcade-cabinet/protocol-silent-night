@@ -118,17 +118,6 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	mid_row.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (1.0 if is_mobile else 1.8))))
 	start_vbox.add_child(mid_row)
 
-	var class_scroll := ScrollContainer.new()
-	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 280.0) if is_mobile else Vector2(minf(800.0, float(layout["safe_rect"].size.x) * 0.56), 400.0)
-	class_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	class_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	mid_row.add_child(class_scroll)
-
-	var classes_box := HBoxContainer.new()
-	classes_box.name = "ClassCards"
-	classes_box.add_theme_constant_override("separation", 20)
-	class_scroll.add_child(classes_box)
-
 	var details_vbox := VBoxContainer.new()
 	details_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	details_vbox.add_theme_constant_override("separation", 20)
@@ -143,6 +132,17 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	select_btn.disabled = true
 	THEME.apply_to_button(select_btn, THEME.NEON_CYAN)
 	details_vbox.add_child(select_btn)
+
+	var class_scroll := ScrollContainer.new()
+	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 320.0) if is_mobile else Vector2(minf(800.0, float(layout["safe_rect"].size.x) * 0.56), 400.0)
+	class_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if is_mobile else ScrollContainer.SCROLL_MODE_AUTO
+	class_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if is_mobile else ScrollContainer.SCROLL_MODE_DISABLED
+	mid_row.add_child(class_scroll)
+
+	var classes_box: Container = VBoxContainer.new() if is_mobile else HBoxContainer.new()
+	classes_box.name = "ClassCards"
+	classes_box.add_theme_constant_override("separation", 20)
+	class_scroll.add_child(classes_box)
 
 	var instruction := Label.new()
 	instruction.text = "Mobile: drag with your left thumb, tap DASH with your right. Desktop: WASD + Shift." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."

@@ -7,6 +7,7 @@ extends RefCounted
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
 const RADAR := preload("res://scripts/stat_radar_chart.gd")
 const PREVIEW_VP := preload("res://scripts/present_preview_viewport.gd")
+const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 ## Tracks the present ID currently previewed (for testability).
 static var _current_preview_id: String = ""
@@ -23,21 +24,23 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 		save_manager: Node, on_class_pressed: Callable,
 		radar_canvas: Control = null, audio_mgr: RefCounted = null) -> void:
 	var best_wave := 0
+	var layout := VIEWPORT_PROFILE.for_viewport(classes_box.get_viewport_rect().size)
+	var is_mobile := bool(layout["is_mobile"])
 	if save_manager != null:
 		best_wave = int(save_manager.state.get("best_wave", 0))
 	for present_id in present_defs.keys():
 		var def: Dictionary = present_defs[present_id]
 		var button := Button.new()
 		var unlocked := is_present_unlocked(def, best_wave, save_manager)
-		var label: String = "%s\n\n" % def.get("name", present_id)
+		var label: String = "%s\n" % def.get("name", present_id)
 		if unlocked:
 			label += def.get("tagline", "")
 		else:
 			label += "[ LOCKED ]\n%s" % unlock_label(def.get("unlock", ""))
 		button.text = label
-		button.custom_minimum_size = Vector2(240, 320)
+		button.custom_minimum_size = Vector2(maxf(220.0, float(layout["safe_rect"].size.x) - float(layout["edge_pad"]) * 2.0), 108.0) if is_mobile else Vector2(240, 320)
 		button.clip_text = true
-		button.add_theme_font_size_override("font_size", 14)
+		button.add_theme_font_size_override("font_size", 13 if is_mobile else 14)
 		var accent_hex: String = def.get("bow_color", "#55f7ff") if unlocked else "#404040"
 		THEME.apply_to_button(button, Color(accent_hex))
 		button.set_meta("class_id", present_id)
