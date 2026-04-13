@@ -6,14 +6,16 @@ extends RefCounted
 ## Gameplay: difficulty preference, permadeath default.
 
 const BUS_KEYS: Array = ["Master", "Music", "SFX", "Ambient", "UI"]
+const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 
 static func build(root: Control, audio_mgr: RefCounted, save_manager: Node, on_close: Callable) -> Dictionary:
+	var size := VIEWPORT_PROFILE.center_panel_size(root.get_viewport_rect().size, Vector2(520.0, 540.0), Vector2(320.0, 360.0))
 	var panel := PanelContainer.new()
 	panel.name = "SettingsMenu"
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	panel.custom_minimum_size = Vector2(520, 540)
-	panel.position = Vector2(-260, -270)
+	panel.custom_minimum_size = size
+	panel.position = -size * 0.5
 	panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.04, 0.05, 0.08, 0.96)
@@ -36,7 +38,7 @@ static func build(root: Control, audio_mgr: RefCounted, save_manager: Node, on_c
 	title.add_theme_color_override("font_color", Color("#69d6ff"))
 	vbox.add_child(title)
 	var tabs := TabContainer.new()
-	tabs.custom_minimum_size = Vector2(480, 380)
+	tabs.custom_minimum_size = size - Vector2(40.0, 150.0)
 	vbox.add_child(tabs)
 	var sliders: Dictionary = _build_audio_tab(tabs, audio_mgr, save_manager)
 	var display_state: Dictionary = _build_display_tab(tabs, save_manager)

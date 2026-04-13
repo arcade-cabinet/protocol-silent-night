@@ -4,13 +4,16 @@ extends RefCounted
 ## only — callers are responsible for setting get_tree().paused.
 ## process_mode = PROCESS_MODE_ALWAYS ensures buttons respond while paused.
 
+const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
+
 
 static func build(root: Control, on_resume: Callable, on_restart: Callable, on_settings: Callable, on_quit: Callable) -> Dictionary:
+	var size := VIEWPORT_PROFILE.center_panel_size(root.get_viewport_rect().size, Vector2(320.0, 400.0), Vector2(280.0, 320.0))
 	var panel := PanelContainer.new()
 	panel.name = "PauseMenu"
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	panel.custom_minimum_size = Vector2(320, 400)
-	panel.position = Vector2(-160, -200)
+	panel.custom_minimum_size = size
+	panel.position = -size * 0.5
 	panel.process_mode = Node.PROCESS_MODE_ALWAYS
 	panel.set_meta("focused_index", 0)
 	panel.gui_input.connect(func(event: InputEvent) -> void: _handle_input(panel, event))

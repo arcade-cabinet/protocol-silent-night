@@ -26,7 +26,7 @@ var joystick_base: ColorRect; var joystick_knob: ColorRect
 var start_classes_box: Container
 var select_button: Button
 var radar_canvas: Control
-var upgrade_box: HBoxContainer
+var upgrade_box: BoxContainer
 var difficulty_panel: PanelContainer
 var coal_sidebar_state: Dictionary = {}
 var _last_coal_signature: String = ""

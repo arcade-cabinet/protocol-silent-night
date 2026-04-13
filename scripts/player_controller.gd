@@ -2,10 +2,12 @@ extends RefCounted
 
 const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
 const GEAR_VISUALIZER := preload("res://scripts/gear_visualizer.gd")
+const PLAYER_TOUCH_INPUT := preload("res://scripts/player_touch_input.gd")
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
 var present_factory: RefCounted = PRESENT_FACTORY.new()
+var _touch_memory := {"move_index": -1, "dash_index": -1}
 
 
 func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
@@ -153,28 +155,4 @@ func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary) 
 		var joy := event as InputEventJoypadButton
 		if joy.button_index == JOY_BUTTON_RIGHT_SHOULDER or joy.button_index == JOY_BUTTON_A:
 			state["dash_pressed"] = joy.pressed
-	if event is InputEventScreenTouch:
-		var touch := event as InputEventScreenTouch
-		if touch.position.x > viewport_size.x * 0.7 and touch.position.y > viewport_size.y * 0.65:
-			state["dash_pressed"] = touch.pressed
-			return
-		state["touch_active"] = touch.pressed
-		if touch.pressed:
-			state["touch_origin"] = touch.position
-			state["touch_position"] = touch.position
-			state["joystick_base"] = touch.position
-			state["joystick_knob"] = touch.position
-			state["show_joystick"] = true
-		else:
-			state["input_move"] = Vector2.ZERO
-			state["hide_joystick"] = true
-	if event is InputEventScreenDrag and bool(state.get("touch_active", false)):
-		var drag := event as InputEventScreenDrag
-		state["touch_position"] = drag.position
-		var origin: Vector2 = state["touch_origin"]
-		var delta_vec: Vector2 = drag.position - origin
-		var move: Vector2 = delta_vec.limit_length(72.0) / 72.0
-		state["input_move"] = move
-		state["joystick_base"] = origin
-		state["joystick_knob"] = origin + move * 52.0
-		state["show_joystick"] = true
+	PLAYER_TOUCH_INPUT.handle(event, viewport_size, state, _touch_memory)
