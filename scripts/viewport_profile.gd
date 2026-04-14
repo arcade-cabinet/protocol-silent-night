@@ -3,9 +3,9 @@ extends RefCounted
 const MOBILE_BREAKPOINT := 920.0
 
 
-static func for_viewport(viewport_size: Vector2) -> Dictionary:
+static func for_viewport(viewport_size: Vector2, safe_area_override: Rect2 = Rect2()) -> Dictionary:
 	var viewport_rect := Rect2(Vector2.ZERO, viewport_size)
-	var safe_rect := _resolve_safe_rect(viewport_rect)
+	var safe_rect := _resolve_safe_rect(viewport_rect, safe_area_override)
 	var shortest := minf(viewport_size.x, viewport_size.y)
 	var portrait := viewport_size.y > viewport_size.x * 1.02
 	var mobile := OS.has_feature("mobile") or portrait or shortest <= MOBILE_BREAKPOINT
@@ -33,8 +33,8 @@ static func for_viewport(viewport_size: Vector2) -> Dictionary:
 	}
 
 
-static func dash_rect(viewport_size: Vector2) -> Rect2:
-	var profile := for_viewport(viewport_size)
+static func dash_rect(viewport_size: Vector2, safe_area_override: Rect2 = Rect2()) -> Rect2:
+	var profile := for_viewport(viewport_size, safe_area_override)
 	var size := float(profile["dash_button_size"])
 	var inset := float(profile["action_inset"])
 	var safe_rect: Rect2 = profile["safe_rect"]
@@ -44,8 +44,8 @@ static func dash_rect(viewport_size: Vector2) -> Rect2:
 	)
 
 
-static func center_panel_size(viewport_size: Vector2, desired: Vector2, min_size: Vector2 = Vector2(280.0, 280.0)) -> Vector2:
-	var profile := for_viewport(viewport_size)
+static func center_panel_size(viewport_size: Vector2, desired: Vector2, min_size: Vector2 = Vector2(280.0, 280.0), safe_area_override: Rect2 = Rect2()) -> Vector2:
+	var profile := for_viewport(viewport_size, safe_area_override)
 	var safe_rect: Rect2 = profile["safe_rect"]
 	var edge_pad := float(profile["edge_pad"])
 	var max_size := Vector2(
@@ -58,8 +58,8 @@ static func center_panel_size(viewport_size: Vector2, desired: Vector2, min_size
 	)
 
 
-static func _resolve_safe_rect(viewport_rect: Rect2) -> Rect2:
-	var safe_area: Rect2 = Rect2(DisplayServer.get_display_safe_area())
+static func _resolve_safe_rect(viewport_rect: Rect2, safe_area_override: Rect2 = Rect2()) -> Rect2:
+	var safe_area: Rect2 = safe_area_override if safe_area_override.size != Vector2.ZERO else Rect2(DisplayServer.get_display_safe_area())
 	if safe_area.size.x <= 0.0 or safe_area.size.y <= 0.0:
 		return viewport_rect
 	safe_area = safe_area.intersection(viewport_rect)

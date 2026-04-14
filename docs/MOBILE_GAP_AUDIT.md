@@ -24,15 +24,14 @@
   The present-select screen now spends portrait height on the active loadout rail instead of nesting the whole screen inside an outer mobile scroll wrapper.
 - **Phone-native difficulty handoff**
   Difficulty now comes up as a present-aware mobile decision rail instead of a generic full-screen desktop grid.
+- **Safe-area regression matrix**
+  Viewport profile tests now cover portrait notch/home-indicator and landscape notch overrides instead of assuming one default safe area.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
 ### Controls
 
 ### UI / Readability
-
-- **No explicit notch/home-indicator regression tests**
-  Safe-area code exists now, but there is no automated matrix across notch/no-notch landscape and portrait targets.
 
 ### Performance
 
@@ -52,6 +51,6 @@
 
 ## Highest-Value Next Moves
 
-1. Add notch/home-indicator regression coverage across portrait safe-area variants instead of relying on one iPhone-sized capture.
-2. Turn the portrait screenshot ritual into an assertable baseline workflow instead of an additive artifact dump.
-3. Add a real touch-flow display-session e2e so the whole mobile deploy path is exercised without hand inspection.
+1. Turn the portrait screenshot ritual into an assertable baseline workflow instead of an additive artifact dump.
+2. Add a real touch-flow display-session e2e so the whole mobile deploy path is exercised without hand inspection.
+3. Run Android hardware soak with frame-budget notes instead of extrapolating from desktop portrait captures.
