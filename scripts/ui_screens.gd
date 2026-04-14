@@ -133,27 +133,56 @@ static func build_level_screen(root: Control) -> Dictionary:
 	level_margin.add_theme_constant_override("margin_bottom", int(round(float(layout["safe_bottom"]) + edge_pad)))
 	level_screen.add_child(level_margin)
 
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	level_margin.add_child(scroll)
-
 	var level_vbox := VBoxContainer.new()
 	level_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	level_vbox.add_theme_constant_override("separation", 18)
-	scroll.add_child(level_vbox)
+	level_vbox.add_theme_constant_override("separation", 12 if is_mobile else 18)
+	var decision_shell: PanelContainer = null
+	if is_mobile:
+		var mobile_frame := VBoxContainer.new()
+		mobile_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		level_margin.add_child(mobile_frame)
+		var top_spacer := Control.new()
+		top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		mobile_frame.add_child(top_spacer)
+		decision_shell = PanelContainer.new()
+		decision_shell.custom_minimum_size = Vector2(maxf(260.0, float(layout["safe_rect"].size.x) - edge_pad * 2.0), 0.0)
+		decision_shell.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		THEME.apply_to_panel(decision_shell, Color("7aff8a"))
+		mobile_frame.add_child(decision_shell)
+		var shell_margin := MarginContainer.new()
+		shell_margin.add_theme_constant_override("margin_left", 4)
+		shell_margin.add_theme_constant_override("margin_top", 6)
+		shell_margin.add_theme_constant_override("margin_right", 4)
+		shell_margin.add_theme_constant_override("margin_bottom", 6)
+		decision_shell.add_child(shell_margin)
+		shell_margin.add_child(level_vbox)
+	else:
+		var scroll := ScrollContainer.new()
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		level_margin.add_child(scroll)
+		scroll.add_child(level_vbox)
 
 	var level_title := Label.new()
 	level_title.name = "LevelTitle"
 	level_title.text = "Festive Upgrade"
 	level_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	level_title.modulate = Color("7aff8a")
-	level_title.add_theme_font_size_override("font_size", 30 if is_mobile else 38)
+	level_title.add_theme_font_size_override("font_size", 24 if is_mobile else 38)
 	level_vbox.add_child(level_title)
+
+	var level_hint := Label.new()
+	level_hint.name = "LevelHint"
+	level_hint.text = "Pick one field patch and get back on the board."
+	level_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	level_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	level_hint.add_theme_font_size_override("font_size", 13 if is_mobile else 16)
+	level_hint.add_theme_color_override("font_color", Color("dceefb"))
+	level_vbox.add_child(level_hint)
 
 	var upgrade_box: BoxContainer = VBoxContainer.new() if is_mobile else HBoxContainer.new()
 	upgrade_box.name = "UpgradeCards"
 	upgrade_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	upgrade_box.add_theme_constant_override("separation", 18)
+	upgrade_box.add_theme_constant_override("separation", 12 if is_mobile else 18)
 	level_vbox.add_child(upgrade_box)
-	return {"level_screen": level_screen, "upgrade_box": upgrade_box}
+	return {"level_screen": level_screen, "upgrade_box": upgrade_box, "decision_shell": decision_shell, "level_hint": level_hint}

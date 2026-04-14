@@ -1,5 +1,6 @@
 extends RefCounted
 
+const THEME := preload("res://scripts/holidaypunk_theme.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 var ui_mgr: RefCounted
@@ -48,13 +49,17 @@ func trigger_level_up(state_setter: Callable, upgrade_defs: Array, test_mode: Di
 	choices = choices.slice(0, 3)
 	var layout := VIEWPORT_PROFILE.for_viewport(ui_mgr.root_control.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
-	var card_width := maxf(220.0, float(layout["safe_rect"].size.x) - float(layout["edge_pad"]) * 2.0)
+	var card_width := maxf(220.0, float(layout["safe_rect"].size.x) - float(layout["edge_pad"]) * (2.6 if is_mobile else 2.0))
 	for choice in choices:
 		var button := Button.new()
-		button.text = "%s\n%s" % [choice["name"], choice["description"]]
-		button.custom_minimum_size = Vector2(card_width, 112.0) if is_mobile else Vector2(220, 160)
-		button.add_theme_font_size_override("font_size", 16 if is_mobile else 18)
+		button.text = _upgrade_label(choice, is_mobile)
+		button.custom_minimum_size = Vector2(card_width, 136.0) if is_mobile else Vector2(220, 160)
+		button.add_theme_font_size_override("font_size", 15 if is_mobile else 18)
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT if is_mobile else HORIZONTAL_ALIGNMENT_CENTER
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.clip_text = true
 		button.set_meta("upgrade_id", choice["id"])
+		THEME.apply_to_button(button, _upgrade_accent(String(choice["id"])))
 		button.pressed.connect(on_upgrade_button_pressed.bind(button))
 		ui_mgr.upgrade_box.add_child(button)
 	if bool(test_mode.get("auto_choose_upgrade", false)) and choices.size() > 0:
@@ -92,3 +97,20 @@ func apply_upgrade(upgrade_id: String, player_state: Dictionary) -> void:
 func record_kill() -> void:
 	kills += 1
 	ui_mgr.kills_label.text = str(kills)
+
+
+static func _upgrade_label(choice: Dictionary, is_mobile: bool) -> String:
+	if not is_mobile:
+		return "%s\n%s" % [choice["name"], choice["description"]]
+	return "%s\n%s\nTAP TO INSTALL" % [choice["name"], choice["description"]]
+
+
+static func _upgrade_accent(upgrade_id: String) -> Color:
+	match upgrade_id:
+		"damage": return Color("ff617e")
+		"fire_rate": return Color("69d6ff")
+		"health": return Color("7aff8a")
+		"speed": return Color("55f7ff")
+		"range": return Color("ffd700")
+		"aura": return Color("d88bff")
+		_: return THEME.NEON_CYAN

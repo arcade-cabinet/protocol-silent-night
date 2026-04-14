@@ -9,7 +9,7 @@
 - **Consistent action geometry**
   The touch dash zone now uses the same safe-area-aware footprint as the visible dash button instead of a giant hardcoded bottom-right percentage block.
 - **Portrait visual capture lane**
-  `test/e2e/capture_mobile_screenshots.gd` now captures `menu_mobile`, `gameplay_mobile`, `level_up_mobile`, `boss_mobile`, and `victory_mobile`.
+  `test/e2e/capture_mobile_screenshots.gd` now captures `menu_mobile`, `present_select_mobile`, `gameplay_mobile`, `level_up_mobile`, `boss_mobile`, and `victory_mobile`.
 - **Runtime quality tiers**
   Display preferences now drive live quality tiers for particles, damage-number density, enemy cap, screen shake, and minimap zoom instead of assuming one desktop budget.
 - **Touch calibration/settings surface**
@@ -18,6 +18,8 @@
   Mobile runs now surface the active auto-fire lock with an on-board reticle, tether line, and label so target choice is legible during crowded waves.
 - **Per-present touch doctrine**
   The active present now nudges joystick reach, dash footprint, dash verb, and lock language through a live touch doctrine instead of treating every loadout like the same operator.
+- **Phone-native level-up sheet**
+  The level-up overlay now rises as a centered mobile decision sheet with authored upgrade cards instead of pinning a desktop-style stack to the top edge.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -27,8 +29,6 @@
 
 - **Start/loadout flow still scrolls rather than re-composing**
   The responsive shell is safer now, but the present select and difficulty flows still solve tight screens partly with scrolling instead of a cleaner phone-native composition.
-- **Level-up cards are stacked, not re-authored**
-  Mobile can read and use them, but the card composition is still the desktop card system adapted down rather than designed for thumb-speed decision making.
 - **No explicit notch/home-indicator regression tests**
   Safe-area code exists now, but there is no automated matrix across notch/no-notch landscape and portrait targets.
 
@@ -50,6 +50,6 @@
 
 ## Highest-Value Next Moves
 
-1. Add a mobile-only composition pass for present select and level-up so those screens stop relying on scroll as the safety valve.
-2. Recompose present select and level-up into truly phone-native decision surfaces instead of scroll-safe desktop adaptations.
+1. Recompose present select into a truly phone-native loadout surface instead of a scroll-safe desktop adaptation.
+2. Recompose the difficulty flow so it reads like a fast phone decision instead of a safe desktop panel.
 3. Add notch/home-indicator viewport regression coverage and turn `capture_mobile_screenshots.gd` into a recurring visual verification ritual.

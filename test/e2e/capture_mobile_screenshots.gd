@@ -23,6 +23,12 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/menu_mobile.png" % _shot_dir)
+	_main.ui_mgr._on_play_pressed()
+	await process_frame
+	await process_frame
+	await _main.capture_screenshot("%s/present_select_mobile.png" % _shot_dir)
+	_main.ui_mgr._on_back_to_title_pressed()
+	await process_frame
 	await _capture_touch_settings()
 
 	_main.configure_test_mode({
@@ -44,6 +50,9 @@ func _run() -> void:
 		"auto_choose_upgrade": false,
 	})
 	_main.debug_force_level_up()
+	for _i in range(8):
+		await process_frame
+	_main.ui_mgr.show_message("", 0.0)
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/level_up_mobile.png" % _shot_dir)
