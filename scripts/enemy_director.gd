@@ -155,6 +155,12 @@ func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_n
 	# Boss is now handled by BossPhases in game_manager
 
 
+func refresh_threat_language(enemies: Array, boss_ref: Dictionary, boss_phase: int) -> void:
+	for enemy in enemies:
+		STAGE_MARKS.update_enemy_markers(enemy)
+	STAGE_MARKS.update_boss_markers(boss_ref, boss_phase)
+
+
 func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, range_limit: float) -> Dictionary:
 	var best: Dictionary = {}
 	var best_distance := INF

@@ -70,6 +70,7 @@ func tick_playing(delta: float) -> void:
 func _tick_combat_systems(delta: float) -> void:
 	main.enemies_ai.update_enemies(delta, main.enemies, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(main, "_damage_player"), Callable(self, "spawn_projectile_hostile"), main._test_scale("boss_attack_scale"), Callable(self, "_enemy_telegraph"))
 	main.boss_phases.update_boss(delta, main.boss_ref, main.player_node, Callable(main, "_move_actor"), Callable(self, "spawn_projectile_hostile"), Callable(main, "_damage_player"), main.ui_mgr.show_message, Callable(self, "_boss_summon_minion"), main.fx_root, main._test_scale("boss_attack_scale"), Callable(self, "_on_boss_phase_changed"))
+	main.enemies_ai.refresh_threat_language(main.enemies, main.boss_ref, main.boss_phases.current_phase)
 	main.combat.update_projectiles(delta, main.projectiles, main.enemies, main.boss_ref, main.player_node, main.obstacle_colliders, main.ui_mgr.boss_bar, main.ui_mgr.boss_panel, Callable(main, "_damage_player"), Callable(main, "_kill_enemy"), Callable(self, "on_boss_killed"), main.fx_root, main.vfx, main.dmg_numbers)
 	main.combat.update_pickups(delta, main.pickups, main.player_node, main.config, main.test_mode, Callable(self, "gain_xp"), main.fx_root, main.particles, Callable(self, "gain_cookies"), Callable(self, "gain_scroll"))
 	main.combat.update_vfx(delta, main.vfx)
