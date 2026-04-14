@@ -34,6 +34,7 @@ static func kill_enemy(main: Node, enemy_index: int) -> void:
 	main.combat.spawn_hit_fx(main.fx_root, main.vfx, enemy["node"].position, enemy["color"])
 	main.particles.spawn_death_burst(main.fx_root, enemy["node"].position,
 		enemy["color"], float(enemy["node"].scale.x))
+	preload("res://scripts/enemy_reactivity.gd").spawn_death_echo(main.fx_root, main.vfx, enemy)
 	enemy["node"].queue_free()
 	main.enemies.remove_at(enemy_index)
 	main.progression.record_kill()

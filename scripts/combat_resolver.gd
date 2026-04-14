@@ -1,6 +1,7 @@
 extends RefCounted
 
 const PROJECTILE_VISUALS := preload("res://scripts/projectile_visuals.gd")
+const ENEMY_REACTIVITY := preload("res://scripts/enemy_reactivity.gd")
 
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
@@ -46,6 +47,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 				if projectile["node"].position.distance_to(enemy["node"].position) < 0.9 * float(enemy["node"].scale.x):
 					var is_crit: bool = randf() < float(projectile.get("crit_chance", 0.0))
 					var hit_damage: float = float(projectile["damage"]) * (2.0 if is_crit else 1.0)
+					ENEMY_REACTIVITY.register_hit(enemy, projectile["direction"], hit_damage / maxf(1.0, float(enemy.get("max_hp", 1.0))))
 					enemy["hp"] -= hit_damage
 					spawn_hit_fx(fx_root, vfx, enemy["node"].position, enemy["color"])
 					if audio_mgr != null:
@@ -63,6 +65,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 			if not remove and boss_alive and projectile["node"].position.distance_to(boss_ref["node"].position) < 1.8:
 				var is_crit: bool = randf() < float(projectile.get("crit_chance", 0.0))
 				var hit_damage := float(projectile["damage"]) * (2.0 if is_crit else 1.0)
+				ENEMY_REACTIVITY.register_hit(boss_ref, projectile["direction"], hit_damage / maxf(1.0, float(boss_ref.get("max_hp", 1.0))))
 				boss_ref["hp"] -= hit_damage
 				boss_bar.value = boss_ref["hp"]
 				spawn_hit_fx(fx_root, vfx, boss_ref["node"].position, boss_ref["color"])
@@ -117,7 +120,12 @@ func update_vfx(delta: float, vfx: Array) -> void:
 	for index in range(vfx.size() - 1, -1, -1):
 		var fx: Dictionary = vfx[index]
 		fx["life"] -= delta
-		fx["node"].scale = fx["node"].scale.lerp(Vector3.ZERO, delta * 8.0)
+		if String(fx.get("mode", "")) == "collapse":
+			fx["node"].position += Vector3(0, -0.7, 0) * delta
+			fx["node"].rotation_degrees.z += float(fx.get("tilt_sign", 1.0)) * delta * 180.0
+			fx["node"].scale = fx["node"].scale.lerp(Vector3(0.65, 0.12, 0.65), delta * 8.0)
+		else:
+			fx["node"].scale = fx["node"].scale.lerp(Vector3.ZERO, delta * 8.0)
 		if fx["life"] <= 0.0:
 			fx["node"].queue_free()
 			vfx.remove_at(index)

@@ -21,6 +21,7 @@ static func on_boss_killed(main: Node) -> void:
 		return
 	main.boss_phases.clear()
 	if is_instance_valid(main.boss_ref.get("node")):
+		preload("res://scripts/enemy_reactivity.gd").spawn_death_echo(main.fx_root, main.vfx, main.boss_ref)
 		main.boss_ref["node"].queue_free()
 	main.boss_ref = {}
 	main.ui_mgr.boss_panel.visible = false
