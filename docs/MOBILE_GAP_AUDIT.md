@@ -34,6 +34,8 @@
   A portrait windowed e2e now walks through deploy flow, difficulty handoff, live left-thumb movement drag, and concurrent dash touch, then runs in the CI display lane instead of relying on manual handheld inspection.
 - **Doctrine + handedness touch proof**
   The display lane now also proves a left-handed `Sightline` run, including left-edge dash geometry, the `STEP` dash verb, and the doctrine-specific lock callout instead of only validating the default breach-style striker lane.
+- **Doctrine-specific portrait visual baselines**
+  The mobile screenshot guard now includes left-handed `Sightline` and unlock-gated `Sweep` gameplay frames, so doctrine-specific action geometry and lock/readability states are visually pinned instead of only behavior-tested.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -56,5 +58,5 @@
 ## Highest-Value Next Moves
 
 1. Run Android hardware soak with frame-budget notes instead of extrapolating from desktop portrait captures.
-2. Add operator-specific touch/readability soak for the remaining doctrines beyond the current breach and sightline lanes.
-3. Turn the display-session touch e2e into a wider matrix that covers unlock-gated presents, not just default-available runs.
+2. Add operator-specific touch/readability soak for the remaining doctrine lanes beyond the current breach, sightline, and sweep coverage.
+3. Turn the display-session touch e2e into a wider matrix that covers more unlock-gated presents instead of stopping at one unlock-backed sweep path.

@@ -7,7 +7,6 @@ var _shot_dir := "res://.artifacts/screenshots"
 var _save_manager: Node = null
 var _capture_seed := 1225
 
-
 func _initialize() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	DisplayServer.window_set_size(Vector2i(390, 844))
@@ -18,7 +17,6 @@ func _initialize() -> void:
 	_main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(_main)
 	call_deferred("_run")
-
 
 func _run() -> void:
 	await process_frame
@@ -40,6 +38,9 @@ func _run() -> void:
 	await _step_simulation(12)
 	await _capture_mobile("gameplay_mobile.png")
 	await _capture_mobile("target_hint_mobile.png")
+	await _capture_doctrine_mobile("sightline_left_mobile.png", "p_02", "left")
+	await _capture_doctrine_mobile("sweep_mobile.png", "p_06", "right", 3)
+	await _restore_default_mobile_run()
 
 	_set_capture_test_mode({
 		"invincible": true,
@@ -110,6 +111,34 @@ func _set_capture_test_mode(overrides: Dictionary = {}) -> void:
 		options[key] = overrides[key]
 	_main.configure_test_mode(options)
 
+func _capture_doctrine_mobile(file_name: String, class_id: String, handedness: String, unlock_wave: int = 0) -> void:
+	if unlock_wave > 0:
+		_save_manager.register_wave_reached(unlock_wave)
+	_save_manager.set_preference("touch_handedness", handedness)
+	_set_capture_test_mode({
+		"invincible": true,
+		"auto_collect": true,
+		"auto_choose_upgrade": true,
+	})
+	_main.start_run(class_id)
+	_main.debug_spawn_boss()
+	await _step_until_target_hint()
+	await _capture_mobile(file_name)
+
+func _restore_default_mobile_run() -> void:
+	_save_manager.reset_state_for_tests()
+	_save_manager.load_state()
+	_save_manager.set_preference("touch_handedness", "right")
+	_set_capture_test_mode({
+		"invincible": true,
+		"auto_collect": true,
+		"auto_choose_upgrade": true,
+		"player_damage_scale": 0.35,
+		"player_fire_scale": 3.0,
+	})
+	_main.start_run("holly_striker")
+	await _step_until_enemy_spawn()
+	await _step_simulation(12)
 
 func _step_until_enemy_spawn(max_steps: int = 80, delta: float = 0.1) -> void:
 	for _i in range(max_steps):
@@ -117,6 +146,12 @@ func _step_until_enemy_spawn(max_steps: int = 80, delta: float = 0.1) -> void:
 		if _main.enemies.size() > 0:
 			return
 
+func _step_until_target_hint(max_steps: int = 20, delta: float = 0.1) -> void:
+	var label: Label = _main.ui_mgr.widgets.get("target_hint", {}).get("label")
+	for _i in range(max_steps):
+		_main.debug_tick(delta)
+		if label != null and label.visible:
+			return
 
 func _step_simulation(steps: int, delta: float = 0.1) -> void:
 	for _i in range(steps):

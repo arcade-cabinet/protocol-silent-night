@@ -10,6 +10,8 @@ const FILES := [
 	"settings_mobile.png",
 	"gameplay_mobile.png",
 	"target_hint_mobile.png",
+	"sightline_left_mobile.png",
+	"sweep_mobile.png",
 	"level_up_mobile.png",
 	"boss_mobile.png",
 	"victory_mobile.png",
