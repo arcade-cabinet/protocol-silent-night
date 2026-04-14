@@ -54,6 +54,17 @@ func test_boss_panel_shows_when_boss_spawns() -> void:
 	assert_dict(main.boss_ref).is_not_empty()
 
 
+func test_start_run_clears_stale_boss_panel() -> void:
+	var main = auto_free(_scene.instantiate())
+	add_child(main); await get_tree().process_frame
+	main.start_run("holly_striker"); await get_tree().process_frame
+	main.debug_spawn_boss(); await get_tree().process_frame
+	assert_bool(main.boss_panel.visible).is_true()
+	main.start_run("holly_striker"); await get_tree().process_frame
+	assert_bool(main.boss_panel.visible).is_false()
+	assert_dict(main.boss_ref).is_empty()
+
+
 func test_board_query_matches_continuous_arena_boundary() -> void:
 	var main = auto_free(_scene.instantiate())
 	add_child(main)

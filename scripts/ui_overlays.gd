@@ -30,24 +30,28 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 	var shell_wrap := VBoxContainer.new()
 	shell_wrap.alignment = BoxContainer.ALIGNMENT_CENTER
 	shell_wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	shell_wrap.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.add_child(shell_wrap)
+	var top_spacer := Control.new()
+	top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	shell_wrap.add_child(top_spacer)
 	var report_shell := PanelContainer.new()
-	report_shell.custom_minimum_size = Vector2(maxf(320.0, float(layout["safe_rect"].size.x) * 0.58), 0.0)
+	report_shell.custom_minimum_size = Vector2(maxf(360.0, float(layout["safe_rect"].size.x) * 0.7), 220.0 if is_mobile else 250.0)
 	report_shell.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	THEME.apply_to_panel(report_shell, THEME.NEON_GOLD)
+	report_shell.add_theme_stylebox_override("panel", THEME.make_panel_style(THEME.NEON_GOLD, Color(0.11, 0.04, 0.05, 0.96)))
 	shell_wrap.add_child(report_shell)
 	var shell_margin := MarginContainer.new()
-	shell_margin.add_theme_constant_override("margin_left", 12)
-	shell_margin.add_theme_constant_override("margin_top", 14)
-	shell_margin.add_theme_constant_override("margin_right", 12)
-	shell_margin.add_theme_constant_override("margin_bottom", 14)
+	shell_margin.add_theme_constant_override("margin_left", 14 if is_mobile else 18)
+	shell_margin.add_theme_constant_override("margin_top", 16 if is_mobile else 20)
+	shell_margin.add_theme_constant_override("margin_right", 14 if is_mobile else 18)
+	shell_margin.add_theme_constant_override("margin_bottom", 16 if is_mobile else 20)
 	report_shell.add_child(shell_margin)
 	var end_vbox := VBoxContainer.new()
 	end_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	end_vbox.add_theme_constant_override("separation", 16)
+	end_vbox.add_theme_constant_override("separation", 14 if is_mobile else 16)
 	shell_margin.add_child(end_vbox)
 	var kicker := Label.new()
-	kicker.text = "AFTERMATH REPORT"
+	kicker.text = "AFTERMATH REPORT // TREE LOT SIGNAL"
 	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	kicker.add_theme_font_size_override("font_size", 12 if is_mobile else 14)
 	kicker.add_theme_color_override("font_color", THEME.NEON_GOLD)
@@ -56,23 +60,27 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 	var end_title := Label.new()
 	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	end_title.add_theme_font_size_override("font_size", 32 if is_mobile else 42)
+	end_title.add_theme_font_size_override("font_size", 34 if is_mobile else 46)
 	end_title.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	end_title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.88))
+	end_title.add_theme_constant_override("outline_size", 4)
 	end_vbox.add_child(end_title)
 
 	var end_message := Label.new()
 	end_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	end_message.add_theme_font_size_override("font_size", 18 if is_mobile else 20)
+	end_message.add_theme_color_override("font_color", Color("edf7ff"))
 	end_vbox.add_child(end_message)
 
 	var end_waves := Label.new()
 	end_waves.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_waves.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	end_waves.add_theme_font_size_override("font_size", 16 if is_mobile else 18)
+	end_waves.add_theme_font_size_override("font_size", 15 if is_mobile else 18)
+	end_waves.add_theme_color_override("font_color", THEME.NEON_CYAN)
 	end_vbox.add_child(end_waves)
 	var end_sting := Label.new()
-	end_sting.text = "THE LOT KEPT SCORE."
+	end_sting.text = "COUNT THE DAMAGE. CASH THE HAUL. WALK BACK UNDER THE LIGHTS."
 	end_sting.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_sting.add_theme_font_size_override("font_size", 11 if is_mobile else 12)
 	end_sting.add_theme_color_override("font_color", Color("dceefb"))
@@ -82,7 +90,11 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 	restart.text = "BACK TO THE LOT"
 	restart.custom_minimum_size = Vector2(220, 56) if is_mobile else Vector2(180, 48)
 	restart.pressed.connect(on_menu_return)
+	THEME.apply_to_button(restart, THEME.NEON_GOLD)
 	end_vbox.add_child(restart)
+	var bottom_spacer := Control.new()
+	bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	shell_wrap.add_child(bottom_spacer)
 	return {"end_screen": end_screen, "end_title": end_title, "end_message": end_message, "end_waves": end_waves}
 
 

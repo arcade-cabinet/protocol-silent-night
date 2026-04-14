@@ -13,14 +13,14 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
 	var safe_size: Vector2 = layout["safe_rect"].size
-	var width := clampf(safe_size.x * 0.52, 320.0, 620.0)
+	var width := clampf(safe_size.x * 0.62, 360.0, 700.0)
 	var boss_panel := VBoxContainer.new()
 	boss_panel.name = "BossPanel"
 	boss_panel.anchor_left = 0.5
 	boss_panel.anchor_right = 0.5
 	boss_panel.anchor_top = 0.0
 	boss_panel.anchor_bottom = 0.0
-	boss_panel.offset_top = float(layout["safe_top"]) + float(layout["edge_pad"]) + 92.0
+	boss_panel.offset_top = float(layout["safe_top"]) + float(layout["edge_pad"]) + 72.0
 	boss_panel.offset_left = -width * 0.5
 	boss_panel.offset_right = width * 0.5
 	boss_panel.visible = false
@@ -28,20 +28,20 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	var shell := PanelContainer.new()
 	shell.custom_minimum_size = Vector2(width, 0.0)
 	shell.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	THEME.apply_to_panel(shell, THEME.NEON_RED)
+	shell.add_theme_stylebox_override("panel", THEME.make_panel_style(THEME.NEON_GOLD, Color(0.12, 0.03, 0.05, 0.96)))
 	boss_panel.add_child(shell)
 	var shell_margin := MarginContainer.new()
-	shell_margin.add_theme_constant_override("margin_left", 10)
-	shell_margin.add_theme_constant_override("margin_top", 8)
-	shell_margin.add_theme_constant_override("margin_right", 10)
-	shell_margin.add_theme_constant_override("margin_bottom", 10)
+	shell_margin.add_theme_constant_override("margin_left", 10 if is_mobile else 12)
+	shell_margin.add_theme_constant_override("margin_top", 8 if is_mobile else 10)
+	shell_margin.add_theme_constant_override("margin_right", 10 if is_mobile else 12)
+	shell_margin.add_theme_constant_override("margin_bottom", 10 if is_mobile else 12)
 	shell.add_child(shell_margin)
 	var shell_vbox := VBoxContainer.new()
 	shell_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	shell_vbox.add_theme_constant_override("separation", 4)
+	shell_vbox.add_theme_constant_override("separation", 5 if is_mobile else 6)
 	shell_margin.add_child(shell_vbox)
 	var boss_kicker := Label.new()
-	boss_kicker.text = "YULE RIOT ACTIVE"
+	boss_kicker.text = "CROWN TARGET LIVE // TREE LOT PANIC"
 	boss_kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	boss_kicker.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	boss_kicker.add_theme_font_size_override("font_size", 10 if is_mobile else 11)
@@ -50,12 +50,12 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	boss_title.text = "// KRAMPUS-PRIME //"
 	boss_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	boss_title.add_theme_color_override("font_color", THEME.NEON_RED)
-	boss_title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	boss_title.add_theme_constant_override("outline_size", 4)
-	boss_title.add_theme_font_size_override("font_size", 20 if is_mobile else 24)
+	boss_title.add_theme_color_override("font_outline_color", THEME.NEON_GOLD.darkened(0.72))
+	boss_title.add_theme_constant_override("outline_size", 5)
+	boss_title.add_theme_font_size_override("font_size", 22 if is_mobile else 28)
 	shell_vbox.add_child(boss_title)
 	var boss_hint := Label.new()
-	boss_hint.text = "BURN THE CROWN // HOLD THE LOT"
+	boss_hint.text = "CUT THE CROWN // KEEP THE LOT BREATHING"
 	boss_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	boss_hint.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	boss_hint.add_theme_font_size_override("font_size", 10 if is_mobile else 12)
@@ -63,10 +63,16 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	var boss_bar := ProgressBar.new()
 	boss_bar.max_value = 100
 	boss_bar.value = 100
-	boss_bar.custom_minimum_size = Vector2(width - 24.0, 18 if is_mobile else 22)
+	boss_bar.custom_minimum_size = Vector2(width - 24.0, 20 if is_mobile else 24)
 	boss_bar.show_percentage = false
 	THEME.apply_to_progress_bar(boss_bar, THEME.NEON_RED)
 	shell_vbox.add_child(boss_bar)
+	var boss_sting := Label.new()
+	boss_sting.text = "PRESSURE SPIKES UNTIL ONE OF YOU DROPS."
+	boss_sting.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_sting.add_theme_color_override("font_color", Color("dceefb"))
+	boss_sting.add_theme_font_size_override("font_size", 10 if is_mobile else 11)
+	shell_vbox.add_child(boss_sting)
 	return {"boss_panel": boss_panel, "boss_bar": boss_bar}
 
 
