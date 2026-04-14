@@ -2,6 +2,7 @@ extends SceneTree
 
 const IMAGE_COMPARE := preload("res://scripts/image_compare.gd")
 const DEFAULT_BASELINE_DIR := "res://test/baselines/mobile"
+const LINUX_BASELINE_DIR := "res://test/baselines/mobile/linux"
 const DEFAULT_ACTUAL_DIR := "res://.artifacts/screenshots"
 const FILES := [
 	"menu_mobile.png",
@@ -42,7 +43,7 @@ const FILE_DIFF_LIMITS := {
 func _initialize() -> void:
 	var baseline_dir := OS.get_environment("MOBILE_BASELINE_DIR")
 	if baseline_dir.is_empty():
-		baseline_dir = DEFAULT_BASELINE_DIR
+		baseline_dir = _default_baseline_dir()
 	var actual_dir := OS.get_environment("MOBILE_ACTUAL_DIR")
 	if actual_dir.is_empty():
 		actual_dir = DEFAULT_ACTUAL_DIR
@@ -86,3 +87,10 @@ func _format_result(result: Dictionary) -> String:
 func _env_float(key: String, fallback: float) -> float:
 	var raw := OS.get_environment(key)
 	return fallback if raw.is_empty() else raw.to_float()
+
+
+func _default_baseline_dir() -> String:
+	if OS.get_name() != "Linux":
+		return DEFAULT_BASELINE_DIR
+	var linux_dir := ProjectSettings.globalize_path(LINUX_BASELINE_DIR)
+	return LINUX_BASELINE_DIR if DirAccess.dir_exists_absolute(linux_dir) else DEFAULT_BASELINE_DIR

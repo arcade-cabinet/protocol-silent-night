@@ -47,8 +47,9 @@ static func compare_images(expected: Image, actual: Image, channel_tolerance: fl
 
 
 static func _pixel_delta(a: Color, b: Color) -> float:
-	var r_delta := absf(a.r - b.r)
-	var g_delta := absf(a.g - b.g)
-	var b_delta := absf(a.b - b.b)
-	var a_delta := absf(a.a - b.a)
-	return maxf(maxf(r_delta, g_delta), maxf(b_delta, a_delta))
+	var a_visible := Vector3(a.r, a.g, a.b) * a.a
+	var b_visible := Vector3(b.r, b.g, b.b) * b.a
+	var r_delta := absf(a_visible.x - b_visible.x)
+	var g_delta := absf(a_visible.y - b_visible.y)
+	var b_delta := absf(a_visible.z - b_visible.z)
+	return maxf(r_delta, maxf(g_delta, b_delta))
