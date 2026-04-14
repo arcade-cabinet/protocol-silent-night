@@ -30,6 +30,8 @@
   Portrait capture now has a committed baseline set plus a compare script with deterministic mobile capture setup and a tight render-jitter envelope, so mobile visuals can fail fast instead of relying only on manual artifact inspection.
 - **CI-backed mobile visual gate**
   The portrait baseline guard now has a dedicated CI job with software-rendered display capture and screenshot artifact upload, so regressions stop at pull request time instead of depending on local discipline.
+- **Display-session mobile touch e2e**
+  A portrait windowed e2e now walks through deploy flow, difficulty handoff, live left-thumb movement drag, and concurrent dash touch, then runs in the CI display lane instead of relying on manual handheld inspection.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -46,13 +48,11 @@
 
 ### QA / Release Readiness
 
-- **No touch-flow e2e on a real display**
-  Current automated tests prove control logic and scene boot, but they still do not synthesize an end-to-end on-screen touch run in a non-headless display session.
 - **No Android hardware soak**
   Export preset exists, but there is no measured battery/thermal/session validation on representative devices.
 
 ## Highest-Value Next Moves
 
-1. Add a real touch-flow display-session e2e so the whole mobile deploy path is exercised without hand inspection.
-2. Run Android hardware soak with frame-budget notes instead of extrapolating from desktop portrait captures.
-3. Add operator-specific touch/readability soak so every present doctrine is proven on handheld framing, not just the default striker lane.
+1. Run Android hardware soak with frame-budget notes instead of extrapolating from desktop portrait captures.
+2. Add operator-specific touch/readability soak so every present doctrine is proven on handheld framing, not just the default striker lane.
+3. Turn the new display-session touch e2e into a small matrix of left-handed and doctrine-specific runs instead of one default striker lane.
