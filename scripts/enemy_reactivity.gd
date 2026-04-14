@@ -27,8 +27,10 @@ static func spawn_death_echo(root: Node3D, vfx: Array, target: Dictionary) -> vo
 	var echo := Node3D.new()
 	echo.name = "DeathEcho"
 	echo.transform = source.global_transform
-	var clone := source.duplicate()
-	echo.add_child(clone)
+	var shell := _echo_shell(source)
+	if shell == null:
+		return
+	echo.add_child(shell)
 	root.add_child(echo)
 	vfx.append({
 		"node": echo,
@@ -73,4 +75,30 @@ static func _visual_root(node: Variant) -> Node3D:
 		if name.begins_with("Present_") or name == "BossFallback" or child is MeshInstance3D:
 			root.set_meta("cached_visual_root", child_node)
 			return child_node
+	return null
+
+
+static func _echo_shell(source: Node3D) -> Node3D:
+	var mesh := _first_mesh(source)
+	if mesh == null:
+		return null
+	var clone := MeshInstance3D.new()
+	clone.mesh = mesh.mesh
+	clone.material_override = mesh.material_override
+	clone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	clone.position = mesh.position
+	clone.rotation = mesh.rotation
+	clone.scale = mesh.scale
+	return clone
+
+
+static func _first_mesh(root: Node3D) -> MeshInstance3D:
+	if root is MeshInstance3D:
+		return root as MeshInstance3D
+	for child in root.get_children():
+		if not (child is Node3D):
+			continue
+		var mesh := _first_mesh(child as Node3D)
+		if mesh != null:
+			return mesh
 	return null
