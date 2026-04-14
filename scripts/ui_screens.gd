@@ -1,98 +1,28 @@
 extends RefCounted
 
+const HUD_SHELL := preload("res://scripts/hud_shell.gd")
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 
 static func build_hud(root: Control) -> Dictionary:
-	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
-	var is_mobile := bool(layout["is_mobile"])
-	var hud_root := VBoxContainer.new()
-	hud_root.name = "HudMargin"
-	hud_root.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	hud_root.offset_left = float(layout["safe_left"]) + float(layout["edge_pad"])
-	hud_root.offset_top = float(layout["safe_top"]) + float(layout["edge_pad"])
-	hud_root.offset_right = -(float(layout["safe_right"]) + float(layout["edge_pad"]))
-	hud_root.add_theme_constant_override("separation", 4 if is_mobile else 2)
-	hud_root.visible = false
-	root.add_child(hud_root)
-
-	var top_bar := HBoxContainer.new()
-	top_bar.add_theme_constant_override("separation", 8 if is_mobile else 10)
-	hud_root.add_child(top_bar)
-	var hp_bar := ProgressBar.new()
-	hp_bar.max_value = 100
-	hp_bar.value = 100
-	hp_bar.custom_minimum_size = Vector2(96, 18) if is_mobile else Vector2(120, 18)
-	hp_bar.show_percentage = false
-	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	THEME.apply_to_progress_bar(hp_bar, Color("ff617e"))
-	top_bar.add_child(hp_bar)
-
-	var hp_label := Label.new()
-	hp_label.text = "100/100"
-	hp_label.add_theme_font_size_override("font_size", 12 if is_mobile else 14)
-	hp_label.add_theme_color_override("font_color", Color("ff617e"))
-	top_bar.add_child(hp_label)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_bar.add_child(spacer)
-
-	var wave_label := Label.new()
-	wave_label.text = "LEVEL 1"
-	wave_label.add_theme_font_size_override("font_size", 13 if is_mobile else 16)
-	wave_label.add_theme_color_override("font_color", THEME.NEON_GOLD)
-	top_bar.add_child(wave_label)
-	var timer_label := Label.new()
-	timer_label.text = "120"
-	timer_label.add_theme_font_size_override("font_size", 18 if is_mobile else 22)
-	timer_label.add_theme_color_override("font_color", THEME.NEON_WHITE)
-	top_bar.add_child(timer_label)
-	var spacer2 := Control.new()
-	spacer2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_bar.add_child(spacer2)
-
-	var kills_label := Label.new()
-	kills_label.text = "0"
-	kills_label.add_theme_font_size_override("font_size", 12 if is_mobile else 14)
-	kills_label.add_theme_color_override("font_color", THEME.NEON_GOLD)
-	top_bar.add_child(kills_label)
-	var cookie_label := Label.new()
-	cookie_label.text = "0 C"
-	cookie_label.add_theme_font_size_override("font_size", 12 if is_mobile else 14)
-	cookie_label.add_theme_color_override("font_color", Color("ffd700"))
-	top_bar.add_child(cookie_label)
-	var level_label := Label.new()
-	level_label.text = "LV 1"
-	level_label.add_theme_font_size_override("font_size", 12 if is_mobile else 14)
-	level_label.add_theme_color_override("font_color", THEME.NEON_CYAN)
-	top_bar.add_child(level_label)
-
-	var xp_bar := ProgressBar.new()
-	xp_bar.max_value = 5
-	xp_bar.value = 0
-	xp_bar.custom_minimum_size = Vector2(0, 8)
-	xp_bar.show_percentage = false
-	THEME.apply_to_progress_bar(xp_bar, Color("69d6ff"))
-	hud_root.add_child(xp_bar)
-	return {
-		"hud_root": hud_root,
-		"level_label": level_label, "xp_bar": xp_bar,
-		"hp_bar": hp_bar, "hp_label": hp_label,
-		"wave_label": wave_label, "timer_label": timer_label,
-		"kills_label": kills_label, "cookie_label": cookie_label
-	}
+	return HUD_SHELL.build(root)
 
 
 static func build_boss_panel(root: Control) -> Dictionary:
 	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
+	var safe_size: Vector2 = layout["safe_rect"].size
+	var width := clampf(safe_size.x * 0.52, 320.0, 620.0)
 	var boss_panel := VBoxContainer.new()
 	boss_panel.name = "BossPanel"
-	boss_panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	boss_panel.offset_top = float(layout["safe_top"]) + float(layout["edge_pad"]) + 56.0
-	boss_panel.offset_left = float(layout["safe_left"]) + float(layout["edge_pad"])
-	boss_panel.offset_right = -(float(layout["safe_right"]) + float(layout["edge_pad"]))
+	boss_panel.anchor_left = 0.5
+	boss_panel.anchor_right = 0.5
+	boss_panel.anchor_top = 0.0
+	boss_panel.anchor_bottom = 0.0
+	boss_panel.offset_top = float(layout["safe_top"]) + float(layout["edge_pad"]) + 92.0
+	boss_panel.offset_left = -width * 0.5
+	boss_panel.offset_right = width * 0.5
 	boss_panel.visible = false
 	root.add_child(boss_panel)
 
@@ -108,7 +38,7 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	var boss_bar := ProgressBar.new()
 	boss_bar.max_value = 100
 	boss_bar.value = 100
-	boss_bar.custom_minimum_size = Vector2(0, 20 if is_mobile else 22)
+	boss_bar.custom_minimum_size = Vector2(width, 18 if is_mobile else 22)
 	boss_bar.show_percentage = false
 	THEME.apply_to_progress_bar(boss_bar, THEME.NEON_RED)
 	boss_panel.add_child(boss_bar)
@@ -118,6 +48,7 @@ static func build_boss_panel(root: Control) -> Dictionary:
 static func build_level_screen(root: Control) -> Dictionary:
 	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
+	var stacked_mobile := bool(layout["uses_stacked_mobile_ui"])
 	var edge_pad := float(layout["edge_pad"])
 	var level_screen := PanelContainer.new()
 	level_screen.name = "LevelScreen"
@@ -135,9 +66,9 @@ static func build_level_screen(root: Control) -> Dictionary:
 
 	var level_vbox := VBoxContainer.new()
 	level_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	level_vbox.add_theme_constant_override("separation", 12 if is_mobile else 18)
+	level_vbox.add_theme_constant_override("separation", 12 if stacked_mobile else 18)
 	var decision_shell: PanelContainer = null
-	if is_mobile:
+	if stacked_mobile:
 		var mobile_frame := VBoxContainer.new()
 		mobile_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		level_margin.add_child(mobile_frame)
@@ -157,11 +88,16 @@ static func build_level_screen(root: Control) -> Dictionary:
 		decision_shell.add_child(shell_margin)
 		shell_margin.add_child(level_vbox)
 	else:
-		var scroll := ScrollContainer.new()
-		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-		level_margin.add_child(scroll)
-		scroll.add_child(level_vbox)
+		var frame := VBoxContainer.new()
+		frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		level_margin.add_child(frame)
+		var top_spacer := Control.new()
+		top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		frame.add_child(top_spacer)
+		frame.add_child(level_vbox)
+		var bottom_spacer := Control.new()
+		bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		frame.add_child(bottom_spacer)
 
 	var level_title := Label.new()
 	level_title.name = "LevelTitle"
@@ -180,9 +116,9 @@ static func build_level_screen(root: Control) -> Dictionary:
 	level_hint.add_theme_color_override("font_color", Color("dceefb"))
 	level_vbox.add_child(level_hint)
 
-	var upgrade_box: BoxContainer = VBoxContainer.new() if is_mobile else HBoxContainer.new()
+	var upgrade_box: BoxContainer = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
 	upgrade_box.name = "UpgradeCards"
 	upgrade_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	upgrade_box.add_theme_constant_override("separation", 12 if is_mobile else 18)
+	upgrade_box.add_theme_constant_override("separation", 12 if stacked_mobile else 18)
 	level_vbox.add_child(upgrade_box)
 	return {"level_screen": level_screen, "upgrade_box": upgrade_box, "decision_shell": decision_shell, "level_hint": level_hint}

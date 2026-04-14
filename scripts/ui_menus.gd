@@ -1,9 +1,9 @@
 extends RefCounted
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
-const RADAR_CHART := preload("res://scripts/stat_radar_chart.gd")
 const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
+const START_DETAIL := preload("res://scripts/start_present_detail.gd")
 
 
 static func build_title_screen(root: Control, on_play: Callable, on_progress: Callable) -> Dictionary:
@@ -23,21 +23,25 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	margin.add_theme_constant_override("margin_bottom", int(round(float(layout["safe_bottom"]) + edge_pad * 2.0)))
 	screen.add_child(margin)
 
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	margin.add_child(scroll)
-
+	var frame := VBoxContainer.new()
+	frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	margin.add_child(frame)
+	var top_spacer := Control.new()
+	top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	frame.add_child(top_spacer)
 	var vbox := VBoxContainer.new()
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * 1.4)))
-	scroll.add_child(vbox)
+	frame.add_child(vbox)
+	var bottom_spacer := Control.new()
+	bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	frame.add_child(bottom_spacer)
 
 	var title := Label.new()
 	title.text = "PROTOCOL: SILENT NIGHT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.add_theme_font_size_override("font_size", 32 if is_mobile else 64)
+	title.add_theme_font_size_override("font_size", 38 if is_mobile else 64)
 	title.add_theme_color_override("font_color", THEME.NEON_WHITE)
 	title.add_theme_color_override("font_outline_color", THEME.NEON_CYAN)
 	title.add_theme_constant_override("outline_size", 8)
@@ -73,6 +77,7 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 static func build_start_screen(root: Control, on_back: Callable, on_resume: Callable = Callable()) -> Dictionary:
 	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
+	var stacked_mobile := bool(layout["uses_stacked_mobile_ui"])
 	var edge_pad := float(layout["edge_pad"])
 	var start_screen := PanelContainer.new()
 	start_screen.name = "StartScreen"
@@ -92,7 +97,7 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	start_vbox.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * 1.3)))
 	start_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var outer_scroll: ScrollContainer = null
-	if is_mobile:
+	if stacked_mobile:
 		start_margin.add_child(start_vbox)
 	else:
 		outer_scroll = ScrollContainer.new()
@@ -118,24 +123,23 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	start_vbox.add_child(subtitle)
 
-	var mid_row: BoxContainer = VBoxContainer.new() if is_mobile else HBoxContainer.new()
+	var mid_row: BoxContainer = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
 	mid_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	mid_row.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (1.0 if is_mobile else 1.8))))
-	mid_row.size_flags_vertical = Control.SIZE_EXPAND_FILL if is_mobile else Control.SIZE_SHRINK_CENTER
+	mid_row.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (1.0 if stacked_mobile else 1.8))))
+	mid_row.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
 	start_vbox.add_child(mid_row)
 
 	var details_vbox := VBoxContainer.new()
 	details_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	details_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	details_vbox.add_theme_constant_override("separation", 12 if is_mobile else 20)
+	details_vbox.add_theme_constant_override("separation", 12 if stacked_mobile else 20)
 	mid_row.add_child(details_vbox)
-
-	var radar_canvas := RADAR_CHART.build(details_vbox, Vector2(168, 168) if is_mobile else Vector2(240, 240))
+	var detail_state := START_DETAIL.build(details_vbox, layout)
 	var select_btn := Button.new()
 	select_btn.text = "SELECT"
 	select_btn.name = "SelectButton"
-	select_btn.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 56) if is_mobile else Vector2(240, 60)
-	select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if is_mobile else Control.SIZE_SHRINK_CENTER
+	select_btn.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 56) if stacked_mobile else Vector2(240, 60)
+	select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
 	select_btn.add_theme_font_size_override("font_size", 22 if is_mobile else 24)
 	select_btn.disabled = true
 	THEME.apply_to_button(select_btn, THEME.NEON_CYAN)
@@ -152,19 +156,19 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	details_vbox.add_child(resume_btn)
 
 	var class_scroll := ScrollContainer.new()
-	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 240.0) if is_mobile else Vector2(minf(800.0, float(layout["safe_rect"].size.x) * 0.56), 400.0)
-	class_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if is_mobile else ScrollContainer.SCROLL_MODE_AUTO
-	class_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if is_mobile else ScrollContainer.SCROLL_MODE_DISABLED
-	class_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL if is_mobile else Control.SIZE_SHRINK_CENTER
+	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 240.0) if stacked_mobile else Vector2(minf(800.0, float(layout["safe_rect"].size.x) * 0.56), 400.0)
+	class_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if stacked_mobile else ScrollContainer.SCROLL_MODE_AUTO
+	class_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if stacked_mobile else ScrollContainer.SCROLL_MODE_DISABLED
+	class_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
 	mid_row.add_child(class_scroll)
 
-	var classes_box: Container = VBoxContainer.new() if is_mobile else HBoxContainer.new()
+	var classes_box: Container = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
 	classes_box.name = "ClassCards"
-	classes_box.add_theme_constant_override("separation", 12 if is_mobile else 20)
+	classes_box.add_theme_constant_override("separation", 12 if stacked_mobile else 20)
 	class_scroll.add_child(classes_box)
 
 	var instruction := Label.new()
-	instruction.text = "Mobile: drag with your left thumb, tap DASH with your right. Desktop: WASD + Shift." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
+	instruction.text = "Phone: landscape is primary. Drag with your left thumb, tap DASH with your right." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
 	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	instruction.modulate = Color("dceefb")
@@ -178,7 +182,7 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	THEME.apply_to_button(back_btn, THEME.NEON_CYAN)
 	back_btn.pressed.connect(on_back)
 	start_vbox.add_child(back_btn)
-	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": radar_canvas, "select_btn": select_btn, "resume_btn": resume_btn, "class_scroll": class_scroll, "uses_outer_scroll": outer_scroll != null}
+	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": null, "detail_state": detail_state, "select_btn": select_btn, "resume_btn": resume_btn, "class_scroll": class_scroll, "uses_outer_scroll": outer_scroll != null}
 
 
 static func refresh_resume_button(screen: PanelContainer, save_manager: Node, present_defs: Dictionary = {}) -> void:

@@ -107,5 +107,5 @@ static func _normalize_profile(profile_id: String) -> String:
 static func _auto_profile(viewport_size: Vector2) -> String:
 	var viewport_profile: Dictionary = VIEWPORT_PROFILE.for_viewport(viewport_size)
 	if bool(viewport_profile.get("is_mobile", false)):
-		return "low" if bool(viewport_profile.get("is_portrait", false)) else "balanced"
+		return "low" if bool(viewport_profile.get("requires_landscape_rotation", false)) else "balanced"
 	return "high" if viewport_size.x >= 1600.0 and viewport_size.y >= 900.0 else "balanced"

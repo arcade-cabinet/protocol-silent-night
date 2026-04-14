@@ -17,6 +17,7 @@ const TIERS := [
 static func build(root: Control, on_select: Callable, current_tier: int = 1, current_perma: bool = false) -> Dictionary:
 	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
+	var stacked_mobile := bool(layout["uses_stacked_mobile_ui"])
 	var edge_pad := float(layout["edge_pad"])
 	var panel := PanelContainer.new()
 	panel.name = "DifficultySelect"
@@ -34,10 +35,10 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 
 	var vbox := VBoxContainer.new()
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 12 if is_mobile else 16)
+	vbox.add_theme_constant_override("separation", 12 if stacked_mobile else 16)
 	var decision_shell: PanelContainer = null
-	var uses_outer_scroll := not is_mobile
-	if is_mobile:
+	var uses_outer_scroll := not stacked_mobile
+	if stacked_mobile:
 		var mobile_frame := VBoxContainer.new()
 		mobile_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		margin.add_child(mobile_frame)
@@ -100,15 +101,15 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 	endless_check.add_theme_font_size_override("font_size", 13 if is_mobile else 18)
 	endless_check.add_theme_color_override("font_color", THEME.NEON_GOLD)
 
-	var toggles: BoxContainer = VBoxContainer.new() if is_mobile else HBoxContainer.new()
+	var toggles: BoxContainer = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
 	toggles.alignment = BoxContainer.ALIGNMENT_CENTER
-	toggles.add_theme_constant_override("separation", 10 if is_mobile else 40)
+	toggles.add_theme_constant_override("separation", 10 if stacked_mobile else 40)
 	toggles.add_child(perma_check)
 	toggles.add_child(endless_check)
 	vbox.add_child(toggles)
 
 	var tier_container: Control
-	if is_mobile:
+	if stacked_mobile:
 		var rail := VBoxContainer.new()
 		rail.name = "TierRail"
 		rail.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -127,10 +128,10 @@ static func build(root: Control, on_select: Callable, current_tier: int = 1, cur
 		var tier: Dictionary = TIERS[i]
 		var tier_index := i + 1
 		var btn := Button.new()
-		btn.text = _tier_label(tier, is_mobile)
-		btn.custom_minimum_size = Vector2(maxf(240.0, float(layout["safe_rect"].size.x) - edge_pad * 2.0), 64.0) if is_mobile else Vector2(280, 120)
-		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if is_mobile else Control.SIZE_SHRINK_CENTER
-		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT if is_mobile else HORIZONTAL_ALIGNMENT_CENTER
+		btn.text = _tier_label(tier, stacked_mobile)
+		btn.custom_minimum_size = Vector2(maxf(240.0, float(layout["safe_rect"].size.x) - edge_pad * 2.0), 64.0) if stacked_mobile else Vector2(280, 120)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT if stacked_mobile else HORIZONTAL_ALIGNMENT_CENTER
 		btn.add_theme_font_size_override("font_size", 13 if is_mobile else 14)
 		THEME.apply_to_button(btn, Color(tier["color"]))
 		if tier_index == current_tier:
@@ -187,8 +188,8 @@ static func prepare(state: Dictionary, present_def: Dictionary) -> void:
 		THEME.apply_to_panel(state["decision_shell"], accent)
 
 
-static func _tier_label(tier: Dictionary, is_mobile: bool) -> String:
-	if not is_mobile:
+static func _tier_label(tier: Dictionary, stacked_mobile: bool) -> String:
+	if not stacked_mobile:
 		return "%s\n%dx // %d rewraps\n%s" % [tier["name"], tier["mult"], tier["rewraps"], tier["desc"]]
 	var rewrap_label := "%d REWRAP%s" % [int(tier["rewraps"]), "" if int(tier["rewraps"]) == 1 else "S"]
 	return "%s // %dx PRESSURE\n%s // %s" % [tier["name"], int(tier["mult"]), rewrap_label, String(tier["desc"]).to_upper()]

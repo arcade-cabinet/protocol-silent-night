@@ -31,9 +31,20 @@ func test_auto_profile_uses_low_tier_for_portrait_phone() -> void:
 	assert_int(int(profile["enemy_cap"])).is_less(40)
 
 
+func test_auto_profile_uses_balanced_tier_for_landscape_phone() -> void:
+	var profile: Dictionary = QUALITY.resolve("auto", Vector2(844.0, 390.0))
+	assert_str(String(profile["id"])).is_equal("balanced")
+	assert_int(int(profile["enemy_cap"])).is_equal(40)
+
+
+func test_auto_profile_keeps_balanced_tier_for_large_portrait() -> void:
+	var profile: Dictionary = QUALITY.resolve("auto", Vector2(720.0, 1280.0))
+	assert_str(String(profile["id"])).is_equal("balanced")
+
+
 func test_settings_menu_quality_selector_persists_choice() -> void:
 	var viewport: SubViewport = auto_free(SubViewport.new())
-	viewport.size = Vector2i(390, 844)
+	viewport.size = Vector2i(844, 390)
 	add_child(viewport)
 	var root: Control = auto_free(Control.new())
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

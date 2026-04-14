@@ -3,7 +3,7 @@ extends SceneTree
 const SAVE_MANAGER_SCRIPT := preload("res://scripts/save_manager.gd")
 const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
 
-const WINDOW_SIZE := Vector2i(390, 844)
+const WINDOW_SIZE := Vector2i(844, 390)
 const RUN_SEED := 2606
 
 var _main: Node = null

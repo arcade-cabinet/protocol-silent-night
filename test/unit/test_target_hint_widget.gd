@@ -5,7 +5,7 @@ const TARGET_HINT := preload("res://scripts/target_hint_widget.gd")
 
 func test_target_hint_tracks_visible_mobile_target() -> void:
 	var viewport: SubViewport = auto_free(SubViewport.new())
-	viewport.size = Vector2i(390, 844)
+	viewport.size = Vector2i(844, 390)
 	add_child(viewport)
 	var world := Node3D.new()
 	viewport.add_child(world)

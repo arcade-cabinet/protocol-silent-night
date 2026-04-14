@@ -9,9 +9,11 @@ class StubMaterials:
 		return null
 	func arena_surface_material(_radius: float) -> Material:
 		return null
+	func outer_field_material(_radius: float) -> Material:
+		return null
 	func material_for_zone(_zone: String) -> Material:
 		return null
-	func snow_material() -> Material:
+	func emissive_material(_color: Color, _energy: float = 1.4, _roughness: float = 0.22) -> Material:
 		return null
 
 

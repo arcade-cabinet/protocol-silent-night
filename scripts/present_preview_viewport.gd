@@ -6,6 +6,11 @@ const AUTO_ROTATE := preload("res://scripts/auto_rotate.gd")
 const FACTORY_SCRIPT := preload("res://scripts/present_factory.gd")
 
 static var _factory: PresentFactory = null
+static var _spin_enabled := true
+
+
+static func set_spin_enabled(enabled: bool) -> void:
+	_spin_enabled = enabled
 
 
 static func build(parent: Control) -> SubViewport:
@@ -13,26 +18,19 @@ static func build(parent: Control) -> SubViewport:
 		return null
 	var container := SubViewportContainer.new()
 	container.name = "PresentPreviewContainer"
-	container.custom_minimum_size = Vector2(200.0, 200.0)
 	container.stretch = true
-	container.anchor_left = 1.0
-	container.anchor_right = 1.0
-	container.anchor_top = 0.0
-	container.anchor_bottom = 0.0
-	container.offset_left = -210.0
-	container.offset_right = -10.0
-	container.offset_top = 10.0
-	container.offset_bottom = 210.0
+	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	parent.add_child(container)
 	var vp := SubViewport.new()
 	vp.name = "PresentPreview"
-	vp.size = Vector2i(200, 200)
+	vp.size = Vector2i(320, 220)
 	vp.own_world_3d = true
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	vp.transparent_bg = true
 	container.add_child(vp)
 	var cam := Camera3D.new()
-	cam.look_at_from_position(Vector3(0.0, 1.5, 3.0), Vector3(0.0, 0.5, 0.0), Vector3.UP)
+	cam.look_at_from_position(Vector3(0.0, 1.2, 2.4), Vector3(0.0, 0.72, 0.0), Vector3.UP)
 	vp.add_child(cam)
 	var light := DirectionalLight3D.new()
 	light.rotation_degrees = Vector3(-45.0, 30.0, 0.0)
@@ -54,6 +52,8 @@ static func update_present(vp: SubViewport, def: Dictionary) -> void:
 	if _factory == null:
 		_factory = FACTORY_SCRIPT.new()
 	var mesh: Node3D = _factory.build_present(def)
-	var spinner := AUTO_ROTATE.new()
-	mesh.add_child(spinner)
+	mesh.rotation_degrees = Vector3(0.0, -18.0, 0.0)
+	if _spin_enabled:
+		var spinner := AUTO_ROTATE.new()
+		mesh.add_child(spinner)
 	mesh_root.add_child(mesh)

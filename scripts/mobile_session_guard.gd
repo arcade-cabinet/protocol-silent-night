@@ -5,6 +5,8 @@ const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 
 static func handle_notification(main: Node, what: int) -> void:
+	if _session_pause_suppressed(main):
+		return
 	match what:
 		Node.NOTIFICATION_APPLICATION_PAUSED, Node.NOTIFICATION_WM_GO_BACK_REQUEST:
 			_pause_active_run(main)
@@ -52,3 +54,10 @@ static func _is_mobile(main: Node) -> bool:
 	if main == null or main.get_viewport() == null:
 		return false
 	return bool(VIEWPORT_PROFILE.for_viewport(main.get_viewport().get_visible_rect().size).get("is_mobile", false))
+
+
+static func _session_pause_suppressed(main: Node) -> bool:
+	if main == null or not main.has_method("get"):
+		return false
+	var options: Variant = main.get("test_mode")
+	return options is Dictionary and bool(options.get("suppress_session_pause", false))

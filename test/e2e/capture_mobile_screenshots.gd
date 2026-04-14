@@ -1,6 +1,8 @@
 extends SceneTree
 
 const SAVE_MANAGER_SCRIPT := preload("res://scripts/save_manager.gd")
+const PAUSE_MENU := preload("res://scripts/pause_menu.gd")
+const PREVIEW_VP := preload("res://scripts/present_preview_viewport.gd")
 
 var _main: Node = null
 var _shot_dir := "res://.artifacts/screenshots"
@@ -9,7 +11,8 @@ var _capture_seed := 1225
 
 func _initialize() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	DisplayServer.window_set_size(Vector2i(390, 844))
+	DisplayServer.window_set_size(Vector2i(844, 390))
+	PREVIEW_VP.set_spin_enabled(false)
 	_save_manager = _ensure_save_manager()
 	_save_manager.set_save_path_for_tests("user://mobile_screenshot_capture.json")
 	_save_manager.reset_state_for_tests()
@@ -36,6 +39,7 @@ func _run() -> void:
 	_main.start_run("holly_striker")
 	await _step_until_enemy_spawn()
 	await _step_simulation(12)
+	_clear_runtime_overlays()
 	await _capture_mobile("gameplay_mobile.png")
 	await _capture_mobile("target_hint_mobile.png")
 	await _capture_doctrine_mobile("skate_mobile.png", "p_01", "right")
@@ -50,7 +54,7 @@ func _run() -> void:
 	})
 	_main.debug_force_level_up()
 	await _step_simulation(4)
-	_main.ui_mgr.show_message("", 0.0)
+	_clear_runtime_overlays()
 	await _capture_mobile("level_up_mobile.png")
 
 	_main._apply_upgrade("damage")
@@ -61,12 +65,15 @@ func _run() -> void:
 	})
 	_main.debug_spawn_boss()
 	await _step_simulation(6)
+	_clear_runtime_overlays()
 	await _capture_mobile("boss_mobile.png")
 
 	_main.debug_end_run(true)
+	_clear_runtime_overlays()
 	await _capture_mobile("victory_mobile.png")
 
 	_save_manager.reset_state_for_tests()
+	PREVIEW_VP.set_spin_enabled(true)
 	quit(0)
 
 
@@ -107,6 +114,7 @@ func _set_capture_test_mode(overrides: Dictionary = {}) -> void:
 	var options := {
 		"manual_tick": true,
 		"fixed_run_seed": _capture_seed,
+		"suppress_session_pause": true,
 	}
 	for key in overrides.keys():
 		options[key] = overrides[key]
@@ -179,6 +187,20 @@ func _stabilize_dynamic_visuals() -> void:
 	for node in _main.find_children("*", "CPUParticles3D", true, false):
 		(node as CPUParticles3D).emitting = false
 		(node as CPUParticles3D).visible = false
+
+
+func _clear_runtime_overlays() -> void:
+	_main.ui_mgr.show_message("", 0.0)
+	if _main.get_tree() != null:
+		_main.get_tree().paused = false
+	var pause_state: Dictionary = _main.ui_mgr.widgets.get("pause", {})
+	if not pause_state.is_empty():
+		PAUSE_MENU.hide(pause_state)
+	var settings_state: Dictionary = _main.ui_mgr.widgets.get("settings", {})
+	if not settings_state.is_empty():
+		var panel: PanelContainer = settings_state.get("panel")
+		if panel != null:
+			panel.visible = false
 
 
 func _first_unlocked_present() -> Button:

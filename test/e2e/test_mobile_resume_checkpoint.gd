@@ -2,7 +2,7 @@ extends SceneTree
 
 const SAVE_MANAGER_SCRIPT := preload("res://scripts/save_manager.gd")
 
-const WINDOW_SIZE := Vector2i(390, 844)
+const WINDOW_SIZE := Vector2i(844, 390)
 const RUN_SEED := 1225
 
 var _main: Node = null

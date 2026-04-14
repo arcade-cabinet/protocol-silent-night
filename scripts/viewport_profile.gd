@@ -1,6 +1,7 @@
 extends RefCounted
 
 const MOBILE_BREAKPOINT := 920.0
+const PORTRAIT_PLAY_MIN_WIDTH := 640.0
 
 
 static func for_viewport(viewport_size: Vector2, safe_area_override: Rect2 = Rect2()) -> Dictionary:
@@ -9,6 +10,8 @@ static func for_viewport(viewport_size: Vector2, safe_area_override: Rect2 = Rec
 	var shortest := minf(viewport_size.x, viewport_size.y)
 	var portrait := viewport_size.y > viewport_size.x * 1.02
 	var mobile := OS.has_feature("mobile") or portrait or shortest <= MOBILE_BREAKPOINT
+	var portrait_play_supported := not portrait or safe_rect.size.x >= PORTRAIT_PLAY_MIN_WIDTH
+	var stacked_mobile_ui := mobile and portrait and portrait_play_supported
 	var edge_pad := clampf(shortest * 0.04, 16.0, 36.0)
 	var section_gap := clampf(shortest * 0.03, 12.0, 28.0)
 	var action_inset := clampf(shortest * 0.045, 18.0, 32.0)
@@ -21,6 +24,9 @@ static func for_viewport(viewport_size: Vector2, safe_area_override: Rect2 = Rec
 		"safe_bottom": viewport_size.y - safe_rect.end.y,
 		"is_mobile": mobile,
 		"is_portrait": portrait,
+		"supports_portrait_play": portrait_play_supported,
+		"requires_landscape_rotation": mobile and portrait and not portrait_play_supported,
+		"uses_stacked_mobile_ui": stacked_mobile_ui,
 		"edge_pad": edge_pad,
 		"section_gap": section_gap,
 		"action_inset": action_inset,

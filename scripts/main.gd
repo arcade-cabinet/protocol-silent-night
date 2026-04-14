@@ -8,6 +8,7 @@ const PLAYER_DAMAGE_HANDLER := preload("res://scripts/player_damage_handler.gd")
 const PICKUP_MAGNET_RING := preload("res://scripts/pickup_magnet_ring.gd")
 const FLAIR_ANIMATOR_SCR := preload("res://scripts/flair_animator.gd")
 const BETWEEN_MATCH_FLOW := preload("res://scripts/between_match_flow.gd")
+const ORIENTATION_GATE := preload("res://scripts/orientation_gate.gd")
 var config: Dictionary = {}
 var enemy_defs: Dictionary = {}
 var upgrade_defs: Array = []
@@ -37,6 +38,7 @@ var progression: RefCounted
 var game_mgr: RefCounted
 var mobile_feedback := preload("res://scripts/mobile_feedback.gd").new()
 var flair_animator: Node
+var orientation_gate: Dictionary = {}
 var shake_magnitude: float = 0.0
 var screen_shake := preload("res://scripts/screen_shake.gd").new()
 var music_director := preload("res://scripts/music_director.gd").new()
@@ -122,6 +124,7 @@ func _init_services() -> void:
 	between_match = BETWEEN_MATCH_FLOW.new(self)
 	between_match.build_screens(ui_mgr.root_control)
 	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
+	orientation_gate = ORIENTATION_GATE.build(ui_mgr.root_control)
 const DEBUG_HELPERS := preload("res://scripts/debug_helpers.gd")
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
@@ -133,17 +136,20 @@ func debug_zone_at(wp: Vector3) -> String: return "arena" if absf(wp.x) <= float
 func debug_is_blocked(wp: Vector3, r: float = 0.6) -> bool: return not _can_occupy(wp, r)
 func debug_tick(delta: float) -> void: _tick(delta)
 
-
 func _process(delta: float) -> void:
 	if not bool(test_mode.get("manual_tick", false)):
 		_tick(delta)
 
 func _tick(delta: float) -> void:
 	ui_mgr.update_transient_overlays(delta)
+	if ORIENTATION_GATE.refresh(orientation_gate, self):
+		input_move = Vector2.ZERO; move_velocity = Vector2.ZERO
+		touch_active = false; dash_pressed = false; ui_mgr.hide_joystick()
+		ui_mgr.refresh_widgets(self); return
+	ui_mgr.refresh_widgets(self)
 	if state == "playing":
 		game_mgr.tick_playing(delta)
 		music_director.tick(delta, audio_mgr, enemies.size(), float(player_state.get("hp", 100.0)) / maxf(1.0, float(player_state.get("max_hp", 100.0))), not boss_ref.is_empty())
-		ui_mgr.refresh_widgets(self)
 		_widget_time += delta
 		if player_node != null: PICKUP_MAGNET_RING.update(pickup_magnet_ring, player_node.position, float(config.get("pickup_magnet_radius", 1.0)), 1.0, _widget_time)
 	elif state == "wave_clear":

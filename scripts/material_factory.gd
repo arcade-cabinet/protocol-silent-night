@@ -15,11 +15,11 @@ func arena_surface_material(arena_radius: float) -> Material:
 shader_type spatial;
 render_mode blend_mix, cull_disabled, depth_draw_opaque;
 
-uniform vec4 base_color : source_color = vec4(0.66, 0.76, 0.85, 1.0);
-uniform vec4 grid_color : source_color = vec4(0.18, 0.28, 0.39, 1.0);
+uniform vec4 snow_color : source_color = vec4(0.77, 0.82, 0.9, 1.0);
+uniform vec4 drift_shadow : source_color = vec4(0.42, 0.5, 0.62, 1.0);
 uniform float arena_radius = 18.0;
 uniform float grid_scale = 0.5;
-uniform float grid_strength = 0.22;
+uniform float grid_strength = 0.16;
 
 varying vec3 world_pos;
 
@@ -32,22 +32,25 @@ void fragment() {
 	float half_h = arena_radius;
 	float gx = smoothstep(0.95, 1.0, fract((world_pos.x + half_w) * grid_scale));
 	float gz = smoothstep(0.95, 1.0, fract((world_pos.z + half_h) * grid_scale));
-	vec3 color = base_color.rgb;
-	color -= grid_color.rgb * (gx + gz) * grid_strength;
-	// Radial zone tinting: snow (inner) → ice (mid) → asphalt (outer perimeter)
+	vec3 color = snow_color.rgb;
+	color -= drift_shadow.rgb * (gx + gz) * grid_strength;
 	float r = length(world_pos.xz) / arena_radius;
-	float ice_t = smoothstep(0.32, 0.60, r);
-	float asphalt_t = smoothstep(0.68, 0.88, r);
-	color = mix(color, vec3(0.68, 0.90, 0.98), ice_t * 0.22);
-	color = mix(color, vec3(0.16, 0.22, 0.28), asphalt_t * 0.38);
-	float edge_x = smoothstep(half_w - 1.5, half_w, abs(world_pos.x));
-	float edge_z = smoothstep(half_h - 1.5, half_h, abs(world_pos.z));
-	float edge = max(edge_x, edge_z);
-	color = mix(color, vec3(0.18, 0.28, 0.4), edge * 0.55);
+	float ice_t = smoothstep(0.36, 0.74, r);
+	float ribbon_x = smoothstep(half_w - 2.4, half_w - 0.5, abs(world_pos.x));
+	float ribbon_z = smoothstep(half_h - 2.0, half_h - 0.4, abs(world_pos.z));
+	float ribbon = max(ribbon_x, ribbon_z);
+	vec3 holly_red = vec3(0.74, 0.12, 0.18);
+	vec3 tinsel_green = vec3(0.14, 0.42, 0.22);
+	vec3 ornament_gold = vec3(0.8, 0.62, 0.18);
+	float stripe_mix = step(0.0, sin((world_pos.x + world_pos.z) * 0.22));
+	vec3 stripe_color = mix(holly_red, tinsel_green, stripe_mix);
+	color = mix(color, vec3(0.86, 0.93, 0.98), ice_t * 0.18);
+	color = mix(color, stripe_color, ribbon * 0.22);
+	color += ornament_gold * (0.04 + ribbon * 0.08) * (1.0 - ice_t * 0.35);
 	ALBEDO = color;
-	ROUGHNESS = mix(0.88, mix(0.18, 0.72, asphalt_t), ice_t * 0.6);
-	SPECULAR = mix(0.12, 0.45, ice_t * (1.0 - asphalt_t));
-	EMISSION = color * 0.05;
+	ROUGHNESS = mix(0.93, 0.34, ice_t);
+	SPECULAR = mix(0.1, 0.34, ice_t);
+	EMISSION = color * (0.04 + ribbon * 0.05);
 }
 """
 	var material := ShaderMaterial.new()
@@ -78,12 +81,13 @@ void fragment() {
 	float inner = smoothstep(arena_radius + 1.0, arena_radius + 6.0, radial);
 	float gx = smoothstep(0.95, 1.0, fract((world_pos.x + arena_radius) * 0.28));
 	float gz = smoothstep(0.95, 1.0, fract((world_pos.z + arena_radius) * 0.28));
-	vec3 color = mix(vec3(0.18, 0.25, 0.34), vec3(0.07, 0.11, 0.18), inner);
-	color += vec3(0.05, 0.08, 0.12) * gx;
-	color += vec3(0.05, 0.08, 0.12) * gz;
+	vec3 color = mix(vec3(0.58, 0.67, 0.78), vec3(0.29, 0.36, 0.46), inner);
+	color -= vec3(0.08, 0.1, 0.14) * (gx + gz) * 0.18;
+	float glow = smoothstep(arena_radius + 1.5, arena_radius + 3.5, radial);
+	color = mix(color, vec3(0.45, 0.16, 0.18), glow * 0.08);
 	ALBEDO = color;
-	ROUGHNESS = 0.94;
-	SPECULAR = 0.05;
+	ROUGHNESS = 0.9;
+	SPECULAR = 0.08;
 }
 """
 	var material := ShaderMaterial.new()

@@ -3,11 +3,23 @@ extends GdUnitTestSuite
 var _profile := preload("res://scripts/viewport_profile.gd")
 
 
-func test_portrait_viewport_uses_mobile_profile() -> void:
+func test_compact_portrait_phone_requires_landscape_rotation() -> void:
 	var result: Dictionary = _profile.for_viewport(Vector2(390.0, 844.0))
 	assert_bool(result["is_mobile"]).is_true()
 	assert_bool(result["is_portrait"]).is_true()
+	assert_bool(result["supports_portrait_play"]).is_false()
+	assert_bool(result["requires_landscape_rotation"]).is_true()
+	assert_bool(result["uses_stacked_mobile_ui"]).is_false()
 	assert_float(result["dash_button_size"]).is_greater_equal(96.0)
+
+
+func test_large_portrait_foldable_supports_stacked_mobile_ui() -> void:
+	var result: Dictionary = _profile.for_viewport(Vector2(720.0, 1280.0))
+	assert_bool(result["is_mobile"]).is_true()
+	assert_bool(result["is_portrait"]).is_true()
+	assert_bool(result["supports_portrait_play"]).is_true()
+	assert_bool(result["requires_landscape_rotation"]).is_false()
+	assert_bool(result["uses_stacked_mobile_ui"]).is_true()
 
 
 func test_dash_rect_stays_inside_safe_viewport() -> void:
