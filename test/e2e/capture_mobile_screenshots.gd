@@ -36,6 +36,7 @@ func _run() -> void:
 	for _i in range(90):
 		await process_frame
 	await _main.capture_screenshot("%s/gameplay_mobile.png" % _shot_dir)
+	await _main.capture_screenshot("%s/target_hint_mobile.png" % _shot_dir)
 
 	_main.configure_test_mode({
 		"invincible": true,

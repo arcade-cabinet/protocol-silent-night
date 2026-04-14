@@ -14,6 +14,8 @@
   Display preferences now drive live quality tiers for particles, damage-number density, enemy cap, screen shake, and minimap zoom instead of assuming one desktop budget.
 - **Touch calibration/settings surface**
   Players can now swap handedness and tune joystick reach plus dash button size from the settings menu, with the visible overlay and hit zones updating live.
+- **Aim-side auto-target affordance**
+  Mobile runs now surface the active auto-fire lock with an on-board reticle, tether line, and label so target choice is legible during crowded waves.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -21,8 +23,6 @@
 
 - **No dedicated movement affordance tuning per operator**
   Dash cooldown, button feel, and thumb travel are still globally tuned instead of per-operator or per-weapon identity.
-- **No aim-side affordance**
-  Auto-fire is viable, but there is no mobile-facing threat lead, aim cone hint, or “why did that target get chosen” readability layer.
 ### UI / Readability
 
 - **Start/loadout flow still scrolls rather than re-composing**
@@ -51,5 +51,5 @@
 ## Highest-Value Next Moves
 
 1. Add a mobile-only composition pass for present select and level-up so those screens stop relying on scroll as the safety valve.
-2. Add frame-budget instrumentation and expose the active quality tier in a player-readable way during real mobile sessions.
-3. Run `capture_mobile_screenshots.gd` as part of the visual verification ritual and commit the resulting reference set.
+2. Add operator-specific touch tuning and target-readability rules so each present’s dash feel and lock affordance match its combat identity.
+3. Add notch/home-indicator viewport regression coverage and turn `capture_mobile_screenshots.gd` into a recurring visual verification ritual.

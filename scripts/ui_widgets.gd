@@ -6,16 +6,19 @@ extends RefCounted
 
 const MINIMAP := preload("res://scripts/minimap_widget.gd")
 const THREAT := preload("res://scripts/threat_indicator.gd")
+const TARGET_HINT := preload("res://scripts/target_hint_widget.gd")
 const SETTINGS := preload("res://scripts/settings_menu.gd")
 const SETTINGS_RUNTIME := preload("res://scripts/settings_menu_runtime.gd")
 const PAUSE := preload("res://scripts/pause_menu.gd")
 const COMBO := preload("res://scripts/combo_counter.gd")
+const COMBAT_HELPERS := preload("res://scripts/combat_helpers.gd")
 
 
 static func build_all(root: Control) -> Dictionary:
 	var state: Dictionary = {}
 	state["minimap"] = MINIMAP.build(root)
 	state["threat"] = THREAT.build(root)
+	state["target_hint"] = TARGET_HINT.build(root)
 	state["combo_counter"] = COMBO.new()
 	state["combo_label"] = _build_combo_label(root)
 	state["vignette"] = _build_vignette(root)
@@ -54,6 +57,7 @@ static func refresh(state: Dictionary, main: Node) -> void:
 		return
 	_refresh_minimap(state, main)
 	_refresh_threat(state, main)
+	_refresh_target_hint(state, main)
 	_refresh_combo(state, main)
 	_refresh_vignette(state, main)
 
@@ -75,6 +79,11 @@ static func _refresh_threat(state: Dictionary, main: Node) -> void:
 		return
 	var tier: String = "gold" if float(main.boss_ref.get("hp", 1.0)) < float(main.boss_ref.get("max_hp", 1.0)) * 0.3 else "red"
 	THREAT.update(state["threat"], boss_node.position, main.player_node.position, tier)
+
+
+static func _refresh_target_hint(state: Dictionary, main: Node) -> void:
+	var target: Dictionary = COMBAT_HELPERS.closest_target(main) if main.player_node != null else {}
+	TARGET_HINT.update(state["target_hint"], main.camera, main.player_node, target)
 
 
 static func _refresh_combo(state: Dictionary, main: Node) -> void:
