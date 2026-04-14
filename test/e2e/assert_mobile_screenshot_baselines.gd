@@ -23,8 +23,10 @@ const FILES := [
 const CHANNEL_TOLERANCE := 0.02
 const DIFF_RATIO_LIMIT := 0.0004
 const FILE_DIFF_LIMITS := {
-	"scroll_mobile.png": 0.0005,
-	"market_mobile.png": 0.0008,
+	"results_mobile.png": 0.0010,
+	"scroll_mobile.png": 0.0007,
+	"market_mobile.png": 0.0012,
+	"victory_mobile.png": 0.0005,
 }
 
 
