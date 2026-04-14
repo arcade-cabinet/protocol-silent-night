@@ -162,8 +162,8 @@ func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_n
 
 func refresh_threat_language(enemies: Array, boss_ref: Dictionary, boss_phase: int) -> void:
 	for enemy in enemies:
-		STAGE_MARKS.update_enemy_markers(enemy)
-	STAGE_MARKS.update_boss_markers(boss_ref, boss_phase)
+		STAGE_MARKS.update_enemy_markers(enemy); preload("res://scripts/enemy_pose_language.gd").update_enemy_pose(enemy)
+	STAGE_MARKS.update_boss_markers(boss_ref, boss_phase); preload("res://scripts/enemy_pose_language.gd").update_boss_pose(boss_ref, boss_phase)
 
 
 func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, range_limit: float) -> Dictionary:
