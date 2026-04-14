@@ -1,6 +1,7 @@
 extends RefCounted
 
 const EnemyBehaviors := preload("res://scripts/enemy_behaviors.gd")
+const STAGE_MARKS := preload("res://scripts/enemy_stage_marks.gd")
 const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
 var present_factory: RefCounted = PRESENT_FACTORY.new()
 
@@ -48,6 +49,7 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 	shadow.position = Vector3(0, 0.02, 0)
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
+	STAGE_MARKS.attach_enemy_markers(enemy_node, materials, Color(def["color"]), float(def["scale"]), enemy_type)
 	actor_root.add_child(enemy_node)
 	if override_position != Vector3.INF:
 		enemy_node.position = override_position
@@ -105,6 +107,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	ring.position = Vector3(0, 1.3, 0)
 	ring.material_override = materials.emissive_material(Color("ffe07a"), 2.0, 0.2)
 	boss_node.add_child(ring)
+	STAGE_MARKS.attach_boss_markers(boss_node, materials, Color(def["color"]))
 	boss_node.position = Vector3(0, 0.18, -(float(config["arena_radius"]) - 3.0))
 	actor_root.add_child(boss_node)
 	var new_boss := {
