@@ -151,7 +151,7 @@ static func trigger_level_up(main: Node) -> void:
 static func boss_phase_sting(main: Node) -> void:
 	if main.audio_mgr != null: main.audio_mgr.play_boss_sting()
 	if main.screen_shake != null: main.screen_shake.add_trauma(0.8)
-	if main.mobile_feedback != null: main.mobile_feedback.trigger(main, "boss_phase")
+	if main.get("mobile_feedback") != null: main.mobile_feedback.trigger(main, "boss_phase")
 
 
 static func enemy_telegraph(main: Node, etype: String, pos: Vector3) -> void:
@@ -164,7 +164,7 @@ static func end_run_audio(main: Node, win: bool) -> void:
 	if win: main.audio_mgr.play_victory()
 	else: main.audio_mgr.play_death()
 	main.audio_mgr.stop_ambient()
-	if main.mobile_feedback != null: main.mobile_feedback.trigger(main, "victory" if win else "death")
+	if main.get("mobile_feedback") != null: main.mobile_feedback.trigger(main, "victory" if win else "death")
 
 
 static func apply_reduced_motion(main: Node, sm: Node) -> void:
