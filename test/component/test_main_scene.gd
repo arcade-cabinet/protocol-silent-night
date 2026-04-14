@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 
 var _scene := preload("res://scenes/main.tscn")
+var _mobile_session := preload("res://scripts/mobile_session_guard.gd")
 
 
 func test_scene_starts_run_and_hides_menu() -> void:
@@ -117,3 +118,26 @@ func test_victory_unlocks_bumble_and_returns_to_menu_cleanly() -> void:
 	assert_bool(main.title_screen.visible).is_true()
 	assert_bool(main.dash_button.visible).is_false()
 	SaveManager.reset_state_for_tests()
+
+
+func test_mobile_back_request_pauses_run_and_clears_touch_state() -> void:
+	var main = auto_free(_scene.instantiate())
+	add_child(main)
+	await get_tree().process_frame
+	main.start_run("holly_striker")
+	await get_tree().process_frame
+	main.touch_active = true
+	main.input_move = Vector2(1.0, 0.0)
+	main.move_velocity = Vector2(0.8, 0.0)
+	main.dash_pressed = true
+
+	_mobile_session.handle_notification(main, Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+
+	var pause_state: Dictionary = main.ui_mgr.widgets["pause"]
+	assert_bool(main.get_tree().paused).is_true()
+	assert_bool((pause_state["panel"] as PanelContainer).visible).is_true()
+	assert_bool(main.touch_active).is_false()
+	assert_vector(main.input_move).is_equal(Vector2.ZERO)
+	assert_vector(main.move_velocity).is_equal(Vector2.ZERO)
+	assert_bool(main.dash_pressed).is_false()
+	main.ui_mgr.toggle_pause(main.get_tree())

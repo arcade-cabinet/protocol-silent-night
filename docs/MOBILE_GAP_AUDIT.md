@@ -40,17 +40,27 @@
   The display lane now proves an actually unlocked `Sweep` run end to end, including unlock gating, the `JINK` dash verb, right-edge action geometry, and the doctrine-specific `SWEEP LOCK` callout instead of stopping at default-available presents.
 - **Default skate touch proof**
   The display lane now proves the default `Skate` run end to end, including the `SLIDE` dash verb, right-edge action geometry, and the doctrine-specific `HUNT LOCK` callout. That closes the full doctrine set across breach, sightline, sweep, and skate.
+- **Background-safe mobile session guard**
+  Mobile play now auto-pauses on application suspend, focus loss, and Android back requests, while clearing stale touch state so a resumed run does not lurch or dash from frozen input.
+- **Mobile haptics layer**
+  Dash, damage, rewrap, level-up, boss-phase, and run-end beats now drive handheld vibration with a player-facing Touch-tab toggle instead of leaving mobile combat completely silent to the hands.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
 ### Controls
 
+- **No one-thumb accessibility mode**
+  The game is now solid on two-thumb play, but it still assumes split move-plus-dash input instead of offering a genuinely one-thumb or hold-to-aim accessibility variant.
+
 ### UI / Readability
+
+- **No mid-run branch or threat recap on pause**
+  The pause surface stops the action cleanly, but it still does not summarize doctrine, current lock behavior, or late-wave threat context the way a top-tier handheld survivor often does.
 
 ### Performance
 
-- **No mobile frame budget instrumentation**
-  Enemy cap exists, but there is no tracked GPU/CPU budget or frame-time telemetry on actual Android hardware.
+- **No device-backed budget baselines**
+  Live frame telemetry exists in-session, but there are still no representative Android captures that say what stable/stressed/critical actually means on real hardware tiers.
 - **PBR fallback is still opportunistic**
   Missing NAS-mounted textures silently degrade to flat colors in development, which is acceptable for local iteration but not a mobile shipping path.
 
@@ -58,9 +68,11 @@
 
 - **No Android hardware soak**
   Export preset exists, but there is no measured battery/thermal/session validation on representative devices.
+- **No mid-run restore after OS kill**
+  Background pause is now safe, but a hard mobile process death still drops the current run instead of restoring back into the active session.
 
 ## Highest-Value Next Moves
 
-1. Run Android hardware soak with frame-budget notes instead of extrapolating from desktop portrait captures.
-2. Add operator-specific touch/readability soak for more unlock-gated present archetypes and left-handed variants beyond the now-covered doctrine set.
-3. Turn the display-session touch e2e into a wider matrix that covers more unlock-gated presents instead of stopping at one unlock-backed sweep path and one default skate path.
+1. Run Android hardware soak with frame-budget notes and haptics/background-pause behavior instead of extrapolating from desktop portrait captures.
+2. Add true mid-run restore after OS kill so mobile interruption does not mean a lost session.
+3. Expand the display-session touch matrix to more unlock-gated presents and left-handed variants beyond the now-covered doctrine set.

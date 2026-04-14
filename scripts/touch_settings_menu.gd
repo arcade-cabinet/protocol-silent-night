@@ -1,6 +1,7 @@
 extends RefCounted
 
 const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
+const MOBILE_FEEDBACK := preload("res://scripts/mobile_feedback.gd")
 
 
 static func build_tab(tabs: TabContainer, root: Control, save_manager: Node) -> void:
@@ -18,6 +19,7 @@ static func build_tab(tabs: TabContainer, root: Control, save_manager: Node) -> 
 	_add_handedness_row(page, save_manager, apply)
 	_add_scale_row(page, "Joystick reach", "touch_joystick_scale", save_manager, apply)
 	_add_scale_row(page, "Dash button size", "touch_dash_scale", save_manager, apply)
+	_add_toggle_row(page, "Haptics", "mobile_haptics", true, save_manager, apply)
 	page.add_child(note)
 	note.text = _note_text(root, save_manager)
 
@@ -74,6 +76,19 @@ static func _add_scale_row(parent: Container, text: String, key: String, save_ma
 	parent.add_child(row)
 
 
+static func _add_toggle_row(parent: Container, text: String, key: String, default_value: bool, save_manager: Node, on_changed: Callable) -> void:
+	var cb := CheckBox.new()
+	cb.text = text
+	if save_manager != null and save_manager.has_method("get_preference"):
+		cb.button_pressed = bool(save_manager.get_preference(key, default_value))
+	cb.toggled.connect(func(pressed: bool) -> void:
+		if save_manager != null and save_manager.has_method("set_preference"):
+			save_manager.set_preference(key, pressed)
+		on_changed.call()
+	)
+	parent.add_child(cb)
+
+
 static func _apply_live(root: Control, save_manager: Node) -> void:
 	if root == null or root.get_tree() == null:
 		return
@@ -86,11 +101,12 @@ static func _note_text(root: Control, save_manager: Node) -> String:
 	var viewport_size := root.get_viewport_rect().size if root != null else Vector2(390.0, 844.0)
 	var player_class = _current_player_class(root)
 	var profile: Dictionary = TOUCH_PROFILE.resolve(viewport_size, save_manager, player_class)
-	return "Layout: %s · %s doctrine · Reach %.0f%% · Dash %.0f%%" % [
+	return "Layout: %s · %s doctrine · Reach %.0f%% · Dash %.0f%% · %s" % [
 		TOUCH_PROFILE.handedness_label(String(profile["handedness"])),
 		String(profile["doctrine_label"]),
 		float(profile["joystick_scale"]) * 100.0,
 		float(profile["dash_scale"]) * 100.0,
+		MOBILE_FEEDBACK.note_text(viewport_size, save_manager),
 	]
 
 

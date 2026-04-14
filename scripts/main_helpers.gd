@@ -7,6 +7,7 @@ const COAL_ACTIVATOR := preload("res://scripts/coal_activator.gd")
 const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
 const RUNTIME_QUALITY := preload("res://scripts/runtime_quality.gd")
 const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
+const MOBILE_SESSION := preload("res://scripts/mobile_session_guard.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 static var _coal_activator: RefCounted
 
@@ -137,6 +138,10 @@ static func handle_input(main: Node, event: InputEvent) -> void:
 	if s.get("hide_joystick", false): main.ui_mgr.hide_joystick()
 
 
+static func handle_notification(main: Node, what: int) -> void:
+	MOBILE_SESSION.handle_notification(main, what)
+
+
 static func trigger_level_up(main: Node) -> void:
 	main.progression.trigger_level_up(func(st: String) -> void: main.state = st, main.upgrade_defs, main.test_mode, Callable(main, "_apply_upgrade"), Callable(main, "_on_upgrade_button_pressed"))
 
@@ -144,6 +149,7 @@ static func trigger_level_up(main: Node) -> void:
 static func boss_phase_sting(main: Node) -> void:
 	if main.audio_mgr != null: main.audio_mgr.play_boss_sting()
 	if main.screen_shake != null: main.screen_shake.add_trauma(0.8)
+	if main.mobile_feedback != null: main.mobile_feedback.trigger(main, "boss_phase")
 
 
 static func enemy_telegraph(main: Node, etype: String, pos: Vector3) -> void:
@@ -155,6 +161,7 @@ static func end_run_audio(main: Node, win: bool) -> void:
 	if win: main.audio_mgr.play_victory()
 	else: main.audio_mgr.play_death()
 	main.audio_mgr.stop_ambient()
+	if main.mobile_feedback != null: main.mobile_feedback.trigger(main, "victory" if win else "death")
 
 
 static func apply_reduced_motion(main: Node, sm: Node) -> void:

@@ -90,6 +90,17 @@ func test_settings_menu_includes_touch_tab() -> void:
 	assert_str(tabs.get_tab_title(2)).is_equal("Touch")
 
 
+func test_touch_tab_includes_haptics_toggle() -> void:
+	var state: Dictionary = SETTINGS.build(_make_root(), null, null, Callable())
+	var panel: PanelContainer = state["panel"]
+	var touch_page: Node = panel.find_children("*", "TabContainer", true, false)[0].get_child(2)
+	var found := false
+	for node in touch_page.get_children():
+		if node is CheckBox and (node as CheckBox).text == "Haptics":
+			found = true
+	assert_bool(found).is_true()
+
+
 func test_pause_menu_keyboard_navigation_state() -> void:
 	var state: Dictionary = PAUSE.build(_make_root(), Callable(), Callable(), Callable(), Callable())
 	var buttons: Array = state["buttons"]

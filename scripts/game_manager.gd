@@ -135,6 +135,8 @@ func update_player(delta: float) -> void:
 		main.dash_pressed = false
 		if main.audio_mgr != null:
 			main.audio_mgr.play_dash()
+		if main.mobile_feedback != null:
+			main.mobile_feedback.trigger(main, "dash")
 		main.afterimages.append(main.present_animator.spawn_dash_afterimage(main.fx_root, main.player_node))
 	var speed: float = main.player_state["class"].speed * main._test_scale("player_speed_scale")
 	if main.dash_timer > 0.0:

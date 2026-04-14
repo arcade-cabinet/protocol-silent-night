@@ -23,6 +23,8 @@ static func damage_player(main: Node, amount: float) -> void:
 			# Rewrap: dramatic audio + heavy shake — distinct from regular damage.
 			if main.audio_mgr != null:
 				main.audio_mgr.play_rewrap()
+			if main.mobile_feedback != null:
+				main.mobile_feedback.trigger(main, "rewrap")
 			main.shake_magnitude = 0.9
 			if main.screen_shake != null:
 				main.screen_shake.add_trauma(0.9)
@@ -32,5 +34,7 @@ static func damage_player(main: Node, amount: float) -> void:
 	else:
 		if main.audio_mgr != null:
 			main.audio_mgr.play_damage()
+		if main.mobile_feedback != null:
+			main.mobile_feedback.trigger(main, "damage")
 		main.shake_magnitude = 0.3
 		main._update_ui()

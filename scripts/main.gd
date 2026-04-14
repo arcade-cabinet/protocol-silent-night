@@ -35,6 +35,7 @@ var board_obj_handler := preload("res://scripts/board_object_handler.gd").new(bo
 var between_match: RefCounted
 var progression: RefCounted
 var game_mgr: RefCounted
+var mobile_feedback := preload("res://scripts/mobile_feedback.gd").new()
 var flair_animator: Node
 var shake_magnitude: float = 0.0
 var screen_shake := preload("res://scripts/screen_shake.gd").new()
@@ -154,6 +155,7 @@ func _tick(delta: float) -> void:
 	if weather_director != null: weather_director.tick(delta)
 
 func _unhandled_input(event: InputEvent) -> void: MAIN_HELPERS.handle_input(self, event)
+func _notification(what: int) -> void: MAIN_HELPERS.handle_notification(self, what)
 
 func _load_definitions() -> void: MAIN_HELPERS.load_definitions(self)
 
@@ -162,6 +164,7 @@ func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(
 func _return_to_menu() -> void: BOARD_HELPERS.return_to_menu(self)
 
 func _trigger_level_up() -> void:
+	if mobile_feedback != null: mobile_feedback.trigger(self, "level_up")
 	if player_node != null: particles.spawn_level_up_burst(fx_root, player_node.position)
 	MAIN_HELPERS.trigger_level_up(self)
 
