@@ -23,8 +23,14 @@ static func build_results_screen(root: Control, on_continue: Callable) -> Dictio
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_theme_constant_override("separation", 14)
 	margin.add_child(vbox)
+	var kicker := Label.new()
+	kicker.text = "AFTERMATH REPORT"
+	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kicker.add_theme_font_size_override("font_size", 14)
+	kicker.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	vbox.add_child(kicker)
 	var title := Label.new()
-	title.text = "PACKAGE SURVIVED"
+	title.text = "LOT STILL STANDS"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 42)
 	title.add_theme_color_override("font_color", THEME.NEON_GOLD)
@@ -42,6 +48,12 @@ static func build_results_screen(root: Control, on_continue: Callable) -> Dictio
 		lbl.add_theme_font_size_override("font_size", 22)
 		lbl.add_theme_color_override("font_color", THEME.NEON_WHITE)
 		stats_box.add_child(lbl)
+	var sting := Label.new()
+	sting.text = "THE LOT KEPT SCORE."
+	sting.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sting.add_theme_font_size_override("font_size", 13)
+	sting.add_theme_color_override("font_color", Color("dceefb"))
+	vbox.add_child(sting)
 	var continue_btn := Button.new()
 	continue_btn.text = "CONTINUE →"
 	continue_btn.custom_minimum_size = Vector2(260, 60)
@@ -156,4 +168,3 @@ static func _build_scroll_card(outcome: Dictionary) -> Control:
 		body.text = "COAL:\n%s" % String(outcome.get("effect_id", "")).to_upper()
 	card_vbox.add_child(body)
 	return card
-

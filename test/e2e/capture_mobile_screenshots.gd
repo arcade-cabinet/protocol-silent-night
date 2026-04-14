@@ -79,6 +79,7 @@ func _run() -> void:
 
 func _capture_present_and_difficulty() -> void:
 	_main.ui_mgr._on_play_pressed()
+	await _settle_frames(3)
 	await _capture_mobile("present_select_mobile.png")
 	var first_unlocked: Button = _first_unlocked_present()
 	if first_unlocked == null:

@@ -25,7 +25,27 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	boss_panel.offset_right = width * 0.5
 	boss_panel.visible = false
 	root.add_child(boss_panel)
-
+	var shell := PanelContainer.new()
+	shell.custom_minimum_size = Vector2(width, 0.0)
+	shell.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	THEME.apply_to_panel(shell, THEME.NEON_RED)
+	boss_panel.add_child(shell)
+	var shell_margin := MarginContainer.new()
+	shell_margin.add_theme_constant_override("margin_left", 10)
+	shell_margin.add_theme_constant_override("margin_top", 8)
+	shell_margin.add_theme_constant_override("margin_right", 10)
+	shell_margin.add_theme_constant_override("margin_bottom", 10)
+	shell.add_child(shell_margin)
+	var shell_vbox := VBoxContainer.new()
+	shell_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	shell_vbox.add_theme_constant_override("separation", 4)
+	shell_margin.add_child(shell_vbox)
+	var boss_kicker := Label.new()
+	boss_kicker.text = "YULE RIOT ACTIVE"
+	boss_kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_kicker.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	boss_kicker.add_theme_font_size_override("font_size", 10 if is_mobile else 11)
+	shell_vbox.add_child(boss_kicker)
 	var boss_title := Label.new()
 	boss_title.text = "// KRAMPUS-PRIME //"
 	boss_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -33,21 +53,20 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	boss_title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	boss_title.add_theme_constant_override("outline_size", 4)
 	boss_title.add_theme_font_size_override("font_size", 20 if is_mobile else 24)
-	boss_panel.add_child(boss_title)
+	shell_vbox.add_child(boss_title)
 	var boss_hint := Label.new()
-	boss_hint.text = "TREE LOT RIOT"
+	boss_hint.text = "BURN THE CROWN // HOLD THE LOT"
 	boss_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	boss_hint.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	boss_hint.add_theme_font_size_override("font_size", 10 if is_mobile else 12)
-	boss_panel.add_child(boss_hint)
-
+	shell_vbox.add_child(boss_hint)
 	var boss_bar := ProgressBar.new()
 	boss_bar.max_value = 100
 	boss_bar.value = 100
-	boss_bar.custom_minimum_size = Vector2(width, 18 if is_mobile else 22)
+	boss_bar.custom_minimum_size = Vector2(width - 24.0, 18 if is_mobile else 22)
 	boss_bar.show_percentage = false
 	THEME.apply_to_progress_bar(boss_bar, THEME.NEON_RED)
-	boss_panel.add_child(boss_bar)
+	shell_vbox.add_child(boss_bar)
 	return {"boss_panel": boss_panel, "boss_bar": boss_bar}
 
 
@@ -105,9 +124,15 @@ static func build_level_screen(root: Control) -> Dictionary:
 		bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		frame.add_child(bottom_spacer)
 
+	var level_kicker := Label.new()
+	level_kicker.text = "RACK RAID"
+	level_kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	level_kicker.add_theme_font_size_override("font_size", 11 if is_mobile else 13)
+	level_kicker.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	level_vbox.add_child(level_kicker)
 	var level_title := Label.new()
 	level_title.name = "LevelTitle"
-	level_title.text = "Festive Upgrade"
+	level_title.text = "Riot Upgrade"
 	level_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	level_title.modulate = Color("7aff8a")
 	level_title.add_theme_font_size_override("font_size", 24 if is_mobile else 38)

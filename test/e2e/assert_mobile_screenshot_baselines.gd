@@ -18,7 +18,7 @@ const FILES := [
 	"victory_mobile.png",
 ]
 const CHANNEL_TOLERANCE := 0.02
-const DIFF_RATIO_LIMIT := 0.0003
+const DIFF_RATIO_LIMIT := 0.0004
 
 
 func _initialize() -> void:

@@ -27,11 +27,25 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	end_margin.add_child(scroll)
-
+	var shell_wrap := VBoxContainer.new()
+	shell_wrap.alignment = BoxContainer.ALIGNMENT_CENTER
+	shell_wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(shell_wrap)
+	var report_shell := PanelContainer.new()
+	report_shell.custom_minimum_size = Vector2(maxf(320.0, float(layout["safe_rect"].size.x) * 0.58), 0.0)
+	report_shell.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	THEME.apply_to_panel(report_shell, THEME.NEON_GOLD)
+	shell_wrap.add_child(report_shell)
+	var shell_margin := MarginContainer.new()
+	shell_margin.add_theme_constant_override("margin_left", 12)
+	shell_margin.add_theme_constant_override("margin_top", 14)
+	shell_margin.add_theme_constant_override("margin_right", 12)
+	shell_margin.add_theme_constant_override("margin_bottom", 14)
+	report_shell.add_child(shell_margin)
 	var end_vbox := VBoxContainer.new()
 	end_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	end_vbox.add_theme_constant_override("separation", 16)
-	scroll.add_child(end_vbox)
+	shell_margin.add_child(end_vbox)
 	var kicker := Label.new()
 	kicker.text = "AFTERMATH REPORT"
 	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -57,6 +71,12 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 	end_waves.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	end_waves.add_theme_font_size_override("font_size", 16 if is_mobile else 18)
 	end_vbox.add_child(end_waves)
+	var end_sting := Label.new()
+	end_sting.text = "THE LOT KEPT SCORE."
+	end_sting.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	end_sting.add_theme_font_size_override("font_size", 11 if is_mobile else 12)
+	end_sting.add_theme_color_override("font_color", Color("dceefb"))
+	end_vbox.add_child(end_sting)
 
 	var restart := Button.new()
 	restart.text = "BACK TO THE LOT"

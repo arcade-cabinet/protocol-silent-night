@@ -48,9 +48,9 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	vbox.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "// TREE LOT RIOT //"
+	subtitle.text = "// TREE LOT RIOT //\nAUTOFIRE CHAOS • BUILD FAST • DIE LOUD"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 16 if is_mobile else 24)
+	subtitle.add_theme_font_size_override("font_size", 15 if is_mobile else 21)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	vbox.add_child(subtitle)
 
@@ -138,7 +138,7 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	mid_row.add_child(details_vbox)
 	var detail_state := START_DETAIL.build(details_vbox, layout)
 	var select_btn := Button.new()
-	select_btn.text = "SELECT"
+	select_btn.text = "LOCK THE GIFT"
 	select_btn.name = "SelectButton"
 	select_btn.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 56) if stacked_mobile else Vector2(240, 60)
 	select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
