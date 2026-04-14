@@ -36,6 +36,8 @@
   The display lane now also proves a left-handed `Sightline` run, including left-edge dash geometry, the `STEP` dash verb, and the doctrine-specific lock callout instead of only validating the default breach-style striker lane.
 - **Doctrine-specific portrait visual baselines**
   The mobile screenshot guard now includes left-handed `Sightline` and unlock-gated `Sweep` gameplay frames, so doctrine-specific action geometry and lock/readability states are visually pinned instead of only behavior-tested.
+- **Unlock-backed sweep touch proof**
+  The display lane now proves an actually unlocked `Sweep` run end to end, including unlock gating, the `JINK` dash verb, right-edge action geometry, and the doctrine-specific `SWEEP LOCK` callout instead of stopping at default-available presents.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 

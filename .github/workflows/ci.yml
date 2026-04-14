@@ -100,6 +100,16 @@ jobs:
             --path . -s res://test/e2e/test_mobile_touch_sightline_left.gd
         timeout-minutes: 10
 
+      - name: Run unlock-backed sweep mobile touch e2e
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
+        run: |
+          xvfb-run -a \
+            godot --display-driver x11 --rendering-driver opengl3 \
+            --path . -s res://test/e2e/test_mobile_touch_sweep_unlock.gd
+        timeout-minutes: 10
+
       - name: Run mobile visual guard
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
