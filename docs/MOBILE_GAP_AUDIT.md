@@ -32,6 +32,8 @@
   The portrait baseline guard now has a dedicated CI job with software-rendered display capture and screenshot artifact upload, so regressions stop at pull request time instead of depending on local discipline.
 - **Display-session mobile touch e2e**
   A portrait windowed e2e now walks through deploy flow, difficulty handoff, live left-thumb movement drag, and concurrent dash touch, then runs in the CI display lane instead of relying on manual handheld inspection.
+- **Doctrine + handedness touch proof**
+  The display lane now also proves a left-handed `Sightline` run, including left-edge dash geometry, the `STEP` dash verb, and the doctrine-specific lock callout instead of only validating the default breach-style striker lane.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -54,5 +56,5 @@
 ## Highest-Value Next Moves
 
 1. Run Android hardware soak with frame-budget notes instead of extrapolating from desktop portrait captures.
-2. Add operator-specific touch/readability soak so every present doctrine is proven on handheld framing, not just the default striker lane.
-3. Turn the new display-session touch e2e into a small matrix of left-handed and doctrine-specific runs instead of one default striker lane.
+2. Add operator-specific touch/readability soak for the remaining doctrines beyond the current breach and sightline lanes.
+3. Turn the display-session touch e2e into a wider matrix that covers unlock-gated presents, not just default-available runs.
