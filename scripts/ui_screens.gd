@@ -34,6 +34,12 @@ static func build_boss_panel(root: Control) -> Dictionary:
 	boss_title.add_theme_constant_override("outline_size", 4)
 	boss_title.add_theme_font_size_override("font_size", 20 if is_mobile else 24)
 	boss_panel.add_child(boss_title)
+	var boss_hint := Label.new()
+	boss_hint.text = "TREE LOT RIOT"
+	boss_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_hint.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	boss_hint.add_theme_font_size_override("font_size", 10 if is_mobile else 12)
+	boss_panel.add_child(boss_hint)
 
 	var boss_bar := ProgressBar.new()
 	boss_bar.max_value = 100
@@ -109,7 +115,7 @@ static func build_level_screen(root: Control) -> Dictionary:
 
 	var level_hint := Label.new()
 	level_hint.name = "LevelHint"
-	level_hint.text = "Pick one field patch and get back on the board."
+	level_hint.text = "Rip one upgrade off the rack and get back into the riot."
 	level_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	level_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	level_hint.add_theme_font_size_override("font_size", 13 if is_mobile else 16)

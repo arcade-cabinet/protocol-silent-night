@@ -44,7 +44,7 @@ func _run() -> void:
 	root.add_child(_main)
 	await _settle_frames(3)
 	_main.configure_test_mode({"manual_tick": true, "fixed_run_seed": RUN_SEED, "invincible": true, "auto_collect": true})
-	await _activate_button(_button_with_text(_main.title_screen, "DEPLOY"), func() -> bool: return _main.start_screen.visible, "Expected start screen after deploy tap on resume shell")
+	await _activate_button(_button_named(_main.title_screen, "StartRunButton"), func() -> bool: return _main.start_screen.visible, "Expected start screen after deploy tap on resume shell")
 
 	var resume_button: Button = _main.start_screen.find_child("ResumeRunButton", true, false)
 	_assert(resume_button != null and resume_button.visible, "Expected visible resume button on start screen")
@@ -65,7 +65,7 @@ func _run() -> void:
 
 
 func _start_holly_run() -> void:
-	await _activate_button(_button_with_text(_main.title_screen, "DEPLOY"), func() -> bool: return _main.start_screen.visible, "Expected present select after deploy tap")
+	await _activate_button(_button_named(_main.title_screen, "StartRunButton"), func() -> bool: return _main.start_screen.visible, "Expected present select after deploy tap")
 	var present_button := _present_button("holly_striker")
 	_assert(present_button != null, "Expected Holly Striker present button")
 	await _activate_button(present_button, func() -> bool: return _main.current_class_id == "holly_striker", "Expected selected present to update current class")
@@ -129,9 +129,9 @@ func _click_button(button: Button) -> void:
 	await _settle_frames(2)
 
 
-func _button_with_text(root_node: Node, text: String) -> Button:
+func _button_named(root_node: Node, name: String) -> Button:
 	for node in root_node.find_children("*", "Button", true, false):
-		if node is Button and (node as Button).text == text:
+		if node is Button and (node as Button).name == name:
 			return node as Button
 	return null
 

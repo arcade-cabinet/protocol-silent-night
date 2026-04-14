@@ -27,7 +27,7 @@ static func build(parent: BoxContainer, layout: Dictionary) -> Dictionary:
 	margin.add_child(vbox)
 
 	var cue := Label.new()
-	cue.text = "SELECTED GIFT"
+	cue.text = "RIOT PROFILE"
 	cue.add_theme_font_size_override("font_size", 11 if is_mobile else 12)
 	cue.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	vbox.add_child(cue)
@@ -49,7 +49,7 @@ static func build(parent: BoxContainer, layout: Dictionary) -> Dictionary:
 
 	var tagline_label := Label.new()
 	tagline_label.name = "PresentDetailTagline"
-	tagline_label.text = "Holiday hardware with a bad attitude."
+	tagline_label.text = "Gift-bag outlaw with a bad attitude."
 	tagline_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tagline_label.add_theme_font_size_override("font_size", 12 if is_mobile else 14)
 	tagline_label.add_theme_color_override("font_color", Color("dceefb"))
@@ -65,7 +65,7 @@ static func build(parent: BoxContainer, layout: Dictionary) -> Dictionary:
 
 	var unlock_label := Label.new()
 	unlock_label.name = "PresentDetailUnlock"
-	unlock_label.text = "Swipe the rail and pick a dangerous gift."
+	unlock_label.text = "Pick the meanest gift in the lot."
 	unlock_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	unlock_label.add_theme_font_size_override("font_size", 11 if is_mobile else 13)
 	unlock_label.add_theme_color_override("font_color", THEME.NEON_GOLD)

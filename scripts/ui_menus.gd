@@ -48,14 +48,15 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	vbox.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "// ENDLESS VIGIL //"
+	subtitle.text = "// TREE LOT RIOT //"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 16 if is_mobile else 24)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	vbox.add_child(subtitle)
 
 	var play_btn := Button.new()
-	play_btn.text = "DEPLOY"
+	play_btn.name = "StartRunButton"
+	play_btn.text = "RIP THE WRAP"
 	play_btn.custom_minimum_size = Vector2(200, 60) if is_mobile else Vector2(280, 70)
 	play_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	play_btn.add_theme_font_size_override("font_size", 20 if is_mobile else 28)
@@ -64,7 +65,8 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	vbox.add_child(play_btn)
 
 	var prog_btn := Button.new()
-	prog_btn.text = "SERVICE RECORD"
+	prog_btn.name = "ProgressButton"
+	prog_btn.text = "SCAR TISSUE"
 	prog_btn.custom_minimum_size = Vector2(200, 50) if is_mobile else Vector2(280, 60)
 	prog_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	prog_btn.add_theme_font_size_override("font_size", 16 if is_mobile else 22)
@@ -117,7 +119,7 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	start_vbox.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "// ENDLESS VIGIL //"
+	subtitle.text = "// PICK THE MEANEST GIFT //"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 11 if is_mobile else 20)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
@@ -168,7 +170,7 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	class_scroll.add_child(classes_box)
 
 	var instruction := Label.new()
-	instruction.text = "Phone: landscape is primary. Drag with your left thumb, tap DASH with your right." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
+	instruction.text = "Phone: landscape is primary. Left thumb drives. Right thumb starts trouble." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and hit the dash button when the lot turns ugly."
 	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	instruction.modulate = Color("dceefb")

@@ -31,7 +31,7 @@ static func build_progress_screen(root: Control, on_back: Callable) -> Dictionar
 	scroll.add_child(vbox)
 
 	var title := Label.new()
-	title.text = "SERVICE RECORD"
+	title.text = "SCAR TISSUE"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28 if is_mobile else 48)
 	title.add_theme_color_override("font_color", THEME.NEON_GOLD)

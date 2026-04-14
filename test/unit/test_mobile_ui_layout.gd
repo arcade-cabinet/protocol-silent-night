@@ -30,7 +30,7 @@ func test_level_screen_uses_wide_phone_upgrade_row() -> void:
 	var upgrade_box: Node = level_ui["upgrade_box"]
 	assert_object(upgrade_box).is_instanceof(HBoxContainer)
 	assert_object(level_ui["decision_shell"]).is_null()
-	assert_str((level_ui["level_hint"] as Label).text).contains("Pick one field patch")
+	assert_str((level_ui["level_hint"] as Label).text).contains("Rip one upgrade")
 
 
 func test_difficulty_screen_uses_wide_phone_grid() -> void:

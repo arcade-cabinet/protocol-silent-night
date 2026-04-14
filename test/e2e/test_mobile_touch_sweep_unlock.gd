@@ -31,7 +31,7 @@ func _run() -> void:
 		"auto_choose_upgrade": true,
 		"skip_between_match": true,
 	})
-	await _activate_button(_button_with_text(_main.title_screen, "DEPLOY"), func() -> bool: return _main.start_screen.visible)
+	await _activate_button(_button_named(_main.title_screen, "StartRunButton"), func() -> bool: return _main.start_screen.visible)
 	var present_button := _present_button("p_06")
 	_assert(present_button != null, "Expected Frosty Operative present button")
 	_assert(bool(present_button.get_meta("unlocked", false)), "Expected Frosty Operative to be unlocked for the sweep run")
@@ -150,9 +150,9 @@ func _game_drag(position: Vector2, index: int) -> void:
 	event.position = position
 	_main._unhandled_input(event)
 
-func _button_with_text(root_node: Node, text: String) -> Button:
+func _button_named(root_node: Node, name: String) -> Button:
 	for node in root_node.find_children("*", "Button", true, false):
-		if node is Button and (node as Button).text == text:
+		if node is Button and (node as Button).name == name:
 			return node as Button
 	return null
 

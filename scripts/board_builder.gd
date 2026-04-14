@@ -46,46 +46,63 @@ func build_snow_drifts(board_root: Node3D, board_data: BoardLayout) -> void:
 
 
 func build_outer_ridge(board_root: Node3D, _board_data: BoardLayout) -> void:
-	# Low snowbanks and festive hazard stakes hold the board without reading as debug ice walls.
-	var arena_radius: float = 18.0 # Should probably come from config but keeping consistent with prev
-	var half_w := arena_radius * 1.6
-	var half_h := arena_radius
+	# Build elongated snowbanks from ridge samples so the perimeter reads as drift lines,
+	# not as a repeated row of ice pucks.
 	var snow_material: Material = materials.material_for_zone("snow")
 	var accents := [Color("ff2244"), Color("ffd700"), Color("1f9f58")]
+	var ridges: Array = _board_data.ridges if not _board_data.ridges.is_empty() else _fallback_ridges()
+	for ridge_index in range(ridges.size()):
+		var ridge: Dictionary = ridges[ridge_index]
+		var world: Vector2 = ridge["world"]
+		var mound := MeshInstance3D.new()
+		var mound_mesh := CylinderMesh.new()
+		var radius := float(ridge.get("radius", 1.8))
+		var height := clampf(float(ridge.get("height", 3.6)) * 0.12, 0.36, 0.95)
+		mound_mesh.top_radius = radius * 0.76
+		mound_mesh.bottom_radius = radius
+		mound_mesh.height = height
+		mound.mesh = mound_mesh
+		mound.position = Vector3(world.x, height * 0.32, world.y)
+		mound.scale = Vector3(clampf(radius * 1.15, 1.4, 3.2), 1.0, 0.58)
+		mound.rotation.y = world.angle() + PI * 0.5
+		mound.material_override = snow_material
+		board_root.add_child(mound)
+		if ridge_index % 3 == 0:
+			_add_hazard_pair(board_root, world, world.angle() + PI * 0.5, accents[int(ridge_index / 3) % accents.size()])
+
+
+func _add_hazard_pair(board_root: Node3D, world: Vector2, tangent_angle: float, accent: Color) -> void:
+	var tangent := Vector2.RIGHT.rotated(tangent_angle)
+	for offset in [-0.8, 0.8]:
+		var post := MeshInstance3D.new()
+		var post_mesh := CylinderMesh.new()
+		post_mesh.top_radius = 0.1
+		post_mesh.bottom_radius = 0.15
+		post_mesh.height = 1.15
+		post.mesh = post_mesh
+		post.position = Vector3(world.x + tangent.x * offset, 0.72, world.y + tangent.y * offset)
+		post.material_override = materials.flat_material(Color("2b1716"))
+		board_root.add_child(post)
+		var cap := MeshInstance3D.new()
+		var cap_mesh := SphereMesh.new()
+		cap_mesh.radius = 0.16
+		cap_mesh.height = 0.32
+		cap.mesh = cap_mesh
+		cap.position = post.position + Vector3(0.0, 0.52, 0.0)
+		cap.material_override = materials.emissive_material(accent, 1.3, 0.35)
+		board_root.add_child(cap)
+
+
+func _fallback_ridges() -> Array:
+	var ridges: Array = []
+	var arena_radius := 18.0
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
-	var perimeter: Array = [
-		[Vector2(-half_w, -half_h), Vector2(half_w, -half_h)],
-		[Vector2(-half_w, half_h), Vector2(half_w, half_h)],
-		[Vector2(-half_w, -half_h), Vector2(-half_w, half_h)],
-		[Vector2(half_w, -half_h), Vector2(half_w, half_h)]
-	]
-	for segment in perimeter:
-		var start: Vector2 = segment[0]
-		var end: Vector2 = segment[1]
-		var dist := start.distance_to(end)
-		var steps := int(dist / 2.5)
-		for i in range(steps):
-			var t := float(i) / float(steps)
-			var pos := start.lerp(end, t)
-			var drift := MeshInstance3D.new()
-			var drift_mesh := CylinderMesh.new()
-			var radius := rng.randf_range(0.95, 1.75)
-			drift_mesh.top_radius = radius * 0.9
-			drift_mesh.bottom_radius = radius * 1.18
-			drift_mesh.height = rng.randf_range(0.35, 0.9)
-			drift.mesh = drift_mesh
-			drift.position = Vector3(pos.x, drift_mesh.height * 0.28, pos.y)
-			drift.rotation.y = rng.randf() * TAU
-			drift.material_override = snow_material
-			board_root.add_child(drift)
-			if i % 4 == 0:
-				var post := MeshInstance3D.new()
-				var post_mesh := CylinderMesh.new()
-				post_mesh.top_radius = 0.12
-				post_mesh.bottom_radius = 0.18
-				post_mesh.height = rng.randf_range(1.1, 1.8)
-				post.mesh = post_mesh
-				post.position = Vector3(pos.x, post_mesh.height * 0.5 + 0.15, pos.y)
-				post.material_override = materials.emissive_material(accents[int(i / 4) % accents.size()], 1.45, 0.32)
-				board_root.add_child(post)
+	for ridge_index in range(18):
+		var angle := TAU * float(ridge_index) / 18.0 + rng.randf_range(-0.08, 0.08)
+		ridges.append({
+			"world": Vector2.RIGHT.rotated(angle) * (arena_radius + rng.randf_range(2.4, 5.8)),
+			"radius": rng.randf_range(1.0, 2.4),
+			"height": rng.randf_range(2.4, 7.0),
+		})
+	return ridges

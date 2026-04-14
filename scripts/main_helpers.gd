@@ -188,7 +188,7 @@ static func show_gameplay_ui(main: Node) -> void:
 static func finalize_end_screen(main: Node, win: bool) -> void:
 	var ui: RefCounted = main.ui_mgr
 	ui.end_screen.visible = true
-	ui.end_title.text = "CAMPAIGN SECURED" if win else "OVERWHELMED"
+	ui.end_title.text = "PACKAGE SURVIVED" if win else "WRAP RIPPED OPEN"
 	ui.end_title.modulate = Color("69d6ff") if win else Color("ff617e")
-	ui.end_message.text = "Krampus-Prime purged." if win else "Operator down."
+	ui.end_message.text = "Krampus-Prime purged. The lot still howls." if win else "Operator down. The lot got meaner."
 	ui.end_waves.text = "Waves cleared: %d" % maxi(1, main.current_wave_index + 1)

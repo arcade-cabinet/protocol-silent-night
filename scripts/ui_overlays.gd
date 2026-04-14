@@ -32,11 +32,18 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 	end_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	end_vbox.add_theme_constant_override("separation", 16)
 	scroll.add_child(end_vbox)
+	var kicker := Label.new()
+	kicker.text = "AFTERMATH REPORT"
+	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kicker.add_theme_font_size_override("font_size", 12 if is_mobile else 14)
+	kicker.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	end_vbox.add_child(kicker)
 
 	var end_title := Label.new()
 	end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	end_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	end_title.add_theme_font_size_override("font_size", 32 if is_mobile else 42)
+	end_title.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	end_vbox.add_child(end_title)
 
 	var end_message := Label.new()
@@ -52,7 +59,7 @@ static func build_end_screen(root: Control, on_menu_return: Callable) -> Diction
 	end_vbox.add_child(end_waves)
 
 	var restart := Button.new()
-	restart.text = "Main Menu"
+	restart.text = "BACK TO THE LOT"
 	restart.custom_minimum_size = Vector2(220, 56) if is_mobile else Vector2(180, 48)
 	restart.pressed.connect(on_menu_return)
 	end_vbox.add_child(restart)

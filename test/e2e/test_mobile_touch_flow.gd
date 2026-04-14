@@ -32,7 +32,7 @@ func _run() -> void:
 		"player_damage_scale": 0.7,
 	})
 
-	await _activate_button(_button_with_text(_main.title_screen, "DEPLOY"), func() -> bool: return _main.start_screen.visible, "Expected present select after deploy tap")
+	await _activate_button(_button_named(_main.title_screen, "StartRunButton"), func() -> bool: return _main.start_screen.visible, "Expected present select after deploy tap")
 
 	var present_button := _present_button("holly_striker")
 	_assert(present_button != null, "Expected Holly Striker present button")
@@ -158,9 +158,9 @@ func _click_button(button: Button) -> void:
 	Input.parse_input_event(up)
 	await _settle_frames(2)
 
-func _button_with_text(root_node: Node, text: String) -> Button:
+func _button_named(root_node: Node, name: String) -> Button:
 	for node in root_node.find_children("*", "Button", true, false):
-		if node is Button and (node as Button).text == text:
+		if node is Button and (node as Button).name == name:
 			return node as Button
 	return null
 
