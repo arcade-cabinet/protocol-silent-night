@@ -15,7 +15,7 @@ func test_start_screen_uses_wide_phone_card_row() -> void:
 	var start: Dictionary = _menus.build_start_screen(root, func() -> void: pass)
 	var classes_box: Node = start["classes_box"]
 	assert_object(classes_box).is_instanceof(HBoxContainer)
-	assert_bool(bool(start["uses_outer_scroll"])).is_true()
+	assert_bool(bool(start["uses_outer_scroll"])).is_false()
 	assert_int(int((start["class_scroll"] as ScrollContainer).horizontal_scroll_mode)).is_equal(ScrollContainer.SCROLL_MODE_AUTO)
 
 

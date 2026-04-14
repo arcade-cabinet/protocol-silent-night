@@ -4,7 +4,7 @@ const THEME := preload("res://scripts/holidaypunk_theme.gd")
 const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 const START_DETAIL := preload("res://scripts/start_present_detail.gd")
-
+const RITUAL := preload("res://scripts/frontdoor_ritual.gd")
 
 static func build_title_screen(root: Control, on_play: Callable, on_progress: Callable) -> Dictionary:
 	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
@@ -53,7 +53,7 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	subtitle.add_theme_font_size_override("font_size", 15 if is_mobile else 21)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	vbox.add_child(subtitle)
-
+	vbox.add_child(RITUAL.build_title_manifesto(is_mobile, bool(layout["uses_stacked_mobile_ui"])))
 	var play_btn := Button.new()
 	play_btn.name = "StartRunButton"
 	play_btn.text = "RIP THE WRAP"
@@ -96,10 +96,10 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 
 	var start_vbox := VBoxContainer.new()
 	start_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	start_vbox.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * 1.3)))
+	start_vbox.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (0.8 if is_mobile and not stacked_mobile else 1.3))))
 	start_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var outer_scroll: ScrollContainer = null
-	if stacked_mobile:
+	if stacked_mobile or is_mobile:
 		start_margin.add_child(start_vbox)
 	else:
 		outer_scroll = ScrollContainer.new()
@@ -124,11 +124,11 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	subtitle.add_theme_font_size_override("font_size", 11 if is_mobile else 20)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	start_vbox.add_child(subtitle)
-
+	start_vbox.add_child(RITUAL.build_select_manifesto(is_mobile, stacked_mobile))
 	var mid_row: BoxContainer = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
 	mid_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	mid_row.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (1.0 if stacked_mobile else 1.8))))
-	mid_row.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
+	mid_row.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile or is_mobile else Control.SIZE_SHRINK_CENTER
 	start_vbox.add_child(mid_row)
 
 	var details_vbox := VBoxContainer.new()
@@ -158,23 +158,22 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	details_vbox.add_child(resume_btn)
 
 	var class_scroll := ScrollContainer.new()
-	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 240.0) if stacked_mobile else Vector2(minf(800.0, float(layout["safe_rect"].size.x) * 0.56), 400.0)
+	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 240.0) if stacked_mobile else Vector2(minf(760.0, float(layout["safe_rect"].size.x) * 0.58), 212.0 if is_mobile else 400.0)
 	class_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if stacked_mobile else ScrollContainer.SCROLL_MODE_AUTO
 	class_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if stacked_mobile else ScrollContainer.SCROLL_MODE_DISABLED
-	class_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
+	class_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile or is_mobile else Control.SIZE_SHRINK_CENTER
 	mid_row.add_child(class_scroll)
 
 	var classes_box: Container = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
 	classes_box.name = "ClassCards"
 	classes_box.add_theme_constant_override("separation", 12 if stacked_mobile else 20)
 	class_scroll.add_child(classes_box)
-
 	var instruction := Label.new()
-	instruction.text = "Phone: landscape is primary. Left thumb drives. Right thumb starts trouble." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and hit the dash button when the lot turns ugly."
+	instruction.text = "Landscape only. Left thumb steers. Right thumb starts the riot." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and punch the dash before the lot punches back."
 	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	instruction.modulate = Color("dceefb")
-	start_vbox.add_child(instruction)
+	if not (is_mobile and not stacked_mobile): start_vbox.add_child(instruction)
 
 	var back_btn := Button.new()
 	back_btn.text = "< BACK"

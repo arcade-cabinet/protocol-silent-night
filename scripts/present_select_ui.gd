@@ -29,13 +29,17 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 	var layout := VIEWPORT_PROFILE.for_viewport(classes_box.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
 	var stacked_mobile := bool(layout["uses_stacked_mobile_ui"])
+	var wide_mobile := is_mobile and not stacked_mobile
 	if save_manager != null:
 		best_wave = int(save_manager.state.get("best_wave", 0))
 	for present_id in present_defs.keys():
 		var def: Dictionary = present_defs[present_id]
 		var button := Button.new()
 		var unlocked := is_present_unlocked(def, best_wave, save_manager)
-		button.custom_minimum_size = Vector2(maxf(220.0, float(layout["safe_rect"].size.x) - float(layout["edge_pad"]) * 2.0), 108.0) if stacked_mobile else Vector2(240, 320)
+		var card_size := Vector2(maxf(220.0, float(layout["safe_rect"].size.x) - float(layout["edge_pad"]) * 2.0), 108.0) if stacked_mobile else Vector2(240, 320)
+		if wide_mobile:
+			card_size = Vector2(clampf(float(layout["safe_rect"].size.x) * 0.26, 190.0, 220.0), 188.0)
+		button.custom_minimum_size = card_size
 		button.add_theme_font_size_override("font_size", 12 if is_mobile else 13)
 		var accent_hex: String = def.get("bow_color", "#55f7ff") if unlocked else "#404040"
 		THEME.apply_to_button(button, Color(accent_hex))
@@ -139,25 +143,25 @@ static func _update_details(detail_state: Dictionary, def: Dictionary, unlocked:
 	if tagline_label != null:
 		tagline_label.text = "%s // %s" % [_archetype_tag(def), _riot_flavor(def)]
 	if stats_label != null:
-		stats_label.text = _stat_summary(def)
+		stats_label.text = "%s\n%s" % [_stat_summary(def), _punk_summary(def)]
 	if unlock_label_node != null:
-		unlock_label_node.text = "READY FOR DEPLOYMENT · %s" % _punk_summary(def) if unlocked else "LOCKED · %s" % unlock_label(String(def.get("unlock", ""))).to_upper()
+		unlock_label_node.text = "READY FOR DEPLOYMENT · LOCK THE GIFT" if unlocked else "LOCKED · %s" % unlock_label(String(def.get("unlock", ""))).to_upper()
 
 
 static func _card_copy(def: Dictionary, unlocked: bool) -> Dictionary:
 	return {
-		"kicker": "LIVE NOW" if unlocked else unlock_label(String(def.get("unlock", ""))).to_upper(),
+		"kicker": "RACK READY" if unlocked else unlock_label(String(def.get("unlock", ""))).to_upper(),
 		"name": String(def.get("name", "Unknown Present")).to_upper(),
 		"role": _archetype_tag(def),
 		"stats": _compact_stats(def),
 		"flavor": _riot_flavor(def),
-		"footer": "RIP THE WRAP" if unlocked else "LOCKED GIFT",
+		"footer": "LOCK THE GIFT" if unlocked else "LOCKED GIFT",
 		"unlocked": unlocked,
 	}
 
 
 static func _compact_stats(def: Dictionary) -> String:
-	return "DMG %d  RATE %.1f  RNG %d" % [int(round(float(def.get("damage", 0.0)))), 1.0 / maxf(float(def.get("fire_rate", 1.0)), 0.01), int(round(float(def.get("range", 0.0))))]
+	return "DMG %d  RATE %.1f  RNG %d  VOL %d" % [int(round(float(def.get("damage", 0.0)))), 1.0 / maxf(float(def.get("fire_rate", 1.0)), 0.01), int(round(float(def.get("range", 0.0)))), int(def.get("shot_count", 1))]
 
 
 static func _stat_summary(def: Dictionary) -> String:
@@ -181,11 +185,11 @@ static func _archetype_tag(def: Dictionary) -> String:
 
 
 static func _punk_summary(def: Dictionary) -> String:
-	return "%s / %s / %s" % [_pretty_token(String(def.get("expression", "manic"))), _pretty_token(String(def.get("body_shape", "gift_bag"))), _pretty_token(String(def.get("accessory", "none")))]
+	return "%s / %s / %s" % [_pretty_token(String(def.get("expression", "manic"))), _pretty_token(String(def.get("topper", "none"))), _pretty_token(String(def.get("accessory", "none")))]
 
 
 static func _riot_flavor(def: Dictionary) -> String:
-	return "%s %s with %s" % [_pretty_token(String(def.get("expression", "manic"))), _pretty_token(String(def.get("body_shape", "gift_bag"))), _pretty_token(String(def.get("accessory", "none")))]
+	return "%s %s with %s and %s" % [_pretty_token(String(def.get("expression", "manic"))), _pretty_token(String(def.get("body_shape", "gift_bag"))), _pretty_token(String(def.get("topper", "none"))), _pretty_token(String(def.get("accessory", "none")))]
 
 
 static func _pretty_token(value: String) -> String:
