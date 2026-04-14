@@ -26,7 +26,13 @@ func start_run(class_id: String) -> void:
 	main.current_class_id = class_id
 	main.state = "playing"
 	main.current_wave_index = -1
-	main.run_seed = int(Time.get_ticks_msec()) ^ int(Time.get_unix_time_from_system())
+	main.run_seed = int(main.test_mode.get("fixed_run_seed", int(Time.get_ticks_msec()) ^ int(Time.get_unix_time_from_system())))
+	seed(main.run_seed)
+	wave_spawner.configure_seed(main.run_seed)
+	main.board_obj_handler.configure_seed(main.run_seed)
+	main.particles._rng.seed = main.run_seed ^ 0xFACE12
+	main.screen_shake._rng.seed = main.run_seed ^ 0x5AE1
+	main.screen_shake.reset()
 	main.progression.reset()
 	main.dash_timer = 0.0
 	main.dash_cooldown_timer = 0.0

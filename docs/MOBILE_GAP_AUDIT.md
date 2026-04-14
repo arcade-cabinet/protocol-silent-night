@@ -26,6 +26,8 @@
   Difficulty now comes up as a present-aware mobile decision rail instead of a generic full-screen desktop grid.
 - **Safe-area regression matrix**
   Viewport profile tests now cover portrait notch/home-indicator and landscape notch overrides instead of assuming one default safe area.
+- **Assertable mobile baseline guard**
+  Portrait capture now has a committed baseline set plus a compare script with deterministic mobile capture setup and a tight render-jitter envelope, so mobile visuals can fail fast instead of relying only on manual artifact inspection.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -42,8 +44,8 @@
 
 ### QA / Release Readiness
 
-- **Portrait screenshot batch is additive, not yet CI-enforced**
-  The capture lane exists, but it is not yet wired into a recurring regression ritual or artifact comparison workflow.
+- **Mobile baseline guard is local-only**
+  The compare script now produces stable local pass/fail results, but it is still not wired into CI or release gating.
 - **No touch-flow e2e on a real display**
   Current automated tests prove control logic and scene boot, but they still do not synthesize an end-to-end on-screen touch run in a non-headless display session.
 - **No Android hardware soak**
@@ -51,6 +53,6 @@
 
 ## Highest-Value Next Moves
 
-1. Turn the portrait screenshot ritual into an assertable baseline workflow instead of an additive artifact dump.
+1. Wire the mobile baseline guard into CI so visual regressions fail before merge instead of during local review.
 2. Add a real touch-flow display-session e2e so the whole mobile deploy path is exercised without hand inspection.
 3. Run Android hardware soak with frame-budget notes instead of extrapolating from desktop portrait captures.

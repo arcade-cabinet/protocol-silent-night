@@ -5,6 +5,7 @@ const SAVE_MANAGER_SCRIPT := preload("res://scripts/save_manager.gd")
 var _main: Node = null
 var _shot_dir := "res://.artifacts/screenshots"
 var _save_manager: Node = null
+var _capture_seed := 1225
 
 
 func _initialize() -> void:
@@ -22,11 +23,12 @@ func _initialize() -> void:
 func _run() -> void:
 	await process_frame
 	await process_frame
-	await _main.capture_screenshot("%s/menu_mobile.png" % _shot_dir)
+	_stabilize_dynamic_visuals()
+	await _capture_mobile("menu_mobile.png")
 	await _capture_touch_settings()
 	await _capture_present_and_difficulty()
 
-	_main.configure_test_mode({
+	_set_capture_test_mode({
 		"invincible": true,
 		"auto_collect": true,
 		"auto_choose_upgrade": true,
@@ -34,39 +36,33 @@ func _run() -> void:
 		"player_fire_scale": 3.0,
 	})
 	_main.start_run("holly_striker")
-	for _i in range(90):
-		await process_frame
-	await _main.capture_screenshot("%s/gameplay_mobile.png" % _shot_dir)
-	await _main.capture_screenshot("%s/target_hint_mobile.png" % _shot_dir)
+	await _step_until_enemy_spawn()
+	await _step_simulation(12)
+	await _capture_mobile("gameplay_mobile.png")
+	await _capture_mobile("target_hint_mobile.png")
 
-	_main.configure_test_mode({
+	_set_capture_test_mode({
 		"invincible": true,
 		"auto_collect": true,
 		"auto_choose_upgrade": false,
 	})
 	_main.debug_force_level_up()
-	for _i in range(8):
-		await process_frame
+	await _step_simulation(4)
 	_main.ui_mgr.show_message("", 0.0)
-	await process_frame
-	await process_frame
-	await _main.capture_screenshot("%s/level_up_mobile.png" % _shot_dir)
+	await _capture_mobile("level_up_mobile.png")
 
 	_main._apply_upgrade("damage")
-	_main.configure_test_mode({
+	_set_capture_test_mode({
 		"invincible": true,
 		"auto_collect": true,
 		"auto_choose_upgrade": true,
 	})
 	_main.debug_spawn_boss()
-	await process_frame
-	await process_frame
-	await _main.capture_screenshot("%s/boss_mobile.png" % _shot_dir)
+	await _step_simulation(6)
+	await _capture_mobile("boss_mobile.png")
 
 	_main.debug_end_run(true)
-	await process_frame
-	await process_frame
-	await _main.capture_screenshot("%s/victory_mobile.png" % _shot_dir)
+	await _capture_mobile("victory_mobile.png")
 
 	_save_manager.reset_state_for_tests()
 	quit(0)
@@ -74,25 +70,19 @@ func _run() -> void:
 
 func _capture_present_and_difficulty() -> void:
 	_main.ui_mgr._on_play_pressed()
-	await process_frame
-	await process_frame
-	await _main.capture_screenshot("%s/present_select_mobile.png" % _shot_dir)
+	await _capture_mobile("present_select_mobile.png")
 	var first_unlocked: Button = _first_unlocked_present()
 	if first_unlocked == null:
 		return
 	first_unlocked.pressed.emit()
-	await process_frame
-	await process_frame
+	await _settle_frames()
 	_main.ui_mgr.select_button.pressed.emit()
-	await process_frame
-	await process_frame
-	await _main.capture_screenshot("%s/difficulty_mobile.png" % _shot_dir)
+	await _capture_mobile("difficulty_mobile.png")
 	var diff_state: Dictionary = _main.ui_mgr.difficulty_panel.get_meta("difficulty_state", {})
 	var tier_buttons: Array = diff_state.get("tier_buttons", [])
 	if not tier_buttons.is_empty():
 		(tier_buttons[0] as Button).pressed.emit()
-	await process_frame
-	await process_frame
+	await _settle_frames()
 
 
 func _capture_touch_settings() -> void:
@@ -107,10 +97,52 @@ func _capture_touch_settings() -> void:
 		if tabs.get_tab_title(idx) == "Touch":
 			tabs.current_tab = idx
 			break
-	await process_frame
-	await process_frame
-	await _main.capture_screenshot("%s/settings_mobile.png" % _shot_dir)
+	await _capture_mobile("settings_mobile.png")
 	panel.visible = false
+
+
+func _set_capture_test_mode(overrides: Dictionary = {}) -> void:
+	var options := {
+		"manual_tick": true,
+		"fixed_run_seed": _capture_seed,
+	}
+	for key in overrides.keys():
+		options[key] = overrides[key]
+	_main.configure_test_mode(options)
+
+
+func _step_until_enemy_spawn(max_steps: int = 80, delta: float = 0.1) -> void:
+	for _i in range(max_steps):
+		_main.debug_tick(delta)
+		if _main.enemies.size() > 0:
+			return
+
+
+func _step_simulation(steps: int, delta: float = 0.1) -> void:
+	for _i in range(steps):
+		_main.debug_tick(delta)
+
+
+func _settle_frames(count: int = 2) -> void:
+	for _i in range(count):
+		await process_frame
+
+
+func _capture_mobile(file_name: String) -> void:
+	_stabilize_dynamic_visuals()
+	await _settle_frames()
+	await _main.capture_screenshot("%s/%s" % [_shot_dir, file_name])
+
+
+func _stabilize_dynamic_visuals() -> void:
+	if _main.flair_animator != null:
+		_main.flair_animator.set_process(false)
+	for node in _main.find_children("*", "GPUParticles3D", true, false):
+		(node as GPUParticles3D).emitting = false
+		(node as GPUParticles3D).visible = false
+	for node in _main.find_children("*", "CPUParticles3D", true, false):
+		(node as CPUParticles3D).emitting = false
+		(node as CPUParticles3D).visible = false
 
 
 func _first_unlocked_present() -> Button:
