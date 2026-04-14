@@ -12,8 +12,12 @@ var drop_rng := RandomNumberGenerator.new()
 func _init(bf: RefCounted, sp: RefCounted) -> void:
 	board_factory = bf
 	scroll_pickup = sp
-	spawn_rng.seed = int(Time.get_ticks_usec()) + 17
-	drop_rng.seed = int(Time.get_ticks_usec()) + 29
+	configure_seed(int(Time.get_ticks_usec()))
+
+
+func configure_seed(base_seed: int) -> void:
+	spawn_rng.seed = base_seed + 17
+	drop_rng.seed = base_seed + 29
 
 
 func spawn_board_object(main: Node) -> void:

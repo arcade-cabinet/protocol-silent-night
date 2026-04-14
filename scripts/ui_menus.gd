@@ -1,9 +1,14 @@
 extends RefCounted
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
-const RADAR_CHART := preload("res://scripts/stat_radar_chart.gd")
+const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
+const START_DETAIL := preload("res://scripts/start_present_detail.gd")
+const RITUAL := preload("res://scripts/frontdoor_ritual.gd")
 
 static func build_title_screen(root: Control, on_play: Callable, on_progress: Callable) -> Dictionary:
+	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
+	var is_mobile := bool(layout["is_mobile"])
+	var edge_pad := float(layout["edge_pad"])
 	var screen := PanelContainer.new()
 	screen.name = "TitleScreen"
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -11,36 +16,46 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	root.add_child(screen)
 
 	var margin := MarginContainer.new()
-	var is_mobile := root.get_viewport_rect().size.x < 800
-	margin.add_theme_constant_override("margin_left", 20 if is_mobile else 60)
-	margin.add_theme_constant_override("margin_top", 100)
-	margin.add_theme_constant_override("margin_right", 20 if is_mobile else 60)
-	margin.add_theme_constant_override("margin_bottom", 100)
+	margin.add_theme_constant_override("margin_left", int(round(float(layout["safe_left"]) + edge_pad)))
+	margin.add_theme_constant_override("margin_top", int(round(float(layout["safe_top"]) + edge_pad * 2.0)))
+	margin.add_theme_constant_override("margin_right", int(round(float(layout["safe_right"]) + edge_pad)))
+	margin.add_theme_constant_override("margin_bottom", int(round(float(layout["safe_bottom"]) + edge_pad * 2.0)))
 	screen.add_child(margin)
 
+	var frame := VBoxContainer.new()
+	frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	margin.add_child(frame)
+	var top_spacer := Control.new()
+	top_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	frame.add_child(top_spacer)
 	var vbox := VBoxContainer.new()
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 32)
-	margin.add_child(vbox)
+	vbox.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * 1.4)))
+	frame.add_child(vbox)
+	var bottom_spacer := Control.new()
+	bottom_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	frame.add_child(bottom_spacer)
 
 	var title := Label.new()
 	title.text = "PROTOCOL: SILENT NIGHT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 32 if is_mobile else 64)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 38 if is_mobile else 64)
 	title.add_theme_color_override("font_color", THEME.NEON_WHITE)
 	title.add_theme_color_override("font_outline_color", THEME.NEON_CYAN)
 	title.add_theme_constant_override("outline_size", 8)
 	vbox.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "// ENDLESS VIGIL //"
+	subtitle.text = "// TREE LOT RIOT //\nAUTOFIRE CHAOS • BUILD FAST • DIE LOUD"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 16 if is_mobile else 24)
+	subtitle.add_theme_font_size_override("font_size", 15 if is_mobile else 21)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	vbox.add_child(subtitle)
-
+	vbox.add_child(RITUAL.build_title_manifesto(is_mobile, bool(layout["uses_stacked_mobile_ui"])))
 	var play_btn := Button.new()
-	play_btn.text = "DEPLOY"
+	play_btn.name = "StartRunButton"
+	play_btn.text = "RIP THE WRAP"
 	play_btn.custom_minimum_size = Vector2(200, 60) if is_mobile else Vector2(280, 70)
 	play_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	play_btn.add_theme_font_size_override("font_size", 20 if is_mobile else 28)
@@ -49,20 +64,22 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	vbox.add_child(play_btn)
 
 	var prog_btn := Button.new()
-	prog_btn.text = "SERVICE RECORD"
+	prog_btn.name = "ProgressButton"
+	prog_btn.text = "SCAR TISSUE"
 	prog_btn.custom_minimum_size = Vector2(200, 50) if is_mobile else Vector2(280, 60)
 	prog_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	prog_btn.add_theme_font_size_override("font_size", 16 if is_mobile else 22)
 	THEME.apply_to_button(prog_btn, THEME.NEON_GOLD)
 	prog_btn.pressed.connect(on_progress)
 	vbox.add_child(prog_btn)
-
-
 	return {"screen": screen}
 
 
 static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
-	var is_mobile := root.get_viewport_rect().size.x < 800
+	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
+	var is_mobile := bool(layout["is_mobile"])
+	var stacked_mobile := bool(layout["uses_stacked_mobile_ui"])
+	var edge_pad := float(layout["edge_pad"])
 	var start_screen := PanelContainer.new()
 	start_screen.name = "StartScreen"
 	start_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -70,79 +87,83 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	root.add_child(start_screen)
 
 	var start_margin := MarginContainer.new()
-	start_margin.add_theme_constant_override("margin_left", 20 if is_mobile else 60)
-	start_margin.add_theme_constant_override("margin_top", 24 if is_mobile else 48)
-	start_margin.add_theme_constant_override("margin_right", 20 if is_mobile else 60)
-	start_margin.add_theme_constant_override("margin_bottom", 24 if is_mobile else 48)
+	start_margin.add_theme_constant_override("margin_left", int(round(float(layout["safe_left"]) + edge_pad)))
+	start_margin.add_theme_constant_override("margin_top", int(round(float(layout["safe_top"]) + edge_pad)))
+	start_margin.add_theme_constant_override("margin_right", int(round(float(layout["safe_right"]) + edge_pad)))
+	start_margin.add_theme_constant_override("margin_bottom", int(round(float(layout["safe_bottom"]) + edge_pad)))
 	start_screen.add_child(start_margin)
 
 	var start_vbox := VBoxContainer.new()
 	start_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	start_vbox.add_theme_constant_override("separation", 22)
-	start_margin.add_child(start_vbox)
+	start_vbox.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (0.8 if is_mobile and not stacked_mobile else 1.3))))
+	start_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var outer_scroll: ScrollContainer = null
+	if stacked_mobile or is_mobile:
+		start_margin.add_child(start_vbox)
+	else:
+		outer_scroll = ScrollContainer.new()
+		outer_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		outer_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		start_margin.add_child(outer_scroll)
+		outer_scroll.add_child(start_vbox)
 
 	var title := Label.new()
 	title.text = "PROTOCOL: SILENT NIGHT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24 if is_mobile else 48)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 20 if is_mobile else 48)
 	title.add_theme_color_override("font_color", THEME.NEON_WHITE)
 	title.add_theme_color_override("font_outline_color", THEME.NEON_CYAN)
 	title.add_theme_constant_override("outline_size", 6)
 	start_vbox.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "// ENDLESS VIGIL //"
+	subtitle.text = "// PICK THE MEANEST GIFT //"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 14 if is_mobile else 20)
+	subtitle.add_theme_font_size_override("font_size", 11 if is_mobile else 20)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	start_vbox.add_child(subtitle)
-
-
-	var screen_w := root.get_viewport_rect().size.x
-	var mid_row: BoxContainer
-	if is_mobile:
-		mid_row = VBoxContainer.new()
-	else:
-		mid_row = HBoxContainer.new()
+	start_vbox.add_child(RITUAL.build_select_manifesto(is_mobile, stacked_mobile))
+	var mid_row: BoxContainer = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
 	mid_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	mid_row.add_theme_constant_override("separation", 20 if is_mobile else 40)
+	mid_row.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (1.0 if stacked_mobile else 1.8))))
+	mid_row.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile or is_mobile else Control.SIZE_SHRINK_CENTER
 	start_vbox.add_child(mid_row)
-
-	var scroll_container := ScrollContainer.new()
-	scroll_container.custom_minimum_size = Vector2(root.get_viewport_rect().size.x * 0.9, 260) if is_mobile else Vector2(800, 400)
-	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	mid_row.add_child(scroll_container)
-
-	var classes_box := HBoxContainer.new()
-	classes_box.name = "ClassCards"
-	classes_box.add_theme_constant_override("separation", 20)
-	scroll_container.add_child(classes_box)
 
 	var details_vbox := VBoxContainer.new()
 	details_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	details_vbox.add_theme_constant_override("separation", 20)
+	details_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details_vbox.add_theme_constant_override("separation", 12 if stacked_mobile else 20)
 	mid_row.add_child(details_vbox)
-
-	var radar_canvas := RADAR_CHART.build(details_vbox, Vector2(240, 240))
-
+	var detail_state := START_DETAIL.build(details_vbox, layout)
 	var select_btn := Button.new()
-	select_btn.text = "SELECT"
+	select_btn.text = "LOCK THE GIFT"
 	select_btn.name = "SelectButton"
-	select_btn.custom_minimum_size = Vector2(240, 60)
-	select_btn.add_theme_font_size_override("font_size", 24)
+	select_btn.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 56) if stacked_mobile else Vector2(240, 60)
+	select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if stacked_mobile else Control.SIZE_SHRINK_CENTER
+	select_btn.add_theme_font_size_override("font_size", 22 if is_mobile else 24)
 	select_btn.disabled = true
 	THEME.apply_to_button(select_btn, THEME.NEON_CYAN)
 	details_vbox.add_child(select_btn)
 
+	var class_scroll := ScrollContainer.new()
+	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 240.0) if stacked_mobile else Vector2(minf(760.0, float(layout["safe_rect"].size.x) * 0.58), 212.0 if is_mobile else 400.0)
+	class_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if stacked_mobile else ScrollContainer.SCROLL_MODE_AUTO
+	class_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if stacked_mobile else ScrollContainer.SCROLL_MODE_DISABLED
+	class_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL if stacked_mobile or is_mobile else Control.SIZE_SHRINK_CENTER
+	mid_row.add_child(class_scroll)
 
-	var instruction := Label.new()
-	instruction.text = "Drag to move, tap DASH. Desktop: WASD + Shift" if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and use the dash button."
-	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	instruction.modulate = Color("dceefb")
-	start_vbox.add_child(instruction)
-
+	var classes_box: Container = VBoxContainer.new() if stacked_mobile else HBoxContainer.new()
+	classes_box.name = "ClassCards"
+	classes_box.add_theme_constant_override("separation", 12 if stacked_mobile else 20)
+	class_scroll.add_child(classes_box)
+	if not (is_mobile and not stacked_mobile):
+		var instruction := Label.new()
+		instruction.text = "Landscape only. Left thumb steers. Right thumb starts the riot." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and punch the dash before the lot punches back."
+		instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		instruction.modulate = Color("dceefb")
+		start_vbox.add_child(instruction)
 
 	var back_btn := Button.new()
 	back_btn.text = "< BACK"
@@ -152,7 +173,4 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	THEME.apply_to_button(back_btn, THEME.NEON_CYAN)
 	back_btn.pressed.connect(on_back)
 	start_vbox.add_child(back_btn)
-
-	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": radar_canvas, "select_btn": select_btn}
-
-
+	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": null, "detail_state": detail_state, "select_btn": select_btn, "class_scroll": class_scroll, "uses_outer_scroll": outer_scroll != null}

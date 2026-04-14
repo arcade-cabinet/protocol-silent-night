@@ -17,6 +17,7 @@ static func build_preview(item: Dictionary) -> SubViewportContainer:
 	var viewport := SubViewport.new()
 	viewport.size = PREVIEW_SIZE
 	viewport.own_world_3d = true
+	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	viewport.transparent_bg = true
 	viewport.msaa_3d = Viewport.MSAA_4X
 	container.add_child(viewport)

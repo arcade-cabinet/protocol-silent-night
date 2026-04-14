@@ -1,7 +1,10 @@
 extends RefCounted
 
 const EnemyBehaviors := preload("res://scripts/enemy_behaviors.gd")
+const STAGE_MARKS := preload("res://scripts/enemy_stage_marks.gd")
+const SILHOUETTES := preload("res://scripts/enemy_silhouette_kit.gd")
 const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
+const ENEMY_POSE := preload("res://scripts/enemy_pose_language.gd")
 var present_factory: RefCounted = PRESENT_FACTORY.new()
 
 var materials: RefCounted  # MaterialFactory
@@ -10,17 +13,18 @@ var audio_mgr: RefCounted = null
 var _uid_counter: int = 0
 var _enemy_shadow_mesh: PlaneMesh = null
 var _boss_shadow_mesh: PlaneMesh = null
+var enemy_cap: int = 48
 
 
 func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 	materials = material_factory
 	pixels = pixel_renderer
 
-
-const MAX_ENEMY_CAP := 48  # Mobile performance ceiling
+func configure_quality(profile: Dictionary) -> void:
+	enemy_cap = int(profile.get("enemy_cap", 48))
 
 func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scale: float, enemy_defs: Dictionary, config: Dictionary, phase_level: int = 1, speed_mult: float = 1.0, damage_mult: float = 1.0, override_position: Vector3 = Vector3.INF) -> void:
-	if enemies.size() >= MAX_ENEMY_CAP:
+	if enemies.size() >= enemy_cap:
 		return
 	if not enemy_defs.has(enemy_type):
 		push_error("spawn_enemy: unknown type '%s'" % enemy_type)
@@ -30,9 +34,10 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 	enemy_node.name = "Enemy_%s" % enemy_type
 	var is_present: bool = def.get("render_as", "") == "present"
 	var visual_root: Node3D
-	
+
 	if is_present:
 		visual_root = present_factory.build_present(def)
+		SILHOUETTES.decorate_enemy(visual_root, enemy_type, def)
 		enemy_node.add_child(visual_root)
 	else:
 		var mesh_instance: MeshInstance3D = pixels.make_billboard_sprite(enemy_type, 2.0, Color(def["color"]))
@@ -47,6 +52,7 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 	shadow.position = Vector3(0, 0.02, 0)
 	shadow.material_override = materials.shadow_material()
 	enemy_node.add_child(shadow)
+	STAGE_MARKS.attach_enemy_markers(enemy_node, materials, Color(def["color"]), float(def["scale"]), enemy_type)
 	actor_root.add_child(enemy_node)
 	if override_position != Vector3.INF:
 		enemy_node.position = override_position
@@ -85,7 +91,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	var def: Dictionary = enemy_defs["boss"]
 	var boss_node := Node3D.new()
 	boss_node.name = "Boss"
-	var body: Node3D = _load_model("boss")
+	var body: Node3D = SILHOUETTES.build_boss_fallback(Color(def["color"]))
 	boss_node.add_child(body)
 	if _boss_shadow_mesh == null:
 		_boss_shadow_mesh = PlaneMesh.new()
@@ -104,6 +110,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	ring.position = Vector3(0, 1.3, 0)
 	ring.material_override = materials.emissive_material(Color("ffe07a"), 2.0, 0.2)
 	boss_node.add_child(ring)
+	STAGE_MARKS.attach_boss_markers(boss_node, materials, Color(def["color"]))
 	boss_node.position = Vector3(0, 0.18, -(float(config["arena_radius"]) - 3.0))
 	actor_root.add_child(boss_node)
 	var new_boss := {
@@ -151,6 +158,14 @@ func update_enemies(delta: float, enemies: Array, boss_ref: Dictionary, player_n
 	# Boss is now handled by BossPhases in game_manager
 
 
+func refresh_threat_language(enemies: Array, boss_ref: Dictionary, boss_phase: int) -> void:
+	for enemy in enemies:
+		STAGE_MARKS.update_enemy_markers(enemy)
+		ENEMY_POSE.update_enemy_pose(enemy)
+	STAGE_MARKS.update_boss_markers(boss_ref, boss_phase)
+	ENEMY_POSE.update_boss_pose(boss_ref, boss_phase)
+
+
 func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, range_limit: float) -> Dictionary:
 	var best: Dictionary = {}
 	var best_distance := INF
@@ -166,15 +181,18 @@ func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, r
 	return best
 
 func _load_model(enemy_type: String) -> Node3D:
+	if enemy_type == "boss":
+		return Node3D.new()
 	var path := ""
 	match enemy_type:
 		"elf": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
 		"santa": path = "res://assets/characters/yuletide/animations/dodge_and_counter.glb" # Placeholder for santa
 		"bumble": path = "res://assets/characters/bumble/animations/basic_jump.glb"
-		"boss": path = "res://assets/characters/krampus/animations/combat_stance.glb"
 		"grunt", "rusher", "tank": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
 		_: path = "res://assets/characters/yuletide/animations/basic_jump.glb"
-	
+
+	if not ResourceLoader.exists(path):
+		return Node3D.new()
 	var res = load(path)
 	if res == null: return Node3D.new()
 	var scene: Node3D = res.instantiate()

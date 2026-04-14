@@ -5,12 +5,12 @@ class_name HolidaypunkTheme
 ## Creates StyleBoxFlat instances with neon borders, dark backgrounds,
 ## and holiday color accents. Applied to HUD panels, buttons, and bars.
 
-const BG_DARK := Color(0.02, 0.06, 0.1, 0.88)
-const BG_PANEL := Color(0.04, 0.1, 0.16, 0.92)
-const NEON_CYAN := Color("55f7ff")
-const NEON_RED := Color("ff2244")
-const NEON_GOLD := Color("ffd700")
-const NEON_GREEN := Color("55ff88")
+const BG_DARK := Color(0.04, 0.03, 0.05, 0.9)
+const BG_PANEL := Color(0.09, 0.07, 0.09, 0.94)
+const NEON_CYAN := Color("69d6ff")
+const NEON_RED := Color("ff314d")
+const NEON_GOLD := Color("e8c14d")
+const NEON_GREEN := Color("59d67d")
 const NEON_WHITE := Color("f0f8ff")
 
 
@@ -36,7 +36,7 @@ static func make_panel_style(accent: Color = NEON_CYAN, bg: Color = BG_PANEL) ->
 
 
 static func make_button_style(accent: Color = NEON_CYAN,
-		bg: Color = Color(0.05, 0.12, 0.18, 0.92)) -> StyleBoxFlat:
+		bg: Color = Color(0.12, 0.08, 0.09, 0.94)) -> StyleBoxFlat:
 	var style := make_panel_style(accent, bg)
 	style.content_margin_left = 16
 	style.content_margin_right = 16
@@ -46,7 +46,7 @@ static func make_button_style(accent: Color = NEON_CYAN,
 
 
 static func make_hover_style(accent: Color = NEON_CYAN) -> StyleBoxFlat:
-	var style := make_button_style(accent, Color(0.08, 0.18, 0.28, 0.95))
+	var style := make_button_style(accent, Color(0.16, 0.08, 0.09, 0.97))
 	style.shadow_size = 10
 	style.border_width_left = 3
 	style.border_width_right = 3
@@ -57,7 +57,7 @@ static func make_hover_style(accent: Color = NEON_CYAN) -> StyleBoxFlat:
 
 static func make_disabled_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.06, 0.09, 0.5)
+	style.bg_color = Color(0.08, 0.07, 0.08, 0.56)
 	style.border_color = Color(0.3, 0.32, 0.36, 0.6)
 	style.border_width_left = 1
 	style.border_width_right = 1
@@ -80,8 +80,8 @@ static func make_bar_style(accent: Color) -> StyleBoxFlat:
 
 static func make_bar_bg_style() -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.08, 0.12, 0.9)
-	style.border_color = Color(0.2, 0.3, 0.4, 0.8)
+	style.bg_color = Color(0.08, 0.07, 0.08, 0.94)
+	style.border_color = Color(0.3, 0.22, 0.2, 0.85)
 	style.border_width_left = 1
 	style.border_width_right = 1
 	style.border_width_top = 1

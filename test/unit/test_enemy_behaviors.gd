@@ -192,3 +192,4 @@ func test_spawn_enemy_propagates_phase_level_and_speed_mult() -> void:
 	director.spawn_enemy(root, enemies, "grunt", 1.0, defs, cfg, 3, 2.0)
 	assert_int(int(enemies[0]["phase_level"])).is_equal(3)
 	assert_float(float(enemies[0]["speed"])).is_equal_approx(base_speed * 2.0, 0.001)
+	assert_object((enemies[0]["node"] as Node3D).find_child("ThreatMarks", true, false)).is_not_null()

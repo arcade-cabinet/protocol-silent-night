@@ -17,9 +17,13 @@ var _spiral_angle: float = 0.0
 
 func _init(main_node: Node) -> void:
 	main = main_node
-	boss_rng.seed = int(Time.get_ticks_usec())
-	scroll_rng.seed = int(Time.get_ticks_usec()) + 31337
-	_spawn_rng.seed = int(Time.get_ticks_usec()) + 99991
+	configure_seed(int(Time.get_ticks_usec()))
+
+
+func configure_seed(base_seed: int) -> void:
+	boss_rng.seed = base_seed
+	scroll_rng.seed = base_seed + 31337
+	_spawn_rng.seed = base_seed + 99991
 
 
 func reset_for_level() -> void:

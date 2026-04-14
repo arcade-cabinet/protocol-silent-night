@@ -82,6 +82,25 @@ func test_settings_menu_minimap_slider_present() -> void:
 	assert_float(slider.max_value).is_equal_approx(60.0, 0.001)
 
 
+func test_settings_menu_includes_touch_tab() -> void:
+	var state: Dictionary = SETTINGS.build(_make_root(), null, null, Callable())
+	var panel: PanelContainer = state["panel"]
+	var tabs: TabContainer = panel.find_children("*", "TabContainer", true, false)[0]
+	assert_int(tabs.get_tab_count()).is_greater_equal(4)
+	assert_str(tabs.get_tab_title(2)).is_equal("Touch")
+
+
+func test_touch_tab_includes_haptics_toggle() -> void:
+	var state: Dictionary = SETTINGS.build(_make_root(), null, null, Callable())
+	var panel: PanelContainer = state["panel"]
+	var touch_page: Node = panel.find_children("*", "TabContainer", true, false)[0].get_child(2)
+	var found := false
+	for node in touch_page.get_children():
+		if node is CheckBox and (node as CheckBox).text == "Haptics":
+			found = true
+	assert_bool(found).is_true()
+
+
 func test_pause_menu_keyboard_navigation_state() -> void:
 	var state: Dictionary = PAUSE.build(_make_root(), Callable(), Callable(), Callable(), Callable())
 	var buttons: Array = state["buttons"]
@@ -89,6 +108,18 @@ func test_pause_menu_keyboard_navigation_state() -> void:
 	var panel: PanelContainer = state["panel"]
 	PAUSE.show(state)
 	assert_int(int(panel.get_meta("focused_index"))).is_equal(0)
+
+
+func test_pause_menu_context_snapshot_is_visible_when_updated() -> void:
+	var state: Dictionary = PAUSE.build(_make_root(), Callable(), Callable(), Callable(), Callable())
+	PAUSE.update_context(state, {
+		"title": "HUNTER · SKATE",
+		"detail": "SLIDE · HUNT LOCK · 12 HOSTILES",
+		"hint": "Wave 4 · 48s left · 60 FPS STABLE",
+	})
+	assert_str((state["context_title"] as Label).text).contains("SKATE")
+	assert_bool((state["context_detail"] as Label).visible).is_true()
+	assert_bool((state["context_hint"] as Label).visible).is_true()
 
 
 func test_radar_chart_renders_labels_array() -> void:

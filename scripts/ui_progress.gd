@@ -1,8 +1,11 @@
 extends RefCounted
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
+const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 static func build_progress_screen(root: Control, on_back: Callable) -> Dictionary:
+	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
+	var is_mobile := bool(layout["is_mobile"])
 	var panel := PanelContainer.new()
 	panel.name = "ProgressScreen"
 	panel.visible = false
@@ -10,21 +13,25 @@ static func build_progress_screen(root: Control, on_back: Callable) -> Dictionar
 	panel.add_theme_stylebox_override("panel", THEME.make_panel_style(THEME.NEON_CYAN, Color(0.02, 0.04, 0.06, 0.94)))
 	root.add_child(panel)
 
-	var is_mobile := root.get_viewport_rect().size.x < 800
 	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 20 if is_mobile else 80)
-	margin.add_theme_constant_override("margin_top", 40 if is_mobile else 60)
-	margin.add_theme_constant_override("margin_right", 20 if is_mobile else 80)
-	margin.add_theme_constant_override("margin_bottom", 40 if is_mobile else 60)
+	margin.add_theme_constant_override("margin_left", int(round(float(layout["safe_left"]) + float(layout["edge_pad"]))))
+	margin.add_theme_constant_override("margin_top", int(round(float(layout["safe_top"]) + float(layout["edge_pad"]))))
+	margin.add_theme_constant_override("margin_right", int(round(float(layout["safe_right"]) + float(layout["edge_pad"]))))
+	margin.add_theme_constant_override("margin_bottom", int(round(float(layout["safe_bottom"]) + float(layout["edge_pad"]))))
 	panel.add_child(margin)
+
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	margin.add_child(scroll)
 
 	var vbox := VBoxContainer.new()
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_theme_constant_override("separation", 20)
-	margin.add_child(vbox)
+	scroll.add_child(vbox)
 
 	var title := Label.new()
-	title.text = "SERVICE RECORD"
+	title.text = "SCAR TISSUE"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28 if is_mobile else 48)
 	title.add_theme_color_override("font_color", THEME.NEON_GOLD)

@@ -1,5 +1,4 @@
 extends Node3D
-
 const PROGRESSION_MANAGER := preload("res://scripts/progression_manager.gd")
 const GAME_MANAGER := preload("res://scripts/game_manager.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
@@ -9,12 +8,11 @@ const PLAYER_DAMAGE_HANDLER := preload("res://scripts/player_damage_handler.gd")
 const PICKUP_MAGNET_RING := preload("res://scripts/pickup_magnet_ring.gd")
 const FLAIR_ANIMATOR_SCR := preload("res://scripts/flair_animator.gd")
 const BETWEEN_MATCH_FLOW := preload("res://scripts/between_match_flow.gd")
-
+const ORIENTATION_GATE := preload("res://scripts/orientation_gate.gd")
 var config: Dictionary = {}
 var enemy_defs: Dictionary = {}
 var upgrade_defs: Array = []
 var present_defs: Dictionary = {}
-
 var mat_factory := preload("res://scripts/material_factory.gd").new()
 var pix_renderer := preload("res://scripts/pixel_art_renderer.gd").new()
 var board_generator := preload("res://scripts/board_generator.gd").new()
@@ -38,13 +36,14 @@ var board_obj_handler := preload("res://scripts/board_object_handler.gd").new(bo
 var between_match: RefCounted
 var progression: RefCounted
 var game_mgr: RefCounted
+var mobile_feedback := preload("res://scripts/mobile_feedback.gd").new()
 var flair_animator: Node
+var orientation_gate: Dictionary = {}
 var shake_magnitude: float = 0.0
 var screen_shake := preload("res://scripts/screen_shake.gd").new()
 var music_director := preload("res://scripts/music_director.gd").new()
 var pickup_magnet_ring: MeshInstance3D
 var _widget_time: float = 0.0
-
 var runtime_root: Node3D
 var board_root: Node3D
 var actor_root: Node3D
@@ -52,7 +51,6 @@ var projectile_root: Node3D
 var pickup_root: Node3D
 var fx_root: Node3D
 var camera: Camera3D
-
 var title_screen: PanelContainer:
 	get: return ui_mgr.title_screen
 var start_screen: PanelContainer:
@@ -93,6 +91,7 @@ var run_seed: int = 0
 var level_lookback: Array = []
 var difficulty_tier: int = 1
 var permadeath: bool = false
+var endless_mode: bool = false
 var rewraps: int = 5
 var run_cookies: int = 0
 var run_scrolls: Array = []
@@ -103,8 +102,6 @@ var move_velocity := Vector2.ZERO
 var touch_active := false; var touch_origin := Vector2.ZERO; var touch_position := Vector2.ZERO
 var dash_pressed := false; var dash_timer := 0.0; var dash_cooldown_timer := 0.0
 var wave_clear_timer := 0.0; var test_mode := {}
-
-
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
@@ -113,8 +110,6 @@ func _ready() -> void:
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
 	MAIN_HELPERS.apply_reduced_motion(self, _save_manager())
-
-
 func _init_services() -> void:
 	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
 	combat.audio_mgr = audio_mgr
@@ -129,16 +124,10 @@ func _init_services() -> void:
 	between_match = BETWEEN_MATCH_FLOW.new(self)
 	between_match.build_screens(ui_mgr.root_control)
 	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
-
+	orientation_gate = ORIENTATION_GATE.build(ui_mgr.root_control)
 const DEBUG_HELPERS := preload("res://scripts/debug_helpers.gd")
-
-
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
-
-
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
-
-
 func debug_force_level_up() -> void: DEBUG_HELPERS.force_level_up(self)
 func debug_spawn_boss() -> void: DEBUG_HELPERS.spawn_boss(self)
 func debug_end_run(win: bool) -> void: DEBUG_HELPERS.end_run(self, win)
@@ -147,17 +136,21 @@ func debug_zone_at(wp: Vector3) -> String: return "arena" if absf(wp.x) <= float
 func debug_is_blocked(wp: Vector3, r: float = 0.6) -> bool: return not _can_occupy(wp, r)
 func debug_tick(delta: float) -> void: _tick(delta)
 
-
 func _process(delta: float) -> void:
 	if not bool(test_mode.get("manual_tick", false)):
 		_tick(delta)
 
 func _tick(delta: float) -> void:
 	ui_mgr.update_transient_overlays(delta)
+	if ORIENTATION_GATE.refresh(orientation_gate, self):
+		input_move = Vector2.ZERO; move_velocity = Vector2.ZERO
+		touch_active = false; dash_pressed = false; ui_mgr.hide_joystick()
+		player_ctrl.reset_touch_memory()
+		ui_mgr.refresh_widgets(self); return
+	ui_mgr.refresh_widgets(self)
 	if state == "playing":
 		game_mgr.tick_playing(delta)
 		music_director.tick(delta, audio_mgr, enemies.size(), float(player_state.get("hp", 100.0)) / maxf(1.0, float(player_state.get("max_hp", 100.0))), not boss_ref.is_empty())
-		ui_mgr.refresh_widgets(self)
 		_widget_time += delta
 		if player_node != null: PICKUP_MAGNET_RING.update(pickup_magnet_ring, player_node.position, float(config.get("pickup_magnet_radius", 1.0)), 1.0, _widget_time)
 	elif state == "wave_clear":
@@ -169,6 +162,7 @@ func _tick(delta: float) -> void:
 	if weather_director != null: weather_director.tick(delta)
 
 func _unhandled_input(event: InputEvent) -> void: MAIN_HELPERS.handle_input(self, event)
+func _notification(what: int) -> void: MAIN_HELPERS.handle_notification(self, what)
 
 func _load_definitions() -> void: MAIN_HELPERS.load_definitions(self)
 
@@ -177,6 +171,7 @@ func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(
 func _return_to_menu() -> void: BOARD_HELPERS.return_to_menu(self)
 
 func _trigger_level_up() -> void:
+	if mobile_feedback != null: mobile_feedback.trigger(self, "level_up")
 	if player_node != null: particles.spawn_level_up_burst(fx_root, player_node.position)
 	MAIN_HELPERS.trigger_level_up(self)
 

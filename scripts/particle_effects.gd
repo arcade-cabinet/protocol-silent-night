@@ -14,10 +14,23 @@ var _sphere_cache: SphereMesh = null
 var _mat_cache: Dictionary = {}
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var reduced_motion: bool = false
+var _particle_entry_cap: int = 180
+var _muzzle_flash_sparks: int = 4
+var _death_burst_particles: int = 12
+var _pickup_sparkles: int = 5
+var _level_up_particles: int = 25
 
 
 func configure(reduced: bool) -> void:
 	reduced_motion = reduced
+
+
+func configure_quality(profile: Dictionary) -> void:
+	_particle_entry_cap = int(profile.get("particle_entry_cap", 180))
+	_muzzle_flash_sparks = int(profile.get("muzzle_flash_sparks", 4))
+	_death_burst_particles = int(profile.get("death_burst_particles", 12))
+	_pickup_sparkles = int(profile.get("pickup_sparkles", 5))
+	_level_up_particles = int(profile.get("level_up_particles", 25))
 
 
 func _init() -> void:
@@ -61,6 +74,10 @@ func _spawn_node(root: Node3D, position: Vector3, color: Color, scale_value: flo
 
 
 func _track(node: MeshInstance3D, velocity: Vector3, life: float, start_scale: float, gravity: float = 0.0) -> void:
+	if _entries.size() >= _particle_entry_cap:
+		if node != null and is_instance_valid(node):
+			node.queue_free()
+		return
 	_entries.append({
 		"node": node,
 		"velocity": velocity,
@@ -80,7 +97,7 @@ func spawn_muzzle_flash(root: Node3D, position: Vector3, direction: Vector3, col
 	forward = forward.normalized()
 	var flash := _spawn_node(root, position + forward * 0.3, color, 0.85, 3.2)
 	_track(flash, forward * 1.2, MUZZLE_LIFE, 0.85, 0.0)
-	for spark_index in range(4):
+	for spark_index in range(_muzzle_flash_sparks):
 		var jitter := Vector3(_rng.randf_range(-0.4, 0.4), _rng.randf_range(-0.2, 0.3), _rng.randf_range(-0.4, 0.4))
 		var spark_dir := (forward * 2.8 + jitter).normalized()
 		var spark := _spawn_node(root, position + forward * 0.2, color.lightened(0.25), 0.35, 2.6)
@@ -90,7 +107,7 @@ func spawn_muzzle_flash(root: Node3D, position: Vector3, direction: Vector3, col
 func spawn_death_burst(root: Node3D, position: Vector3, color: Color, size: float = 1.0) -> void:
 	if root == null or reduced_motion:
 		return
-	var count := 12
+	var count := _death_burst_particles
 	for index in range(count):
 		var angle := float(index) / float(count) * TAU
 		var horiz := Vector3(cos(angle), 0.0, sin(angle))
@@ -107,7 +124,7 @@ func spawn_death_burst(root: Node3D, position: Vector3, color: Color, size: floa
 func spawn_pickup_sparkle(root: Node3D, position: Vector3) -> void:
 	if root == null:
 		return
-	for index in range(5):
+	for index in range(_pickup_sparkles):
 		var offset := Vector3(_rng.randf_range(-0.3, 0.3), _rng.randf_range(0.0, 0.3), _rng.randf_range(-0.3, 0.3))
 		var rise := Vector3(_rng.randf_range(-0.4, 0.4), _rng.randf_range(1.8, 3.0), _rng.randf_range(-0.4, 0.4))
 		var particle_scale := _rng.randf_range(0.18, 0.32)
@@ -159,18 +176,14 @@ func active_count() -> int:
 	return _entries.size()
 
 func spawn_level_up_burst(root: Node3D, pos: Vector3) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(Time.get_ticks_usec())
-	
-	for i in range(25):
-		var angle := rng.randf() * TAU
-		var radius := rng.randf_range(1.5, 3.5)
-		var h := rng.randf_range(0.0, 4.0)
+	for i in range(_level_up_particles):
+		var angle := _rng.randf() * TAU
+		var radius := _rng.randf_range(1.5, 3.5)
+		var h := _rng.randf_range(0.0, 4.0)
 		var offset := Vector3(cos(angle) * radius, h, sin(angle) * radius)
 		
-		var speed := rng.randf_range(4.0, 8.0)
+		var speed := _rng.randf_range(4.0, 8.0)
 		var v := Vector3(0, speed, 0) + offset.normalized() * speed * 0.2
 		
-		var p := _spawn_node(root, pos + offset * 0.2, Color("#ffd700"), rng.randf_range(0.8, 1.6), 3.0)
-		_track(p, v, rng.randf_range(1.0, 2.5), p.scale.x, -5.0)
-
+		var p := _spawn_node(root, pos + offset * 0.2, Color("#ffd700"), _rng.randf_range(0.8, 1.6), 3.0)
+		_track(p, v, _rng.randf_range(1.0, 2.5), p.scale.x, -5.0)

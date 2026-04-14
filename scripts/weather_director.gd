@@ -4,6 +4,7 @@ class_name WeatherDirector
 var _env: Environment
 var _dir_light: DirectionalLight3D
 var _snow: GPUParticles3D
+var _gusts: GPUParticles3D
 
 var _target_fog_color: Color
 var _target_fog_density: float
@@ -63,6 +64,35 @@ func _init(main: Node3D) -> void:
 	
 	_snow.draw_pass_1 = quad
 	main.add_child(_snow)
+	_gusts = GPUParticles3D.new()
+	_gusts.name = "WeatherGusts"
+	_gusts.amount = 80
+	_gusts.lifetime = 1.3
+	_gusts.visibility_aabb = AABB(Vector3(-45, -25, -45), Vector3(90, 50, 90))
+	_gusts.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_gusts.position = Vector3(0, 12.0, 0)
+	var gust_mat := ParticleProcessMaterial.new()
+	gust_mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	gust_mat.emission_box_extents = Vector3(42.0, 1.0, 42.0)
+	gust_mat.direction = Vector3(1.0, -0.18, 0.32).normalized()
+	gust_mat.spread = 7.0
+	gust_mat.initial_velocity_min = 10.0
+	gust_mat.initial_velocity_max = 18.0
+	gust_mat.gravity = Vector3(0, -1.5, 0)
+	gust_mat.color = Color("e7f5ff")
+	gust_mat.scale_min = 1.2
+	gust_mat.scale_max = 2.2
+	_gusts.process_material = gust_mat
+	var gust_quad := QuadMesh.new()
+	gust_quad.size = Vector2(1.2, 0.07)
+	var gust_sm := StandardMaterial3D.new()
+	gust_sm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	gust_sm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	gust_sm.albedo_color = Color(1, 1, 1, 0.42)
+	gust_sm.billboard_mode = StandardMaterial3D.BILLBOARD_PARTICLES
+	gust_quad.material = gust_sm
+	_gusts.draw_pass_1 = gust_quad
+	main.add_child(_gusts)
 
 
 func set_intensity(wave: int, max_waves: int, difficulty: int) -> void:
@@ -88,6 +118,9 @@ func set_intensity(wave: int, max_waves: int, difficulty: int) -> void:
 	var target_amount := int(400 + _intensity * 2100 * diff_mult)
 	if _snow.amount != target_amount:
 		_snow.amount = target_amount
+	var gust_amount := int(80 + _intensity * 280 * diff_mult)
+	if _gusts.amount != gust_amount:
+		_gusts.amount = gust_amount
 		
 	# Increase wind speed with intensity
 	var mat: ParticleProcessMaterial = _snow.process_material
@@ -96,6 +129,11 @@ func set_intensity(wave: int, max_waves: int, difficulty: int) -> void:
 	mat.initial_velocity_min = 6.0 + _intensity * 6.0
 	mat.initial_velocity_max = 12.0 + _intensity * 12.0
 	mat.color = Color("cde2f0").lerp(Color("ffcccc"), _intensity * 0.6)
+	var gust_pm: ParticleProcessMaterial = _gusts.process_material
+	gust_pm.direction = Vector3(1.0 + _intensity * 1.4, -0.15, 0.28 + _intensity * 0.6).normalized()
+	gust_pm.initial_velocity_min = 10.0 + _intensity * 10.0
+	gust_pm.initial_velocity_max = 18.0 + _intensity * 16.0
+	gust_pm.color = Color("e7f5ff").lerp(Color("ffd7d7"), _intensity * 0.35)
 
 func tick(delta: float) -> void:
 	if _env.fog_density != _target_fog_density:
@@ -108,4 +146,3 @@ func tick(delta: float) -> void:
 		_dir_light.light_color = _dir_light.light_color.lerp(_target_light_color, delta * 0.5)
 	if _dir_light.light_energy != _target_light_energy:
 		_dir_light.light_energy = lerpf(_dir_light.light_energy, _target_light_energy, delta * 0.5)
-

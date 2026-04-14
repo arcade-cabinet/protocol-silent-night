@@ -6,16 +6,16 @@ static func build_world(main: Node3D) -> void:
 	world_environment.name = "WorldEnvironment"
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color("09121b")
+	env.background_color = Color("05070d")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color("a5bbd2")
-	env.ambient_light_energy = 0.7
+	env.ambient_light_color = Color("7a8ca0")
+	env.ambient_light_energy = 0.36
 	env.fog_enabled = true
-	env.fog_light_color = Color("2d4762")
-	env.fog_light_energy = 0.2
-	env.fog_density = 0.0022
+	env.fog_light_color = Color("1d2938")
+	env.fog_light_energy = 0.1
+	env.fog_density = 0.0028
 	env.glow_enabled = true
-	env.glow_intensity = 0.65
+	env.glow_intensity = 0.34
 	world_environment.environment = env
 	main.add_child(world_environment)
 
@@ -30,8 +30,8 @@ static func build_world(main: Node3D) -> void:
 
 	var directional_light := DirectionalLight3D.new()
 	directional_light.name = "DirLight"
-	directional_light.light_color = Color("d6ecff")
-	directional_light.light_energy = 1.25
+	directional_light.light_color = Color("c7d5e4")
+	directional_light.light_energy = 0.82
 	directional_light.shadow_enabled = true
 	directional_light.rotation_degrees = Vector3(-58, -34, 0)
 	main.add_child(directional_light)

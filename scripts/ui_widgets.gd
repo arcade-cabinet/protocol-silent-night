@@ -6,15 +6,20 @@ extends RefCounted
 
 const MINIMAP := preload("res://scripts/minimap_widget.gd")
 const THREAT := preload("res://scripts/threat_indicator.gd")
+const TARGET_HINT := preload("res://scripts/target_hint_widget.gd")
 const SETTINGS := preload("res://scripts/settings_menu.gd")
+const SETTINGS_RUNTIME := preload("res://scripts/settings_menu_runtime.gd")
 const PAUSE := preload("res://scripts/pause_menu.gd")
+const PAUSE_SNAPSHOT := preload("res://scripts/pause_snapshot.gd")
 const COMBO := preload("res://scripts/combo_counter.gd")
+const COMBAT_HELPERS := preload("res://scripts/combat_helpers.gd")
 
 
 static func build_all(root: Control) -> Dictionary:
 	var state: Dictionary = {}
 	state["minimap"] = MINIMAP.build(root)
 	state["threat"] = THREAT.build(root)
+	state["target_hint"] = TARGET_HINT.build(root)
 	state["combo_counter"] = COMBO.new()
 	state["combo_label"] = _build_combo_label(root)
 	state["vignette"] = _build_vignette(root)
@@ -53,6 +58,7 @@ static func refresh(state: Dictionary, main: Node) -> void:
 		return
 	_refresh_minimap(state, main)
 	_refresh_threat(state, main)
+	_refresh_target_hint(state, main)
 	_refresh_combo(state, main)
 	_refresh_vignette(state, main)
 
@@ -74,6 +80,12 @@ static func _refresh_threat(state: Dictionary, main: Node) -> void:
 		return
 	var tier: String = "gold" if float(main.boss_ref.get("hp", 1.0)) < float(main.boss_ref.get("max_hp", 1.0)) * 0.3 else "red"
 	THREAT.update(state["threat"], boss_node.position, main.player_node.position, tier)
+
+
+static func _refresh_target_hint(state: Dictionary, main: Node) -> void:
+	var target: Dictionary = COMBAT_HELPERS.closest_target(main) if main.player_node != null else {}
+	var player_class = main.player_state.get("class") if main.player_state is Dictionary else null
+	TARGET_HINT.update(state["target_hint"], main.camera, main.player_node, target, player_class)
 
 
 static func _refresh_combo(state: Dictionary, main: Node) -> void:
@@ -130,6 +142,8 @@ static func toggle_pause(state: Dictionary, tree: SceneTree) -> void:
 		PAUSE.hide(state["pause"])
 		if tree != null: tree.paused = false
 	else:
+		if tree != null:
+			PAUSE.update_context(state["pause"], PAUSE_SNAPSHOT.build(tree.current_scene))
 		PAUSE.show(state["pause"])
 		if tree != null: tree.paused = true
 
@@ -162,6 +176,8 @@ static func tick_overlays(mgr: Object, delta: float) -> void:
 		mgr.achievement_overlay.modulate.a = clampf(mgr.achievement_timer / 0.3 if mgr.achievement_timer < 0.3 else 1.0, 0.0, 1.0)
 	else:
 		mgr.achievement_overlay.visible = false
+	if mgr.widgets.has("settings"):
+		SETTINGS_RUNTIME.tick(mgr.widgets["settings"], mgr.root_control, mgr.root_control.get_node_or_null("/root/SaveManager"), Callable(SETTINGS, "_quality_note_text"))
 
 
 static func update_hud(ui: RefCounted, player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0, coal_queue: Array = []) -> void:

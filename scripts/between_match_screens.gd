@@ -1,10 +1,5 @@
 extends RefCounted
-
-## Builds the between-match screens: Results and Scroll Opening.
-## Market screen lives in market_screen.gd.
-
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
-
 
 static func build_results_screen(root: Control, on_continue: Callable) -> Dictionary:
 	var panel := PanelContainer.new()
@@ -23,8 +18,14 @@ static func build_results_screen(root: Control, on_continue: Callable) -> Dictio
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_theme_constant_override("separation", 14)
 	margin.add_child(vbox)
+	var kicker := Label.new()
+	kicker.text = "AFTERMATH REPORT"
+	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kicker.add_theme_font_size_override("font_size", 14)
+	kicker.add_theme_color_override("font_color", THEME.NEON_GOLD)
+	vbox.add_child(kicker)
 	var title := Label.new()
-	title.text = "PACKAGE SURVIVED"
+	title.text = "LOT STILL STANDS"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 42)
 	title.add_theme_color_override("font_color", THEME.NEON_GOLD)
@@ -42,25 +43,25 @@ static func build_results_screen(root: Control, on_continue: Callable) -> Dictio
 		lbl.add_theme_font_size_override("font_size", 22)
 		lbl.add_theme_color_override("font_color", THEME.NEON_WHITE)
 		stats_box.add_child(lbl)
+	var sting := Label.new()
+	sting.text = "THE LOT KEPT SCORE."
+	sting.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sting.add_theme_font_size_override("font_size", 13)
+	sting.add_theme_color_override("font_color", Color("dceefb"))
+	vbox.add_child(sting)
 	var continue_btn := Button.new()
-	continue_btn.text = "CONTINUE →"
+	continue_btn.text = "CRACK THE MAILBAG →"
 	continue_btn.custom_minimum_size = Vector2(260, 60)
 	continue_btn.add_theme_font_size_override("font_size", 18)
 	THEME.apply_to_button(continue_btn, THEME.NEON_CYAN)
 	continue_btn.pressed.connect(on_continue)
 	vbox.add_child(continue_btn)
-	return {
-		"panel": panel,
-		"level_label": level_label, "kills_label": kills_label,
-		"cookies_label": cookies_label, "scrolls_label": scrolls_label,
-	}
+	return {"panel": panel, "level_label": level_label, "kills_label": kills_label, "cookies_label": cookies_label, "scrolls_label": scrolls_label}
 
 
 static func update_results(state: Dictionary, data: Dictionary) -> void:
-	state["level_label"].text = "Depth Survived: %d" % int(data.get("level", 0))
-	state["kills_label"].text = "Enemies Purged: %d" % int(data.get("kills", 0))
-	state["cookies_label"].text = "Cookies Earned: %d" % int(data.get("cookies", 0))
-	state["scrolls_label"].text = "Scrolls Cracked: %d" % int(data.get("scrolls", 0))
+	state["level_label"].text = "Depth Survived: %d" % int(data.get("level", 0)); state["kills_label"].text = "Enemies Purged: %d" % int(data.get("kills", 0))
+	state["cookies_label"].text = "Cookies Earned: %d" % int(data.get("cookies", 0)); state["scrolls_label"].text = "Scrolls Cracked: %d" % int(data.get("scrolls", 0))
 
 
 static func build_scroll_screen(root: Control, on_continue: Callable) -> Dictionary:
@@ -80,34 +81,45 @@ static func build_scroll_screen(root: Control, on_continue: Callable) -> Diction
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	vbox.add_theme_constant_override("separation", 16)
 	margin.add_child(vbox)
+	var kicker := Label.new()
+	kicker.text = "MAILBAG RIOT"
+	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kicker.add_theme_font_size_override("font_size", 14)
+	kicker.add_theme_color_override("font_color", THEME.NEON_RED)
+	vbox.add_child(kicker)
 	var title := Label.new()
-	title.text = "OPEN YOUR SCROLLS"
+	title.text = "CRACK THE NIGHT HAUL"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 36)
 	title.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	vbox.add_child(title)
+	var summary := Label.new()
+	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	summary.add_theme_font_size_override("font_size", 15)
+	summary.add_theme_color_override("font_color", THEME.NEON_WHITE)
+	vbox.add_child(summary)
 	var scroll_grid := GridContainer.new()
-	scroll_grid.columns = 5
+	scroll_grid.columns = _scroll_columns(root)
 	scroll_grid.add_theme_constant_override("h_separation", 12)
 	scroll_grid.add_theme_constant_override("v_separation", 12)
 	vbox.add_child(scroll_grid)
 	var continue_btn := Button.new()
-	continue_btn.text = "TO THE MARKET →"
+	continue_btn.text = "RIOT THE MARKET →"
 	continue_btn.custom_minimum_size = Vector2(260, 60)
 	continue_btn.add_theme_font_size_override("font_size", 18)
 	THEME.apply_to_button(continue_btn, THEME.NEON_GOLD)
 	continue_btn.pressed.connect(on_continue)
 	vbox.add_child(continue_btn)
-	return {"panel": panel, "grid": scroll_grid}
-
+	return {"panel": panel, "grid": scroll_grid, "summary": summary}
 
 static func populate_scroll_grid(state: Dictionary, outcomes: Array) -> void:
 	var grid: GridContainer = state["grid"]
+	state["summary"].text = _scroll_summary(outcomes)
 	for child in grid.get_children():
 		child.queue_free()
 	if outcomes.is_empty():
 		var empty := Label.new()
-		empty.text = "// EMPTY MAILBAG //"
+		empty.text = "// NO SCROLLS. JUST SPLINTERS. //"
 		empty.add_theme_font_size_override("font_size", 20)
 		empty.add_theme_color_override("font_color", THEME.NEON_WHITE)
 		grid.add_child(empty)
@@ -117,11 +129,10 @@ static func populate_scroll_grid(state: Dictionary, outcomes: Array) -> void:
 		grid.add_child(_build_scroll_card(outcomes[i]))
 	if outcomes.size() > display_count:
 		var overflow := Label.new()
-		overflow.text = "+%d still wrapped" % (outcomes.size() - display_count)
+		overflow.text = "+%d MORE PACKETS STACKED" % (outcomes.size() - display_count)
 		overflow.add_theme_font_size_override("font_size", 16)
 		overflow.add_theme_color_override("font_color", THEME.NEON_GOLD)
 		grid.add_child(overflow)
-
 
 static func _build_scroll_card(outcome: Dictionary) -> Control:
 	var is_nice: bool = String(outcome.get("type", "nice")) == "nice"
@@ -139,11 +150,17 @@ static func _build_scroll_card(outcome: Dictionary) -> Control:
 	card_vbox.add_theme_constant_override("separation", 6)
 	card_margin.add_child(card_vbox)
 	var header := Label.new()
-	header.text = "NICE" if is_nice else "NAUGHTY"
+	header.text = "NICE CUT" if is_nice else "NAUGHTY HIT"
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_theme_font_size_override("font_size", 16)
 	header.add_theme_color_override("font_color", accent)
 	card_vbox.add_child(header)
+	var kicker := Label.new()
+	kicker.text = "COOKIE PAYOUT" if is_nice else "COAL SCRIPT"
+	kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kicker.add_theme_font_size_override("font_size", 11)
+	kicker.add_theme_color_override("font_color", THEME.NEON_WHITE)
+	card_vbox.add_child(kicker)
 	var body := Label.new()
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -153,7 +170,29 @@ static func _build_scroll_card(outcome: Dictionary) -> Control:
 	if is_nice:
 		body.text = "+%d C" % int(outcome.get("cookies", 0))
 	else:
-		body.text = "COAL:\n%s" % String(outcome.get("effect_id", "")).to_upper()
+		body.text = String(outcome.get("effect_id", "")).replace("_", " ").to_upper()
 	card_vbox.add_child(body)
+	var footer := Label.new()
+	footer.text = "RISE AND SPEND IT" if is_nice else String(outcome.get("rarity", "coal")).to_upper()
+	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	footer.add_theme_font_size_override("font_size", 10)
+	footer.add_theme_color_override("font_color", accent)
+	card_vbox.add_child(footer)
 	return card
 
+static func _scroll_columns(root: Control) -> int:
+	var width := int(root.get_viewport_rect().size.x)
+	if width >= 1400: return 5
+	if width >= 1100: return 4
+	return 3 if width >= 760 else 2
+
+
+static func _scroll_summary(outcomes: Array) -> String:
+	var nice := 0; var nasty := 0; var cookies := 0
+	for outcome in outcomes:
+		if String(outcome.get("type", "nice")) == "nice":
+			nice += 1
+			cookies += int(outcome.get("cookies", 0))
+		else:
+			nasty += 1
+	return "%d NICE CUTS · %d C · %d COAL HITS" % [nice, cookies, nasty]

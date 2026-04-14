@@ -2,11 +2,13 @@ extends RefCounted
 
 ## Builds present character select button cards.
 ## Extracted from ui_manager.gd for LOC compliance.
-## Hover-driven radar chart updates via stat_radar_chart.gd API.
+## Hover-driven preview updates with optional radar/detail sidecar state.
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
 const RADAR := preload("res://scripts/stat_radar_chart.gd")
 const PREVIEW_VP := preload("res://scripts/present_preview_viewport.gd")
+const CARD_SHELL := preload("res://scripts/present_card_shell.gd")
+const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 ## Tracks the present ID currently previewed (for testability).
 static var _current_preview_id: String = ""
@@ -21,34 +23,37 @@ static func init_preview(parent: Control) -> void:
 
 static func build_present_buttons(classes_box: Container, present_defs: Dictionary,
 		save_manager: Node, on_class_pressed: Callable,
-		radar_canvas: Control = null, audio_mgr: RefCounted = null) -> void:
+		radar_canvas: Control = null, audio_mgr: RefCounted = null,
+		detail_state: Dictionary = {}) -> void:
 	var best_wave := 0
+	var layout := VIEWPORT_PROFILE.for_viewport(classes_box.get_viewport_rect().size)
+	var is_mobile := bool(layout["is_mobile"])
+	var stacked_mobile := bool(layout["uses_stacked_mobile_ui"])
+	var wide_mobile := is_mobile and not stacked_mobile
 	if save_manager != null:
 		best_wave = int(save_manager.state.get("best_wave", 0))
 	for present_id in present_defs.keys():
 		var def: Dictionary = present_defs[present_id]
 		var button := Button.new()
 		var unlocked := is_present_unlocked(def, best_wave, save_manager)
-		var label: String = "%s\n\n" % def.get("name", present_id)
-		if unlocked:
-			label += def.get("tagline", "")
-		else:
-			label += "[ LOCKED ]\n%s" % unlock_label(def.get("unlock", ""))
-		button.text = label
-		button.custom_minimum_size = Vector2(240, 320)
-		button.clip_text = true
-		button.add_theme_font_size_override("font_size", 14)
+		var card_size := Vector2(maxf(220.0, float(layout["safe_rect"].size.x) - float(layout["edge_pad"]) * 2.0), 108.0) if stacked_mobile else Vector2(240, 320)
+		if wide_mobile:
+			card_size = Vector2(clampf(float(layout["safe_rect"].size.x) * 0.26, 190.0, 220.0), 188.0)
+		button.custom_minimum_size = card_size
+		button.add_theme_font_size_override("font_size", 12 if is_mobile else 13)
 		var accent_hex: String = def.get("bow_color", "#55f7ff") if unlocked else "#404040"
 		THEME.apply_to_button(button, Color(accent_hex))
+		CARD_SHELL.apply(button, _card_copy(def, unlocked), Color(accent_hex), is_mobile)
 		button.set_meta("class_id", present_id)
 		button.set_meta("unlocked", unlocked)
 		var captured_id: String = present_id
 		var captured_def: Dictionary = def
 		var captured_canvas: Control = radar_canvas
+		var captured_detail: Dictionary = detail_state
 		button.pressed.connect(
 			func() -> void:
 				if audio_mgr != null: audio_mgr.play_menu_click()
-				if captured_canvas != null: _update_preview(captured_id, captured_def, captured_canvas)
+				_update_preview(captured_id, captured_def, captured_canvas, captured_detail, unlocked)
 				for child in classes_box.get_children():
 					if child is Button:
 						child.remove_theme_stylebox_override("normal")
@@ -62,7 +67,7 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 		if radar_canvas != null:
 			button.mouse_entered.connect(
 				func() -> void:
-					_update_preview(captured_id, captured_def, captured_canvas)
+					_update_preview(captured_id, captured_def, captured_canvas, captured_detail, unlocked)
 			)
 		classes_box.add_child(button)
 	# Pre-select the last-used present so gamepad/keyboard nav starts there.
@@ -84,9 +89,8 @@ static func build_present_buttons(classes_box: Container, present_defs: Dictiona
 	
 	if selected_node != null:
 		selected_node.grab_focus()
-		if radar_canvas != null:
-			var sid: String = selected_node.get_meta("class_id", "")
-			_update_preview(sid, present_defs.get(sid, {}), radar_canvas)
+		var sid: String = selected_node.get_meta("class_id", "")
+		_update_preview(sid, present_defs.get(sid, {}), radar_canvas, detail_state, bool(selected_node.get_meta("unlocked", false)))
 
 
 static func is_present_unlocked(def: Dictionary, best_wave: int, save_manager: Node = null) -> bool:
@@ -116,9 +120,79 @@ static func unlock_label(req: String) -> String:
 
 ## Updates the radar chart, 3D viewport preview, and records the hovered present ID.
 static func _update_preview(present_id: String, def: Dictionary,
-		radar_canvas: Control) -> void:
+		radar_canvas: Control = null, detail_state: Dictionary = {},
+		unlocked: bool = true) -> void:
 	_current_preview_id = present_id
-	RADAR.update(radar_canvas, def)
+	if radar_canvas != null:
+		RADAR.update(radar_canvas, def)
+	_update_details(detail_state, def, unlocked)
 	if _preview_viewport == null or not is_instance_valid(_preview_viewport):
 		return
 	PREVIEW_VP.update_present(_preview_viewport, def)
+
+
+static func _update_details(detail_state: Dictionary, def: Dictionary, unlocked: bool) -> void:
+	if detail_state.is_empty():
+		return
+	var name_label: Label = detail_state.get("name_label")
+	var tagline_label: Label = detail_state.get("tagline_label")
+	var stats_label: Label = detail_state.get("stats_label")
+	var unlock_label_node: Label = detail_state.get("unlock_label")
+	if name_label != null:
+		name_label.text = String(def.get("name", "Unknown Present")).to_upper()
+	if tagline_label != null:
+		tagline_label.text = "%s // %s" % [_archetype_tag(def), _riot_flavor(def)]
+	if stats_label != null:
+		stats_label.text = "%s\n%s" % [_stat_summary(def), _punk_summary(def)]
+	if unlock_label_node != null:
+		unlock_label_node.text = "READY FOR DEPLOYMENT · LOCK THE GIFT" if unlocked else "LOCKED · %s" % unlock_label(String(def.get("unlock", ""))).to_upper()
+
+
+static func _card_copy(def: Dictionary, unlocked: bool) -> Dictionary:
+	return {
+		"kicker": "RACK READY" if unlocked else unlock_label(String(def.get("unlock", ""))).to_upper(),
+		"name": String(def.get("name", "Unknown Present")).to_upper(),
+		"role": _archetype_tag(def),
+		"stats": _compact_stats(def),
+		"flavor": _riot_flavor(def),
+		"footer": "LOCK THE GIFT" if unlocked else "LOCKED GIFT",
+		"unlocked": unlocked,
+	}
+
+
+static func _compact_stats(def: Dictionary) -> String:
+	return "DMG %d  RATE %.1f  RNG %d  VOL %d" % [int(round(float(def.get("damage", 0.0)))), 1.0 / maxf(float(def.get("fire_rate", 1.0)), 0.01), int(round(float(def.get("range", 0.0)))), int(def.get("shot_count", 1))]
+
+
+static func _stat_summary(def: Dictionary) -> String:
+	return "DMG %d  RATE %.1f/S  RANGE %d  VOLLEY %d  PIERCE %d" % [int(round(float(def.get("damage", 0.0)))), 1.0 / maxf(float(def.get("fire_rate", 1.0)), 0.01), int(round(float(def.get("range", 0.0)))), int(def.get("shot_count", 1)), int(def.get("pierce", 1))]
+
+
+static func _archetype_tag(def: Dictionary) -> String:
+	var range_val := float(def.get("range", 0.0))
+	var damage := float(def.get("damage", 0.0))
+	var rate := 1.0 / maxf(float(def.get("fire_rate", 1.0)), 0.01)
+	var shots := int(def.get("shot_count", 1))
+	if shots >= 3:
+		return "SHOTGUN RIOT"
+	if range_val >= 22.0 and damage <= 15.0:
+		return "ROOFLINE SNIPER"
+	if damage >= 30.0:
+		return "BREACH BRUISER"
+	if rate >= 3.5:
+		return "TINSEL SPRAYER"
+	return "TREE LOT HUSTLER"
+
+
+static func _punk_summary(def: Dictionary) -> String:
+	return "%s / %s / %s" % [_pretty_token(String(def.get("expression", "manic"))), _pretty_token(String(def.get("topper", "none"))), _pretty_token(String(def.get("accessory", "none")))]
+
+
+static func _riot_flavor(def: Dictionary) -> String:
+	return "%s %s with %s and %s" % [_pretty_token(String(def.get("expression", "manic"))), _pretty_token(String(def.get("body_shape", "gift_bag"))), _pretty_token(String(def.get("topper", "none"))), _pretty_token(String(def.get("accessory", "none")))]
+
+
+static func _pretty_token(value: String) -> String:
+	if value.is_empty() or value == "none":
+		return "No Flair"
+	return value.replace("_", " ").capitalize()

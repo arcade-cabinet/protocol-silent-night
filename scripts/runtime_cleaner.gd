@@ -13,6 +13,9 @@ static func clear(main: Node) -> void:
 		array_ref.clear()
 	main.obstacle_colliders.clear()
 	main.boss_ref = {}
+	if main.ui_mgr != null and main.ui_mgr.boss_panel != null:
+		main.ui_mgr.boss_panel.visible = false
+		main.ui_mgr.boss_bar.value = main.ui_mgr.boss_bar.max_value
 	main.run_cookies = 0
 	main.run_scrolls.clear()
 	main.coal_queue.clear()
@@ -23,6 +26,8 @@ static func clear(main: Node) -> void:
 	for child in main.board_root.get_children():
 		child.queue_free()
 	for child in main.actor_root.get_children():
+		child.queue_free()
+	for child in main.fx_root.get_children():
 		child.queue_free()
 	if main.player_node != null:
 		main.player_node.queue_free()

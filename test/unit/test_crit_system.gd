@@ -62,6 +62,17 @@ func test_hostile_projectile_zero_crit_chance_by_default() -> void:
 	assert_float(float(projectiles[0].get("crit_chance", 0.0))).is_equal_approx(0.0, 0.001)
 
 
+func test_projectile_builds_multi_part_visual_shell() -> void:
+	var combat := _make_combat()
+	var root := _make_projectile_root()
+	var projectiles: Array = []
+	combat.spawn_projectile(root, projectiles, Vector3.ZERO, Vector3(1, 0, 0),
+		false, 10.0, 1, 20.0, 0.3, Color("ffffff"))
+	var node := projectiles[0]["node"] as Node3D
+	assert_int(node.get_child_count()).is_greater_equal(5)
+	assert_object(node.find_child("ProjectileTip", false, false)).is_not_null()
+
+
 # --- guaranteed crit deals double damage ---
 
 func _run_projectile_hit(crit_chance: float, base_damage: float) -> Dictionary:

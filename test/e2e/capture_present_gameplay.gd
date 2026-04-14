@@ -23,23 +23,21 @@ func _initialize() -> void:
 func _run() -> void:
 	await process_frame
 	_main.configure_test_mode({"invincible": true, "auto_collect": true})
-	_main.start_run("elf")
+	_main.start_run("holly_striker")
 	await process_frame
 
 	# Now inject a present character next to the player
 	var spawner := PresentSpawner.new()
 	spawner.load_definitions("res://declarations/presents/presents.json")
-	var present := spawner.spawn_player("holly_striker", 0.55)
-	present.position = Vector3(2.5, 0.12, 0)
-	_main.runtime_root.get_node("Actors").add_child(present)
-
-	var present2 := spawner.spawn_player("jingle_tank", 0.55)
-	present2.position = Vector3(-2.5, 0.12, 0)
-	_main.runtime_root.get_node("Actors").add_child(present2)
-
-	var present3 := spawner.spawn_player("tinsel_rush", 0.55)
-	present3.position = Vector3(0, 0.12, 2.5)
-	_main.runtime_root.get_node("Actors").add_child(present3)
+	var showcase := [
+		{"id": "holly_striker", "pos": Vector3(2.5, 0.12, 0.0)},
+		{"id": "p_03", "pos": Vector3(-2.5, 0.12, 0.0)},
+		{"id": "p_08", "pos": Vector3(0.0, 0.12, 2.5)},
+	]
+	for entry in showcase:
+		var present := spawner.spawn_player(String(entry["id"]), 0.55)
+		present.position = entry["pos"]
+		_main.runtime_root.get_node("Actors").add_child(present)
 
 	await process_frame
 	await process_frame

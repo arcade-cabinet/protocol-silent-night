@@ -26,7 +26,8 @@ var joystick_base: ColorRect; var joystick_knob: ColorRect
 var start_classes_box: Container
 var select_button: Button
 var radar_canvas: Control
-var upgrade_box: HBoxContainer
+var present_detail_state: Dictionary = {}
+var upgrade_box: BoxContainer
 var difficulty_panel: PanelContainer
 var coal_sidebar_state: Dictionary = {}
 var _last_coal_signature: String = ""
@@ -63,6 +64,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	start_screen = start["screen"]
 	start_classes_box = start["classes_box"]
 	radar_canvas = start["radar_canvas"]
+	present_detail_state = start["detail_state"]
 	select_button = start["select_btn"]
 
 	var hud := UI_BUILDER.build_hud(root)
@@ -108,7 +110,8 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 		coal_sidebar_state = COAL_SIDEBAR.build_sidebar(root, on_coal_activate)
 
 	widgets = UI_WIDGETS.build_all(root)
-	PRESENT_SELECT.init_preview(root)
+	if present_detail_state.has("preview_host"):
+		PRESENT_SELECT.init_preview(present_detail_state["preview_host"])
 
 	return ui
 
@@ -157,7 +160,7 @@ func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, presen
 
 
 func _build_present_buttons(present_defs: Dictionary, save_manager: Node, on_class_pressed: Callable) -> void:
-	PRESENT_SELECT.build_present_buttons(self.start_classes_box, present_defs, save_manager, on_class_pressed, self.radar_canvas, self.audio_mgr)
+	PRESENT_SELECT.build_present_buttons(self.start_classes_box, present_defs, save_manager, on_class_pressed, self.radar_canvas, self.audio_mgr, self.present_detail_state)
 
 
 func show_message(text: String, duration: float, color: Color = Color.WHITE) -> void:

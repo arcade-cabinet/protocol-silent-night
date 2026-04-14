@@ -13,6 +13,26 @@ const PRESENT_ANIMATOR := preload("res://scripts/present_animator.gd")
 const SCREEN_SHAKE := preload("res://scripts/screen_shake.gd")
 const COMBO := preload("res://scripts/combo_counter.gd")
 const MAIN_HELPERS := preload("res://scripts/main_helpers.gd")
+const MATERIAL_FACTORY := preload("res://scripts/material_factory.gd")
+
+
+class SpyAudio:
+	extends RefCounted
+	var calls: Array = []
+	func play_enemy_telegraph(enemy_type: String, _world_pos: Vector3) -> void:
+		calls.append(enemy_type)
+
+
+class FakeMain:
+	extends Node
+	var audio_mgr: RefCounted = null
+	var fx_root: Node3D = null
+	var mat_factory: RefCounted = null
+	func _init() -> void:
+		fx_root = Node3D.new()
+		fx_root.name = "FxRoot"
+		add_child(fx_root)
+		mat_factory = MATERIAL_FACTORY.new()
 
 
 func test_boss_phases_emits_phase_changed_callable() -> void:
@@ -47,6 +67,16 @@ func test_enemy_telegraph_fires_before_shot() -> void:
 	ENEMY_BEHAVIORS.behavior_ranged(enemy, player_node, 0.016, move_cb, shot_cb, 1, tcb)
 	assert_int(telegraph_fired.size()).is_equal(1)
 	assert_str(String(telegraph_fired[0])).is_equal("santa")
+
+
+func test_main_helpers_enemy_telegraph_spawns_board_warning() -> void:
+	var fake: FakeMain = auto_free(FakeMain.new())
+	add_child(fake)
+	var audio: SpyAudio = SpyAudio.new()
+	fake.audio_mgr = audio
+	MAIN_HELPERS.enemy_telegraph(fake, "santa", Vector3(3, 0, -2))
+	assert_int(audio.calls.size()).is_equal(1)
+	assert_object(fake.fx_root.find_child("EnemyTelegraph_santa", true, false)).is_not_null()
 
 
 func test_reduced_motion_blocks_flair_animator_tick() -> void:
