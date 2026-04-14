@@ -27,6 +27,8 @@ static func clear(main: Node) -> void:
 		child.queue_free()
 	for child in main.actor_root.get_children():
 		child.queue_free()
+	for child in main.fx_root.get_children():
+		child.queue_free()
 	if main.player_node != null:
 		main.player_node.queue_free()
 	main.player_node = null

@@ -9,6 +9,7 @@ const RUNTIME_QUALITY := preload("res://scripts/runtime_quality.gd")
 const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
 const MOBILE_SESSION := preload("res://scripts/mobile_session_guard.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
+const ENEMY_TELEGRAPH_FX := preload("res://scripts/enemy_telegraph_fx.gd")
 static var _coal_activator: RefCounted
 
 
@@ -154,6 +155,7 @@ static func boss_phase_sting(main: Node) -> void:
 
 static func enemy_telegraph(main: Node, etype: String, pos: Vector3) -> void:
 	if main.audio_mgr != null: main.audio_mgr.play_enemy_telegraph(etype, pos)
+	ENEMY_TELEGRAPH_FX.spawn(main.fx_root, main.mat_factory, etype, pos)
 
 
 static func end_run_audio(main: Node, win: bool) -> void:
