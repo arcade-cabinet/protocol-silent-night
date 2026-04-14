@@ -51,6 +51,7 @@ func test_boss_panel_shows_when_boss_spawns() -> void:
 
 	assert_bool(main.boss_panel.visible).is_true()
 	assert_dict(main.boss_ref).is_not_empty()
+	_clear_boss_runtime(main)
 
 
 func test_start_run_clears_stale_boss_panel() -> void:
@@ -62,6 +63,7 @@ func test_start_run_clears_stale_boss_panel() -> void:
 	main.start_run("holly_striker"); await get_tree().process_frame
 	assert_bool(main.boss_panel.visible).is_false()
 	assert_dict(main.boss_ref).is_empty()
+	_clear_boss_runtime(main)
 
 
 func test_board_query_matches_continuous_arena_boundary() -> void:
@@ -152,3 +154,12 @@ func test_mobile_back_request_pauses_run_and_clears_touch_state() -> void:
 	assert_vector(main.move_velocity).is_equal(Vector2.ZERO)
 	assert_bool(main.dash_pressed).is_false()
 	main.ui_mgr.toggle_pause(main.get_tree())
+
+
+func _clear_boss_runtime(main: Node) -> void:
+	if main == null:
+		return
+	var boss_node: Node3D = main.boss_ref.get("node")
+	if is_instance_valid(boss_node):
+		boss_node.queue_free()
+	main.boss_ref = {}

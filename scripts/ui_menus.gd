@@ -157,12 +157,13 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	classes_box.name = "ClassCards"
 	classes_box.add_theme_constant_override("separation", 12 if stacked_mobile else 20)
 	class_scroll.add_child(classes_box)
-	var instruction := Label.new()
-	instruction.text = "Landscape only. Left thumb steers. Right thumb starts the riot." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and punch the dash before the lot punches back."
-	instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	instruction.modulate = Color("dceefb")
-	if not (is_mobile and not stacked_mobile): start_vbox.add_child(instruction)
+	if not (is_mobile and not stacked_mobile):
+		var instruction := Label.new()
+		instruction.text = "Landscape only. Left thumb steers. Right thumb starts the riot." if is_mobile else "Desktop: WASD or arrows to move, Shift to dash. Mobile: drag anywhere and punch the dash before the lot punches back."
+		instruction.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		instruction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		instruction.modulate = Color("dceefb")
+		start_vbox.add_child(instruction)
 
 	var back_btn := Button.new()
 	back_btn.text = "< BACK"
