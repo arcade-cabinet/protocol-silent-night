@@ -38,6 +38,10 @@ func start_run(class_id: String) -> void:
 	main.dash_timer = 0.0
 	main.dash_cooldown_timer = 0.0
 	main.move_velocity = Vector2.ZERO
+	main.input_move = Vector2.ZERO
+	main.touch_active = false
+	main.dash_pressed = false
+	main.player_ctrl.reset_touch_memory()
 	main.boss_ref = {}
 	main.level_lookback.clear()
 	frame_budget.reset()

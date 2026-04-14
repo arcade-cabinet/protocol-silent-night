@@ -27,6 +27,8 @@ static func return_to_menu(main: Node) -> void:
 	main.input_move = Vector2.ZERO
 	main.touch_active = false
 	main.dash_pressed = false
+	if main.player_ctrl != null:
+		main.player_ctrl.reset_touch_memory()
 	var ui: RefCounted = main.ui_mgr
 	ui.end_screen.visible = false
 	ui.level_screen.visible = false

@@ -24,6 +24,8 @@ static func _pause_active_run(main: Node) -> void:
 	main.input_move = Vector2.ZERO
 	main.move_velocity = Vector2.ZERO
 	main.dash_pressed = false
+	if main.player_ctrl != null:
+		main.player_ctrl.reset_touch_memory()
 	if main.ui_mgr != null:
 		main.ui_mgr.hide_joystick()
 		main.ui_mgr.toggle_pause(tree)

@@ -61,6 +61,8 @@ static func _visual_root(node: Variant) -> Node3D:
 	var root := node as Node3D
 	if root == null:
 		return null
+	if root.has_meta("cached_visual_root"):
+		return root.get_meta("cached_visual_root") as Node3D
 	for child in root.get_children():
 		if not (child is Node3D):
 			continue
@@ -69,5 +71,6 @@ static func _visual_root(node: Variant) -> Node3D:
 		if name == "ThreatMarks" or name == "DeathEcho":
 			continue
 		if name.begins_with("Present_") or name == "BossFallback" or child is MeshInstance3D:
+			root.set_meta("cached_visual_root", child_node)
 			return child_node
 	return null

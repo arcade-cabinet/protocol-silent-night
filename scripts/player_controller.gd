@@ -156,3 +156,8 @@ func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary, 
 		if joy.button_index == JOY_BUTTON_RIGHT_SHOULDER or joy.button_index == JOY_BUTTON_A:
 			state["dash_pressed"] = joy.pressed
 	PLAYER_TOUCH_INPUT.handle(event, viewport_size, state, _touch_memory, save_manager, player_class)
+
+
+func reset_touch_memory() -> void:
+	_touch_memory["move_index"] = -1
+	_touch_memory["dash_index"] = -1

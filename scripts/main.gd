@@ -145,6 +145,7 @@ func _tick(delta: float) -> void:
 	if ORIENTATION_GATE.refresh(orientation_gate, self):
 		input_move = Vector2.ZERO; move_velocity = Vector2.ZERO
 		touch_active = false; dash_pressed = false; ui_mgr.hide_joystick()
+		player_ctrl.reset_touch_memory()
 		ui_mgr.refresh_widgets(self); return
 	ui_mgr.refresh_widgets(self)
 	if state == "playing":

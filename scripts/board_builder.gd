@@ -46,12 +46,12 @@ func build_snow_drifts(board_root: Node3D, board_data: BoardLayout) -> void:
 		board_root.add_child(node)
 
 
-func build_outer_ridge(board_root: Node3D, _board_data: BoardLayout) -> void:
+func build_outer_ridge(board_root: Node3D, board_data: BoardLayout) -> void:
 	# Build elongated snowbanks from ridge samples so the perimeter reads as drift lines,
 	# not as a repeated row of ice pucks.
 	var snow_material: Material = materials.material_for_zone("snow")
 	var accents := [Color("ff2244"), Color("ffd700"), Color("1f9f58")]
-	var ridges: Array = _board_data.ridges if not _board_data.ridges.is_empty() else _fallback_ridges()
+	var ridges: Array = board_data.ridges if not board_data.ridges.is_empty() else _fallback_ridges()
 	for ridge_index in range(ridges.size()):
 		var ridge: Dictionary = ridges[ridge_index]
 		var world: Vector2 = ridge["world"]

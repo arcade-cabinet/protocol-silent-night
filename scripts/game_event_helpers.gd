@@ -3,6 +3,7 @@ extends RefCounted
 ## Static helpers for game events and progression to keep game_manager.gd under 200 LOC.
 
 const RUNTIME_CLEANER := preload("res://scripts/runtime_cleaner.gd")
+const ENEMY_REACTIVITY := preload("res://scripts/enemy_reactivity.gd")
 
 static func begin_wave_clear(main: Node) -> void:
 	main.state = "wave_clear"
@@ -20,7 +21,7 @@ static func on_boss_killed(main: Node) -> void:
 		return
 	main.boss_phases.clear()
 	if is_instance_valid(main.boss_ref.get("node")):
-		preload("res://scripts/enemy_reactivity.gd").spawn_death_echo(main.fx_root, main.vfx, main.boss_ref)
+		ENEMY_REACTIVITY.spawn_death_echo(main.fx_root, main.vfx, main.boss_ref)
 		main.boss_ref["node"].queue_free()
 	main.boss_ref = {}
 	main.ui_mgr.boss_panel.visible = false

@@ -40,6 +40,7 @@ static func update_enemy_markers(enemy: Dictionary) -> void:
 	var marks := enemy["node"].get_node_or_null("ThreatMarks") as Node3D
 	if marks == null:
 		return
+	var refs := _marker_refs(marks)
 	var enemy_type := String(enemy.get("id", "grunt"))
 	var timer := float(enemy.get("behavior_timer", 0.0))
 	var phase_level := int(enemy.get("phase_level", 1))
@@ -49,15 +50,15 @@ static func update_enemy_markers(enemy: Dictionary) -> void:
 		alert = maxf(alert, 0.35)
 	marks.rotation.y = timer * (0.45 + phase_level * 0.08)
 	marks.scale = Vector3.ONE * (1.0 + float(phase_level - 1) * 0.06)
-	_style_mesh(marks.get_node("ThreatDisc"), _base_color(enemy), 0.16 + alert * 0.22 + phase_level * 0.02, 1.05 + alert * 0.8)
-	var ring := marks.get_node("ThreatRing") as MeshInstance3D
+	_style_mesh(refs["disc"], _base_color(enemy), 0.16 + alert * 0.22 + phase_level * 0.02, 1.05 + alert * 0.8)
+	var ring := refs["ring"] as MeshInstance3D
 	ring.scale = Vector3.ONE * (1.0 + alert * 0.42 + pulse * 0.12)
 	_style_mesh(ring, _base_color(enemy), 0.78, 1.9 + alert * 1.0 + phase_level * 0.16)
-	var accent := marks.get_node("ThreatAccent") as MeshInstance3D
+	var accent := refs["accent"] as MeshInstance3D
 	accent.visible = phase_level > 1 or alert > 0.0 or enemy_type in ["tank", "elf", "santa", "bumble", "rusher"]
 	accent.scale = Vector3.ONE * (1.0 + alert * 0.28 + pulse * 0.08)
 	_style_mesh(accent, _accent_for(enemy_type), 0.78, 1.45 + alert * 1.0 + phase_level * 0.12)
-	var spikes := marks.get_node("ThreatSpikes") as Node3D
+	var spikes := refs["spikes"] as Node3D
 	spikes.visible = alert > 0.0
 	spikes.rotation.y = timer * 4.8
 	spikes.scale = Vector3.ONE * (1.0 + alert * 0.46 + pulse * 0.12)
@@ -70,20 +71,37 @@ static func update_boss_markers(boss_ref: Dictionary, phase: int) -> void:
 	var marks := boss_ref["node"].get_node_or_null("ThreatMarks") as Node3D
 	if marks == null:
 		return
+	var refs := _marker_refs(marks)
 	var pulse := 0.92 + sin(float(boss_ref.get("attack_timer", 0.0)) * 7.2) * 0.08
-	_style_mesh(marks.get_node("ThreatDisc"), Color("3a0812"), 0.24 + phase * 0.05, 1.0 + phase * 0.35)
-	var ring := marks.get_node("ThreatRing") as MeshInstance3D
+	_style_mesh(refs["disc"], Color("3a0812"), 0.24 + phase * 0.05, 1.0 + phase * 0.35)
+	var ring := refs["ring"] as MeshInstance3D
 	ring.scale = Vector3.ONE * (1.0 + phase * 0.08 + pulse * 0.06)
 	_style_mesh(ring, Color(boss_ref.get("color", Color("ff2244"))), 0.84, 2.6 + phase * 0.35)
-	var accent := marks.get_node("ThreatAccent") as MeshInstance3D
+	var accent := refs["accent"] as MeshInstance3D
 	accent.visible = phase >= 2
 	accent.scale = Vector3.ONE * (1.0 + phase * 0.12 + pulse * 0.04)
 	_style_mesh(accent, Color("ffd86e"), 0.84, 1.9 + phase * 0.45)
 	for idx in range(4):
-		var flare := marks.get_node("ThreatFlare%d" % idx) as MeshInstance3D
+		var flare := refs["flares"][idx] as MeshInstance3D
 		flare.visible = idx < phase + 1
 		flare.scale = Vector3.ONE * (1.0 + phase * 0.12 + pulse * 0.06)
 		_style_mesh(flare, Color("ffd86e"), 0.95, 2.2 + phase * 0.5)
+
+
+static func _marker_refs(marks: Node3D) -> Dictionary:
+	if marks.has_meta("marker_refs"):
+		return marks.get_meta("marker_refs") as Dictionary
+	var refs := {
+		"disc": marks.get_node_or_null("ThreatDisc"),
+		"ring": marks.get_node_or_null("ThreatRing"),
+		"accent": marks.get_node_or_null("ThreatAccent"),
+		"spikes": marks.get_node_or_null("ThreatSpikes"),
+		"flares": [],
+	}
+	for idx in range(4):
+		refs["flares"].append(marks.get_node_or_null("ThreatFlare%d" % idx))
+	marks.set_meta("marker_refs", refs)
+	return refs
 
 
 static func _disc(name: String, color: Color, radius: float, alpha: float, energy: float) -> MeshInstance3D:

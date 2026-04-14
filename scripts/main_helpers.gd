@@ -10,6 +10,7 @@ const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
 const MOBILE_SESSION := preload("res://scripts/mobile_session_guard.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 const ENEMY_TELEGRAPH_FX := preload("res://scripts/enemy_telegraph_fx.gd")
+const ENEMY_REACTIVITY := preload("res://scripts/enemy_reactivity.gd")
 static var _coal_activator: RefCounted
 
 
@@ -34,7 +35,7 @@ static func kill_enemy(main: Node, enemy_index: int) -> void:
 	main.combat.spawn_hit_fx(main.fx_root, main.vfx, enemy["node"].position, enemy["color"])
 	main.particles.spawn_death_burst(main.fx_root, enemy["node"].position,
 		enemy["color"], float(enemy["node"].scale.x))
-	preload("res://scripts/enemy_reactivity.gd").spawn_death_echo(main.fx_root, main.vfx, enemy)
+	ENEMY_REACTIVITY.spawn_death_echo(main.fx_root, main.vfx, enemy)
 	enemy["node"].queue_free()
 	main.enemies.remove_at(enemy_index)
 	main.progression.record_kill()
