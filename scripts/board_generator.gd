@@ -15,14 +15,17 @@ func generate_board(board_seed: int, config: Dictionary) -> BoardLayout:
 	var obstacles: Array[Dictionary] = []
 	var landmarks: Array[Dictionary] = []
 
-	var drift_count := 5 + rng.randi_range(0, 3)
+	var drift_count := 3 + rng.randi_range(0, 2)
 	for drift_index in range(drift_count):
 		var angle := rng.randf() * TAU
-		var radius := rng.randf_range(safe_radius * 1.15, arena_radius * 0.8)
+		var edge_bias := rng.randf()
+		var radius := lerpf(safe_radius * 1.85, arena_radius * 0.94, edge_bias * edge_bias)
+		if drift_index == 0:
+			radius = rng.randf_range(safe_radius * 1.45, arena_radius * 0.62)
 		drifts.append({
 			"world": Vector2.RIGHT.rotated(angle) * radius,
-			"radius": rng.randf_range(1.2, 2.7),
-			"stretch": rng.randf_range(0.8, 1.5),
+			"radius": rng.randf_range(0.9, 1.9),
+			"stretch": rng.randf_range(1.35, 2.8),
 			"rotation": rng.randf_range(0.0, TAU)
 		})
 

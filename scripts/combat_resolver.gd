@@ -3,6 +3,7 @@ extends RefCounted
 var materials: RefCounted  # MaterialFactory
 var pixels: RefCounted  # PixelArtRenderer
 var audio_mgr: RefCounted = null
+var _trail_materials: Dictionary = {}
 
 
 func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
@@ -11,13 +12,24 @@ func _init(material_factory: RefCounted, pixel_renderer: RefCounted) -> void:
 
 
 func spawn_projectile(projectile_root: Node3D, projectiles: Array, origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float, player_color: Color, fx_root: Node3D = null, particles: RefCounted = null, crit_chance: float = 0.0) -> void:
-	var node := MeshInstance3D.new()
+	var bolt_color := Color("ff617e") if hostile else player_color
+	var node := Node3D.new()
+	var head := MeshInstance3D.new()
 	var sphere := SphereMesh.new()
-	sphere.radius = scale_value
-	sphere.height = scale_value * 2.0
-	node.mesh = sphere
-	node.material_override = materials.emissive_material(Color("ff617e") if hostile else player_color, 1.6, 0.08)
+	sphere.radius = scale_value * 1.05
+	sphere.height = scale_value * 2.1
+	head.mesh = sphere
+	head.material_override = materials.emissive_material(bolt_color, 2.7, 0.05)
+	node.add_child(head)
+	var tail := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(scale_value * 1.1, scale_value * 0.7, scale_value * 8.8)
+	tail.mesh = box
+	tail.position = Vector3(0, 0, scale_value * 3.7)
+	tail.material_override = _trail_material(bolt_color)
+	node.add_child(tail)
 	node.position = origin
+	node.look_at_from_position(origin, origin + direction.normalized(), Vector3.UP, true)
 	projectile_root.add_child(node)
 	projectiles.append({"node": node, "direction": direction, "hostile": hostile, "damage": damage, "pierce": pierce, "speed": speed, "life": 1.0, "crit_chance": crit_chance})
 	if audio_mgr != null and not hostile:
@@ -31,6 +43,7 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 		var projectile: Dictionary = projectiles[index]
 		projectile["life"] -= delta
 		projectile["node"].position += projectile["direction"] * float(projectile["speed"]) * delta
+		projectile["node"].look_at_from_position(projectile["node"].position, projectile["node"].position + projectile["direction"], Vector3.UP, true)
 		var remove: bool = projectile["life"] <= 0.0
 		if not remove and bool(projectile["hostile"]) and _projectile_hits_obstacle(projectile["node"].position, obstacle_colliders):
 			spawn_hit_fx(fx_root, vfx, Vector3(projectile["node"].position.x, 0.72, projectile["node"].position.z), Color("dceefb"))
@@ -77,6 +90,21 @@ func update_projectiles(delta: float, projectiles: Array, enemies: Array, boss_r
 			projectiles.remove_at(index)
 		else:
 			projectiles[index] = projectile
+
+
+func _trail_material(color: Color) -> StandardMaterial3D:
+	var key := color.to_html(false)
+	if _trail_materials.has(key):
+		return _trail_materials[key]
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(color.r, color.g, color.b, 0.78)
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 2.6
+	_trail_materials[key] = mat
+	return mat
 
 
 func update_pickups(delta: float, pickups: Array, player_node: Node3D, config: Dictionary, test_mode: Dictionary, on_gain_xp: Callable, fx_root: Node3D = null, particles: RefCounted = null, on_gain_cookies: Callable = Callable(), on_gain_scroll: Callable = Callable()) -> void:

@@ -28,7 +28,8 @@ func test_generate_board_reserves_player_safe_space_and_builds_outer_ridge() -> 
 	var safe_radius: float = config["player_spawn_safe_radius"]
 	var arena_radius: float = config["arena_radius"]
 
-	assert_int(board.drifts.size()).is_greater(4)
+	assert_int(board.drifts.size()).is_greater_equal(3)
+	assert_int(board.drifts.size()).is_less_equal(5)
 	assert_int(board.ridges.size()).is_equal(18)
 	assert_int(board.obstacles.size()).is_greater(0)
 	assert_int(board.landmarks.size()).is_greater(0)

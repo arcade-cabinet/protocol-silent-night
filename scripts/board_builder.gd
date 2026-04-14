@@ -29,19 +29,20 @@ func build_board_foundation(board_root: Node3D, arena_radius: float) -> void:
 
 
 func build_snow_drifts(board_root: Node3D, board_data: BoardLayout) -> void:
-	var snow_material: Material = materials.material_for_zone("snow")
+	var drift_material: Material = materials.flat_material(Color("c8d6e2"))
 	for drift in board_data.drifts:
 		var node := MeshInstance3D.new()
 		var mesh := CylinderMesh.new()
 		var radius := float(drift.get("radius", 1.8))
-		mesh.top_radius = radius
-		mesh.bottom_radius = radius * 0.94
-		mesh.height = 0.06
+		mesh.top_radius = radius * 0.92
+		mesh.bottom_radius = radius
+		mesh.height = 0.035
 		node.mesh = mesh
-		node.position = Vector3(float(drift["world"].x), 0.04, float(drift["world"].y))
-		node.scale = Vector3(float(drift.get("stretch", 1.0)), 1.0, 1.0 / maxf(float(drift.get("stretch", 1.0)), 0.01))
+		node.position = Vector3(float(drift["world"].x), 0.025, float(drift["world"].y))
+		var stretch := float(drift.get("stretch", 1.0))
+		node.scale = Vector3(stretch * 1.2, 1.0, clampf(1.0 / maxf(stretch * 1.6, 0.01), 0.22, 0.58))
 		node.rotation.y = float(drift.get("rotation", 0.0))
-		node.material_override = snow_material
+		node.material_override = drift_material
 		board_root.add_child(node)
 
 
