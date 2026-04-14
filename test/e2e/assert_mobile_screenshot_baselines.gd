@@ -16,9 +16,16 @@ const FILES := [
 	"level_up_mobile.png",
 	"boss_mobile.png",
 	"victory_mobile.png",
+	"results_mobile.png",
+	"scroll_mobile.png",
+	"market_mobile.png",
 ]
 const CHANNEL_TOLERANCE := 0.02
 const DIFF_RATIO_LIMIT := 0.0004
+const FILE_DIFF_LIMITS := {
+	"scroll_mobile.png": 0.0005,
+	"market_mobile.png": 0.0008,
+}
 
 
 func _initialize() -> void:
@@ -42,7 +49,8 @@ func _initialize() -> void:
 			continue
 		var result: Dictionary = IMAGE_COMPARE.compare_files(baseline_path, actual_path, channel_tolerance)
 		var reason := String(result.get("reason", ""))
-		if reason in ["load_failed", "missing_image", "size_mismatch"] or float(result.get("diff_ratio", 1.0)) > diff_ratio_limit:
+		var file_limit := float(FILE_DIFF_LIMITS.get(file_name, diff_ratio_limit))
+		if reason in ["load_failed", "missing_image", "size_mismatch"] or float(result.get("diff_ratio", 1.0)) > file_limit:
 			failures.append("%s :: %s" % [file_name, _format_result(result)])
 	if failures.is_empty():
 		print("Mobile screenshot baselines match.")

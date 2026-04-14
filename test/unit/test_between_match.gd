@@ -149,6 +149,7 @@ func test_populate_scroll_grid_builds_one_card_per_outcome() -> void:
 	SCREENS.populate_scroll_grid(state, outcomes)
 	var grid: GridContainer = state["grid"]
 	assert_int(grid.get_child_count()).is_equal(3)
+	assert_str((state["summary"] as Label).text).contains("30 C")
 
 
 func test_populate_scroll_grid_empty_shows_empty_label() -> void:
@@ -172,3 +173,16 @@ func test_populate_scroll_grid_caps_at_twenty_plus_overflow() -> void:
 	SCREENS.populate_scroll_grid(state, outcomes)
 	var grid: GridContainer = state["grid"]
 	assert_int(grid.get_child_count()).is_equal(21)
+
+
+func test_market_stat_line_formats_primary_bonuses() -> void:
+	var summary := MARKET._stat_line({
+		"stats": {"damage_mult": 0.1, "crit_chance": 0.08}
+	})
+	assert_str(summary).contains("DMG +10%")
+	assert_str(summary).contains("CRIT +8%")
+
+
+func test_market_slot_label_shortens_inventory_slot_names() -> void:
+	assert_str(MARKET._slot_label("weapon_mod")).is_equal("BARREL")
+	assert_str(MARKET._slot_label("tag_charm")).is_equal("TAG")
