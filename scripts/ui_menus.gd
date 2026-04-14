@@ -86,21 +86,25 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	start_margin.add_theme_constant_override("margin_bottom", int(round(float(layout["safe_bottom"]) + edge_pad)))
 	start_screen.add_child(start_margin)
 
-	var outer_scroll := ScrollContainer.new()
-	outer_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	outer_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	start_margin.add_child(outer_scroll)
-
 	var start_vbox := VBoxContainer.new()
 	start_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	start_vbox.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * 1.3)))
-	outer_scroll.add_child(start_vbox)
+	start_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var outer_scroll: ScrollContainer = null
+	if is_mobile:
+		start_margin.add_child(start_vbox)
+	else:
+		outer_scroll = ScrollContainer.new()
+		outer_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		outer_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		start_margin.add_child(outer_scroll)
+		outer_scroll.add_child(start_vbox)
 
 	var title := Label.new()
 	title.text = "PROTOCOL: SILENT NIGHT"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.add_theme_font_size_override("font_size", 24 if is_mobile else 48)
+	title.add_theme_font_size_override("font_size", 20 if is_mobile else 48)
 	title.add_theme_color_override("font_color", THEME.NEON_WHITE)
 	title.add_theme_color_override("font_outline_color", THEME.NEON_CYAN)
 	title.add_theme_constant_override("outline_size", 6)
@@ -109,39 +113,43 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	var subtitle := Label.new()
 	subtitle.text = "// ENDLESS VIGIL //"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 14 if is_mobile else 20)
+	subtitle.add_theme_font_size_override("font_size", 11 if is_mobile else 20)
 	subtitle.add_theme_color_override("font_color", THEME.NEON_GOLD)
 	start_vbox.add_child(subtitle)
 
 	var mid_row: BoxContainer = VBoxContainer.new() if is_mobile else HBoxContainer.new()
 	mid_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	mid_row.add_theme_constant_override("separation", int(round(float(layout["section_gap"]) * (1.0 if is_mobile else 1.8))))
+	mid_row.size_flags_vertical = Control.SIZE_EXPAND_FILL if is_mobile else Control.SIZE_SHRINK_CENTER
 	start_vbox.add_child(mid_row)
 
 	var details_vbox := VBoxContainer.new()
 	details_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	details_vbox.add_theme_constant_override("separation", 20)
+	details_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details_vbox.add_theme_constant_override("separation", 12 if is_mobile else 20)
 	mid_row.add_child(details_vbox)
 
-	var radar_canvas := RADAR_CHART.build(details_vbox, Vector2(220, 220) if is_mobile else Vector2(240, 240))
+	var radar_canvas := RADAR_CHART.build(details_vbox, Vector2(168, 168) if is_mobile else Vector2(240, 240))
 	var select_btn := Button.new()
 	select_btn.text = "SELECT"
 	select_btn.name = "SelectButton"
-	select_btn.custom_minimum_size = Vector2(220, 56) if is_mobile else Vector2(240, 60)
+	select_btn.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 56) if is_mobile else Vector2(240, 60)
+	select_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL if is_mobile else Control.SIZE_SHRINK_CENTER
 	select_btn.add_theme_font_size_override("font_size", 22 if is_mobile else 24)
 	select_btn.disabled = true
 	THEME.apply_to_button(select_btn, THEME.NEON_CYAN)
 	details_vbox.add_child(select_btn)
 
 	var class_scroll := ScrollContainer.new()
-	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 320.0) if is_mobile else Vector2(minf(800.0, float(layout["safe_rect"].size.x) * 0.56), 400.0)
+	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 240.0) if is_mobile else Vector2(minf(800.0, float(layout["safe_rect"].size.x) * 0.56), 400.0)
 	class_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if is_mobile else ScrollContainer.SCROLL_MODE_AUTO
 	class_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if is_mobile else ScrollContainer.SCROLL_MODE_DISABLED
+	class_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL if is_mobile else Control.SIZE_SHRINK_CENTER
 	mid_row.add_child(class_scroll)
 
 	var classes_box: Container = VBoxContainer.new() if is_mobile else HBoxContainer.new()
 	classes_box.name = "ClassCards"
-	classes_box.add_theme_constant_override("separation", 20)
+	classes_box.add_theme_constant_override("separation", 12 if is_mobile else 20)
 	class_scroll.add_child(classes_box)
 
 	var instruction := Label.new()
@@ -159,4 +167,4 @@ static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	THEME.apply_to_button(back_btn, THEME.NEON_CYAN)
 	back_btn.pressed.connect(on_back)
 	start_vbox.add_child(back_btn)
-	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": radar_canvas, "select_btn": select_btn}
+	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": radar_canvas, "select_btn": select_btn, "class_scroll": class_scroll, "uses_outer_scroll": outer_scroll != null}

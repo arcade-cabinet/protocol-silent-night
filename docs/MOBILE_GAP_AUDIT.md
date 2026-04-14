@@ -20,6 +20,8 @@
   The active present now nudges joystick reach, dash footprint, dash verb, and lock language through a live touch doctrine instead of treating every loadout like the same operator.
 - **Phone-native level-up sheet**
   The level-up overlay now rises as a centered mobile decision sheet with authored upgrade cards instead of pinning a desktop-style stack to the top edge.
+- **Phone-native present-select rail**
+  The present-select screen now spends portrait height on the active loadout rail instead of nesting the whole screen inside an outer mobile scroll wrapper.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -27,8 +29,6 @@
 
 ### UI / Readability
 
-- **Start/loadout flow still scrolls rather than re-composing**
-  The responsive shell is safer now, but the present select and difficulty flows still solve tight screens partly with scrolling instead of a cleaner phone-native composition.
 - **No explicit notch/home-indicator regression tests**
   Safe-area code exists now, but there is no automated matrix across notch/no-notch landscape and portrait targets.
 
@@ -50,6 +50,6 @@
 
 ## Highest-Value Next Moves
 
-1. Recompose present select into a truly phone-native loadout surface instead of a scroll-safe desktop adaptation.
-2. Recompose the difficulty flow so it reads like a fast phone decision instead of a safe desktop panel.
+1. Recompose the difficulty flow so it reads like a fast phone decision instead of a safe desktop panel.
+2. Add a post-present-select portrait capture for the difficulty handoff so the whole deploy path is visually covered.
 3. Add notch/home-indicator viewport regression coverage and turn `capture_mobile_screenshots.gd` into a recurring visual verification ritual.

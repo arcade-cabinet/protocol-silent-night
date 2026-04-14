@@ -14,6 +14,8 @@ func test_start_screen_uses_vertical_mobile_card_list() -> void:
 	var start: Dictionary = _menus.build_start_screen(root, func() -> void: pass)
 	var classes_box: Node = start["classes_box"]
 	assert_object(classes_box).is_instanceof(VBoxContainer)
+	assert_bool(bool(start["uses_outer_scroll"])).is_false()
+	assert_int(int((start["class_scroll"] as ScrollContainer).size_flags_vertical)).is_equal(Control.SIZE_EXPAND_FILL)
 
 
 func test_level_screen_uses_vertical_mobile_upgrade_stack() -> void:
