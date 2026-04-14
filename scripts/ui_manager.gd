@@ -42,7 +42,7 @@ var achievement_timer: float = 0.0
 var root_control: Control
 
 
-func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable(), on_coal_activate: Callable = Callable()) -> CanvasLayer:
+func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on_dash_up: Callable, on_difficulty_selected: Callable = Callable(), on_coal_activate: Callable = Callable(), on_resume_run: Callable = Callable()) -> CanvasLayer:
 	var ui := CanvasLayer.new()
 	ui.name = "UI"
 	parent.add_child(ui)
@@ -59,7 +59,7 @@ func build_ui(parent: Node, on_menu_return: Callable, on_dash_down: Callable, on
 	progress_screen = prog["panel"]
 	progress_grid = prog["grid"]
 
-	var start := UI_MENUS.build_start_screen(root, _on_back_to_title_pressed)
+	var start := UI_MENUS.build_start_screen(root, _on_back_to_title_pressed, on_resume_run)
 	start_screen = start["screen"]
 	start_classes_box = start["classes_box"]
 	radar_canvas = start["radar_canvas"]
@@ -145,6 +145,7 @@ func _on_back_to_title_pressed() -> void: start_screen.visible = false; title_sc
 func refresh_start_screen(save_manager: Node, on_class_pressed: Callable, present_defs: Dictionary = {}) -> void:
 	title_screen.visible = true
 	start_screen.visible = false
+	UI_MENUS.refresh_resume_button(start_screen, save_manager, present_defs)
 	if select_button != null:
 		select_button.disabled = true
 	if difficulty_panel != null:

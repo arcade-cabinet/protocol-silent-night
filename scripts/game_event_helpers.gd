@@ -3,6 +3,7 @@ extends RefCounted
 ## Static helpers for game events and progression to keep game_manager.gd under 200 LOC.
 
 const RUNTIME_CLEANER := preload("res://scripts/runtime_cleaner.gd")
+const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 
 static func begin_wave_clear(main: Node) -> void:
 	main.state = "wave_clear"
@@ -48,6 +49,7 @@ static func end_run(main: Node, win: bool) -> void:
 	ui.boss_panel.visible = false
 	var sm: Node = main._save_manager()
 	if sm != null:
+		SUSPENDED_RUN.clear(sm)
 		sm.suspend_autosave()
 		if main.run_cookies > 0:
 			sm.add_cookies(main.run_cookies)

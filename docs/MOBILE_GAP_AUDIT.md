@@ -46,6 +46,8 @@
   Dash, damage, rewrap, level-up, boss-phase, and run-end beats now drive handheld vibration with a player-facing Touch-tab toggle instead of leaving mobile combat completely silent to the hands.
 - **Pause-time doctrine + pressure recap**
   The pause card now surfaces the active present/doctrine, dash verb, lock language, hostile pressure, and frame-budget rating so a resumed run does not dump the player back into the board with zero context.
+- **Suspended-run checkpoint restore**
+  Mobile app pause/back now writes a suspended-run checkpoint, the start screen surfaces a `RESUME VIGIL` action, and the restored run comes back on the same wave checkpoint with its progression, upgrades, cookies, and rewrap count intact.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -70,11 +72,11 @@
 
 - **No Android hardware soak**
   Export preset exists, but there is no measured battery/thermal/session validation on representative devices.
-- **No mid-run restore after OS kill**
-  Background pause is now safe, but a hard mobile process death still drops the current run instead of restoring back into the active session.
+- **Resume is checkpoint-grade, not exact-state**
+  Suspended restore now preserves the run and wave context, but it still restarts from the wave checkpoint instead of reconstructing live enemies, pickups, and exact board pressure at the frame of interruption.
 
 ## Highest-Value Next Moves
 
 1. Run Android hardware soak with frame-budget notes and haptics/background-pause behavior instead of extrapolating from desktop portrait captures.
-2. Add true mid-run restore after OS kill so mobile interruption does not mean a lost session.
+2. Decide whether the checkpoint restore is the shipping bar or whether boss/pickup state needs a more exact suspended snapshot.
 3. Expand the display-session touch matrix to more unlock-gated presents and left-handed variants beyond the now-covered doctrine set.

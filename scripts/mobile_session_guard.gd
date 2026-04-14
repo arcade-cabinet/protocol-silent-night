@@ -1,5 +1,6 @@
 extends RefCounted
 
+const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 
@@ -18,10 +19,11 @@ static func handle_notification(main: Node, what: int) -> void:
 
 
 static func _pause_active_run(main: Node) -> void:
-	if main == null or String(main.get("state")) != "playing":
+	if main == null or String(main.get("state")) not in ["playing", "wave_clear", "level_up"]:
 		return
+	SUSPENDED_RUN.capture(main)
 	var tree := main.get_tree()
-	if tree == null or tree.paused:
+	if String(main.get("state")) != "playing" or tree == null or tree.paused:
 		return
 	main.touch_active = false
 	main.input_move = Vector2.ZERO

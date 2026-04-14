@@ -7,6 +7,7 @@ const COMBAT_HELPERS := preload("res://scripts/combat_helpers.gd")
 const EVENT_HELPERS := preload("res://scripts/game_event_helpers.gd")
 const BOARD_HELPERS := preload("res://scripts/board_helpers.gd")
 const FRAME_BUDGET := preload("res://scripts/frame_budget_monitor.gd")
+const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 
 var main: Node
 var wave_spawner: RefCounted
@@ -42,6 +43,7 @@ func start_run(class_id: String) -> void:
 	frame_budget.reset()
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	var start_sm: Node = main._save_manager()
+	SUSPENDED_RUN.clear(start_sm)
 	if start_sm != null:
 		start_sm.record_run_start()
 	main.coal_queue = start_sm.get_coal() if start_sm != null else []
