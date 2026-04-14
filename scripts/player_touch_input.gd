@@ -3,8 +3,8 @@ extends RefCounted
 const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
 
 
-static func handle(event: InputEvent, viewport_size: Vector2, state: Dictionary, memory: Dictionary, save_manager: Node = null) -> void:
-	var touch_profile: Dictionary = TOUCH_PROFILE.resolve(viewport_size, save_manager)
+static func handle(event: InputEvent, viewport_size: Vector2, state: Dictionary, memory: Dictionary, save_manager: Node = null, player_class = null) -> void:
+	var touch_profile: Dictionary = TOUCH_PROFILE.resolve(viewport_size, save_manager, player_class)
 	if event is InputEventScreenTouch:
 		_handle_touch(event as InputEventScreenTouch, state, memory, touch_profile)
 	elif event is InputEventScreenDrag:

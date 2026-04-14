@@ -148,11 +148,11 @@ func update_player_aura(delta: float, player_state: Dictionary, player_node: Nod
 			if boss_ref["hp"] <= 0 and on_boss_killed.is_valid():
 				on_boss_killed.call()
 
-func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary, save_manager: Node = null) -> void:
+func handle_input(event: InputEvent, viewport_size: Vector2, state: Dictionary, save_manager: Node = null, player_class = null) -> void:
 	if event is InputEventKey and event.physical_keycode == KEY_SHIFT:
 		state["dash_pressed"] = event.pressed
 	if event is InputEventJoypadButton:
 		var joy := event as InputEventJoypadButton
 		if joy.button_index == JOY_BUTTON_RIGHT_SHOULDER or joy.button_index == JOY_BUTTON_A:
 			state["dash_pressed"] = joy.pressed
-	PLAYER_TOUCH_INPUT.handle(event, viewport_size, state, _touch_memory, save_manager)
+	PLAYER_TOUCH_INPUT.handle(event, viewport_size, state, _touch_memory, save_manager, player_class)

@@ -1,6 +1,7 @@
 extends RefCounted
 
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
+const TOUCH_DOCTRINE := preload("res://scripts/touch_doctrine.gd")
 
 const HANDEDNESS_ORDER: Array = ["right", "left"]
 const HANDEDNESS_LABELS: Dictionary = {
@@ -17,16 +18,22 @@ static func handedness_label(handedness: String) -> String:
 	return String(HANDEDNESS_LABELS.get(_normalize_handedness(handedness), HANDEDNESS_LABELS["right"]))
 
 
-static func resolve(viewport_size: Vector2, save_manager: Node = null) -> Dictionary:
+static func resolve(viewport_size: Vector2, save_manager: Node = null, player_class = null) -> Dictionary:
 	var base: Dictionary = VIEWPORT_PROFILE.for_viewport(viewport_size)
 	var safe_rect: Rect2 = base["safe_rect"]
 	var inset := float(base["action_inset"])
+	var doctrine: Dictionary = TOUCH_DOCTRINE.resolve(player_class)
 	var handedness := _normalize_handedness(_pref_string(save_manager, "touch_handedness", "right"))
-	var joystick_scale := clampf(_pref_float(save_manager, "touch_joystick_scale", 1.0), 0.8, 1.35)
-	var dash_scale := clampf(_pref_float(save_manager, "touch_dash_scale", 1.0), 0.8, 1.35)
+	var joystick_scale := clampf(_pref_float(save_manager, "touch_joystick_scale", 1.0) * float(doctrine["joystick_scale_mult"]), 0.8, 1.45)
+	var dash_scale := clampf(_pref_float(save_manager, "touch_dash_scale", 1.0) * float(doctrine["dash_scale_mult"]), 0.8, 1.45)
 	var dash_size := float(base["dash_button_size"]) * dash_scale
 	var dash_x := safe_rect.position.x + inset if handedness == "left" else safe_rect.end.x - inset - dash_size
 	return {
+		"doctrine_id": doctrine["id"],
+		"doctrine_label": doctrine["label"],
+		"dash_label": doctrine["dash_label"],
+		"lock_prefix": doctrine["lock_prefix"],
+		"accent": doctrine["accent"],
 		"handedness": handedness,
 		"dash_rect": Rect2(Vector2(dash_x, safe_rect.end.y - inset - dash_size), Vector2.ONE * dash_size),
 		"dash_button_size": dash_size,
@@ -42,11 +49,13 @@ static func resolve(viewport_size: Vector2, save_manager: Node = null) -> Dictio
 static func apply_to_main(main: Node, save_manager: Node = null) -> Dictionary:
 	if main == null or main.ui_mgr == null or main.get_viewport() == null:
 		return {}
-	var profile: Dictionary = resolve(main.get_viewport().get_visible_rect().size, save_manager)
+	var player_class = main.player_state.get("class") if main.player_state is Dictionary else null
+	var profile: Dictionary = resolve(main.get_viewport().get_visible_rect().size, save_manager, player_class)
 	var ui: RefCounted = main.ui_mgr
 	var dash_rect: Rect2 = profile["dash_rect"]
 	if ui.dash_button != null:
 		ui.dash_button.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		ui.dash_button.text = String(profile["dash_label"])
 		ui.dash_button.custom_minimum_size = dash_rect.size
 		ui.dash_button.offset_left = dash_rect.position.x
 		ui.dash_button.offset_top = dash_rect.position.y

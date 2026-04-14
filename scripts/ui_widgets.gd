@@ -83,7 +83,8 @@ static func _refresh_threat(state: Dictionary, main: Node) -> void:
 
 static func _refresh_target_hint(state: Dictionary, main: Node) -> void:
 	var target: Dictionary = COMBAT_HELPERS.closest_target(main) if main.player_node != null else {}
-	TARGET_HINT.update(state["target_hint"], main.camera, main.player_node, target)
+	var player_class = main.player_state.get("class") if main.player_state is Dictionary else null
+	TARGET_HINT.update(state["target_hint"], main.camera, main.player_node, target, player_class)
 
 
 static func _refresh_combo(state: Dictionary, main: Node) -> void:

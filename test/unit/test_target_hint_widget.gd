@@ -19,12 +19,16 @@ func test_target_hint_tracks_visible_mobile_target() -> void:
 	var enemy := Node3D.new()
 	enemy.position = Vector3(1.5, 0.0, -1.0)
 	world.add_child(enemy)
+	var cls := ClassResource.new()
+	cls.damage = 34.0
+	cls.range_val = 16.0
+	cls.fire_rate = 0.5
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	viewport.add_child(root)
 	await get_tree().process_frame
 	var state: Dictionary = TARGET_HINT.build(root)
-	TARGET_HINT.update(state, camera, player, {"id": "rusher", "node": enemy})
+	TARGET_HINT.update(state, camera, player, {"id": "rusher", "node": enemy}, cls)
 	assert_bool((state["line"] as Line2D).visible).is_true()
 	assert_bool((state["reticle"] as PanelContainer).visible).is_true()
-	assert_str((state["label"] as Label).text).contains("AUTO LOCK")
+	assert_str((state["label"] as Label).text).contains("BREACH LOCK")

@@ -5,6 +5,7 @@ extends RefCounted
 
 const COAL_ACTIVATOR := preload("res://scripts/coal_activator.gd")
 const RUNTIME_QUALITY := preload("res://scripts/runtime_quality.gd")
+const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 static var _coal_activator: RefCounted
 
@@ -121,7 +122,8 @@ static func handle_input(main: Node, event: InputEvent) -> void:
 		if event.physical_keycode == KEY_ESCAPE: main.ui_mgr.toggle_pause(main.get_tree())
 		elif event.physical_keycode == KEY_TAB: main.ui_mgr.open_settings()
 	var s := {"dash_pressed": main.dash_pressed, "touch_active": main.touch_active, "touch_origin": main.touch_origin, "touch_position": main.touch_position, "input_move": main.input_move}
-	main.player_ctrl.handle_input(event, Vector2(main.get_viewport().size), s, main._save_manager())
+	var player_class = main.player_state.get("class") if main.player_state is Dictionary else null
+	main.player_ctrl.handle_input(event, Vector2(main.get_viewport().size), s, main._save_manager(), player_class)
 	main.dash_pressed = s.get("dash_pressed", main.dash_pressed)
 	main.touch_active = s.get("touch_active", main.touch_active)
 	main.touch_origin = s.get("touch_origin", main.touch_origin)
@@ -169,6 +171,7 @@ static func show_gameplay_ui(main: Node) -> void:
 	if main.audio_mgr != null:
 		main.audio_mgr.play_music("gameplay"); main.audio_mgr.play_ambient()
 	if main.music_director != null: main.music_director.reset()
+	TOUCH_PROFILE.apply_to_main(main, main._save_manager())
 
 
 static func finalize_end_screen(main: Node, win: bool) -> void:

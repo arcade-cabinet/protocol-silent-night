@@ -84,9 +84,21 @@ static func _apply_live(root: Control, save_manager: Node) -> void:
 
 static func _note_text(root: Control, save_manager: Node) -> String:
 	var viewport_size := root.get_viewport_rect().size if root != null else Vector2(390.0, 844.0)
-	var profile: Dictionary = TOUCH_PROFILE.resolve(viewport_size, save_manager)
-	return "Layout: %s · Reach %.0f%% · Dash %.0f%%" % [
+	var player_class = _current_player_class(root)
+	var profile: Dictionary = TOUCH_PROFILE.resolve(viewport_size, save_manager, player_class)
+	return "Layout: %s · %s doctrine · Reach %.0f%% · Dash %.0f%%" % [
 		TOUCH_PROFILE.handedness_label(String(profile["handedness"])),
+		String(profile["doctrine_label"]),
 		float(profile["joystick_scale"]) * 100.0,
 		float(profile["dash_scale"]) * 100.0,
 	]
+
+
+static func _current_player_class(root: Control):
+	if root == null or root.get_tree() == null:
+		return null
+	var scene: Node = root.get_tree().current_scene
+	if scene == null or scene.get("player_state") == null:
+		return null
+	var player_state: Variant = scene.get("player_state")
+	return player_state.get("class") if player_state is Dictionary else null

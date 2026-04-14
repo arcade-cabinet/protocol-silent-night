@@ -16,13 +16,13 @@
   Players can now swap handedness and tune joystick reach plus dash button size from the settings menu, with the visible overlay and hit zones updating live.
 - **Aim-side auto-target affordance**
   Mobile runs now surface the active auto-fire lock with an on-board reticle, tether line, and label so target choice is legible during crowded waves.
+- **Per-present touch doctrine**
+  The active present now nudges joystick reach, dash footprint, dash verb, and lock language through a live touch doctrine instead of treating every loadout like the same operator.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
 ### Controls
 
-- **No dedicated movement affordance tuning per operator**
-  Dash cooldown, button feel, and thumb travel are still globally tuned instead of per-operator or per-weapon identity.
 ### UI / Readability
 
 - **Start/loadout flow still scrolls rather than re-composing**
@@ -51,5 +51,5 @@
 ## Highest-Value Next Moves
 
 1. Add a mobile-only composition pass for present select and level-up so those screens stop relying on scroll as the safety valve.
-2. Add operator-specific touch tuning and target-readability rules so each present’s dash feel and lock affordance match its combat identity.
+2. Recompose present select and level-up into truly phone-native decision surfaces instead of scroll-safe desktop adaptations.
 3. Add notch/home-indicator viewport regression coverage and turn `capture_mobile_screenshots.gd` into a recurring visual verification ritual.

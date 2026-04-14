@@ -1,5 +1,6 @@
 extends RefCounted
 
+const TOUCH_DOCTRINE := preload("res://scripts/touch_doctrine.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 const LABELS: Dictionary = {
@@ -48,7 +49,7 @@ static func build(root: Control) -> Dictionary:
 	return {"is_mobile": bool(layout["is_mobile"]), "layer": layer, "line": line, "reticle": reticle, "label": label}
 
 
-static func update(state: Dictionary, camera: Camera3D, player_node: Node3D, target: Dictionary) -> void:
+static func update(state: Dictionary, camera: Camera3D, player_node: Node3D, target: Dictionary, player_class = null) -> void:
 	if state.is_empty() or not bool(state.get("is_mobile", false)):
 		_hide(state)
 		return
@@ -67,7 +68,8 @@ static func update(state: Dictionary, camera: Camera3D, player_node: Node3D, tar
 	var line: Line2D = state["line"]
 	var reticle: PanelContainer = state["reticle"]
 	var label: Label = state["label"]
-	var tint := _color_for(target)
+	var doctrine: Dictionary = TOUCH_DOCTRINE.resolve(player_class)
+	var tint := _color_for(target, doctrine)
 	var from_screen := camera.unproject_position(player_pos)
 	var to_screen := camera.unproject_position(target_pos)
 	line.default_color = tint
@@ -76,7 +78,7 @@ static func update(state: Dictionary, camera: Camera3D, player_node: Node3D, tar
 	reticle.self_modulate = tint
 	reticle.position = to_screen - reticle.custom_minimum_size * 0.5
 	reticle.visible = true
-	label.text = String(LABELS.get(String(target.get("id", "")), "AUTO LOCK"))
+	label.text = "%s · %s" % [String(doctrine["lock_prefix"]), String(LABELS.get(String(target.get("id", "")), "TARGET"))]
 	label.add_theme_color_override("font_color", tint)
 	label.position = Vector2(
 		clampf(to_screen.x - label.custom_minimum_size.x * 0.5, 12.0, maxf(12.0, state["layer"].size.x - label.custom_minimum_size.x - 12.0)),
@@ -93,5 +95,5 @@ static func _hide(state: Dictionary) -> void:
 			state[key].visible = false
 
 
-static func _color_for(target: Dictionary) -> Color:
-	return Color("#ffe07a") if String(target.get("id", "")) == "boss" else Color("#69d6ff")
+static func _color_for(target: Dictionary, doctrine: Dictionary) -> Color:
+	return Color("#ffe07a") if String(target.get("id", "")) == "boss" else Color(String(doctrine["accent"]))
