@@ -7,6 +7,7 @@ extends RefCounted
 const MINIMAP := preload("res://scripts/minimap_widget.gd")
 const THREAT := preload("res://scripts/threat_indicator.gd")
 const SETTINGS := preload("res://scripts/settings_menu.gd")
+const SETTINGS_RUNTIME := preload("res://scripts/settings_menu_runtime.gd")
 const PAUSE := preload("res://scripts/pause_menu.gd")
 const COMBO := preload("res://scripts/combo_counter.gd")
 
@@ -162,6 +163,8 @@ static func tick_overlays(mgr: Object, delta: float) -> void:
 		mgr.achievement_overlay.modulate.a = clampf(mgr.achievement_timer / 0.3 if mgr.achievement_timer < 0.3 else 1.0, 0.0, 1.0)
 	else:
 		mgr.achievement_overlay.visible = false
+	if mgr.widgets.has("settings"):
+		SETTINGS_RUNTIME.tick(mgr.widgets["settings"], mgr.root_control, mgr.root_control.get_node_or_null("/root/SaveManager"), Callable(SETTINGS, "_quality_note_text"))
 
 
 static func update_hud(ui: RefCounted, player_state: Dictionary, xp_needed: int, xp: int, level: int, kills: int, cookies: int = 0, coal_queue: Array = []) -> void:

@@ -82,6 +82,14 @@ func test_settings_menu_minimap_slider_present() -> void:
 	assert_float(slider.max_value).is_equal_approx(60.0, 0.001)
 
 
+func test_settings_menu_includes_touch_tab() -> void:
+	var state: Dictionary = SETTINGS.build(_make_root(), null, null, Callable())
+	var panel: PanelContainer = state["panel"]
+	var tabs: TabContainer = panel.find_children("*", "TabContainer", true, false)[0]
+	assert_int(tabs.get_tab_count()).is_greater_equal(4)
+	assert_str(tabs.get_tab_title(2)).is_equal("Touch")
+
+
 func test_pause_menu_keyboard_navigation_state() -> void:
 	var state: Dictionary = PAUSE.build(_make_root(), Callable(), Callable(), Callable(), Callable())
 	var buttons: Array = state["buttons"]

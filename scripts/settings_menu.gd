@@ -8,6 +8,8 @@ extends RefCounted
 const BUS_KEYS: Array = ["Master", "Music", "SFX", "Ambient", "UI"]
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 const RUNTIME_QUALITY := preload("res://scripts/runtime_quality.gd")
+const SETTINGS_RUNTIME := preload("res://scripts/settings_menu_runtime.gd")
+const TOUCH_SETTINGS := preload("res://scripts/touch_settings_menu.gd")
 static func build(root: Control, audio_mgr: RefCounted, save_manager: Node, on_close: Callable) -> Dictionary:
 	var size := VIEWPORT_PROFILE.center_panel_size(root.get_viewport_rect().size, Vector2(520.0, 540.0), Vector2(320.0, 360.0))
 	var panel := PanelContainer.new()
@@ -41,6 +43,7 @@ static func build(root: Control, audio_mgr: RefCounted, save_manager: Node, on_c
 	vbox.add_child(tabs)
 	var sliders: Dictionary = _build_audio_tab(tabs, audio_mgr, save_manager)
 	var display_state: Dictionary = _build_display_tab(tabs, root, save_manager)
+	TOUCH_SETTINGS.build_tab(tabs, root, save_manager)
 	_build_gameplay_tab(tabs, save_manager)
 	var close := Button.new()
 	close.text = "CLOSE"
@@ -178,7 +181,7 @@ static func _quality_note_text(root: Control, sm: Node) -> String:
 	var selected := String(sm.get_preference("quality_profile", "auto")) if sm != null and sm.has_method("get_preference") else "auto"
 	var profile: Dictionary = RUNTIME_QUALITY.resolve(selected, viewport_size)
 	var lead := "Auto resolved" if selected == "auto" else "Active quality"
-	return "%s: %s · %d foes · %d FX" % [lead, String(profile["label"]), int(profile["enemy_cap"]), int(profile["particle_entry_cap"])]
+	return "%s: %s · %d foes · %d FX\n%s" % [lead, String(profile["label"]), int(profile["enemy_cap"]), int(profile["particle_entry_cap"]), SETTINGS_RUNTIME.budget_note_text(root)]
 static func show(state: Dictionary) -> void:
 	if state.is_empty():
 		return

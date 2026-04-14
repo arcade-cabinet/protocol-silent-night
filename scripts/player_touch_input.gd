@@ -1,20 +1,21 @@
 extends RefCounted
 
-const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
+const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
 
 
-static func handle(event: InputEvent, viewport_size: Vector2, state: Dictionary, memory: Dictionary) -> void:
+static func handle(event: InputEvent, viewport_size: Vector2, state: Dictionary, memory: Dictionary, save_manager: Node = null) -> void:
+	var touch_profile: Dictionary = TOUCH_PROFILE.resolve(viewport_size, save_manager)
 	if event is InputEventScreenTouch:
-		_handle_touch(event as InputEventScreenTouch, viewport_size, state, memory)
+		_handle_touch(event as InputEventScreenTouch, state, memory, touch_profile)
 	elif event is InputEventScreenDrag:
-		_handle_drag(event as InputEventScreenDrag, viewport_size, state, memory)
+		_handle_drag(event as InputEventScreenDrag, state, memory, touch_profile)
 
 
-static func _handle_touch(touch: InputEventScreenTouch, viewport_size: Vector2, state: Dictionary, memory: Dictionary) -> void:
+static func _handle_touch(touch: InputEventScreenTouch, state: Dictionary, memory: Dictionary, touch_profile: Dictionary) -> void:
 	var index := int(touch.index)
 	var dash_index := int(memory.get("dash_index", -1))
 	var move_index := int(memory.get("move_index", -1))
-	if touch.pressed and _is_dash_touch(touch.position, viewport_size):
+	if touch.pressed and _is_dash_touch(touch.position, touch_profile):
 		memory["dash_index"] = index
 		state["dash_pressed"] = true
 		return
@@ -35,16 +36,16 @@ static func _handle_touch(touch: InputEventScreenTouch, viewport_size: Vector2, 
 		state["show_joystick"] = true
 
 
-static func _handle_drag(drag: InputEventScreenDrag, viewport_size: Vector2, state: Dictionary, memory: Dictionary) -> void:
+static func _handle_drag(drag: InputEventScreenDrag, state: Dictionary, memory: Dictionary, touch_profile: Dictionary) -> void:
 	if int(memory.get("move_index", -1)) != int(drag.index):
 		return
 	state["touch_active"] = true
 	state["touch_position"] = drag.position
 	var origin: Vector2 = state.get("touch_origin", drag.position)
 	var delta_vec := drag.position - origin
-	var radius := float(VIEWPORT_PROFILE.for_viewport(viewport_size)["joystick_drag_radius"])
+	var radius := float(touch_profile["joystick_drag_radius"])
 	var move := delta_vec.limit_length(radius) / radius
-	var visual_radius := float(VIEWPORT_PROFILE.for_viewport(viewport_size)["joystick_visual_radius"])
+	var visual_radius := float(touch_profile["joystick_visual_radius"])
 	state["input_move"] = move
 	state["joystick_base"] = origin
 	state["joystick_knob"] = origin + move * visual_radius
@@ -58,5 +59,6 @@ static func _clear_move_touch(state: Dictionary, memory: Dictionary) -> void:
 	state["hide_joystick"] = true
 
 
-static func _is_dash_touch(position: Vector2, viewport_size: Vector2) -> bool:
-	return VIEWPORT_PROFILE.dash_rect(viewport_size).has_point(position)
+static func _is_dash_touch(position: Vector2, touch_profile: Dictionary) -> bool:
+	var dash_rect: Rect2 = touch_profile["dash_rect"]
+	return dash_rect.has_point(position)

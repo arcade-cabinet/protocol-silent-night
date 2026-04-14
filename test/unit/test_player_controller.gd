@@ -5,6 +5,18 @@ extends GdUnitTestSuite
 
 var _ctrl_script := preload("res://scripts/player_controller.gd")
 var _viewport_profile := preload("res://scripts/viewport_profile.gd")
+
+
+class SaveDouble extends Node:
+	var prefs: Dictionary = {}
+
+	func get_preference(key: String, default_value = null):
+		return prefs.get(key, default_value)
+
+	func set_preference(key: String, value) -> void:
+		prefs[key] = value
+
+
 func _make_ctrl() -> RefCounted:
 	return _ctrl_script.new(null, null)
 
@@ -138,6 +150,30 @@ func test_second_touch_can_dash_without_stealing_move_touch() -> void:
 	ctrl.handle_input(dash_touch, vp, state)
 	assert_bool(state["dash_pressed"]).is_false()
 	assert_bool(state["touch_active"]).is_true()
+
+
+func test_left_handed_dash_zone_triggers_from_left_edge() -> void:
+	var state: Dictionary = {
+		"touch_active": false,
+		"touch_origin": Vector2.ZERO,
+		"touch_position": Vector2.ZERO,
+		"input_move": Vector2.ZERO,
+		"joystick_base": Vector2.ZERO,
+		"joystick_knob": Vector2.ZERO,
+		"show_joystick": false,
+		"hide_joystick": false,
+		"dash_pressed": false,
+	}
+	var save: SaveDouble = auto_free(SaveDouble.new())
+	save.set_preference("touch_handedness", "left")
+	var ctrl: RefCounted = _make_ctrl()
+	var vp := Vector2(390.0, 844.0)
+	var touch := InputEventScreenTouch.new()
+	touch.index = 1
+	touch.position = Vector2(64.0, 760.0)
+	touch.pressed = true
+	ctrl.handle_input(touch, vp, state, save)
+	assert_bool(state["dash_pressed"]).is_true()
 
 
 func test_gamepad_r1_triggers_dash() -> void:

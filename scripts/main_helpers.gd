@@ -121,7 +121,7 @@ static func handle_input(main: Node, event: InputEvent) -> void:
 		if event.physical_keycode == KEY_ESCAPE: main.ui_mgr.toggle_pause(main.get_tree())
 		elif event.physical_keycode == KEY_TAB: main.ui_mgr.open_settings()
 	var s := {"dash_pressed": main.dash_pressed, "touch_active": main.touch_active, "touch_origin": main.touch_origin, "touch_position": main.touch_position, "input_move": main.input_move}
-	main.player_ctrl.handle_input(event, Vector2(main.get_viewport().size), s)
+	main.player_ctrl.handle_input(event, Vector2(main.get_viewport().size), s, main._save_manager())
 	main.dash_pressed = s.get("dash_pressed", main.dash_pressed)
 	main.touch_active = s.get("touch_active", main.touch_active)
 	main.touch_origin = s.get("touch_origin", main.touch_origin)

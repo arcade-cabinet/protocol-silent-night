@@ -23,6 +23,7 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/menu_mobile.png" % _shot_dir)
+	await _capture_touch_settings()
 
 	_main.configure_test_mode({
 		"invincible": true,
@@ -64,6 +65,24 @@ func _run() -> void:
 
 	_save_manager.reset_state_for_tests()
 	quit(0)
+
+
+func _capture_touch_settings() -> void:
+	_main.ui_mgr.open_settings()
+	await process_frame
+	await process_frame
+	var panel: PanelContainer = _main.ui_mgr.widgets.get("settings", {}).get("panel")
+	if panel == null:
+		return
+	var tabs: TabContainer = panel.find_children("*", "TabContainer", true, false)[0]
+	for idx in range(tabs.get_tab_count()):
+		if tabs.get_tab_title(idx) == "Touch":
+			tabs.current_tab = idx
+			break
+	await process_frame
+	await process_frame
+	await _main.capture_screenshot("%s/settings_mobile.png" % _shot_dir)
+	panel.visible = false
 
 
 func _ensure_save_manager() -> Node:

@@ -6,14 +6,17 @@ const MAIN_HELPERS := preload("res://scripts/main_helpers.gd")
 const COMBAT_HELPERS := preload("res://scripts/combat_helpers.gd")
 const EVENT_HELPERS := preload("res://scripts/game_event_helpers.gd")
 const BOARD_HELPERS := preload("res://scripts/board_helpers.gd")
+const FRAME_BUDGET := preload("res://scripts/frame_budget_monitor.gd")
 
 var main: Node
 var wave_spawner: RefCounted
+var frame_budget: RefCounted
 
 
 func _init(main_node: Node) -> void:
 	main = main_node
 	wave_spawner = WAVE_SPAWNER.new(main_node)
+	frame_budget = FRAME_BUDGET.new()
 
 
 func start_run(class_id: String) -> void:
@@ -30,6 +33,7 @@ func start_run(class_id: String) -> void:
 	main.move_velocity = Vector2.ZERO
 	main.boss_ref = {}
 	main.level_lookback.clear()
+	frame_budget.reset()
 	main.rewraps = 0 if main.permadeath else maxi(0, 6 - main.difficulty_tier)
 	var start_sm: Node = main._save_manager()
 	if start_sm != null:
@@ -45,6 +49,7 @@ func start_run(class_id: String) -> void:
 
 
 func tick_playing(delta: float) -> void:
+	frame_budget.sample(delta)
 	update_player(delta)
 	update_spawning(delta)
 	_tick_combat_systems(delta)
@@ -94,12 +99,8 @@ func start_next_wave() -> void:
 		_spawn_board_object()
 
 
-func spawn_boss(hp_scale: float) -> void:
-	main.boss_ref = main.enemies_ai.spawn_boss(main.actor_root, main.boss_ref, main.enemy_defs, main.config, hp_scale, main._test_scale("boss_hp_scale"), main.ui_mgr.boss_panel, main.ui_mgr.boss_bar, main.ui_mgr.show_message)
-
-
-func end_run(win: bool) -> void:
-	EVENT_HELPERS.end_run(main, win)
+func spawn_boss(hp_scale: float) -> void: main.boss_ref = main.enemies_ai.spawn_boss(main.actor_root, main.boss_ref, main.enemy_defs, main.config, hp_scale, main._test_scale("boss_hp_scale"), main.ui_mgr.boss_panel, main.ui_mgr.boss_bar, main.ui_mgr.show_message)
+func end_run(win: bool) -> void: EVENT_HELPERS.end_run(main, win)
 
 
 func spawn_player() -> void:
@@ -149,8 +150,7 @@ func update_spawning(delta: float) -> void:
 	wave_spawner.update_spawning(delta, Callable(self, "spawn_boss"), Callable(self, "_spawn_board_object"))
 
 
-func _spawn_board_object() -> void:
-	main.board_obj_handler.spawn_board_object(main)
+func _spawn_board_object() -> void: main.board_obj_handler.spawn_board_object(main)
 
 
 func spawn_projectile_player(origin: Vector3, direction: Vector3, hostile: bool, damage: float, pierce: int, speed: float, scale_value: float) -> void:
@@ -161,33 +161,12 @@ func spawn_projectile_hostile(origin: Vector3, direction: Vector3, hostile: bool
 	COMBAT_HELPERS.spawn_projectile_hostile(main, origin, direction, hostile, damage, pierce, speed, scale_value)
 
 
-func spawn_aura_damage_number(wp: Vector3, a: float, c: Color) -> void:
-	COMBAT_HELPERS.spawn_aura_damage_number(main, wp, a, c)
-
-
-func on_boss_killed() -> void:
-	EVENT_HELPERS.on_boss_killed(main)
-
-
-func gain_xp(amt: int) -> void:
-	EVENT_HELPERS.gain_xp(main, amt)
-
-
-func gain_cookies(amt: int) -> void:
-	EVENT_HELPERS.gain_cookies(main, amt)
-
-
-func gain_scroll(scroll_type: String) -> void:
-	main.run_scrolls.append({"scroll_type": scroll_type})
-
-
-func _boss_summon_minion() -> void:
-	COMBAT_HELPERS.boss_summon_minion(main)
-
-
-func _on_boss_phase_changed(_phase: int) -> void:
-	EVENT_HELPERS.on_boss_phase_changed(main)
-
-
-func _enemy_telegraph(etype: String, pos: Vector3) -> void:
-	EVENT_HELPERS.enemy_telegraph(main, etype, pos)
+func spawn_aura_damage_number(wp: Vector3, a: float, c: Color) -> void: COMBAT_HELPERS.spawn_aura_damage_number(main, wp, a, c)
+func on_boss_killed() -> void: EVENT_HELPERS.on_boss_killed(main)
+func gain_xp(amt: int) -> void: EVENT_HELPERS.gain_xp(main, amt)
+func gain_cookies(amt: int) -> void: EVENT_HELPERS.gain_cookies(main, amt)
+func gain_scroll(scroll_type: String) -> void: main.run_scrolls.append({"scroll_type": scroll_type})
+func _boss_summon_minion() -> void: COMBAT_HELPERS.boss_summon_minion(main)
+func _on_boss_phase_changed(_phase: int) -> void: EVENT_HELPERS.on_boss_phase_changed(main)
+func _enemy_telegraph(etype: String, pos: Vector3) -> void: EVENT_HELPERS.enemy_telegraph(main, etype, pos)
+func frame_budget_summary() -> Dictionary: return frame_budget.summary()

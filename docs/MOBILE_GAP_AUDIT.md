@@ -12,6 +12,8 @@
   `test/e2e/capture_mobile_screenshots.gd` now captures `menu_mobile`, `gameplay_mobile`, `level_up_mobile`, `boss_mobile`, and `victory_mobile`.
 - **Runtime quality tiers**
   Display preferences now drive live quality tiers for particles, damage-number density, enemy cap, screen shake, and minimap zoom instead of assuming one desktop budget.
+- **Touch calibration/settings surface**
+  Players can now swap handedness and tune joystick reach plus dash button size from the settings menu, with the visible overlay and hit zones updating live.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -21,9 +23,6 @@
   Dash cooldown, button feel, and thumb travel are still globally tuned instead of per-operator or per-weapon identity.
 - **No aim-side affordance**
   Auto-fire is viable, but there is no mobile-facing threat lead, aim cone hint, or “why did that target get chosen” readability layer.
-- **No touch calibration/settings surface**
-  Players cannot tune joystick drag radius, dash button size, handedness, or vibration.
-
 ### UI / Readability
 
 - **Start/loadout flow still scrolls rather than re-composing**

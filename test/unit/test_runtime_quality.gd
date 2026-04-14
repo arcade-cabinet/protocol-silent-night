@@ -49,6 +49,7 @@ func test_settings_menu_quality_selector_persists_choice() -> void:
 			break
 	assert_int(low_idx).is_greater_equal(0)
 	assert_str(quality_note.text).contains("Auto resolved")
+	assert_str(quality_note.text).contains("Session:")
 	option.item_selected.emit(low_idx)
 	assert_str(String(save.get_preference("quality_profile", ""))).is_equal("low")
 	assert_str(quality_note.text).contains("Active quality")
