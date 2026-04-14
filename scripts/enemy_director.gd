@@ -2,6 +2,7 @@ extends RefCounted
 
 const EnemyBehaviors := preload("res://scripts/enemy_behaviors.gd")
 const STAGE_MARKS := preload("res://scripts/enemy_stage_marks.gd")
+const SILHOUETTES := preload("res://scripts/enemy_silhouette_kit.gd")
 const PRESENT_FACTORY := preload("res://scripts/present_factory.gd")
 var present_factory: RefCounted = PRESENT_FACTORY.new()
 
@@ -32,9 +33,10 @@ func spawn_enemy(actor_root: Node3D, enemies: Array, enemy_type: String, hp_scal
 	enemy_node.name = "Enemy_%s" % enemy_type
 	var is_present: bool = def.get("render_as", "") == "present"
 	var visual_root: Node3D
-	
+
 	if is_present:
 		visual_root = present_factory.build_present(def)
+		SILHOUETTES.decorate_enemy(visual_root, enemy_type, def)
 		enemy_node.add_child(visual_root)
 	else:
 		var mesh_instance: MeshInstance3D = pixels.make_billboard_sprite(enemy_type, 2.0, Color(def["color"]))
@@ -89,6 +91,9 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	var boss_node := Node3D.new()
 	boss_node.name = "Boss"
 	var body: Node3D = _load_model("boss")
+	if body.get_child_count() == 0:
+		body.free()
+		body = SILHOUETTES.build_boss_fallback(Color(def["color"]))
 	boss_node.add_child(body)
 	if _boss_shadow_mesh == null:
 		_boss_shadow_mesh = PlaneMesh.new()
@@ -176,15 +181,18 @@ func closest_target(enemies: Array, boss_ref: Dictionary, player_node: Node3D, r
 	return best
 
 func _load_model(enemy_type: String) -> Node3D:
+	if enemy_type == "boss":
+		return Node3D.new()
 	var path := ""
 	match enemy_type:
 		"elf": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
 		"santa": path = "res://assets/characters/yuletide/animations/dodge_and_counter.glb" # Placeholder for santa
 		"bumble": path = "res://assets/characters/bumble/animations/basic_jump.glb"
-		"boss": path = "res://assets/characters/krampus/animations/combat_stance.glb"
 		"grunt", "rusher", "tank": path = "res://assets/characters/yuletide/animations/basic_jump.glb"
 		_: path = "res://assets/characters/yuletide/animations/basic_jump.glb"
-	
+
+	if not ResourceLoader.exists(path):
+		return Node3D.new()
 	var res = load(path)
 	if res == null: return Node3D.new()
 	var scene: Node3D = res.instantiate()

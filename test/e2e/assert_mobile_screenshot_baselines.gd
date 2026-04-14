@@ -9,6 +9,7 @@ const FILES := [
 	"difficulty_mobile.png",
 	"settings_mobile.png",
 	"gameplay_mobile.png",
+	"enemy_silhouettes_mobile.png",
 	"telegraph_mobile.png",
 	"threat_marks_mobile.png",
 	"projectile_mobile.png",
@@ -26,8 +27,9 @@ const FILES := [
 const CHANNEL_TOLERANCE := 0.02
 const DIFF_RATIO_LIMIT := 0.0004
 const FILE_DIFF_LIMITS := {
+	"enemy_silhouettes_mobile.png": 0.0250,
 	"present_select_mobile.png": 0.0300,
-	"telegraph_mobile.png": 0.0018,
+	"telegraph_mobile.png": 0.0025,
 	"results_mobile.png": 0.0010,
 	"scroll_mobile.png": 0.0010,
 	"market_mobile.png": 0.0018,

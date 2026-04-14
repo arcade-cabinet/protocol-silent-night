@@ -12,6 +12,7 @@ read -r -a ASSERT_ARGS <<< "${GODOT_ASSERT_ARGS:---headless}"
 
 if ((${#CAPTURE_ARGS[@]} > 0)); then
 	"$GODOT_CAPTURE_BIN" "${CAPTURE_ARGS[@]}" --path "$ROOT" -s res://test/e2e/capture_mobile_screenshots.gd
+	"$GODOT_CAPTURE_BIN" "${CAPTURE_ARGS[@]}" --path "$ROOT" -s res://test/e2e/capture_mobile_enemy_silhouettes.gd
 	"$GODOT_CAPTURE_BIN" "${CAPTURE_ARGS[@]}" --path "$ROOT" -s res://test/e2e/capture_mobile_enemy_telegraph.gd
 	"$GODOT_CAPTURE_BIN" "${CAPTURE_ARGS[@]}" --path "$ROOT" -s res://test/e2e/capture_mobile_threat_marks.gd
 	"$GODOT_CAPTURE_BIN" "${CAPTURE_ARGS[@]}" --path "$ROOT" -s res://test/e2e/capture_mobile_projectile.gd
@@ -19,6 +20,7 @@ if ((${#CAPTURE_ARGS[@]} > 0)); then
 	"$GODOT_CAPTURE_BIN" "${CAPTURE_ARGS[@]}" --path "$ROOT" -s res://test/e2e/capture_mobile_meta_screens.gd
 else
 	"$GODOT_CAPTURE_BIN" --path "$ROOT" -s res://test/e2e/capture_mobile_screenshots.gd
+	"$GODOT_CAPTURE_BIN" --path "$ROOT" -s res://test/e2e/capture_mobile_enemy_silhouettes.gd
 	"$GODOT_CAPTURE_BIN" --path "$ROOT" -s res://test/e2e/capture_mobile_enemy_telegraph.gd
 	"$GODOT_CAPTURE_BIN" --path "$ROOT" -s res://test/e2e/capture_mobile_threat_marks.gd
 	"$GODOT_CAPTURE_BIN" --path "$ROOT" -s res://test/e2e/capture_mobile_projectile.gd
