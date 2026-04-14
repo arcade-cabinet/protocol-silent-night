@@ -44,6 +44,8 @@
   Mobile play now auto-pauses on application suspend, focus loss, and Android back requests, while clearing stale touch state so a resumed run does not lurch or dash from frozen input.
 - **Mobile haptics layer**
   Dash, damage, rewrap, level-up, boss-phase, and run-end beats now drive handheld vibration with a player-facing Touch-tab toggle instead of leaving mobile combat completely silent to the hands.
+- **Pause-time doctrine + pressure recap**
+  The pause card now surfaces the active present/doctrine, dash verb, lock language, hostile pressure, and frame-budget rating so a resumed run does not dump the player back into the board with zero context.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -54,8 +56,8 @@
 
 ### UI / Readability
 
-- **No mid-run branch or threat recap on pause**
-  The pause surface stops the action cleanly, but it still does not summarize doctrine, current lock behavior, or late-wave threat context the way a top-tier handheld survivor often does.
+- **No pause-surface targeting affordance jump**
+  The recap now explains doctrine and pressure, but the pause card still does not let the player jump straight into settings slices like Touch or Display from the specific pressure it is surfacing.
 
 ### Performance
 

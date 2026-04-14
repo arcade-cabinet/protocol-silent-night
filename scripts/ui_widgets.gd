@@ -10,6 +10,7 @@ const TARGET_HINT := preload("res://scripts/target_hint_widget.gd")
 const SETTINGS := preload("res://scripts/settings_menu.gd")
 const SETTINGS_RUNTIME := preload("res://scripts/settings_menu_runtime.gd")
 const PAUSE := preload("res://scripts/pause_menu.gd")
+const PAUSE_SNAPSHOT := preload("res://scripts/pause_snapshot.gd")
 const COMBO := preload("res://scripts/combo_counter.gd")
 const COMBAT_HELPERS := preload("res://scripts/combat_helpers.gd")
 
@@ -141,6 +142,8 @@ static func toggle_pause(state: Dictionary, tree: SceneTree) -> void:
 		PAUSE.hide(state["pause"])
 		if tree != null: tree.paused = false
 	else:
+		if tree != null:
+			PAUSE.update_context(state["pause"], PAUSE_SNAPSHOT.build(tree.current_scene))
 		PAUSE.show(state["pause"])
 		if tree != null: tree.paused = true
 

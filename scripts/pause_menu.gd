@@ -8,7 +8,7 @@ const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 
 static func build(root: Control, on_resume: Callable, on_restart: Callable, on_settings: Callable, on_quit: Callable) -> Dictionary:
-	var size := VIEWPORT_PROFILE.center_panel_size(root.get_viewport_rect().size, Vector2(320.0, 400.0), Vector2(280.0, 320.0))
+	var size := VIEWPORT_PROFILE.center_panel_size(root.get_viewport_rect().size, Vector2(320.0, 452.0), Vector2(280.0, 340.0))
 	var panel := PanelContainer.new()
 	panel.name = "PauseMenu"
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -44,6 +44,9 @@ static func build(root: Control, on_resume: Callable, on_restart: Callable, on_s
 	title.add_theme_font_size_override("font_size", 32)
 	title.add_theme_color_override("font_color", Color("#ffd700"))
 	vbox.add_child(title)
+	var context_title := _add_context_label(vbox, 18, Color("#69d6ff"))
+	var context_detail := _add_context_label(vbox, 13, Color(0.95, 0.98, 1.0, 0.9))
+	var context_hint := _add_context_label(vbox, 12, Color(0.78, 0.87, 1.0, 0.82))
 
 	var buttons: Array = [
 		_add_button(vbox, "RESUME", on_resume),
@@ -52,7 +55,7 @@ static func build(root: Control, on_resume: Callable, on_restart: Callable, on_s
 		_add_button(vbox, "QUIT", on_quit),
 	]
 	panel.set_meta("buttons", buttons)
-	return {"panel": panel, "buttons": buttons}
+	return {"panel": panel, "buttons": buttons, "context_title": context_title, "context_detail": context_detail, "context_hint": context_hint}
 
 
 static func _add_button(parent: Container, text: String, callback: Callable) -> Button:
@@ -64,6 +67,17 @@ static func _add_button(parent: Container, text: String, callback: Callable) -> 
 		b.pressed.connect(callback)
 	parent.add_child(b)
 	return b
+
+
+static func _add_context_label(parent: Container, font_size: int, tint: Color) -> Label:
+	var label := Label.new()
+	label.visible = false
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", font_size)
+	label.modulate = tint
+	parent.add_child(label)
+	return label
 
 
 static func show(state: Dictionary) -> void:
@@ -81,6 +95,18 @@ static func hide(state: Dictionary) -> void:
 	if state.is_empty():
 		return
 	(state["panel"] as PanelContainer).visible = false
+
+
+static func update_context(state: Dictionary, snapshot: Dictionary) -> void:
+	if state.is_empty():
+		return
+	for pair in [["context_title", "title"], ["context_detail", "detail"], ["context_hint", "hint"]]:
+		var label: Label = state.get(pair[0])
+		if label == null:
+			continue
+		var text := String(snapshot.get(pair[1], ""))
+		label.text = text
+		label.visible = not text.is_empty()
 
 
 static func _handle_input(panel: PanelContainer, event: InputEvent) -> void:
