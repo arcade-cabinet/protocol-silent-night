@@ -4,6 +4,7 @@ extends RefCounted
 ## These are thin wrappers that access main's state directly.
 
 const COAL_ACTIVATOR := preload("res://scripts/coal_activator.gd")
+const DIFFICULTY_SELECT := preload("res://scripts/difficulty_select.gd")
 const RUNTIME_QUALITY := preload("res://scripts/runtime_quality.gd")
 const TOUCH_PROFILE := preload("res://scripts/touch_profile.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
@@ -56,6 +57,9 @@ static func on_class_button_pressed(main: Node, button: Button) -> void:
 
 static func on_character_selected(main: Node) -> void:
 	if main.ui_mgr.difficulty_panel != null:
+		var present_def: Dictionary = main.present_defs.get(main.current_class_id, {})
+		var diff_state: Dictionary = main.ui_mgr.difficulty_panel.get_meta("difficulty_state", {})
+		DIFFICULTY_SELECT.prepare(diff_state, present_def)
 		main.ui_mgr.start_screen.visible = false
 		main.ui_mgr.difficulty_panel.visible = true
 	else:

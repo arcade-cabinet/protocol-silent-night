@@ -1,5 +1,4 @@
 extends Node3D
-
 const PROGRESSION_MANAGER := preload("res://scripts/progression_manager.gd")
 const GAME_MANAGER := preload("res://scripts/game_manager.gd")
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
@@ -9,12 +8,10 @@ const PLAYER_DAMAGE_HANDLER := preload("res://scripts/player_damage_handler.gd")
 const PICKUP_MAGNET_RING := preload("res://scripts/pickup_magnet_ring.gd")
 const FLAIR_ANIMATOR_SCR := preload("res://scripts/flair_animator.gd")
 const BETWEEN_MATCH_FLOW := preload("res://scripts/between_match_flow.gd")
-
 var config: Dictionary = {}
 var enemy_defs: Dictionary = {}
 var upgrade_defs: Array = []
 var present_defs: Dictionary = {}
-
 var mat_factory := preload("res://scripts/material_factory.gd").new()
 var pix_renderer := preload("res://scripts/pixel_art_renderer.gd").new()
 var board_generator := preload("res://scripts/board_generator.gd").new()
@@ -44,7 +41,6 @@ var screen_shake := preload("res://scripts/screen_shake.gd").new()
 var music_director := preload("res://scripts/music_director.gd").new()
 var pickup_magnet_ring: MeshInstance3D
 var _widget_time: float = 0.0
-
 var runtime_root: Node3D
 var board_root: Node3D
 var actor_root: Node3D
@@ -52,7 +48,6 @@ var projectile_root: Node3D
 var pickup_root: Node3D
 var fx_root: Node3D
 var camera: Camera3D
-
 var title_screen: PanelContainer:
 	get: return ui_mgr.title_screen
 var start_screen: PanelContainer:
@@ -93,6 +88,7 @@ var run_seed: int = 0
 var level_lookback: Array = []
 var difficulty_tier: int = 1
 var permadeath: bool = false
+var endless_mode: bool = false
 var rewraps: int = 5
 var run_cookies: int = 0
 var run_scrolls: Array = []
@@ -103,8 +99,6 @@ var move_velocity := Vector2.ZERO
 var touch_active := false; var touch_origin := Vector2.ZERO; var touch_position := Vector2.ZERO
 var dash_pressed := false; var dash_timer := 0.0; var dash_cooldown_timer := 0.0
 var wave_clear_timer := 0.0; var test_mode := {}
-
-
 func _ready() -> void:
 	_load_definitions()
 	WORLD_BUILDER.build_world(self)
@@ -113,8 +107,6 @@ func _ready() -> void:
 	_refresh_start_screen()
 	ui_mgr.show_message("", 0.0)
 	MAIN_HELPERS.apply_reduced_motion(self, _save_manager())
-
-
 func _init_services() -> void:
 	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
 	combat.audio_mgr = audio_mgr
@@ -129,16 +121,9 @@ func _init_services() -> void:
 	between_match = BETWEEN_MATCH_FLOW.new(self)
 	between_match.build_screens(ui_mgr.root_control)
 	ui_mgr.ensure_menus(audio_mgr, _save_manager(), _return_to_menu, _return_to_menu)
-
 const DEBUG_HELPERS := preload("res://scripts/debug_helpers.gd")
-
-
 func configure_test_mode(options: Dictionary) -> void: test_mode = options.duplicate(true)
-
-
 func start_run(class_id: String) -> void: game_mgr.start_run(class_id)
-
-
 func debug_force_level_up() -> void: DEBUG_HELPERS.force_level_up(self)
 func debug_spawn_boss() -> void: DEBUG_HELPERS.spawn_boss(self)
 func debug_end_run(win: bool) -> void: DEBUG_HELPERS.end_run(self, win)

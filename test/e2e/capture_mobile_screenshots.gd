@@ -23,13 +23,8 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	await _main.capture_screenshot("%s/menu_mobile.png" % _shot_dir)
-	_main.ui_mgr._on_play_pressed()
-	await process_frame
-	await process_frame
-	await _main.capture_screenshot("%s/present_select_mobile.png" % _shot_dir)
-	_main.ui_mgr._on_back_to_title_pressed()
-	await process_frame
 	await _capture_touch_settings()
+	await _capture_present_and_difficulty()
 
 	_main.configure_test_mode({
 		"invincible": true,
@@ -77,6 +72,29 @@ func _run() -> void:
 	quit(0)
 
 
+func _capture_present_and_difficulty() -> void:
+	_main.ui_mgr._on_play_pressed()
+	await process_frame
+	await process_frame
+	await _main.capture_screenshot("%s/present_select_mobile.png" % _shot_dir)
+	var first_unlocked: Button = _first_unlocked_present()
+	if first_unlocked == null:
+		return
+	first_unlocked.pressed.emit()
+	await process_frame
+	await process_frame
+	_main.ui_mgr.select_button.pressed.emit()
+	await process_frame
+	await process_frame
+	await _main.capture_screenshot("%s/difficulty_mobile.png" % _shot_dir)
+	var diff_state: Dictionary = _main.ui_mgr.difficulty_panel.get_meta("difficulty_state", {})
+	var tier_buttons: Array = diff_state.get("tier_buttons", [])
+	if not tier_buttons.is_empty():
+		(tier_buttons[0] as Button).pressed.emit()
+	await process_frame
+	await process_frame
+
+
 func _capture_touch_settings() -> void:
 	_main.ui_mgr.open_settings()
 	await process_frame
@@ -93,6 +111,13 @@ func _capture_touch_settings() -> void:
 	await process_frame
 	await _main.capture_screenshot("%s/settings_mobile.png" % _shot_dir)
 	panel.visible = false
+
+
+func _first_unlocked_present() -> Button:
+	for child in _main.ui_mgr.start_classes_box.get_children():
+		if child is Button and bool(child.get_meta("unlocked", false)):
+			return child
+	return null
 
 
 func _ensure_save_manager() -> Node:

@@ -9,7 +9,7 @@
 - **Consistent action geometry**
   The touch dash zone now uses the same safe-area-aware footprint as the visible dash button instead of a giant hardcoded bottom-right percentage block.
 - **Portrait visual capture lane**
-  `test/e2e/capture_mobile_screenshots.gd` now captures `menu_mobile`, `present_select_mobile`, `gameplay_mobile`, `level_up_mobile`, `boss_mobile`, and `victory_mobile`.
+  `test/e2e/capture_mobile_screenshots.gd` now captures `menu_mobile`, `present_select_mobile`, `difficulty_mobile`, `gameplay_mobile`, `level_up_mobile`, `boss_mobile`, and `victory_mobile`.
 - **Runtime quality tiers**
   Display preferences now drive live quality tiers for particles, damage-number density, enemy cap, screen shake, and minimap zoom instead of assuming one desktop budget.
 - **Touch calibration/settings surface**
@@ -22,6 +22,8 @@
   The level-up overlay now rises as a centered mobile decision sheet with authored upgrade cards instead of pinning a desktop-style stack to the top edge.
 - **Phone-native present-select rail**
   The present-select screen now spends portrait height on the active loadout rail instead of nesting the whole screen inside an outer mobile scroll wrapper.
+- **Phone-native difficulty handoff**
+  Difficulty now comes up as a present-aware mobile decision rail instead of a generic full-screen desktop grid.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -50,6 +52,6 @@
 
 ## Highest-Value Next Moves
 
-1. Recompose the difficulty flow so it reads like a fast phone decision instead of a safe desktop panel.
-2. Add a post-present-select portrait capture for the difficulty handoff so the whole deploy path is visually covered.
-3. Add notch/home-indicator viewport regression coverage and turn `capture_mobile_screenshots.gd` into a recurring visual verification ritual.
+1. Add notch/home-indicator regression coverage across portrait safe-area variants instead of relying on one iPhone-sized capture.
+2. Turn the portrait screenshot ritual into an assertable baseline workflow instead of an additive artifact dump.
+3. Add a real touch-flow display-session e2e so the whole mobile deploy path is exercised without hand inspection.
