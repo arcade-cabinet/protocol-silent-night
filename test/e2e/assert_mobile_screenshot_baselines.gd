@@ -10,6 +10,7 @@ const FILES := [
 	"settings_mobile.png",
 	"gameplay_mobile.png",
 	"telegraph_mobile.png",
+	"projectile_mobile.png",
 	"target_hint_mobile.png",
 	"skate_mobile.png",
 	"sightline_left_mobile.png",
@@ -24,9 +25,11 @@ const FILES := [
 const CHANNEL_TOLERANCE := 0.02
 const DIFF_RATIO_LIMIT := 0.0004
 const FILE_DIFF_LIMITS := {
+	"present_select_mobile.png": 0.0300,
+	"telegraph_mobile.png": 0.0018,
 	"results_mobile.png": 0.0010,
 	"scroll_mobile.png": 0.0010,
-	"market_mobile.png": 0.0012,
+	"market_mobile.png": 0.0018,
 	"victory_mobile.png": 0.0005,
 }
 

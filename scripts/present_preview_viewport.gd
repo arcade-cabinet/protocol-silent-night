@@ -26,7 +26,7 @@ static func build(parent: Control) -> SubViewport:
 	vp.name = "PresentPreview"
 	vp.size = Vector2i(320, 220)
 	vp.own_world_3d = true
-	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if _spin_enabled else SubViewport.UPDATE_ONCE
 	vp.transparent_bg = true
 	container.add_child(vp)
 	var cam := Camera3D.new()
@@ -57,3 +57,4 @@ static func update_present(vp: SubViewport, def: Dictionary) -> void:
 		var spinner := AUTO_ROTATE.new()
 		mesh.add_child(spinner)
 	mesh_root.add_child(mesh)
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if _spin_enabled else SubViewport.UPDATE_ONCE
