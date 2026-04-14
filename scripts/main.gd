@@ -114,7 +114,7 @@ func _init_services() -> void:
 	audio_mgr.attach(runtime_root.get_node("Audio"), _save_manager())
 	combat.audio_mgr = audio_mgr
 	enemies_ai.audio_mgr = audio_mgr
-	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal, _resume_suspended_run)
+	ui_mgr.build_ui(self, _return_to_menu, func() -> void: dash_pressed = true, func() -> void: dash_pressed = false, _on_difficulty_selected, _activate_coal)
 	flair_animator = FLAIR_ANIMATOR_SCR.new()
 	runtime_root.add_child(flair_animator)
 	pickup_magnet_ring = PICKUP_MAGNET_RING.build(runtime_root)
@@ -168,7 +168,6 @@ func _load_definitions() -> void: MAIN_HELPERS.load_definitions(self)
 func _save_manager() -> Node: return get_node_or_null("/root/SaveManager")
 func _refresh_start_screen() -> void: ui_mgr.refresh_start_screen(_save_manager(), _on_class_button_pressed, present_defs)
 func _return_to_menu() -> void: BOARD_HELPERS.return_to_menu(self)
-func _resume_suspended_run() -> bool: return preload("res://scripts/suspended_run.gd").restore(self)
 
 func _trigger_level_up() -> void:
 	if mobile_feedback != null: mobile_feedback.trigger(self, "level_up")

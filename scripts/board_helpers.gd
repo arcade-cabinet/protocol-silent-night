@@ -5,7 +5,6 @@ extends RefCounted
 const WORLD_BUILDER := preload("res://scripts/world_builder.gd")
 
 const EVENT_HELPERS := preload("res://scripts/game_event_helpers.gd")
-const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 
 
 static func build_board(main: Node) -> void:
@@ -38,6 +37,5 @@ static func return_to_menu(main: Node) -> void:
 	if ui.difficulty_panel != null:
 		ui.difficulty_panel.visible = false
 	ui.hide_joystick()
-	SUSPENDED_RUN.clear(main._save_manager())
 	EVENT_HELPERS.clear_runtime(main)
 	main._refresh_start_screen()

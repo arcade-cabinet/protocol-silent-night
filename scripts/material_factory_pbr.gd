@@ -12,10 +12,11 @@ static func pbr_material(material_name: String, tint: Color, material_cache: Dic
 		return material_cache[material_name]
 	var base_path := "%s/%s" % [MATERIAL_ROOT, material_name]
 	var material := StandardMaterial3D.new()
-	material.albedo_texture = load_texture("%s/%s_1K-JPG_Color.jpg" % [base_path, material_name], texture_cache)
-	material.normal_enabled = true
-	material.normal_texture = load_texture("%s/%s_1K-JPG_NormalGL.jpg" % [base_path, material_name], texture_cache)
-	material.roughness_texture = load_texture("%s/%s_1K-JPG_Roughness.jpg" % [base_path, material_name], texture_cache)
+	if should_use_external_pbr():
+		material.albedo_texture = load_texture("%s/%s_1K-JPG_Color.jpg" % [base_path, material_name], texture_cache)
+		material.normal_enabled = material.albedo_texture != null
+		material.normal_texture = load_texture("%s/%s_1K-JPG_NormalGL.jpg" % [base_path, material_name], texture_cache)
+		material.roughness_texture = load_texture("%s/%s_1K-JPG_Roughness.jpg" % [base_path, material_name], texture_cache)
 	material.albedo_color = tint
 	material.uv1_scale = Vector3(1.18, 1.18, 1.0)
 	material.metallic = 0.04
@@ -39,7 +40,8 @@ static func decal_material(material_name: String, material_cache: Dictionary, te
 	var material := StandardMaterial3D.new()
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_PER_PIXEL
-	material.albedo_texture = load_texture("%s/%s/%s_1K-JPG_Color.jpg" % [DECAL_ROOT, material_name, material_name], texture_cache)
+	if should_use_external_pbr():
+		material.albedo_texture = load_texture("%s/%s/%s_1K-JPG_Color.jpg" % [DECAL_ROOT, material_name, material_name], texture_cache)
 	material.albedo_color = Color(1, 1, 1, 0.82)
 	material.roughness = 0.55
 	material.emission_enabled = true
@@ -60,3 +62,11 @@ static func load_texture(path: String, texture_cache: Dictionary) -> Texture2D:
 	var texture := ImageTexture.create_from_image(image)
 	texture_cache[path] = texture
 	return texture
+
+
+static func should_use_external_pbr() -> bool:
+	if OS.has_feature("template"):
+		return false
+	if OS.get_environment("PSN_FORCE_RELEASE_FALLBACK") == "1":
+		return false
+	return DirAccess.dir_exists_absolute(MATERIAL_ROOT) and DirAccess.dir_exists_absolute(DECAL_ROOT)

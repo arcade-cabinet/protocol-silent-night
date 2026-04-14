@@ -1,7 +1,6 @@
 extends RefCounted
 
 const THEME := preload("res://scripts/holidaypunk_theme.gd")
-const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 const START_DETAIL := preload("res://scripts/start_present_detail.gd")
 const RITUAL := preload("res://scripts/frontdoor_ritual.gd")
@@ -76,7 +75,7 @@ static func build_title_screen(root: Control, on_play: Callable, on_progress: Ca
 	return {"screen": screen}
 
 
-static func build_start_screen(root: Control, on_back: Callable, on_resume: Callable = Callable()) -> Dictionary:
+static func build_start_screen(root: Control, on_back: Callable) -> Dictionary:
 	var layout := VIEWPORT_PROFILE.for_viewport(root.get_viewport_rect().size)
 	var is_mobile := bool(layout["is_mobile"])
 	var stacked_mobile := bool(layout["uses_stacked_mobile_ui"])
@@ -146,16 +145,6 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	select_btn.disabled = true
 	THEME.apply_to_button(select_btn, THEME.NEON_CYAN)
 	details_vbox.add_child(select_btn)
-	var resume_btn := Button.new()
-	resume_btn.name = "ResumeRunButton"
-	resume_btn.visible = false
-	resume_btn.custom_minimum_size = select_btn.custom_minimum_size
-	resume_btn.size_flags_horizontal = select_btn.size_flags_horizontal
-	resume_btn.add_theme_font_size_override("font_size", 16 if is_mobile else 18)
-	THEME.apply_to_button(resume_btn, THEME.NEON_GOLD)
-	if on_resume.is_valid():
-		resume_btn.pressed.connect(on_resume)
-	details_vbox.add_child(resume_btn)
 
 	var class_scroll := ScrollContainer.new()
 	class_scroll.custom_minimum_size = Vector2(float(layout["safe_rect"].size.x) - edge_pad * 2.0, 240.0) if stacked_mobile else Vector2(minf(760.0, float(layout["safe_rect"].size.x) * 0.58), 212.0 if is_mobile else 400.0)
@@ -183,16 +172,4 @@ static func build_start_screen(root: Control, on_back: Callable, on_resume: Call
 	THEME.apply_to_button(back_btn, THEME.NEON_CYAN)
 	back_btn.pressed.connect(on_back)
 	start_vbox.add_child(back_btn)
-	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": null, "detail_state": detail_state, "select_btn": select_btn, "resume_btn": resume_btn, "class_scroll": class_scroll, "uses_outer_scroll": outer_scroll != null}
-
-
-static func refresh_resume_button(screen: PanelContainer, save_manager: Node, present_defs: Dictionary = {}) -> void:
-	if screen == null:
-		return
-	var resume_btn: Button = screen.find_child("ResumeRunButton", true, false)
-	if resume_btn == null:
-		return
-	var summary: Dictionary = SUSPENDED_RUN.summary(save_manager, present_defs)
-	resume_btn.visible = not summary.is_empty()
-	if not summary.is_empty():
-		resume_btn.text = "RESUME VIGIL · WAVE %d · %s" % [int(summary.get("resume_level", 1)), String(summary.get("present_name", "UNKNOWN")).to_upper()]
+	return {"screen": start_screen, "classes_box": classes_box, "radar_canvas": null, "detail_state": detail_state, "select_btn": select_btn, "class_scroll": class_scroll, "uses_outer_scroll": outer_scroll != null}

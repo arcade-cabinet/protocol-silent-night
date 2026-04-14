@@ -1,6 +1,5 @@
 extends RefCounted
 
-const SUSPENDED_RUN := preload("res://scripts/suspended_run.gd")
 const VIEWPORT_PROFILE := preload("res://scripts/viewport_profile.gd")
 
 
@@ -10,20 +9,14 @@ static func handle_notification(main: Node, what: int) -> void:
 	match what:
 		Node.NOTIFICATION_APPLICATION_PAUSED, Node.NOTIFICATION_WM_GO_BACK_REQUEST:
 			_pause_active_run(main)
-		Node.NOTIFICATION_APPLICATION_RESUMED:
-			_hint_resume(main)
 		Node.NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 			if _is_mobile(main):
 				_pause_active_run(main)
-		Node.NOTIFICATION_WM_WINDOW_FOCUS_IN:
-			if _is_mobile(main):
-				_hint_resume(main)
 
 
 static func _pause_active_run(main: Node) -> void:
 	if main == null or String(main.get("state")) not in ["playing", "wave_clear", "level_up"]:
 		return
-	SUSPENDED_RUN.capture(main)
 	var tree := main.get_tree()
 	if String(main.get("state")) != "playing" or tree == null or tree.paused:
 		return
@@ -40,14 +33,6 @@ static func _pause_active_run(main: Node) -> void:
 			save_manager.save_state()
 	if main.get("mobile_feedback") != null:
 		main.mobile_feedback.trigger(main, "pause")
-
-
-static func _hint_resume(main: Node) -> void:
-	if main == null or String(main.get("state")) != "playing":
-		return
-	var tree := main.get_tree()
-	if tree != null and tree.paused and main.ui_mgr != null:
-		main.ui_mgr.show_message("RESUME WHEN READY", 1.2, Color("69d6ff"))
 
 
 static func _is_mobile(main: Node) -> bool:

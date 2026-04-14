@@ -120,17 +120,7 @@ jobs:
             --path . -s res://test/e2e/test_mobile_touch_skate_default.gd
         timeout-minutes: 10
 
-      - name: Run suspended-run mobile resume e2e
-        env:
-          LIBGL_ALWAYS_SOFTWARE: "1"
-          MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
-        run: |
-          xvfb-run -a \
-            godot --display-driver x11 --rendering-driver opengl3 \
-            --path . -s res://test/e2e/test_mobile_resume_checkpoint.gd
-        timeout-minutes: 10
-
-      - name: Run mobile visual guard
+      - name: Run production visual audit
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
           MESA_LOADER_DRIVER_OVERRIDE: llvmpipe
@@ -138,7 +128,7 @@ jobs:
           GODOT_CAPTURE_ARGS: -a godot --display-driver x11 --rendering-driver opengl3
           GODOT_ASSERT_BIN: godot
           GODOT_ASSERT_ARGS: --headless
-        run: ./scripts/run_mobile_visual_guard.sh
+        run: ./scripts/run_production_audit.sh
         timeout-minutes: 10
 
       - name: Upload mobile screenshots

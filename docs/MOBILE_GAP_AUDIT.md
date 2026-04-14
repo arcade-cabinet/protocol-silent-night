@@ -44,8 +44,8 @@
   Dash, damage, rewrap, level-up, boss-phase, and run-end beats now drive handheld vibration with a player-facing Touch-tab toggle instead of leaving mobile combat completely silent to the hands.
 - **Pause-time doctrine + pressure recap**
   The pause card now surfaces the active present/doctrine, dash verb, lock language, hostile pressure, and frame-budget rating so a resumed run does not dump the player back into the board with zero context.
-- **Suspended-run checkpoint restore**
-  Mobile app pause/back now writes a suspended-run checkpoint, the start screen surfaces a `RESUME VIGIL` action, and the restored run comes back on the same wave checkpoint with its progression, upgrades, cookies, and rewrap count intact.
+- **Production pause contract**
+  Mobile app pause/back now behaves like a roguelike shipping surface: the active run pauses cleanly, stale touch state is cleared, and meta progression/preferences persist, but an interrupted run is not advertised as resumable.
 
 ## Remaining Product Gaps Versus A Truly Mobile-Optimized Arena Game
 
@@ -72,11 +72,10 @@
 
 - **No Android hardware soak**
   Export preset exists, but there is no measured battery/thermal/session validation on representative devices.
-- **Resume is checkpoint-grade, not exact-state**
-  Suspended restore now preserves the run and wave context, but it still restarts from the wave checkpoint instead of reconstructing live enemies, pickups, and exact board pressure at the frame of interruption.
-
+- **No Android hardware soak**
+  Export preset exists, but there is still no measured battery/thermal/session validation on representative devices.
 ## Highest-Value Next Moves
 
 1. Raise landscape phone combat, boss, and level-up presentation to the POC visual floor instead of treating the orientation cut as the finish line.
 2. Run Android hardware soak with frame-budget notes and haptics/background-pause behavior instead of extrapolating from desktop captures.
-3. Decide whether the checkpoint restore is the shipping bar or whether boss/pickup state needs a more exact suspended snapshot.
+3. Make pause and settings transitions feel equally authored now that resume is no longer part of the shipping promise.

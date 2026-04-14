@@ -22,8 +22,7 @@ const DEFAULT_STATE := {
 	"cookies": 0,
 	"coal": [],
 	"gear_inventory": [],
-	"equipped_gear": {},
-	"suspended_run": {}
+	"equipped_gear": {}
 }
 
 var save_path: String = "user://silent_night_save.json"

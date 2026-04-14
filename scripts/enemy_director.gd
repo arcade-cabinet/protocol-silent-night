@@ -90,10 +90,7 @@ func spawn_boss(actor_root: Node3D, boss_ref: Dictionary, enemy_defs: Dictionary
 	var def: Dictionary = enemy_defs["boss"]
 	var boss_node := Node3D.new()
 	boss_node.name = "Boss"
-	var body: Node3D = _load_model("boss")
-	if body.get_child_count() == 0:
-		body.free()
-		body = SILHOUETTES.build_boss_fallback(Color(def["color"]))
+	var body: Node3D = SILHOUETTES.build_boss_fallback(Color(def["color"]))
 	boss_node.add_child(body)
 	if _boss_shadow_mesh == null:
 		_boss_shadow_mesh = PlaneMesh.new()

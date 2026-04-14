@@ -169,3 +169,27 @@ func test_record_campaign_clear_increments() -> void:
 	sm.record_campaign_clear()
 	assert_int(sm.get_achievement("campaign_clears")).is_equal(1)
 	DirAccess.remove_absolute(path)
+
+
+func test_legacy_suspended_run_key_is_dropped_on_load() -> void:
+	var save = auto_free(_save_script.new())
+	save.set_save_path_for_tests("user://gdunit_legacy_suspended_run.json")
+	save.reset_state_for_tests()
+	var file := FileAccess.open(save.save_path, FileAccess.WRITE)
+	file.store_string(JSON.stringify({
+		"unlocked": {"elf": true, "santa": false, "bumble": false},
+		"best_wave": 5,
+		"best_level": 3,
+		"achievements": {"total_kills": 2, "total_runs": 1, "total_waves_cleared": 5, "campaign_clears": 0},
+		"preferences": {"difficulty_tier": 1, "permadeath": false, "last_present": "holly_striker"},
+		"cookies": 7,
+		"coal": [],
+		"gear_inventory": [],
+		"equipped_gear": {},
+		"suspended_run": {"resume_level": 9}
+	}))
+	file = null
+	save.load_state()
+	assert_bool(save.state.has("suspended_run")).is_false()
+	assert_int(int(save.state["best_wave"])).is_equal(5)
+	save.reset_state_for_tests()

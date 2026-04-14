@@ -3,6 +3,7 @@
 ## Canonical baseline
 
 - `docs/reference/poc.html` is the visual floor.
+- `docs/PRODUCTION_CHECKLIST.md` is the current release gate.
 - When the Godot build and the POC disagree on feel, composition, or information density, the POC wins.
 - The latest local `docs/reference/poc.html` should stay aligned with the user-supplied HTML reference, not drift behind the thread.
 
