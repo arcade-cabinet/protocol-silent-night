@@ -38,6 +38,7 @@ func _run() -> void:
 	await _step_simulation(12)
 	await _capture_mobile("gameplay_mobile.png")
 	await _capture_mobile("target_hint_mobile.png")
+	await _capture_doctrine_mobile("skate_mobile.png", "p_01", "right")
 	await _capture_doctrine_mobile("sightline_left_mobile.png", "p_02", "left")
 	await _capture_doctrine_mobile("sweep_mobile.png", "p_06", "right", 3)
 	await _restore_default_mobile_run()
