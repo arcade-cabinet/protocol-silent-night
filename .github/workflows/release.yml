@@ -75,7 +75,7 @@ jobs:
           echo "APK_PATH=export/android/${APK_NAME}" >> "$GITHUB_ENV"
 
       - name: Upload APK to release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v2
         with:
           files: ${{ env.APK_PATH }}
 
@@ -113,6 +113,6 @@ jobs:
           echo "ZIP_PATH=${ZIP_NAME}" >> "$GITHUB_ENV"
 
       - name: Upload web export to release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v2
         with:
           files: ${{ env.ZIP_PATH }}
