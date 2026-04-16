@@ -27,6 +27,7 @@ func _run() -> void:
 	_main.ui_mgr.progress_screen.visible = false
 	_main.current_wave_index = 9
 	_main.debug_end_run(true)
+	_stabilize_dynamic_visuals()
 	await _settle_frames(3)
 	await _main.capture_screenshot("%s/victory_mobile.png" % _shot_dir)
 	_save_manager.reset_state_for_tests()
@@ -36,6 +37,18 @@ func _run() -> void:
 func _settle_frames(count: int) -> void:
 	for _i in range(count):
 		await process_frame
+
+
+func _stabilize_dynamic_visuals() -> void:
+	_main.process_mode = Node.PROCESS_MODE_DISABLED
+	if _main.flair_animator != null:
+		_main.flair_animator.set_process(false)
+	for node in _main.find_children("*", "GPUParticles3D", true, false):
+		(node as GPUParticles3D).emitting = false
+		(node as GPUParticles3D).visible = false
+	for node in _main.find_children("*", "CPUParticles3D", true, false):
+		(node as CPUParticles3D).emitting = false
+		(node as CPUParticles3D).visible = false
 
 
 func _ensure_save_manager() -> Node:

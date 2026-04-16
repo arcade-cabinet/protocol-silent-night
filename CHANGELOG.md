@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.5.0...v0.6.0) (2026-04-14)
+
+
+### Features
+
+* **gameplay:** add endless mode and complex level-up particle bursts ([#201](https://github.com/arcade-cabinet/protocol-silent-night/issues/201)) ([b9b82d3](https://github.com/arcade-cabinet/protocol-silent-night/commit/b9b82d3e3252561b33d31195f243a2a829090f73))
+* **production:** lock release contracts and audit lane ([#203](https://github.com/arcade-cabinet/protocol-silent-night/issues/203)) ([7e45cb7](https://github.com/arcade-cabinet/protocol-silent-night/commit/7e45cb789b56bb497ab525ce9a4c074e868b85b1))
+
 ## [0.5.0](https://github.com/arcade-cabinet/protocol-silent-night/compare/v0.4.0...v0.5.0) (2026-04-12)
 
 
