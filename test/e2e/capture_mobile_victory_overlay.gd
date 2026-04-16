@@ -40,6 +40,7 @@ func _settle_frames(count: int) -> void:
 
 
 func _stabilize_dynamic_visuals() -> void:
+	_main.process_mode = Node.PROCESS_MODE_DISABLED
 	if _main.flair_animator != null:
 		_main.flair_animator.set_process(false)
 	for node in _main.find_children("*", "GPUParticles3D", true, false):
